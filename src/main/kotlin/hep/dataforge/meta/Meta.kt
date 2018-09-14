@@ -1,7 +1,6 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.Name
-import hep.dataforge.names.NameToken
 import hep.dataforge.names.toName
 
 /**
@@ -10,13 +9,13 @@ import hep.dataforge.names.toName
  * * a single node
  * * a list of nodes
  */
-sealed class MetaItem<M : Meta<M>> {
-    class ValueItem<M : Meta<M>>(val value: Value) : MetaItem<M>()
-    class SingleNodeItem<M : Meta<M>>(val node: M) : MetaItem<M>()
-    class MultiNodeItem<M : Meta<M>>(val nodes: List<M>) : MetaItem<M>()
+sealed class MetaItem<M : Meta> {
+    class ValueItem<M : Meta>(val value: Value) : MetaItem<M>()
+    class SingleNodeItem<M : Meta>(val node: M) : MetaItem<M>()
+    class MultiNodeItem<M : Meta>(val nodes: List<M>) : MetaItem<M>()
 }
 
-operator fun <M : Meta<M>> List<M>.get(query: String): M? {
+operator fun <M : Meta> List<M>.get(query: String): M? {
     return if (query.isEmpty()) {
         first()
     } else {
@@ -31,8 +30,26 @@ operator fun <M : Meta<M>> List<M>.get(query: String): M? {
  *  * [MetaItem.SingleNodeItem] single node
  *  * [MetaItem.MultiNodeItem] multi-value node
  */
-interface Meta<M : Meta<M>> {
-    val items: Map<String, MetaItem<M>>
+interface Meta {
+    val items: Map<String, MetaItem<out Meta>>
+}
+
+operator fun Meta.get(name: Name): MetaItem<out Meta>? {
+    return when (name.length) {
+        0 -> error("Can't resolve element from empty name")
+        1 -> items[name.first()!!.body]
+        else -> name.first()!!.let{ token -> items[token.body]?.nodes?.get(token.query)}?.get(name.cutFirst())
+    }
+}
+
+//TODO create Java helper for meta operations
+operator fun Meta.get(key: String): MetaItem<out Meta>? = get(key.toName())
+
+/**
+ * A meta node that ensures that all of its descendants has at least the same type
+ */
+abstract class MetaNode<M: MetaNode<M>>: Meta{
+    abstract override val items: Map<String, MetaItem<M>>
 
     operator fun get(name: Name): MetaItem<M>? {
         return when (name.length) {
@@ -50,7 +67,7 @@ interface Meta<M : Meta<M>> {
  *
  * If the argument is possibly mutable node, it is copied on creation
  */
-class SealedMeta(meta: Meta<*>) : Meta<SealedMeta> {
+class SealedMeta(meta: Meta) : MetaNode<SealedMeta>() {
     override val items: Map<String, MetaItem<SealedMeta>> = if (meta is SealedMeta) {
         meta.items
     } else {
@@ -68,4 +85,4 @@ class SealedMeta(meta: Meta<*>) : Meta<SealedMeta> {
 /**
  * Generate sealed node from [this]. If it is already sealed return it as is
  */
-fun Meta<*>.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(this)
+fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(this)

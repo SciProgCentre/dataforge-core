@@ -3,8 +3,8 @@ package hep.dataforge.meta
 /**
  * DSL builder for meta
  */
-class MetaBuilder : MutableMeta<MetaBuilder>() {
-    override fun wrap(meta: Meta<*>): MetaBuilder = meta.builder()
+class MetaBuilder : MutableMetaNode<MetaBuilder>() {
+    override fun wrap(meta: Meta): MetaBuilder = meta.builder()
     override fun empty(): MetaBuilder = MetaBuilder()
 
     infix fun String.to(value: Any) {
@@ -19,7 +19,7 @@ class MetaBuilder : MutableMeta<MetaBuilder>() {
 /**
  * For safety, builder always copies the initial meta even if it is builder itself
  */
-fun Meta<*>.builder(): MetaBuilder {
+fun Meta.builder(): MetaBuilder {
     return MetaBuilder().also { builder ->
         items.mapValues { entry ->
             val item = entry.value
@@ -31,3 +31,5 @@ fun Meta<*>.builder(): MetaBuilder {
         }
     }
 }
+
+fun buildMeta(builder: MetaBuilder.() -> Unit): Meta = MetaBuilder().apply(builder)

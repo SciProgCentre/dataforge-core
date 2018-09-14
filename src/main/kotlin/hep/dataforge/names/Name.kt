@@ -65,7 +65,11 @@ data class NameToken internal constructor(val body: String, val query: String) {
         if (body.isEmpty()) error("Syntax error: Name token body is empty")
     }
 
-    override fun toString(): String = "$body[$query]"
+    override fun toString(): String = if (hasQuery()) {
+        "$body[$query]"
+    } else {
+        body
+    }
 
     fun hasQuery() = query.isNotEmpty()
 }

@@ -1,0 +1,27 @@
+plugins {
+    id 'kotlin-platform-jvm'
+}
+
+group 'hep.dataforge'
+version '0.1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    expectedBy rootProject
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    testCompile "junit:junit:4.12"
+    testCompile "org.jetbrains.kotlin:kotlin-test"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+sourceCompatibility = "1.8"

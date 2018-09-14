@@ -13,7 +13,7 @@ val MetaItem<*>.double get() = number.toDouble()
 val MetaItem<*>.int get() = number.toInt()
 val MetaItem<*>.long get() = number.toLong()
 
-val <M : Meta<M>> MetaItem<M>.node: M
+val <M : Meta> MetaItem<M>.node: M
     get() = when (this) {
         is MetaItem.ValueItem -> error("Trying to interpret value meta item as node item")
         is MetaItem.SingleNodeItem -> node
@@ -24,14 +24,14 @@ val <M : Meta<M>> MetaItem<M>.node: M
  * Utility method to access item content as list of nodes.
  * Returns empty list if it is value item.
  */
-val <M : Meta<M>> MetaItem<M>.nodes: List<M>
+val <M : Meta> MetaItem<M>.nodes: List<M>
     get() = when (this) {
         is MetaItem.ValueItem -> emptyList()//error("Trying to interpret value meta item as node item")
         is MetaItem.SingleNodeItem -> listOf(node)
         is MetaItem.MultiNodeItem -> nodes
     }
 
-fun <M : Meta<M>> MetaItem<M>.indexOf(meta: M): Int {
+fun <M : Meta> MetaItem<M>.indexOf(meta: M): Int {
     return when (this) {
         is MetaItem.ValueItem -> -1
         is MetaItem.SingleNodeItem -> if (node == meta) 0 else -1

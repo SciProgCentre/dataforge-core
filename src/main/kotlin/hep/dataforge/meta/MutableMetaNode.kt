@@ -8,10 +8,15 @@ class MetaListener(val owner: Any? = null, val action: (name: Name, oldItem: Met
     operator fun invoke(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) = action(name, oldItem, newItem)
 }
 
+
+interface MutableMeta<M : MutableMeta<M>>: Meta{
+    operator fun set(name: Name, item: MetaItem<M>)
+}
+
 /**
  * A mutable meta node with attachable change listener
  */
-abstract class MutableMeta<M : MutableMeta<M>> : Meta<M> {
+abstract class MutableMetaNode<M : MutableMetaNode<M>> : MetaNode<M>(), MutableMeta<M> {
     private val listeners = HashSet<MetaListener>()
 
     /**
@@ -57,14 +62,14 @@ abstract class MutableMeta<M : MutableMeta<M>> : Meta<M> {
     /**
      * Transform given meta to node type of this meta tree
      */
-    protected abstract fun wrap(meta: Meta<*>): M
+    protected abstract fun wrap(meta: Meta): M
 
     /**
      * Create empty node
      */
     protected abstract fun empty(): M
 
-    operator fun set(name: Name, item: MetaItem<M>) {
+    override operator fun set(name: Name, item: MetaItem<M>) {
         when (name.length) {
             0 -> error("Can't set meta item for empty name")
             1 -> {
@@ -83,11 +88,11 @@ abstract class MutableMeta<M : MutableMeta<M>> : Meta<M> {
     }
 
     operator fun set(name: Name, value: Value) = set(name, MetaItem.ValueItem(value))
-    operator fun set(name: Name, meta: Meta<*>) = set(name, MetaItem.SingleNodeItem(wrap(meta)))
-    operator fun set(name: Name, metas: List<Meta<*>>) = set(name, MetaItem.MultiNodeItem(metas.map { wrap(it) }))
+    operator fun set(name: Name, meta: Meta) = set(name, MetaItem.SingleNodeItem(wrap(meta)))
+    operator fun set(name: Name, metas: List<Meta>) = set(name, MetaItem.MultiNodeItem(metas.map { wrap(it) }))
 
     operator fun set(name: String, item: MetaItem<M>) = set(name.toName(), item)
     operator fun set(name: String, value: Value) = set(name.toName(), MetaItem.ValueItem(value))
-    operator fun set(name: String, meta: Meta<*>) = set(name.toName(), MetaItem.SingleNodeItem(wrap(meta)))
-    operator fun set(name: String, metas: List<Meta<*>>) = set(name.toName(), MetaItem.MultiNodeItem(metas.map { wrap(it) }))
+    operator fun set(name: String, meta: Meta) = set(name.toName(), MetaItem.SingleNodeItem(wrap(meta)))
+    operator fun set(name: String, metas: List<Meta>) = set(name.toName(), MetaItem.MultiNodeItem(metas.map { wrap(it) }))
 }
