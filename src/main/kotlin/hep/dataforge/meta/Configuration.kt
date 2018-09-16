@@ -2,7 +2,11 @@ package hep.dataforge.meta
 
 //TODO add validator to configuration
 
-class Configuration: MutableMetaNode<Configuration>() {
+/**
+ * Mutable meta representing object state
+ */
+class Configuration : MutableMetaNode<Configuration>() {
+
     /**
      * Attach configuration node instead of creating one
      */
@@ -20,4 +24,21 @@ class Configuration: MutableMetaNode<Configuration>() {
     }
 
     override fun empty(): Configuration = Configuration()
+
+    /**
+     * Universal set method
+     */
+    operator fun set(key: String, value: Any?) {
+        when (value) {
+            null -> remove(key)
+            is Meta -> set(key, value)
+            else -> set(key, Value.of(value))
+        }
+    }
 }
+
+interface Configurable {
+    val config: Configuration
+}
+
+open class SimpleConfigurable(override val config:Configuration): Configurable

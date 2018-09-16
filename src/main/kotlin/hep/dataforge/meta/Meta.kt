@@ -86,3 +86,10 @@ class SealedMeta(meta: Meta) : MetaNode<SealedMeta>() {
  * Generate sealed node from [this]. If it is already sealed return it as is
  */
 fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(this)
+
+/**
+ * Generic meta-holder object
+ */
+interface Metoid{
+    val meta: Meta
+}

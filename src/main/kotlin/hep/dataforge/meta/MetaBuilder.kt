@@ -1,7 +1,7 @@
 package hep.dataforge.meta
 
 /**
- * DSL builder for meta
+ * DSL builder for meta. Is not intended to store mutable state
  */
 class MetaBuilder : MutableMetaNode<MetaBuilder>() {
     override fun wrap(meta: Meta): MetaBuilder = meta.builder()

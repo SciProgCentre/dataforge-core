@@ -9,8 +9,8 @@ class MetaListener(val owner: Any? = null, val action: (name: Name, oldItem: Met
 }
 
 
-interface MutableMeta<M : MutableMeta<M>>: Meta{
-    operator fun set(name: Name, item: MetaItem<M>)
+interface MutableMeta<M : MutableMeta<M>> : Meta {
+    operator fun set(name: Name, item: MetaItem<M>?)
 }
 
 /**
@@ -69,7 +69,7 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : MetaNode<M>(), MutableM
      */
     protected abstract fun empty(): M
 
-    override operator fun set(name: Name, item: MetaItem<M>) {
+    override operator fun set(name: Name, item: MetaItem<M>?) {
         when (name.length) {
             0 -> error("Can't set meta item for empty name")
             1 -> {
@@ -86,6 +86,8 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : MetaNode<M>(), MutableM
             }
         }
     }
+
+    fun remove(name: String) = set(name.toName(), null)
 
     operator fun set(name: Name, value: Value) = set(name, MetaItem.ValueItem(value))
     operator fun set(name: Name, meta: Meta) = set(name, MetaItem.SingleNodeItem(wrap(meta)))

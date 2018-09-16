@@ -4,8 +4,18 @@ pluginManagement {
             if (requested.id.id == "kotlin-platform-common") {
                 useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
             }
+
+            if (requested.id.id == "kotlin-platform-jvm") {
+                useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
+            }
+
+            if (requested.id.id == "kotlin-platform-js") {
+                useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
+            }
         }
     }
 }
 rootProject.name = 'dataforge-meta'
 
+include ":dataforge-meta-jvm"
+include ":dataforge-meta-js"
