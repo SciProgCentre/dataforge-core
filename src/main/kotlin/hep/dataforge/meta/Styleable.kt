@@ -5,7 +5,7 @@ import hep.dataforge.names.Name
 /**
  * A configuration decorator with applied style
  */
-class StyledConfig(val config: Configuration, val style: Meta = EmptyMeta) : MutableMeta<StyledConfig> {
+class StyledConfig(val config: Config, val style: Meta = EmptyMeta) : MutableMeta<StyledConfig> {
 
     override fun onChange(owner: Any?, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit) {
         config.onChange(owner, action)
@@ -46,6 +46,8 @@ class StyledConfig(val config: Configuration, val style: Meta = EmptyMeta) : Mut
             key to item
         }
 }
+
+fun Config.withStyle(style: Meta = EmptyMeta) = StyledConfig(this, style)
 
 interface Styleable : Configurable {
     val styledConfig: StyledConfig

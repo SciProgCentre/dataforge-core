@@ -118,3 +118,30 @@ operator fun <M : MutableMeta<M>> M.set(key: String, value: Any?) {
         else -> set(key, Value.of(value))
     }
 }
+
+/**
+ * Update existing mutable node with another node. The rules are following:
+ *  * value replaces anything
+ *  * node updates node and replaces anything but node
+ *  * node list updates node list if number of nodes in the list is the same and replaces anything otherwise
+ */
+fun <M : MutableMetaNode<M>> M.update(meta: Meta) {
+    meta.items.forEach { entry ->
+        val value = entry.value
+        when (value) {
+            is MetaItem.ValueItem -> this[entry.key] = value.value
+            is MetaItem.SingleNodeItem -> (this[entry.key] as? MetaItem.SingleNodeItem)
+                    ?.node?.update(value.node) ?: kotlin.run { this[entry.key] = value.node }
+            is MetaItem.MultiNodeItem -> {
+                val existing = this[entry.key]
+                if (existing is MetaItem.MultiNodeItem && existing.nodes.size == value.nodes.size) {
+                    existing.nodes.forEachIndexed { index, m ->
+                        m.update(value.nodes[index])
+                    }
+                } else {
+                    this[entry.key] = value.nodes
+                }
+            }
+        }
+    }
+}

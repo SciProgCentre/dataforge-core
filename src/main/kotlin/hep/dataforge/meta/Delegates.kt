@@ -95,7 +95,7 @@ fun Metoid.number(default: Number, key: String? = null) = SafeNumberDelegate(key
 
 inline fun <reified E : Enum<E>> Metoid.enum(default: E, key: String? = null) = SafeEnumDelegate(key, default) { enumValueOf(it) }
 
-/* Configuration delegates */
+/* Config delegates */
 
 class ValueConfigDelegate(private val key: String? = null, private val default: Value? = null) : ReadWriteProperty<Configurable, Value?> {
     override fun getValue(thisRef: Configurable, property: KProperty<*>): Value? {
@@ -103,7 +103,12 @@ class ValueConfigDelegate(private val key: String? = null, private val default: 
     }
 
     override fun setValue(thisRef: Configurable, property: KProperty<*>, value: Value?) {
-        thisRef.config[key ?: property.name] = value
+        val name = key ?: property.name
+        if(value == null){
+            thisRef.config.remove(name)
+        } else {
+            thisRef.config[name] = value
+        }
     }
 }
 
@@ -181,9 +186,9 @@ class SafeEnumvConfigDelegate<E : Enum<E>>(private val key: String? = null, priv
 
 //Child node delegate
 
-class ChildConfigDelegate<T : Configurable>(private val key: String? = null, private val converter: (Configuration) -> T) : ReadWriteProperty<Configurable, T> {
+class ChildConfigDelegate<T : Configurable>(private val key: String? = null, private val converter: (Config) -> T) : ReadWriteProperty<Configurable, T> {
     override fun getValue(thisRef: Configurable, property: KProperty<*>): T {
-        return converter(thisRef.config.get(key ?: property.name)?.node ?: Configuration())
+        return converter(thisRef.config[key ?: property.name]?.node ?: Config())
     }
 
     override fun setValue(thisRef: Configurable, property: KProperty<*>, value: T) {
@@ -207,7 +212,7 @@ fun Configurable.number(default: Number? = null, key: String? = null) = NumberCo
 
 fun Configurable.child(key: String? = null) = ChildConfigDelegate(key) { SimpleConfigurable(it) }
 
-fun <T : Configurable> Configurable.child(key: String? = null, converter: (Configuration) -> T) = ChildConfigDelegate(key, converter)
+fun <T : Configurable> Configurable.child(key: String? = null, converter: (Config) -> T) = ChildConfigDelegate(key, converter)
 
 //fun <T : Configurable> Configurable.spec(spec: Specification<T>, key: String? = null) = ChildConfigDelegate<T>(key) { spec.wrap(this) }
 
