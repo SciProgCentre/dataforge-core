@@ -38,7 +38,7 @@ operator fun Meta.get(name: Name): MetaItem<out Meta>? {
     return when (name.length) {
         0 -> error("Can't resolve element from empty name")
         1 -> items[name.first()!!.body]
-        else -> name.first()!!.let{ token -> items[token.body]?.nodes?.get(token.query)}?.get(name.cutFirst())
+        else -> name.first()!!.let { token -> items[token.body]?.nodes?.get(token.query) }?.get(name.cutFirst())
     }
 }
 
@@ -48,14 +48,14 @@ operator fun Meta.get(key: String): MetaItem<out Meta>? = get(key.toName())
 /**
  * A meta node that ensures that all of its descendants has at least the same type
  */
-abstract class MetaNode<M: MetaNode<M>>: Meta{
+abstract class MetaNode<M : MetaNode<M>> : Meta {
     abstract override val items: Map<String, MetaItem<M>>
 
     operator fun get(name: Name): MetaItem<M>? {
         return when (name.length) {
             0 -> error("Can't resolve element from empty name")
             1 -> items[name.first()!!.body]
-            else -> name.first()!!.let{ token -> items[token.body]?.nodes?.get(token.query)}?.get(name.cutFirst())
+            else -> name.first()!!.let { token -> items[token.body]?.nodes?.get(token.query) }?.get(name.cutFirst())
         }
     }
 
@@ -87,9 +87,13 @@ class SealedMeta(meta: Meta) : MetaNode<SealedMeta>() {
  */
 fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(this)
 
+object EmptyMeta : Meta {
+    override val items: Map<String, MetaItem<out Meta>> = emptyMap()
+}
+
 /**
  * Generic meta-holder object
  */
-interface Metoid{
+interface Metoid {
     val meta: Meta
 }

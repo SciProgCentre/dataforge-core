@@ -7,6 +7,8 @@ import kotlin.reflect.KProperty
 
 /* Meta delegates */
 
+//TODO add caching for sealed nodes
+
 class ValueDelegate(private val key: String? = null, private val default: Value? = null) : ReadOnlyProperty<Metoid, Value?> {
     override fun getValue(thisRef: Metoid, property: KProperty<*>): Value? {
         return thisRef.meta[key ?: property.name]?.value ?: default
