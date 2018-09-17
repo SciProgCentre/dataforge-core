@@ -7,7 +7,7 @@ import hep.dataforge.names.Name
 /**
  * Mutable meta representing object state
  */
-class Config : MutableMetaNode<Config>() {
+open class Config : MutableMetaNode<Config>() {
 
     /**
      * Attach configuration node instead of creating one

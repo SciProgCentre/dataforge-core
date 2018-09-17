@@ -1,21 +1,29 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.Name
+import hep.dataforge.names.toName
 
 /**
  * A configuration decorator with applied style
  */
-class StyledConfig(val config: Config, val style: Meta = EmptyMeta) : MutableMeta<StyledConfig> {
+class StyledConfig(val config: Config, style: Meta = EmptyMeta) : Config() {
 
-    override fun onChange(owner: Any?, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit) {
-        config.onChange(owner, action)
+    var style: Meta = style
+        set(value) {
+            field.items.forEach {
+                itemChanged(it.key.toName(), it.value, null)
+            }
+            field = value
+            value.items.forEach {
+                itemChanged(it.key.toName(), null, it.value)
+            }
+        }
+
+    init {
+        config.onChange { name, oldItem, newItem -> this.itemChanged(name, oldItem, newItem) }
     }
 
-    override fun removeListener(owner: Any) {
-        config.removeListener(owner)
-    }
-
-    override fun set(name: Name, item: MetaItem<StyledConfig>?) {
+    override fun set(name: Name, item: MetaItem<Config>?) {
         when (item) {
             null -> config.remove(name)
             is MetaItem.ValueItem -> config[name] = item.value
@@ -24,16 +32,16 @@ class StyledConfig(val config: Config, val style: Meta = EmptyMeta) : MutableMet
         }
     }
 
-    override val items: Map<String, MetaItem<StyledConfig>>
+    override val items: Map<String, MetaItem<Config>>
         get() = (config.items.keys + style.items.keys).associate { key ->
             val value = config.items[key]
             val styleValue = style[key]
-            val item: MetaItem<StyledConfig> = when (value) {
+            val item: MetaItem<Config> = when (value) {
                 null -> when (styleValue) {
                     null -> error("Should be unreachable")
                     is MetaItem.ValueItem -> MetaItem.ValueItem(styleValue.value)
-                    is MetaItem.SingleNodeItem -> MetaItem.SingleNodeItem(StyledConfig(config.empty(), styleValue.node))
-                    is MetaItem.MultiNodeItem -> MetaItem.MultiNodeItem(styleValue.nodes.map { StyledConfig(config.empty(), it) })
+                    is MetaItem.SingleNodeItem -> MetaItem.SingleNodeItem<Config>(StyledConfig(config.empty(), styleValue.node))
+                    is MetaItem.MultiNodeItem -> MetaItem.MultiNodeItem<Config>(styleValue.nodes.map { StyledConfig(config.empty(), it) })
                 }
                 is MetaItem.ValueItem -> MetaItem.ValueItem(value.value)
                 is MetaItem.SingleNodeItem -> MetaItem.SingleNodeItem(
@@ -47,14 +55,18 @@ class StyledConfig(val config: Config, val style: Meta = EmptyMeta) : MutableMet
         }
 }
 
-fun Config.withStyle(style: Meta = EmptyMeta) = StyledConfig(this, style)
+fun Config.withStyle(style: Meta = EmptyMeta) = if (this is StyledConfig) {
+    StyledConfig(this.config, style)
+} else {
+    StyledConfig(this, style)
+}
 
 interface Styleable : Configurable {
-    val styledConfig: StyledConfig
+    override val config: StyledConfig
 
-    override val config
-        get() = styledConfig.config
-
-    val style
-        get() = styledConfig.style
+    var style
+        get() = config.style
+        set(value) {
+            config.style = value
+        }
 }

@@ -41,7 +41,7 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : MetaNode<M>(), MutableM
     override val items: Map<String, MetaItem<M>>
         get() = _items
 
-    private fun itemChanged(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) {
+    protected fun itemChanged(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) {
         listeners.forEach { it(name, oldItem, newItem) }
     }
 
