@@ -1,5 +1,7 @@
 package hep.dataforge.meta
 
+import kotlinx.serialization.Serializable
+
 
 /**
  * The list of supported Value types.
@@ -16,6 +18,7 @@ enum class ValueType {
  *
  * Value can represent a list of value objects.
  */
+@Serializable(with = ValueSerializer::class)
 interface Value {
     /**
      * Get raw value of this value

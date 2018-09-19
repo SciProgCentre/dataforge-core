@@ -1,17 +1,12 @@
 plugins {
     id 'kotlin-platform-js'
-}
-
-group 'hep.dataforge'
-version '0.1.0-SNAPSHOT'
-
-repositories {
-    mavenCentral()
+    //id 'kotlinx-serialization'
 }
 
 dependencies {
-    expectedBy rootProject
+    expectedBy project(":dataforge-meta-common")
 
-    compile "org.jetbrains.kotlin:kotlin-stdlib-js"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
+    compile  "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
     testCompile "org.jetbrains.kotlin:kotlin-test-js"
 }

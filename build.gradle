@@ -1,5 +1,15 @@
-plugins {
-    id 'kotlin-platform-common' version '1.2.70'
+buildscript {
+    ext.kotlin_version = '1.2.70'
+    ext.serialization_version = '0.6.2'
+    repositories {
+        jcenter()
+        maven { url "https://kotlin.bintray.com/kotlinx" }
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlinx:kotlinx-gradle-serialization-plugin:$serialization_version"
+    }
 }
 
 description = "The basic interfaces for DataForge meta-data"
@@ -7,17 +17,10 @@ description = "The basic interfaces for DataForge meta-data"
 group 'hep.dataforge'
 version '0.1.1-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-common"
-    testCompile "org.jetbrains.kotlin:kotlin-test-annotations-common"
-    testCompile "org.jetbrains.kotlin:kotlin-test-common"
-}
-kotlin {
-    experimental {
-        coroutines "enable"
+subprojects{
+    repositories {
+        jcenter()
+        maven { url "https://kotlin.bintray.com/kotlinx" }
+        //maven { url 'https://jitpack.io' }
     }
 }

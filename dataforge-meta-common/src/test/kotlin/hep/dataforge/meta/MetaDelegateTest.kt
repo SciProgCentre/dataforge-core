@@ -12,7 +12,8 @@ class MetaDelegateTest {
 
     @Test
     fun delegateTest() {
-        val testObject = object : SimpleConfigurable(Config()) {
+        val testObject = object : Specification {
+            override val config: Config = Config()
             var myValue by string()
             var safeValue by number(2.2)
             var enumValue by enum(TestEnum.YES)

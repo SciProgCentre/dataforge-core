@@ -2,6 +2,7 @@ package hep.dataforge.meta
 
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import kotlinx.serialization.Serializable
 
 /**
  * A member of the meta tree. Could be represented as one of following:
@@ -30,6 +31,7 @@ operator fun <M : Meta> List<M>.get(query: String): M? {
  *  * [MetaItem.SingleNodeItem] single node
  *  * [MetaItem.MultiNodeItem] multi-value node
  */
+@Serializable
 interface Meta {
     val items: Map<String, MetaItem<out Meta>>
 }

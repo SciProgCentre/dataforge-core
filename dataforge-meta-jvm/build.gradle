@@ -1,21 +1,15 @@
 plugins {
     id 'kotlin-platform-jvm'
-}
-
-group 'hep.dataforge'
-version '0.1.0-SNAPSHOT'
-
-repositories {
-    mavenCentral()
+    id 'kotlinx-serialization'
 }
 
 dependencies {
-    expectedBy rootProject
+    expectedBy project(":dataforge-meta-common")
 
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    testCompile "junit:junit:4.12"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile  "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
     testCompile "org.jetbrains.kotlin:kotlin-test"
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit5"
 }
 
 compileKotlin {
