@@ -1,15 +1,15 @@
-plugins {
+plugins{
     id 'kotlin-platform-jvm'
-    id 'kotlinx-serialization'
 }
 
 dependencies {
     expectedBy project(":dataforge-meta-common")
 
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile  "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
     testCompile "org.jetbrains.kotlin:kotlin-test"
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit5"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit"
 }
 
 compileKotlin {

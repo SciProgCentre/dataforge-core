@@ -1,7 +1,5 @@
 package hep.dataforge.meta
 
-import kotlinx.serialization.Serializable
-
 
 /**
  * The list of supported Value types.
@@ -18,7 +16,6 @@ enum class ValueType {
  *
  * Value can represent a list of value objects.
  */
-@Serializable(with = ValueSerializer::class)
 interface Value {
     /**
      * Get raw value of this value
@@ -69,10 +66,10 @@ interface Value {
  * A singleton null value
  */
 object Null : Value {
-    override val value: Any? = null
-    override val type: ValueType = ValueType.NULL
-    override val number: Number = Double.NaN
-    override val string: String = "@null"
+    override val value: Any? get() = null
+    override val type: ValueType get() = ValueType.NULL
+    override val number: Number get() = Double.NaN
+    override val string: String get() = "@null"
 }
 
 /**
@@ -85,40 +82,60 @@ fun Value.isNull(): Boolean = this == Null
  * Singleton true value
  */
 object True : Value {
-    override val value: Any? = true
-    override val type: ValueType = ValueType.BOOLEAN
-    override val number: Number = 1.0
-    override val string: String = "+"
+    override val value: Any? get() = true
+    override val type: ValueType get() = ValueType.BOOLEAN
+    override val number: Number get() = 1.0
+    override val string: String get() = "+"
 }
 
 /**
  * Singleton false value
  */
 object False : Value {
-    override val value: Any? = false
-    override val type: ValueType = ValueType.BOOLEAN
-    override val number: Number = -1.0
-    override val string: String = "-"
+    override val value: Any? get() = false
+    override val type: ValueType get() = ValueType.BOOLEAN
+    override val number: Number get() = -1.0
+    override val string: String get() = "-"
 }
 
 val Value.boolean get() = this == True || this.list.firstOrNull() == True || (type == ValueType.STRING && string.toBoolean())
 
 class NumberValue(override val number: Number) : Value {
     override val value: Any? get() = number
-    override val type: ValueType = ValueType.NUMBER
+    override val type: ValueType get() = ValueType.NUMBER
     override val string: String get() = number.toString()
+
+    override fun equals(other: Any?): Boolean {
+        return this.number == (other as? Value)?.number
+    }
+
+    override fun hashCode(): Int = number.hashCode()
+
+
 }
 
 class StringValue(override val string: String) : Value {
     override val value: Any? get() = string
-    override val type: ValueType = ValueType.STRING
+    override val type: ValueType get() = ValueType.STRING
     override val number: Number get() = string.toDouble()
+
+    override fun equals(other: Any?): Boolean {
+        return this.string == (other as? Value)?.string
+    }
+
+    override fun hashCode(): Int  = string.hashCode()
 }
 
 class EnumValue<E : Enum<*>>(override val value: E) : Value {
-    override val type: ValueType = ValueType.STRING
-    override val number: Number = value.ordinal
-    override val string: String = value.name
+    override val type: ValueType get() = ValueType.STRING
+    override val number: Number get() = value.ordinal
+    override val string: String get() = value.name
+
+    override fun equals(other: Any?): Boolean {
+        return string == (other as? Value)?.string
+    }
+
+    override fun hashCode(): Int = value.hashCode()
 }
 
 class ListValue(override val list: List<Value>) : Value {
@@ -147,6 +164,7 @@ fun Boolean.asValue(): Value = if (this) True else False
 fun String.asValue(): Value = StringValue(this)
 
 fun Collection<Value>.asValue(): Value = ListValue(this.toList())
+
 
 /**
  * Create Value from String using closest match conversion
@@ -181,4 +199,15 @@ fun String.parseValue(): Value {
 
     //Give up and return a StringValue
     return StringValue(this)
+}
+
+class LazyParsedValue(override val string: String): Value{
+    private  val parsedValue by lazy { string.parseValue() }
+
+    override val value: Any?
+        get() = parsedValue.value
+    override val type: ValueType
+        get() = parsedValue.type
+    override val number: Number
+        get() = parsedValue.number
 }

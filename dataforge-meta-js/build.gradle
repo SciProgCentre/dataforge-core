@@ -1,6 +1,5 @@
-plugins {
+plugins{
     id 'kotlin-platform-js'
-    //id 'kotlinx-serialization'
 }
 
 dependencies {

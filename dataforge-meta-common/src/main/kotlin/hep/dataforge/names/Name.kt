@@ -1,6 +1,5 @@
 package hep.dataforge.names
 
-import kotlin.coroutines.experimental.buildSequence
 
 /**
  * The general interface for working with names.
@@ -75,7 +74,7 @@ data class NameToken internal constructor(val body: String, val query: String) {
 }
 
 fun String.toName(): Name {
-    val tokens = buildSequence<NameToken> {
+    val tokens = sequence {
         var bodyBuilder = StringBuilder()
         var queryBuilder = StringBuilder()
         var bracketCount: Int = 0

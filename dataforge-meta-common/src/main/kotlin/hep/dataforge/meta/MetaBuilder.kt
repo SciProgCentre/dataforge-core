@@ -10,7 +10,18 @@ class MetaBuilder : MutableMetaNode<MetaBuilder>() {
     override fun empty(): MetaBuilder = MetaBuilder()
 
     infix fun String.to(value: Any) {
+        if (value is Meta) {
+            this@MetaBuilder[this] = value
+        }
         this@MetaBuilder[this] = Value.of(value)
+    }
+
+    infix fun String.to(meta: Meta) {
+        this@MetaBuilder[this] = meta
+    }
+
+    infix fun String.to(value: Iterable<Meta>) {
+        this@MetaBuilder[this] = value.toList()
     }
 
     infix fun String.to(metaBuilder: MetaBuilder.() -> Unit) {
