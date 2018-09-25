@@ -15,12 +15,12 @@ interface MetaFormat {
     suspend fun read(input: Input): Meta
 }
 
-/**
- * Resolve format by its name. Null if not provided
- */
-expect fun resolveFormat(name: String): MetaFormat?
-
-/**
- * Resolve format by its binary key. Null if not provided
- */
-expect fun resolveFormat(key: Short): MetaFormat?
+///**
+// * Resolve format by its name. Null if not provided
+// */
+//expect fun resolveFormat(name: String): MetaFormat?
+//
+///**
+// * Resolve format by its binary key. Null if not provided
+// */
+//expect fun resolveFormat(key: Short): MetaFormat?

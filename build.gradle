@@ -24,14 +24,14 @@ buildscript {
 
 description = "The basic interfaces for DataForge meta-data"
 
-group 'hep.dataforge'
-version '0.1.1-SNAPSHOT'
+group = 'hep.dataforge'
+version = '0.1.1-SNAPSHOT'
 
 allprojects {
     repositories {
         jcenter()
         maven { url = "http://dl.bintray.com/kotlin/kotlin-eap" }
-        maven { url "https://kotlin.bintray.com/kotlinx" }
+        maven { url = "https://kotlin.bintray.com/kotlinx" }
         //maven { url 'https://jitpack.io' }
     }
 }
