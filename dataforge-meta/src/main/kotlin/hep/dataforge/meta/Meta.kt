@@ -96,11 +96,6 @@ abstract class MetaNode<M : MetaNode<M>> : Meta {
     override fun hashCode(): Int {
         return items.hashCode()
     }
-
-    override fun toString(): String {
-        return toJSON().toString()
-    }
-
 }
 
 /**

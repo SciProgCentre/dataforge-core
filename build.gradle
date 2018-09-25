@@ -1,6 +1,7 @@
 buildscript {
     ext.kotlin_version = '1.3.0-rc-57'
     ext.serialization_version = '0.8.0-rc13'
+    ext.kotlinx_io_version = '0.1.0-alpha-15-rc13'
     repositories {
         jcenter()
         maven {
@@ -33,8 +34,4 @@ allprojects {
         maven { url "https://kotlin.bintray.com/kotlinx" }
         //maven { url 'https://jitpack.io' }
     }
-}
-
-subprojects {
-    apply plugin: 'kotlinx-serialization'
 }

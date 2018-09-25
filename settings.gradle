@@ -14,8 +14,12 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'dataforge-meta'
+rootProject.name = 'dataforge-core'
 
-include ":dataforge-meta-common"
-include ":dataforge-meta-jvm"
-include ":dataforge-meta-js"
+include ":dataforge-meta"
+include ":dataforge-meta:dataforge-meta-jvm"
+include ":dataforge-meta:dataforge-meta-js"
+
+include ":dataforge-meta:dataforge-meta-io"
+
+include ":dataforge-envelope"

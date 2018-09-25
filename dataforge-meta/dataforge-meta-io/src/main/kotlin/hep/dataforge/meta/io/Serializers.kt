@@ -1,46 +1,47 @@
-package hep.dataforge.meta
+package hep.dataforge.meta.io
 
-import kotlinx.serialization.json.*
+import hep.dataforge.meta.*
+import kotlinx.serialization.Serializable
 
 
 /*Universal serialization*/
 
-//sealed class MetaItemProxy {
-//
-//    @Serializable
-//    class NumberValueProxy(val number: Number) : MetaItemProxy()
-//
-//    @Serializable
-//    class StringValueProxy(val string: String) : MetaItemProxy()
-//
-//    @Serializable
-//    class BooleanValueProxy(val boolean: Boolean) : MetaItemProxy()
-//
-//    @Serializable
-//    object NullValueProxy : MetaItemProxy()
-//
-//    @Serializable
-//    class MetaProxy(@Serializable val map: Map<String, MetaItemProxy>) : MetaItemProxy()
-//
-//    @Serializable
-//    class MetaListProxy(@Serializable val nodes: List<MetaProxy>) : MetaItemProxy()
-//}
-//
-//
-//fun Meta.toMap(): Map<String, MetaItemProxy> {
-//   return this.items.mapValues { (_, value) ->
-//        when (value) {
-//            is MetaItem.ValueItem -> when (value.value.type) {
-//                ValueType.NUMBER -> MetaItemProxy.NumberValueProxy(value.value.number)
-//                ValueType.STRING -> MetaItemProxy.StringValueProxy(value.value.string)
-//                ValueType.BOOLEAN -> MetaItemProxy.BooleanValueProxy(value.value.boolean)
-//                ValueType.NULL -> MetaItemProxy.NullValueProxy
-//            }
-//            is MetaItem.SingleNodeItem -> MetaItemProxy.MetaProxy(value.node.toMap())
-//            is MetaItem.MultiNodeItem -> MetaItemProxy.MetaListProxy(value.nodes.map { MetaItemProxy.MetaProxy(it.toMap()) })
-//        }
-//    }
-//}
+sealed class MetaItemProxy {
+
+    @Serializable
+    class NumberValueProxy(val number: Number) : MetaItemProxy()
+
+    @Serializable
+    class StringValueProxy(val string: String) : MetaItemProxy()
+
+    @Serializable
+    class BooleanValueProxy(val boolean: Boolean) : MetaItemProxy()
+
+    @Serializable
+    object NullValueProxy : MetaItemProxy()
+
+    @Serializable
+    class MetaProxy(@Serializable val map: Map<String, MetaItemProxy>) : MetaItemProxy()
+
+    @Serializable
+    class MetaListProxy(@Serializable val nodes: List<MetaProxy>) : MetaItemProxy()
+}
+
+
+fun Meta.toMap(): Map<String, MetaItemProxy> {
+   return this.items.mapValues { (_, value) ->
+        when (value) {
+            is MetaItem.ValueItem<*> -> when (value.value.type) {
+                ValueType.NUMBER -> MetaItemProxy.NumberValueProxy(value.value.number)
+                ValueType.STRING -> MetaItemProxy.StringValueProxy(value.value.string)
+                ValueType.BOOLEAN -> MetaItemProxy.BooleanValueProxy(value.value.boolean)
+                ValueType.NULL -> MetaItemProxy.NullValueProxy
+            }
+            is MetaItem.SingleNodeItem<*> -> MetaItemProxy.MetaProxy(value.node.toMap())
+            is MetaItem.MultiNodeItem<*> -> MetaItemProxy.MetaListProxy(value.nodes.map { MetaItemProxy.MetaProxy(it.toMap()) })
+        }
+    }
+}
 
 
 /*Direct JSON serialization*/

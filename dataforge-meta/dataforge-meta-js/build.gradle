@@ -3,9 +3,8 @@ plugins{
 }
 
 dependencies {
-    expectedBy project(":dataforge-meta-common")
+    expectedBy project(":dataforge-meta")
 
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
-    compile  "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
     testCompile "org.jetbrains.kotlin:kotlin-test-js"
 }
