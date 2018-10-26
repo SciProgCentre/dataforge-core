@@ -1,6 +1,6 @@
 plugins {
     id 'kotlin-multiplatform'
-    id 'kotlinx-serialization'
+    //id 'kotlinx-serialization'
 }
 repositories {
     maven { url = 'http://dl.bintray.com/kotlin/kotlin-eap' }
@@ -19,27 +19,41 @@ kotlin {
         commonMain {
             dependencies {
                 api project(":dataforge-meta")
-                implementation 'org.jetbrains.kotlin:kotlin-reflect'
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
+                //implementation 'org.jetbrains.kotlin:kotlin-reflect'
+                //implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-io:$kotlinx_io_version"
             }
         }
-        commonTest {}
+        commonTest {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-test-common'
+                implementation 'org.jetbrains.kotlin:kotlin-test-annotations-common'
+            }
+        }
         jvmMain {
             dependencies {
                 implementation 'com.github.cliftonlabs:json-simple:3.0.2'
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+                //implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-io-jvm:$kotlinx_io_version"
             }
         }
-        jvmTest {}
+        jvmTest {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-test'
+                implementation 'org.jetbrains.kotlin:kotlin-test-junit'
+            }
+        }
         jsMain {
             dependencies {
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
+                //implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-io-js:$kotlinx_io_version"
             }
         }
-        jsTest {}
+        jsTest {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-test-js'
+            }
+        }
 //        iosMain {
 //        }
 //        iosTest {

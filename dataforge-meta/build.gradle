@@ -23,8 +23,8 @@ kotlin {
         }
         commonTest {
             dependencies {
-                api 'org.jetbrains.kotlin:kotlin-test-common'
-                api 'org.jetbrains.kotlin:kotlin-test-annotations-common'
+                implementation 'org.jetbrains.kotlin:kotlin-test-common'
+                implementation 'org.jetbrains.kotlin:kotlin-test-annotations-common'
             }
         }
         jvmMain {
@@ -34,8 +34,8 @@ kotlin {
         }
         jvmTest {
             dependencies {
-                api 'org.jetbrains.kotlin:kotlin-test'
-                api 'org.jetbrains.kotlin:kotlin-test-junit'
+                implementation 'org.jetbrains.kotlin:kotlin-test'
+                implementation 'org.jetbrains.kotlin:kotlin-test-junit'
             }
         }
         jsMain {
@@ -45,7 +45,7 @@ kotlin {
         }
         jsTest {
             dependencies {
-                api 'org.jetbrains.kotlin:kotlin-test-js'
+                implementation 'org.jetbrains.kotlin:kotlin-test-js'
             }
         }
 //        iosMain {

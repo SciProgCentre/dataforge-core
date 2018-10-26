@@ -1,10 +1,7 @@
 package hep.dataforge.meta.io
 
 import hep.dataforge.meta.*
-import kotlinx.io.core.Input
-import kotlinx.io.core.Output
-import kotlinx.io.core.readText
-import kotlinx.io.core.writeText
+import kotlinx.io.core.*
 
 /**
  * A format for meta serialization
@@ -13,8 +10,18 @@ interface MetaFormat {
     val name: String
     val key: Short
 
-    suspend fun write(meta: Meta, out: Output)
-    suspend fun read(input: Input): Meta
+    fun write(meta: Meta, out: Output)
+    fun read(input: Input): Meta
+}
+
+fun MetaFormat.stringify(meta: Meta): String {
+    val builder = BytePacketBuilder()
+    write(meta,builder)
+    return builder.build().readText()
+}
+
+fun MetaFormat.parse(str: String): Meta{
+    return read(ByteReadPacket(str.toByteArray()))
 }
 
 ///**
@@ -34,20 +41,20 @@ object JSONMetaFormat : MetaFormat {
     override val name: String = "json"
     override val key: Short = 0x4a53//"JS"
 
-    override suspend fun write(meta: Meta, out: Output) = writeJson(meta, out)
-    override suspend fun read(input: Input): Meta = readJson(input)
+    override fun write(meta: Meta, out: Output) = writeJson(meta, out)
+    override fun read(input: Input): Meta = readJson(input)
 }
 
 object BinaryMetaFormat : MetaFormat {
     override val name: String = "bin"
     override val key: Short = 0x4249//BI
 
-    override suspend fun write(meta: Meta, out: Output) {
+    override fun write(meta: Meta, out: Output) {
         out.writeMeta(meta)
     }
 
-    override suspend fun read(input: Input): Meta {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun read(input: Input): Meta {
+        return (input.readMetaItem() as MetaItem.SingleNodeItem).node
     }
 
     private fun Output.writeChar(char: Char) = writeByte(char.toByte())
@@ -155,7 +162,7 @@ object BinaryMetaFormat : MetaFormat {
                     (1..length).forEach { _ ->
                         val name = readString()
                         val item = readMetaItem()
-                        set(name,item)
+                        set(name, item)
                     }
                 }
                 MetaItem.SingleNodeItem(meta)
