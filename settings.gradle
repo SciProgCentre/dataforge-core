@@ -28,5 +28,4 @@ rootProject.name = 'dataforge-core'
 
 include ":dataforge-meta"
 include ":dataforge-meta-io"
-
-include ":dataforge-envelope"
+//include ":dataforge-envelope"

@@ -10,34 +10,9 @@ import hep.dataforge.names.toName
  * * a list of nodes
  */
 sealed class MetaItem<M : Meta> {
-    class ValueItem<M : Meta>(val value: Value) : MetaItem<M>(){
-        override fun equals(other: Any?): Boolean {
-            return this.value == (other as? ValueItem<*>)?.value
-        }
-
-        override fun hashCode(): Int {
-            return value.hashCode()
-        }
-    }
-    class SingleNodeItem<M : Meta>(val node: M) : MetaItem<M>(){
-        override fun equals(other: Any?): Boolean {
-            return this.node == (other as? SingleNodeItem<*>)?.node
-        }
-
-        override fun hashCode(): Int {
-            return node.hashCode()
-        }
-    }
-
-    class MultiNodeItem<M : Meta>(val nodes: List<M>) : MetaItem<M>(){
-        override fun equals(other: Any?): Boolean {
-            return this.nodes == (other as? MultiNodeItem<*>)?.nodes
-        }
-
-        override fun hashCode(): Int {
-            return nodes.hashCode()
-        }
-    }
+    data class ValueItem<M : Meta>(val value: Value) : MetaItem<M>()
+    data class SingleNodeItem<M : Meta>(val node: M) : MetaItem<M>()
+    data class MultiNodeItem<M : Meta>(val nodes: List<M>) : MetaItem<M>()
 }
 
 operator fun <M : Meta> List<M>.get(query: String): M? {

@@ -45,4 +45,4 @@ fun Meta.builder(): MetaBuilder {
     }
 }
 
-fun buildMeta(builder: MetaBuilder.() -> Unit): Meta = MetaBuilder().apply(builder)
+fun buildMeta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)

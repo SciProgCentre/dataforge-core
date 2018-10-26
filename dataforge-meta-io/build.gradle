@@ -1,5 +1,5 @@
 plugins {
-    id 'kotlin-multiplatform'// version '1.3.0-rc-57'
+    id 'kotlin-multiplatform'
     id 'kotlinx-serialization'
 }
 repositories {
@@ -18,45 +18,28 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation project(":dataforge-meta")
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-common"
+                api project(":dataforge-meta")
                 implementation 'org.jetbrains.kotlin:kotlin-reflect'
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-io:$kotlinx_io_version"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
             }
         }
-        commonTest {
-            dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-test-common'
-                implementation 'org.jetbrains.kotlin:kotlin-test-annotations-common'
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
-            }
-        }
+        commonTest {}
         jvmMain {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-                implementation "org.jetbrains.kotlinx:kotlinx-io-jvm:$kotlinx_io_version"
+                implementation 'com.github.cliftonlabs:json-simple:3.0.2'
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+                implementation "org.jetbrains.kotlinx:kotlinx-io-jvm:$kotlinx_io_version"
             }
         }
-        jvmTest {
-            dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-test'
-                implementation 'org.jetbrains.kotlin:kotlin-test-junit'
-            }
-        }
+        jvmTest {}
         jsMain {
             dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
+                implementation "org.jetbrains.kotlinx:kotlinx-io-js:$kotlinx_io_version"
             }
         }
-        jsTest {
-            dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-test-js'
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
-            }
-        }
+        jsTest {}
 //        iosMain {
 //        }
 //        iosTest {

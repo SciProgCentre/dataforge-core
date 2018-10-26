@@ -6,59 +6,59 @@ import kotlinx.serialization.json.*
 
 /*Direct JSON serialization*/
 
-fun Value.toJson(): JsonElement = if (isList()) {
-    JsonArray(list.map { it.toJson() })
-} else {
-    when (type) {
-        ValueType.NUMBER -> JsonPrimitive(number)
-        ValueType.STRING -> JsonPrimitive(string)
-        ValueType.BOOLEAN -> JsonPrimitive(boolean)
-        ValueType.NULL -> JsonNull
-    }
-}
-
-fun Meta.toJSON(): JsonObject {
-    val map = this.items.mapValues { (_, value) ->
-        when (value) {
-            is MetaItem.ValueItem -> value.value.toJson()
-            is MetaItem.SingleNodeItem -> value.node.toJSON()
-            is MetaItem.MultiNodeItem -> JsonArray(value.nodes.map { it.toJSON() })
-        }
-    }
-    return JsonObject(map)
-}
-
-fun JsonPrimitive.toValue(): Value {
-    return when (this) {
-        is JsonLiteral -> LazyParsedValue(content)
-        is JsonNull -> Null
-    }
-}
-
-fun JsonObject.toMeta(): Meta {
-    return buildMeta {
-        this@toMeta.forEach { (key, value) ->
-            when (value) {
-                is JsonPrimitive -> set(key, value.toValue())
-                is JsonObject -> set(key, value.toMeta())
-                is JsonArray -> if (value.all { it is JsonPrimitive }) {
-                    set(key, ListValue(value.map { (it as JsonPrimitive).toValue() }))
-                } else {
-                    set(
-                            key,
-                            value.map {
-                                if (it is JsonObject) {
-                                    it.toMeta()
-                                } else {
-                                    buildMeta { "@value" to it.primitive.toValue() }
-                                }
-                            }
-                    )
-                }
-            }
-        }
-    }
-}
+//fun Value.toJson(): JsonElement = if (isList()) {
+//    JsonArray(list.map { it.toJson() })
+//} else {
+//    when (type) {
+//        ValueType.NUMBER -> JsonPrimitive(number)
+//        ValueType.STRING -> JsonPrimitive(string)
+//        ValueType.BOOLEAN -> JsonPrimitive(boolean)
+//        ValueType.NULL -> JsonNull
+//    }
+//}
+//
+//fun Meta.toJSON(): JsonObject {
+//    val map = this.items.mapValues { (_, value) ->
+//        when (value) {
+//            is MetaItem.ValueItem -> value.value.toJson()
+//            is MetaItem.SingleNodeItem -> value.node.toJSON()
+//            is MetaItem.MultiNodeItem -> JsonArray(value.nodes.map { it.toJSON() })
+//        }
+//    }
+//    return JsonObject(map)
+//}
+//
+//fun JsonPrimitive.toValue(): Value {
+//    return when (this) {
+//        is JsonLiteral -> LazyParsedValue(content)
+//        is JsonNull -> Null
+//    }
+//}
+//
+//fun JsonObject.toMeta(): Meta {
+//    return buildMeta {
+//        this@toMeta.forEach { (key, value) ->
+//            when (value) {
+//                is JsonPrimitive -> set(key, value.toValue())
+//                is JsonObject -> set(key, value.toMeta())
+//                is JsonArray -> if (value.all { it is JsonPrimitive }) {
+//                    set(key, ListValue(value.map { (it as JsonPrimitive).toValue() }))
+//                } else {
+//                    set(
+//                            key,
+//                            value.map {
+//                                if (it is JsonObject) {
+//                                    it.toMeta()
+//                                } else {
+//                                    buildMeta { "@value" to it.primitive.toValue() }
+//                                }
+//                            }
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
 
 /*Direct CBOR serialization*/
 
@@ -67,45 +67,6 @@ fun JsonObject.toMeta(): Meta {
 //        encodeNumber(char.toByte().toLong())
 //    }
 //
-//    fun CBOR.CBOREncoder.encodeValue(value: Value) {
-//        if (value.isList()) {
-//            encodeChar('L')
-//            startArray()
-//            value.list.forEach {
-//                encodeValue(it)
-//            }
-//            end()
-//        } else when (value.type) {
-//            ValueType.NUMBER -> when (value.value) {
-//                is Int, is Short, is Long -> {
-//                    encodeChar('i')
-//                    encodeNumber(value.number.toLong())
-//                }
-//                is Float -> {
-//                    encodeChar('f')
-//                    encodeFloat(value.number.toFloat())
-//                }
-//                else -> {
-//                    encodeChar('d')
-//                    encodeDouble(value.number.toDouble())
-//                }
-//            }
-//            ValueType.STRING -> {
-//                encodeChar('S')
-//                encodeString(value.string)
-//            }
-//            ValueType.BOOLEAN -> {
-//                if (value.boolean) {
-//                    encodeChar('+')
-//                } else {
-//                    encodeChar('-')
-//                }
-//            }
-//            ValueType.NULL -> {
-//                encodeChar('N')
-//            }
-//        }
-//    }
 //
 //    fun CBOR.CBOREncoder.encodeMeta(meta: Meta) {
 //        meta.items.forEach { (key, item) ->

@@ -1,7 +1,7 @@
 buildscript {
-    ext.kotlin_version = '1.3.0-rc-57'
-    ext.serialization_version = '0.8.0-rc13'
-    ext.kotlinx_io_version = '0.1.0-alpha-15-rc13'
+    ext.kotlin_version = '1.3.0-rc-190'
+    ext.serialization_version = '0.8.3-rc13'
+    ext.kotlinx_io_version = '0.1.0-alpha-24-rc13'
     repositories {
         jcenter()
         maven {
@@ -12,26 +12,25 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
     }
 }
 
-//plugins {
-//    id 'kotlin-platform-common' version "$kotlin_version" apply false
-//    id 'kotlin-platform-jvm' version "$kotlin_version" apply false
-//    id 'kotlin-platform-js' version "$kotlin_version" apply false
-//    id 'kotlinx-serialization' version "$kotlin_version" apply false
-//}
-
-description = "The basic interfaces for DataForge meta-data"
-
-group = 'hep.dataforge'
-version = '0.1.1-SNAPSHOT'
-
 allprojects {
+    apply plugin: 'maven-publish'
+    apply plugin: "com.jfrog.artifactory"
+
     repositories {
         jcenter()
         maven { url = "http://dl.bintray.com/kotlin/kotlin-eap" }
         maven { url = "https://kotlin.bintray.com/kotlinx" }
         //maven { url 'https://jitpack.io' }
     }
+
+    group = 'hep.dataforge'
+    version = '0.1.1-SNAPSHOT'
+}
+
+if(file('aritfactory.gradle').exists()) {
+    apply from: 'aritfactory.gradle'
 }
