@@ -58,7 +58,7 @@ class Name internal constructor(val tokens: List<NameToken>) {
  * Following symbols are prohibited in name tokens: `{}.:\`.
  * A name token could have appendix in square brackets called *query*
  */
-data class NameToken internal constructor(val body: String, val query: String) {
+data class NameToken(val body: String, val query: String = "") {
 
     init {
         if (body.isEmpty()) error("Syntax error: Name token body is empty")
@@ -107,6 +107,8 @@ fun String.toName(): Name {
     }
     return Name(tokens.toList())
 }
+
+operator fun NameToken.plus(other: Name): Name = Name(listOf(this) + other.tokens)
 
 operator fun Name.plus(other: Name): Name = Name(this.tokens + other.tokens)
 

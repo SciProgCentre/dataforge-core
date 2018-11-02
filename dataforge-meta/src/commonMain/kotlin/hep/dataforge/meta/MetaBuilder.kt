@@ -37,9 +37,8 @@ fun Meta.builder(): MetaBuilder {
         items.mapValues { entry ->
             val item = entry.value
             builder[entry.key] = when (item) {
-                is MetaItem.ValueItem -> MetaItem.ValueItem(item.value)
-                is MetaItem.SingleNodeItem -> MetaItem.SingleNodeItem(item.node.builder())
-                is MetaItem.MultiNodeItem -> MetaItem.MultiNodeItem(item.nodes.map { it.builder() })
+                is MetaItem.ValueItem -> MetaItem.ValueItem<MetaBuilder>(item.value)
+                is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.builder())
             }
         }
     }

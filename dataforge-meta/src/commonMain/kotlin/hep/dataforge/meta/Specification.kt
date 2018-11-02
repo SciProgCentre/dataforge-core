@@ -4,7 +4,7 @@ package hep.dataforge.meta
  * Marker interface for specifications
  */
 interface Specification: Configurable{
-    operator fun get(name: String): MetaItem<Config>? = config.get(name)
+    operator fun get(name: String): MetaItem<Config>? = config[name]
 }
 
 /**

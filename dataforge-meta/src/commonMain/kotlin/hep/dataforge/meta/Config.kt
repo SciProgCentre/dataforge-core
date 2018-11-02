@@ -22,8 +22,7 @@ fun Meta.toConfig(): Config = this as? Config ?: Config().also { builder ->
         val item = entry.value
         builder[entry.key] = when (item) {
             is MetaItem.ValueItem -> MetaItem.ValueItem(item.value)
-            is MetaItem.SingleNodeItem -> MetaItem.SingleNodeItem(item.node.toConfig())
-            is MetaItem.MultiNodeItem -> MetaItem.MultiNodeItem(item.nodes.map { it.toConfig() })
+            is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.toConfig())
         }
     }
 }

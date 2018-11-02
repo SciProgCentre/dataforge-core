@@ -3,13 +3,14 @@ package hep.dataforge.meta.io
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaItem
 import hep.dataforge.meta.Value
+import hep.dataforge.names.NameToken
 
 /**
  * Represent any js object as meta
  */
 class JSMeta(val obj: Any) : Meta {
-    override val items: Map<String, MetaItem<out Meta>>
-        get() = listKeys(obj).associateWith { convert(js("obj[it]")) }
+    override val items: Map<NameToken, MetaItem<out Meta>>
+        get() = listKeys(obj).map { NameToken(it) }.associateWith { convert(js("obj[it]")) }
 
     private fun listKeys(obj: Any): List<String> = js("Object").keys(obj) as List<String>
 
@@ -22,15 +23,9 @@ class JSMeta(val obj: Any) : Meta {
             null, isPrimitive(obj), is Number, is String, is Boolean -> MetaItem.ValueItem<JSMeta>(Value.of(obj))
             isList(obj) -> {
                 val list = obj as List<*>
-                //if first value is primitive, treat as value
-                if (isPrimitive(list.first())) {
-                    MetaItem.ValueItem<JSMeta>(Value.of(list))
-                } else {
-                    //else treat as meta list
-                    MetaItem.MultiNodeItem(list.map { JSMeta(it!!) })
-                }
+                MetaItem.ValueItem<JSMeta>(Value.of(list))
             }
-            else -> MetaItem.SingleNodeItem(JSMeta(obj))
+            else -> MetaItem.NodeItem(JSMeta(obj))
         }
     }
 }

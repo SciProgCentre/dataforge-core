@@ -1,6 +1,7 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.Name
+import hep.dataforge.names.NameToken
 import hep.dataforge.names.toName
 
 /**
@@ -27,12 +28,11 @@ class StyledConfig(val config: Config, style: Meta = EmptyMeta) : Config() {
         when (item) {
             null -> config.remove(name)
             is MetaItem.ValueItem -> config[name] = item.value
-            is MetaItem.SingleNodeItem -> config[name] = item.node
-            is MetaItem.MultiNodeItem -> config[name] = item.nodes
+            is MetaItem.NodeItem -> config[name] = item.node
         }
     }
 
-    override val items: Map<String, MetaItem<Config>>
+    override val items: Map<NameToken, MetaItem<Config>>
         get() = (config.items.keys + style.items.keys).associate { key ->
             val value = config.items[key]
             val styleValue = style[key]
@@ -40,16 +40,12 @@ class StyledConfig(val config: Config, style: Meta = EmptyMeta) : Config() {
                 null -> when (styleValue) {
                     null -> error("Should be unreachable")
                     is MetaItem.ValueItem -> MetaItem.ValueItem(styleValue.value)
-                    is MetaItem.SingleNodeItem -> MetaItem.SingleNodeItem<Config>(StyledConfig(config.empty(), styleValue.node))
-                    is MetaItem.MultiNodeItem -> MetaItem.MultiNodeItem<Config>(styleValue.nodes.map { StyledConfig(config.empty(), it) })
+                    is MetaItem.NodeItem -> MetaItem.NodeItem<Config>(StyledConfig(config.empty(), styleValue.node))
                 }
                 is MetaItem.ValueItem -> MetaItem.ValueItem(value.value)
-                is MetaItem.SingleNodeItem -> MetaItem.SingleNodeItem(
+                is MetaItem.NodeItem -> MetaItem.NodeItem(
                         StyledConfig(value.node, styleValue?.node ?: EmptyMeta)
                 )
-                is MetaItem.MultiNodeItem -> MetaItem.MultiNodeItem(value.nodes.map {
-                    StyledConfig(it, styleValue?.node ?: EmptyMeta)
-                })
             }
             key to item
         }

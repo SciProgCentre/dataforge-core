@@ -2,10 +2,11 @@ plugins {
     id 'kotlin-multiplatform'
     //id 'kotlinx-serialization'
 }
+
 repositories {
-    maven { url = 'http://dl.bintray.com/kotlin/kotlin-eap' }
-    mavenCentral()
+    jcenter()
 }
+
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')

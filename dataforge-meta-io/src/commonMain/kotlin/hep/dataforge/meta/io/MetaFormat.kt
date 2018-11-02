@@ -54,7 +54,7 @@ object BinaryMetaFormat : MetaFormat {
     }
 
     override fun read(input: Input): Meta {
-        return (input.readMetaItem() as MetaItem.SingleNodeItem).node
+        return (input.readMetaItem() as MetaItem.NodeItem).node
     }
 
     private fun Output.writeChar(char: Char) = writeByte(char.toByte())
@@ -115,20 +115,13 @@ object BinaryMetaFormat : MetaFormat {
         writeChar('M')
         writeInt(meta.items.size)
         meta.items.forEach { (key, item) ->
-            writeString(key)
+            writeString(key.toString())
             when (item) {
                 is MetaItem.ValueItem -> {
                     writeValue(item.value)
                 }
-                is MetaItem.SingleNodeItem -> {
+                is MetaItem.NodeItem -> {
                     writeMeta(item.node)
-                }
-                is MetaItem.MultiNodeItem -> {
-                    writeChar('#')
-                    writeInt(item.nodes.size)
-                    item.nodes.forEach {
-                        writeMeta(it)
-                    }
                 }
             }
         }
@@ -165,12 +158,7 @@ object BinaryMetaFormat : MetaFormat {
                         set(name, item)
                     }
                 }
-                MetaItem.SingleNodeItem(meta)
-            }
-            '#' -> {
-                val length = readInt()
-                val nodes = (1..length).map { (readMetaItem() as MetaItem.SingleNodeItem).node }
-                MetaItem.MultiNodeItem(nodes)
+                MetaItem.NodeItem(meta)
             }
             else -> error("Unknown serialization key character: $keyChar")
         }

@@ -1,10 +1,11 @@
 plugins {
     id 'kotlin-multiplatform'
 }
+
 repositories {
-    maven { url = 'http://dl.bintray.com/kotlin/kotlin-eap' }
-    mavenCentral()
+    jcenter()
 }
+
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')

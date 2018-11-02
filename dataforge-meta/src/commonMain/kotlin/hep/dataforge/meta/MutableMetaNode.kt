@@ -1,6 +1,7 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.Name
+import hep.dataforge.names.NameToken
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
 
@@ -10,14 +11,16 @@ class MetaListener(val owner: Any? = null, val action: (name: Name, oldItem: Met
 
 
 interface MutableMeta<M : MutableMeta<M>> : Meta {
-    override val items: Map<String, MetaItem<M>>
+    override val items: Map<NameToken, MetaItem<M>>
     operator fun set(name: Name, item: MetaItem<M>?)
     fun onChange(owner: Any? = null, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit)
     fun removeListener(owner: Any)
 }
 
 /**
- * A mutable meta node with attachable change listener
+ * A mutable meta node with attachable change listener.
+ *
+ * Changes in Meta are not thread safe.
  */
 abstract class MutableMetaNode<M : MutableMetaNode<M>> : MetaNode<M>(), MutableMeta<M> {
     private val listeners = HashSet<MetaListener>()
@@ -36,26 +39,24 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : MetaNode<M>(), MutableM
         listeners.removeAll { it.owner === owner }
     }
 
-    private val _items: MutableMap<String, MetaItem<M>> = HashMap()
+    private val _items: MutableMap<NameToken, MetaItem<M>> = HashMap()
 
-    override val items: Map<String, MetaItem<M>>
+    override val items: Map<NameToken, MetaItem<M>>
         get() = _items
 
     protected fun itemChanged(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) {
         listeners.forEach { it(name, oldItem, newItem) }
     }
 
-    protected open fun replaceItem(key: String, oldItem: MetaItem<M>?, newItem: MetaItem<M>?) {
+    protected open fun replaceItem(key: NameToken, oldItem: MetaItem<M>?, newItem: MetaItem<M>?) {
         if (newItem == null) {
             _items.remove(key)
-            oldItem?.nodes?.forEach {
-                it.removeListener(this)
-            }
+            oldItem?.node?.removeListener(this)
         } else {
             _items[key] = newItem
-            newItem.nodes.forEach {
-                it.onChange(this) { name, oldItem, newItem ->
-                    itemChanged(key.toName() + name, oldItem, newItem)
+            if(newItem is MetaItem.NodeItem) {
+                newItem.node.onChange(this) { name, oldChild, newChild ->
+                    itemChanged(key + name, oldChild, newChild)
                 }
             }
         }
@@ -79,14 +80,13 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : MetaNode<M>(), MutableM
             0 -> error("Can't set meta item for empty name")
             1 -> {
                 val token = name.first()!!
-                if (token.hasQuery()) TODO("Queries are not supported in set operations on meta")
-                replaceItem(token.body, get(name), item)
+                replaceItem(token, get(name), item)
             }
             else -> {
                 val token = name.first()!!
                 //get existing or create new node. Query is ignored for new node
-                val child = this.items[token.body]?.nodes?.get(token.query)
-                        ?: empty().also { this[token.body.toName()] = MetaItem.SingleNodeItem(it) }
+                val child = this.items[token]?.node
+                        ?: empty().also { this[token.body.toName()] = MetaItem.NodeItem(it) }
                 child[name.cutFirst()] = item
             }
         }
@@ -99,13 +99,11 @@ fun <M : MutableMeta<M>> M.remove(name: Name) = set(name, null)
 fun <M : MutableMeta<M>> M.remove(name: String) = remove(name.toName())
 
 operator fun <M : MutableMeta<M>> M.set(name: Name, value: Value) = set(name, MetaItem.ValueItem(value))
-operator fun <M : MutableMetaNode<M>> M.set(name: Name, meta: Meta) = set(name, MetaItem.SingleNodeItem(wrap(name, meta)))
-operator fun <M : MutableMetaNode<M>> M.set(name: Name, metas: List<Meta>) = set(name, MetaItem.MultiNodeItem(metas.map { wrap(name, it) }))
-
+operator fun <M : MutableMetaNode<M>> M.set(name: Name, meta: Meta) = set(name, MetaItem.NodeItem(wrap(name, meta)))
 operator fun <M : MutableMeta<M>> M.set(name: String, item: MetaItem<M>) = set(name.toName(), item)
 operator fun <M : MutableMeta<M>> M.set(name: String, value: Value) = set(name.toName(), MetaItem.ValueItem(value))
 operator fun <M : MutableMetaNode<M>> M.set(name: String, meta: Meta) = set(name.toName(), meta)
-operator fun <M : MutableMetaNode<M>> M.set(name: String, metas: List<Meta>) = set(name.toName(), metas)
+operator fun <M : MutableMeta<M>> M.set(token: NameToken, item: MetaItem<M>?) = set(token.toName(), item)
 
 
 /**
@@ -129,19 +127,23 @@ fun <M : MutableMetaNode<M>> M.update(meta: Meta) {
     meta.items.forEach { entry ->
         val value = entry.value
         when (value) {
-            is MetaItem.ValueItem -> this[entry.key] = value.value
-            is MetaItem.SingleNodeItem -> (this[entry.key] as? MetaItem.SingleNodeItem)
-                    ?.node?.update(value.node) ?: kotlin.run { this[entry.key] = value.node }
-            is MetaItem.MultiNodeItem -> {
-                val existing = this[entry.key]
-                if (existing is MetaItem.MultiNodeItem && existing.nodes.size == value.nodes.size) {
-                    existing.nodes.forEachIndexed { index, m ->
-                        m.update(value.nodes[index])
-                    }
-                } else {
-                    this[entry.key] = value.nodes
-                }
-            }
+            is MetaItem.ValueItem -> this[entry.key.toName()] = value.value
+            is MetaItem.NodeItem -> (this[entry.key.toName()] as? MetaItem.NodeItem)?.node?.update(value.node)
+                    ?: run { this[entry.key.toName()] = value.node }
         }
     }
 }
+
+// Same name siblings generation
+
+fun <M : MutableMetaNode<M>> M.setIndexed(name: Name, metas: Iterable<Meta>, queryFactory: (Int) -> String = { it.toString() }) {
+    val tokens = name.tokens.toMutableList()
+    val last = tokens.last()
+    metas.forEachIndexed { index, meta ->
+        val indexedToken = NameToken(last.body, last.query + queryFactory(index))
+        tokens[tokens.lastIndex] = indexedToken
+        set(Name(tokens), meta)
+    }
+}
+
+operator fun <M : MutableMetaNode<M>> M.set(name: Name, metas: Iterable<Meta>) = setIndexed(name, metas)

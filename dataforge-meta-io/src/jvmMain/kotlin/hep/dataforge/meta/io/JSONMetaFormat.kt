@@ -34,13 +34,8 @@ private fun Meta.toJson(): JsonObject {
     val builder = JsonObject()
     items.forEach { name, item ->
         when (item) {
-            is MetaItem.ValueItem -> builder[name] = item.value.toJson()
-            is MetaItem.SingleNodeItem -> builder[name] = item.node.toJson()
-            is MetaItem.MultiNodeItem -> {
-                val array = JsonArray()
-                item.nodes.forEach { array.add(it.toJson()) }
-                builder[name] = array
-            }
+            is MetaItem.ValueItem -> builder[name.toString()] = item.value.toJson()
+            is MetaItem.NodeItem -> builder[name.toString()] = item.node.toJson()
         }
     }
     return builder

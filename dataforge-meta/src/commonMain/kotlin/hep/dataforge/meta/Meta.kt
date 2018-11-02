@@ -1,46 +1,56 @@
 package hep.dataforge.meta
 
+import hep.dataforge.meta.Meta.Companion.VALUE_KEY
+import hep.dataforge.meta.MetaItem.NodeItem
+import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.names.Name
+import hep.dataforge.names.NameToken
 import hep.dataforge.names.toName
 
 /**
  * A member of the meta tree. Could be represented as one of following:
- * * a value
- * * a single node
- * * a list of nodes
+ * * a [ValueItem] (leaf)
+ * * a [NodeItem] (node)
  */
 sealed class MetaItem<M : Meta> {
     data class ValueItem<M : Meta>(val value: Value) : MetaItem<M>()
-    data class SingleNodeItem<M : Meta>(val node: M) : MetaItem<M>()
-    data class MultiNodeItem<M : Meta>(val nodes: List<M>) : MetaItem<M>()
-}
-
-operator fun <M : Meta> List<M>.get(query: String): M? {
-    return if (query.isEmpty()) {
-        first()
-    } else {
-        //TODO add custom key queries
-        get(query.toInt())
-    }
+    data class NodeItem<M : Meta>(val node: M) : MetaItem<M>()
 }
 
 /**
  * Generic meta tree representation. Elements are [MetaItem] objects that could be represented by three different entities:
  *  * [MetaItem.ValueItem] (leaf)
- *  * [MetaItem.SingleNodeItem] single node
- *  * [MetaItem.MultiNodeItem] multi-value node
+ *  * [MetaItem.NodeItem] single node
+ *
+ *   * Same name siblings are supported via elements with the same [Name] but different queries
  */
 interface Meta {
-    val items: Map<String, MetaItem<out Meta>>
-}
+    val items: Map<NameToken, MetaItem<out Meta>>
 
-operator fun Meta.get(name: Name): MetaItem<out Meta>? {
-    return when (name.length) {
-        0 -> error("Can't resolve element from empty name")
-        1 -> items[name.first()!!.body]
-        else -> name.first()!!.let { token -> items[token.body]?.nodes?.get(token.query) }?.get(name.cutFirst())
+    companion object {
+        /**
+         * A key for single value node
+         */
+        const val VALUE_KEY = "@value"
     }
 }
+
+/**
+ * Fast [String]-based accessor for item map
+ */
+operator fun <T> Map<NameToken, T>.get(body: String, query: String = ""): T? = get(NameToken(body, query))
+
+operator fun Meta.get(name: Name): MetaItem<out Meta>? {
+    return name.first()?.let { token ->
+        val tail = name.cutFirst()
+        when (tail.length) {
+            0 -> items[token]
+            else -> items[token]?.node?.get(tail)
+        }
+    }
+}
+
+operator fun Meta.get(token: NameToken): MetaItem<out Meta>? = items[token]
 
 //TODO create Java helper for meta operations
 operator fun Meta.get(key: String): MetaItem<out Meta>? = get(key.toName())
@@ -49,13 +59,15 @@ operator fun Meta.get(key: String): MetaItem<out Meta>? = get(key.toName())
  * A meta node that ensures that all of its descendants has at least the same type
  */
 abstract class MetaNode<M : MetaNode<M>> : Meta {
-    abstract override val items: Map<String, MetaItem<M>>
+    abstract override val items: Map<NameToken, MetaItem<M>>
 
     operator fun get(name: Name): MetaItem<M>? {
-        return when (name.length) {
-            0 -> error("Can't resolve element from empty name")
-            1 -> items[name.first()!!.body]
-            else -> name.first()!!.let { token -> items[token.body]?.nodes?.get(token.query) }?.get(name.cutFirst())
+        return name.first()?.let { token ->
+            val tail = name.cutFirst()
+            when (tail.length) {
+                0 -> items[token]
+                else -> items[token]?.node?.get(tail)
+            }
         }
     }
 
@@ -78,34 +90,19 @@ abstract class MetaNode<M : MetaNode<M>> : Meta {
  *
  * If the argument is possibly mutable node, it is copied on creation
  */
-class SealedMeta internal constructor(override val items: Map<String, MetaItem<SealedMeta>>) : MetaNode<SealedMeta>() {
-
-    companion object {
-        fun seal(meta: Meta): SealedMeta {
-            val items = if (meta is SealedMeta) {
-                meta.items
-            } else {
-                meta.items.mapValues { entry ->
-                    val item = entry.value
-                    when (item) {
-                        is MetaItem.ValueItem -> MetaItem.ValueItem(item.value)
-                        is MetaItem.SingleNodeItem -> MetaItem.SingleNodeItem(seal(item.node))
-                        is MetaItem.MultiNodeItem -> MetaItem.MultiNodeItem(item.nodes.map { seal(it) })
-                    }
-                }
-            }
-            return SealedMeta(items)
-        }
-    }
-}
-
+class SealedMeta internal constructor(override val items: Map<NameToken, MetaItem<SealedMeta>>) : MetaNode<SealedMeta>()
 /**
  * Generate sealed node from [this]. If it is already sealed return it as is
  */
-fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta.seal(this)
+fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(items.mapValues { entry -> entry.value.seal() })
+
+fun MetaItem<*>.seal(): MetaItem<SealedMeta> = when (this) {
+    is MetaItem.ValueItem -> MetaItem.ValueItem(value)
+    is MetaItem.NodeItem -> MetaItem.NodeItem(node.seal())
+}
 
 object EmptyMeta : Meta {
-    override val items: Map<String, MetaItem<out Meta>> = emptyMap()
+    override val items: Map<NameToken, MetaItem<out Meta>> = emptyMap()
 }
 
 /**
@@ -113,39 +110,22 @@ object EmptyMeta : Meta {
  */
 
 val MetaItem<*>.value
-    get() = (this as? MetaItem.ValueItem)?.value ?: error("Trying to interpret node meta item as value item")
+    get() = (this as? MetaItem.ValueItem)?.value
+            ?: (this.node[VALUE_KEY] as? MetaItem.ValueItem)?.value
+            ?: error("Trying to interpret node meta item as value item")
 val MetaItem<*>.string get() = value.string
 val MetaItem<*>.boolean get() = value.boolean
 val MetaItem<*>.number get() = value.number
 val MetaItem<*>.double get() = number.toDouble()
 val MetaItem<*>.int get() = number.toInt()
 val MetaItem<*>.long get() = number.toLong()
+val MetaItem<*>.short get() = number.toShort()
 
 val <M : Meta> MetaItem<M>.node: M
     get() = when (this) {
         is MetaItem.ValueItem -> error("Trying to interpret value meta item as node item")
-        is MetaItem.SingleNodeItem -> node
-        is MetaItem.MultiNodeItem -> nodes.first()
+        is MetaItem.NodeItem -> node
     }
-
-/**
- * Utility method to access item content as list of nodes.
- * Returns empty list if it is value item.
- */
-val <M : Meta> MetaItem<M>.nodes: List<M>
-    get() = when (this) {
-        is MetaItem.ValueItem -> emptyList()//error("Trying to interpret value meta item as node item")
-        is MetaItem.SingleNodeItem -> listOf(node)
-        is MetaItem.MultiNodeItem -> nodes
-    }
-
-fun <M : Meta> MetaItem<M>.indexOf(meta: M): Int {
-    return when (this) {
-        is MetaItem.ValueItem -> -1
-        is MetaItem.SingleNodeItem -> if (node == meta) 0 else -1
-        is MetaItem.MultiNodeItem -> nodes.indexOf(meta)
-    }
-}
 
 /**
  * Generic meta-holder object
