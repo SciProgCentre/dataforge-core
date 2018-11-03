@@ -4,6 +4,7 @@ import com.github.cliftonlabs.json_simple.JsonArray
 import com.github.cliftonlabs.json_simple.JsonObject
 import com.github.cliftonlabs.json_simple.Jsoner
 import hep.dataforge.meta.*
+import hep.dataforge.names.toName
 import kotlinx.io.core.*
 import java.io.ByteArrayInputStream
 import java.io.InputStreamReader
@@ -97,12 +98,18 @@ private fun MetaBuilder.appendValue(key: String, value: Any?) {
     when (value) {
         is JsonObject -> this[key] = value.toMeta()
         is JsonArray -> {
-            value.forEach {
-                if (it is JsonArray) {
-                    this[key] = it.toListValue()
-                } else {
-                    appendValue(key, it)
+            if (value.none { it is JsonObject }) {
+                //If all values are primitives or arrays
+                this[key] = value.toListValue()
+            } else {
+                val list = value.map<Any, Meta> {
+                    when(it){
+                        is JsonObject -> it.toMeta()
+                        is JsonArray -> it.toListValue().toMeta()
+                        else -> Value.of(it).toMeta()
+                    }
                 }
+                setIndexed(key.toName(),list)
             }
         }
         is Number -> this[key] = NumberValue(value)

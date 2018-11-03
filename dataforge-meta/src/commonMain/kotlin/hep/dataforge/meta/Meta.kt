@@ -35,6 +35,8 @@ interface Meta {
     }
 }
 
+/* Get operations*/
+
 /**
  * Fast [String]-based accessor for item map
  */
@@ -51,9 +53,21 @@ operator fun Meta.get(name: Name): MetaItem<out Meta>? {
 }
 
 operator fun Meta.get(token: NameToken): MetaItem<out Meta>? = items[token]
-
-//TODO create Java helper for meta operations
 operator fun Meta.get(key: String): MetaItem<out Meta>? = get(key.toName())
+
+/**
+ * Get all items matching given name.
+ */
+fun Meta.getByName(name: Name): Map<String, MetaItem<out Meta>> {
+    if (name.length == 0) error("Can't use empty name for that")
+    val (body, query) = name.last()!!
+    val regex = query.toRegex()
+    return (this[name.cutLast()] as? NodeItem<*>)?.node?.items
+            ?.filter { it.key.body == body && (query.isEmpty()|| regex.matches(it.key.query)) }
+            ?.mapKeys { it.key.query }
+            ?: emptyMap()
+
+}
 
 /**
  * A meta node that ensures that all of its descendants has at least the same type
@@ -91,6 +105,7 @@ abstract class MetaNode<M : MetaNode<M>> : Meta {
  * If the argument is possibly mutable node, it is copied on creation
  */
 class SealedMeta internal constructor(override val items: Map<NameToken, MetaItem<SealedMeta>>) : MetaNode<SealedMeta>()
+
 /**
  * Generate sealed node from [this]. If it is already sealed return it as is
  */
@@ -133,3 +148,5 @@ val <M : Meta> MetaItem<M>.node: M
 interface Metoid {
     val meta: Meta
 }
+
+fun Value.toMeta() = buildMeta { Meta.VALUE_KEY to this }

@@ -54,7 +54,7 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : MetaNode<M>(), MutableM
             oldItem?.node?.removeListener(this)
         } else {
             _items[key] = newItem
-            if(newItem is MetaItem.NodeItem) {
+            if (newItem is MetaItem.NodeItem) {
                 newItem.node.onChange(this) { name, oldChild, newChild ->
                     itemChanged(key + name, oldChild, newChild)
                 }
@@ -105,7 +105,6 @@ operator fun <M : MutableMeta<M>> M.set(name: String, value: Value) = set(name.t
 operator fun <M : MutableMetaNode<M>> M.set(name: String, meta: Meta) = set(name.toName(), meta)
 operator fun <M : MutableMeta<M>> M.set(token: NameToken, item: MetaItem<M>?) = set(token.toName(), item)
 
-
 /**
  * Universal set method
  */
@@ -134,16 +133,20 @@ fun <M : MutableMetaNode<M>> M.update(meta: Meta) {
     }
 }
 
-// Same name siblings generation
+/* Same name siblings generation */
 
-fun <M : MutableMetaNode<M>> M.setIndexed(name: Name, metas: Iterable<Meta>, queryFactory: (Int) -> String = { it.toString() }) {
+fun <M : MutableMeta<M>> M.setIndexed(name: Name, items: Iterable<MetaItem<M>>, queryFactory: (Int) -> String = { it.toString() }) {
     val tokens = name.tokens.toMutableList()
     val last = tokens.last()
-    metas.forEachIndexed { index, meta ->
+    items.forEachIndexed { index, meta ->
         val indexedToken = NameToken(last.body, last.query + queryFactory(index))
         tokens[tokens.lastIndex] = indexedToken
         set(Name(tokens), meta)
     }
+}
+
+fun <M : MutableMetaNode<M>> M.setIndexed(name: Name, metas: Iterable<Meta>, queryFactory: (Int) -> String = { it.toString() }) {
+    setIndexed(name, metas.map { wrap(name, it) }, queryFactory)
 }
 
 operator fun <M : MutableMetaNode<M>> M.set(name: Name, metas: Iterable<Meta>) = setIndexed(name, metas)

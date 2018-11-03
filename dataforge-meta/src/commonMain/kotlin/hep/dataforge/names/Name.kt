@@ -22,12 +22,12 @@ class Name internal constructor(val tokens: List<NameToken>) {
     fun last(): NameToken? = tokens.lastOrNull()
 
     /**
-     * The reminder of the name after first element is cut
+     * The reminder of the name after first element is cut. For empty name return itself.
      */
     fun cutFirst(): Name = Name(tokens.drop(1))
 
     /**
-     * The reminder of the name after last element is cut
+     * The reminder of the name after last element is cut. For empty name return itself.
      */
     fun cutLast(): Name = Name(tokens.dropLast(1))
 
