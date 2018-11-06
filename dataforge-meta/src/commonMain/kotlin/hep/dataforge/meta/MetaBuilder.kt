@@ -1,6 +1,8 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.Name
+import hep.dataforge.names.toName
+import hep.dataforge.values.Value
 
 /**
  * DSL builder for meta. Is not intended to store mutable state
@@ -36,7 +38,7 @@ fun Meta.builder(): MetaBuilder {
     return MetaBuilder().also { builder ->
         items.mapValues { entry ->
             val item = entry.value
-            builder[entry.key] = when (item) {
+            builder[entry.key.toName()] = when (item) {
                 is MetaItem.ValueItem -> MetaItem.ValueItem<MetaBuilder>(item.value)
                 is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.builder())
             }

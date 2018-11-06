@@ -5,7 +5,11 @@ import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
+import hep.dataforge.names.plus
 import hep.dataforge.names.toName
+import hep.dataforge.values.Value
+import hep.dataforge.values.boolean
+
 
 /**
  * A member of the meta tree. Could be represented as one of following:
@@ -18,14 +22,24 @@ sealed class MetaItem<M : Meta> {
 }
 
 /**
+ * The object that could be represented as [Meta]. Meta provided by [toMeta] method should fully represent object state.
+ * Meaning that two states with the same meta are equal.
+ */
+interface MetaRepr {
+    fun toMeta(): Meta
+}
+
+/**
  * Generic meta tree representation. Elements are [MetaItem] objects that could be represented by three different entities:
  *  * [MetaItem.ValueItem] (leaf)
  *  * [MetaItem.NodeItem] single node
  *
  *   * Same name siblings are supported via elements with the same [Name] but different queries
  */
-interface Meta {
+interface Meta : MetaRepr {
     val items: Map<NameToken, MetaItem<out Meta>>
+
+    override fun toMeta(): Meta = this
 
     companion object {
         /**
@@ -58,16 +72,31 @@ operator fun Meta.get(key: String): MetaItem<out Meta>? = get(key.toName())
 /**
  * Get all items matching given name.
  */
-fun Meta.getByName(name: Name): Map<String, MetaItem<out Meta>> {
+fun Meta.getAll(name: Name): Map<String, MetaItem<out Meta>> {
     if (name.length == 0) error("Can't use empty name for that")
     val (body, query) = name.last()!!
     val regex = query.toRegex()
     return (this[name.cutLast()] as? NodeItem<*>)?.node?.items
-            ?.filter { it.key.body == body && (query.isEmpty()|| regex.matches(it.key.query)) }
+            ?.filter { it.key.body == body && (query.isEmpty() || regex.matches(it.key.query)) }
             ?.mapKeys { it.key.query }
             ?: emptyMap()
 
 }
+
+/**
+ * Transform meta to sequence of [Name]-[Value] pairs
+ */
+fun Meta.asValueSequence(): Sequence<Pair<Name, Value>> {
+    return items.asSequence().flatMap { entry ->
+        val item = entry.value
+        when (item) {
+            is ValueItem -> sequenceOf(entry.key.toName() to item.value)
+            is NodeItem -> item.node.asValueSequence().map { pair -> (entry.key.toName() + pair.first) to pair.second }
+        }
+    }
+}
+
+operator fun Meta.iterator(): Iterator<Pair<Name, Value>> = asValueSequence().iterator()
 
 /**
  * A meta node that ensures that all of its descendants has at least the same type

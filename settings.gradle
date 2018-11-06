@@ -27,4 +27,12 @@ rootProject.name = 'dataforge-core'
 
 include ":dataforge-meta"
 include ":dataforge-meta-io"
+
+include ":dataforge-context"
+include ":dataforge-data"
+include ":dataforge-io"
+
+include ":dataforge-tables"
+
+include ":dataforge-workspace"
 //include ":dataforge-envelope"

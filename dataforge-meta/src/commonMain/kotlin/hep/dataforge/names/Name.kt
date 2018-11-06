@@ -6,7 +6,7 @@ package hep.dataforge.names
  * The name is a dot separated list of strings like `token1.token2.token3`.
  * Each token could contain additional query in square brackets.
  */
-class Name internal constructor(val tokens: List<NameToken>) {
+inline class Name constructor(val tokens: List<NameToken>) {
 
     val length
         get() = tokens.size
@@ -34,19 +34,6 @@ class Name internal constructor(val tokens: List<NameToken>) {
     operator fun get(i: Int): NameToken = tokens[i]
 
     override fun toString(): String = tokens.joinToString(separator = NAME_SEPARATOR) { it.toString() }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Name) return false
-
-        if (tokens != other.tokens) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return tokens.hashCode()
-    }
 
     companion object {
         const val NAME_SEPARATOR = "."
@@ -80,7 +67,7 @@ fun String.toName(): Name {
         var bracketCount: Int = 0
         fun queryOn() = bracketCount > 0
 
-        this@toName.asSequence().forEach {
+        asSequence().forEach {
             if (queryOn()) {
                 when (it) {
                     '[' -> bracketCount++

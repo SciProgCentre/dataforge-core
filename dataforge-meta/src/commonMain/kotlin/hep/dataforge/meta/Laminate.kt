@@ -7,7 +7,17 @@ import hep.dataforge.names.NameToken
  *
  *
  */
-class Laminate(val layers: List<Meta>) : Meta {
+class Laminate(layers: List<Meta>) : Meta {
+
+    val layers: List<Meta> = layers.flatMap {
+        if(it is Laminate){
+            it.layers
+        } else{
+            listOf(it)
+        }
+    }
+
+    constructor(vararg layers: Meta): this(layers.asList())
 
     override val items: Map<NameToken, MetaItem<out Meta>>
         get() = layers.map { it.items.keys }.flatten().associateWith { key ->

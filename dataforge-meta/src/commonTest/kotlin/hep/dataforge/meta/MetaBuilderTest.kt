@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.values.asValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -1,6 +1,7 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.Name
+import hep.dataforge.names.toName
 
 //TODO add validator to configuration
 
@@ -20,7 +21,7 @@ open class Config : MutableMetaNode<Config>() {
 fun Meta.toConfig(): Config = this as? Config ?: Config().also { builder ->
     this.items.mapValues { entry ->
         val item = entry.value
-        builder[entry.key] = when (item) {
+        builder[entry.key.toName()] = when (item) {
             is MetaItem.ValueItem -> MetaItem.ValueItem(item.value)
             is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.toConfig())
         }

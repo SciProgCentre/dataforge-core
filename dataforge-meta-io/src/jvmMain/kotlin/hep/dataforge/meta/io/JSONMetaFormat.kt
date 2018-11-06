@@ -5,10 +5,12 @@ import com.github.cliftonlabs.json_simple.JsonObject
 import com.github.cliftonlabs.json_simple.Jsoner
 import hep.dataforge.meta.*
 import hep.dataforge.names.toName
+import hep.dataforge.values.*
 import kotlinx.io.core.*
 import java.io.ByteArrayInputStream
 import java.io.InputStreamReader
 import java.io.Reader
+import java.nio.ByteBuffer
 import java.text.ParseException
 
 internal actual fun writeJson(meta: Meta, out: Output) {
@@ -31,7 +33,7 @@ private fun Value.toJson(): Any {
     }
 }
 
-private fun Meta.toJson(): JsonObject {
+fun Meta.toJson(): JsonObject {
     val builder = JsonObject()
     items.forEach { name, item ->
         when (item) {
@@ -60,9 +62,11 @@ internal actual fun readJson(input: Input, length: Int): Meta {
                 }
 
                 override fun read(cbuf: CharArray, off: Int, len: Int): Int {
-                    val block = input.readText(Charsets.UTF_8, len).toCharArray()
-                    System.arraycopy(block, 0, cbuf, off, block.size)
-                    return block.size
+                    val buffer = ByteBuffer.allocate(len)
+                    val res = input.readAvailable(buffer)
+                    val chars = String(buffer.array()).toCharArray()
+                    System.arraycopy(chars, 0, cbuf, off, chars.size)
+                    return res
                 }
 
             }
@@ -103,13 +107,13 @@ private fun MetaBuilder.appendValue(key: String, value: Any?) {
                 this[key] = value.toListValue()
             } else {
                 val list = value.map<Any, Meta> {
-                    when(it){
+                    when (it) {
                         is JsonObject -> it.toMeta()
                         is JsonArray -> it.toListValue().toMeta()
                         else -> Value.of(it).toMeta()
                     }
                 }
-                setIndexed(key.toName(),list)
+                setIndexed(key.toName(), list)
             }
         }
         is Number -> this[key] = NumberValue(value)

@@ -27,8 +27,8 @@ class StyledConfig(val config: Config, style: Meta = EmptyMeta) : Config() {
     override fun set(name: Name, item: MetaItem<Config>?) {
         when (item) {
             null -> config.remove(name)
-            is MetaItem.ValueItem -> config[name] = item.value
-            is MetaItem.NodeItem -> config[name] = item.node
+            is MetaItem.ValueItem -> config.setValue(name, item.value)
+            is MetaItem.NodeItem -> config.setNode(name, item.node)
         }
     }
 

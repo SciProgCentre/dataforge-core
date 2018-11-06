@@ -1,6 +1,7 @@
 package hep.dataforge.meta.io
 
 import hep.dataforge.meta.*
+import hep.dataforge.values.*
 import kotlinx.io.core.*
 
 /**
@@ -20,19 +21,11 @@ fun MetaFormat.stringify(meta: Meta): String {
     return builder.build().readText()
 }
 
+fun Meta.asString() = JSONMetaFormat.stringify(this)
+
 fun MetaFormat.parse(str: String): Meta{
     return read(ByteReadPacket(str.toByteArray()))
 }
-
-///**
-// * Resolve format by its name. Null if not provided
-// */
-//expect fun resolveFormat(name: String): MetaFormat?
-//
-///**
-// * Resolve format by its binary key. Null if not provided
-// */
-//expect fun resolveFormat(key: Short): MetaFormat?
 
 internal expect fun writeJson(meta: Meta, out: Output)
 internal expect fun readJson(input: Input, length: Int = -1): Meta
@@ -155,7 +148,7 @@ object BinaryMetaFormat : MetaFormat {
                     (1..length).forEach { _ ->
                         val name = readString()
                         val item = readMetaItem()
-                        set(name, item)
+                        setItem(name, item)
                     }
                 }
                 MetaItem.NodeItem(meta)
@@ -163,6 +156,5 @@ object BinaryMetaFormat : MetaFormat {
             else -> error("Unknown serialization key character: $keyChar")
         }
     }
-
 }
 

@@ -1,4 +1,4 @@
-package hep.dataforge.meta
+package hep.dataforge.values
 
 
 /**
@@ -44,19 +44,22 @@ interface Value {
         get() = listOf(this)
 
     companion object {
+        const val VALUE_TARGET = "value"
+
         /**
          * Convert object to value
          */
         fun of(value: Any?): Value {
             return when (value) {
                 null -> Null
+                is Value -> value
                 true -> True
                 false -> False
                 is Number -> NumberValue(value)
                 is Iterable<*> -> ListValue(value.map { of(it) })
                 is Enum<*> -> EnumValue(value)
                 is CharSequence -> StringValue(value.toString())
-                else -> throw IllegalArgumentException("Unrecognized type of the object converted to Value")
+                else -> throw IllegalArgumentException("Unrecognized type of the object (${value::class}) converted to Value")
             }
         }
     }
@@ -70,6 +73,8 @@ object Null : Value {
     override val type: ValueType get() = ValueType.NULL
     override val number: Number get() = Double.NaN
     override val string: String get() = "@null"
+
+    override fun toString(): String = value.toString()
 }
 
 /**
@@ -86,6 +91,8 @@ object True : Value {
     override val type: ValueType get() = ValueType.BOOLEAN
     override val number: Number get() = 1.0
     override val string: String get() = "+"
+
+    override fun toString(): String = value.toString()
 }
 
 /**
@@ -106,12 +113,21 @@ class NumberValue(override val number: Number) : Value {
     override val string: String get() = number.toString()
 
     override fun equals(other: Any?): Boolean {
-        return this.number == (other as? Value)?.number
+        if (other !is Value) return false
+        return when (number) {
+            is Short -> number == other.number.toShort()
+            is Long -> number == other.number.toLong()
+            is Byte -> number == other.number.toByte()
+            is Int -> number == other.number.toInt()
+            is Float -> number == other.number.toFloat()
+            is Double -> number == other.number.toDouble()
+            else -> number.toString() == other.number.toString()
+        }
     }
 
     override fun hashCode(): Int = number.hashCode()
 
-
+    override fun toString(): String = value.toString()
 }
 
 class StringValue(override val string: String) : Value {
@@ -123,7 +139,9 @@ class StringValue(override val string: String) : Value {
         return this.string == (other as? Value)?.string
     }
 
-    override fun hashCode(): Int  = string.hashCode()
+    override fun hashCode(): Int = string.hashCode()
+
+    override fun toString(): String = value.toString()
 }
 
 class EnumValue<E : Enum<*>>(override val value: E) : Value {
@@ -136,6 +154,8 @@ class EnumValue<E : Enum<*>>(override val value: E) : Value {
     }
 
     override fun hashCode(): Int = value.hashCode()
+
+    override fun toString(): String = value.toString()
 }
 
 class ListValue(override val list: List<Value>) : Value {
@@ -149,6 +169,8 @@ class ListValue(override val list: List<Value>) : Value {
     override val type: ValueType get() = list.first().type
     override val number: Number get() = list.first().number
     override val string: String get() = list.first().string
+
+    override fun toString(): String = value.toString()
 }
 
 /**
@@ -201,8 +223,8 @@ fun String.parseValue(): Value {
     return StringValue(this)
 }
 
-class LazyParsedValue(override val string: String): Value{
-    private  val parsedValue by lazy { string.parseValue() }
+class LazyParsedValue(override val string: String) : Value {
+    private val parsedValue by lazy { string.parseValue() }
 
     override val value: Any?
         get() = parsedValue.value
@@ -210,4 +232,6 @@ class LazyParsedValue(override val string: String): Value{
         get() = parsedValue.type
     override val number: Number
         get() = parsedValue.number
+
+    override fun toString(): String = value.toString()
 }

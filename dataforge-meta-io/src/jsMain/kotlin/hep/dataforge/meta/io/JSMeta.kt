@@ -2,8 +2,8 @@ package hep.dataforge.meta.io
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaItem
-import hep.dataforge.meta.Value
 import hep.dataforge.names.NameToken
+import hep.dataforge.values.Value
 
 /**
  * Represent any js object as meta
@@ -16,7 +16,7 @@ class JSMeta(val obj: Any) : Meta {
 
     private fun isList(obj: Any): Boolean = js("Array").isArray(obj) as Boolean
 
-    private fun isPrimitive(obj: Any?): Boolean = js("obj !== Object(obj)") as Boolean
+    private fun isPrimitive(@Suppress("UNUSED_PARAMETER") obj: Any?): Boolean = js("obj !== Object(obj)") as Boolean
 
     private fun convert(obj: Any?): MetaItem<out Meta> {
         return when (obj) {

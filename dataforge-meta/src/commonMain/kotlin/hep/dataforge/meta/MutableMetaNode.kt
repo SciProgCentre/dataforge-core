@@ -4,6 +4,7 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
+import hep.dataforge.values.Value
 
 class MetaListener(val owner: Any? = null, val action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit) {
     operator fun invoke(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) = action(name, oldItem, newItem)
@@ -77,7 +78,7 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : MetaNode<M>(), MutableM
 
     override operator fun set(name: Name, item: MetaItem<M>?) {
         when (name.length) {
-            0 -> error("Can't set meta item for empty name")
+            0 -> error("Can't setValue meta item for empty name")
             1 -> {
                 val token = name.first()!!
                 replaceItem(token, get(name), item)
@@ -98,23 +99,26 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : MetaNode<M>(), MutableM
 fun <M : MutableMeta<M>> M.remove(name: Name) = set(name, null)
 fun <M : MutableMeta<M>> M.remove(name: String) = remove(name.toName())
 
-operator fun <M : MutableMeta<M>> M.set(name: Name, value: Value) = set(name, MetaItem.ValueItem(value))
-operator fun <M : MutableMetaNode<M>> M.set(name: Name, meta: Meta) = set(name, MetaItem.NodeItem(wrap(name, meta)))
-operator fun <M : MutableMeta<M>> M.set(name: String, item: MetaItem<M>) = set(name.toName(), item)
-operator fun <M : MutableMeta<M>> M.set(name: String, value: Value) = set(name.toName(), MetaItem.ValueItem(value))
-operator fun <M : MutableMetaNode<M>> M.set(name: String, meta: Meta) = set(name.toName(), meta)
-operator fun <M : MutableMeta<M>> M.set(token: NameToken, item: MetaItem<M>?) = set(token.toName(), item)
+fun <M : MutableMeta<M>> M.setValue(name: Name, value: Value) = set(name, MetaItem.ValueItem(value))
+fun <M : MutableMeta<M>> M.setItem(name: String, item: MetaItem<M>) = set(name.toName(), item)
+fun <M : MutableMeta<M>> M.setValue(name: String, value: Value) = set(name.toName(), MetaItem.ValueItem(value))
+fun <M : MutableMeta<M>> M.setItem(token: NameToken, item: MetaItem<M>?) = set(token.toName(), item)
+
+fun <M : MutableMetaNode<M>> M.setNode(name: Name, node: Meta) = set(name, MetaItem.NodeItem(wrap(name, node)))
+fun <M : MutableMetaNode<M>> M.setNode(name: String, node: Meta) = setNode(name.toName(), node)
 
 /**
  * Universal set method
  */
-operator fun <M : MutableMeta<M>> M.set(key: String, value: Any?) {
+operator fun <M : MutableMetaNode<M>> M.set(name: Name, value: Any?) {
     when (value) {
-        null -> remove(key)
-        is Meta -> set(key, value)
-        else -> set(key, Value.of(value))
+        null -> remove(name)
+        is Meta -> setNode(name, value)
+        else -> setValue(name, Value.of(value))
     }
 }
+
+operator fun <M : MutableMetaNode<M>> M.set(key: String, value: Any?) = set(key.toName(), value)
 
 /**
  * Update existing mutable node with another node. The rules are following:
@@ -126,9 +130,9 @@ fun <M : MutableMetaNode<M>> M.update(meta: Meta) {
     meta.items.forEach { entry ->
         val value = entry.value
         when (value) {
-            is MetaItem.ValueItem -> this[entry.key.toName()] = value.value
+            is MetaItem.ValueItem -> setValue(entry.key.toName(),value.value)
             is MetaItem.NodeItem -> (this[entry.key.toName()] as? MetaItem.NodeItem)?.node?.update(value.node)
-                    ?: run { this[entry.key.toName()] = value.node }
+                    ?: run { setNode(entry.key.toName(),value.node)}
         }
     }
 }
