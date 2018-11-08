@@ -15,28 +15,16 @@ interface MetaFormat {
     fun read(input: Input): Meta
 }
 
-fun MetaFormat.stringify(meta: Meta): String {
+fun Meta.asString(format: MetaFormat = JSONMetaFormat): String{
     val builder = BytePacketBuilder()
-    write(meta,builder)
+    format.write(this,builder)
     return builder.build().readText()
 }
-
-fun Meta.asString() = JSONMetaFormat.stringify(this)
 
 fun MetaFormat.parse(str: String): Meta{
     return read(ByteReadPacket(str.toByteArray()))
 }
 
-internal expect fun writeJson(meta: Meta, out: Output)
-internal expect fun readJson(input: Input, length: Int = -1): Meta
-
-object JSONMetaFormat : MetaFormat {
-    override val name: String = "json"
-    override val key: Short = 0x4a53//"JS"
-
-    override fun write(meta: Meta, out: Output) = writeJson(meta, out)
-    override fun read(input: Input): Meta = readJson(input)
-}
 
 object BinaryMetaFormat : MetaFormat {
     override val name: String = "bin"

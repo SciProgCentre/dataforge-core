@@ -15,6 +15,9 @@
  */
 package hep.dataforge.context
 
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.buildMeta
+import hep.dataforge.names.toName
 import java.util.*
 import kotlin.collections.HashMap
 

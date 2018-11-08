@@ -14,7 +14,7 @@ class MetaFormatTest{
                 "c" to 11.1
             }
         }
-        val string = BinaryMetaFormat.stringify(meta)
+        val string =  meta.asString(BinaryMetaFormat)
         val result = BinaryMetaFormat.parse(string)
         assertEquals(meta,result)
     }
@@ -28,7 +28,7 @@ class MetaFormatTest{
                 "c" to 11.1
             }
         }
-        val string = JSONMetaFormat.stringify(meta)
+        val string = meta.asString(JSONMetaFormat)
         val result = JSONMetaFormat.parse(string)
         assertEquals(meta,result)
     }

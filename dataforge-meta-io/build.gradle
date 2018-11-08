@@ -1,6 +1,6 @@
 plugins {
     id 'kotlin-multiplatform'
-    //id 'kotlinx-serialization'
+    id 'kotlinx-serialization'
 }
 
 repositories {
@@ -21,7 +21,7 @@ kotlin {
             dependencies {
                 api project(":dataforge-meta")
                 //implementation 'org.jetbrains.kotlin:kotlin-reflect'
-                //implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-io:$kotlinx_io_version"
             }
         }
@@ -33,8 +33,7 @@ kotlin {
         }
         jvmMain {
             dependencies {
-                implementation 'com.github.cliftonlabs:json-simple:3.0.2'
-                //implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-io-jvm:$kotlinx_io_version"
             }
         }
@@ -46,7 +45,7 @@ kotlin {
         }
         jsMain {
             dependencies {
-                //implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-io-js:$kotlinx_io_version"
             }
         }
