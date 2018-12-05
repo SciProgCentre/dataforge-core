@@ -1,7 +1,9 @@
 plugins {
     id 'kotlin-multiplatform'
-    id 'kotlinx-serialization'
+    id "org.jetbrains.kotlin.multiplatform"
 }
+
+description = "IO for meta"
 
 repositories {
     jcenter()

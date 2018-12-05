@@ -28,8 +28,8 @@ class MetaFormatTest{
                 "c" to 11.1
             }
         }
-        val string = meta.asString(JSONMetaFormat)
-        val result = JSONMetaFormat.parse(string)
+        val string = meta.asString(JsonMetaFormat)
+        val result = JsonMetaFormat.parse(string)
         assertEquals(meta,result)
     }
 
