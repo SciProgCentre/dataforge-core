@@ -1,5 +1,4 @@
 plugins {
-    id 'kotlin-multiplatform'
     id "org.jetbrains.kotlin.multiplatform"
 }
 
