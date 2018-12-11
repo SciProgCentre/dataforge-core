@@ -4,10 +4,6 @@ plugins {
 
 description = "IO for meta"
 
-repositories {
-    jcenter()
-}
-
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
@@ -22,8 +18,8 @@ kotlin {
             dependencies {
                 api project(":dataforge-meta")
                 //implementation 'org.jetbrains.kotlin:kotlin-reflect'
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
-                implementation "org.jetbrains.kotlinx:kotlinx-io:$kotlinx_io_version"
+                api "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serializationVersion"
+                api "org.jetbrains.kotlinx:kotlinx-io:$ioVersion"
             }
         }
         commonTest {
@@ -34,8 +30,8 @@ kotlin {
         }
         jvmMain {
             dependencies {
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
-                implementation "org.jetbrains.kotlinx:kotlinx-io-jvm:$kotlinx_io_version"
+                api "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationVersion"
+                api "org.jetbrains.kotlinx:kotlinx-io-jvm:$ioVersion"
             }
         }
         jvmTest {
@@ -46,8 +42,8 @@ kotlin {
         }
         jsMain {
             dependencies {
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
-                implementation "org.jetbrains.kotlinx:kotlinx-io-js:$kotlinx_io_version"
+                api "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationVersion"
+                api "org.jetbrains.kotlinx:kotlinx-io-js:$ioVersion"
             }
         }
         jsTest {

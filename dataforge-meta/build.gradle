@@ -2,10 +2,6 @@ plugins {
     id "org.jetbrains.kotlin.multiplatform"
 }
 
-repositories {
-    jcenter()
-}
-
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')

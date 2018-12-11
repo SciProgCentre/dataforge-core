@@ -16,7 +16,7 @@ class MetaFormatTest{
         }
         val string =  meta.asString(BinaryMetaFormat)
         val result = BinaryMetaFormat.parse(string)
-        assertEquals(meta,result)
+        assertEquals(meta, result)
     }
 
     @Test
