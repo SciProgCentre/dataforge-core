@@ -10,6 +10,18 @@ import mu.KLogger
 import mu.KotlinLogging
 import kotlin.reflect.KClass
 
+/**
+ * The local environment for anything being done in DataForge framework. Contexts are organized into tree structure with [Global] at the top.
+ * Context has [properties] - equivalent for system environment values, but grouped into a tree and inherited from parent context.
+ *
+ * The main function of the Context is to provide [PluginManager] which stores the loaded plugins and works as a dependency injection point.
+ * The normal behaviour of the [PluginManager] is to search for a plugin in parent context if it is not found in a current one. It is possible to have
+ * different plugins with the same interface in different contexts in the hierarchy. The usual behaviour is to use nearest one, but it could
+ * be overridden by plugin implementation.
+ *
+ * Since plugins could contain mutable state, context has two states: active and inactive. No changes are allowed to active context.
+ * @author Alexander Nozik
+ */
 interface Context : Named, MetaRepr, Provider {
 
     val parent: Context?
@@ -24,6 +36,9 @@ interface Context : Named, MetaRepr, Provider {
      */
     val logger: KLogger
 
+    /**
+     * A [PluginManager] for current context
+     */
     val plugins: PluginManager
 
     /**

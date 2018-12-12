@@ -19,6 +19,9 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
      */
     private val plugins = HashSet<Plugin>()
 
+    /**
+     * A [PluginManager] of parent context if it is present
+     */
     private val parent: PluginManager? = context.parent?.plugins
 
 
@@ -31,7 +34,9 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
     }
 
     /**
-     * Get for existing plugin
+     * Get existing plugin or return null if not present. Only first matching plugin is returned.
+     * @param recursive search for parent [PluginManager] plugins
+     * @param predicate condition for the plugin
      */
     fun get(recursive: Boolean = true, predicate: (Plugin) -> Boolean): Plugin? = sequence(recursive).find(predicate)
 
@@ -87,6 +92,9 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
         }
     }
 
+    /**
+     * Remove a plugin from [PluginManager]
+     */
     fun remove(plugin: Plugin) {
         if (context.isActive) error("Can't remove plugin from active context")
 
@@ -98,7 +106,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
     }
 
     /**
-     * Get plugin instance via plugin reolver and load it.
+     * Get plugin instance via plugin resolver and load it.
      *
      * @param tag
      * @return
@@ -114,6 +122,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
 
     /**
      * Load plugin by its class and meta. Ignore if plugin with this meta is already loaded.
+     * Throw an exception if there exists plugin with the same type, but different meta
      */
     fun <T : Plugin> load(type: KClass<T>, meta: Meta = EmptyMeta): T {
         val loaded = get(type, false)
@@ -141,5 +150,12 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
     }
 
     override fun iterator(): Iterator<Plugin> = plugins.iterator()
+
+    /**
+     * Get a plugin if it exists or load it with given meta if it is not.
+     */
+    inline fun <reified T : Plugin> getOrLoad(noinline metaBuilder: MetaBuilder.() -> Unit = {}): T {
+        return get(true) ?: load(metaBuilder)
+    }
 
 }

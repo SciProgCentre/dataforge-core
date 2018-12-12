@@ -26,13 +26,6 @@ import kotlin.collections.HashSet
 import kotlin.reflect.KClass
 import kotlin.reflect.full.cast
 
-/**
- * The local environment for anything being done in DataForge framework. Contexts are organized into tree structure with [Global] at the top.
- * Each context has a set of named [Value] properties which are taken from parent context in case they are not found in local context.
- * Context implements [ValueProvider] interface and therefore could be uses as a value source for substitutions etc.
- * Context contains [PluginManager] which could be used any number of configurable named plugins.
- * @author Alexander Nozik
- */
 open class JVMContext(
         final override val name: String,
         final override val parent: JVMContext? = Global,
