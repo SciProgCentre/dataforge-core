@@ -9,7 +9,7 @@ repositories {
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
-        //fromPreset(presets.js, 'js')
+        fromPreset(presets.js, 'js')
         // For ARM, preset should be changed to presets.iosArm32 or presets.iosArm64
         // For Linux, preset should be changed to e.g. presets.linuxX64
         // For MacOS, preset should be changed to e.g. presets.macosX64
@@ -18,7 +18,20 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api project(":dataforge-context")
+                api project(":dataforge-meta")
+                api "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutinesVersion"
+            }
+        }
+
+        jvmMain {
+            dependencies {
+                api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+            }
+        }
+
+        jsMain {
+            dependencies {
+                api "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$coroutinesVersion"
             }
         }
     }

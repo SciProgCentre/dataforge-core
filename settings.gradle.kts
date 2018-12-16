@@ -11,5 +11,6 @@ rootProject.name = "dataforge-core"
 include(
         ":dataforge-meta",
         ":dataforge-meta-io",
-        ":dataforge-context"
+        ":dataforge-context",
+        ":dataforge-data"
 )
