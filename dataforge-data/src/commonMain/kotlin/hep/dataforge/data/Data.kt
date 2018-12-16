@@ -7,34 +7,47 @@ import hep.dataforge.names.NameToken
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
 import kotlin.coroutines.CoroutineContext
+import kotlin.reflect.KClass
 
 /**
  * A data element characterized by its meta
  */
-interface Data<out T> : MetaRepr {
+interface Data<out T : Any> : MetaRepr {
+    /**
+     * Type marker for the data. The type is known before the calculation takes place so it could be cheched.
+     */
+    val type: KClass<out T>
+    /**
+     * Meta for the data
+     */
     val meta: Meta
+
+    /**
+     * Lazy data value
+     */
     val goal: Goal<T>
 
     override fun toMeta(): Meta = meta
 
     companion object {
-        fun <T> of(meta: Meta, goal: Goal<T>): Data<T> = DataImpl(meta, goal)
-        fun <T> of(name: String, meta: Meta, goal: Goal<T>): Data<T> = NamedData(name, of(meta, goal))
-        fun <T> static(context: CoroutineContext, meta: Meta, value: T): Data<T> = DataImpl(meta, Goal.static(context, value))
+        fun <T : Any> of(type: KClass<out T>, goal: Goal<T>, meta: Meta): Data<T> = DataImpl(type, goal, meta)
+        inline fun <reified T : Any> of(goal: Goal<T>, meta: Meta): Data<T> = of(T::class, goal, meta)
+        fun <T : Any> of(name: String, goal: Goal<T>, meta: Meta): Data<T> = NamedData(name, of(goal, meta))
+        fun <T : Any> static(context: CoroutineContext, value: T, meta: Meta): Data<T> = DataImpl(value::class, Goal.static(context, value), meta)
     }
 }
 
 /**
  * Generic Data implementation
  */
-private class DataImpl<out T>(override val meta: Meta, override val goal: Goal<T>) : Data<T>
+private class DataImpl<out T : Any>(override val type: KClass<out T>, override val goal: Goal<T>, override val meta: Meta) : Data<T>
 
-class NamedData<out T>(val name: String, data: Data<T>) : Data<T> by data
+class NamedData<out T : Any>(val name: String, data: Data<T>) : Data<T> by data
 
 /**
  * A tree-like data structure grouped into the node. All data inside the node must inherit its type
  */
-interface DataNode<out T> {
+interface DataNode<out T : Any> {
     /**
      * Get the specific data if it exists
      */
@@ -53,17 +66,17 @@ interface DataNode<out T> {
     operator fun iterator(): Iterator<Pair<Name, Data<T>>> = asSequence().iterator()
 
     companion object {
-        fun <T> build(block: DataTreeBuilder<T>.() -> Unit) = DataTreeBuilder<T>().apply(block).build()
+        fun <T : Any> build(block: DataTreeBuilder<T>.() -> Unit) = DataTreeBuilder<T>().apply(block).build()
     }
 
 }
 
-internal sealed class DataTreeItem<out T> {
-    class Node<out T>(val tree: DataTree<T>) : DataTreeItem<T>()
-    class Value<out T>(val value: Data<T>) : DataTreeItem<T>()
+internal sealed class DataTreeItem<out T : Any> {
+    class Node<out T : Any>(val tree: DataTree<T>) : DataTreeItem<T>()
+    class Value<out T : Any>(val value: Data<T>) : DataTreeItem<T>()
 }
 
-class DataTree<out T> internal constructor(private val items: Map<NameToken, DataTreeItem<T>>) : DataNode<T> {
+class DataTree<out T : Any> internal constructor(private val items: Map<NameToken, DataTreeItem<T>>) : DataNode<T> {
     //TODO add node-level meta?
 
     override fun get(name: Name): Data<T>? = when (name.length) {
@@ -93,15 +106,15 @@ class DataTree<out T> internal constructor(private val items: Map<NameToken, Dat
     }
 }
 
-private sealed class DataTreeBuilderItem<out T> {
-    class Node<T>(val tree: DataTreeBuilder<T>) : DataTreeBuilderItem<T>()
-    class Value<T>(val value: Data<T>) : DataTreeBuilderItem<T>()
+private sealed class DataTreeBuilderItem<out T : Any> {
+    class Node<T : Any>(val tree: DataTreeBuilder<T>) : DataTreeBuilderItem<T>()
+    class Value<T : Any>(val value: Data<T>) : DataTreeBuilderItem<T>()
 }
 
 /**
  * A builder for a DataTree.
  */
-class DataTreeBuilder<T> {
+class DataTreeBuilder<T : Any> {
     private val map = HashMap<NameToken, DataTreeBuilderItem<T>>()
 
     operator fun set(token: NameToken, node: DataTreeBuilder<T>) {
@@ -116,7 +129,7 @@ class DataTreeBuilder<T> {
 
     private fun buildNode(token: NameToken): DataTreeBuilder<T> {
         return if (!map.containsKey(token)) {
-            DataTreeBuilder<T>().also { map.put(token, DataTreeBuilderItem.Node(it)) }
+            DataTreeBuilder<T>().also { map[token] = DataTreeBuilderItem.Node(it) }
         } else {
             (map[token] as? DataTreeBuilderItem.Node ?: error("The node with name $token is occupied by leaf")).tree
         }
@@ -177,11 +190,21 @@ class DataTreeBuilder<T> {
 /**
  * Generate a mutable builder from this node. Node content is not changed
  */
-fun <T> DataNode<T>.builder(): DataTreeBuilder<T> = DataTreeBuilder<T>().apply {
+fun <T : Any> DataNode<T>.builder(): DataTreeBuilder<T> = DataTreeBuilder<T>().apply {
     asSequence().forEach { (name, data) -> this[name] = data }
 }
 
 /**
  * Start computation for all goals in data node
  */
-fun DataNode<*>.startAll() = asSequence().forEach { (_,data)->data.goal.start() }
+fun DataNode<*>.startAll() = asSequence().forEach { (_, data) -> data.goal.start() }
+
+fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNode<T> = DataNode.build {
+    asSequence().forEach {(name, data)->
+        if(predicate(name,data)){
+            this[name] = data
+        }
+    }
+}
+
+//fun <T : Any, R: T> DataNode<T>.filterIsInstance(type: KClass<R>): DataNode<R> = filter{_,data -> type.}
