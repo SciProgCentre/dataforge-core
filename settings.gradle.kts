@@ -12,5 +12,6 @@ include(
         ":dataforge-meta",
         ":dataforge-meta-io",
         ":dataforge-context",
-        ":dataforge-data"
+        ":dataforge-data",
+        ":dataforge-io"
 )

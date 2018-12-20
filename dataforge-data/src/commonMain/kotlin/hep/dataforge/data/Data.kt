@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
  */
 interface Data<out T : Any> : MetaRepr {
     /**
-     * Type marker for the data. The type is known before the calculation takes place so it could be cheched.
+     * Type marker for the data. The type is known before the calculation takes place so it could be checked.
      */
     val type: KClass<out T>
     /**

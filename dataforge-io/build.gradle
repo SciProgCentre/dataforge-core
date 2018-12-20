@@ -1,5 +1,5 @@
 plugins {
-    id "org.jetbrains.kotlin.multiplatform"
+    id("org.jetbrains.kotlin.multiplatform")
 }
 
 repositories {
@@ -9,7 +9,7 @@ repositories {
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
-        //fromPreset(presets.js, 'js')
+        fromPreset(presets.js, 'js')
         // For ARM, preset should be changed to presets.iosArm32 or presets.iosArm64
         // For Linux, preset should be changed to e.g. presets.linuxX64
         // For MacOS, preset should be changed to e.g. presets.macosX64
@@ -19,6 +19,19 @@ kotlin {
         commonMain {
             dependencies {
                 api project(":dataforge-context")
+                api project(":dataforge-meta-io")
+            }
+        }
+
+        jvmMain {
+            dependencies {
+
+            }
+        }
+
+        jsMain {
+            dependencies {
+
             }
         }
     }
