@@ -10,16 +10,17 @@ interface PluginFactory {
 }
 
 
-object PluginRepository {
+expect object PluginRepository {
 
     /**
      * List plugins available in the repository
      */
-    fun list(): Sequence<PluginFactory> = Global.services(PluginFactory::class)
+    fun list(): Sequence<PluginFactory>
 
-    /**
-     * Fetch specific plugin and instantiate it with given meta
-     */
-    fun fetch(tag: PluginTag, meta: Meta): Plugin = PluginRepository.list().find { it.tag.matches(tag) }?.build(meta)
-            ?: error("Plugin with tag $tag not found in the repository")
 }
+
+/**
+ * Fetch specific plugin and instantiate it with given meta
+ */
+fun PluginRepository.fetch(tag: PluginTag, meta: Meta): Plugin = PluginRepository.list().find { it.tag.matches(tag) }?.build(meta)
+        ?: error("Plugin with tag $tag not found in the repository")

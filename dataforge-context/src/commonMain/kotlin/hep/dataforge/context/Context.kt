@@ -6,8 +6,11 @@ import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
 import hep.dataforge.provider.provideAll
 import hep.dataforge.values.Value
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import mu.KLogger
 import mu.KotlinLogging
+import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 
 /**
@@ -22,12 +25,12 @@ import kotlin.reflect.KClass
  * Since plugins could contain mutable state, context has two states: active and inactive. No changes are allowed to active context.
  * @author Alexander Nozik
  */
-interface Context : Named, MetaRepr, Provider {
+interface Context : Named, MetaRepr, Provider, CoroutineScope {
 
     val parent: Context?
 
     /**
-     * Context properties. Working as substitutes for environment variables
+     * Context properties. Working as substitute for environment variables
      */
     val properties: Meta
 
@@ -45,11 +48,6 @@ interface Context : Named, MetaRepr, Provider {
      * Defines if context is used in any kind of active computations. Active context properties and plugins could not be changed
      */
     val isActive: Boolean
-
-    /**
-     * Provide services for given type
-     */
-    fun <T : Any> services(type: KClass<T>): Sequence<T>
 
     override val defaultTarget: String get() = Plugin.PLUGIN_TARGET
 
@@ -79,10 +77,19 @@ interface Context : Named, MetaRepr, Provider {
      */
     fun deactivate(activator: Any)
 
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Default
+
     /**
      * Detach all plugins and terminate context
      */
     fun close()
+
+    override fun toMeta(): Meta = buildMeta {
+        "parent" to parent?.name
+        "properties" to properties.seal()
+        "plugins" to plugins.map { it.toMeta() }
+    }
 }
 
 /**
@@ -95,7 +102,11 @@ inline fun <reified T : Any> Context.list(target: String): Sequence<T> {
 /**
  * A global root context
  */
-expect object Global : Context
+expect object Global : Context{
+    fun getContext(name: String): Context
+}
+
+
 
 /**
  * The interface for something that encapsulated in context

@@ -42,7 +42,6 @@ actual object Global : Context, JVMContext("GLOBAL", null, Thread.currentThread(
      *
      * @throws Exception
      */
-    @Throws(Exception::class)
     override fun close() {
         logger.info("Shutting down GLOBAL")
         for (ctx in contextRegistry.values) {
@@ -60,20 +59,7 @@ actual object Global : Context, JVMContext("GLOBAL", null, Thread.currentThread(
      * @return
      */
     @Synchronized
-    fun getContext(name: String): Context {
+    actual fun getContext(name: String): Context {
         return contextRegistry.getOrPut(name) { JVMContext(name) }
-    }
-
-    /**
-     * Close all contexts and terminate framework
-     */
-    @JvmStatic
-    fun terminate() {
-        try {
-            close()
-        } catch (e: Exception) {
-            logger.error("Exception while terminating DataForge framework", e)
-        }
-
     }
 }

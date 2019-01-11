@@ -16,6 +16,7 @@
 package hep.dataforge.context
 
 import hep.dataforge.meta.*
+import kotlinx.coroutines.Dispatchers
 import mu.KLogger
 import mu.KotlinLogging
 import java.lang.ref.WeakReference
@@ -23,6 +24,7 @@ import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.collections.HashSet
+import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 import kotlin.reflect.full.cast
 
@@ -72,21 +74,8 @@ open class JVMContext(
 
     private val serviceCache: MutableMap<Class<*>, ServiceLoader<*>> = HashMap()
 
-    override fun <T : Any> services(type: KClass<T>): Sequence<T> {
+    fun <T : Any> services(type: KClass<T>): Sequence<T> {
         return serviceCache.getOrPut(type.java) { ServiceLoader.load(type.java, classLoader) }.asSequence().map { type.cast(it) }
-    }
-
-    /**
-     * Get identity for this context
-     *
-     * @return
-     */
-    override fun toMeta(): Meta {
-        return buildMeta {
-            "parent" to parent?.name
-            "properties" to properties.seal()
-            "plugins" to plugins.map { it.toMeta() }
-        }
     }
 
     /**

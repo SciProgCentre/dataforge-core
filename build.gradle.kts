@@ -1,8 +1,8 @@
 buildscript {
     extra["kotlinVersion"] = "1.3.11"
-    extra["ioVersion"] = "0.1.2-dev-2"
+    extra["ioVersion"] = "0.1.2"
     extra["serializationVersion"] = "0.9.1"
-    extra["coroutinesVersion"] = "1.0.1"
+    extra["coroutinesVersion"] = "1.1.0"
 
     val kotlinVersion: String by extra
     val ioVersion: String by extra
