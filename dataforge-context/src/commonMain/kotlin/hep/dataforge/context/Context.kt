@@ -4,6 +4,7 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
+import hep.dataforge.provider.Types
 import hep.dataforge.provider.provideAll
 import hep.dataforge.values.Value
 import kotlinx.coroutines.CoroutineScope
@@ -94,8 +95,8 @@ interface Context : Named, MetaRepr, Provider, CoroutineScope {
 /**
  * A sequences of all objects provided by plugins with given target and type
  */
-inline fun <reified T : Any> Context.list(target: String): Sequence<T> {
-    return plugins.asSequence().flatMap { provideAll(target) }.mapNotNull { it as? T }
+inline fun <reified T : Any> Context.provideAll(target: String = Types[T::class]): Sequence<T> {
+    return plugins.asSequence().flatMap { it.provideAll(target) }.filterIsInstance<T>()
 }
 
 /**

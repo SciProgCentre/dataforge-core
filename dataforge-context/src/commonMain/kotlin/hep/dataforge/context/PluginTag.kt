@@ -44,6 +44,8 @@ data class PluginTag(
 
     companion object {
 
+        const val DATAFORGE_GROUP = "hep.dataforge"
+
         /**
          * Build new PluginTag from standard string representation
          *
