@@ -1,8 +1,8 @@
 buildscript {
-    extra["kotlinVersion"] = "1.3.11"
+    extra["kotlinVersion"] = "1.3.20"
     extra["ioVersion"] = "0.1.2"
     extra["serializationVersion"] = "0.9.1"
-    extra["coroutinesVersion"] = "1.1.0"
+    extra["coroutinesVersion"] = "1.1.1"
 
     val kotlinVersion: String by extra
     val ioVersion: String by extra
@@ -35,7 +35,7 @@ allprojects {
     }
 
     group = "hep.dataforge"
-    version = "0.1.1-dev-1"
+    version = "0.1.1-dev-2"
 }
 
 if (file("artifactory.gradle").exists()) {

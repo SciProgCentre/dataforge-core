@@ -63,13 +63,14 @@ private class StaticGoalImpl<T>(val context: CoroutineContext, deferred: Complet
     override val totalWork: Double get() = 0.0
     override val workDone: Double get() = 0.0
     override val coroutineContext: CoroutineContext get() = context
-
 }
 
 
 /**
  * Create a new [Goal] with given [dependencies] and execution [block]. The block takes monitor as parameter.
  * The goal block runs in a supervised scope, meaning that when it fails, it won't affect external scope.
+ *
+ * **Important:** Unlike regular deferred, the [Goal] is started lazily, so the actual calculation is called only when result is requested.
  */
 fun <R> CoroutineScope.createGoal(dependencies: Collection<Goal<*>>, block: suspend GoalMonitor.() -> R): Goal<R> {
     val monitor = GoalMonitor()
