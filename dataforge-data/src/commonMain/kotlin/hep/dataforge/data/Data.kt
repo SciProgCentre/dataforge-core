@@ -32,15 +32,25 @@ interface Data<out T : Any> : MetaRepr {
     companion object {
         fun <T : Any> of(type: KClass<out T>, goal: Goal<T>, meta: Meta): Data<T> = DataImpl(type, goal, meta)
         inline fun <reified T : Any> of(goal: Goal<T>, meta: Meta): Data<T> = of(T::class, goal, meta)
-        fun <T : Any> of(name: String, goal: Goal<T>, meta: Meta): Data<T> = NamedData(name, of(goal, meta))
-        fun <T : Any> static(context: CoroutineContext, value: T, meta: Meta): Data<T> = DataImpl(value::class, Goal.static(context, value), meta)
+        fun <T : Any> of(name: String, type: KClass<out T>, goal: Goal<T>, meta: Meta): Data<T> =
+            NamedData(name, of(type, goal, meta))
+
+        inline fun <reified T : Any> of(name: String, goal: Goal<T>, meta: Meta): Data<T> =
+            of(name, T::class, goal, meta)
+
+        fun <T : Any> static(context: CoroutineContext, value: T, meta: Meta): Data<T> =
+            DataImpl(value::class, Goal.static(context, value), meta)
     }
 }
 
 /**
  * Generic Data implementation
  */
-private class DataImpl<out T : Any>(override val type: KClass<out T>, override val goal: Goal<T>, override val meta: Meta) : Data<T>
+private class DataImpl<out T : Any>(
+    override val type: KClass<out T>,
+    override val goal: Goal<T>,
+    override val meta: Meta
+) : Data<T>
 
 class NamedData<out T : Any>(val name: String, data: Data<T>) : Data<T> by data
 
@@ -200,8 +210,8 @@ fun <T : Any> DataNode<T>.builder(): DataTreeBuilder<T> = DataTreeBuilder<T>().a
 fun DataNode<*>.startAll() = asSequence().forEach { (_, data) -> data.goal.start() }
 
 fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNode<T> = DataNode.build {
-    asSequence().forEach {(name, data)->
-        if(predicate(name,data)){
+    asSequence().forEach { (name, data) ->
+        if (predicate(name, data)) {
             this[name] = data
         }
     }

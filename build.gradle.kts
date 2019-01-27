@@ -1,13 +1,10 @@
-buildscript {
-    extra["kotlinVersion"] = "1.3.20"
-    extra["ioVersion"] = "0.1.2"
-    extra["serializationVersion"] = "0.9.1"
-    extra["coroutinesVersion"] = "1.1.1"
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
-    val kotlinVersion: String by extra
-    val ioVersion: String by extra
-    val coroutinesVersion: String by extra
-    val serializationVersion: String by extra
+buildscript {
+    val kotlinVersion: String by rootProject.extra("1.3.20")
+    val ioVersion: String by rootProject.extra("0.1.2")
+    val coroutinesVersion: String by rootProject.extra("1.1.1")
+    val serializationVersion: String by rootProject.extra("0.9.1")
 
     repositories {
         jcenter()
@@ -36,6 +33,21 @@ allprojects {
 
     group = "hep.dataforge"
     version = "0.1.1-dev-2"
+
+    extensions.findByType<KotlinMultiplatformExtension>()?.apply {
+        jvm {
+            compilations.all {
+                kotlinOptions {
+                    jvmTarget = "1.8"
+                }
+            }
+        }
+        targets.all {
+            sourceSets.all {
+                languageSettings.progressiveMode = true
+            }
+        }
+    }
 }
 
 if (file("artifactory.gradle").exists()) {

@@ -65,7 +65,7 @@ interface Plugin : Named, Metoid, ContextAware, Provider, MetaRepr {
 
     override fun toMeta(): Meta = buildMeta {
         "context" to context.name
-        "type" to this::class.qualifiedName
+        "type" to this::class.simpleName
         "tag" to tag
         "meta" to meta
     }

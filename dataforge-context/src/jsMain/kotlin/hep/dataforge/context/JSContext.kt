@@ -4,7 +4,6 @@ import hep.dataforge.meta.*
 import mu.KLogger
 import mu.KotlinLogging
 import kotlin.jvm.Synchronized
-import kotlin.reflect.KClass
 
 actual object Global: Context, JSContext("GLOBAL", null){
     /**
@@ -50,13 +49,6 @@ open class JSContext(
 
     override val plugins: PluginManager by lazy { PluginManager(this) }
     override val logger: KLogger = KotlinLogging.logger(name)
-
-    /**
-     * A property showing that dispatch thread is started in the context
-     */
-    private var started = false
-
-    override fun <T : Any> services(type: KClass<T>): Sequence<T>  = TODO("Not implemented")
 
     /**
      * Free up resources associated with this context
