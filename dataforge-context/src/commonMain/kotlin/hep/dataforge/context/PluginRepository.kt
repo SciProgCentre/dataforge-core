@@ -5,12 +5,14 @@ import kotlin.reflect.KClass
 
 interface PluginFactory {
     val tag: PluginTag
-    val type: KClass<Plugin>
+    val type: KClass<out Plugin>
     fun build(meta: Meta): Plugin
 }
 
 
 expect object PluginRepository {
+
+    fun register(factory: PluginFactory)
 
     /**
      * List plugins available in the repository
