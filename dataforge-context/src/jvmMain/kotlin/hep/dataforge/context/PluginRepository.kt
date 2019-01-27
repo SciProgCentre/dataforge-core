@@ -12,6 +12,6 @@ actual object PluginRepository {
      * List plugins available in the repository
      */
     actual fun list(): Sequence<PluginFactory> =
-            factories.asSequence() + Global.services(PluginFactory::class)
+        factories.asSequence() + Global.services(PluginFactory::class)
 
 }

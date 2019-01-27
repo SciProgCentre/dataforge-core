@@ -59,7 +59,8 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
      * @return
      */
     @Suppress("UNCHECKED_CAST")
-    operator fun <T : Plugin> get(type: KClass<T>, recursive: Boolean = true): T? = get(recursive) { type.isInstance(it) } as T?
+    operator fun <T : Plugin> get(type: KClass<T>, recursive: Boolean = true): T? =
+        get(recursive) { type.isInstance(it) } as T?
 
     inline fun <reified T : Plugin> get(recursive: Boolean = true): T? = get(T::class, recursive)
 

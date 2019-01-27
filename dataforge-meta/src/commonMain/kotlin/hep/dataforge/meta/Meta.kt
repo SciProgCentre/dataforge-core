@@ -77,9 +77,9 @@ fun Meta.getAll(name: Name): Map<String, MetaItem<out Meta>> {
     val (body, query) = name.last()!!
     val regex = query.toRegex()
     return (this[name.cutLast()] as? NodeItem<*>)?.node?.items
-            ?.filter { it.key.body == body && (query.isEmpty() || regex.matches(it.key.query)) }
-            ?.mapKeys { it.key.query }
-            ?: emptyMap()
+        ?.filter { it.key.body == body && (query.isEmpty() || regex.matches(it.key.query)) }
+        ?.mapKeys { it.key.query }
+        ?: emptyMap()
 
 }
 
@@ -155,8 +155,8 @@ object EmptyMeta : Meta {
 
 val MetaItem<*>.value
     get() = (this as? MetaItem.ValueItem)?.value
-            ?: (this.node[VALUE_KEY] as? MetaItem.ValueItem)?.value
-            ?: error("Trying to interpret node meta item as value item")
+        ?: (this.node[VALUE_KEY] as? MetaItem.ValueItem)?.value
+        ?: error("Trying to interpret node meta item as value item")
 val MetaItem<*>.string get() = value.string
 val MetaItem<*>.boolean get() = value.boolean
 val MetaItem<*>.number get() = value.number

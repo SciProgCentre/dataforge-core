@@ -3,7 +3,7 @@ package hep.dataforge.meta
 /**
  * Marker interface for specifications
  */
-interface Specification: Configurable{
+interface Specification : Configurable {
     operator fun get(name: String): MetaItem<Config>? = config[name]
 }
 
@@ -26,24 +26,29 @@ interface SpecificationBuilder<T : Specification> {
     fun wrap(meta: Meta): T = wrap(meta.toConfig())
 }
 
-fun <T : Specification> specification(wrapper: (Config) -> T): SpecificationBuilder<T> = object : SpecificationBuilder<T> {
-    override fun wrap(config: Config): T  = wrapper(config)
-}
+fun <T : Specification> specification(wrapper: (Config) -> T): SpecificationBuilder<T> =
+    object : SpecificationBuilder<T> {
+        override fun wrap(config: Config): T = wrapper(config)
+    }
 
 /**
  * Apply specified configuration to configurable
  */
-fun <T : Configurable, C : Specification, S : SpecificationBuilder<C>> T.configure(spec: S, action: C.() -> Unit) = apply { spec.update(config, action) }
+fun <T : Configurable, C : Specification, S : SpecificationBuilder<C>> T.configure(spec: S, action: C.() -> Unit) =
+    apply { spec.update(config, action) }
 
 /**
  * Update configuration using given specification
  */
-fun <C : Specification, S : SpecificationBuilder<C>> Specification.update(spec: S, action: C.() -> Unit) = apply { spec.update(config, action) }
+fun <C : Specification, S : SpecificationBuilder<C>> Specification.update(spec: S, action: C.() -> Unit) =
+    apply { spec.update(config, action) }
 
 /**
  * Create a style based on given specification
  */
-fun <C : Specification, S : SpecificationBuilder<C>> S.createStyle(action: C.() -> Unit): Meta = Config().also { update(it, action) }
+fun <C : Specification, S : SpecificationBuilder<C>> S.createStyle(action: C.() -> Unit): Meta =
+    Config().also { update(it, action) }
 
 
-fun <C : Specification> Specification.spec(spec: SpecificationBuilder<C>, key: String? = null) = ChildConfigDelegate<C>(key) { spec.wrap(config) }
+fun <C : Specification> Specification.spec(spec: SpecificationBuilder<C>, key: String? = null) =
+    ChildConfigDelegate<C>(key) { spec.wrap(config) }

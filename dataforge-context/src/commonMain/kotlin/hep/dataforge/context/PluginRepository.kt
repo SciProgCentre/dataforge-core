@@ -24,5 +24,6 @@ expect object PluginRepository {
 /**
  * Fetch specific plugin and instantiate it with given meta
  */
-fun PluginRepository.fetch(tag: PluginTag, meta: Meta): Plugin = PluginRepository.list().find { it.tag.matches(tag) }?.build(meta)
+fun PluginRepository.fetch(tag: PluginTag, meta: Meta): Plugin =
+    PluginRepository.list().find { it.tag.matches(tag) }?.build(meta)
         ?: error("Plugin with tag $tag not found in the repository")

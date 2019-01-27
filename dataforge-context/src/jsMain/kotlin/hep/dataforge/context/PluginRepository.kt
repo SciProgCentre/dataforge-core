@@ -24,7 +24,7 @@ actual object PluginRepository {
     }
 
     inline fun <reified T : Plugin> register(tag: PluginTag, noinline constructor: (Meta) -> T) =
-            register(tag, T::class, constructor)
+        register(tag, T::class, constructor)
 
     /**
      * List plugins available in the repository

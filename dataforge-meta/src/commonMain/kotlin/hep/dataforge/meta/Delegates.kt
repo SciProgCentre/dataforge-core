@@ -11,25 +11,29 @@ import kotlin.reflect.KProperty
 
 //TODO add caching for sealed nodes
 
-class ValueDelegate(private val key: String? = null, private val default: Value? = null) : ReadOnlyProperty<Metoid, Value?> {
+class ValueDelegate(private val key: String? = null, private val default: Value? = null) :
+    ReadOnlyProperty<Metoid, Value?> {
     override fun getValue(thisRef: Metoid, property: KProperty<*>): Value? {
         return thisRef.meta[key ?: property.name]?.value ?: default
     }
 }
 
-class StringDelegate(private val key: String? = null, private val default: String? = null) : ReadOnlyProperty<Metoid, String?> {
+class StringDelegate(private val key: String? = null, private val default: String? = null) :
+    ReadOnlyProperty<Metoid, String?> {
     override fun getValue(thisRef: Metoid, property: KProperty<*>): String? {
         return thisRef.meta[key ?: property.name]?.string ?: default
     }
 }
 
-class BooleanDelegate(private val key: String? = null, private val default: Boolean? = null) : ReadOnlyProperty<Metoid, Boolean?> {
+class BooleanDelegate(private val key: String? = null, private val default: Boolean? = null) :
+    ReadOnlyProperty<Metoid, Boolean?> {
     override fun getValue(thisRef: Metoid, property: KProperty<*>): Boolean? {
         return thisRef.meta[key ?: property.name]?.boolean ?: default
     }
 }
 
-class NumberDelegate(private val key: String? = null, private val default: Number? = null) : ReadOnlyProperty<Metoid, Number?> {
+class NumberDelegate(private val key: String? = null, private val default: Number? = null) :
+    ReadOnlyProperty<Metoid, Number?> {
     override fun getValue(thisRef: Metoid, property: KProperty<*>): Number? {
         return thisRef.meta[key ?: property.name]?.number ?: default
     }
@@ -37,25 +41,32 @@ class NumberDelegate(private val key: String? = null, private val default: Numbe
 
 //Delegates with non-null values
 
-class SafeStringDelegate(private val key: String? = null, private val default: String) : ReadOnlyProperty<Metoid, String> {
+class SafeStringDelegate(private val key: String? = null, private val default: String) :
+    ReadOnlyProperty<Metoid, String> {
     override fun getValue(thisRef: Metoid, property: KProperty<*>): String {
         return thisRef.meta[key ?: property.name]?.string ?: default
     }
 }
 
-class SafeBooleanDelegate(private val key: String? = null, private val default: Boolean) : ReadOnlyProperty<Metoid, Boolean> {
+class SafeBooleanDelegate(private val key: String? = null, private val default: Boolean) :
+    ReadOnlyProperty<Metoid, Boolean> {
     override fun getValue(thisRef: Metoid, property: KProperty<*>): Boolean {
         return thisRef.meta[key ?: property.name]?.boolean ?: default
     }
 }
 
-class SafeNumberDelegate(private val key: String? = null, private val default: Number) : ReadOnlyProperty<Metoid, Number> {
+class SafeNumberDelegate(private val key: String? = null, private val default: Number) :
+    ReadOnlyProperty<Metoid, Number> {
     override fun getValue(thisRef: Metoid, property: KProperty<*>): Number {
         return thisRef.meta[key ?: property.name]?.number ?: default
     }
 }
 
-class SafeEnumDelegate<E : Enum<E>>(private val key: String? = null, private val default: E, private val resolver: (String) -> E) : ReadOnlyProperty<Metoid, E> {
+class SafeEnumDelegate<E : Enum<E>>(
+    private val key: String? = null,
+    private val default: E,
+    private val resolver: (String) -> E
+) : ReadOnlyProperty<Metoid, E> {
     override fun getValue(thisRef: Metoid, property: KProperty<*>): E {
         return (thisRef.meta[key ?: property.name]?.string)?.let { resolver(it) } ?: default
     }
@@ -63,9 +74,10 @@ class SafeEnumDelegate<E : Enum<E>>(private val key: String? = null, private val
 
 //Child node delegate
 
-class ChildDelegate<T>(private val key: String? = null, private val converter: (Meta) -> T) : ReadOnlyProperty<Metoid, T?> {
+class ChildDelegate<T>(private val key: String? = null, private val converter: (Meta) -> T) :
+    ReadOnlyProperty<Metoid, T?> {
     override fun getValue(thisRef: Metoid, property: KProperty<*>): T? {
-        return thisRef.meta[key ?: property.name]?.node?.let { converter(it)}
+        return thisRef.meta[key ?: property.name]?.node?.let { converter(it) }
     }
 }
 
@@ -95,18 +107,20 @@ fun Metoid.boolean(default: Boolean, key: String? = null) = SafeBooleanDelegate(
 @JvmName("safeNumber")
 fun Metoid.number(default: Number, key: String? = null) = SafeNumberDelegate(key, default)
 
-inline fun <reified E : Enum<E>> Metoid.enum(default: E, key: String? = null) = SafeEnumDelegate(key, default) { enumValueOf(it) }
+inline fun <reified E : Enum<E>> Metoid.enum(default: E, key: String? = null) =
+    SafeEnumDelegate(key, default) { enumValueOf(it) }
 
 /* Config delegates */
 
-class ValueConfigDelegate(private val key: String? = null, private val default: Value? = null) : ReadWriteProperty<Configurable, Value?> {
+class ValueConfigDelegate(private val key: String? = null, private val default: Value? = null) :
+    ReadWriteProperty<Configurable, Value?> {
     override fun getValue(thisRef: Configurable, property: KProperty<*>): Value? {
         return thisRef.config[key ?: property.name]?.value ?: default
     }
 
     override fun setValue(thisRef: Configurable, property: KProperty<*>, value: Value?) {
         val name = key ?: property.name
-        if(value == null){
+        if (value == null) {
             thisRef.config.remove(name)
         } else {
             thisRef.config[name] = value
@@ -114,7 +128,8 @@ class ValueConfigDelegate(private val key: String? = null, private val default: 
     }
 }
 
-class StringConfigDelegate(private val key: String? = null, private val default: String? = null) : ReadWriteProperty<Configurable, String?> {
+class StringConfigDelegate(private val key: String? = null, private val default: String? = null) :
+    ReadWriteProperty<Configurable, String?> {
     override fun getValue(thisRef: Configurable, property: KProperty<*>): String? {
         return thisRef.config[key ?: property.name]?.string ?: default
     }
@@ -124,7 +139,8 @@ class StringConfigDelegate(private val key: String? = null, private val default:
     }
 }
 
-class BooleanConfigDelegate(private val key: String? = null, private val default: Boolean? = null) : ReadWriteProperty<Configurable, Boolean?> {
+class BooleanConfigDelegate(private val key: String? = null, private val default: Boolean? = null) :
+    ReadWriteProperty<Configurable, Boolean?> {
     override fun getValue(thisRef: Configurable, property: KProperty<*>): Boolean? {
         return thisRef.config[key ?: property.name]?.boolean ?: default
     }
@@ -134,7 +150,8 @@ class BooleanConfigDelegate(private val key: String? = null, private val default
     }
 }
 
-class NumberConfigDelegate(private val key: String? = null, private val default: Number? = null) : ReadWriteProperty<Configurable, Number?> {
+class NumberConfigDelegate(private val key: String? = null, private val default: Number? = null) :
+    ReadWriteProperty<Configurable, Number?> {
     override fun getValue(thisRef: Configurable, property: KProperty<*>): Number? {
         return thisRef.config[key ?: property.name]?.number ?: default
     }
@@ -146,7 +163,8 @@ class NumberConfigDelegate(private val key: String? = null, private val default:
 
 //Delegates with non-null values
 
-class SafeStringConfigDelegate(private val key: String? = null, private val default: String) : ReadWriteProperty<Configurable, String> {
+class SafeStringConfigDelegate(private val key: String? = null, private val default: String) :
+    ReadWriteProperty<Configurable, String> {
     override fun getValue(thisRef: Configurable, property: KProperty<*>): String {
         return thisRef.config[key ?: property.name]?.string ?: default
     }
@@ -156,7 +174,8 @@ class SafeStringConfigDelegate(private val key: String? = null, private val defa
     }
 }
 
-class SafeBooleanConfigDelegate(private val key: String? = null, private val default: Boolean) : ReadWriteProperty<Configurable, Boolean> {
+class SafeBooleanConfigDelegate(private val key: String? = null, private val default: Boolean) :
+    ReadWriteProperty<Configurable, Boolean> {
     override fun getValue(thisRef: Configurable, property: KProperty<*>): Boolean {
         return thisRef.config[key ?: property.name]?.boolean ?: default
     }
@@ -166,7 +185,8 @@ class SafeBooleanConfigDelegate(private val key: String? = null, private val def
     }
 }
 
-class SafeNumberConfigDelegate(private val key: String? = null, private val default: Number) : ReadWriteProperty<Configurable, Number> {
+class SafeNumberConfigDelegate(private val key: String? = null, private val default: Number) :
+    ReadWriteProperty<Configurable, Number> {
     override fun getValue(thisRef: Configurable, property: KProperty<*>): Number {
         return thisRef.config[key ?: property.name]?.number ?: default
     }
@@ -176,7 +196,11 @@ class SafeNumberConfigDelegate(private val key: String? = null, private val defa
     }
 }
 
-class SafeEnumvConfigDelegate<E : Enum<E>>(private val key: String? = null, private val default: E, private val resolver: (String) -> E) : ReadWriteProperty<Configurable, E> {
+class SafeEnumvConfigDelegate<E : Enum<E>>(
+    private val key: String? = null,
+    private val default: E,
+    private val resolver: (String) -> E
+) : ReadWriteProperty<Configurable, E> {
     override fun getValue(thisRef: Configurable, property: KProperty<*>): E {
         return (thisRef.config[key ?: property.name]?.string)?.let { resolver(it) } ?: default
     }
@@ -188,7 +212,8 @@ class SafeEnumvConfigDelegate<E : Enum<E>>(private val key: String? = null, priv
 
 //Child node delegate
 
-class ChildConfigDelegate<T : Configurable>(private val key: String? = null, private val converter: (Config) -> T) : ReadWriteProperty<Configurable, T> {
+class ChildConfigDelegate<T : Configurable>(private val key: String? = null, private val converter: (Config) -> T) :
+    ReadWriteProperty<Configurable, T> {
     override fun getValue(thisRef: Configurable, property: KProperty<*>): T {
         return converter(thisRef.config[key ?: property.name]?.node ?: Config())
     }
@@ -214,7 +239,8 @@ fun Configurable.number(default: Number? = null, key: String? = null) = NumberCo
 
 fun Configurable.child(key: String? = null) = ChildConfigDelegate(key) { SimpleConfigurable(it) }
 
-fun <T : Configurable> Configurable.child(key: String? = null, converter: (Config) -> T) = ChildConfigDelegate(key, converter)
+fun <T : Configurable> Configurable.child(key: String? = null, converter: (Config) -> T) =
+    ChildConfigDelegate(key, converter)
 
 //fun <T : Configurable> Configurable.spec(spec: Specification<T>, key: String? = null) = ChildConfigDelegate<T>(key) { spec.wrap(this) }
 
@@ -227,4 +253,5 @@ fun Configurable.boolean(default: Boolean, key: String? = null) = SafeBooleanCon
 @JvmName("safeNumber")
 fun Configurable.number(default: Number, key: String? = null) = SafeNumberConfigDelegate(key, default)
 
-inline fun <reified E : Enum<E>> Configurable.enum(default: E, key: String? = null) = SafeEnumvConfigDelegate(key, default) { enumValueOf(it) }
+inline fun <reified E : Enum<E>> Configurable.enum(default: E, key: String? = null) =
+    SafeEnumvConfigDelegate(key, default) { enumValueOf(it) }

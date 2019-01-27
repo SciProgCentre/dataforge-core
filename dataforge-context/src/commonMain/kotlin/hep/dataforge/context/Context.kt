@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import mu.KLogger
 import mu.KotlinLogging
 import kotlin.coroutines.CoroutineContext
-import kotlin.reflect.KClass
 
 /**
  * The local environment for anything being done in DataForge framework. Contexts are organized into tree structure with [Global] at the top.
@@ -102,10 +101,9 @@ inline fun <reified T : Any> Context.list(target: String): Sequence<T> {
 /**
  * A global root context
  */
-expect object Global : Context{
+expect object Global : Context {
     fun getContext(name: String): Context
 }
-
 
 
 /**

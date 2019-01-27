@@ -74,7 +74,7 @@ class JsonMeta(val json: JsonObject) : Meta {
     }
 }
 
-class JsonMetaFormatFactory: MetaFormatFactory{
+class JsonMetaFormatFactory : MetaFormatFactory {
     override val name: String = "json"
     override val key: Short = 0x4a53//"JS"
 

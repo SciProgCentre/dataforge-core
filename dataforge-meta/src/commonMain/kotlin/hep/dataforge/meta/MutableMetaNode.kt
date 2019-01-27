@@ -6,7 +6,10 @@ import hep.dataforge.names.plus
 import hep.dataforge.names.toName
 import hep.dataforge.values.Value
 
-class MetaListener(val owner: Any? = null, val action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit) {
+class MetaListener(
+    val owner: Any? = null,
+    val action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit
+) {
     operator fun invoke(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) = action(name, oldItem, newItem)
 }
 
@@ -87,7 +90,7 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : MetaNode<M>(), MutableM
                 val token = name.first()!!
                 //get existing or create new node. Query is ignored for new node
                 val child = this.items[token]?.node
-                        ?: empty().also { this[token.body.toName()] = MetaItem.NodeItem(it) }
+                    ?: empty().also { this[token.body.toName()] = MetaItem.NodeItem(it) }
                 child[name.cutFirst()] = item
             }
         }
@@ -130,16 +133,20 @@ fun <M : MutableMetaNode<M>> M.update(meta: Meta) {
     meta.items.forEach { entry ->
         val value = entry.value
         when (value) {
-            is MetaItem.ValueItem -> setValue(entry.key.toName(),value.value)
+            is MetaItem.ValueItem -> setValue(entry.key.toName(), value.value)
             is MetaItem.NodeItem -> (this[entry.key.toName()] as? MetaItem.NodeItem)?.node?.update(value.node)
-                    ?: run { setNode(entry.key.toName(),value.node)}
+                ?: run { setNode(entry.key.toName(), value.node) }
         }
     }
 }
 
 /* Same name siblings generation */
 
-fun <M : MutableMeta<M>> M.setIndexed(name: Name, items: Iterable<MetaItem<M>>, queryFactory: (Int) -> String = { it.toString() }) {
+fun <M : MutableMeta<M>> M.setIndexed(
+    name: Name,
+    items: Iterable<MetaItem<M>>,
+    queryFactory: (Int) -> String = { it.toString() }
+) {
     val tokens = name.tokens.toMutableList()
     val last = tokens.last()
     items.forEachIndexed { index, meta ->
@@ -149,7 +156,11 @@ fun <M : MutableMeta<M>> M.setIndexed(name: Name, items: Iterable<MetaItem<M>>, 
     }
 }
 
-fun <M : MutableMetaNode<M>> M.setIndexed(name: Name, metas: Iterable<Meta>, queryFactory: (Int) -> String = { it.toString() }) {
+fun <M : MutableMetaNode<M>> M.setIndexed(
+    name: Name,
+    metas: Iterable<Meta>,
+    queryFactory: (Int) -> String = { it.toString() }
+) {
     setIndexed(name, metas.map { wrap(name, it) }, queryFactory)
 }
 

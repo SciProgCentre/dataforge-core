@@ -21,13 +21,13 @@ interface MetaFormatFactory {
     fun build(): MetaFormat
 }
 
-fun Meta.asString(format: MetaFormat = JsonMetaFormat): String{
+fun Meta.asString(format: MetaFormat = JsonMetaFormat): String {
     val builder = BytePacketBuilder()
-    format.write(this,builder)
+    format.write(this, builder)
     return builder.build().readText()
 }
 
-fun MetaFormat.parse(str: String): Meta{
+fun MetaFormat.parse(str: String): Meta {
     return read(ByteReadPacket(str.toByteArray()))
 }
 

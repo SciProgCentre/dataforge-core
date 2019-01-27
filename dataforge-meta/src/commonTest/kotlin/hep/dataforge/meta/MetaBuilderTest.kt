@@ -5,12 +5,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-class MetaBuilderTest{
+class MetaBuilderTest {
     @Test
-    fun testBuilder(){
+    fun testBuilder() {
         val meta = buildMeta {
             "a" to 22
-            "b" to listOf(1,2,3)
+            "b" to listOf(1, 2, 3)
             this["c"] = "myValue".asValue()
             "node" to {
                 "e" to 12.2

@@ -7,7 +7,7 @@ description = "Context and provider definitions"
 val coroutinesVersion: String by rootProject.extra
 
 kotlin {
-    jvm ()
+    jvm()
     js()
 
     sourceSets {

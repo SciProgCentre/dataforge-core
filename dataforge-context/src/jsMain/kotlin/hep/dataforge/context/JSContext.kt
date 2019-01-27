@@ -5,14 +5,14 @@ import mu.KLogger
 import mu.KotlinLogging
 import kotlin.jvm.Synchronized
 
-actual object Global: Context, JSContext("GLOBAL", null){
+actual object Global : Context, JSContext("GLOBAL", null) {
     /**
      * Closing all contexts
      *
      * @throws Exception
      */
     override fun close() {
-        logger.info{"Shutting down GLOBAL"}
+        logger.info { "Shutting down GLOBAL" }
         for (ctx in contextRegistry.values) {
             ctx.close()
         }
@@ -34,10 +34,10 @@ actual object Global: Context, JSContext("GLOBAL", null){
 }
 
 open class JSContext(
-        final override val name: String,
-        final override val parent: JSContext? = Global,
-        properties: Meta = EmptyMeta
-): Context {
+    final override val name: String,
+    final override val parent: JSContext? = Global,
+    properties: Meta = EmptyMeta
+) : Context {
 
     private val _properties = Config().apply { update(properties) }
     override val properties: Meta

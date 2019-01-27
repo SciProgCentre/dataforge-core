@@ -20,7 +20,8 @@ interface Goal<out T> : Deferred<T>, CoroutineScope {
         /**
          * Create goal wrapping static value. This goal is always completed
          */
-        fun <T> static(context: CoroutineContext, value: T): Goal<T> = StaticGoalImpl(context, CompletableDeferred(value))
+        fun <T> static(context: CoroutineContext, value: T): Goal<T> =
+            StaticGoalImpl(context, CompletableDeferred(value))
     }
 }
 
@@ -48,16 +49,18 @@ class GoalMonitor {
 }
 
 private class GoalImpl<T>(
-        override val dependencies: Collection<Goal<*>>,
-        val monitor: GoalMonitor,
-        deferred: Deferred<T>) : Goal<T>, Deferred<T> by deferred {
+    override val dependencies: Collection<Goal<*>>,
+    val monitor: GoalMonitor,
+    deferred: Deferred<T>
+) : Goal<T>, Deferred<T> by deferred {
     override val coroutineContext: CoroutineContext get() = this
     override val totalWork: Double get() = dependencies.sumByDouble { totalWork } + monitor.totalWork
     override val workDone: Double get() = dependencies.sumByDouble { workDone } + monitor.workDone
     override val status: String get() = monitor.status
 }
 
-private class StaticGoalImpl<T>(val context: CoroutineContext, deferred: CompletableDeferred<T>) : Goal<T>, Deferred<T> by deferred {
+private class StaticGoalImpl<T>(val context: CoroutineContext, deferred: CompletableDeferred<T>) : Goal<T>,
+    Deferred<T> by deferred {
     override val dependencies: Collection<Goal<*>> get() = emptyList()
     override val status: String get() = ""
     override val totalWork: Double get() = 0.0
@@ -94,7 +97,10 @@ fun <T, R> Goal<T>.pipe(block: suspend GoalMonitor.(T) -> R): Goal<R> = createGo
  * Create a joining goal.
  * @param scope the scope for resulting goal. By default use first goal in list
  */
-fun <T, R> Collection<Goal<T>>.join(scope: CoroutineScope = first(), block: suspend GoalMonitor.(Collection<T>) -> R): Goal<R> =
-        scope.createGoal(this) {
-            block(map { it.await() })
-        }
+fun <T, R> Collection<Goal<T>>.join(
+    scope: CoroutineScope = first(),
+    block: suspend GoalMonitor.(Collection<T>) -> R
+): Goal<R> =
+    scope.createGoal(this) {
+        block(map { it.await() })
+    }

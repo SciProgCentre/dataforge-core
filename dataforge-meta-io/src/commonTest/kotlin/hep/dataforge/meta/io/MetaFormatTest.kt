@@ -4,9 +4,9 @@ import hep.dataforge.meta.buildMeta
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class MetaFormatTest{
+class MetaFormatTest {
     @Test
-    fun testBinaryMetaFormat(){
+    fun testBinaryMetaFormat() {
         val meta = buildMeta {
             "a" to 22
             "node" to {
@@ -14,13 +14,13 @@ class MetaFormatTest{
                 "c" to 11.1
             }
         }
-        val string =  meta.asString(BinaryMetaFormat)
+        val string = meta.asString(BinaryMetaFormat)
         val result = BinaryMetaFormat.parse(string)
         assertEquals(meta, result)
     }
 
     @Test
-    fun testJsonMetaFormat(){
+    fun testJsonMetaFormat() {
         val meta = buildMeta {
             "a" to 22
             "node" to {
@@ -30,7 +30,7 @@ class MetaFormatTest{
         }
         val string = meta.asString(JsonMetaFormat)
         val result = JsonMetaFormat.parse(string)
-        assertEquals(meta,result)
+        assertEquals(meta, result)
     }
 
 }

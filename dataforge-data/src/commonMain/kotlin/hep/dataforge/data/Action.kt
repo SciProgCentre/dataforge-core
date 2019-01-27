@@ -50,10 +50,11 @@ class PipeAction<in T : Any, out R : Any>(val transform: (Name, Data<T>, Meta) -
         /**
          * A simple pipe that performs transformation on the data and copies input meta into the output
          */
-        inline fun <T : Any, reified R : Any> simple(noinline transform: suspend (Name, T, Meta) -> R) = PipeAction { name, data: Data<T>, meta ->
-            val goal = data.goal.pipe { transform(name, it, meta) }
-            return@PipeAction Data.of(goal, data.meta)
-        }
+        inline fun <T : Any, reified R : Any> simple(noinline transform: suspend (Name, T, Meta) -> R) =
+            PipeAction { name, data: Data<T>, meta ->
+                val goal = data.goal.pipe { transform(name, it, meta) }
+                return@PipeAction Data.of(goal, data.meta)
+            }
     }
 }
 

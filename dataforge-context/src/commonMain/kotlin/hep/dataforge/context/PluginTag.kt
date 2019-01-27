@@ -11,9 +11,9 @@ import hep.dataforge.meta.buildMeta
  * @author Alexander Nozik
  */
 data class PluginTag(
-        val name: String,
-        val group: String = "",
-        val version: String = ""
+    val name: String,
+    val group: String = "",
+    val version: String = ""
 ) : MetaRepr {
 
     /**

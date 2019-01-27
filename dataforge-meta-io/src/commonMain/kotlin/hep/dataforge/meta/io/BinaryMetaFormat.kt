@@ -124,7 +124,7 @@ object BinaryMetaFormat : MetaFormat {
     }
 }
 
-class BinaryMetaFormatFactory: MetaFormatFactory{
+class BinaryMetaFormatFactory : MetaFormatFactory {
     override val name: String = "bin"
     override val key: Short = 0x4249//BI
 

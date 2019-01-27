@@ -31,6 +31,10 @@ interface OutputManager : Plugin {
 /**
  * Get an output with given [name], [stage] and reified content type
  */
-inline fun <reified T : Any> OutputManager.typed(name: Name, stage: Name = EmptyName, meta: Meta = EmptyMeta): Output<T> {
+inline fun <reified T : Any> OutputManager.typed(
+    name: Name,
+    stage: Name = EmptyName,
+    meta: Meta = EmptyMeta
+): Output<T> {
     return typed(T::class, name, stage, meta)
 }

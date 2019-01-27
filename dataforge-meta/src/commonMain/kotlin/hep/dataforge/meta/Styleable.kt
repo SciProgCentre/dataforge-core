@@ -44,7 +44,7 @@ class StyledConfig(val config: Config, style: Meta = EmptyMeta) : Config() {
                 }
                 is MetaItem.ValueItem -> MetaItem.ValueItem(value.value)
                 is MetaItem.NodeItem -> MetaItem.NodeItem(
-                        StyledConfig(value.node, styleValue?.node ?: EmptyMeta)
+                    StyledConfig(value.node, styleValue?.node ?: EmptyMeta)
                 )
             }
             key to item
