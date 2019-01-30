@@ -4,8 +4,6 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
-import hep.dataforge.provider.Types
-import hep.dataforge.provider.provideAll
 import hep.dataforge.values.Value
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +52,7 @@ interface Context : Named, MetaRepr, Provider, CoroutineScope {
     override fun provideTop(target: String, name: Name): Any? {
         return when (target) {
             Plugin.PLUGIN_TARGET -> plugins[PluginTag.fromString(name.toString())]
-            Value.VALUE_TARGET -> properties[name]?.value
+            Value.TYPE -> properties[name]?.value
             else -> null
         }
     }
@@ -62,7 +60,7 @@ interface Context : Named, MetaRepr, Provider, CoroutineScope {
     override fun listTop(target: String): Sequence<Name> {
         return when (target) {
             Plugin.PLUGIN_TARGET -> plugins.asSequence().map { it.name.toName() }
-            Value.VALUE_TARGET -> properties.asValueSequence().map { it.first }
+            Value.TYPE -> properties.asValueSequence().map { it.first }
             else -> emptySequence()
         }
     }
@@ -92,15 +90,9 @@ interface Context : Named, MetaRepr, Provider, CoroutineScope {
     }
 }
 
-/**
- * A sequences of all objects provided by plugins with given target and type
- */
-inline fun <reified T : Any> Context.provideAll(target: String = Types[T::class]): Sequence<T> {
-    return plugins.asSequence().flatMap { it.provideAll(target) }.filterIsInstance<T>()
-}
 
 /**
- * A global root context
+ * A global root context. Closing [Global] terminates the framework.
  */
 expect object Global : Context {
     fun getContext(name: String): Context

@@ -1,8 +1,10 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Context
-import hep.dataforge.context.provideAll
+import hep.dataforge.io.TextRenderer.Companion.TEXT_RENDERER_TYPE
 import hep.dataforge.meta.Meta
+import hep.dataforge.provider.Type
+import hep.dataforge.provider.provideAll
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
@@ -18,7 +20,8 @@ class TextOutput(override val context: Context, private val output: kotlinx.io.c
         } else {
             val value = cache[obj::class]
             if (value == null) {
-                val answer = context.provideAll<TextRenderer>().filter { it.type.isInstance(obj) }.firstOrNull()
+                val answer = context.provideAll(TEXT_RENDERER_TYPE).filterIsInstance<TextRenderer>()
+                    .filter { it.type.isInstance(obj) }.firstOrNull()
                 if (answer != null) {
                     cache[obj::class] = answer
                     answer
@@ -35,6 +38,7 @@ class TextOutput(override val context: Context, private val output: kotlinx.io.c
     }
 }
 
+@Type(TEXT_RENDERER_TYPE)
 interface TextRenderer {
     /**
      * The priority of this renderer compared to other renderers
@@ -46,6 +50,10 @@ interface TextRenderer {
     val type: KClass<*>
 
     suspend fun kotlinx.io.core.Output.render(obj: Any)
+
+    companion object {
+        const val TEXT_RENDERER_TYPE = "dataforge.textRenderer"
+    }
 }
 
 object DefaultTextRenderer : TextRenderer {

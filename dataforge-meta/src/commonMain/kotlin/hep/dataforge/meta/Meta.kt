@@ -42,6 +42,7 @@ interface Meta : MetaRepr {
     override fun toMeta(): Meta = this
 
     companion object {
+        const val TYPE = "meta"
         /**
          * A key for single value node
          */

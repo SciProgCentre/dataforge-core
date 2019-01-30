@@ -44,7 +44,7 @@ interface Value {
         get() = listOf(this)
 
     companion object {
-        const val VALUE_TARGET = "value"
+        const val TYPE = "value"
 
         /**
          * Convert object to value

@@ -88,10 +88,4 @@ fun Provider.provideAll(target: String): Sequence<Any> {
     return listTop(target).map { provideTop(target, it) ?: error("The element $it is declared but not provided") }
 }
 
-/**
- * Provide an object with given name inferring target from its type using [Type] annotation
- */
-inline fun <reified T : Any> Provider.provideByType(name: String): T? {
-    val target = Types[T::class]
-    return provide(target, name)
-}
+

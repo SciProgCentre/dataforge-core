@@ -161,7 +161,8 @@ fun <M : MutableMetaNode<M>> M.setIndexed(
     metas: Iterable<Meta>,
     queryFactory: (Int) -> String = { it.toString() }
 ) {
-    setIndexed(name, metas.map { wrap(name, it) }, queryFactory)
+    setIndexed(name, metas.map { MetaItem.NodeItem(wrap(name, it)) }, queryFactory)
 }
 
 operator fun <M : MutableMetaNode<M>> M.set(name: Name, metas: Iterable<Meta>) = setIndexed(name, metas)
+operator fun <M : MutableMetaNode<M>> M.set(name: String, metas: Iterable<Meta>) = setIndexed(name.toName(), metas)
