@@ -4,12 +4,14 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
+import hep.dataforge.provider.provideAll
 import hep.dataforge.values.Value
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import mu.KLogger
 import mu.KotlinLogging
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.jvm.JvmName
 
 /**
  * The local environment for anything being done in DataForge framework. Contexts are organized into tree structure with [Global] at the top.
@@ -23,29 +25,36 @@ import kotlin.coroutines.CoroutineContext
  * Since plugins could contain mutable state, context has two states: active and inactive. No changes are allowed to active context.
  * @author Alexander Nozik
  */
-interface Context : Named, MetaRepr, Provider, CoroutineScope {
+open class Context(final override val name: String, val parent: Context? = Global) : Named, MetaRepr, Provider,
+    CoroutineScope {
 
-    val parent: Context?
+    private val config = Config()
 
     /**
      * Context properties. Working as substitute for environment variables
      */
-    val properties: Meta
+    val properties: Meta = if (parent == null) {
+        config
+    } else {
+        Laminate(config, parent.properties)
+    }
 
     /**
      * Context logger
      */
-    val logger: KLogger
+    val logger: KLogger = KotlinLogging.logger(name)
 
     /**
      * A [PluginManager] for current context
      */
-    val plugins: PluginManager
+    val plugins: PluginManager by lazy { PluginManager(this) }
+
+    private val activators = HashSet<Any>()
 
     /**
      * Defines if context is used in any kind of active computations. Active context properties and plugins could not be changed
      */
-    val isActive: Boolean
+    val isActive: Boolean = activators.isNotEmpty()
 
     override val defaultTarget: String get() = Plugin.PLUGIN_TARGET
 
@@ -68,20 +77,36 @@ interface Context : Named, MetaRepr, Provider, CoroutineScope {
     /**
      * Mark context as active and used by [activator]
      */
-    fun activate(activator: Any)
+    fun activate(activator: Any) {
+        activators.add(activator)
+    }
 
     /**
      * Mark context unused by [activator]
      */
-    fun deactivate(activator: Any)
+    fun deactivate(activator: Any) {
+        activators.remove(activator)
+    }
+
+    /**
+     * Change the properties of the context. If active, throw an exception
+     */
+    fun configure(action: Config.() -> Unit) {
+        if (isActive) error("Can't configure active context")
+        config.action()
+    }
 
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Default
+        get() = EmptyCoroutineContext
 
     /**
      * Detach all plugins and terminate context
      */
-    fun close()
+    open fun close() {
+        if (isActive) error("Can't close active context")
+        //detach all plugins
+        plugins.forEach { it.detach() }
+    }
 
     override fun toMeta(): Meta = buildMeta {
         "parent" to parent?.name
@@ -90,12 +115,45 @@ interface Context : Named, MetaRepr, Provider, CoroutineScope {
     }
 }
 
+/**
+ * A sequences of all objects provided by plugins with given target and type
+ */
+fun Context.members(target: String): Sequence<Any> =
+    plugins.asSequence().flatMap { it.provideAll(target) }
+
+@JvmName("typedMembers")
+inline fun <reified T : Any> Context.members(target: String) =
+    members(target).filterIsInstance<T>()
+
 
 /**
  * A global root context. Closing [Global] terminates the framework.
  */
-expect object Global : Context {
-    fun getContext(name: String): Context
+object Global : Context("GLOBAL", null) {
+    /**
+     * Closing all contexts
+     *
+     * @throws Exception
+     */
+    override fun close() {
+        logger.info { "Shutting down GLOBAL" }
+        for (ctx in contextRegistry.values) {
+            ctx.close()
+        }
+        super.close()
+    }
+
+    private val contextRegistry = HashMap<String, Context>()
+
+    /**
+     * Get previously builder context o builder a new one
+     *
+     * @param name
+     * @return
+     */
+    fun getContext(name: String): Context {
+        return contextRegistry.getOrPut(name) { Context(name) }
+    }
 }
 
 

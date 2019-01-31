@@ -180,3 +180,5 @@ interface Metoid {
 }
 
 fun Value.toMeta() = buildMeta { Meta.VALUE_KEY to this }
+
+fun Meta.isEmpty() = this === EmptyMeta || this.items.isEmpty()

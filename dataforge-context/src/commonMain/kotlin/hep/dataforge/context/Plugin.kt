@@ -1,8 +1,8 @@
 package hep.dataforge.context
 
+import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
-import hep.dataforge.meta.Metoid
 import hep.dataforge.meta.buildMeta
 import hep.dataforge.provider.Provider
 
@@ -22,7 +22,7 @@ import hep.dataforge.provider.Provider
  *
  * @author Alexander Nozik
  */
-interface Plugin : Named, Metoid, ContextAware, Provider, MetaRepr {
+interface Plugin : Named, ContextAware, Provider, MetaRepr, Configurable {
 
     /**
      * Get tag for this plugin
@@ -67,7 +67,7 @@ interface Plugin : Named, Metoid, ContextAware, Provider, MetaRepr {
         "context" to context.name
         "type" to this::class.simpleName
         "tag" to tag
-        "meta" to meta
+        "meta" to config
     }
 
     companion object {

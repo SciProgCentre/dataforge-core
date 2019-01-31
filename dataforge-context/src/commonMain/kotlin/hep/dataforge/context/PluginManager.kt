@@ -1,9 +1,6 @@
 package hep.dataforge.context
 
-import hep.dataforge.meta.EmptyMeta
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.buildMeta
+import hep.dataforge.meta.*
 import kotlin.reflect.KClass
 
 /**
@@ -115,8 +112,8 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
     fun load(tag: PluginTag, meta: Meta = EmptyMeta): Plugin {
         val loaded = get(tag, false)
         return when {
-            loaded == null -> load(PluginRepository.fetch(tag, meta))
-            loaded.meta == meta -> loaded // if meta is the same, return existing plugin
+            loaded == null -> load(PluginRepository.fetch(tag)).configure(meta)
+            loaded.config == meta -> loaded // if meta is the same, return existing plugin
             else -> throw RuntimeException("Can't load plugin with tag $tag. Plugin with this tag and different configuration already exists in context.")
         }
     }
@@ -137,7 +134,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
                     error("Corrupt type information in plugin repository")
                 }
             }
-            loaded.meta == meta -> loaded // if meta is the same, return existing plugin
+            loaded.config == meta -> loaded // if meta is the same, return existing plugin
             else -> throw RuntimeException("Can't load plugin with type $type. Plugin with this type and different configuration already exists in context.")
         }
     }

@@ -1,15 +1,15 @@
 package hep.dataforge.context
 
-import hep.dataforge.meta.EmptyMeta
-import hep.dataforge.meta.Meta
+import hep.dataforge.meta.Config
 import hep.dataforge.names.Name
 
-abstract class AbstractPlugin(override val meta: Meta = EmptyMeta) : Plugin {
-
+abstract class AbstractPlugin : Plugin {
     private var _context: Context? = null
 
     override val context: Context
         get() = _context ?: error("Plugin $tag is not attached")
+
+    override val config = Config()
 
     override fun attach(context: Context) {
         this._context = context
@@ -18,6 +18,8 @@ abstract class AbstractPlugin(override val meta: Meta = EmptyMeta) : Plugin {
     override fun detach() {
         this._context = null
     }
+
+    //TODO make configuration activation-safe
 
     override fun provideTop(target: String, name: Name): Any? = null
 

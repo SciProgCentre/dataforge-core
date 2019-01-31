@@ -1,6 +1,7 @@
 package hep.dataforge.provider
 
 import hep.dataforge.context.Context
+import hep.dataforge.context.members
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
@@ -31,7 +32,5 @@ inline fun <reified T : Any> Provider.provideAllByType(): Sequence<T> {
 /**
  * A sequences of all objects provided by plugins with given target and type
  */
-inline fun <reified T : Any> Context.components(): Sequence<T> {
-    return plugins.asSequence().flatMap { it.provideAll(Types[T::class]) }.filterIsInstance<T>()
-}
+inline fun <reified T : Any> Context.members(): Sequence<T> = members<T>(Types[T::class])
 

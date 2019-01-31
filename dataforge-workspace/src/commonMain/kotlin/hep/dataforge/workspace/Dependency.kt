@@ -31,12 +31,9 @@ class DataDependency(val filter: DataFilter) : Dependency() {
 
 class TaskModelDependency(val name: String, val meta: Meta, val placement: Name = EmptyName) : Dependency() {
     override fun apply(workspace: Workspace): DataNode<Any> {
-        val model =
-            workspace.tasks[name]?.build(workspace, meta) ?: error("Task with name $name not found in $workspace")
-
-        val task = workspace.tasks[model.name] ?: error("Task with name ${model.name} is not found in the workspace")
+        val task = workspace.tasks[name] ?: error("Task with name ${name} is not found in the workspace")
         if (task.isTerminal) TODO("Support terminal task")
-        val result = task.run(model)
+        val result = with(workspace) { task(meta) }
         return if (placement.isEmpty()) {
             result
         } else {
