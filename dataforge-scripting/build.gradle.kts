@@ -8,12 +8,20 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":dataforge-workspace"))
-                implementation("org.jetbrains.kotlin:kotlin-scripting-common")
+                implementation(kotlin("scripting-common"))
             }
         }
         val jvmMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host")
+                implementation(kotlin("scripting-jvm-host-embeddable"))
+                implementation(kotlin("scripting-jvm"))
+            }
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(kotlin("test-junit"))
+                implementation("ch.qos.logback:logback-classic:1.2.3")
             }
         }
     }
