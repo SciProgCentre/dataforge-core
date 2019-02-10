@@ -32,7 +32,7 @@ allprojects {
     }
 
     group = "hep.dataforge"
-    version = "0.1.1-dev-2"
+    version = "0.1.1-dev-3"
 
     extensions.findByType<KotlinMultiplatformExtension>()?.apply {
         jvm {
