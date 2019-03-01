@@ -3,7 +3,7 @@ package hep.dataforge.meta
 import hep.dataforge.names.NameToken
 
 /**
- * A meta laminate consisting of multiple immutable meta layers. For mutable front layer, use [StyledConfig].
+ * A meta laminate consisting of multiple immutable meta layers. For mutable front layer, use [Styled].
  *
  *
  */

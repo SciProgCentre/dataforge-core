@@ -55,5 +55,8 @@ fun <C : Specification, S : SpecificationCompanion<C>> S.createStyle(action: C.(
     Config().also { update(it, action) }
 
 
-fun <C : Specification> Specification.spec(spec: SpecificationCompanion<C>, key: String? = null) =
-    ChildConfigDelegate<C>(key) { spec.wrap(config) }
+fun <M : MutableMetaNode<M>, C : Specification> Specification.spec(
+    spec: SpecificationCompanion<C>,
+    key: String? = null
+) =
+    ChildConfigDelegate(config, key) { spec.wrap(config) }

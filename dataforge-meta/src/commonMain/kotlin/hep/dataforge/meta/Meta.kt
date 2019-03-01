@@ -102,21 +102,26 @@ operator fun Meta.iterator(): Iterator<Pair<Name, Value>> = asValueSequence().it
 /**
  * A meta node that ensures that all of its descendants has at least the same type
  */
-abstract class MetaNode<M : MetaNode<M>> : Meta {
-    abstract override val items: Map<NameToken, MetaItem<M>>
+interface MetaNode<M : MetaNode<M>> : Meta {
+    override val items: Map<NameToken, MetaItem<M>>
+}
 
-    operator fun get(name: Name): MetaItem<M>? {
-        return name.first()?.let { token ->
-            val tail = name.cutFirst()
-            when (tail.length) {
-                0 -> items[token]
-                else -> items[token]?.node?.get(tail)
-            }
+operator fun <M : MetaNode<M>> MetaNode<M>.get(name: Name): MetaItem<M>? {
+    return name.first()?.let { token ->
+        val tail = name.cutFirst()
+        when (tail.length) {
+            0 -> items[token]
+            else -> items[token]?.node?.get(tail)
         }
     }
+}
 
-    operator fun get(key: String): MetaItem<M>? = get(key.toName())
+operator fun <M : MetaNode<M>> MetaNode<M>.get(key: String): MetaItem<M>? = get(key.toName())
 
+/**
+ * Equals and hash code implementation for meta node
+ */
+abstract class AbstractMetaNode<M : MetaNode<M>> : MetaNode<M> {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Meta) return false
@@ -134,7 +139,8 @@ abstract class MetaNode<M : MetaNode<M>> : Meta {
  *
  * If the argument is possibly mutable node, it is copied on creation
  */
-class SealedMeta internal constructor(override val items: Map<NameToken, MetaItem<SealedMeta>>) : MetaNode<SealedMeta>()
+class SealedMeta internal constructor(override val items: Map<NameToken, MetaItem<SealedMeta>>) :
+    AbstractMetaNode<SealedMeta>()
 
 /**
  * Generate sealed node from [this]. If it is already sealed return it as is
@@ -154,17 +160,19 @@ object EmptyMeta : Meta {
  * Unsafe methods to access values and nodes directly from [MetaItem]
  */
 
-val MetaItem<*>.value
+val MetaItem<*>?.value
     get() = (this as? MetaItem.ValueItem)?.value
-        ?: (this.node[VALUE_KEY] as? MetaItem.ValueItem)?.value
-        ?: error("Trying to interpret node meta item as value item")
-val MetaItem<*>.string get() = value.string
-val MetaItem<*>.boolean get() = value.boolean
-val MetaItem<*>.number get() = value.number
-val MetaItem<*>.double get() = number.toDouble()
-val MetaItem<*>.int get() = number.toInt()
-val MetaItem<*>.long get() = number.toLong()
-val MetaItem<*>.short get() = number.toShort()
+        ?: (this?.node?.get(VALUE_KEY) as? MetaItem.ValueItem)?.value
+
+val MetaItem<*>?.string get() = value?.string
+val MetaItem<*>?.boolean get() = value?.boolean
+val MetaItem<*>?.number get() = value?.number
+val MetaItem<*>?.double get() = number?.toDouble()
+val MetaItem<*>?.int get() = number?.toInt()
+val MetaItem<*>?.long get() = number?.toLong()
+val MetaItem<*>?.short get() = number?.toShort()
+
+val MetaItem<*>?.stringList get() = value?.list?.map { it.string } ?: emptyList()
 
 val <M : Meta> MetaItem<M>.node: M
     get() = when (this) {

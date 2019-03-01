@@ -2,10 +2,6 @@ plugins {
     kotlin("multiplatform")
 }
 
-repositories {
-    jcenter()
-}
-
 kotlin {
     jvm()
     js()
