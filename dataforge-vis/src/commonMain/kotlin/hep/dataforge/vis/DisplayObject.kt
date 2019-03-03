@@ -66,14 +66,18 @@ tailrec fun DisplayObject.getProperty(name: Name): MetaItem<*>? = properties[nam
 /**
  * A change listener for [DisplayObject] configuration.
  */
-fun DisplayObject.onChange(owner: Any?, action: (Name, before: MetaItem<*>?, after: MetaItem<*>?) -> Unit) =
+fun DisplayObject.onChange(owner: Any?, action: (Name, before: MetaItem<*>?, after: MetaItem<*>?) -> Unit) {
     properties.style.onChange(owner, action)
+    parent?.onChange(owner, action)
+}
 
 /**
  * Remove all meta listeners with matching owners
  */
-fun DisplayObject.removeChangeListener(owner: Any?) =
+fun DisplayObject.removeChangeListener(owner: Any?) {
     properties.style.removeListener(owner)
+    parent?.removeChangeListener(owner)
+}
 
 
 /**
@@ -92,7 +96,7 @@ internal data class ObjectListener(
  * Basic group of display objects
  */
 open class DisplayNode(
-    override val parent: DisplayObject?,
+    override val parent: DisplayObject? = null,
     override val type: String = DEFAULT_TYPE,
     meta: Meta = EmptyMeta
 ) : DisplayGroup {
@@ -115,7 +119,7 @@ open class DisplayNode(
     }
 
     override fun removeChild(obj: DisplayObject) {
-        if(_children.remove(obj)){
+        if (_children.remove(obj)) {
             listeners.forEach { it.action }
         }
     }

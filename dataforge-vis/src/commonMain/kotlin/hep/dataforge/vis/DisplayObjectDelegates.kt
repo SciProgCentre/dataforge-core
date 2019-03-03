@@ -1,48 +1,98 @@
 package hep.dataforge.vis
 
 import hep.dataforge.meta.*
-import hep.dataforge.values.Null
+import hep.dataforge.names.Name
+import hep.dataforge.names.toName
 import hep.dataforge.values.Value
 import kotlin.jvm.JvmName
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
-fun DisplayObject.value(default: Value = Null, key: String? = null) =
-    ValueConfigDelegate(properties, key, default)
+/**
+ * A delegate for display object properties
+ */
+class DisplayObjectDelegate(
+    val key: Name?,
+    val default: MetaItem<*>?,
+    val inherited: Boolean
+) : ReadWriteProperty<DisplayObject, MetaItem<*>?> {
+    override fun getValue(thisRef: DisplayObject, property: KProperty<*>): MetaItem<*>? {
+        val name = key ?: property.name.toName()
+        return if (inherited) {
+            thisRef.getProperty(name)
+        } else {
+            thisRef.properties[name]
+        } ?: default
+    }
 
-fun DisplayObject.string(default: String? = null, key: String? = null) =
-    StringConfigDelegate(properties, key, default)
+    override fun setValue(thisRef: DisplayObject, property: KProperty<*>, value: MetaItem<*>?) {
+        val name = key ?: property.name.toName()
+        thisRef.properties.style[name] = value
+    }
+}
 
-fun DisplayObject.boolean(default: Boolean? = null, key: String? = null) =
-    BooleanConfigDelegate(properties, key, default)
+class DisplayObjectDelegateWrapper<T>(
+    val key: Name?,
+    val default: T,
+    val inherited: Boolean,
+    val write: Config.(name: Name, value: T) -> Unit = { name, value -> set(name, value) },
+    val read: (MetaItem<*>?) -> T?
+) : ReadWriteProperty<DisplayObject, T> {
+    override fun getValue(thisRef: DisplayObject, property: KProperty<*>): T {
+        val name = key ?: property.name.toName()
+        return if (inherited) {
+            read(thisRef.getProperty(name))
+        } else {
+            read(thisRef.properties[name])
+        } ?: default
+    }
 
-fun DisplayObject.number(default: Number? = null, key: String? = null) =
-    NumberConfigDelegate(properties, key, default)
-
-fun DisplayObject.double(default: Double? = null, key: String? = null) =
-    NumberConfigDelegate(properties, key, default).double
-
-fun DisplayObject.int(default: Int? = null, key: String? = null) =
-    NumberConfigDelegate(properties, key, default).int
+    override fun setValue(thisRef: DisplayObject, property: KProperty<*>, value: T) {
+        val name = key ?: property.name.toName()
+        thisRef.properties.style.write(name, value)
+    }
+}
 
 
-fun DisplayObject.node(key: String? = null) = StyledNodeDelegate(properties, key)
+fun DisplayObject.value(default: Value? = null, key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { it.value }
+
+fun DisplayObject.string(default: String? = null, key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { it.string }
+
+fun DisplayObject.boolean(default: Boolean? = null, key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { it.boolean }
+
+fun DisplayObject.number(default: Number? = null, key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { it.number }
+
+fun DisplayObject.double(default: Double? = null, key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { it.double }
+
+fun DisplayObject.int(default: Int? = null, key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { it.int }
+
+
+fun DisplayObject.node(key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), null, inherited) { it.node }
 
 //fun <T : Configurable> Configurable.spec(spec: Specification<T>, key: String? = null) = ChildConfigDelegate<T>(key) { spec.wrap(this) }
 
 @JvmName("safeString")
-fun DisplayObject.string(default: String, key: String? = null) =
-    SafeStringConfigDelegate(properties, key, default)
+fun DisplayObject.string(default: String, key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { it.string }
 
 @JvmName("safeBoolean")
-fun DisplayObject.boolean(default: Boolean, key: String? = null) =
-    SafeBooleanConfigDelegate(properties, key, default)
+fun DisplayObject.boolean(default: Boolean, key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { it.boolean }
 
 @JvmName("safeNumber")
-fun DisplayObject.number(default: Number, key: String? = null) =
-    SafeNumberConfigDelegate(properties, key, default)
+fun DisplayObject.number(default: Number, key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { it.number }
 
 @JvmName("safeDouble")
-fun DisplayObject.double(default: Double, key: String? = null) =
-    SafeNumberConfigDelegate(properties, key, default).double
+fun DisplayObject.double(default: Double, key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { it.double }
 
-inline fun <reified E : Enum<E>> DisplayObject.enum(default: E, key: String? = null) =
-    SafeEnumvConfigDelegate(properties, key, default) { enumValueOf(it) }
+inline fun <reified E : Enum<E>> DisplayObject.enum(default: E, key: String? = null, inherited: Boolean = true) =
+    DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { item -> item.string?.let { enumValueOf<E>(it) } }

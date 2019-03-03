@@ -20,8 +20,13 @@ object JsonMetaFormat : MetaFormat {
 
     override fun read(input: Input): Meta {
         val str = input.readText()
-        val json = JsonTreeParser.parse(str)
-        return json.toMeta()
+        val json = Json.plain.parseJson(str)
+
+        if(json is JsonObject) {
+            return json.toMeta()
+        } else {
+            TODO("non-object root")
+        }
     }
 }
 
@@ -45,6 +50,20 @@ fun Meta.toJson(): JsonObject {
     return JsonObject(map)
 }
 
+
+fun JsonElement.toMetaItem() = when (this) {
+    is JsonPrimitive -> MetaItem.ValueItem<JsonMeta>(this.toValue())
+    is JsonObject -> MetaItem.NodeItem(this.toMeta())
+    is JsonArray -> {
+        if (this.all { it is JsonPrimitive }) {
+            val value = ListValue(this.map { (it as JsonPrimitive).toValue() })
+            MetaItem.ValueItem<JsonMeta>(value)
+        } else {
+            TODO("mixed nodes json")
+        }
+    }
+}
+
 fun JsonObject.toMeta() = JsonMeta(this)
 
 private fun JsonPrimitive.toValue(): Value {
@@ -57,19 +76,7 @@ private fun JsonPrimitive.toValue(): Value {
 class JsonMeta(val json: JsonObject) : Meta {
     override val items: Map<NameToken, MetaItem<out Meta>> by lazy {
         json.mapKeys { NameToken(it.key) }.mapValues { entry ->
-            val element = entry.value
-            when (element) {
-                is JsonPrimitive -> MetaItem.ValueItem<JsonMeta>(element.toValue())
-                is JsonObject -> MetaItem.NodeItem(element.toMeta())
-                is JsonArray -> {
-                    if (element.all { it is JsonPrimitive }) {
-                        val value = ListValue(element.map { (it as JsonPrimitive).toValue() })
-                        MetaItem.ValueItem<JsonMeta>(value)
-                    } else {
-                        TODO("mixed nodes json")
-                    }
-                }
-            }
+            entry.value.toMetaItem()
         }
     }
 }

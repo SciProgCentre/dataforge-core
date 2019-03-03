@@ -49,7 +49,7 @@ class Laminate(layers: List<Meta>) : Meta {
                     first().seal()
                 all { it is MetaItem.NodeItem } -> {
                     //list nodes in item
-                    val nodes = map { it.node }
+                    val nodes = map { (it as MetaItem.NodeItem).node }
                     //represent as key->value entries
                     val entries = nodes.flatMap { it.items.entries.asSequence() }
                     //group by keys

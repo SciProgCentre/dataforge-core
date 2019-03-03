@@ -174,8 +174,9 @@ val MetaItem<*>?.short get() = number?.toShort()
 
 val MetaItem<*>?.stringList get() = value?.list?.map { it.string } ?: emptyList()
 
-val <M : Meta> MetaItem<M>.node: M
+val <M : Meta> MetaItem<M>?.node: M?
     get() = when (this) {
+        null -> null
         is MetaItem.ValueItem -> error("Trying to interpret value meta item as node item")
         is MetaItem.NodeItem -> node
     }

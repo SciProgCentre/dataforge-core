@@ -1,9 +1,10 @@
 package hep.dataforge.vis.spatial
 
+import hep.dataforge.io.Output
+import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
-import hep.dataforge.vis.DisplayLeaf
-import hep.dataforge.vis.DisplayObject
-import hep.dataforge.vis.double
+import hep.dataforge.vis.*
+import hep.dataforge.vis.DisplayObject.Companion.DEFAULT_TYPE
 
 
 open class DisplayObject3D(parent: DisplayObject?, type: String, meta: Meta) : DisplayLeaf(parent, type, meta) {
@@ -16,13 +17,9 @@ open class DisplayObject3D(parent: DisplayObject?, type: String, meta: Meta) : D
     }
 }
 
-class Box3D(parent: DisplayObject?, meta: Meta) : DisplayObject3D(parent,
-    TYPE, meta) {
-    var xSize by double(1.0)
-    var ySize by double(1.0)
-    var zSize by double(1.0)
+fun DisplayGroup.group(meta: Meta = EmptyMeta, action: DisplayGroup.() -> Unit = {}) =
+    DisplayNode(this, DEFAULT_TYPE, meta).apply(action).also{addChild(it)}
 
-    companion object {
-        const val TYPE = "geometry.spatial.box"
-    }
-}
+
+fun Output<DisplayObject>.render(meta: Meta = EmptyMeta, action: DisplayGroup.() -> Unit) =
+    render(DisplayNode(null, DEFAULT_TYPE, EmptyMeta).apply(action), meta)
