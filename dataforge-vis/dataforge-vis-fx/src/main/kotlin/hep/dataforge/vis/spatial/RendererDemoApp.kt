@@ -18,7 +18,7 @@ class RendererDemoApp : App(RendererDemoView::class)
 class RendererDemoView : View() {
     val renderer = FXSpatialRenderer(Global)
     override val root: Parent = borderpane {
-        center = renderer.canvas
+        center = renderer.canvas.root
     }
 
     lateinit var group: DisplayGroup
@@ -51,7 +51,7 @@ class RendererDemoView : View() {
             }
         }
 
-        renderer.cameraRotation.apply {
+        renderer.canvas.cameraRotation.apply {
             ry.angle = -30.0
             rx.angle = -15.0
         }
