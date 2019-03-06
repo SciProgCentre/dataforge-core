@@ -1,8 +1,5 @@
 package hep.dataforge.vis
 
-import hep.dataforge.meta.*
-import hep.dataforge.names.Name
-import hep.dataforge.names.toName
 import javafx.beans.binding.ObjectBinding
 import tornadofx.*
 

@@ -5,6 +5,7 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import hep.dataforge.values.Value
 import kotlin.jvm.JvmName
+import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -96,3 +97,24 @@ fun DisplayObject.double(default: Double, key: String? = null, inherited: Boolea
 
 inline fun <reified E : Enum<E>> DisplayObject.enum(default: E, key: String? = null, inherited: Boolean = true) =
     DisplayObjectDelegateWrapper(key?.toName(), default, inherited) { item -> item.string?.let { enumValueOf<E>(it) } }
+
+//merge properties
+
+fun <T> DisplayObject.merge(
+    key: String? = null,
+    transformer: (Sequence<MetaItem<*>>) -> T
+): ReadOnlyProperty<DisplayObject, T> {
+    return object : ReadOnlyProperty<DisplayObject, T> {
+        override fun getValue(thisRef: DisplayObject, property: KProperty<*>): T {
+            val name = key?.toName() ?: property.name.toName()
+            val sequence = sequence<MetaItem<*>> {
+                var thisObj: DisplayObject? = thisRef
+                while (thisObj != null) {
+                    thisObj.properties[name]?.let { yield(it) }
+                    thisObj = thisObj.parent
+                }
+            }
+            return transformer(sequence)
+        }
+    }
+}

@@ -6,7 +6,7 @@ import hep.dataforge.vis.DisplayGroup
 import hep.dataforge.vis.DisplayObject
 import hep.dataforge.vis.double
 
-class Box(parent: DisplayObject?, meta: Meta) : DisplayObject3D(parent, TYPE, meta) {
+class Box(parent: DisplayObject?, meta: Meta) : DisplayShape3D(parent, TYPE, meta) {
     var xSize by double(1.0)
     var ySize by double(1.0)
     var zSize by double(1.0)

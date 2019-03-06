@@ -12,7 +12,7 @@ dependencies{
     implementation("org.fxyz3d:fxyz3d:0.4.0")
 }
 
-extensions.findByType<JavaFXOptions>()?.apply {
+configure<JavaFXOptions> {
     modules("javafx.controls")
 }
 

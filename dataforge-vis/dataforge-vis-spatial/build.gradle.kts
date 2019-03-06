@@ -4,7 +4,26 @@ plugins {
 
 kotlin {
     jvm()
-    js()
+    js {
+        configure(listOf(compilations["main"], compilations["test"])) {
+            tasks.getByName(compileKotlinTaskName) {
+                kotlinOptions {
+                    metaInfo = true
+                    sourceMap = true
+                    sourceMapEmbedSources = "always"
+                    moduleKind = "umd"
+                }
+            }
+        }
+
+        configure(listOf(compilations["main"])) {
+            tasks.getByName(compileKotlinTaskName) {
+                kotlinOptions {
+                    main = "call"
+                }
+            }
+        }
+    }
 
     sourceSets {
         val commonMain by getting {
@@ -24,3 +43,4 @@ kotlin {
         }
     }
 }
+

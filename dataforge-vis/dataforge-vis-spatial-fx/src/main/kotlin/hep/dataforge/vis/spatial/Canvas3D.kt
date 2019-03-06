@@ -19,20 +19,33 @@ class Canvas3D : Fragment() {
         translateZ = CAMERA_INITIAL_DISTANCE
     }
 
-    //TODO move up
-    val cameraShift = CameraTransformer().apply {
+    private val cameraShift = CameraTransformer().apply {
         val cameraFlip = CameraTransformer()
         cameraFlip.children.add(camera)
         cameraFlip.setRotateZ(180.0)
         children.add(cameraFlip)
     }
 
-    val cameraRotation = CameraTransformer().apply {
+    val translationXProperty get() = cameraShift.t.xProperty()
+    var translateX by translationXProperty
+    val translationYProperty get() = cameraShift.t.yProperty()
+    var translateY by translationYProperty
+    val translationZProperty get() = cameraShift.t.zProperty()
+    var translateZ by translationZProperty
+
+    private val cameraRotation = CameraTransformer().apply {
         children.add(cameraShift)
         ry.angle = CAMERA_INITIAL_Y_ANGLE
         rx.angle = CAMERA_INITIAL_X_ANGLE
         rz.angle = CAMERA_INITIAL_Z_ANGLE
     }
+
+    val rotationXProperty get() = cameraRotation.rx.angleProperty()
+    var angleX by rotationXProperty
+    val rotationYProperty get() = cameraRotation.ry.angleProperty()
+    var angleY by rotationYProperty
+    val rotationZProperty get() = cameraRotation.rz.angleProperty()
+    var angleZ by rotationZProperty
 
 
     override val root =borderpane {
@@ -122,10 +135,6 @@ class Canvas3D : Fragment() {
                     cameraRotation.rz.angle + mouseDeltaX * MOUSE_SPEED * modifier * ROTATION_SPEED
                 cameraRotation.rx.angle =
                     cameraRotation.rx.angle + mouseDeltaY * MOUSE_SPEED * modifier * ROTATION_SPEED
-                //                } else if (me.isSecondaryButtonDown()) {
-                //                    double z = camera.getTranslateZ();
-                //                    double newZ = z + mouseDeltaX * MOUSE_SPEED * modifier*100;
-                //                    camera.setTranslateZ(newZ);
             } else if (me.isSecondaryButtonDown) {
                 cameraShift.t.x = cameraShift.t.x + mouseDeltaX * MOUSE_SPEED * modifier * TRACK_SPEED
                 cameraShift.t.y = cameraShift.t.y + mouseDeltaY * MOUSE_SPEED * modifier * TRACK_SPEED

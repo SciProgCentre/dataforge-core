@@ -2,28 +2,26 @@ package hep.dataforge.vis.spatial
 
 import hep.dataforge.context.Global
 import hep.dataforge.meta.number
+import hep.dataforge.vis.ApplicationBase
 import hep.dataforge.vis.DisplayGroup
-import javafx.scene.Parent
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import tornadofx.*
+import kotlin.browser.document
 import kotlin.random.Random
 
 
-class RendererDemoApp : App(RendererDemoView::class)
+class ThreeDemoApp : ApplicationBase() {
 
+    override val stateKeys: List<String> = emptyList()
 
-class RendererDemoView : View() {
-    val renderer = FXSpatialRenderer(Global)
-    override val root: Parent = borderpane {
-        center = renderer.canvas.root
-    }
+    override fun start(state: Map<String, Any>) {
+        println("started")
+        val renderer = ThreeOutput(Global)
+        document.getElementById("canvas")?.appendChild(renderer.root)
 
-    lateinit var group: DisplayGroup
-
-    init {
+        lateinit var group: DisplayGroup
 
         renderer.render {
             group = group {
@@ -51,14 +49,16 @@ class RendererDemoView : View() {
             }
         }
 
-        renderer.canvas.cameraRotation.apply {
-            ry.angle = -30.0
-            rx.angle = -15.0
-        }
+//        view.animate()
+
+//        view = WebLinesView(document.getElementById("lines")!!, document.getElementById("addForm")!!)
+//        presenter = LinesPresenter(view)
+//
+//        state["lines"]?.let { linesState ->
+//            @Suppress("UNCHECKED_CAST")
+//            presenter.restore(linesState as Array<String>)
+//        }
     }
-}
 
-
-fun main() {
-    launch<RendererDemoApp>()
+    override fun dispose() = emptyMap<String,Any>()//mapOf("lines" to presenter.dispose())
 }

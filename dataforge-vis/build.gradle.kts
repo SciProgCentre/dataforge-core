@@ -1,5 +1,8 @@
+import org.openjfx.gradle.JavaFXOptions
+
 plugins {
     kotlin("multiplatform")
+    id("org.openjfx.javafxplugin")
 }
 
 kotlin {
@@ -14,6 +17,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
+                //api("no.tornado:tornadofx:1.7.18")
             }
         }
         val jsMain by getting {
@@ -21,4 +25,8 @@ kotlin {
             }
         }
     }
+}
+
+configure<JavaFXOptions>{
+    modules("javafx.controls")
 }
