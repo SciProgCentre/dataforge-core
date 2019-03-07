@@ -48,3 +48,13 @@ kotlin {
 //        }
     }
 }
+
+//tasks.withType<Kotlin2JsCompile>{
+//    kotlinOptions{
+//        metaInfo = true
+//        outputFile = "${project.buildDir.path}/js/${project.name}.js"
+//        sourceMap = true
+//        moduleKind = "umd"
+//        main = "call"
+//    }
+//}

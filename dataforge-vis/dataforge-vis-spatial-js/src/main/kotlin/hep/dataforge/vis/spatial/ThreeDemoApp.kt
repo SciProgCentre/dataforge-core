@@ -4,6 +4,7 @@ import hep.dataforge.context.Global
 import hep.dataforge.meta.number
 import hep.dataforge.vis.ApplicationBase
 import hep.dataforge.vis.DisplayGroup
+import info.laht.threekt.external.controls.OrbitControls
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -17,9 +18,9 @@ class ThreeDemoApp : ApplicationBase() {
     override val stateKeys: List<String> = emptyList()
 
     override fun start(state: Map<String, Any>) {
-        println("started")
         val renderer = ThreeOutput(Global)
-        document.getElementById("canvas")?.appendChild(renderer.root)
+        renderer.start(document.getElementById("canvas")!!)
+        println("started")
 
         lateinit var group: DisplayGroup
 

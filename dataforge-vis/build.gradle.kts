@@ -1,8 +1,5 @@
-import org.openjfx.gradle.JavaFXOptions
-
 plugins {
     kotlin("multiplatform")
-    id("org.openjfx.javafxplugin")
 }
 
 kotlin {
@@ -25,8 +22,4 @@ kotlin {
             }
         }
     }
-}
-
-configure<JavaFXOptions>{
-    modules("javafx.controls")
 }

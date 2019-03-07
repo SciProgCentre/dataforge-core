@@ -1,5 +1,10 @@
 package hep.dataforge.vis.spatial
 
+import hep.dataforge.meta.MetaItem
+import hep.dataforge.meta.double
+import hep.dataforge.meta.get
+import hep.dataforge.meta.int
+import hep.dataforge.values.ValueType
 import javafx.scene.paint.Color
 import javafx.scene.paint.Material
 import javafx.scene.paint.PhongMaterial
@@ -51,11 +56,12 @@ fun MetaItem<*>.color(): Color {
 /**
  * Infer FX material based on meta item
  */
-fun MetaItem<*>.material(): Material {
+fun MetaItem<*>?.material(): Material {
     return when (this) {
+        null -> Materials.GREY
         is MetaItem.ValueItem -> PhongMaterial(color())
         is MetaItem.NodeItem -> PhongMaterial().apply {
-            node["color"]?.let { diffuseColor = it.color() }
+            (node["color"]?: this@material).let { diffuseColor = it.color() }
             node["specularColor"]?.let { specularColor = it.color() }
         }
     }

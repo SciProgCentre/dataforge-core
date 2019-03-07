@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     val kotlinVersion: String by rootProject.extra("1.3.21")
@@ -39,7 +40,7 @@ allprojects {
     }
 
     group = "hep.dataforge"
-    version = "0.1.1-dev-4"
+    version = "0.1.1-dev-5"
 
     // apply bintray configuration
     apply(from = "${rootProject.rootDir}/gradle/bintray.gradle")
@@ -50,42 +51,6 @@ allprojects {
 }
 
 subprojects {
-    extensions.findByType<KotlinMultiplatformExtension>()?.apply {
-        jvm {
-            compilations.all {
-                kotlinOptions {
-                    jvmTarget = "1.8"
-                }
-            }
-        }
-
-        js{
-            configure(listOf(compilations["main"], compilations["test"])) {
-                tasks.getByName(compileKotlinTaskName) {
-                    kotlinOptions {
-                        metaInfo = true
-                        sourceMap = true
-                        sourceMapEmbedSources = "always"
-                        moduleKind = "umd"
-                    }
-                }
-            }
-
-            configure(listOf(compilations["main"])) {
-                tasks.getByName(compileKotlinTaskName) {
-                    kotlinOptions {
-                        main = "call"
-                    }
-                }
-            }
-        }
-
-        targets.all {
-            sourceSets.all {
-                languageSettings.progressiveMode = true
-            }
-        }
-    }
 
     //    dokka {
 //        outputFormat = "html"
@@ -97,46 +62,79 @@ subprojects {
 //            classifier = "javadoc"
 //    }
 
+    // Create empty jar for sources classifier to satisfy maven requirements
+    val stubSources by tasks.registering(Jar::class) {
+        archiveClassifier.set("sources")
+        //from(sourceSets.main.get().allSource)
+    }
 
-    if (!name.startsWith("dataforge")) return@subprojects
+    // Create empty jar for javadoc classifier to satisfy maven requirements
+    val stubJavadoc by tasks.registering(Jar::class) {
+        archiveClassifier.set("javadoc")
+    }
 
-    extensions.findByType<PublishingExtension>()?.apply {
-        publications.filterIsInstance<MavenPublication>().forEach { publication ->
-            if (publication.name == "kotlinMultiplatform") {
-                // for our root metadata publication, set artifactId with a package and project name
-                publication.artifactId = project.name
-            } else {
-                // for targets, set artifactId with a package, project name and target name (e.g. iosX64)
-                publication.artifactId = "${project.name}-${publication.name}"
-            }
+    tasks.withType<KotlinCompile> {
+        kotlinOptions{
+            jvmTarget = "1.8"
         }
+    }
 
-        // Create empty jar for sources classifier to satisfy maven requirements
-        val stubSources by tasks.registering(Jar::class) {
-            archiveClassifier.set("sources")
-            //from(sourceSets.main.get().allSource)
-        }
 
-        // Create empty jar for javadoc classifier to satisfy maven requirements
-        val stubJavadoc by tasks.registering(Jar::class) {
-            archiveClassifier.set("javadoc")
-        }
-
+    afterEvaluate {
         extensions.findByType<KotlinMultiplatformExtension>()?.apply {
+            jvm {
+                compilations.all {
+                    kotlinOptions {
+                        jvmTarget = "1.8"
+                    }
+                }
+            }
 
-            targets.forEach { target ->
-                val publication = publications.findByName(target.name) as MavenPublication
+            js {
+                compilations.all {
+                    tasks.getByName(compileKotlinTaskName) {
+                        kotlinOptions {
+                            metaInfo = true
+                            sourceMap = true
+                            sourceMapEmbedSources = "always"
+                            moduleKind = "umd"
+                        }
+                    }
+                }
 
-                // Patch publications with fake javadoc
-                publication.artifact(stubJavadoc)
+                configure(listOf(compilations["main"])) {
+                    tasks.getByName(compileKotlinTaskName) {
+                        kotlinOptions {
+                            main = "call"
+                        }
+                    }
+                }
+            }
 
-                // Remove gradle metadata publishing from all targets which are not native
-//                if (target.platformType.name != "native") {
-//                    publication.gradleModuleMetadataFile = null
-//                    tasks.matching { it.name == "generateMetadataFileFor${name.capitalize()}Publication" }.all {
-//                        onlyIf { false }
-//                    }
-//                }
+            targets.all {
+                sourceSets.all {
+                    languageSettings.progressiveMode = true
+                }
+            }
+
+            configure<PublishingExtension> {
+
+                publications.filterIsInstance<MavenPublication>().forEach { publication ->
+                    if (publication.name == "kotlinMultiplatform") {
+                        // for our root metadata publication, set artifactId with a package and project name
+                        publication.artifactId = project.name
+                    } else {
+                        // for targets, set artifactId with a package, project name and target name (e.g. iosX64)
+                        publication.artifactId = "${project.name}-${publication.name}"
+                    }
+                }
+
+                targets.all {
+                    val publication = publications.findByName(name) as MavenPublication
+
+                    // Patch publications with fake javadoc
+                    publication.artifact(stubJavadoc.get())
+                }
             }
         }
     }

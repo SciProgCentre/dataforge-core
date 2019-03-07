@@ -1,6 +1,12 @@
 package hep.dataforge.vis.spatial
 
+import hep.dataforge.context.Context
+import hep.dataforge.io.Output
+import hep.dataforge.meta.Meta
+import hep.dataforge.vis.DisplayGroup
 import hep.dataforge.vis.DisplayObjectPropertyListener
+import hep.dataforge.vis.float
+import hep.dataforge.vis.transform
 import javafx.scene.Group
 import javafx.scene.Node
 import org.fxyz3d.shapes.primitives.CuboidMesh
@@ -22,7 +28,7 @@ class FX3DOutput(override val context: Context) : Output<Any> {
                 val y = listener["y"].float()
                 val z = listener["z"].float()
                 val center = objectBinding(x, y, z) {
-                    Point3D(x.value ?: 0f, y.value ?: 0f, z.value ?: 0f)
+                    org.fxyz3d.geometry.Point3D(x.value ?: 0f, y.value ?: 0f, z.value ?: 0f)
                 }
                 when (obj) {
                     is DisplayGroup3D -> Group(obj.children.map { buildNode(it) }).apply {

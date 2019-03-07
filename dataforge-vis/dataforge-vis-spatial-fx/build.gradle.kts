@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.openjfx.gradle.JavaFXOptions
 
 plugins {
@@ -6,7 +5,8 @@ plugins {
     id("org.openjfx.javafxplugin")
 }
 
-dependencies{
+dependencies {
+    api(project(":dataforge-vis"))
     api(project(":dataforge-vis:dataforge-vis-spatial"))
     api("no.tornado:tornadofx:1.7.18")
     implementation("org.fxyz3d:fxyz3d:0.4.0")
@@ -14,10 +14,4 @@ dependencies{
 
 configure<JavaFXOptions> {
     modules("javafx.controls")
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions{
-        jvmTarget = "1.8"
-    }
 }

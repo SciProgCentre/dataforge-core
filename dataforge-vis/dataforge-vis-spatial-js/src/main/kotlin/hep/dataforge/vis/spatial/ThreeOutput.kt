@@ -3,17 +3,25 @@ package hep.dataforge.vis.spatial
 import hep.dataforge.context.Context
 import hep.dataforge.io.Output
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.get
 import hep.dataforge.vis.DisplayGroup
 import info.laht.threekt.WebGLRenderer
 import info.laht.threekt.cameras.PerspectiveCamera
+import info.laht.threekt.core.BufferGeometry
 import info.laht.threekt.core.Object3D
 import info.laht.threekt.external.controls.OrbitControls
+import info.laht.threekt.extras.curves.CatmullRomCurve3
 import info.laht.threekt.geometries.BoxBufferGeometry
 import info.laht.threekt.lights.AmbientLight
+import info.laht.threekt.materials.LineBasicMaterial
+import info.laht.threekt.materials.MeshBasicMaterial
 import info.laht.threekt.materials.MeshPhongMaterial
 import info.laht.threekt.math.ColorConstants
+import info.laht.threekt.math.Vector3
+import info.laht.threekt.objects.Line
 import info.laht.threekt.objects.Mesh
 import info.laht.threekt.scenes.Scene
+import org.w3c.dom.Element
 import kotlin.browser.window
 
 class ThreeOutput(override val context: Context) : Output<Any> {
@@ -23,28 +31,39 @@ class ThreeOutput(override val context: Context) : Output<Any> {
         setSize(window.innerWidth, window.innerHeight)
     }
 
-    private val scene: Scene = Scene().apply {
+    val scene: Scene = Scene().apply {
         add(AmbientLight())
     }
-    private val camera = PerspectiveCamera(
+
+    val camera = PerspectiveCamera(
         75,
         window.innerWidth.toDouble() / window.innerHeight,
         0.1,
         10000
     ).apply {
-        position.z = 4500.0
+        position.setZ(1000)
     }
 
-    private val controls: OrbitControls = OrbitControls(camera, renderer.domElement)
+    val controls: OrbitControls = OrbitControls(camera, renderer.domElement)
 
-    val root by lazy {
+    val root get() = renderer.domElement
+
+    private fun animate() {
+        window.requestAnimationFrame {
+            animate()
+        }
+        renderer.render(scene, camera)
+    }
+
+    fun start(element: Element) {
         window.addEventListener("resize", {
             camera.aspect = window.innerWidth.toDouble() / window.innerHeight;
             camera.updateProjectionMatrix();
 
             renderer.setSize(window.innerWidth, window.innerHeight)
         }, false)
-        renderer.domElement
+        element.appendChild(root)
+        animate()
     }
 
 
@@ -65,12 +84,10 @@ class ThreeOutput(override val context: Context) : Output<Any> {
                         this.translateZ(obj.z)
                     }
                     is Box -> {
+                        //TODO add bindings
                         val geometry = BoxBufferGeometry(obj.xSize, obj.ySize, obj.zSize)
                             .translate(obj.x, obj.y, obj.z)
-                        val material = MeshPhongMaterial().apply {
-                            this.color.set(ColorConstants.darkgreen)
-                        }
-                        Mesh(geometry, material)
+                        Mesh(geometry, obj.properties["color"].material())
                     }
                     else -> {
                         logger.error { "No renderer defined for ${obj::class}" }
@@ -90,9 +107,9 @@ class ThreeOutput(override val context: Context) : Output<Any> {
         buildNode(obj)?.let { scene.add(it) }
     }
 
-    //    init {
+//    init {
 //        val cube: Mesh
-
+//
 //        cube = Mesh(
 //            BoxBufferGeometry(1, 1, 1),
 //            MeshPhongMaterial().apply {
@@ -125,16 +142,6 @@ class ThreeOutput(override val context: Context) : Output<Any> {
 //
 //        // Create the final object to add to the scene
 //        Line(geometry, material).apply(scene::add)
-
-//    }
-
-//    fun animate() {
-//        window.requestAnimationFrame {
-//            cube.rotation.x += 0.01
-//            cube.rotation.y += 0.01
-//            animate()
-//        }
-//        renderer.render(scene, camera)
 //    }
 
 }
