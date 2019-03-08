@@ -34,7 +34,7 @@ class Styled(val base: Meta, val style: Config = Config().empty()) : MutableMeta
         if (item == null) {
             style.remove(name)
         } else {
-            style.set(name, item)
+            style[name] = item
         }
     }
 

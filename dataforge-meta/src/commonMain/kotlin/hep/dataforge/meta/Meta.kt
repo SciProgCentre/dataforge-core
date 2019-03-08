@@ -7,6 +7,7 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
+import hep.dataforge.values.EnumValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.boolean
 
@@ -57,7 +58,8 @@ interface Meta : MetaRepr {
  */
 operator fun <T> Map<NameToken, T>.get(body: String, query: String = ""): T? = get(NameToken(body, query))
 
-operator fun Meta.get(name: Name): MetaItem<out Meta>? {
+operator fun Meta?.get(name: Name): MetaItem<out Meta>? {
+    if (this == null) return null
     return name.first()?.let { token ->
         val tail = name.cutFirst()
         when (tail.length) {
@@ -67,8 +69,8 @@ operator fun Meta.get(name: Name): MetaItem<out Meta>? {
     }
 }
 
-operator fun Meta.get(token: NameToken): MetaItem<out Meta>? = items[token]
-operator fun Meta.get(key: String): MetaItem<out Meta>? = get(key.toName())
+operator fun Meta?.get(token: NameToken): MetaItem<out Meta>? = this?.items?.get(token)
+operator fun Meta?.get(key: String): MetaItem<out Meta>? = get(key.toName())
 
 /**
  * Get all items matching given name.
@@ -168,9 +170,16 @@ val MetaItem<*>?.string get() = value?.string
 val MetaItem<*>?.boolean get() = value?.boolean
 val MetaItem<*>?.number get() = value?.number
 val MetaItem<*>?.double get() = number?.toDouble()
+val MetaItem<*>?.float get() = number?.toFloat()
 val MetaItem<*>?.int get() = number?.toInt()
 val MetaItem<*>?.long get() = number?.toLong()
 val MetaItem<*>?.short get() = number?.toShort()
+
+inline fun <reified E : Enum<E>> MetaItem<*>?.enum() = if (this is ValueItem && this.value is EnumValue<*>) {
+    this.value as E
+} else {
+    string?.let { enumValueOf<E>(it) }
+}
 
 val MetaItem<*>?.stringList get() = value?.list?.map { it.string } ?: emptyList()
 

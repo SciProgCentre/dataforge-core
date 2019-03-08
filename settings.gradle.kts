@@ -26,9 +26,5 @@ include(
     ":dataforge-data",
     ":dataforge-io",
     ":dataforge-workspace",
-    ":dataforge-scripting",
-    ":dataforge-vis",
-    ":dataforge-vis:dataforge-vis-spatial",
-    ":dataforge-vis:dataforge-vis-spatial-fx",
-    ":dataforge-vis:dataforge-vis-spatial-js"
+    ":dataforge-scripting"
 )
