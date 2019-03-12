@@ -28,7 +28,9 @@ interface Goal<out T> : Deferred<T>, CoroutineScope {
 /**
  * A monitor of goal state that could be accessed only form inside the goal
  */
-class GoalMonitor {
+class GoalMonitor : CoroutineContext.Element {
+    override val key: CoroutineContext.Key<*> get() = GoalMonitor
+
     var totalWork: Double = 1.0
     var workDone: Double = 0.0
     var status: String = ""
@@ -46,6 +48,8 @@ class GoalMonitor {
     fun finish() {
         workDone = totalWork
     }
+
+    companion object : CoroutineContext.Key<GoalMonitor>
 }
 
 private class GoalImpl<T>(

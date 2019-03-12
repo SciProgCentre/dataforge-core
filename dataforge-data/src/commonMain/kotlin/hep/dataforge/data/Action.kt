@@ -20,9 +20,10 @@ interface Action<in T : Any, out R : Any> {
 }
 
 /**
- * Action composition. The result is terminal if one of parts is terminal
+ * Action composition. The result is terminal if one of its parts is terminal
  */
 infix fun <T : Any, I : Any, R : Any> Action<T, I>.then(action: Action<I, R>): Action<T, R> {
+    // TODO introduce composite action and add optimize by adding action to the list
     return object : Action<T, R> {
         override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
             return action(this@then.invoke(node, meta), meta)
