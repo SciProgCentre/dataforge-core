@@ -10,4 +10,4 @@ import kotlinx.io.streams.asOutput
  */
 actual val ConsoleOutput: Output<Any> = TextOutput(Global, System.out.asOutput())
 
-actual val OutputDispatcher  = Dispatchers.IO
+actual val Dispatchers.Output get() = Dispatchers.IO

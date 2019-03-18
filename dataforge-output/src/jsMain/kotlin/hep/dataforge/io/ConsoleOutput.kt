@@ -19,4 +19,4 @@ actual val ConsoleOutput: Output<Any> = object : Output<Any> {
 
 }
 
-actual val OutputDispatcher: CoroutineDispatcher = Dispatchers.Default
+actual val Dispatchers.Output: CoroutineDispatcher get() = Dispatchers.Default

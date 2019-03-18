@@ -5,6 +5,7 @@ import hep.dataforge.io.TextRenderer.Companion.TEXT_RENDERER_TYPE
 import hep.dataforge.meta.Meta
 import hep.dataforge.provider.Type
 import hep.dataforge.provider.provideAll
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
@@ -32,12 +33,15 @@ class TextOutput(override val context: Context, private val output: kotlinx.io.c
                 value
             }
         }
-        context.launch(OutputDispatcher) {
+        context.launch(Dispatchers.Output) {
             renderer.run { output.render(obj) }
         }
     }
 }
 
+/**
+ * A text or binary renderer based on [kotlinx.io.core.Output]
+ */
 @Type(TEXT_RENDERER_TYPE)
 interface TextRenderer {
     /**

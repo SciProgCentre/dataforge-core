@@ -24,7 +24,7 @@ include(
     ":dataforge-meta-io",
     ":dataforge-context",
     ":dataforge-data",
-    ":dataforge-io",
+    ":dataforge-output",
     ":dataforge-workspace",
     ":dataforge-scripting"
 )
