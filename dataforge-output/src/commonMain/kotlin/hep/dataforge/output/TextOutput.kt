@@ -1,7 +1,7 @@
-package hep.dataforge.io
+package hep.dataforge.output
 
 import hep.dataforge.context.Context
-import hep.dataforge.io.TextRenderer.Companion.TEXT_RENDERER_TYPE
+import hep.dataforge.output.TextRenderer.Companion.TEXT_RENDERER_TYPE
 import hep.dataforge.meta.Meta
 import hep.dataforge.provider.Type
 import hep.dataforge.provider.provideAll

@@ -1,4 +1,4 @@
-package hep.dataforge.io
+package hep.dataforge.output
 
 import hep.dataforge.context.AbstractPlugin
 import hep.dataforge.context.Context

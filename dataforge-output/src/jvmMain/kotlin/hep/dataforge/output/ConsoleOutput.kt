@@ -1,4 +1,4 @@
-package hep.dataforge.io
+package hep.dataforge.output
 
 import hep.dataforge.context.Global
 import kotlinx.coroutines.Dispatchers
