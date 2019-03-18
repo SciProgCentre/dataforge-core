@@ -80,8 +80,8 @@ fun Meta.getAll(name: Name): Map<String, MetaItem<out Meta>> {
     val (body, query) = name.last()!!
     val regex = query.toRegex()
     return (this[name.cutLast()] as? NodeItem<*>)?.node?.items
-        ?.filter { it.key.body == body && (query.isEmpty() || regex.matches(it.key.query)) }
-        ?.mapKeys { it.key.query }
+        ?.filter { it.key.body == body && (query.isEmpty() || regex.matches(it.key.index)) }
+        ?.mapKeys { it.key.index }
         ?: emptyMap()
 
 }

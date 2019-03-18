@@ -40,7 +40,7 @@ allprojects {
     }
 
     group = "hep.dataforge"
-    version = "0.1.1-dev-5"
+    version = "0.1.2-dev-1"
 
     // apply bintray configuration
     apply(from = "${rootProject.rootDir}/gradle/bintray.gradle")

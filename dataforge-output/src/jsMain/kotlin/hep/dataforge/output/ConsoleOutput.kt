@@ -1,4 +1,4 @@
-package hep.dataforge.io
+package hep.dataforge.output
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
@@ -19,4 +19,4 @@ actual val ConsoleOutput: Output<Any> = object : Output<Any> {
 
 }
 
-actual val OutputDispatcher: CoroutineDispatcher = Dispatchers.Default
+actual val Dispatchers.Output: CoroutineDispatcher get() = Dispatchers.Default
