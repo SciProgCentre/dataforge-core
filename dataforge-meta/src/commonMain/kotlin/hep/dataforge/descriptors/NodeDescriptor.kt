@@ -22,7 +22,6 @@
 package hep.dataforge.descriptors
 
 import hep.dataforge.Named
-import hep.dataforge.description.ValueDescriptor
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import java.util.*

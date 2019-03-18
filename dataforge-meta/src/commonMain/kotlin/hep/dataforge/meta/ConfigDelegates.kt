@@ -10,8 +10,8 @@ import kotlin.jvm.JvmName
 /**
  * A property delegate that uses custom key
  */
-fun Configurable.value(default: Value = Null, key: String? = null) =
-    ValueConfigDelegate(config, key, default)
+fun Configurable.value(default: Any = Null, key: String? = null) =
+    ValueConfigDelegate(config, key, Value.of(default))
 
 fun Configurable.string(default: String? = null, key: String? = null) =
     StringConfigDelegate(config, key, default)
@@ -28,15 +28,28 @@ fun Configurable.child(key: String? = null) = MetaNodeDelegate(config, key)
 
 @JvmName("safeString")
 fun Configurable.string(default: String, key: String? = null) =
-    SafeStringConfigDelegate(config, key, default)
+    SafeStringConfigDelegate(config, key) { default }
 
 @JvmName("safeBoolean")
 fun Configurable.boolean(default: Boolean, key: String? = null) =
-    SafeBooleanConfigDelegate(config, key, default)
+    SafeBooleanConfigDelegate(config, key) { default }
 
 @JvmName("safeNumber")
 fun Configurable.number(default: Number, key: String? = null) =
+    SafeNumberConfigDelegate(config, key) { default }
+
+@JvmName("safeString")
+fun Configurable.string(key: String? = null, default: () -> String) =
+    SafeStringConfigDelegate(config, key, default)
+
+@JvmName("safeBoolean")
+fun Configurable.boolean(key: String? = null, default: () -> Boolean) =
+    SafeBooleanConfigDelegate(config, key, default)
+
+@JvmName("safeNumber")
+fun Configurable.number(key: String? = null, default: () -> Number) =
     SafeNumberConfigDelegate(config, key, default)
+
 
 inline fun <reified E : Enum<E>> Configurable.enum(default: E, key: String? = null) =
     SafeEnumvConfigDelegate(config, key, default) { enumValueOf(it) }

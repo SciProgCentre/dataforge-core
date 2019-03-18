@@ -14,19 +14,10 @@
  *  limitations under the License.
  */
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package hep.dataforge.description
+package hep.dataforge.descriptors
 
-import hep.dataforge.Named
 import hep.dataforge.meta.*
-import hep.dataforge.names.AnonymousNotAlowed
-import hep.dataforge.values.BooleanValue
-import hep.dataforge.values.Value
-import hep.dataforge.values.ValueType
+import hep.dataforge.values.*
 
 /**
  * A descriptor for meta value
@@ -35,54 +26,54 @@ import hep.dataforge.values.ValueType
  *
  * @author Alexander Nozik
  */
-class ValueDescriptor(val meta: Meta) : MetaRepr {
+class ValueDescriptor(override val config: Config) : Specification {
 
     /**
      * The default for this value. Null if there is no default.
      *
      * @return
      */
-    val default by meta.value()
+    var default: Value? by value()
 
     /**
      * True if multiple values with this name are allowed.
      *
      * @return
      */
-    val multiple: Boolean by meta.boolean(false)
+    var multiple: Boolean by boolean(false)
 
     /**
      * True if the value is required
      *
      * @return
      */
-    val required: Boolean by meta.boolean(default == null)
+    var required: Boolean by boolean { default == null }
 
     /**
      * Value name
      *
      * @return
      */
-    val name: String by meta.string{ error("Anonimous descriptors are not allowed")}
+    var name: String by string { error("Anonymous descriptors are not allowed") }
 
     /**
      * The value info
      *
      * @return
      */
-    val info: String by stringValue(def = "")
+    var info: String? by string()
 
     /**
      * A list of allowed ValueTypes. Empty if any value type allowed
      *
      * @return
      */
-    val type: List<ValueType> by customValue(def = emptyList()) {
-        it.list.map { v -> ValueType.valueOf(v.string) }
+    var type: List<ValueType> by value().map {
+        it?.list?.map { v -> ValueType.valueOf(v.string) } ?: emptyList()
     }
 
-    val tags: List<String> by customValue(def = emptyList()) {
-        meta.getStringArray("tags").toList()
+    var tags: List<String> by value().map { value ->
+        value?.list?.map { it.string } ?: emptyList()
     }
 
     /**
@@ -92,7 +83,7 @@ class ValueDescriptor(val meta: Meta) : MetaRepr {
      * @param value
      * @return
      */
-    fun isValueAllowed(value: Value): Boolean {
+    fun isAllowedValue(value: Value): Boolean {
         return (type.isEmpty() || type.contains(ValueType.STRING) || type.contains(value.type)) && (allowedValues.isEmpty() || allowedValues.contains(
             value
         ))
@@ -104,96 +95,74 @@ class ValueDescriptor(val meta: Meta) : MetaRepr {
      *
      * @return
      */
-    val allowedValues: List<Value> by customValue(
-        def = if (type.size == 1 && type[0] === ValueType.BOOLEAN) {
-            listOf(BooleanValue.TRUE, BooleanValue.FALSE)
+    var allowedValues: List<Value> by value().map {
+        it?.list ?: if (type.size == 1 && type[0] === ValueType.BOOLEAN) {
+            listOf(True, False)
         } else {
             emptyList()
         }
-    ) { it.list }
+    }
 
-    companion object {
+    companion object : SpecificationCompanion<ValueDescriptor> {
 
-        /**
-         * Build a value descriptor from annotation
-         */
-        fun build(def: ValueDef): ValueDescriptor {
-            val builder = MetaBuilder("value")
-                .setValue("name", def.key)
+        override fun wrap(config: Config): ValueDescriptor = ValueDescriptor(config)
 
-            if (def.type.isNotEmpty()) {
-                builder.setValue("type", def.type)
-            }
-
-            if (def.multiple) {
-                builder.setValue("multiple", def.multiple)
-            }
-
-            if (!def.info.isEmpty()) {
-                builder.setValue("info", def.info)
-            }
-
-            if (def.allowed.isNotEmpty()) {
-                builder.setValue("allowedValues", def.allowed)
-            } else if (def.enumeration != Any::class) {
-                if (def.enumeration.java.isEnum) {
-                    val values = def.enumeration.java.enumConstants
-                    builder.setValue("allowedValues", values.map { it.toString() })
-                } else {
-                    throw RuntimeException("Only enumeration classes are allowed in 'enumeration' annotation property")
-                }
-            }
-
-            if (def.def.isNotEmpty()) {
-                builder.setValue("default", def.def)
-            } else if (!def.required) {
-                builder.setValue("required", def.required)
-            }
-
-            if (def.tags.isNotEmpty()) {
-                builder.setValue("tags", def.tags)
-            }
-            return ValueDescriptor(builder)
-        }
-
-        /**
-         * Build a value descriptor from its fields
-         */
-        fun build(
-            name: String,
-            info: String = "",
-            defaultValue: Any? = null,
-            required: Boolean = false,
-            multiple: Boolean = false,
-            types: List<ValueType> = emptyList(),
-            allowedValues: List<Any> = emptyList()
-        ): ValueDescriptor {
-            val valueBuilder = buildMeta("value") {
-                "name" to name
-                if (!types.isEmpty()) "type" to types
-                if (required) "required" to required
-                if (multiple) "multiple" to multiple
-                if (!info.isEmpty()) "info" to info
-                if (defaultValue != null) "default" to defaultValue
-                if (!allowedValues.isEmpty()) "allowedValues" to allowedValues
-            }.build()
-            return ValueDescriptor(valueBuilder)
-        }
-
-        /**
-         * Build empty value descriptor
-         */
-        fun empty(valueName: String): ValueDescriptor {
-            val builder = MetaBuilder("value")
-                .setValue("name", valueName)
-            return ValueDescriptor(builder)
-        }
-
-        /**
-         * Merge two separate value descriptors
-         */
-        fun merge(primary: ValueDescriptor, secondary: ValueDescriptor): ValueDescriptor {
-            return ValueDescriptor(Laminate(primary.meta, secondary.meta))
-        }
+//        /**
+//         * Build a value descriptor from annotation
+//         */
+//        fun build(def: ValueDef): ValueDescriptor {
+//            val builder = MetaBuilder("value")
+//                .setValue("name", def.key)
+//
+//            if (def.type.isNotEmpty()) {
+//                builder.setValue("type", def.type)
+//            }
+//
+//            if (def.multiple) {
+//                builder.setValue("multiple", def.multiple)
+//            }
+//
+//            if (!def.info.isEmpty()) {
+//                builder.setValue("info", def.info)
+//            }
+//
+//            if (def.allowed.isNotEmpty()) {
+//                builder.setValue("allowedValues", def.allowed)
+//            } else if (def.enumeration != Any::class) {
+//                if (def.enumeration.java.isEnum) {
+//                    val values = def.enumeration.java.enumConstants
+//                    builder.setValue("allowedValues", values.map { it.toString() })
+//                } else {
+//                    throw RuntimeException("Only enumeration classes are allowed in 'enumeration' annotation property")
+//                }
+//            }
+//
+//            if (def.def.isNotEmpty()) {
+//                builder.setValue("default", def.def)
+//            } else if (!def.required) {
+//                builder.setValue("required", def.required)
+//            }
+//
+//            if (def.tags.isNotEmpty()) {
+//                builder.setValue("tags", def.tags)
+//            }
+//            return ValueDescriptor(builder)
+//        }
+//
+//        /**
+//         * Build empty value descriptor
+//         */
+//        fun empty(valueName: String): ValueDescriptor {
+//            val builder = MetaBuilder("value")
+//                .setValue("name", valueName)
+//            return ValueDescriptor(builder)
+//        }
+//
+//        /**
+//         * Merge two separate value descriptors
+//         */
+//        fun merge(primary: ValueDescriptor, secondary: ValueDescriptor): ValueDescriptor {
+//            return ValueDescriptor(Laminate(primary.meta, secondary.meta))
+//        }
     }
 }

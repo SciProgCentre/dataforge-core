@@ -183,6 +183,9 @@ class ValueConfigDelegate<M : MutableMeta<M>>(
             config.setValue(name, value)
         }
     }
+
+    fun <T> map(writer: (T) -> Value? = { Value.of(it) }, reader: (Value?) -> T) =
+        ReadWriteDelegateWrapper(this, reader, writer)
 }
 
 class StringConfigDelegate<M : MutableMeta<M>>(
