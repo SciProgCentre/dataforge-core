@@ -4,7 +4,7 @@ package hep.dataforge.names
 /**
  * The general interface for working with names.
  * The name is a dot separated list of strings like `token1.token2.token3`.
- * Each token could contain additional query in square brackets.
+ * Each token could contain additional index in square brackets.
  */
 inline class Name constructor(val tokens: List<NameToken>) {
 
@@ -43,21 +43,21 @@ inline class Name constructor(val tokens: List<NameToken>) {
 /**
  * A single name token. Body is not allowed to be empty.
  * Following symbols are prohibited in name tokens: `{}.:\`.
- * A name token could have appendix in square brackets called *query*
+ * A name token could have appendix in square brackets called *index*
  */
-data class NameToken(val body: String, val query: String = "") {
+data class NameToken(val body: String, val index: String = "") {
 
     init {
         if (body.isEmpty()) error("Syntax error: Name token body is empty")
     }
 
-    override fun toString(): String = if (hasQuery()) {
-        "$body[$query]"
+    override fun toString(): String = if (hasIndex()) {
+        "$body[$index]"
     } else {
         body
     }
 
-    fun hasQuery() = query.isNotEmpty()
+    fun hasIndex() = index.isNotEmpty()
 }
 
 fun String.toName(): Name {
@@ -84,7 +84,7 @@ fun String.toName(): Name {
                     '[' -> bracketCount++
                     ']' -> error("Syntax error: closing bracket ] not have not matching open bracket")
                     else -> {
-                        if (queryBuilder.isNotEmpty()) error("Syntax error: only name end and name separator are allowed after query")
+                        if (queryBuilder.isNotEmpty()) error("Syntax error: only name end and name separator are allowed after index")
                         bodyBuilder.append(it)
                     }
                 }
