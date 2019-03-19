@@ -11,45 +11,45 @@ import kotlin.jvm.JvmName
  * A property delegate that uses custom key
  */
 fun Configurable.value(default: Any = Null, key: String? = null) =
-    ValueConfigDelegate(config, key, Value.of(default))
+    MutableValueDelegate(config, key, Value.of(default))
 
 fun Configurable.string(default: String? = null, key: String? = null) =
-    StringConfigDelegate(config, key, default)
+    MutableStringDelegate(config, key, default)
 
 fun Configurable.boolean(default: Boolean? = null, key: String? = null) =
-    BooleanConfigDelegate(config, key, default)
+    MutableBooleanDelegate(config, key, default)
 
 fun Configurable.number(default: Number? = null, key: String? = null) =
-    NumberConfigDelegate(config, key, default)
+    MutableNumberDelegate(config, key, default)
 
-fun Configurable.child(key: String? = null) = MetaNodeDelegate(config, key)
+fun Configurable.node(key: String? = null) = MutableNodeDelegate(config, key)
 
 //fun <T : Configurable> Configurable.spec(spec: Specification<T>, key: String? = null) = ChildConfigDelegate<T>(key) { spec.wrap(this) }
 
 @JvmName("safeString")
 fun Configurable.string(default: String, key: String? = null) =
-    SafeStringConfigDelegate(config, key) { default }
+    MutableSafeStringDelegate(config, key) { default }
 
 @JvmName("safeBoolean")
 fun Configurable.boolean(default: Boolean, key: String? = null) =
-    SafeBooleanConfigDelegate(config, key) { default }
+    MutableSafeBooleanDelegate(config, key) { default }
 
 @JvmName("safeNumber")
 fun Configurable.number(default: Number, key: String? = null) =
-    SafeNumberConfigDelegate(config, key) { default }
+    MutableSafeNumberDelegate(config, key) { default }
 
 @JvmName("safeString")
 fun Configurable.string(key: String? = null, default: () -> String) =
-    SafeStringConfigDelegate(config, key, default)
+    MutableSafeStringDelegate(config, key, default)
 
 @JvmName("safeBoolean")
 fun Configurable.boolean(key: String? = null, default: () -> Boolean) =
-    SafeBooleanConfigDelegate(config, key, default)
+    MutableSafeBooleanDelegate(config, key, default)
 
 @JvmName("safeNumber")
 fun Configurable.number(key: String? = null, default: () -> Number) =
-    SafeNumberConfigDelegate(config, key, default)
+    MutableSafeNumberDelegate(config, key, default)
 
 
 inline fun <reified E : Enum<E>> Configurable.enum(default: E, key: String? = null) =
-    SafeEnumvConfigDelegate(config, key, default) { enumValueOf(it) }
+    MutableSafeEnumvDelegate(config, key, default) { enumValueOf(it) }

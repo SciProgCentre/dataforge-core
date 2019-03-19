@@ -164,23 +164,23 @@ inline fun <reified E : Enum<E>> Meta.enum(default: E, key: String? = null) =
     SafeEnumDelegate(this, key, default) { enumValueOf(it) }
 
 
-/* Config delegates */
+/* Read-write delegates */
 
-class ValueConfigDelegate<M : MutableMeta<M>>(
-    val config: M,
+class MutableValueDelegate<M : MutableMeta<M>>(
+    val meta: M,
     private val key: String? = null,
     private val default: Value? = null
 ) : ReadWriteProperty<Any?, Value?> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): Value? {
-        return config[key ?: property.name]?.value ?: default
+        return meta[key ?: property.name]?.value ?: default
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: Value?) {
         val name = key ?: property.name
         if (value == null) {
-            config.remove(name)
+            meta.remove(name)
         } else {
-            config.setValue(name, value)
+            meta.setValue(name, value)
         }
     }
 
@@ -188,59 +188,59 @@ class ValueConfigDelegate<M : MutableMeta<M>>(
         ReadWriteDelegateWrapper(this, reader, writer)
 }
 
-class StringConfigDelegate<M : MutableMeta<M>>(
-    val config: M,
+class MutableStringDelegate<M : MutableMeta<M>>(
+    val meta: M,
     private val key: String? = null,
     private val default: String? = null
 ) : ReadWriteProperty<Any?, String?> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): String? {
-        return config[key ?: property.name]?.string ?: default
+        return meta[key ?: property.name]?.string ?: default
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: String?) {
         val name = key ?: property.name
         if (value == null) {
-            config.remove(name)
+            meta.remove(name)
         } else {
-            config.setValue(name, value.asValue())
+            meta.setValue(name, value.asValue())
         }
     }
 }
 
-class BooleanConfigDelegate<M : MutableMeta<M>>(
-    val config: M,
+class MutableBooleanDelegate<M : MutableMeta<M>>(
+    val meta: M,
     private val key: String? = null,
     private val default: Boolean? = null
 ) : ReadWriteProperty<Any?, Boolean?> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean? {
-        return config[key ?: property.name]?.boolean ?: default
+        return meta[key ?: property.name]?.boolean ?: default
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean?) {
         val name = key ?: property.name
         if (value == null) {
-            config.remove(name)
+            meta.remove(name)
         } else {
-            config.setValue(name, value.asValue())
+            meta.setValue(name, value.asValue())
         }
     }
 }
 
-class NumberConfigDelegate<M : MutableMeta<M>>(
-    val config: M,
+class MutableNumberDelegate<M : MutableMeta<M>>(
+    val meta: M,
     private val key: String? = null,
     private val default: Number? = null
 ) : ReadWriteProperty<Any?, Number?> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): Number? {
-        return config[key ?: property.name]?.number ?: default
+        return meta[key ?: property.name]?.number ?: default
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: Number?) {
         val name = key ?: property.name
         if (value == null) {
-            config.remove(name)
+            meta.remove(name)
         } else {
-            config.setValue(name, value.asValue())
+            meta.setValue(name, value.asValue())
         }
     }
 
@@ -252,8 +252,8 @@ class NumberConfigDelegate<M : MutableMeta<M>>(
 
 //Delegates with non-null values
 
-class SafeStringConfigDelegate<M : MutableMeta<M>>(
-    val config: M,
+class MutableSafeStringDelegate<M : MutableMeta<M>>(
+    val meta: M,
     private val key: String? = null,
     default: () -> String
 ) : ReadWriteProperty<Any?, String> {
@@ -261,16 +261,16 @@ class SafeStringConfigDelegate<M : MutableMeta<M>>(
     private val default: String by lazy(default)
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): String {
-        return config[key ?: property.name]?.string ?: default
+        return meta[key ?: property.name]?.string ?: default
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: String) {
-        config.setValue(key ?: property.name, value.asValue())
+        meta.setValue(key ?: property.name, value.asValue())
     }
 }
 
-class SafeBooleanConfigDelegate<M : MutableMeta<M>>(
-    val config: M,
+class MutableSafeBooleanDelegate<M : MutableMeta<M>>(
+    val meta: M,
     private val key: String? = null,
     default: () -> Boolean
 ) : ReadWriteProperty<Any?, Boolean> {
@@ -278,16 +278,16 @@ class SafeBooleanConfigDelegate<M : MutableMeta<M>>(
     private val default: Boolean by lazy(default)
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean {
-        return config[key ?: property.name]?.boolean ?: default
+        return meta[key ?: property.name]?.boolean ?: default
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
-        config.setValue(key ?: property.name, value.asValue())
+        meta.setValue(key ?: property.name, value.asValue())
     }
 }
 
-class SafeNumberConfigDelegate<M : MutableMeta<M>>(
-    val config: M,
+class MutableSafeNumberDelegate<M : MutableMeta<M>>(
+    val meta: M,
     private val key: String? = null,
     default: () -> Number
 ) : ReadWriteProperty<Any?, Number> {
@@ -295,11 +295,11 @@ class SafeNumberConfigDelegate<M : MutableMeta<M>>(
     private val default: Number by lazy(default)
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): Number {
-        return config[key ?: property.name]?.number ?: default
+        return meta[key ?: property.name]?.number ?: default
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: Number) {
-        config.setValue(key ?: property.name, value.asValue())
+        meta.setValue(key ?: property.name, value.asValue())
     }
 
     val double get() = ReadWriteDelegateWrapper(this, reader = { it.toDouble() }, writer = { it })
@@ -308,48 +308,48 @@ class SafeNumberConfigDelegate<M : MutableMeta<M>>(
     val long get() = ReadWriteDelegateWrapper(this, reader = { it.toLong() }, writer = { it })
 }
 
-class SafeEnumvConfigDelegate<M : MutableMeta<M>, E : Enum<E>>(
-    val config: M,
+class MutableSafeEnumvDelegate<M : MutableMeta<M>, E : Enum<E>>(
+    val meta: M,
     private val key: String? = null,
     private val default: E,
     private val resolver: (String) -> E
 ) : ReadWriteProperty<Any?, E> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): E {
-        return (config[key ?: property.name]?.string)?.let { resolver(it) } ?: default
+        return (meta[key ?: property.name]?.string)?.let { resolver(it) } ?: default
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: E) {
-        config.setValue(key ?: property.name, value.name.asValue())
+        meta.setValue(key ?: property.name, value.name.asValue())
     }
 }
 
 //Child node delegate
 
-class MetaNodeDelegate<M : MutableMetaNode<M>>(
-    val config: M,
+class MutableNodeDelegate<M : MutableMetaNode<M>>(
+    val meta: M,
     private val key: String? = null
-) : ReadWriteProperty<Any?, Meta> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): Meta {
-        return config[key ?: property.name]?.node ?: EmptyMeta
+) : ReadWriteProperty<Any?, Meta?> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): Meta? {
+        return meta[key ?: property.name]?.node
     }
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Meta) {
-        config[key ?: property.name] = value
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Meta?) {
+        meta[key ?: property.name] = value
     }
 }
 
-class ChildConfigDelegate<M : MutableMetaNode<M>, T : Configurable>(
-    val config: M,
+class MutableMorphDelegate<M : MutableMetaNode<M>, T : Configurable>(
+    val meta: M,
     private val key: String? = null,
     private val converter: (Meta) -> T
 ) :
     ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return converter(config[key ?: property.name]?.node ?: EmptyMeta)
+        return converter(meta[key ?: property.name]?.node ?: EmptyMeta)
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        config[key ?: property.name] = value.config
+        meta[key ?: property.name] = value.config
     }
 }
 
@@ -374,45 +374,43 @@ class ReadWriteDelegateWrapper<T, R>(
  * A property delegate that uses custom key
  */
 fun <M : MutableMeta<M>> M.value(default: Value = Null, key: String? = null) =
-    ValueConfigDelegate(this, key, default)
+    MutableValueDelegate(this, key, default)
 
 fun <M : MutableMeta<M>> M.string(default: String? = null, key: String? = null) =
-    StringConfigDelegate(this, key, default)
+    MutableStringDelegate(this, key, default)
 
 fun <M : MutableMeta<M>> M.boolean(default: Boolean? = null, key: String? = null) =
-    BooleanConfigDelegate(this, key, default)
+    MutableBooleanDelegate(this, key, default)
 
 fun <M : MutableMeta<M>> M.number(default: Number? = null, key: String? = null) =
-    NumberConfigDelegate(this, key, default)
+    MutableNumberDelegate(this, key, default)
 
-fun <M : MutableMetaNode<M>> M.child(key: String? = null) = MetaNodeDelegate(this, key)
-
-//fun <T : Configurable> Configurable.spec(spec: Specification<T>, key: String? = null) = ChildConfigDelegate<T>(key) { spec.wrap(this) }
+fun <M : MutableMetaNode<M>> M.node(key: String? = null) = MutableNodeDelegate(this, key)
 
 @JvmName("safeString")
 fun <M : MutableMeta<M>> M.string(default: String, key: String? = null) =
-    SafeStringConfigDelegate(this, key) { default }
+    MutableSafeStringDelegate(this, key) { default }
 
 @JvmName("safeBoolean")
 fun <M : MutableMeta<M>> M.boolean(default: Boolean, key: String? = null) =
-    SafeBooleanConfigDelegate(this, key) { default }
+    MutableSafeBooleanDelegate(this, key) { default }
 
 @JvmName("safeNumber")
 fun <M : MutableMeta<M>> M.number(default: Number, key: String? = null) =
-    SafeNumberConfigDelegate(this, key) { default }
+    MutableSafeNumberDelegate(this, key) { default }
 
 @JvmName("safeString")
 fun <M : MutableMeta<M>> M.string(key: String? = null, default: () -> String) =
-    SafeStringConfigDelegate(this, key, default)
+    MutableSafeStringDelegate(this, key, default)
 
 @JvmName("safeBoolean")
 fun <M : MutableMeta<M>> M.boolean(key: String? = null, default: () -> Boolean) =
-    SafeBooleanConfigDelegate(this, key, default)
+    MutableSafeBooleanDelegate(this, key, default)
 
 @JvmName("safeNumber")
 fun <M : MutableMeta<M>> M.number(key: String? = null, default: () -> Number) =
-    SafeNumberConfigDelegate(this, key, default)
+    MutableSafeNumberDelegate(this, key, default)
 
 
 inline fun <M : MutableMeta<M>, reified E : Enum<E>> M.enum(default: E, key: String? = null) =
-    SafeEnumvConfigDelegate(this, key, default) { enumValueOf(it) }
+    MutableSafeEnumvDelegate(this, key, default) { enumValueOf(it) }

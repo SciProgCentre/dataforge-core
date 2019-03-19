@@ -22,6 +22,7 @@
 package hep.dataforge.descriptors
 
 import hep.dataforge.meta.*
+import hep.dataforge.names.NameToken
 import hep.dataforge.names.toName
 
 /**
@@ -39,6 +40,14 @@ class NodeDescriptor(override val config: Config) : Specification {
      */
     var name: String by string { error("Anonymous descriptors are not allowed") }
 
+
+    /**
+     * The default for this node. Null if there is no default.
+     *
+     * @return
+     */
+    var default: Meta? by node()
+
     /**
      * True if multiple children with this nodes name are allowed. Anonymous
      * nodes are always single
@@ -52,7 +61,7 @@ class NodeDescriptor(override val config: Config) : Specification {
      *
      * @return
      */
-    var required: Boolean by boolean(false)
+    var required: Boolean by boolean { default == null }
 
     /**
      * The node description
@@ -78,6 +87,18 @@ class NodeDescriptor(override val config: Config) : Specification {
             name to ValueDescriptor.wrap(node.node ?: error("Value descriptor must be a node"))
         }
 
+    fun value(name: String, descriptor: ValueDescriptor) {
+        val token = NameToken("value", name)
+        config[token] = descriptor.config
+    }
+
+    /**
+     * Add a value descriptor using block for
+     */
+    fun value(name: String, block: ValueDescriptor.() -> Unit) {
+        value(name, ValueDescriptor.build { this.name = name }.apply(block))
+    }
+
     /**
      * The map of children node descriptors
      */
@@ -87,43 +108,15 @@ class NodeDescriptor(override val config: Config) : Specification {
         }
 
 
-    /**
-     * Check if this node has default
-     *
-     * @return
-     */
-    fun hasDefault(): Boolean {
-        return meta.hasMeta("default")
+    fun node(name: String, descriptor: NodeDescriptor) {
+        val token = NameToken("node", name)
+        config[token] = descriptor.config
     }
 
-    /**
-     * The default meta for this node (could be multiple). Null if not defined
-     *
-     * @return
-     */
-    val default: List<Meta> by nodeList(def = emptyList())
-
-    /**
-     * Identify if this descriptor has child value descriptor with default
-     *
-     * @param name
-     * @return
-     */
-    fun hasDefaultForValue(name: String): Boolean {
-        return getValueDescriptor(name)?.hasDefault() ?: false
+    fun node(name: String, block: NodeDescriptor.() -> Unit) {
+        node(name, NodeDescriptor.build { this.name = name }.apply(block))
     }
 
-    /**
-     * The key of the value which is used to display this node in case it is
-     * multiple. By default, the key is empty which means that node index is
-     * used.
-     *
-     * @return
-     */
-    val key: String by stringValue(def = "")
-
-
-    fun builder(): DescriptorBuilder = DescriptorBuilder(this.name, Configuration(this.meta))
 
     //override val descriptor: NodeDescriptor =  empty("descriptor")
 
@@ -131,8 +124,5 @@ class NodeDescriptor(override val config: Config) : Specification {
 
         override fun wrap(config: Config): NodeDescriptor = NodeDescriptor(config)
 
-        fun empty(nodeName: String): NodeDescriptor {
-            return NodeDescriptor(Meta.buildEmpty(nodeName))
-        }
     }
 }

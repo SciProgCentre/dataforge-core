@@ -125,6 +125,8 @@ operator fun <M : MutableMetaNode<M>> M.set(name: Name, value: Any?) {
     }
 }
 
+operator fun <M : MutableMetaNode<M>> M.set(name: NameToken, value: Any?) = set(Name(key), value)
+
 operator fun <M : MutableMetaNode<M>> M.set(key: String, value: Any?) = set(key.toName(), value)
 
 /**

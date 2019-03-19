@@ -17,7 +17,10 @@
 package hep.dataforge.descriptors
 
 import hep.dataforge.meta.*
-import hep.dataforge.values.*
+import hep.dataforge.values.False
+import hep.dataforge.values.True
+import hep.dataforge.values.Value
+import hep.dataforge.values.ValueType
 
 /**
  * A descriptor for meta value
@@ -34,6 +37,10 @@ class ValueDescriptor(override val config: Config) : Specification {
      * @return
      */
     var default: Value? by value()
+
+    fun default(v: Any) {
+        this.default = Value.of(v)
+    }
 
     /**
      * True if multiple values with this name are allowed.
@@ -72,6 +79,10 @@ class ValueDescriptor(override val config: Config) : Specification {
         it?.list?.map { v -> ValueType.valueOf(v.string) } ?: emptyList()
     }
 
+    fun type(vararg t: ValueType) {
+        this.type = listOf(*t)
+    }
+
     var tags: List<String> by value().map { value ->
         value?.list?.map { it.string } ?: emptyList()
     }
@@ -103,9 +114,23 @@ class ValueDescriptor(override val config: Config) : Specification {
         }
     }
 
+    /**
+     * Allow given list of value and forbid others
+     */
+    fun allow(vararg v: Any) {
+        this.allowedValues = v.map { Value.of(it) }
+    }
+
     companion object : SpecificationCompanion<ValueDescriptor> {
 
         override fun wrap(config: Config): ValueDescriptor = ValueDescriptor(config)
+
+        inline fun <reified E : Enum<E>> enum(name: String) =
+            ValueDescriptor.build {
+                this.name = name
+                type(ValueType.STRING)
+                this.allowedValues = enumValues<E>().map { Value.of(it.name) }
+            }
 
 //        /**
 //         * Build a value descriptor from annotation

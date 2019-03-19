@@ -59,4 +59,4 @@ fun <M : MutableMetaNode<M>, C : Specification> Specification.spec(
     spec: SpecificationCompanion<C>,
     key: String? = null
 ) =
-    ChildConfigDelegate(config, key) { spec.wrap(config) }
+    MutableMorphDelegate(config, key) { spec.wrap(config) }

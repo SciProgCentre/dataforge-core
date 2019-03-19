@@ -1,8 +1,6 @@
 package hep.dataforge.meta
 
 
-
-
 fun Meta.toDynamic(): dynamic {
     fun MetaItem<*>.toDynamic(): dynamic = when (this) {
         is MetaItem.ValueItem -> this.value.value.asDynamic()

@@ -23,14 +23,14 @@ import kotlin.reflect.KClass
 @MustBeDocumented
 annotation class ValueDef(
         val key: String,
-        val type: Array<ValueType> = [ValueType.STRING],
+        val type: Array<ValueType> = arrayOf(ValueType.STRING),
         val multiple: Boolean = false,
         val def: String = "",
         val info: String = "",
         val required: Boolean = true,
-        val allowed: Array<String> = [],
+        val allowed: Array<String> = emptyArray(),
         val enumeration: KClass<*> = Any::class,
-        val tags: Array<String> = []
+        val tags: Array<String> = emptyArray()
 )
 
 @MustBeDocumented
@@ -39,11 +39,11 @@ annotation class NodeDef(
         val info: String = "",
         val multiple: Boolean = false,
         val required: Boolean = false,
-        val tags: Array<String> = [],
+        val tags: Array<String> = emptyArray(),
         /**
          * A list of child value descriptors
          */
-        val values: Array<ValueDef> = [],
+        val values: Array<ValueDef> = emptyArray(),
         /**
          * A target class for this node to describe
          * @return
@@ -135,11 +135,11 @@ annotation class DescriptorValue(val def: ValueDef)
 @MustBeDocumented
 annotation class ValueProperty(
         val name: String = "",
-        val type: Array<ValueType> = [ValueType.STRING],
+        val type: Array<ValueType> = arrayOf(ValueType.STRING),
         val multiple: Boolean = false,
         val def: String = "",
         val enumeration: KClass<*> = Any::class,
-        val tags: Array<String> = []
+        val tags: Array<String> = emptyArray()
 )
 
 
