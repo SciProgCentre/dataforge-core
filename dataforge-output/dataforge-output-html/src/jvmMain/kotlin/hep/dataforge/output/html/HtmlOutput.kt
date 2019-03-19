@@ -8,6 +8,7 @@ import hep.dataforge.output.TextRenderer.Companion.TEXT_RENDERER_TYPE
 import hep.dataforge.output.html.HtmlBuilder.Companion.HTML_CONVERTER_TYPE
 import hep.dataforge.provider.Type
 import hep.dataforge.provider.provideAll
+import hep.dataforge.provider.provideAllByType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.html.TagConsumer
@@ -28,7 +29,7 @@ class HtmlOutput<T : Any>(override val context: Context, private val consumer: T
         } else {
             val value = cache[obj::class]
             if (value == null) {
-                val answer = context.provideAll(HTML_CONVERTER_TYPE).filterIsInstance<HtmlBuilder<*>>()
+                val answer = context.provideAllByType<HtmlBuilder<*>>()
                     .filter { it.type.isInstance(obj) }.firstOrNull()
                 if (answer != null) {
                     cache[obj::class] = answer

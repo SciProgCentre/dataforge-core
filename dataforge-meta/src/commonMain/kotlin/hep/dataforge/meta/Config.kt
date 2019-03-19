@@ -2,7 +2,7 @@ package hep.dataforge.meta
 
 import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
-import hep.dataforge.names.toName
+import hep.dataforge.names.asName
 
 //TODO add validator to configuration
 
@@ -28,7 +28,7 @@ operator fun Config.get(token: NameToken): MetaItem<Config>? = items[token]
 fun Meta.toConfig(): Config = this as? Config ?: Config().also { builder ->
     this.items.mapValues { entry ->
         val item = entry.value
-        builder[entry.key.toName()] = when (item) {
+        builder[entry.key.asName()] = when (item) {
             is MetaItem.ValueItem -> MetaItem.ValueItem(item.value)
             is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.toConfig())
         }

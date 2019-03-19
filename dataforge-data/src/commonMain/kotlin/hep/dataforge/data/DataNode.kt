@@ -4,6 +4,7 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
+import hep.dataforge.names.asName
 
 /**
  * A tree-like data structure grouped into the node. All data inside the node must inherit its type
@@ -50,23 +51,23 @@ class DataTree<out T : Any> internal constructor(private val items: Map<NameToke
     override fun get(name: Name): Data<T>? = when (name.length) {
         0 -> error("Empty name")
         1 -> (items[name.first()] as? DataTreeItem.Value)?.value
-        else -> getNode(name.first()!!.toName())?.get(name.cutFirst())
+        else -> getNode(name.first()!!.asName())?.get(name.cutFirst())
     }
 
     override fun getNode(name: Name): DataTree<T>? = when (name.length) {
         0 -> this
         1 -> (items[name.first()] as? DataTreeItem.Node)?.tree
-        else -> getNode(name.first()!!.toName())?.getNode(name.cutFirst())
+        else -> getNode(name.first()!!.asName())?.getNode(name.cutFirst())
     }
 
     override fun dataSequence(): Sequence<Pair<Name, Data<T>>> {
         return sequence {
             items.forEach { (head, tree) ->
                 when (tree) {
-                    is DataTreeItem.Value -> yield(head.toName() to tree.value)
+                    is DataTreeItem.Value -> yield(head.asName() to tree.value)
                     is DataTreeItem.Node -> {
                         val subSequence =
-                            tree.tree.dataSequence().map { (name, data) -> (head.toName() + name) to data }
+                            tree.tree.dataSequence().map { (name, data) -> (head.asName() + name) to data }
                         yieldAll(subSequence)
                     }
                 }
@@ -78,9 +79,9 @@ class DataTree<out T : Any> internal constructor(private val items: Map<NameToke
         return sequence {
             items.forEach { (head, tree) ->
                 if (tree is DataTreeItem.Node) {
-                    yield(head.toName() to tree.tree)
+                    yield(head.asName() to tree.tree)
                     val subSequence =
-                        tree.tree.nodeSequence().map { (name, node) -> (head.toName() + name) to node }
+                        tree.tree.nodeSequence().map { (name, node) -> (head.asName() + name) to node }
                     yieldAll(subSequence)
                 }
             }

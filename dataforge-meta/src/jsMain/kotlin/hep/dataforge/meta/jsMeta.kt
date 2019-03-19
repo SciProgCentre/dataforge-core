@@ -1,7 +1,14 @@
 package hep.dataforge.meta
 
 
+//TODO add Meta wrapper for dynamic
+
+/**
+ * Represent or copy this [Meta] to dynamic object to be passed to JS libraries
+ */
 fun Meta.toDynamic(): dynamic {
+    //if(this is DynamicMeta) return this.obj
+
     fun MetaItem<*>.toDynamic(): dynamic = when (this) {
         is MetaItem.ValueItem -> this.value.value.asDynamic()
         is MetaItem.NodeItem -> this.node.toDynamic()

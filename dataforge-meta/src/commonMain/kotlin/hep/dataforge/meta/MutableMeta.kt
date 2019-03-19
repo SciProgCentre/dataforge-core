@@ -4,6 +4,7 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
+import hep.dataforge.names.asName
 import hep.dataforge.values.Value
 
 internal data class MetaListener(
@@ -62,7 +63,7 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : AbstractMetaNode<M>(), 
                 }
             }
         }
-        itemChanged(key.toName(), oldItem, newItem)
+        itemChanged(key.asName(), oldItem, newItem)
     }
 
     /**
@@ -103,7 +104,7 @@ fun <M : MutableMeta<M>> MutableMeta<M>.setItem(name: String, item: MetaItem<M>)
 fun <M : MutableMeta<M>> MutableMeta<M>.setValue(name: String, value: Value) =
     set(name.toName(), MetaItem.ValueItem(value))
 
-fun <M : MutableMeta<M>> MutableMeta<M>.setItem(token: NameToken, item: MetaItem<M>?) = set(token.toName(), item)
+fun <M : MutableMeta<M>> MutableMeta<M>.setItem(token: NameToken, item: MetaItem<M>?) = set(token.asName(), item)
 
 fun <M : MutableMetaNode<M>> MutableMetaNode<M>.setNode(name: Name, node: Meta) =
     set(name, MetaItem.NodeItem(wrap(name, node)))
@@ -125,7 +126,7 @@ operator fun <M : MutableMetaNode<M>> M.set(name: Name, value: Any?) {
     }
 }
 
-operator fun <M : MutableMetaNode<M>> M.set(name: NameToken, value: Any?) = set(Name(key), value)
+operator fun <M : MutableMetaNode<M>> M.set(name: NameToken, value: Any?) = set(name.asName(), value)
 
 operator fun <M : MutableMetaNode<M>> M.set(key: String, value: Any?) = set(key.toName(), value)
 
@@ -139,9 +140,9 @@ fun <M : MutableMetaNode<M>> M.update(meta: Meta) {
     meta.items.forEach { entry ->
         val value = entry.value
         when (value) {
-            is MetaItem.ValueItem -> setValue(entry.key.toName(), value.value)
-            is MetaItem.NodeItem -> (this[entry.key.toName()] as? MetaItem.NodeItem)?.node?.update(value.node)
-                ?: run { setNode(entry.key.toName(), value.node) }
+            is MetaItem.ValueItem -> setValue(entry.key.asName(), value.value)
+            is MetaItem.NodeItem -> (this[entry.key.asName()] as? MetaItem.NodeItem)?.node?.update(value.node)
+                ?: run { setNode(entry.key.asName(), value.node) }
         }
     }
 }

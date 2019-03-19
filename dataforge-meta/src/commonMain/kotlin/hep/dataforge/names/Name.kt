@@ -101,7 +101,7 @@ operator fun Name.plus(other: Name): Name = Name(this.tokens + other.tokens)
 
 operator fun Name.plus(other: String): Name = this + other.toName()
 
-fun NameToken.toName() = Name(listOf(this))
+fun NameToken.asName() = Name(listOf(this))
 
 val EmptyName = Name(emptyList())
 

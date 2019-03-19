@@ -7,6 +7,7 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
+import hep.dataforge.names.asName
 import hep.dataforge.values.EnumValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.boolean
@@ -93,8 +94,8 @@ fun Meta.asValueSequence(): Sequence<Pair<Name, Value>> {
     return items.asSequence().flatMap { entry ->
         val item = entry.value
         when (item) {
-            is ValueItem -> sequenceOf(entry.key.toName() to item.value)
-            is NodeItem -> item.node.asValueSequence().map { pair -> (entry.key.toName() + pair.first) to pair.second }
+            is ValueItem -> sequenceOf(entry.key.asName() to item.value)
+            is NodeItem -> item.node.asValueSequence().map { pair -> (entry.key.asName() + pair.first) to pair.second }
         }
     }
 }
