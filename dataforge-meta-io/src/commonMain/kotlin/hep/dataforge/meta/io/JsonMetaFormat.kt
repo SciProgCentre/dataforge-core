@@ -3,6 +3,7 @@ package hep.dataforge.meta.io
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaItem
 import hep.dataforge.names.NameToken
+import hep.dataforge.names.toName
 import hep.dataforge.values.*
 import kotlinx.io.core.Input
 import kotlinx.io.core.Output
@@ -22,10 +23,10 @@ object JsonMetaFormat : MetaFormat {
         val str = input.readText()
         val json = Json.plain.parseJson(str)
 
-        if(json is JsonObject) {
+        if (json is JsonObject) {
             return json.toMeta()
         } else {
-            TODO("non-object root")
+            TODO("Non-object root not supported")
         }
     }
 }
@@ -51,33 +52,46 @@ fun Meta.toJson(): JsonObject {
 }
 
 
-fun JsonElement.toMetaItem() = when (this) {
-    is JsonPrimitive -> MetaItem.ValueItem<JsonMeta>(this.toValue())
-    is JsonObject -> MetaItem.NodeItem(this.toMeta())
-    is JsonArray -> {
-        if (this.all { it is JsonPrimitive }) {
-            val value = ListValue(this.map { (it as JsonPrimitive).toValue() })
-            MetaItem.ValueItem<JsonMeta>(value)
-        } else {
-            TODO("mixed nodes json")
-        }
-    }
-}
-
 fun JsonObject.toMeta() = JsonMeta(this)
 
-private fun JsonPrimitive.toValue(): Value {
-    return when (this) {
-        JsonNull -> Null
-        else -> this.content.parseValue() // Optimize number and boolean parsing
-    }
-}
-
 class JsonMeta(val json: JsonObject) : Meta {
-    override val items: Map<NameToken, MetaItem<out Meta>> by lazy {
-        json.mapKeys { NameToken(it.key) }.mapValues { entry ->
-            entry.value.toMetaItem()
+
+    private fun JsonPrimitive.toValue(): Value {
+        return when (this) {
+            JsonNull -> Null
+            else -> this.content.parseValue() // Optimize number and boolean parsing
         }
+    }
+
+    private operator fun MutableMap<String, MetaItem<JsonMeta>>.set(key: String, value: JsonElement) = when (value) {
+        is JsonPrimitive -> this[key] = MetaItem.ValueItem(value.toValue())
+        is JsonObject -> this[key] = MetaItem.NodeItem(value.toMeta())
+        is JsonArray -> {
+            when {
+                value.all { it is JsonPrimitive } -> {
+                    val listValue = ListValue(
+                        value.map {
+                            //We already checked that all values are primitives
+                            (it as JsonPrimitive).toValue()
+                        }
+                    )
+                    this[key] = MetaItem.ValueItem(listValue)
+                }
+                else -> value.forEachIndexed { index, jsonElement ->
+                    when (jsonElement) {
+                        is JsonObject -> this["$key[$index]"] = MetaItem.NodeItem(JsonMeta(jsonElement))
+                        is JsonPrimitive -> this["$key[$index]"] = MetaItem.ValueItem(jsonElement.toValue())
+                        is JsonArray -> TODO("Nested arrays not supported")
+                    }
+                }
+            }
+        }
+    }
+
+    override val items: Map<NameToken, MetaItem<JsonMeta>> by lazy {
+        val map = HashMap<String, MetaItem<JsonMeta>>()
+        json.forEach { (key, value) -> map[key] = value }
+        map.mapKeys { it.key.toName().first()!! }
     }
 }
 

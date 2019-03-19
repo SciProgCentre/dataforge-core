@@ -21,10 +21,8 @@
  */
 package hep.dataforge.descriptors
 
-import hep.dataforge.Named
 import hep.dataforge.meta.*
-import hep.dataforge.names.Name
-import java.util.*
+import hep.dataforge.names.toName
 
 /**
  * Descriptor for meta node. Could contain additional information for viewing
@@ -32,7 +30,14 @@ import java.util.*
  *
  * @author Alexander Nozik
  */
-open class NodeDescriptor(val meta: Meta) : MetaRepr {
+class NodeDescriptor(override val config: Config) : Specification {
+
+    /**
+     * The name of this node
+     *
+     * @return
+     */
+    var name: String by string { error("Anonymous descriptors are not allowed") }
 
     /**
      * True if multiple children with this nodes name are allowed. Anonymous
@@ -40,103 +45,47 @@ open class NodeDescriptor(val meta: Meta) : MetaRepr {
      *
      * @return
      */
-    val multiple: Boolean by meta.boolean(false)
+    var multiple: Boolean by boolean(false)
 
     /**
      * True if the node is required
      *
      * @return
      */
-    val required: Boolean by meta.boolean(false)
+    var required: Boolean by boolean(false)
 
     /**
      * The node description
      *
      * @return
      */
-    open val info: String by meta.string("")
+    var info: String? by string()
 
     /**
      * A list of tags for this node. Tags used to customize node usage
      *
      * @return
      */
-    val tags: List<String> by customValue(def = emptyList()) { it.list.map { it.string } }
-
-    /**
-     * The name of this node
-     *
-     * @return
-     */
-    override val name: String by stringValue(def = meta.name)
+    var tags: List<String> by value().map { value ->
+        value?.list?.map { it.string } ?: emptyList()
+    }
 
     /**
      * The list of value descriptors
-     *
-     * @return
      */
-    fun valueDescriptors(): Map<String, ValueDescriptor> {
-        val map = HashMap<String, ValueDescriptor>()
-        if (meta.hasMeta("value")) {
-            for (valueNode in meta.getMetaList("value")) {
-                val vd = ValueDescriptor(valueNode)
-                map[vd.name] = vd
-            }
+    val values: Map<String, ValueDescriptor>
+        get() = config.getAll("value".toName()).entries.associate { (name, node) ->
+            name to ValueDescriptor.wrap(node.node ?: error("Value descriptor must be a node"))
         }
-        return map
-    }
-
-    /**
-     * The child node descriptor for given name. Name syntax is supported.
-     *
-     * @param name
-     * @return
-     */
-    fun getNodeDescriptor(name: String): NodeDescriptor? {
-        return getNodeDescriptor(Name.of(name))
-    }
-
-    fun getNodeDescriptor(name: Name): NodeDescriptor? {
-        return if (name.length == 1) {
-            childrenDescriptors()[name.unescaped]
-        } else {
-            getNodeDescriptor(name.cutLast())?.getNodeDescriptor(name.last)
-        }
-    }
-
-    /**
-     * The value descriptor for given value name. Name syntax is supported.
-     *
-     * @param name
-     * @return
-     */
-    fun getValueDescriptor(name: String): ValueDescriptor? {
-        return getValueDescriptor(Name.of(name))
-    }
-
-    fun getValueDescriptor(name: Name): ValueDescriptor? {
-        return if (name.length == 1) {
-            valueDescriptors()[name.unescaped]
-        } else {
-            getNodeDescriptor(name.cutLast())?.getValueDescriptor(name.last)
-        }
-    }
 
     /**
      * The map of children node descriptors
-     *
-     * @return
      */
-    fun childrenDescriptors(): Map<String, NodeDescriptor> {
-        val map = HashMap<String, NodeDescriptor>()
-        if (meta.hasMeta("node")) {
-            for (node in meta.getMetaList("node")) {
-                val nd = NodeDescriptor(node)
-                map[nd.name] = nd
-            }
+    val nodes: Map<String, NodeDescriptor>
+        get() = config.getAll("node".toName()).entries.associate { (name, node) ->
+            name to NodeDescriptor.wrap(node.node ?: error("Node descriptor must be a node"))
         }
-        return map
-    }
+
 
     /**
      * Check if this node has default
@@ -173,15 +122,14 @@ open class NodeDescriptor(val meta: Meta) : MetaRepr {
      */
     val key: String by stringValue(def = "")
 
-    override fun toMeta(): Meta {
-        return meta
-    }
 
     fun builder(): DescriptorBuilder = DescriptorBuilder(this.name, Configuration(this.meta))
 
     //override val descriptor: NodeDescriptor =  empty("descriptor")
 
-    companion object {
+    companion object : SpecificationCompanion<NodeDescriptor> {
+
+        override fun wrap(config: Config): NodeDescriptor = NodeDescriptor(config)
 
         fun empty(nodeName: String): NodeDescriptor {
             return NodeDescriptor(Meta.buildEmpty(nodeName))
