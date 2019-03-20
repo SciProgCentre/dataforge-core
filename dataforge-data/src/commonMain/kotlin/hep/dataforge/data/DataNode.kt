@@ -1,15 +1,18 @@
 package hep.dataforge.data
 
-import hep.dataforge.names.Name
-import hep.dataforge.names.NameToken
-import hep.dataforge.names.plus
-import hep.dataforge.names.toName
-import hep.dataforge.names.asName
+import hep.dataforge.names.*
+import kotlin.reflect.KClass
 
 /**
  * A tree-like data structure grouped into the node. All data inside the node must inherit its type
  */
 interface DataNode<out T : Any> {
+
+    /**
+     * The minimal common ancestor to all data in the node
+     */
+    val type: KClass<out T>
+
     /**
      * Get the specific data if it exists
      */
@@ -35,7 +38,10 @@ interface DataNode<out T : Any> {
     companion object {
         const val TYPE = "dataNode"
 
-        fun <T : Any> build(block: DataTreeBuilder<T>.() -> Unit) = DataTreeBuilder<T>().apply(block).build()
+        fun <T : Any> build(type: KClass<out T>, block: DataTreeBuilder<T>.() -> Unit) =
+            DataTreeBuilder<T>(type).apply(block).build()
+
+        fun <T : Any> builder(type: KClass<out T>) = DataTreeBuilder(type)
     }
 
 }
@@ -45,7 +51,10 @@ internal sealed class DataTreeItem<out T : Any> {
     class Value<out T : Any>(val value: Data<T>) : DataTreeItem<T>()
 }
 
-class DataTree<out T : Any> internal constructor(private val items: Map<NameToken, DataTreeItem<T>>) : DataNode<T> {
+class DataTree<out T : Any> internal constructor(
+    override val type: KClass<out T>,
+    private val items: Map<NameToken, DataTreeItem<T>>
+) : DataNode<T> {
     //TODO add node-level meta?
 
     override fun get(name: Name): Data<T>? = when (name.length) {
@@ -97,7 +106,7 @@ private sealed class DataTreeBuilderItem<out T : Any> {
 /**
  * A builder for a DataTree.
  */
-class DataTreeBuilder<T : Any> {
+class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
     private val map = HashMap<NameToken, DataTreeBuilderItem<T>>()
 
     operator fun set(token: NameToken, node: DataTreeBuilder<T>) {
@@ -112,7 +121,7 @@ class DataTreeBuilder<T : Any> {
 
     private fun buildNode(token: NameToken): DataTreeBuilder<T> {
         return if (!map.containsKey(token)) {
-            DataTreeBuilder<T>().also { map[token] = DataTreeBuilderItem.Node(it) }
+            DataTreeBuilder<T>(type).also { map[token] = DataTreeBuilderItem.Node(it) }
         } else {
             (map[token] as? DataTreeBuilderItem.Node ?: error("The node with name $token is occupied by leaf")).tree
         }
@@ -157,7 +166,7 @@ class DataTreeBuilder<T : Any> {
     /**
      * Build and append node
      */
-    infix fun String.to(block: DataTreeBuilder<T>.() -> Unit) = set(toName(), DataTreeBuilder<T>().apply(block))
+    infix fun String.to(block: DataTreeBuilder<T>.() -> Unit) = set(toName(), DataTreeBuilder<T>(type).apply(block))
 
     fun build(): DataTree<T> {
         val resMap = map.mapValues { (_, value) ->
@@ -166,14 +175,14 @@ class DataTreeBuilder<T : Any> {
                 is DataTreeBuilderItem.Node -> DataTreeItem.Node(value.tree.build())
             }
         }
-        return DataTree(resMap)
+        return DataTree(type, resMap)
     }
 }
 
 /**
  * Generate a mutable builder from this node. Node content is not changed
  */
-fun <T : Any> DataNode<T>.builder(): DataTreeBuilder<T> = DataTreeBuilder<T>().apply {
+fun <T : Any> DataNode<T>.builder(): DataTreeBuilder<T> = DataTreeBuilder(type).apply {
     dataSequence().forEach { (name, data) -> this[name] = data }
 }
 
@@ -182,7 +191,7 @@ fun <T : Any> DataNode<T>.builder(): DataTreeBuilder<T> = DataTreeBuilder<T>().a
  */
 fun DataNode<*>.startAll() = dataSequence().forEach { (_, data) -> data.goal.start() }
 
-fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNode<T> = DataNode.build {
+fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNode<T> = DataNode.build(type) {
     dataSequence().forEach { (name, data) ->
         if (predicate(name, data)) {
             this[name] = data

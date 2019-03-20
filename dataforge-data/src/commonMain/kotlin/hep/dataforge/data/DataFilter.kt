@@ -22,7 +22,7 @@ class DataFilter(override val config: Config) : Specification {
 fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
     val sourceNode = filter.from?.let { getNode(it.toName()) } ?: this@filter
     val regex = filter.pattern.toRegex()
-    val targetNode = DataTreeBuilder<T>().apply {
+    val targetNode = DataTreeBuilder(type).apply {
         sourceNode.dataSequence().forEach { (name, data) ->
             if (name.toString().matches(regex)) {
                 this[name] = data
@@ -30,7 +30,7 @@ fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
         }
     }
     return filter.to?.let {
-        DataTreeBuilder<T>().apply { this[it.toName()] = targetNode }.build()
+        DataTreeBuilder(type).apply { this[it.toName()] = targetNode }.build()
     } ?: targetNode.build()
 }
 

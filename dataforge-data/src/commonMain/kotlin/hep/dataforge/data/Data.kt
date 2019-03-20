@@ -2,6 +2,7 @@ package hep.dataforge.data
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
+import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 
@@ -36,8 +37,8 @@ interface Data<out T : Any> : MetaRepr {
         inline fun <reified T : Any> of(name: String, goal: Goal<T>, meta: Meta): Data<T> =
             of(name, T::class, goal, meta)
 
-        fun <T : Any> static(context: CoroutineContext, value: T, meta: Meta): Data<T> =
-            DataImpl(value::class, Goal.static(context, value), meta)
+        fun <T : Any> static(scope: CoroutineScope, value: T, meta: Meta): Data<T> =
+            DataImpl(value::class, Goal.static(scope, value), meta)
     }
 }
 

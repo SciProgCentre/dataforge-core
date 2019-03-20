@@ -11,6 +11,7 @@ kotlin {
         val commonMain by getting{
             dependencies {
                 api(project(":dataforge-meta"))
+                api(kotlin("reflect"))
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutinesVersion")
             }
         }

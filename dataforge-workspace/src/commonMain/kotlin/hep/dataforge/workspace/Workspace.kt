@@ -54,7 +54,7 @@ interface Workspace : ContextAware, Provider {
         try {
             val model = build(this@Workspace, config)
             validate(model)
-            return run(model)
+            return run(this@Workspace, model)
         } finally {
             context.deactivate(this)
         }

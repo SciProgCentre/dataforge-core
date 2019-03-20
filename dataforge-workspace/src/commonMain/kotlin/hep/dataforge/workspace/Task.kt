@@ -2,13 +2,14 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Named
 import hep.dataforge.data.DataNode
+import hep.dataforge.descriptors.Described
 import hep.dataforge.meta.Meta
 import hep.dataforge.provider.Type
 import hep.dataforge.workspace.Task.Companion.TYPE
 import kotlin.reflect.KClass
 
 @Type(TYPE)
-interface Task<out R : Any> : Named {
+interface Task<out R : Any> : Named, Described {
     /**
      * Terminal task is the one that could not build model lazily
      */
@@ -41,10 +42,11 @@ interface Task<out R : Any> : Named {
      * Run given task model. Type check expected to be performed before actual
      * calculation.
      *
-     * @param model
+     * @param workspace - a workspace to run task model in
+     * @param model - a model to be executed
      * @return
      */
-    fun run(model: TaskModel): DataNode<R>
+    fun run(workspace: Workspace, model: TaskModel): DataNode<R>
 
     companion object {
         const val TYPE = "task"
