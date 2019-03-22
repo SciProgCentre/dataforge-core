@@ -17,17 +17,17 @@ fun <T : Any, R : Any> Data<T>.safeCast(type: KClass<R>): Data<R>? {
  * Filter a node by data and node type. Resulting node and its subnodes is guaranteed to have border type [type],
  * but could contain empty nodes
  */
-fun <T : Any, R : Any> DataNode<T>.cast(type: KClass<out R>): DataNode<R> {
-    return if (this is CheckedDataNode) {
+fun <T : Any, R : Any> DataNode<T>.cast(type: KClass<R>): DataNode<R> {
+    return if (this is CastDataNode) {
         origin.cast(type)
     } else {
-        CheckedDataNode(this, type)
+        CastDataNode(this, type)
     }
 }
 
 inline fun <T : Any, reified R : Any> DataNode<T>.cast(): DataNode<R> = cast(R::class)
 
-class CheckedDataNode<out T : Any>(val origin: DataNode<Any>, override val type: KClass<out T>) : DataNode<T> {
+class CastDataNode<out T : Any>(val origin: DataNode<Any>, override val type: KClass<out T>) : DataNode<T> {
 
     override fun get(name: Name): Data<T>? =
         origin[name]?.safeCast(type)

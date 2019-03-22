@@ -5,7 +5,10 @@ import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.node
+import hep.dataforge.meta.string
+import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import mu.KotlinLogging
 import kotlin.reflect.KClass
 
 class GenericTask<R : Any>(
@@ -17,11 +20,11 @@ class GenericTask<R : Any>(
 ) : Task<R> {
 
     private fun gather(workspace: Workspace, model: TaskModel): DataNode<Any> {
-//        val builder = DataTreeBuilder(Any::class)
-//        model.dependencies.forEach { dep ->
-//            dep.apply(workspace)
-//        }
-//        return builder.build()
+        return DataNode.build(Any::class) {
+            model.dependencies.forEach { dep ->
+                update(dep.apply(workspace))
+            }
+        }
     }
 
     override fun run(workspace: Workspace, model: TaskModel): DataNode<R> {
@@ -32,11 +35,11 @@ class GenericTask<R : Any>(
         val input = gather(workspace, model)
 
         //execute
-        workspace.context.logger.info("Starting task '$name' on data node ${input.name} with meta: \n${model.meta}")
+        workspace.context.logger.info("Starting task '$name' on ${model.target} with meta: \n${model.meta}")
         val output = dataTransform.invoke(model, input)
 
         //handle result
-        output.handle(model.context.dispatcher) { this.handle(it) }
+        //output.handle(model.context.dispatcher) { this.handle(it) }
 
         return output
     }
@@ -65,13 +68,13 @@ class KTaskBuilder(val name: String) {
     private class DataTransformation(
         val from: String = "",
         val to: String = "",
-        val transform: TaskModel.(DataNode<Any>?) -> DataNode<Any>
+        val transform: TaskModel.(DataNode<Any>) -> DataNode<Any>
     ) {
-        operator fun invoke(model: TaskModel, node: DataNode<Any>): DataNode<Any> {
+        operator fun invoke(model: TaskModel, node: DataNode<Any>): DataNode<Any>? {
             val localData = if (from.isEmpty()) {
                 node
             } else {
-                node.getNode(from.toName())
+                node.getNode(from.toName()) ?: return null
             }
             return transform.invoke(model, localData);
         }
@@ -84,13 +87,13 @@ class KTaskBuilder(val name: String) {
     }
 
     fun <T : Any> transform(
-        inputType: Class<T>,
+        inputType: KClass<T>,
         from: String = "",
         to: String = "",
         transform: TaskModel.(DataNode<T>) -> DataNode<Any>
     ) {
         dataTransforms += DataTransformation(from, to) { data: DataNode<Any> ->
-            transform.invoke(this, data.checked(inputType))
+            transform.invoke(this, data.cast(inputType))
         }
     }
 
@@ -99,7 +102,7 @@ class KTaskBuilder(val name: String) {
         to: String = "",
         noinline transform: TaskModel.(DataNode<T>) -> DataNode<Any>
     ) {
-        transform(T::class.java, from, to, transform)
+        transform(T::class, from, to, transform)
     }
 
     /**
@@ -112,7 +115,6 @@ class KTaskBuilder(val name: String) {
     }
 
     inline fun <reified T : Any, reified R : Any> pipeAction(
-        actionName: String = "pipe",
         from: String = "",
         to: String = "",
         noinline action: PipeBuilder<T, R>.() -> Unit
@@ -126,7 +128,6 @@ class KTaskBuilder(val name: String) {
     }
 
     inline fun <reified T : Any, reified R : Any> pipe(
-        actionName: String = "pipe",
         from: String = "",
         to: String = "",
         noinline action: suspend ActionEnv.(T) -> R
@@ -140,7 +141,6 @@ class KTaskBuilder(val name: String) {
 
 
     inline fun <reified T : Any, reified R : Any> joinAction(
-        actionName: String = "join",
         from: String = "",
         to: String = "",
         noinline action: JoinGroupBuilder<T, R>.() -> Unit
@@ -154,23 +154,21 @@ class KTaskBuilder(val name: String) {
     }
 
     inline fun <reified T : Any, reified R : Any> join(
-        actionName: String = name,
         from: String = "",
         to: String = "",
-        noinline action: suspend ActionEnv.(Map<String, T>) -> R
+        noinline action: suspend ActionEnv.(Map<Name, T>) -> R
     ) {
         val join: Action<T, R> = JoinAction(
             inputType = T::class,
             outputType = R::class,
             action = {
-                result(meta.getString("@target", actionName), action)
+                result(actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonimous", action)
             }
         )
         action(join, from, to);
     }
 
     inline fun <reified T : Any, reified R : Any> splitAction(
-        actionName: String = "split",
         from: String = "",
         to: String = "",
         noinline action: SplitBuilder<T, R>.() -> Unit
@@ -194,16 +192,18 @@ class KTaskBuilder(val name: String) {
         val transform: TaskModel.(DataNode<Any>) -> DataNode<Any> = { data ->
             if (dataTransforms.isEmpty()) {
                 //return data node as is
-                logger.warn("No transformation present, returning input data")
-                data.checked(Any::class.java)
+                KotlinLogging.logger(this::class.toString()).warn("No transformation present, returning input data")
+                data
             } else {
                 val builder = DataTreeBuilder(Any::class)
                 dataTransforms.forEach {
                     val res = it(this, data)
-                    if (it.to.isEmpty()) {
-                        builder.update(res)
-                    } else {
-                        builder.putNode(it.to, res)
+                    if (res != null) {
+                        if (it.to.isEmpty()) {
+                            builder.update(res)
+                        } else {
+                            builder[it.to.toName()] = res
+                        }
                     }
                 }
                 builder.build()

@@ -24,7 +24,7 @@ class JoinGroup<T : Any, R : Any>(var name: String, internal val node: DataNode<
 
 }
 
-class JoinGroupBuilder<T : Any, R : Any> {
+class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
     private val groupRules: MutableList<(DataNode<T>) -> List<JoinGroup<T, R>>> = ArrayList();
 
     /**
@@ -80,7 +80,7 @@ class JoinAction<T : Any, R : Any>(
             error("$inputType expected, but ${node.type} received")
         }
         return DataNode.build(outputType) {
-            JoinGroupBuilder<T, R>().apply(action).buildGroups(node).forEach { group ->
+            JoinGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
 
                 val laminate = Laminate(group.meta, meta)
 

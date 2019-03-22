@@ -2,7 +2,6 @@ package hep.dataforge.workspace
 
 import hep.dataforge.data.DataFilter
 import hep.dataforge.data.DataNode
-import hep.dataforge.data.DataTreeBuilder
 import hep.dataforge.data.filter
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
@@ -18,9 +17,15 @@ sealed class Dependency : MetaRepr {
     abstract fun apply(workspace: Workspace): DataNode<Any>
 }
 
-class DataDependency(val filter: DataFilter) : Dependency() {
-    override fun apply(workspace: Workspace): DataNode<Any> =
-        workspace.data.filter(filter)
+class DataDependency(val filter: DataFilter, val placement: Name = EmptyName) : Dependency() {
+    override fun apply(workspace: Workspace): DataNode<Any> {
+        val result =  workspace.data.filter(filter)
+        return if (placement.isEmpty()) {
+            result
+        } else {
+            DataNode.build(Any::class){ this[placement] = result }
+        }
+    }
 
     override fun toMeta(): Meta = filter.config
 
@@ -37,7 +42,7 @@ class TaskModelDependency(val name: String, val meta: Meta, val placement: Name 
         return if (placement.isEmpty()) {
             result
         } else {
-            DataTreeBuilder(Any::class).apply { this[placement] = result }.build()
+            DataNode.build(Any::class){ this[placement] = result }
         }
     }
 

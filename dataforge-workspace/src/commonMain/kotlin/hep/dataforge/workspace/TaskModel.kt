@@ -12,6 +12,7 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import hep.dataforge.workspace.TaskModel.Companion.MODEL_TARGET_KEY
 
 
 /**
@@ -39,6 +40,10 @@ data class TaskModel(
             //TODO ensure all dependencies are listed
         }
     }
+
+    companion object {
+        const val MODEL_TARGET_KEY = "@target"
+    }
 }
 
 /**
@@ -62,6 +67,8 @@ class TaskModelBuilder(val name: String, meta: Meta = EmptyMeta) {
      */
     var meta: MetaBuilder = meta.builder()
     val dependencies = HashSet<Dependency>()
+
+    var target: String by this.meta.string(key = MODEL_TARGET_KEY,default = "")
 
     /**
      * Add dependency for
@@ -95,3 +102,6 @@ class TaskModelBuilder(val name: String, meta: Meta = EmptyMeta) {
 
     fun build(): TaskModel = TaskModel(name, meta.seal(), dependencies)
 }
+
+
+val TaskModel.target get() = meta[MODEL_TARGET_KEY]?.string ?: ""

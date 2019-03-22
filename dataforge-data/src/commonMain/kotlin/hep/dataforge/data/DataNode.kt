@@ -167,6 +167,14 @@ class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
      */
     infix fun String.to(block: DataTreeBuilder<T>.() -> Unit) = set(toName(), DataTreeBuilder<T>(type).apply(block))
 
+
+    fun update(node: DataNode<T>){
+        node.data().forEach {
+            //TODO check if the place is occupied
+            this[it.first] = it.second
+        }
+    }
+
     fun build(): DataTree<T> {
         val resMap = map.mapValues { (_, value) ->
             when (value) {
