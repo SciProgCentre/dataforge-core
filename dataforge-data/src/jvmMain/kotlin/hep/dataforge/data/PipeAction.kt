@@ -25,7 +25,7 @@ class PipeBuilder<T, R>(var name: Name, var meta: MetaBuilder) {
 }
 
 
-abstract class PipeAction<T : Any, R : Any>(
+class PipeAction<T : Any, R : Any>(
     val inputType: KClass<T>,
     val outputType: KClass<R>,
     val context: CoroutineContext = EmptyCoroutineContext,
@@ -37,7 +37,7 @@ abstract class PipeAction<T : Any, R : Any>(
             error("$inputType expected, but ${node.type} received")
         }
         return DataNode.build(outputType) {
-            node.dataSequence().forEach { (name, data) ->
+            node.data().forEach { (name, data) ->
                 //merging data meta with action meta (data meta is primary)
                 val oldMeta = meta.builder().apply { update(data.meta) }
                 // creating environment from old meta and name
@@ -56,5 +56,12 @@ abstract class PipeAction<T : Any, R : Any>(
         }
     }
 }
+
+inline fun <reified T : Any, reified R : Any> DataNode<T>.pipe(
+    meta: Meta,
+    context: CoroutineContext = EmptyCoroutineContext,
+    noinline action: PipeBuilder<T, R>.() -> Unit
+): DataNode<R> = PipeAction(T::class, R::class, context, action).invoke(this, meta)
+
 
 

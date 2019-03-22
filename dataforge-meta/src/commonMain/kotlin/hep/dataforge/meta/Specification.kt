@@ -22,13 +22,14 @@ interface SpecificationCompanion<T : Specification> {
 
     fun build(action: T.() -> Unit) = update(Config(), action)
 
+    fun empty() = build {  }
+
     /**
      * Wrap generic configuration producing instance of desired type
      */
     fun wrap(config: Config): T
 
     fun wrap(meta: Meta): T = wrap(meta.toConfig())
-
 }
 
 fun <T : Specification> specification(wrapper: (Config) -> T): SpecificationCompanion<T> =

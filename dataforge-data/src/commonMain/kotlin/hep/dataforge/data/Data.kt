@@ -3,7 +3,6 @@ package hep.dataforge.data
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
 import kotlinx.coroutines.CoroutineScope
-import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 
 /**
@@ -30,7 +29,9 @@ interface Data<out T : Any> : MetaRepr {
         const val TYPE = "data"
 
         fun <T : Any> of(type: KClass<out T>, goal: Goal<T>, meta: Meta): Data<T> = DataImpl(type, goal, meta)
+
         inline fun <reified T : Any> of(goal: Goal<T>, meta: Meta): Data<T> = of(T::class, goal, meta)
+
         fun <T : Any> of(name: String, type: KClass<out T>, goal: Goal<T>, meta: Meta): Data<T> =
             NamedData(name, of(type, goal, meta))
 
@@ -42,7 +43,18 @@ interface Data<out T : Any> : MetaRepr {
     }
 }
 
-suspend fun <T: Any> Data<T>.await(): T = goal.await()
+/**
+ * Upcast a [Data] to a supertype
+ */
+inline fun <reified R : Any, reified T : R> Data<T>.cast(): Data<R> {
+    return Data.of(R::class, goal, meta)
+}
+
+fun <R : Any, T : R> Data<T>.cast(type: KClass<R>): Data<R> {
+    return Data.of(type, goal, meta)
+}
+
+suspend fun <T : Any> Data<T>.await(): T = goal.await()
 
 /**
  * Generic Data implementation

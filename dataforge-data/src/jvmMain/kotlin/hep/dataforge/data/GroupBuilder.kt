@@ -44,7 +44,7 @@ object GroupBuilder {
         override fun <T : Any> invoke(node: DataNode<T>): Map<String, DataNode<T>> {
             val map = HashMap<String, DataTreeBuilder<T>>()
 
-            node.dataSequence().forEach { (name, data) ->
+            node.data().forEach { (name, data) ->
                 val tagValue = data.meta[key]?.string ?: defaultTagValue
                 map.getOrPut(tagValue) { DataNode.builder(node.type) }[name] = data
             }

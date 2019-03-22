@@ -43,8 +43,8 @@ interface Workspace : ContextAware, Provider {
         return when (target) {
             "target", Meta.TYPE -> targets.keys.asSequence().map { it.toName() }
             Task.TYPE -> tasks.keys.asSequence().map { it.toName() }
-            Data.TYPE -> data.dataSequence().map { it.first }
-            DataNode.TYPE -> data.nodeSequence().map { it.first }
+            Data.TYPE -> data.data().map { it.first }
+            DataNode.TYPE -> data.nodes().map { it.first }
             else -> emptySequence()
         }
     }

@@ -112,7 +112,20 @@ fun <T, R> Collection<Goal<T>>.join(
     scope: CoroutineScope = first(),
     context: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Collection<T>) -> R
-): Goal<R> =
-    scope.createGoal(this, context) {
-        block(map { it.await() })
-    }
+): Goal<R> = scope.createGoal(this, context) {
+    block(map { it.await() })
+}
+
+/**
+ * A joining goal for a map
+ * @param K type of the map key
+ * @param T type of the input goal
+ * @param R type of the result goal
+ */
+fun <K, T, R> Map<K, Goal<T>>.join(
+    scope: CoroutineScope = values.first(),
+    context: CoroutineContext = EmptyCoroutineContext,
+    block: suspend CoroutineScope.(Map<K, T>) -> R
+): Goal<R> = scope.createGoal(this.values, context) {
+    block(mapValues { it.value.await() })
+}

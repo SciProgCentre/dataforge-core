@@ -6,7 +6,6 @@ import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.builder
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
-import java.util.stream.Collectors
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
@@ -17,9 +16,9 @@ class JoinGroup<T : Any, R : Any>(var name: String, internal val node: DataNode<
 
     var meta: MetaBuilder = MetaBuilder()
 
-    lateinit var result: suspend ActionEnv.(Map<String, T>) -> R
+    lateinit var result: suspend ActionEnv.(Map<Name, T>) -> R
 
-    fun result(f: suspend ActionEnv.(Map<String, T>) -> R) {
+    fun result(f: suspend ActionEnv.(Map<Name, T>) -> R) {
         this.result = f;
     }
 
@@ -53,7 +52,7 @@ class JoinGroupBuilder<T : Any, R : Any> {
     /**
      * Apply transformation to the whole node
      */
-    fun result(resultName: String, f: suspend ActionEnv.(Map<String, T>) -> R) {
+    fun result(resultName: String, f: suspend ActionEnv.(Map<Name, T>) -> R) {
         groupRules += { node ->
             listOf(JoinGroup<T, R>(resultName, node).apply { result(f) })
         }
@@ -85,21 +84,19 @@ class JoinAction<T : Any, R : Any>(
 
                 val laminate = Laminate(group.meta, meta)
 
-                val goalMap: Map<String, Goal<T>> = group.node
-                    .dataSequence()
+                val goalMap: Map<Name, Goal<T>> = group.node
+                    .data()
                     .associate { it.first to it.second.goal }
 
                 val groupName: String = group.name;
 
-                if (groupName.isEmpty()) {
-                    throw AnonymousNotAlowedException("Anonymous groups are not allowed");
-                }
-
                 val env = ActionEnv(groupName.toName(), laminate.builder())
 
-                val goal = goalMap.join(dispatcher) { group.result.invoke(env, it) }
-                val res = NamedData(env.name, outputType, goal, env.meta)
-                builder.add(res)
+                val goal = goalMap.join(context = context) { group.result.invoke(env, it) }
+
+                val res = Data.of(outputType, goal, env.meta)
+
+                set(env.name, res)
             }
 
         }

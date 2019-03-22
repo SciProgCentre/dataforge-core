@@ -3,11 +3,17 @@ package hep.dataforge.data
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.builder
 import hep.dataforge.names.Name
-import kotlinx.coroutines.runBlocking
+import hep.dataforge.names.toName
+import kotlin.collections.set
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.reflect.KClass
+import kotlin.reflect.full.isSuperclassOf
 
 
-class FragmentEnv<T : Any, R : Any>(val context: Context, val name: String, var meta: MetaBuilder, val log: Chronicle) {
+class FragmentRule<T : Any, R : Any>(val name: Name, var meta: MetaBuilder) {
     lateinit var result: suspend (T) -> R
 
     fun result(f: suspend (T) -> R) {
@@ -16,75 +22,51 @@ class FragmentEnv<T : Any, R : Any>(val context: Context, val name: String, var 
 }
 
 
-class SplitBuilder<T : Any, R : Any>(val context: Context, val name: String, val meta: Meta) {
-    internal val fragments: MutableMap<String, FragmentEnv<T, R>.() -> Unit> = HashMap()
+class SplitBuilder<T : Any, R : Any>(val name: Name, val meta: Meta) {
+    internal val fragments: MutableMap<Name, FragmentRule<T, R>.() -> Unit> = HashMap()
 
     /**
      * Add new fragment building rule. If the framgent not defined, result won't be available even if it is present in the map
      * @param name the name of a fragment
      * @param rule the rule to transform fragment name and meta using
      */
-    fun fragment(name: String, rule: FragmentEnv<T, R>.() -> Unit) {
-        fragments[name] = rule
+    fun fragment(name: String, rule: FragmentRule<T, R>.() -> Unit) {
+        fragments[name.toName()] = rule
     }
 }
 
-class KSplit<T : Any, R : Any>(
-    actionName: String,
-    inputType: Class<T>,
-    outputType: Class<R>,
+class SplitAction<T : Any, R : Any>(
+    val inputType: KClass<T>,
+    val outputType: KClass<R>,
+    val context: CoroutineContext = EmptyCoroutineContext,
     private val action: SplitBuilder<T, R>.() -> Unit
-) : GenericAction<T, R>(actionName, inputType, outputType) {
+) : Action<T, R> {
 
-    override fun run(context: Context, data: DataNode<out T>, actionMeta: Meta): DataNode<R> {
-        if (!this.inputType.isAssignableFrom(data.type)) {
-            throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type} received")
+    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
+        if (!this.inputType.isSuperclassOf(node.type)) {
+            error("$inputType expected, but ${node.type} received")
         }
 
-        val builder = DataSet.edit(outputType)
+        return DataNode.build(outputType) {
+            node.data().forEach { (name, data) ->
 
+                val laminate = Laminate(data.meta, meta)
 
-        runBlocking {
-            data.dataStream(true).forEach {
+                val split = SplitBuilder<T, R>(name, data.meta).apply(action)
 
-                val laminate = Laminate(it.meta, actionMeta)
-
-                val split = SplitBuilder<T, R>(context, it.name, it.meta).apply(action)
-
-
-                val dispatcher = context + getExecutorService(context, laminate).asCoroutineDispatcher()
-
-                // Create a map of results in a single goal
-                //val commonGoal = it.goal.pipe(dispatcher) { split.result.invoke(env, it) }
 
                 // apply individual fragment rules to result
-                split.fragments.forEach { name, rule ->
-                    val env = FragmentEnv<T, R>(
-                        context,
-                        it.name,
-                        laminate.builder,
-                        context.history.getChronicle(Name.joinString(it.name, name))
-                    )
+                split.fragments.forEach { fragmentName, rule ->
+                    val env = FragmentRule<T, R>(fragmentName, laminate.builder())
 
-                    rule.invoke(env)
+                    rule(env)
 
-                    val goal = it.goal.pipe(dispatcher, env.result)
+                    val goal = data.goal.pipe(context = context) { env.result(it) }
 
-                    val res = NamedData(env.name, outputType, goal, env.meta)
-                    builder.add(res)
+                    val res = Data.of(outputType, goal, env.meta)
+                    set(env.name, res)
                 }
             }
         }
-
-        return builder.build();
     }
-}
-
-inline fun <reified T : Any, reified R : Any> DataNode<T>.pipe(
-    context: Context,
-    meta: Meta,
-    name: String = "pipe",
-    noinline action: PipeBuilder<T, R>.() -> Unit
-): DataNode<R> {
-    return KPipe(name, T::class.java, R::class.java, action).run(context, this, meta);
 }

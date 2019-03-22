@@ -11,7 +11,7 @@ import hep.dataforge.meta.buildMeta
  * A builder for a workspace
  */
 class WorkspaceBuilder(var context: Context) {
-    val data = DataTreeBuilder<Any>()
+    val data = DataTreeBuilder(Any::class)
     val targets = HashMap<String, Meta>()
     val tasks = HashSet<Task<Any>>()
 

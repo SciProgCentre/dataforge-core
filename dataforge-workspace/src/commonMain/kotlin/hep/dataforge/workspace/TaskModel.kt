@@ -45,8 +45,8 @@ data class TaskModel(
  * Build input for the task
  */
 fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> {
-    return DataTreeBuilder<Any>().apply {
-        dependencies.asSequence().flatMap { it.apply(workspace).dataSequence() }.forEach { (name, data) ->
+    return DataTreeBuilder(Any::class).apply {
+        dependencies.asSequence().flatMap { it.apply(workspace).data() }.forEach { (name, data) ->
             //TODO add concise error on replacement
             this[name] = data
         }

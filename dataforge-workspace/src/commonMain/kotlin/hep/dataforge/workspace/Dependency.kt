@@ -37,7 +37,7 @@ class TaskModelDependency(val name: String, val meta: Meta, val placement: Name 
         return if (placement.isEmpty()) {
             result
         } else {
-            DataTreeBuilder<Any>().apply { this[placement] = result }.build()
+            DataTreeBuilder(Any::class).apply { this[placement] = result }.build()
         }
     }
 

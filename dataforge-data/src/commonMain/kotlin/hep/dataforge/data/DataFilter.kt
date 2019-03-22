@@ -23,7 +23,7 @@ fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
     val sourceNode = filter.from?.let { getNode(it.toName()) } ?: this@filter
     val regex = filter.pattern.toRegex()
     val targetNode = DataTreeBuilder(type).apply {
-        sourceNode.dataSequence().forEach { (name, data) ->
+        sourceNode.data().forEach { (name, data) ->
             if (name.toString().matches(regex)) {
                 this[name] = data
             }
