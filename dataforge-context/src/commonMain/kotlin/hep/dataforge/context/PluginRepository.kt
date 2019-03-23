@@ -4,23 +4,23 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.configure
 import kotlin.reflect.KClass
 
-interface PluginFactory {
+interface PluginFactory<T: Plugin> {
     val tag: PluginTag
-    val type: KClass<out Plugin>
-    fun build(): Plugin
+    val type: KClass<out T>
+    fun build(): T
 }
 
-fun PluginFactory.build(meta: Meta) = build().configure(meta)
+fun PluginFactory<*>.build(meta: Meta) = build().configure(meta)
 
 
 expect object PluginRepository {
 
-    fun register(factory: PluginFactory)
+    fun register(factory: PluginFactory<*>)
 
     /**
      * List plugins available in the repository
      */
-    fun list(): Sequence<PluginFactory>
+    fun list(): Sequence<PluginFactory<*>>
 
 }
 
@@ -31,15 +31,16 @@ fun PluginRepository.fetch(tag: PluginTag): Plugin =
     PluginRepository.list().find { it.tag.matches(tag) }?.build()
         ?: error("Plugin with tag $tag not found in the repository")
 
-fun PluginRepository.register(tag: PluginTag, type: KClass<out Plugin>, constructor: () -> Plugin) {
-    val factory = object : PluginFactory {
+fun <T: Plugin> PluginRepository.register(tag: PluginTag, type: KClass<out T>, constructor: () -> T): PluginFactory<T> {
+    val factory = object : PluginFactory<T> {
         override val tag: PluginTag = tag
-        override val type: KClass<out Plugin> = type
+        override val type: KClass<out T> = type
 
-        override fun build(): Plugin = constructor()
+        override fun build(): T = constructor()
 
     }
     PluginRepository.register(factory)
+    return factory
 }
 
 inline fun <reified T : Plugin> PluginRepository.register(tag: PluginTag, noinline constructor: () -> T) =

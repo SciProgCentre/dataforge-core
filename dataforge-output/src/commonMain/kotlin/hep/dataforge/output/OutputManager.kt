@@ -1,9 +1,6 @@
 package hep.dataforge.output
 
-import hep.dataforge.context.AbstractPlugin
-import hep.dataforge.context.Context
-import hep.dataforge.context.Plugin
-import hep.dataforge.context.PluginTag
+import hep.dataforge.context.*
 import hep.dataforge.context.PluginTag.Companion.DATAFORGE_GROUP
 import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
@@ -24,13 +21,18 @@ interface OutputManager : Plugin {
      * @param name represents the name inside the node.
      * @param meta configuration for [Output] (not for rendered object)
      */
-    operator fun <T : Any> get(type: KClass<out T>, name: Name, stage: Name = EmptyName, meta: Meta = EmptyMeta): Output<T>
+    operator fun <T : Any> get(
+        type: KClass<out T>,
+        name: Name,
+        stage: Name = EmptyName,
+        meta: Meta = EmptyMeta
+    ): Output<T>
 }
 
 /**
  * Get an output manager for a context
  */
-val Context.output: OutputManager get() = plugins.get() ?: ConsoleOutputManager
+val Context.output: OutputManager get() = plugins.get() ?: ConsoleOutputManager()
 
 /**
  * Get an output with given [name], [stage] and reified content type
@@ -47,7 +49,7 @@ inline operator fun <reified T : Any> OutputManager.get(
  * Directly render an object using the most suitable renderer
  */
 fun OutputManager.render(obj: Any, name: Name, stage: Name = EmptyName, meta: Meta = EmptyMeta) =
-        get(obj::class, name,stage).render(obj,meta)
+    get(obj::class, name, stage).render(obj, meta)
 
 /**
  * System console output.
@@ -55,10 +57,18 @@ fun OutputManager.render(obj: Any, name: Name, stage: Name = EmptyName, meta: Me
  */
 expect val ConsoleOutput: Output<Any>
 
-object ConsoleOutputManager : AbstractPlugin(), OutputManager {
-    override val tag: PluginTag = PluginTag("output.console", group = DATAFORGE_GROUP)
+class ConsoleOutputManager : AbstractPlugin(), OutputManager {
+    override val tag: PluginTag get() = ConsoleOutputManager.tag
 
     override fun <T : Any> get(type: KClass<out T>, name: Name, stage: Name, meta: Meta): Output<T> = ConsoleOutput
+
+    companion object : PluginFactory<ConsoleOutputManager> {
+        override val tag = PluginTag("output.console", group = DATAFORGE_GROUP)
+
+        override val type = ConsoleOutputManager::class
+
+        override fun build() = ConsoleOutputManager()
+    }
 }
 
 /**

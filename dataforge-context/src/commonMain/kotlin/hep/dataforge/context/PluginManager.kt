@@ -118,6 +118,15 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
         }
     }
 
+    fun load(factory: PluginFactory<*>, meta: Meta = EmptyMeta): Plugin{
+        val loaded = get(factory.tag, false)
+        return when {
+            loaded == null -> factory.build(meta)
+            loaded.config == meta -> loaded // if meta is the same, return existing plugin
+            else -> throw RuntimeException("Can't load plugin with tag ${factory.tag}. Plugin with this tag and different configuration already exists in context.")
+        }
+    }
+
     /**
      * Load plugin by its class and meta. Ignore if plugin with this meta is already loaded.
      * Throw an exception if there exists plugin with the same type, but different meta

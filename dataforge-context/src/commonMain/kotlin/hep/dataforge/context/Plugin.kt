@@ -46,7 +46,7 @@ interface Plugin : Named, ContextAware, Provider, MetaRepr, Configurable {
      *
      * @return
      */
-    fun dependsOn(): List<PluginTag> = emptyList()
+    fun dependsOn(): List<PluginFactory<*>> = emptyList()
 
     /**
      * Start this plugin and attach registration info to the context. This method
