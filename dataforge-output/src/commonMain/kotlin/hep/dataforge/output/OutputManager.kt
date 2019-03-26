@@ -67,7 +67,7 @@ class ConsoleOutputManager : AbstractPlugin(), OutputManager {
 
         override val type = ConsoleOutputManager::class
 
-        override fun build() = ConsoleOutputManager()
+        override fun invoke() = ConsoleOutputManager()
     }
 }
 

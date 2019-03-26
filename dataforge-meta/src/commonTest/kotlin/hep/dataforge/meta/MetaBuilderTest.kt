@@ -23,4 +23,18 @@ class MetaBuilderTest {
         assertEquals(true, meta["node.childNode.f"]?.boolean)
     }
 
+    @Test
+    fun testSNS(){
+        val meta = buildMeta {
+            repeat(10){
+                "b.a[$it]" to it
+            }
+        }.seal()
+        assertEquals(10, meta.asValueSequence().count())
+
+        val nodes = meta.getAll("b.a")
+
+        assertEquals(3, nodes["3"]?.int)
+    }
+
 }

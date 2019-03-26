@@ -3,11 +3,7 @@ package hep.dataforge.meta
 import hep.dataforge.meta.Meta.Companion.VALUE_KEY
 import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
-import hep.dataforge.names.Name
-import hep.dataforge.names.NameToken
-import hep.dataforge.names.plus
-import hep.dataforge.names.toName
-import hep.dataforge.names.asName
+import hep.dataforge.names.*
 import hep.dataforge.values.EnumValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.boolean
@@ -77,15 +73,22 @@ operator fun Meta?.get(key: String): MetaItem<out Meta>? = get(key.toName())
  * Get all items matching given name.
  */
 fun Meta.getAll(name: Name): Map<String, MetaItem<out Meta>> {
-    if (name.length == 0) error("Can't use empty name for that")
-    val (body, query) = name.last()!!
-    val regex = query.toRegex()
-    return (this[name.cutLast()] as? NodeItem<*>)?.node?.items
-        ?.filter { it.key.body == body && (query.isEmpty() || regex.matches(it.key.index)) }
+    val root = when (name.length) {
+        0 -> error("Can't use empty name for that")
+        1 -> this
+        else -> (this[name.cutLast()] as? NodeItem<*>)?.node
+    }
+
+    val (body, index) = name.last()!!
+    val regex = index.toRegex()
+
+    return root?.items
+        ?.filter { it.key.body == body && (index.isEmpty() || regex.matches(it.key.index)) }
         ?.mapKeys { it.key.index }
         ?: emptyMap()
-
 }
+
+fun Meta.getAll(name: String): Map<String, MetaItem<out Meta>> = getAll(name.toName())
 
 /**
  * Transform meta to sequence of [Name]-[Value] pairs

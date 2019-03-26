@@ -1,6 +1,9 @@
 package hep.dataforge.context
 
-import hep.dataforge.meta.*
+import hep.dataforge.meta.EmptyMeta
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.buildMeta
 import kotlin.reflect.KClass
 
 /**
@@ -112,7 +115,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
     fun load(tag: PluginTag, meta: Meta = EmptyMeta): Plugin {
         val loaded = get(tag, false)
         return when {
-            loaded == null -> load(PluginRepository.fetch(tag)).configure(meta)
+            loaded == null -> load(PluginRepository.fetch(tag,meta))
             loaded.config == meta -> loaded // if meta is the same, return existing plugin
             else -> throw RuntimeException("Can't load plugin with tag $tag. Plugin with this tag and different configuration already exists in context.")
         }
@@ -121,7 +124,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
     fun load(factory: PluginFactory<*>, meta: Meta = EmptyMeta): Plugin{
         val loaded = get(factory.tag, false)
         return when {
-            loaded == null -> factory.build(meta)
+            loaded == null -> load(factory(meta))
             loaded.config == meta -> loaded // if meta is the same, return existing plugin
             else -> throw RuntimeException("Can't load plugin with tag ${factory.tag}. Plugin with this tag and different configuration already exists in context.")
         }
@@ -135,7 +138,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
         val loaded = get(type, false)
         return when {
             loaded == null -> {
-                val plugin = PluginRepository.list().first { it.type == type }.build(meta)
+                val plugin = PluginRepository.list().first { it.type == type }.invoke(meta)
                 if (type.isInstance(plugin)) {
                     @Suppress("UNCHECKED_CAST")
                     load(plugin as T)
