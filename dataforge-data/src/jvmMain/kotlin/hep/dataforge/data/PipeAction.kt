@@ -14,7 +14,7 @@ class ActionEnv(val name: Name, val meta: Meta)
  * Action environment
  */
 class PipeBuilder<T, R>(var name: Name, var meta: MetaBuilder) {
-    lateinit var result: suspend ActionEnv.(T) -> R;
+    var result: suspend ActionEnv.(T) -> R = TODO("Action not implemented")
 
     /**
      * Calculate the result of goal

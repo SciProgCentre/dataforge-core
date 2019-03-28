@@ -45,7 +45,7 @@ allprojects {
     }
 
     group = "hep.dataforge"
-    version = "0.1.2-dev-1"
+    version = "0.1.2-dev-2"
 
     // apply bintray configuration
     apply(from = "${rootProject.rootDir}/gradle/bintray.gradle")
@@ -67,8 +67,6 @@ subprojects {
 //            classifier = "javadoc"
 //    }
 
-    apply(plugin = "com.moowork.node")
-
     // Create empty jar for sources classifier to satisfy maven requirements
     val stubSources by tasks.registering(Jar::class) {
         archiveClassifier.set("sources")
@@ -89,6 +87,7 @@ subprojects {
 
     afterEvaluate {
         extensions.findByType<KotlinMultiplatformExtension>()?.apply {
+            apply(plugin = "com.moowork.node")
             jvm {
                 compilations.all {
                     kotlinOptions {

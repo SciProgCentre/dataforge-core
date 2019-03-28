@@ -34,8 +34,6 @@ class DynamicMeta(val obj: dynamic) : Meta {
 
     private fun isArray(obj: dynamic): Boolean = js("Array.isArray(obj)") as Boolean
 
-    //private fun isObject(obj: dynamic): Boolean = js("typeof obj === 'object'") as Boolean
-
     private fun asItem(obj: dynamic): MetaItem<DynamicMeta>? {
         if (obj == null) return MetaItem.ValueItem(Null)
         return when (jsTypeOf(obj)) {

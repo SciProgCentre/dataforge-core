@@ -8,15 +8,17 @@ import hep.dataforge.meta.node
 import hep.dataforge.meta.string
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
-import mu.KotlinLogging
 import kotlin.reflect.KClass
+
+//data class TaskEnv(val workspace: Workspace, val model: TaskModel)
+
 
 class GenericTask<R : Any>(
     override val name: String,
     override val type: KClass<out R>,
     override val descriptor: NodeDescriptor,
     private val modelTransform: TaskModelBuilder.(Meta) -> Unit,
-    private val dataTransform: TaskModel.(DataNode<Any>) -> DataNode<R>
+    private val dataTransform: Workspace.() -> TaskModel.(DataNode<Any>) -> DataNode<R>
 ) : Task<R> {
 
     private fun gather(workspace: Workspace, model: TaskModel): DataNode<Any> {
@@ -36,7 +38,7 @@ class GenericTask<R : Any>(
 
         //execute
         workspace.context.logger.info("Starting task '$name' on ${model.target} with meta: \n${model.meta}")
-        val output = dataTransform.invoke(model, input)
+        val output = dataTransform(workspace).invoke(model, input)
 
         //handle result
         //output.handle(model.context.dispatcher) { this.handle(it) }
@@ -65,18 +67,21 @@ class KTaskBuilder(val name: String) {
     private var modelTransform: TaskModelBuilder.(Meta) -> Unit = { data("*") }
     var descriptor: NodeDescriptor? = null
 
+    /**
+     * TODO will look better as extension class
+     */
     private class DataTransformation(
         val from: String = "",
         val to: String = "",
-        val transform: TaskModel.(DataNode<Any>) -> DataNode<Any>
+        val transform: Workspace.() -> TaskModel.(DataNode<Any>) -> DataNode<Any>
     ) {
-        operator fun invoke(model: TaskModel, node: DataNode<Any>): DataNode<Any>? {
+        operator fun Workspace.invoke(model: TaskModel, node: DataNode<Any>): DataNode<Any>? {
             val localData = if (from.isEmpty()) {
                 node
             } else {
                 node.getNode(from.toName()) ?: return null
             }
-            return transform.invoke(model, localData);
+            return transform(this).invoke(model, localData)
         }
     }
 
@@ -90,7 +95,7 @@ class KTaskBuilder(val name: String) {
         inputType: KClass<T>,
         from: String = "",
         to: String = "",
-        transform: TaskModel.(DataNode<T>) -> DataNode<Any>
+        transform: Workspace.() -> TaskModel.(DataNode<T>) -> DataNode<Any>
     ) {
         dataTransforms += DataTransformation(from, to) { data: DataNode<Any> ->
             transform.invoke(this, data.cast(inputType))
@@ -100,7 +105,7 @@ class KTaskBuilder(val name: String) {
     inline fun <reified T : Any> transform(
         from: String = "",
         to: String = "",
-        noinline transform: TaskModel.(DataNode<T>) -> DataNode<Any>
+        noinline transform: Workspace.() -> TaskModel.(DataNode<T>) -> DataNode<Any>
     ) {
         transform(T::class, from, to, transform)
     }
@@ -110,7 +115,7 @@ class KTaskBuilder(val name: String) {
      */
     inline fun <reified T : Any, reified R : Any> action(action: Action<T, R>, from: String = "", to: String = "") {
         transform(from, to) { data: DataNode<T> ->
-            action(data, meta)
+            action(data, model.meta)
         }
     }
 
@@ -189,27 +194,29 @@ class KTaskBuilder(val name: String) {
     }
 
     fun build(): GenericTask<Any> {
-        val transform: TaskModel.(DataNode<Any>) -> DataNode<Any> = { data ->
-            if (dataTransforms.isEmpty()) {
-                //return data node as is
-                KotlinLogging.logger(this::class.toString()).warn("No transformation present, returning input data")
-                data
-            } else {
-                val builder = DataTreeBuilder(Any::class)
-                dataTransforms.forEach {
-                    val res = it(this, data)
-                    if (res != null) {
-                        if (it.to.isEmpty()) {
-                            builder.update(res)
-                        } else {
-                            builder[it.to.toName()] = res
+        val transform: Workspace.() -> TaskModel.(DataNode<Any>) -> DataNode<Any> = {
+            { data ->
+                if (dataTransforms.isEmpty()) {
+                    //return data node as is
+                    logger.warn("No transformation present, returning input data")
+                    data
+                } else {
+                    val builder = DataTreeBuilder(Any::class)
+                    dataTransforms.forEach { transform ->
+                        val res = transform(this, data)
+                        if (res != null) {
+                            if (transform.to.isEmpty()) {
+                                builder.update(res)
+                            } else {
+                                builder[transform.to.toName()] = res
+                            }
                         }
                     }
+                    builder.build()
                 }
-                builder.build()
             }
         }
-        return GenericTask<Any>(name, Any::class, descriptor ?: NodeDescriptor.empty(), modelTransform, transform);
+        return GenericTask(name, Any::class, descriptor ?: NodeDescriptor.empty(), modelTransform, transform);
     }
 }
 
