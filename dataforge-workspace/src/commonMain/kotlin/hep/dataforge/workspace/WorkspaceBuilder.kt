@@ -11,6 +11,7 @@ import hep.dataforge.names.toName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 
+@TaskBuildScope
 interface WorkspaceBuilder {
     val parentContext: Context
     var context: Context

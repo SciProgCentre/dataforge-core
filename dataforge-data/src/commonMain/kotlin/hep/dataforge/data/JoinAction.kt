@@ -9,7 +9,6 @@ import hep.dataforge.names.toName
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSuperclassOf
 
 
 class JoinGroup<T : Any, R : Any>(var name: String, internal val node: DataNode<T>) {
@@ -76,9 +75,7 @@ class JoinAction<T : Any, R : Any>(
 ) : Action<T, R> {
 
     override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
-        if (!this.inputType.isSuperclassOf(node.type)) {
-            error("$inputType expected, but ${node.type} received")
-        }
+        node.checkType(inputType)
         return DataNode.build(outputType) {
             JoinGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
 

@@ -10,11 +10,10 @@ import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSuperclassOf
 
 
 class FragmentRule<T : Any, R : Any>(val name: Name, var meta: MetaBuilder) {
-    lateinit var result: suspend (T) -> R 
+    lateinit var result: suspend (T) -> R
 
     fun result(f: suspend (T) -> R) {
         result = f;
@@ -43,9 +42,7 @@ class SplitAction<T : Any, R : Any>(
 ) : Action<T, R> {
 
     override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
-        if (!this.inputType.isSuperclassOf(node.type)) {
-            error("$inputType expected, but ${node.type} received")
-        }
+        node.checkType(inputType)
 
         return DataNode.build(outputType) {
             node.data().forEach { (name, data) ->
@@ -56,7 +53,7 @@ class SplitAction<T : Any, R : Any>(
 
 
                 // apply individual fragment rules to result
-                split.fragments.forEach { fragmentName, rule ->
+                split.fragments.forEach { (fragmentName, rule) ->
                     val env = FragmentRule<T, R>(fragmentName, laminate.builder())
 
                     rule(env)

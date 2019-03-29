@@ -58,9 +58,13 @@ fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> {
     }.build()
 }
 
+@DslMarker
+annotation class TaskBuildScope
+
 /**
  * A builder for [TaskModel]
  */
+@TaskBuildScope
 class TaskModelBuilder(val name: String, meta: Meta = EmptyMeta) {
     /**
      * Meta for current task. By default uses the whole input meta

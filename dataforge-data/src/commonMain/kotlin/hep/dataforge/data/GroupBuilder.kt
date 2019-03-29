@@ -18,7 +18,6 @@ package hep.dataforge.data
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
-import java.util.*
 
 interface GroupRule {
     operator fun <T : Any> invoke(node: DataNode<T>): Map<String, DataNode<T>>
@@ -40,7 +39,8 @@ object GroupBuilder {
      * @param defaultTagValue
      * @return
      */
-    fun byValue(key: String, defaultTagValue: String): GroupRule = object : GroupRule {
+    fun byValue(key: String, defaultTagValue: String): GroupRule = object :
+        GroupRule {
         override fun <T : Any> invoke(node: DataNode<T>): Map<String, DataNode<T>> {
             val map = HashMap<String, DataTreeBuilder<T>>()
 
@@ -62,7 +62,12 @@ object GroupBuilder {
 //    )
     fun byMeta(config: Meta): GroupRule {
         //TODO expand grouping options
-        return config["byValue"]?.string?.let { byValue(it, config["defaultValue"]?.string ?: "default") }
+        return config["byValue"]?.string?.let {
+            byValue(
+                it,
+                config["defaultValue"]?.string ?: "default"
+            )
+        }
             ?: object : GroupRule {
                 override fun <T : Any> invoke(node: DataNode<T>): Map<String, DataNode<T>> = mapOf("" to node)
             }

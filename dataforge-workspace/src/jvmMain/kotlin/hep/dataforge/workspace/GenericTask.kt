@@ -1,5 +1,6 @@
 package hep.dataforge.workspace
 
+import hep.dataforge.context.Context
 import hep.dataforge.data.*
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.meta.Meta
@@ -63,6 +64,7 @@ class GenericTask<R : Any>(
     //TODO add validation
 }
 
+@TaskBuildScope
 class KTaskBuilder(val name: String) {
     private var modelTransform: TaskModelBuilder.(Meta) -> Unit = { data("*") }
     var descriptor: NodeDescriptor? = null
@@ -73,7 +75,7 @@ class KTaskBuilder(val name: String) {
     private class DataTransformation(
         val from: String = "",
         val to: String = "",
-        val transform: Workspace.() -> TaskModel.(DataNode<Any>) -> DataNode<Any>
+        val transform: (Context, TaskModel, DataNode<Any>) -> DataNode<Any>
     ) {
         operator fun invoke(workspace: Workspace, model: TaskModel, node: DataNode<Any>): DataNode<Any>? {
             val localData = if (from.isEmpty()) {
@@ -81,7 +83,7 @@ class KTaskBuilder(val name: String) {
             } else {
                 node.getNode(from.toName()) ?: return null
             }
-            return transform(workspace).invoke(model, localData)
+            return transform(workspace.context, model, localData)
         }
     }
 
@@ -91,27 +93,23 @@ class KTaskBuilder(val name: String) {
         this.modelTransform = modelTransform
     }
 
-    //class TaskEnv(val workspace: Workspace, val model: TaskModel)
-
     fun <T : Any> transform(
         inputType: KClass<T>,
         from: String = "",
         to: String = "",
-        transform: Workspace.() -> TaskModel.(DataNode<T>) -> DataNode<Any>
+        block: TaskModel.(Context, DataNode<T>) -> DataNode<Any>
     ) {
-        dataTransforms += DataTransformation(from, to) {
-            { data: DataNode<Any> ->
-                transform().invoke(this, data.cast(inputType))
-            }
+        dataTransforms += DataTransformation(from, to) { context, model, data ->
+            block(model, context, data.cast(inputType))
         }
     }
 
     inline fun <reified T : Any> transform(
         from: String = "",
         to: String = "",
-        noinline transform: Workspace.() -> TaskModel.(DataNode<T>) -> DataNode<Any>
+        noinline block: TaskModel.(Context, DataNode<T>) -> DataNode<Any>
     ) {
-        transform(T::class, from, to, transform)
+        transform(T::class, from, to, block)
     }
 
     /**
@@ -120,69 +118,74 @@ class KTaskBuilder(val name: String) {
     inline fun <reified T : Any, reified R : Any> action(
         from: String = "",
         to: String = "",
-        crossinline actionBuilder: Workspace.() -> Action<T, R>
+        crossinline block: Context.() -> Action<T, R>
     ) {
-        transform(from, to) {
-            val res: TaskModel.(DataNode<T>) -> DataNode<Any> = { data: DataNode<T> ->
-                actionBuilder().invoke(data, meta)
-            }
-            res
+        transform(from, to) { context, data: DataNode<T> ->
+            block(context).invoke(data, meta)
         }
     }
+
+    class TaskEnv(val name: Name, val meta: Meta, val context: Context)
 
     inline fun <reified T : Any, reified R : Any> pipeAction(
         from: String = "",
         to: String = "",
-        crossinline block: Workspace.() -> PipeBuilder<T, R>.() -> Unit
+        crossinline block: PipeBuilder<T, R>.(Context) -> Unit
     ) {
         action(from, to) {
+            val context = this
             PipeAction(
                 inputType = T::class,
-                outputType = R::class,
-                block = block()
-            )
+                outputType = R::class
+            ) { block(context) }
         }
     }
 
     inline fun <reified T : Any, reified R : Any> pipe(
         from: String = "",
         to: String = "",
-        crossinline block: Workspace.() -> suspend ActionEnv.(T) -> R
+        crossinline block: suspend TaskEnv.(T) -> R
     ) {
         action(from, to) {
+            val context = this
             PipeAction(
                 inputType = T::class,
                 outputType = R::class
-            ) { result(block()) }
+            ) {
+                result = { data ->
+                    TaskEnv(name, meta, context).block(data)
+                }
+            }
         }
     }
-
 
     inline fun <reified T : Any, reified R : Any> joinAction(
         from: String = "",
         to: String = "",
-        crossinline block: Workspace.() -> JoinGroupBuilder<T, R>.() -> Unit
+        crossinline block: JoinGroupBuilder<T, R>.(Context) -> Unit
     ) {
         action(from, to) {
             JoinAction(
                 inputType = T::class,
-                outputType = R::class,
-                action = block()
-            )
+                outputType = R::class
+            ) { block(this@action) }
         }
     }
 
     inline fun <reified T : Any, reified R : Any> join(
         from: String = "",
         to: String = "",
-        crossinline block: Workspace.() -> suspend ActionEnv.(Map<Name, T>) -> R
+        crossinline block: suspend TaskEnv.(Map<Name, T>) -> R
     ) {
         action(from, to) {
+            val context = this
             JoinAction(
                 inputType = T::class,
                 outputType = R::class,
                 action = {
-                    result(actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonimous", block())
+                    result(actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonimous") { data ->
+                        TaskEnv(name, meta, context).block(data)
+                    }
                 }
             )
         }
@@ -191,21 +194,20 @@ class KTaskBuilder(val name: String) {
     inline fun <reified T : Any, reified R : Any> splitAction(
         from: String = "",
         to: String = "",
-        crossinline block: Workspace.() -> SplitBuilder<T, R>.() -> Unit
+        crossinline block: SplitBuilder<T, R>.(Context) -> Unit
     ) {
         action(from, to) {
             SplitAction(
                 inputType = T::class,
-                outputType = R::class,
-                action = block()
-            )
+                outputType = R::class
+            ) { block(this@action) }
         }
     }
 
     /**
      * Use DSL to create a descriptor for this task
      */
-    fun descriptor(transform: NodeDescriptor.() -> Unit) {
+    fun description(transform: NodeDescriptor.() -> Unit) {
         this.descriptor = NodeDescriptor.build(transform)
     }
 

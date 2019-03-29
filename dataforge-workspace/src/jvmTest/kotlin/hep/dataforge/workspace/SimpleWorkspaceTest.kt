@@ -18,29 +18,25 @@ class SimpleWorkspaceTest {
             model {
                 allData()
             }
-            pipe<Int, Int> {
-                { data ->
-                    context.logger.info { "Starting square on $data" }
-                    data * data
-                }
+            pipe<Int, Int> { data ->
+                context.logger.info { "Starting square on $data" }
+                data * data
             }
         }
 
-        task("sum"){
+        task("sum") {
             model {
                 dependsOn("square")
             }
-            join<Int,Int> {
-                { data ->
-                    context.logger.info { "Starting sum" }
-                    data.values.sum()
-                }
+            join<Int, Int> { data ->
+                context.logger.info { "Starting sum" }
+                data.values.sum()
             }
         }
     }
 
     @Test
-    fun testWorkspace(){
+    fun testWorkspace() {
         val node = workspace.run("sum")
         val res = node.first()
         assertEquals(328350, res.get())

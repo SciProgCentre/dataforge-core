@@ -208,4 +208,9 @@ fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNod
 
 fun <T: Any> DataNode<T>.first(): Data<T> = data().first().second
 
+/**
+ * Check that node is compatible with given type meaning that each element could be cast to the type
+ */
+expect fun DataNode<*>.checkType(type: KClass<*>)
+
 //fun <T : Any, R: T> DataNode<T>.filterIsInstance(type: KClass<R>): DataNode<R> = filter{_,data -> type.}

@@ -5,7 +5,6 @@ import hep.dataforge.names.Name
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSuperclassOf
 
 class ActionEnv(val name: Name, val meta: Meta)
 
@@ -33,9 +32,8 @@ class PipeAction<T : Any, R : Any>(
 ) : Action<T, R> {
 
     override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
-        if (!this.inputType.isSuperclassOf(node.type)) {
-            error("$inputType expected, but ${node.type} received")
-        }
+        node.checkType(inputType)
+
         return DataNode.build(outputType) {
             node.data().forEach { (name, data) ->
                 //merging data meta with action meta (data meta is primary)
