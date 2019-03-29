@@ -1,11 +1,11 @@
 package hep.dataforge.workspace
 
-import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
-import hep.dataforge.context.members
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.buildMeta
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
@@ -49,40 +49,46 @@ interface Workspace : ContextAware, Provider {
         }
     }
 
-    operator fun <R : Any> Task<R>.invoke(config: Meta): DataNode<R> {
+
+    /**
+     * Invoke a task in the workspace utilizing caching if possible
+     */
+    fun <R : Any> run(task: Task<R>, config: Meta): DataNode<R> {
         context.activate(this)
         try {
-            val model = build(this@Workspace, config)
-            validate(model)
-            return run(this@Workspace, model)
+            val model = task.build(this, config)
+            task.validate(model)
+            return task.run(this, model)
         } finally {
             context.deactivate(this)
         }
     }
 
-    /**
-     * Invoke a task in the workspace utilizing caching if possible
-     */
-    operator fun <R : Any> Task<R>.invoke(targetName: String): DataNode<R> {
-        val target = targets[targetName] ?: error("A target with name $targetName not found in ${this@Workspace}")
-        return invoke(target)
-    }
+//    /**
+//     * Invoke a task in the workspace utilizing caching if possible
+//     */
+//    operator fun <R : Any> Task<R>.invoke(targetName: String): DataNode<R> {
+//        val target = targets[targetName] ?: error("A target with name $targetName not found in ${this@Workspace}")
+//        context.logger.info { "Running ${this.name} on $target" }
+//        return invoke(target)
+//    }
 
     companion object {
         const val TYPE = "workspace"
     }
 }
 
-class SimpleWorkspace(
-    override val context: Context,
-    override val data: DataNode<Any>,
-    override val targets: Map<String, Meta>,
-    tasks: Collection<Task<Any>>
-) : Workspace {
-
-    override val tasks: Map<String, Task<*>> by lazy {
-        (context.members<Task<*>>(Task.TYPE) + tasks).associate { it.name to it }
-    }
-
+fun Workspace.run(task: Task<*>, target: String): DataNode<Any> {
+    val meta = targets[target] ?: error("A target with name $target not found in ${this}")
+    return run(task, meta)
 }
 
+
+fun Workspace.run(task: String, target: String) =
+    tasks[task]?.let { run(it, target) } ?: error("Task with name $task not found")
+
+fun Workspace.run(task: String, meta: Meta) =
+    tasks[task]?.let { run(it, meta) } ?: error("Task with name $task not found")
+
+fun Workspace.run(task: String, block: MetaBuilder.() -> Unit = {}) =
+    run(task, buildMeta(block))

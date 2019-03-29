@@ -14,7 +14,7 @@ import kotlin.reflect.full.isSuperclassOf
 
 
 class FragmentRule<T : Any, R : Any>(val name: Name, var meta: MetaBuilder) {
-    var result: suspend (T) -> R = TODO("Action not implemented")
+    lateinit var result: suspend (T) -> R 
 
     fun result(f: suspend (T) -> R) {
         result = f;

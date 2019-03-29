@@ -68,14 +68,20 @@ class TaskModelBuilder(val name: String, meta: Meta = EmptyMeta) {
     var meta: MetaBuilder = meta.builder()
     val dependencies = HashSet<Dependency>()
 
-    var target: String by this.meta.string(key = MODEL_TARGET_KEY,default = "")
+    var target: String by this.meta.string(key = MODEL_TARGET_KEY, default = "")
 
     /**
      * Add dependency for
      */
-    fun dependsOn(name: String, meta: Meta, placement: Name = EmptyName) {
+    fun dependsOn(name: String, meta: Meta = this.meta, placement: Name = EmptyName) {
         dependencies.add(TaskModelDependency(name, meta, placement))
     }
+
+    fun dependsOn(task: Task<*>, meta: Meta = this.meta, placement: Name = EmptyName) =
+        dependsOn(task.name, meta, placement)
+
+    fun dependsOn(task: Task<*>, placement: Name = EmptyName, metaBuilder: MetaBuilder.() -> Unit) =
+        dependsOn(task.name, buildMeta(metaBuilder), placement)
 
     /**
      * Add custom data dependency
@@ -96,8 +102,8 @@ class TaskModelBuilder(val name: String, meta: Meta = EmptyMeta) {
     /**
      * Add all data as root node
      */
-    fun allData() {
-        dependencies.add(DataDependency.all)
+    fun allData(to: Name = EmptyName) {
+        dependencies.add(AllDataDependency(to))
     }
 
     fun build(): TaskModel = TaskModel(name, meta.seal(), dependencies)

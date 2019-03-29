@@ -206,4 +206,6 @@ fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNod
     }
 }
 
+fun <T: Any> DataNode<T>.first(): Data<T> = data().first().second
+
 //fun <T : Any, R: T> DataNode<T>.filterIsInstance(type: KClass<R>): DataNode<R> = filter{_,data -> type.}

@@ -16,7 +16,7 @@ class JoinGroup<T : Any, R : Any>(var name: String, internal val node: DataNode<
 
     var meta: MetaBuilder = MetaBuilder()
 
-    var result: suspend ActionEnv.(Map<Name, T>) -> R = TODO("Action not implemented")
+    lateinit var result: suspend ActionEnv.(Map<Name, T>) -> R
 
     fun result(f: suspend ActionEnv.(Map<Name, T>) -> R) {
         this.result = f;

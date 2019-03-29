@@ -19,35 +19,49 @@ sealed class Dependency : MetaRepr {
 
 class DataDependency(val filter: DataFilter, val placement: Name = EmptyName) : Dependency() {
     override fun apply(workspace: Workspace): DataNode<Any> {
-        val result =  workspace.data.filter(filter)
+        val result = workspace.data.filter(filter)
         return if (placement.isEmpty()) {
             result
         } else {
-            DataNode.build(Any::class){ this[placement] = result }
+            DataNode.build(Any::class) { this[placement] = result }
         }
     }
 
-    override fun toMeta(): Meta = filter.config
-
-    companion object {
-        val all: DataDependency = DataDependency(DataFilter.build { })
+    override fun toMeta(): Meta = buildMeta {
+        "data" to filter.config
+        "to" to placement
     }
+}
+
+class AllDataDependency(val placement: Name = EmptyName) : Dependency() {
+    override fun apply(workspace: Workspace): DataNode<Any> = if (placement.isEmpty()) {
+        workspace.data
+    } else {
+        DataNode.build(Any::class) { this[placement] = workspace.data }
+    }
+
+    override fun toMeta() = buildMeta {
+        "data" to "*"
+        "to" to placement
+    }
+
 }
 
 class TaskModelDependency(val name: String, val meta: Meta, val placement: Name = EmptyName) : Dependency() {
     override fun apply(workspace: Workspace): DataNode<Any> {
         val task = workspace.tasks[name] ?: error("Task with name ${name} is not found in the workspace")
         if (task.isTerminal) TODO("Support terminal task")
-        val result = with(workspace) { task(meta) }
+        val result = workspace.run(task, meta)
         return if (placement.isEmpty()) {
             result
         } else {
-            DataNode.build(Any::class){ this[placement] = result }
+            DataNode.build(Any::class) { this[placement] = result }
         }
     }
 
     override fun toMeta(): Meta = buildMeta {
-        "name" to name
+        "task" to name
         "meta" to meta
+        "to" to placement
     }
 }

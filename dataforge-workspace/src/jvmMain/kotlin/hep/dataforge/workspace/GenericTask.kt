@@ -75,13 +75,13 @@ class KTaskBuilder(val name: String) {
         val to: String = "",
         val transform: Workspace.() -> TaskModel.(DataNode<Any>) -> DataNode<Any>
     ) {
-        operator fun Workspace.invoke(model: TaskModel, node: DataNode<Any>): DataNode<Any>? {
+        operator fun invoke(workspace: Workspace, model: TaskModel, node: DataNode<Any>): DataNode<Any>? {
             val localData = if (from.isEmpty()) {
                 node
             } else {
                 node.getNode(from.toName()) ?: return null
             }
-            return transform(this).invoke(model, localData)
+            return transform(workspace).invoke(model, localData)
         }
     }
 
@@ -91,14 +91,18 @@ class KTaskBuilder(val name: String) {
         this.modelTransform = modelTransform
     }
 
+    //class TaskEnv(val workspace: Workspace, val model: TaskModel)
+
     fun <T : Any> transform(
         inputType: KClass<T>,
         from: String = "",
         to: String = "",
         transform: Workspace.() -> TaskModel.(DataNode<T>) -> DataNode<Any>
     ) {
-        dataTransforms += DataTransformation(from, to) { data: DataNode<Any> ->
-            transform.invoke(this, data.cast(inputType))
+        dataTransforms += DataTransformation(from, to) {
+            { data: DataNode<Any> ->
+                transform().invoke(this, data.cast(inputType))
+            }
         }
     }
 
@@ -113,77 +117,89 @@ class KTaskBuilder(val name: String) {
     /**
      * Perform given action on data elements in `from` node in input and put the result to `to` node
      */
-    inline fun <reified T : Any, reified R : Any> action(action: Action<T, R>, from: String = "", to: String = "") {
-        transform(from, to) { data: DataNode<T> ->
-            action(data, model.meta)
+    inline fun <reified T : Any, reified R : Any> action(
+        from: String = "",
+        to: String = "",
+        crossinline actionBuilder: Workspace.() -> Action<T, R>
+    ) {
+        transform(from, to) {
+            val res: TaskModel.(DataNode<T>) -> DataNode<Any> = { data: DataNode<T> ->
+                actionBuilder().invoke(data, meta)
+            }
+            res
         }
     }
 
     inline fun <reified T : Any, reified R : Any> pipeAction(
         from: String = "",
         to: String = "",
-        noinline action: PipeBuilder<T, R>.() -> Unit
+        crossinline block: Workspace.() -> PipeBuilder<T, R>.() -> Unit
     ) {
-        val pipe: Action<T, R> = PipeAction(
-            inputType = T::class,
-            outputType = R::class,
-            block = action
-        )
-        action(pipe, from, to);
+        action(from, to) {
+            PipeAction(
+                inputType = T::class,
+                outputType = R::class,
+                block = block()
+            )
+        }
     }
 
     inline fun <reified T : Any, reified R : Any> pipe(
         from: String = "",
         to: String = "",
-        noinline action: suspend ActionEnv.(T) -> R
+        crossinline block: Workspace.() -> suspend ActionEnv.(T) -> R
     ) {
-        val pipe: Action<T, R> = PipeAction(
-            inputType = T::class,
-            outputType = R::class
-        ) { result(action) }
-        action(pipe, from, to);
+        action(from, to) {
+            PipeAction(
+                inputType = T::class,
+                outputType = R::class
+            ) { result(block()) }
+        }
     }
 
 
     inline fun <reified T : Any, reified R : Any> joinAction(
         from: String = "",
         to: String = "",
-        noinline action: JoinGroupBuilder<T, R>.() -> Unit
+        crossinline block: Workspace.() -> JoinGroupBuilder<T, R>.() -> Unit
     ) {
-        val join: Action<T, R> = JoinAction(
-            inputType = T::class,
-            outputType = R::class,
-            action = action
-        )
-        action(join, from, to);
+        action(from, to) {
+            JoinAction(
+                inputType = T::class,
+                outputType = R::class,
+                action = block()
+            )
+        }
     }
 
     inline fun <reified T : Any, reified R : Any> join(
         from: String = "",
         to: String = "",
-        noinline action: suspend ActionEnv.(Map<Name, T>) -> R
+        crossinline block: Workspace.() -> suspend ActionEnv.(Map<Name, T>) -> R
     ) {
-        val join: Action<T, R> = JoinAction(
-            inputType = T::class,
-            outputType = R::class,
-            action = {
-                result(actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonimous", action)
-            }
-        )
-        action(join, from, to);
+        action(from, to) {
+            JoinAction(
+                inputType = T::class,
+                outputType = R::class,
+                action = {
+                    result(actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonimous", block())
+                }
+            )
+        }
     }
 
     inline fun <reified T : Any, reified R : Any> splitAction(
         from: String = "",
         to: String = "",
-        noinline action: SplitBuilder<T, R>.() -> Unit
+        crossinline block: Workspace.() -> SplitBuilder<T, R>.() -> Unit
     ) {
-        val split: Action<T, R> = SplitAction(
-            inputType = T::class,
-            outputType = R::class,
-            action = action
-        )
-        action(split, from, to);
+        action(from, to) {
+            SplitAction(
+                inputType = T::class,
+                outputType = R::class,
+                action = block()
+            )
+        }
     }
 
     /**
@@ -193,22 +209,24 @@ class KTaskBuilder(val name: String) {
         this.descriptor = NodeDescriptor.build(transform)
     }
 
-    fun build(): GenericTask<Any> {
-        val transform: Workspace.() -> TaskModel.(DataNode<Any>) -> DataNode<Any> = {
+    fun build(): GenericTask<Any> =
+        GenericTask(name, Any::class, descriptor ?: NodeDescriptor.empty(), modelTransform) {
+            val workspace = this
             { data ->
+                val model = this
                 if (dataTransforms.isEmpty()) {
                     //return data node as is
                     logger.warn("No transformation present, returning input data")
                     data
                 } else {
                     val builder = DataTreeBuilder(Any::class)
-                    dataTransforms.forEach { transform ->
-                        val res = transform(this, data)
+                    dataTransforms.forEach { transformation ->
+                        val res = transformation(workspace, model, data)
                         if (res != null) {
-                            if (transform.to.isEmpty()) {
+                            if (transformation.to.isEmpty()) {
                                 builder.update(res)
                             } else {
-                                builder[transform.to.toName()] = res
+                                builder[transformation.to.toName()] = res
                             }
                         }
                     }
@@ -216,10 +234,12 @@ class KTaskBuilder(val name: String) {
                 }
             }
         }
-        return GenericTask(name, Any::class, descriptor ?: NodeDescriptor.empty(), modelTransform, transform);
-    }
 }
 
 fun task(name: String, builder: KTaskBuilder.() -> Unit): GenericTask<Any> {
-    return KTaskBuilder(name).apply(builder).build();
+    return KTaskBuilder(name).apply(builder).build()
+}
+
+fun WorkspaceBuilder.task(name: String, builder: KTaskBuilder.() -> Unit) {
+    task(KTaskBuilder(name).apply(builder).build())
 }
