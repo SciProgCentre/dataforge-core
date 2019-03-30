@@ -33,6 +33,35 @@ class SimpleWorkspaceTest {
                 data.values.sum()
             }
         }
+
+        task("average") {
+            model {
+                allData()
+            }
+            joinByGroup<Int, Double> { context ->
+                group("even", filter = { name, data -> name.toString().toInt() % 2 == 0 }) {
+                    result { data ->
+                        context.logger.info { "Starting even" }
+                        data.values.average()
+                    }
+                }
+                group("odd", filter = { name, data -> name.toString().toInt() % 2 == 1 }) {
+                    result { data ->
+                        context.logger.info { "Starting odd" }
+                        data.values.average()
+                    }
+                }
+            }
+        }
+
+        task("delta"){
+            model{
+                dependsOn("average")
+            }
+            join<Double,Double> {data->
+                data["even"]!! - data["odd"]!!
+            }
+        }
     }
 
     @Test

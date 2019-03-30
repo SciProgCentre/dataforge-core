@@ -127,7 +127,10 @@ class KTaskBuilder(val name: String) {
 
     class TaskEnv(val name: Name, val meta: Meta, val context: Context)
 
-    inline fun <reified T : Any, reified R : Any> pipeAction(
+    /**
+     * A customized pipe action with ability to change meta and name
+     */
+    inline fun <reified T : Any, reified R : Any> customPipe(
         from: String = "",
         to: String = "",
         crossinline block: PipeBuilder<T, R>.(Context) -> Unit
@@ -141,6 +144,9 @@ class KTaskBuilder(val name: String) {
         }
     }
 
+    /**
+     * A simple pipe action without changing meta or name
+     */
     inline fun <reified T : Any, reified R : Any> pipe(
         from: String = "",
         to: String = "",
@@ -152,6 +158,7 @@ class KTaskBuilder(val name: String) {
                 inputType = T::class,
                 outputType = R::class
             ) {
+                //TODO automatically append task meta
                 result = { data ->
                     TaskEnv(name, meta, context).block(data)
                 }
@@ -159,7 +166,10 @@ class KTaskBuilder(val name: String) {
         }
     }
 
-    inline fun <reified T : Any, reified R : Any> joinAction(
+    /**
+     * Join elements in gathered data by multiple groups
+     */
+    inline fun <reified T : Any, reified R : Any> joinByGroup(
         from: String = "",
         to: String = "",
         crossinline block: JoinGroupBuilder<T, R>.(Context) -> Unit
@@ -172,6 +182,9 @@ class KTaskBuilder(val name: String) {
         }
     }
 
+    /**
+     * Join all elemlents in gathered data matching input type
+     */
     inline fun <reified T : Any, reified R : Any> join(
         from: String = "",
         to: String = "",
@@ -183,7 +196,7 @@ class KTaskBuilder(val name: String) {
                 inputType = T::class,
                 outputType = R::class,
                 action = {
-                    result(actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonimous") { data ->
+                    result(actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonymous") { data ->
                         TaskEnv(name, meta, context).block(data)
                     }
                 }
@@ -191,7 +204,10 @@ class KTaskBuilder(val name: String) {
         }
     }
 
-    inline fun <reified T : Any, reified R : Any> splitAction(
+    /**
+     * Split each element in gathered data into fixed number of fragments
+     */
+    inline fun <reified T : Any, reified R : Any> split(
         from: String = "",
         to: String = "",
         crossinline block: SplitBuilder<T, R>.(Context) -> Unit
@@ -211,7 +227,7 @@ class KTaskBuilder(val name: String) {
         this.descriptor = NodeDescriptor.build(transform)
     }
 
-    fun build(): GenericTask<Any> =
+    internal fun build(): GenericTask<Any> =
         GenericTask(name, Any::class, descriptor ?: NodeDescriptor.empty(), modelTransform) {
             val workspace = this
             { data ->
@@ -245,3 +261,5 @@ fun task(name: String, builder: KTaskBuilder.() -> Unit): GenericTask<Any> {
 fun WorkspaceBuilder.task(name: String, builder: KTaskBuilder.() -> Unit) {
     task(KTaskBuilder(name).apply(builder).build())
 }
+
+//TODO add delegates to build gradle-like tasks

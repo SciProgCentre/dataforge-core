@@ -48,6 +48,14 @@ class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
         }
     }
 
+    fun group(groupName: String, filter: (Name, Data<T>) -> Boolean, action: JoinGroup<T, R>.() -> Unit) {
+        groupRules += { node ->
+            listOf(
+                JoinGroup<T, R>(groupName, node.filter(filter)).apply(action)
+            )
+        }
+    }
+
     /**
      * Apply transformation to the whole node
      */
@@ -99,3 +107,5 @@ class JoinAction<T : Any, R : Any>(
         }
     }
 }
+
+operator fun <T> Map<Name,T>.get(name:String) = get(name.toName())
