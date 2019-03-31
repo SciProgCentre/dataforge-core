@@ -45,7 +45,7 @@ allprojects {
     }
 
     group = "hep.dataforge"
-    version = "0.1.2-dev-2"
+    version = "0.1.2-dev-3"
 
     // apply bintray configuration
     apply(from = "${rootProject.rootDir}/gradle/bintray.gradle")
@@ -117,38 +117,43 @@ subprojects {
                 }
 
 
-                configure<NodeExtension>{
-                    nodeModulesDir = file("$buildDir/node_modules")
-                }
+                val runJsTests by ext(false)
+                
+                if(runJsTests) {
 
-                val compileKotlinJs by tasks.getting(Kotlin2JsCompile::class)
-                val compileTestKotlinJs by tasks.getting(Kotlin2JsCompile::class)
-
-                val populateNodeModules by tasks.registering(Copy::class) {
-                    dependsOn(compileKotlinJs)
-                    from(compileKotlinJs.destinationDir)
-
-                    compilations["test"].runtimeDependencyFiles.forEach {
-                        if (it.exists() && !it.isDirectory) {
-                            from(zipTree(it.absolutePath).matching { include("*.js") })
-                        }
+                    configure<NodeExtension> {
+                        nodeModulesDir = file("$buildDir/node_modules")
                     }
 
-                    into("$buildDir/node_modules")
-                }
+                    val compileKotlinJs by tasks.getting(Kotlin2JsCompile::class)
+                    val compileTestKotlinJs by tasks.getting(Kotlin2JsCompile::class)
 
-                val installMocha by tasks.registering(NpmTask::class) {
-                    setWorkingDir(buildDir)
-                    setArgs(listOf("install", "mocha"))
-                }
+                    val populateNodeModules by tasks.registering(Copy::class) {
+                        dependsOn(compileKotlinJs)
+                        from(compileKotlinJs.destinationDir)
 
-                val runMocha by tasks.registering(NodeTask::class) {
-                    dependsOn(compileTestKotlinJs, populateNodeModules, installMocha)
-                    setScript(file("$buildDir/node_modules/mocha/bin/mocha"))
-                    setArgs(listOf(compileTestKotlinJs.outputFile))
-                }
+                        compilations["test"].runtimeDependencyFiles.forEach {
+                            if (it.exists() && !it.isDirectory) {
+                                from(zipTree(it.absolutePath).matching { include("*.js") })
+                            }
+                        }
 
-                tasks["jsTest"].dependsOn(runMocha)
+                        into("$buildDir/node_modules")
+                    }
+
+                    val installMocha by tasks.registering(NpmTask::class) {
+                        setWorkingDir(buildDir)
+                        setArgs(listOf("install", "mocha"))
+                    }
+
+                    val runMocha by tasks.registering(NodeTask::class) {
+                        dependsOn(compileTestKotlinJs, populateNodeModules, installMocha)
+                        setScript(file("$buildDir/node_modules/mocha/bin/mocha"))
+                        setArgs(listOf(compileTestKotlinJs.outputFile))
+                    }
+
+                    tasks["jsTest"].dependsOn(runMocha)
+                }
             }
 
             sourceSets {

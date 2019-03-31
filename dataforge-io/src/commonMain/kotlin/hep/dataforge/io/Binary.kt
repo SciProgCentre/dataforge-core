@@ -1,6 +1,5 @@
-package hep.dataforge.meta.io
+package hep.dataforge.io
 
-import kotlinx.io.ByteBuffer
 import kotlinx.io.core.Input
 
 //TODO replace by abstraction

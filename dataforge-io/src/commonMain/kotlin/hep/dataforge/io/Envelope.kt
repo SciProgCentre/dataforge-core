@@ -1,4 +1,4 @@
-package hep.dataforge.meta.io
+package hep.dataforge.io
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
@@ -9,13 +9,6 @@ interface Envelope {
     val data: Binary?
 
     companion object {
-//        /**
-//         * Property keys
-//         */
-//        const val TYPE_PROPERTY = "type"
-//        const val META_TYPE_PROPERTY = "metaType"
-//        const val META_LENGTH_PROPERTY = "metaLength"
-//        const val DATA_LENGTH_PROPERTY = "dataLength"
 
         /**
          * meta keys

@@ -1,4 +1,4 @@
-package hep.dataforge.meta.io
+package hep.dataforge.io
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaItem
