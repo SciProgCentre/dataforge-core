@@ -14,8 +14,8 @@ import kotlinx.serialization.json.*
 
 object JsonMetaFormat : MetaFormat {
 
-    override fun write(meta: Meta, out: Output) {
-        val str = meta.toJson().toString()
+    override fun write(obj: Meta, out: Output) {
+        val str = obj.toJson().toString()
         out.writeText(str)
     }
 

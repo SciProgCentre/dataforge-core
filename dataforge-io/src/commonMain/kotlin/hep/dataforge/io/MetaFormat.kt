@@ -1,15 +1,14 @@
 package hep.dataforge.io
 
 import hep.dataforge.meta.Meta
-import kotlinx.io.core.*
+import kotlinx.io.core.BytePacketBuilder
+import kotlinx.io.core.ByteReadPacket
+import kotlinx.io.core.toByteArray
 
 /**
  * A format for meta serialization
  */
-interface MetaFormat {
-    fun write(meta: Meta, out: Output)
-    fun read(input: Input): Meta
-}
+interface MetaFormat: IOFormat<Meta>
 
 /**
  * ServiceLoader compatible factory

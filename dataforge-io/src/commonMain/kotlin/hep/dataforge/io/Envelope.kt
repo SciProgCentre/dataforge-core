@@ -3,10 +3,11 @@ package hep.dataforge.io
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
+import kotlinx.io.core.Input
 
 interface Envelope {
     val meta: Meta
-    val data: Binary?
+    val data: Input?
 
     companion object {
 
@@ -18,7 +19,14 @@ interface Envelope {
         const val ENVELOPE_DATA_TYPE_KEY = "$ENVELOPE_NODE.dataType"
         const val ENVELOPE_DESCRIPTION_KEY = "$ENVELOPE_NODE.description"
         //const val ENVELOPE_TIME_KEY = "@envelope.time"
+
     }
+}
+
+class SimpleEnvelope(override val meta: Meta, val dataProvider: () -> Input?) : Envelope{
+    override val data: Input?
+        get() = dataProvider()
+
 }
 
 /**
@@ -41,3 +49,4 @@ val Envelope.dataType: String? get() = meta[Envelope.ENVELOPE_DATA_TYPE_KEY].str
  * @return
  */
 val Envelope.description: String? get() = meta[Envelope.ENVELOPE_DESCRIPTION_KEY].string
+

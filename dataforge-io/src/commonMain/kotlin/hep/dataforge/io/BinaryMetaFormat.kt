@@ -8,8 +8,8 @@ import kotlinx.io.core.readText
 import kotlinx.io.core.writeText
 
 object BinaryMetaFormat : MetaFormat {
-    override fun write(meta: Meta, out: Output) {
-        out.writeMeta(meta)
+    override fun write(obj: Meta, out: Output) {
+        out.writeMeta(obj)
     }
 
     override fun read(input: Input): Meta {
