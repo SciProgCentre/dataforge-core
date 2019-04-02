@@ -69,7 +69,7 @@ open class Context(final override val name: String, val parent: Context? = Globa
     override fun listTop(target: String): Sequence<Name> {
         return when (target) {
             Plugin.PLUGIN_TARGET -> plugins.asSequence().map { it.name.toName() }
-            Value.TYPE -> properties.asValueSequence().map { it.first }
+            Value.TYPE -> properties.values().map { it.first }
             else -> emptySequence()
         }
     }

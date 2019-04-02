@@ -14,7 +14,7 @@ class StyledTest{
                 }
             }
         }.seal().withStyle()
-        assertEquals(10, meta.asValueSequence().count())
+        assertEquals(10, meta.values().count())
 
         val bNode = meta["b"].node
 
@@ -22,8 +22,8 @@ class StyledTest{
 
         val allNodes = meta.getAll("b.a")
 
-        assertEquals(3, aNodes?.get("3")?.node["d"]?.int)
-        assertEquals(3, allNodes["3"]?.node["d"]?.int)
+        assertEquals(3, aNodes?.get("3").node["d"].int)
+        assertEquals(3, allNodes["3"].node["d"].int)
     }
 
 }

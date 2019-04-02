@@ -30,7 +30,7 @@ class MetaBuilderTest {
                 "b.a[$it]" to it
             }
         }.seal()
-        assertEquals(10, meta.asValueSequence().count())
+        assertEquals(10, meta.values().count())
 
         val nodes = meta.getAll("b.a")
 

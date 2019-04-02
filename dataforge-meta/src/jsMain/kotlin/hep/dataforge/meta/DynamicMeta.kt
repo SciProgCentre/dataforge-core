@@ -32,7 +32,8 @@ fun Meta.toDynamic(): dynamic {
 class DynamicMeta(val obj: dynamic) : Meta {
     private fun keys() = js("Object.keys(this.obj)") as Array<String>
 
-    private fun isArray(obj: dynamic): Boolean = js("Array.isArray(obj)") as Boolean
+    private fun isArray(@Suppress("UNUSED_PARAMETER") obj: dynamic): Boolean =
+        js("Array.isArray(obj)") as Boolean
 
     private fun asItem(obj: dynamic): MetaItem<DynamicMeta>? {
         if (obj == null) return MetaItem.ValueItem(Null)

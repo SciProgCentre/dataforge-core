@@ -106,3 +106,14 @@ fun NameToken.asName() = Name(listOf(this))
 val EmptyName = Name(emptyList())
 
 fun Name.isEmpty(): Boolean = this.length == 0
+
+/**
+ * Set or replace last token index
+ */
+fun Name.withIndex(index: String): Name {
+    val tokens = ArrayList(tokens)
+    val last = NameToken(tokens.last().body, index)
+    tokens.removeAt(tokens.size - 1)
+    tokens.add(last)
+    return Name(tokens)
+}

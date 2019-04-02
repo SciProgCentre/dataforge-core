@@ -1,10 +1,6 @@
 package hep.dataforge.meta
 
-import hep.dataforge.names.Name
-import hep.dataforge.names.NameToken
-import hep.dataforge.names.plus
-import hep.dataforge.names.toName
-import hep.dataforge.names.asName
+import hep.dataforge.names.*
 import hep.dataforge.values.Value
 
 internal data class MetaListener(
@@ -152,12 +148,12 @@ fun <M : MutableMetaNode<M>> M.update(meta: Meta) {
 fun <M : MutableMeta<M>> M.setIndexed(
     name: Name,
     items: Iterable<MetaItem<M>>,
-    queryFactory: (Int) -> String = { it.toString() }
+    indexFactory: MetaItem<M>.(index: Int) -> String = { it.toString() }
 ) {
     val tokens = name.tokens.toMutableList()
     val last = tokens.last()
     items.forEachIndexed { index, meta ->
-        val indexedToken = NameToken(last.body, last.index + queryFactory(index))
+        val indexedToken = NameToken(last.body, last.index + meta.indexFactory(index))
         tokens[tokens.lastIndex] = indexedToken
         set(Name(tokens), meta)
     }
@@ -166,10 +162,24 @@ fun <M : MutableMeta<M>> M.setIndexed(
 fun <M : MutableMetaNode<M>> M.setIndexed(
     name: Name,
     metas: Iterable<Meta>,
-    queryFactory: (Int) -> String = { it.toString() }
+    indexFactory: MetaItem<M>.(index: Int) -> String = { it.toString() }
 ) {
-    setIndexed(name, metas.map { MetaItem.NodeItem(wrap(name, it)) }, queryFactory)
+    setIndexed(name, metas.map { MetaItem.NodeItem(wrap(name, it)) }, indexFactory)
 }
 
 operator fun <M : MutableMetaNode<M>> M.set(name: Name, metas: Iterable<Meta>) = setIndexed(name, metas)
 operator fun <M : MutableMetaNode<M>> M.set(name: String, metas: Iterable<Meta>) = setIndexed(name.toName(), metas)
+
+/**
+ * Append the node with a same-name-sibling, automatically generating numerical index
+ */
+fun <M : MutableMetaNode<M>> M.append(name: Name, value: Any?) {
+    require(!name.isEmpty()) { "Name could not be empty for append operation" }
+    val newIndex = name.last()!!.index
+    if (newIndex.isNotEmpty()) {
+        set(name, value)
+    } else {
+        val index = (getAll(name).keys.mapNotNull { it.toIntOrNull() }.max() ?: -1) + 1
+        set(name.withIndex(index.toString()), value)
+    }
+}
