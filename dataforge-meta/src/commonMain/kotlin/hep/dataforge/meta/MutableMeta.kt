@@ -118,6 +118,7 @@ operator fun <M : MutableMetaNode<M>> M.set(name: Name, value: Any?) {
             is MetaItem.NodeItem<*> -> setNode(name, value.node)
         }
         is Meta -> setNode(name, value)
+        is Specification -> setNode(name, value.config)
         else -> setValue(name, Value.of(value))
     }
 }
@@ -183,3 +184,5 @@ fun <M : MutableMetaNode<M>> M.append(name: Name, value: Any?) {
         set(name.withIndex(index.toString()), value)
     }
 }
+
+fun <M : MutableMetaNode<M>> M.append(name: String, value: Any?) = append(name.toName(), value)

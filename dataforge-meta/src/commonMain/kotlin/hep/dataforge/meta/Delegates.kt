@@ -245,6 +245,7 @@ class MutableNumberDelegate<M : MutableMeta<M>>(
     }
 
     val double get() = ReadWriteDelegateWrapper(this, reader = { it?.toDouble() }, writer = { it })
+    val float get() = ReadWriteDelegateWrapper(this, reader = { it?.toFloat() }, writer = { it })
     val int get() = ReadWriteDelegateWrapper(this, reader = { it?.toInt() }, writer = { it })
     val short get() = ReadWriteDelegateWrapper(this, reader = { it?.toShort() }, writer = { it })
     val long get() = ReadWriteDelegateWrapper(this, reader = { it?.toLong() }, writer = { it })
@@ -303,6 +304,7 @@ class MutableSafeNumberDelegate<M : MutableMeta<M>>(
     }
 
     val double get() = ReadWriteDelegateWrapper(this, reader = { it.toDouble() }, writer = { it })
+    val float get() = ReadWriteDelegateWrapper(this, reader = { it.toFloat() }, writer = { it })
     val int get() = ReadWriteDelegateWrapper(this, reader = { it.toInt() }, writer = { it })
     val short get() = ReadWriteDelegateWrapper(this, reader = { it.toShort() }, writer = { it })
     val long get() = ReadWriteDelegateWrapper(this, reader = { it.toLong() }, writer = { it })
