@@ -45,7 +45,7 @@ allprojects {
     }
 
     group = "hep.dataforge"
-    version = "0.1.2-dev-3"
+    version = "0.1.2-dev-4"
 
     // apply bintray configuration
     apply(from = "${rootProject.rootDir}/gradle/bintray.gradle")
@@ -87,7 +87,6 @@ subprojects {
 
     afterEvaluate {
         extensions.findByType<KotlinMultiplatformExtension>()?.apply {
-            apply(plugin = "com.moowork.node")
             jvm {
                 compilations.all {
                     kotlinOptions {
@@ -120,7 +119,7 @@ subprojects {
                 val runJsTests by ext(false)
                 
                 if(runJsTests) {
-
+                    apply(plugin = "com.moowork.node")
                     configure<NodeExtension> {
                         nodeModulesDir = file("$buildDir/node_modules")
                     }
