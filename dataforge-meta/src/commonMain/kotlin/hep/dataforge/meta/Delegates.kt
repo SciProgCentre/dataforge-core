@@ -344,14 +344,17 @@ class MutableMorphDelegate<M : MutableMetaNode<M>, T : Configurable>(
     val meta: M,
     private val key: String? = null,
     private val converter: (Meta) -> T
-) :
-    ReadWriteProperty<Any?, T> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return converter(meta[key ?: property.name]?.node ?: EmptyMeta)
+) : ReadWriteProperty<Any?, T?> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
+        return meta[key ?: property.name]?.node?.let(converter)
     }
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        meta[key ?: property.name] = value.config
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+        if (value == null) {
+            meta.remove(key ?: property.name)
+        } else {
+            meta[key ?: property.name] = value.config
+        }
     }
 }
 

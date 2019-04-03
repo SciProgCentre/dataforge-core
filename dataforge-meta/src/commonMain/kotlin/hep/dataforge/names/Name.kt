@@ -117,3 +117,6 @@ fun Name.withIndex(index: String): Name {
     tokens.add(last)
     return Name(tokens)
 }
+
+operator fun <T> Map<Name, T>.get(name: String) = get(name.toName())
+operator fun <T> MutableMap<Name, T>.set(name: String, value: T) = set(name.toName(), value)
