@@ -56,7 +56,7 @@ fun <C : Specification, S : SpecificationCompanion<C>> S.createStyle(action: C.(
     Config().also { update(it, action) }
 
 
-fun <M : MutableMetaNode<M>, C : Specification> Specification.spec(
+fun <C : Specification> Specification.spec(
     spec: SpecificationCompanion<C>,
     key: String? = null
 ) =
