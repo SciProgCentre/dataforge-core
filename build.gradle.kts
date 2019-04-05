@@ -102,7 +102,7 @@ subprojects {
                             metaInfo = true
                             sourceMap = true
                             sourceMapEmbedSources = "always"
-                            moduleKind = "umd"
+                            moduleKind = "commonjs"
                         }
                     }
                 }
