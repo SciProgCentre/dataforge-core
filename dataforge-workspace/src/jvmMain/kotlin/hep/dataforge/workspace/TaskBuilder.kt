@@ -5,67 +5,13 @@ import hep.dataforge.data.*
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
-import hep.dataforge.meta.node
 import hep.dataforge.meta.string
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import kotlin.reflect.KClass
 
-//data class TaskEnv(val workspace: Workspace, val model: TaskModel)
-
-
-class GenericTask<R : Any>(
-    override val name: String,
-    override val type: KClass<out R>,
-    override val descriptor: NodeDescriptor,
-    private val modelTransform: TaskModelBuilder.(Meta) -> Unit,
-    private val dataTransform: Workspace.() -> TaskModel.(DataNode<Any>) -> DataNode<R>
-) : Task<R> {
-
-    private fun gather(workspace: Workspace, model: TaskModel): DataNode<Any> {
-        return DataNode.build(Any::class) {
-            model.dependencies.forEach { dep ->
-                update(dep.apply(workspace))
-            }
-        }
-    }
-
-    override fun run(workspace: Workspace, model: TaskModel): DataNode<R> {
-        //validate model
-        validate(model)
-
-        // gather data
-        val input = gather(workspace, model)
-
-        //execute
-        workspace.context.logger.info("Starting task '$name' on ${model.target} with meta: \n${model.meta}")
-        val output = dataTransform(workspace).invoke(model, input)
-
-        //handle result
-        //output.handle(model.context.dispatcher) { this.handle(it) }
-
-        return output
-    }
-
-    /**
-     * Build new TaskModel and apply specific model transformation for this
-     * task. By default model uses the meta node with the same node as the name of the task.
-     *
-     * @param workspace
-     * @param taskConfig
-     * @return
-     */
-    override fun build(workspace: Workspace, taskConfig: Meta): TaskModel {
-        val taskMeta = taskConfig[name]?.node ?: taskConfig
-        val builder = TaskModelBuilder(name, taskMeta)
-        modelTransform.invoke(builder, taskMeta)
-        return builder.build()
-    }
-    //TODO add validation
-}
-
 @TaskBuildScope
-class KTaskBuilder(val name: String) {
+class TaskBuilder(val name: String) {
     private var modelTransform: TaskModelBuilder.(Meta) -> Unit = { data("*") }
     var descriptor: NodeDescriptor? = null
 
@@ -196,7 +142,9 @@ class KTaskBuilder(val name: String) {
                 inputType = T::class,
                 outputType = R::class,
                 action = {
-                    result(actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonymous") { data ->
+                    result(
+                        actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonymous"
+                    ) { data ->
                         TaskEnv(name, meta, context).block(data)
                     }
                 }
@@ -228,7 +176,12 @@ class KTaskBuilder(val name: String) {
     }
 
     internal fun build(): GenericTask<Any> =
-        GenericTask(name, Any::class, descriptor ?: NodeDescriptor.empty(), modelTransform) {
+        GenericTask(
+            name,
+            Any::class,
+            descriptor ?: NodeDescriptor.empty(),
+            modelTransform
+        ) {
             val workspace = this
             { data ->
                 val model = this
@@ -254,12 +207,12 @@ class KTaskBuilder(val name: String) {
         }
 }
 
-fun task(name: String, builder: KTaskBuilder.() -> Unit): GenericTask<Any> {
-    return KTaskBuilder(name).apply(builder).build()
+fun task(name: String, builder: TaskBuilder.() -> Unit): GenericTask<Any> {
+    return TaskBuilder(name).apply(builder).build()
 }
 
-fun WorkspaceBuilder.task(name: String, builder: KTaskBuilder.() -> Unit) {
-    task(KTaskBuilder(name).apply(builder).build())
+fun WorkspaceBuilder.task(name: String, builder: TaskBuilder.() -> Unit) {
+    task(TaskBuilder(name).apply(builder).build())
 }
 
 //TODO add delegates to build gradle-like tasks
