@@ -22,7 +22,7 @@ interface SpecificationCompanion<T : Specification> {
 
     fun build(action: T.() -> Unit) = update(Config(), action)
 
-    fun empty() = build {  }
+    fun empty() = build { }
 
     /**
      * Wrap generic configuration producing instance of desired type
@@ -59,5 +59,4 @@ fun <C : Specification, S : SpecificationCompanion<C>> S.createStyle(action: C.(
 fun <C : Specification> Specification.spec(
     spec: SpecificationCompanion<C>,
     key: String? = null
-) =
-    MutableMorphDelegate(config, key) { spec.wrap(config) }
+) = MutableMorphDelegate(config, key) { spec.wrap(it) }

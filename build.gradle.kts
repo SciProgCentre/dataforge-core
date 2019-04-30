@@ -46,16 +46,18 @@ allprojects {
 
     group = "hep.dataforge"
     version = "0.1.2-dev-5"
-
-    // apply bintray configuration
-    apply(from = "${rootProject.rootDir}/gradle/bintray.gradle")
-
-    //apply artifactory configuration
-    apply(from = "${rootProject.rootDir}/gradle/artifactory.gradle")
-
 }
 
 subprojects {
+
+    if(name.startsWith("dataforge")){
+        // apply bintray configuration
+        apply(from = "${rootProject.rootDir}/gradle/bintray.gradle")
+
+        //apply artifactory configuration
+        apply(from = "${rootProject.rootDir}/gradle/artifactory.gradle")
+
+    }
 
     //    dokka {
 //        outputFormat = "html"
