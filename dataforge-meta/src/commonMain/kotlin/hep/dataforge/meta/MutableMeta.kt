@@ -118,7 +118,7 @@ operator fun <M : MutableMetaNode<M>> M.set(name: Name, value: Any?) {
             is MetaItem.NodeItem<*> -> setNode(name, value.node)
         }
         is Meta -> setNode(name, value)
-        is Specification -> setNode(name, value.config)
+        is Specific -> setNode(name, value.config)
         else -> setValue(name, Value.of(value))
     }
 }

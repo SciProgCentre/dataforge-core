@@ -4,14 +4,14 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.toName
 
 
-class DataFilter(override val config: Config) : Specification {
+class DataFilter(override val config: Config) : Specific {
     var from by string()
     var to by string()
     var pattern by string("*.")
 //    val prefix by string()
 //    val suffix by string()
 
-    companion object : SpecificationCompanion<DataFilter> {
+    companion object : Specification<DataFilter> {
         override fun wrap(config: Config): DataFilter = DataFilter(config)
     }
 }

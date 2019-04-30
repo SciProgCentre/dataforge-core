@@ -95,8 +95,8 @@ inline fun <reified E : Enum<E>> Configurable.enum(default: E, key: String? = nu
 
 fun Configurable.node(key: String? = null) = MutableNodeDelegate(config, key)
 
-fun <T : Specification> Configurable.spec(spec: SpecificationCompanion<T>, key: String? = null) =
+fun <T : Specific> Configurable.spec(spec: Specification<T>, key: String? = null) =
     MutableMorphDelegate(config, key) { spec.wrap(it) }
 
-fun <T : Specification> Configurable.spec(builder: (Config) -> T, key: String? = null) =
+fun <T : Specific> Configurable.spec(builder: (Config) -> T, key: String? = null) =
     MutableMorphDelegate(config, key) { specification(builder).wrap(it) }

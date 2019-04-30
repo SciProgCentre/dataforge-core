@@ -29,7 +29,7 @@ import hep.dataforge.values.ValueType
  *
  * @author Alexander Nozik
  */
-class ValueDescriptor(override val config: Config) : Specification {
+class ValueDescriptor(override val config: Config) : Specific {
 
     /**
      * The default for this value. Null if there is no default.
@@ -121,7 +121,7 @@ class ValueDescriptor(override val config: Config) : Specification {
         this.allowedValues = v.map { Value.of(it) }
     }
 
-    companion object : SpecificationCompanion<ValueDescriptor> {
+    companion object : Specification<ValueDescriptor> {
 
         override fun wrap(config: Config): ValueDescriptor = ValueDescriptor(config)
 

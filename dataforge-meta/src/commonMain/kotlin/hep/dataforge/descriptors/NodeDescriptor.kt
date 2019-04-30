@@ -31,7 +31,7 @@ import hep.dataforge.names.toName
  *
  * @author Alexander Nozik
  */
-class NodeDescriptor(override val config: Config) : Specification {
+class NodeDescriptor(override val config: Config) : Specific {
 
     /**
      * The name of this node
@@ -120,7 +120,7 @@ class NodeDescriptor(override val config: Config) : Specification {
 
     //override val descriptor: NodeDescriptor =  empty("descriptor")
 
-    companion object : SpecificationCompanion<NodeDescriptor> {
+    companion object : Specification<NodeDescriptor> {
 
         override fun wrap(config: Config): NodeDescriptor = NodeDescriptor(config)
 
