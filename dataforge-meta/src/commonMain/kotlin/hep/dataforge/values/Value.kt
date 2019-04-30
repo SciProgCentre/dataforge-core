@@ -55,14 +55,14 @@ interface Value {
                 is Value -> value
                 true -> True
                 false -> False
-                is Number -> NumberValue(value)
+                is Number -> value.asValue()
                 is Iterable<*> -> ListValue(value.map { of(it) })
-                is DoubleArray -> ListValue(value.map { NumberValue(it) })
-                is IntArray -> ListValue(value.map { NumberValue(it) })
-                is FloatArray -> ListValue(value.map { NumberValue(it) })
-                is ShortArray -> ListValue(value.map { NumberValue(it) })
-                is LongArray -> ListValue(value.map { NumberValue(it) })
-                is ByteArray -> ListValue(value.map { NumberValue(it) })
+                is DoubleArray -> value.asValue()
+                is IntArray -> value.asValue()
+                is FloatArray -> value.asValue()
+                is ShortArray -> value.asValue()
+                is LongArray -> value.asValue()
+                is ByteArray -> value.asValue()
                 is Array<*> -> ListValue(value.map { of(it) })
                 is Enum<*> -> EnumValue(value)
                 is CharSequence -> StringValue(value.toString())
@@ -182,11 +182,7 @@ class ListValue(override val list: List<Value>) : Value {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Value) return false
-        val otherList = other.list
-        if (list.size != otherList.size) return false
-
-
-        return (0 until list.size).all { list[it] == otherList[it] }
+        return list == other.list
     }
 
     override fun hashCode(): Int {
@@ -208,7 +204,20 @@ fun Boolean.asValue(): Value = if (this) True else False
 
 fun String.asValue(): Value = StringValue(this)
 
-fun Collection<Value>.asValue(): Value = ListValue(this.toList())
+fun Iterable<Value>.asValue(): Value = ListValue(this.toList())
+
+//TODO maybe optimized storage performance
+fun DoubleArray.asValue(): Value = ListValue(map{NumberValue(it)})
+
+fun IntArray.asValue(): Value = ListValue(map{NumberValue(it)})
+
+fun LongArray.asValue(): Value = ListValue(map{NumberValue(it)})
+
+fun ShortArray.asValue(): Value = ListValue(map{NumberValue(it)})
+
+fun FloatArray.asValue(): Value = ListValue(map{NumberValue(it)})
+
+fun ByteArray.asValue(): Value = ListValue(map{NumberValue(it)})
 
 
 /**
