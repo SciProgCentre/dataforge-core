@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.values.Null
 import hep.dataforge.values.Value
 import kotlin.jvm.JvmName
 
@@ -9,7 +10,7 @@ import kotlin.jvm.JvmName
 /**
  * A property delegate that uses custom key
  */
-fun <T> Configurable.value(default: T, key: String? = null) =
+fun Configurable.value(default: Any = Null, key: String? = null) =
     MutableValueDelegate(config, key, Value.of(default))
 
 fun <T> Configurable.value(default: T? = null, key: String? = null, transform: (Value?) -> T) =

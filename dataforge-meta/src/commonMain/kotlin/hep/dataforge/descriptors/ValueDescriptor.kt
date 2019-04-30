@@ -75,7 +75,7 @@ class ValueDescriptor(override val config: Config) : Specific {
      *
      * @return
      */
-    var type: List<ValueType> by value().map {
+    var type: List<ValueType> by value {
         it?.list?.map { v -> ValueType.valueOf(v.string) } ?: emptyList()
     }
 
@@ -83,7 +83,7 @@ class ValueDescriptor(override val config: Config) : Specific {
         this.type = listOf(*t)
     }
 
-    var tags: List<String> by value().map { value ->
+    var tags: List<String> by value { value ->
         value?.list?.map { it.string } ?: emptyList()
     }
 
@@ -106,7 +106,7 @@ class ValueDescriptor(override val config: Config) : Specific {
      *
      * @return
      */
-    var allowedValues: List<Value> by value().map {
+    var allowedValues: List<Value> by value {
         it?.list ?: if (type.size == 1 && type[0] === ValueType.BOOLEAN) {
             listOf(True, False)
         } else {
