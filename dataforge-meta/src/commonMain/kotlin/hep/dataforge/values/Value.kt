@@ -57,6 +57,13 @@ interface Value {
                 false -> False
                 is Number -> NumberValue(value)
                 is Iterable<*> -> ListValue(value.map { of(it) })
+                is DoubleArray -> ListValue(value.map { NumberValue(it) })
+                is IntArray -> ListValue(value.map { NumberValue(it) })
+                is FloatArray -> ListValue(value.map { NumberValue(it) })
+                is ShortArray -> ListValue(value.map { NumberValue(it) })
+                is LongArray -> ListValue(value.map { NumberValue(it) })
+                is ByteArray -> ListValue(value.map { NumberValue(it) })
+                is Array<*> -> ListValue(value.map { of(it) })
                 is Enum<*> -> EnumValue(value)
                 is CharSequence -> StringValue(value.toString())
                 else -> throw IllegalArgumentException("Unrecognized type of the object (${value::class}) converted to Value")

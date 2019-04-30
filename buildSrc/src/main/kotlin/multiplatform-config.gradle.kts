@@ -1,3 +1,4 @@
+import gradle.kotlin.dsl.plugins._e2353938d1a2b15c365d69a8d533ab12.js
 import org.gradle.kotlin.dsl.*
 
 plugins {
@@ -11,8 +12,6 @@ kotlin {
         compilations.all {
             kotlinOptions {
                 jvmTarget = "1.8"
-                // This was used in kmath-koma, but probably if we need it better to apply it for all modules
-                freeCompilerArgs = listOf("-progressive")
             }
         }
     }
