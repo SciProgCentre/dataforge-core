@@ -178,6 +178,22 @@ class ListValue(override val list: List<Value>) : Value {
     override val string: String get() = list.first().string
 
     override fun toString(): String = value.toString()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Value) return false
+        val otherList = other.list
+        if (list.size != otherList.size) return false
+
+
+        return (0 until list.size).all { list[it] == otherList[it] }
+    }
+
+    override fun hashCode(): Int {
+        return list.hashCode()
+    }
+
+
 }
 
 /**

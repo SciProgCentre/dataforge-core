@@ -26,6 +26,7 @@ class MetaFormatTest {
             "node" to {
                 "b" to "DDD"
                 "c" to 11.1
+                "array" to doubleArrayOf(1.0,2.0,3.0)
             }
         }
         val string = meta.asString(JsonMetaFormat)

@@ -32,11 +32,15 @@ object JsonMetaFormat : MetaFormat {
 }
 
 fun Value.toJson(): JsonElement {
-    return when (type) {
-        ValueType.NUMBER -> JsonPrimitive(number)
-        ValueType.STRING -> JsonPrimitive(string)
-        ValueType.BOOLEAN -> JsonPrimitive(boolean)
-        ValueType.NULL -> JsonNull
+    return if(isList()){
+        JsonArray(list.map { it.toJson() })
+    } else {
+        when (type) {
+            ValueType.NUMBER -> JsonPrimitive(number)
+            ValueType.STRING -> JsonPrimitive(string)
+            ValueType.BOOLEAN -> JsonPrimitive(boolean)
+            ValueType.NULL -> JsonNull
+        }
     }
 }
 
