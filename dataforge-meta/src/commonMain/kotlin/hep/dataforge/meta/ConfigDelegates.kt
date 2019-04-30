@@ -1,6 +1,5 @@
 package hep.dataforge.meta
 
-import hep.dataforge.values.Null
 import hep.dataforge.values.Value
 import kotlin.jvm.JvmName
 
@@ -10,8 +9,17 @@ import kotlin.jvm.JvmName
 /**
  * A property delegate that uses custom key
  */
-fun Configurable.value(default: Any = Null, key: String? = null) =
+fun <T> Configurable.value(default: T, key: String? = null) =
     MutableValueDelegate(config, key, Value.of(default))
+
+fun <T> Configurable.value(default: T? = null, key: String? = null, transform: (Value?) -> T) =
+    MutableValueDelegate(config, key, Value.of(default)).transform(reader = transform)
+
+fun Configurable.stringList(key: String? = null) =
+    value { it?.list?.map { value -> value.string } ?: emptyList() }
+
+fun Configurable.numberList(key: String? = null) =
+    value { it?.list?.map { value -> value.number } ?: emptyList() }
 
 fun Configurable.string(default: String? = null, key: String? = null) =
     MutableStringDelegate(config, key, default)
@@ -92,6 +100,8 @@ fun Configurable.float(default: Float, key: String? = null) =
  */
 inline fun <reified E : Enum<E>> Configurable.enum(default: E, key: String? = null) =
     MutableSafeEnumvDelegate(config, key, default) { enumValueOf(it) }
+
+/* Node delegates */
 
 fun Configurable.node(key: String? = null) = MutableNodeDelegate(config, key)
 

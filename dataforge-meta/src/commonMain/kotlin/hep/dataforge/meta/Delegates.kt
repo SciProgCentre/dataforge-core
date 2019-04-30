@@ -184,7 +184,7 @@ class MutableValueDelegate<M : MutableMeta<M>>(
         }
     }
 
-    fun <T> map(writer: (T) -> Value? = { Value.of(it) }, reader: (Value?) -> T) =
+    fun <T> transform(writer: (T) -> Value? = { Value.of(it) }, reader: (Value?) -> T) =
         ReadWriteDelegateWrapper(this, reader, writer)
 }
 

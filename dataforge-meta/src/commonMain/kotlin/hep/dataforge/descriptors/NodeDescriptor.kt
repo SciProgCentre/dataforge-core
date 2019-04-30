@@ -75,7 +75,7 @@ class NodeDescriptor(override val config: Config) : Specific {
      *
      * @return
      */
-    var tags: List<String> by value().map { value ->
+    var tags: List<String> by value{ value ->
         value?.list?.map { it.string } ?: emptyList()
     }
 
