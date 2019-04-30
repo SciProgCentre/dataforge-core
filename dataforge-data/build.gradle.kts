@@ -1,8 +1,8 @@
 plugins {
-    kotlin("multiplatform")
+    `multiplatform-config`
 }
 
-val coroutinesVersion: String by rootProject.extra
+val coroutinesVersion: String = Versions.coroutinesVersion
 
 kotlin {
     jvm()

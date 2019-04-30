@@ -1,12 +1,12 @@
 plugins {
-    kotlin("multiplatform")
+    `multiplatform-config`
 }
 
 description = "IO for meta"
 
 
-val ioVersion: String by rootProject.extra
-val serializationVersion: String by rootProject.extra
+val ioVersion: String = Versions.ioVersion
+val serializationVersion: String  = Versions.serializationVersion
 
 kotlin {
     jvm()

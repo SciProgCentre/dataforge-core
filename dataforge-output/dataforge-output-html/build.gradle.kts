@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform")
+    `multiplatform-config`
 }
 
 val htmlVersion by rootProject.extra("0.6.12")

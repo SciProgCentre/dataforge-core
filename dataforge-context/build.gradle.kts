@@ -1,10 +1,10 @@
 plugins {
-    kotlin("multiplatform")
+    `multiplatform-config`
 }
 
 description = "Context and provider definitions"
 
-val coroutinesVersion: String by rootProject.extra
+val coroutinesVersion: String  = Versions.coroutinesVersion
 
 kotlin {
     jvm()

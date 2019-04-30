@@ -23,7 +23,7 @@ class MetaDelegateTest {
             override val config: Config = Config()
             var myValue by string()
             var safeValue by double(2.2)
-            var enumValue by config.enum(TestEnum.YES)
+            var enumValue by enum(TestEnum.YES)
             var inner by spec(innerSpec)
         }
         testObject.config["myValue"] = "theString"
