@@ -1,6 +1,5 @@
 package hep.dataforge.context
 
-import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
 import hep.dataforge.meta.buildMeta
@@ -22,7 +21,7 @@ import hep.dataforge.provider.Provider
  *
  * @author Alexander Nozik
  */
-interface Plugin : Named, ContextAware, Provider, MetaRepr, Configurable {
+interface Plugin : Named, ContextAware, Provider, MetaRepr {
 
     /**
      * Get tag for this plugin
@@ -31,13 +30,14 @@ interface Plugin : Named, ContextAware, Provider, MetaRepr, Configurable {
      */
     val tag: PluginTag
 
+    val meta: Meta
+
     /**
      * The name of this plugin ignoring version and group
      *
      * @return
      */
-    override val name: String
-        get() = tag.name
+    override val name: String get() = tag.name
 
     /**
      * Plugin dependencies which are required to attach this plugin. Plugin
@@ -67,7 +67,7 @@ interface Plugin : Named, ContextAware, Provider, MetaRepr, Configurable {
         "context" to context.name
         "type" to this::class.simpleName
         "tag" to tag
-        "meta" to config
+        "meta" to meta
     }
 
     companion object {

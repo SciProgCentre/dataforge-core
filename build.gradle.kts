@@ -1,4 +1,4 @@
-val dataforgeVersion by extra("0.1.2-dev-6")
+val dataforgeVersion by extra("0.1.2-dev-7")
 
 allprojects {
     repositories {

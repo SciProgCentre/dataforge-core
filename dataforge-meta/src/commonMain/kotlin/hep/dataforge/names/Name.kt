@@ -61,6 +61,7 @@ data class NameToken(val body: String, val index: String = "") {
 }
 
 fun String.toName(): Name {
+    if (isBlank()) return EmptyName
     val tokens = sequence {
         var bodyBuilder = StringBuilder()
         var queryBuilder = StringBuilder()

@@ -116,7 +116,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
         val loaded = get(tag, false)
         return when {
             loaded == null -> load(PluginRepository.fetch(tag,meta))
-            loaded.config == meta -> loaded // if meta is the same, return existing plugin
+            loaded.meta == meta -> loaded // if meta is the same, return existing plugin
             else -> throw RuntimeException("Can't load plugin with tag $tag. Plugin with this tag and different configuration already exists in context.")
         }
     }
@@ -125,7 +125,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
         val loaded = get(factory.tag, false)
         return when {
             loaded == null -> load(factory(meta))
-            loaded.config == meta -> loaded // if meta is the same, return existing plugin
+            loaded.meta == meta -> loaded // if meta is the same, return existing plugin
             else -> throw RuntimeException("Can't load plugin with tag ${factory.tag}. Plugin with this tag and different configuration already exists in context.")
         }
     }
@@ -146,7 +146,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
                     error("Corrupt type information in plugin repository")
                 }
             }
-            loaded.config == meta -> loaded // if meta is the same, return existing plugin
+            loaded.meta == meta -> loaded // if meta is the same, return existing plugin
             else -> throw RuntimeException("Can't load plugin with type $type. Plugin with this type and different configuration already exists in context.")
         }
     }
