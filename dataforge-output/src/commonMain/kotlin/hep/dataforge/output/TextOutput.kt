@@ -1,10 +1,10 @@
 package hep.dataforge.output
 
 import hep.dataforge.context.Context
-import hep.dataforge.output.TextRenderer.Companion.TEXT_RENDERER_TYPE
 import hep.dataforge.meta.Meta
+import hep.dataforge.output.TextRenderer.Companion.TEXT_RENDERER_TYPE
 import hep.dataforge.provider.Type
-import hep.dataforge.provider.provideAll
+import hep.dataforge.provider.top
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
@@ -21,8 +21,8 @@ class TextOutput(override val context: Context, private val output: kotlinx.io.c
         } else {
             val value = cache[obj::class]
             if (value == null) {
-                val answer = context.provideAll(TEXT_RENDERER_TYPE).filterIsInstance<TextRenderer>()
-                    .filter { it.type.isInstance(obj) }.firstOrNull()
+                val answer =
+                    context.top<TextRenderer>(TEXT_RENDERER_TYPE).values.firstOrNull { it.type.isInstance(obj) }
                 if (answer != null) {
                     cache[obj::class] = answer
                     answer

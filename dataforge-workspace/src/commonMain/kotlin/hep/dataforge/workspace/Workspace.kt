@@ -27,22 +27,22 @@ interface Workspace : ContextAware, Provider {
     /**
      * All tasks associated with the workspace
      */
-    val tasks: Map<String, Task<*>>
+    val tasks: Map<Name, Task<*>>
 
     override fun provideTop(target: String, name: Name): Any? {
         return when (target) {
             "target", Meta.TYPE -> targets[name.toString()]
-            Task.TYPE -> tasks[name.toString()]
+            Task.TYPE -> tasks[name]
             Data.TYPE -> data[name]
             DataNode.TYPE -> data.getNode(name)
             else -> null
         }
     }
 
-    override fun listTop(target: String): Sequence<Name> {
+    override fun listNames(target: String): Sequence<Name> {
         return when (target) {
             "target", Meta.TYPE -> targets.keys.asSequence().map { it.toName() }
-            Task.TYPE -> tasks.keys.asSequence().map { it.toName() }
+            Task.TYPE -> tasks.keys.asSequence().map { it }
             Data.TYPE -> data.data().map { it.first }
             DataNode.TYPE -> data.nodes().map { it.first }
             else -> emptySequence()
@@ -85,10 +85,10 @@ fun Workspace.run(task: Task<*>, target: String): DataNode<Any> {
 
 
 fun Workspace.run(task: String, target: String) =
-    tasks[task]?.let { run(it, target) } ?: error("Task with name $task not found")
+    tasks[task.toName()]?.let { run(it, target) } ?: error("Task with name $task not found")
 
 fun Workspace.run(task: String, meta: Meta) =
-    tasks[task]?.let { run(it, meta) } ?: error("Task with name $task not found")
+    tasks[task.toName()]?.let { run(it, meta) } ?: error("Task with name $task not found")
 
 fun Workspace.run(task: String, block: MetaBuilder.() -> Unit = {}) =
     run(task, buildMeta(block))

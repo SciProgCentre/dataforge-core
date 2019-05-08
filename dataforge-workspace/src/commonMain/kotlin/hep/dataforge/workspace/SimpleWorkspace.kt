@@ -2,9 +2,11 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
-import hep.dataforge.context.members
 import hep.dataforge.data.DataNode
 import hep.dataforge.meta.Meta
+import hep.dataforge.names.Name
+import hep.dataforge.names.toName
+import hep.dataforge.provider.top
 
 
 /**
@@ -16,8 +18,8 @@ class SimpleWorkspace(
     override val targets: Map<String, Meta>,
     tasks: Collection<Task<Any>>
 ) : Workspace {
-    override val tasks: Map<String, Task<*>> by lazy {
-        (context.members<Task<*>>(Task.TYPE) + tasks).associate { it.name to it }
+    override val tasks: Map<Name, Task<*>> by lazy {
+        context.top<Task<*>>(Task.TYPE) + tasks.associate { it.name.toName() to it }
     }
 
     companion object {

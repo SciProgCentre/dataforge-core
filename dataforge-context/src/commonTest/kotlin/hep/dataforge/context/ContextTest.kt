@@ -17,10 +17,10 @@ class ContextTest {
             }
         }
 
-        override fun listTop(target: String): Sequence<Name> {
+        override fun listNames(target: String): Sequence<Name> {
             return when (target) {
                 "test" -> sequenceOf("a", "b", "c.d").map { it.toName() }
-                else -> super.listTop(target)
+                else -> super.listNames(target)
             }
         }
     }
@@ -28,7 +28,7 @@ class ContextTest {
     @Test
     fun testPluginManager() {
         Global.plugins.load(DummyPlugin())
-        val members = Global.members<Name>("test")
+        val members = Global.content<Name>("test")
         assertEquals(3, members.count())
         members.forEach {
             println(it)

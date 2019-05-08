@@ -20,5 +20,5 @@ abstract class AbstractPlugin(override val meta: Meta = EmptyMeta) : Plugin {
 
     override fun provideTop(target: String, name: Name): Any? = null
 
-    override fun listTop(target: String): Sequence<Name> = emptySequence()
+    override fun listNames(target: String): Sequence<Name> = emptySequence()
 }

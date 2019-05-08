@@ -8,6 +8,7 @@ import hep.dataforge.meta.MetaRepr
 import hep.dataforge.meta.buildMeta
 import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
+import hep.dataforge.names.get
 import hep.dataforge.names.isEmpty
 
 /**
@@ -49,7 +50,7 @@ class AllDataDependency(val placement: Name = EmptyName) : Dependency() {
 
 class TaskModelDependency(val name: String, val meta: Meta, val placement: Name = EmptyName) : Dependency() {
     override fun apply(workspace: Workspace): DataNode<Any> {
-        val task = workspace.tasks[name] ?: error("Task with name ${name} is not found in the workspace")
+        val task = workspace.tasks[name] ?: error("Task with name $name is not found in the workspace")
         if (task.isTerminal) TODO("Support terminal task")
         val result = workspace.run(task, meta)
         return if (placement.isEmpty()) {

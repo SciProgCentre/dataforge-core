@@ -4,11 +4,9 @@ import hep.dataforge.context.Context
 import hep.dataforge.meta.Meta
 import hep.dataforge.output.Output
 import hep.dataforge.output.TextRenderer
-import hep.dataforge.output.TextRenderer.Companion.TEXT_RENDERER_TYPE
 import hep.dataforge.output.html.HtmlBuilder.Companion.HTML_CONVERTER_TYPE
 import hep.dataforge.provider.Type
-import hep.dataforge.provider.provideAll
-import hep.dataforge.provider.provideAllByType
+import hep.dataforge.provider.top
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.html.TagConsumer
@@ -29,7 +27,7 @@ class HtmlOutput<T : Any>(override val context: Context, private val consumer: T
         } else {
             val value = cache[obj::class]
             if (value == null) {
-                val answer = context.provideAllByType<HtmlBuilder<*>>()
+                val answer = context.top<HtmlBuilder<*>>().values
                     .filter { it.type.isInstance(obj) }.firstOrNull()
                 if (answer != null) {
                     cache[obj::class] = answer
