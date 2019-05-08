@@ -1,9 +1,11 @@
 package hep.dataforge.context
 
 import hep.dataforge.names.Name
+import hep.dataforge.names.appendLeft
 import hep.dataforge.names.toName
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 
 class ContextTest {
@@ -31,7 +33,7 @@ class ContextTest {
         val members = Global.content<Name>("test")
         assertEquals(3, members.count())
         members.forEach {
-            println(it)
+            assertTrue{it.key == it.value.appendLeft("test")}
         }
     }
 
