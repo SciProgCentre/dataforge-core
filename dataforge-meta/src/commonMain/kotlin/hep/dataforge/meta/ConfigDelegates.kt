@@ -17,10 +17,10 @@ fun <T> Configurable.value(default: T? = null, key: String? = null, transform: (
     MutableValueDelegate(config, key, Value.of(default)).transform(reader = transform)
 
 fun Configurable.stringList(key: String? = null) =
-    value { it?.list?.map { value -> value.string } ?: emptyList() }
+    value(key) { it?.list?.map { value -> value.string } ?: emptyList() }
 
 fun Configurable.numberList(key: String? = null) =
-    value { it?.list?.map { value -> value.number } ?: emptyList() }
+    value(key) { it?.list?.map { value -> value.number } ?: emptyList() }
 
 fun Configurable.string(default: String? = null, key: String? = null) =
     MutableStringDelegate(config, key, default)

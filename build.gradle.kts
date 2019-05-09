@@ -1,4 +1,4 @@
-val dataforgeVersion by extra("0.1.2-dev-7")
+val dataforgeVersion by extra("0.1.2")
 
 allprojects {
     repositories {
@@ -12,7 +12,7 @@ allprojects {
 
 subprojects {
     if (name.startsWith("dataforge")) {
-        apply(plugin = "bintray-config")
-        apply(plugin = "artifactory-config")
+        apply(plugin = "npm-bintray")
+        apply(plugin = "npm-artifactory")
     } 
 }

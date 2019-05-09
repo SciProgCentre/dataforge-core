@@ -1,5 +1,5 @@
 plugins {
-    `multiplatform-config`
+    `npm-multiplatform`
 }
 
 val htmlVersion by rootProject.extra("0.6.12")

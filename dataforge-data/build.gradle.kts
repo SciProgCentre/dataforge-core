@@ -1,5 +1,5 @@
 plugins {
-    `multiplatform-config`
+    `npm-multiplatform`
 }
 
 val coroutinesVersion: String = Versions.coroutinesVersion
