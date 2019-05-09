@@ -20,9 +20,10 @@ interface Action<in T : Any, out R : Any> {
 }
 
 /**
- * Action composition. The result is terminal if one of parts is terminal
+ * Action composition. The result is terminal if one of its parts is terminal
  */
 infix fun <T : Any, I : Any, R : Any> Action<T, I>.then(action: Action<I, R>): Action<T, R> {
+    // TODO introduce composite action and add optimize by adding action to the list
     return object : Action<T, R> {
         override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
             return action(this@then.invoke(node, meta), meta)
@@ -33,28 +34,19 @@ infix fun <T : Any, I : Any, R : Any> Action<T, I>.then(action: Action<I, R>): A
     }
 }
 
-/**
- * An action that performs the same transformation on each of input data nodes. Null results are ignored.
- */
-class PipeAction<in T : Any, out R : Any>(val transform: (Name, Data<T>, Meta) -> Data<R>?) : Action<T, R> {
-    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataNode.build {
-        node.dataSequence().forEach { (name, data) ->
-            val res = transform(name, data, meta)
-            if (res != null) {
-                set(name, res)
-            }
-        }
-    }
 
-    companion object {
-        /**
-         * A simple pipe that performs transformation on the data and copies input meta into the output
-         */
-        inline fun <T : Any, reified R : Any> simple(noinline transform: suspend (Name, T, Meta) -> R) =
-            PipeAction { name, data: Data<T>, meta ->
-                val goal = data.goal.pipe { transform(name, it, meta) }
-                return@PipeAction Data.of(goal, data.meta)
-            }
-    }
-}
+///**
+// * An action that performs the same transformation on each of input data nodes. Null results are ignored.
+// * The transformation is non-suspending because it is lazy.
+// */
+//class PipeAction<in T : Any, out R : Any>(val transform: (Name, Data<T>, Meta) -> Data<R>?) : Action<T, R> {
+//    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataNode.build {
+//        node.data().forEach { (name, data) ->
+//            val res = transform(name, data, meta)
+//            if (res != null) {
+//                set(name, res)
+//            }
+//        }
+//    }
+//}
 

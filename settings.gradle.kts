@@ -18,13 +18,14 @@ pluginManagement {
 
 enableFeaturePreview("GRADLE_METADATA")
 
-rootProject.name = "dataforge-core"
+//rootProject.name = "dataforge-core"
 include(
     ":dataforge-meta",
-    ":dataforge-meta-io",
+    ":dataforge-io",
     ":dataforge-context",
     ":dataforge-data",
-    ":dataforge-io",
+    ":dataforge-output",
+    ":dataforge-output:dataforge-output-html",
     ":dataforge-workspace",
     ":dataforge-scripting"
 )

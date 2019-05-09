@@ -1,8 +1,7 @@
 package hep.dataforge.context
 
-import hep.dataforge.meta.Config
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.configure
+import hep.dataforge.meta.buildMeta
 
 /**
  * A convenience builder for context
@@ -19,11 +18,11 @@ class ContextBuilder(var name: String = "@anonimous", val parent: Context = Glob
         plugins.add(plugin)
     }
 
-    fun plugin(tag: PluginTag, action: Config.() -> Unit) {
-        plugins.add(PluginRepository.fetch(tag).configure(action))
+    fun plugin(tag: PluginTag, action: MetaBuilder.() -> Unit) {
+        plugins.add(PluginRepository.fetch(tag, buildMeta(action)))
     }
 
-    fun plugin(name: String, group: String = "", version: String = "", action: Config.() -> Unit) {
+    fun plugin(name: String, group: String = "", version: String = "", action: MetaBuilder.() -> Unit) {
         plugin(PluginTag(name, group, version), action)
     }
 

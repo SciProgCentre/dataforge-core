@@ -4,14 +4,14 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.toName
 
 
-class DataFilter(override val config: Config) : Specification {
+class DataFilter(override val config: Config) : Specific {
     var from by string()
     var to by string()
     var pattern by string("*.")
 //    val prefix by string()
 //    val suffix by string()
 
-    companion object : SpecificationCompanion<DataFilter> {
+    companion object : Specification<DataFilter> {
         override fun wrap(config: Config): DataFilter = DataFilter(config)
     }
 }
@@ -22,15 +22,15 @@ class DataFilter(override val config: Config) : Specification {
 fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
     val sourceNode = filter.from?.let { getNode(it.toName()) } ?: this@filter
     val regex = filter.pattern.toRegex()
-    val targetNode = DataTreeBuilder<T>().apply {
-        sourceNode.dataSequence().forEach { (name, data) ->
+    val targetNode = DataTreeBuilder(type).apply {
+        sourceNode.data().forEach { (name, data) ->
             if (name.toString().matches(regex)) {
                 this[name] = data
             }
         }
     }
     return filter.to?.let {
-        DataTreeBuilder<T>().apply { this[it.toName()] = targetNode }.build()
+        DataTreeBuilder(type).apply { this[it.toName()] = targetNode }.build()
     } ?: targetNode.build()
 }
 

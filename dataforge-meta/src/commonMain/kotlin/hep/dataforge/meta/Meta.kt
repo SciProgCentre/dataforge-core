@@ -3,10 +3,7 @@ package hep.dataforge.meta
 import hep.dataforge.meta.Meta.Companion.VALUE_KEY
 import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
-import hep.dataforge.names.Name
-import hep.dataforge.names.NameToken
-import hep.dataforge.names.plus
-import hep.dataforge.names.toName
+import hep.dataforge.names.*
 import hep.dataforge.values.EnumValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.boolean
@@ -76,30 +73,37 @@ operator fun Meta?.get(key: String): MetaItem<out Meta>? = get(key.toName())
  * Get all items matching given name.
  */
 fun Meta.getAll(name: Name): Map<String, MetaItem<out Meta>> {
-    if (name.length == 0) error("Can't use empty name for that")
-    val (body, query) = name.last()!!
-    val regex = query.toRegex()
-    return (this[name.cutLast()] as? NodeItem<*>)?.node?.items
-        ?.filter { it.key.body == body && (query.isEmpty() || regex.matches(it.key.query)) }
-        ?.mapKeys { it.key.query }
-        ?: emptyMap()
+    val root = when (name.length) {
+        0 -> error("Can't use empty name for that")
+        1 -> this
+        else -> (this[name.cutLast()] as? NodeItem<*>)?.node
+    }
 
+    val (body, index) = name.last()!!
+    val regex = index.toRegex()
+
+    return root?.items
+        ?.filter { it.key.body == body && (index.isEmpty() || regex.matches(it.key.index)) }
+        ?.mapKeys { it.key.index }
+        ?: emptyMap()
 }
 
+fun Meta.getAll(name: String): Map<String, MetaItem<out Meta>> = getAll(name.toName())
+
 /**
- * Transform meta to sequence of [Name]-[Value] pairs
+ * Get a sequence of [Name]-[Value] pairs
  */
-fun Meta.asValueSequence(): Sequence<Pair<Name, Value>> {
+fun Meta.values(): Sequence<Pair<Name, Value>> {
     return items.asSequence().flatMap { entry ->
         val item = entry.value
         when (item) {
-            is ValueItem -> sequenceOf(entry.key.toName() to item.value)
-            is NodeItem -> item.node.asValueSequence().map { pair -> (entry.key.toName() + pair.first) to pair.second }
+            is ValueItem -> sequenceOf(entry.key.asName() to item.value)
+            is NodeItem -> item.node.values().map { pair -> (entry.key.asName() + pair.first) to pair.second }
         }
     }
 }
 
-operator fun Meta.iterator(): Iterator<Pair<Name, Value>> = asValueSequence().iterator()
+operator fun Meta.iterator(): Iterator<Pair<Name, Value>> = values().iterator()
 
 /**
  * A meta node that ensures that all of its descendants has at least the same type
@@ -107,6 +111,27 @@ operator fun Meta.iterator(): Iterator<Pair<Name, Value>> = asValueSequence().it
 interface MetaNode<M : MetaNode<M>> : Meta {
     override val items: Map<NameToken, MetaItem<M>>
 }
+
+/**
+ * Get all items matching given name.
+ */
+fun <M : MetaNode<M>> MetaNode<M>.getAll(name: Name): Map<String, MetaItem<M>> {
+    val root: MetaNode<M>? = when (name.length) {
+        0 -> error("Can't use empty name for that")
+        1 -> this
+        else -> (this[name.cutLast()] as? NodeItem<M>)?.node
+    }
+
+    val (body, index) = name.last()!!
+    val regex = index.toRegex()
+
+    return root?.items
+        ?.filter { it.key.body == body && (index.isEmpty() || regex.matches(it.key.index)) }
+        ?.mapKeys { it.key.index }
+        ?: emptyMap()
+}
+
+fun <M : MetaNode<M>> M.getAll(name: String): Map<String, MetaItem<M>> = getAll(name.toName())
 
 operator fun <M : MetaNode<M>> MetaNode<M>.get(name: Name): MetaItem<M>? {
     return name.first()?.let { token ->
@@ -118,7 +143,7 @@ operator fun <M : MetaNode<M>> MetaNode<M>.get(name: Name): MetaItem<M>? {
     }
 }
 
-operator fun <M : MetaNode<M>> MetaNode<M>.get(key: String): MetaItem<M>? = get(key.toName())
+operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: String): MetaItem<M>? = this?.let { get(key.toName()) }
 
 /**
  * Equals and hash code implementation for meta node

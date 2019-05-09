@@ -1,10 +1,10 @@
 plugins {
-    kotlin("multiplatform")
+    `npm-multiplatform`
 }
 
 description = "Context and provider definitions"
 
-val coroutinesVersion: String by rootProject.extra
+val coroutinesVersion: String  = Versions.coroutinesVersion
 
 kotlin {
     jvm()
@@ -22,6 +22,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 api("io.github.microutils:kotlin-logging:1.6.10")
+                api("ch.qos.logback:logback-classic:1.2.3")
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
             }
         }

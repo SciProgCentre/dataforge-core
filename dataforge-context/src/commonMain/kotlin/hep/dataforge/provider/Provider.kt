@@ -17,6 +17,7 @@ package hep.dataforge.provider
 
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import kotlin.jvm.JvmName
 
 /**
  * A marker utility interface for providers.
@@ -51,7 +52,7 @@ interface Provider {
      * @param target
      * @return
      */
-    fun listTop(target: String): Sequence<Name>
+    fun listNames(target: String): Sequence<Name>
 }
 
 fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
@@ -77,15 +78,23 @@ inline fun <reified T : Any> Provider.provide(path: String): T? {
     return provide(Path.parse(path)) as? T
 }
 
-inline fun <reified T : Any> Provider.provide(target: String, name: String): T? {
-    return provide(PathToken(name.toName(), target).toPath()) as? T
+inline fun <reified T : Any> Provider.provide(target: String, name: Name): T? {
+    return provide(PathToken(name, target).toPath()) as? T
 }
 
+inline fun <reified T : Any> Provider.provide(target: String, name: String): T? =
+    provide(target, name.toName())
+
 /**
- * [Sequence] of all elements with given target
+ *  A top level content with names
  */
-fun Provider.provideAll(target: String): Sequence<Any> {
-    return listTop(target).map { provideTop(target, it) ?: error("The element $it is declared but not provided") }
+fun Provider.top(target: String): Map<Name, Any> = top<Any>(target)
+
+@JvmName("typedTop")
+inline fun <reified T : Any> Provider.top(target: String): Map<Name, T> {
+    return listNames(target).associate {
+        it to (provideTop(target, it) as? T ?: error("The element $it is declared but not provided"))
+    }
 }
 
 

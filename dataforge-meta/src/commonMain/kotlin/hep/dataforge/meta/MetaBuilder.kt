@@ -1,7 +1,7 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.Name
-import hep.dataforge.names.toName
+import hep.dataforge.names.asName
 import hep.dataforge.values.Value
 
 /**
@@ -38,7 +38,7 @@ fun Meta.builder(): MetaBuilder {
     return MetaBuilder().also { builder ->
         items.mapValues { entry ->
             val item = entry.value
-            builder[entry.key.toName()] = when (item) {
+            builder[entry.key.asName()] = when (item) {
                 is MetaItem.ValueItem -> MetaItem.ValueItem<MetaBuilder>(item.value)
                 is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.builder())
             }

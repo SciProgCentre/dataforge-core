@@ -48,7 +48,7 @@ class Styled(val base: Meta, val style: Config = Config().empty()) : MutableMeta
     }
 }
 
-fun Styled.configure(meta: Meta) = apply { style.update(style) }
+fun Styled.configure(meta: Meta) = apply { style.update(meta) }
 
 fun Meta.withStyle(style: Meta = EmptyMeta) = if (this is Styled) {
     this.apply { this.configure(style) }

@@ -1,9 +1,6 @@
 package hep.dataforge.meta
 
-import hep.dataforge.names.Name
-import hep.dataforge.names.NameToken
-import hep.dataforge.names.plus
-import hep.dataforge.names.toName
+import hep.dataforge.names.*
 import hep.dataforge.values.Value
 
 internal data class MetaListener(
@@ -62,7 +59,7 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : AbstractMetaNode<M>(), 
                 }
             }
         }
-        itemChanged(key.toName(), oldItem, newItem)
+        itemChanged(key.asName(), oldItem, newItem)
     }
 
     /**
@@ -103,7 +100,7 @@ fun <M : MutableMeta<M>> MutableMeta<M>.setItem(name: String, item: MetaItem<M>)
 fun <M : MutableMeta<M>> MutableMeta<M>.setValue(name: String, value: Value) =
     set(name.toName(), MetaItem.ValueItem(value))
 
-fun <M : MutableMeta<M>> MutableMeta<M>.setItem(token: NameToken, item: MetaItem<M>?) = set(token.toName(), item)
+fun <M : MutableMeta<M>> MutableMeta<M>.setItem(token: NameToken, item: MetaItem<M>?) = set(token.asName(), item)
 
 fun <M : MutableMetaNode<M>> MutableMetaNode<M>.setNode(name: Name, node: Meta) =
     set(name, MetaItem.NodeItem(wrap(name, node)))
@@ -121,9 +118,12 @@ operator fun <M : MutableMetaNode<M>> M.set(name: Name, value: Any?) {
             is MetaItem.NodeItem<*> -> setNode(name, value.node)
         }
         is Meta -> setNode(name, value)
+        is Specific -> setNode(name, value.config)
         else -> setValue(name, Value.of(value))
     }
 }
+
+operator fun <M : MutableMetaNode<M>> M.set(name: NameToken, value: Any?) = set(name.asName(), value)
 
 operator fun <M : MutableMetaNode<M>> M.set(key: String, value: Any?) = set(key.toName(), value)
 
@@ -137,9 +137,9 @@ fun <M : MutableMetaNode<M>> M.update(meta: Meta) {
     meta.items.forEach { entry ->
         val value = entry.value
         when (value) {
-            is MetaItem.ValueItem -> setValue(entry.key.toName(), value.value)
-            is MetaItem.NodeItem -> (this[entry.key.toName()] as? MetaItem.NodeItem)?.node?.update(value.node)
-                ?: run { setNode(entry.key.toName(), value.node) }
+            is MetaItem.ValueItem -> setValue(entry.key.asName(), value.value)
+            is MetaItem.NodeItem -> (this[entry.key.asName()] as? MetaItem.NodeItem)?.node?.update(value.node)
+                ?: run { setNode(entry.key.asName(), value.node) }
         }
     }
 }
@@ -149,12 +149,12 @@ fun <M : MutableMetaNode<M>> M.update(meta: Meta) {
 fun <M : MutableMeta<M>> M.setIndexed(
     name: Name,
     items: Iterable<MetaItem<M>>,
-    queryFactory: (Int) -> String = { it.toString() }
+    indexFactory: MetaItem<M>.(index: Int) -> String = { it.toString() }
 ) {
     val tokens = name.tokens.toMutableList()
     val last = tokens.last()
     items.forEachIndexed { index, meta ->
-        val indexedToken = NameToken(last.body, last.query + queryFactory(index))
+        val indexedToken = NameToken(last.body, last.index + meta.indexFactory(index))
         tokens[tokens.lastIndex] = indexedToken
         set(Name(tokens), meta)
     }
@@ -163,10 +163,26 @@ fun <M : MutableMeta<M>> M.setIndexed(
 fun <M : MutableMetaNode<M>> M.setIndexed(
     name: Name,
     metas: Iterable<Meta>,
-    queryFactory: (Int) -> String = { it.toString() }
+    indexFactory: MetaItem<M>.(index: Int) -> String = { it.toString() }
 ) {
-    setIndexed(name, metas.map { MetaItem.NodeItem(wrap(name, it)) }, queryFactory)
+    setIndexed(name, metas.map { MetaItem.NodeItem(wrap(name, it)) }, indexFactory)
 }
 
 operator fun <M : MutableMetaNode<M>> M.set(name: Name, metas: Iterable<Meta>) = setIndexed(name, metas)
 operator fun <M : MutableMetaNode<M>> M.set(name: String, metas: Iterable<Meta>) = setIndexed(name.toName(), metas)
+
+/**
+ * Append the node with a same-name-sibling, automatically generating numerical index
+ */
+fun <M : MutableMetaNode<M>> M.append(name: Name, value: Any?) {
+    require(!name.isEmpty()) { "Name could not be empty for append operation" }
+    val newIndex = name.last()!!.index
+    if (newIndex.isNotEmpty()) {
+        set(name, value)
+    } else {
+        val index = (getAll(name).keys.mapNotNull { it.toIntOrNull() }.max() ?: -1) + 1
+        set(name.withIndex(index.toString()), value)
+    }
+}
+
+fun <M : MutableMetaNode<M>> M.append(name: String, value: Any?) = append(name.toName(), value)

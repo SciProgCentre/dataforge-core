@@ -12,6 +12,7 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import hep.dataforge.workspace.TaskModel.Companion.MODEL_TARGET_KEY
 
 
 /**
@@ -39,23 +40,31 @@ data class TaskModel(
             //TODO ensure all dependencies are listed
         }
     }
+
+    companion object {
+        const val MODEL_TARGET_KEY = "@target"
+    }
 }
 
 /**
  * Build input for the task
  */
 fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> {
-    return DataTreeBuilder<Any>().apply {
-        dependencies.asSequence().flatMap { it.apply(workspace).dataSequence() }.forEach { (name, data) ->
+    return DataTreeBuilder(Any::class).apply {
+        dependencies.asSequence().flatMap { it.apply(workspace).data() }.forEach { (name, data) ->
             //TODO add concise error on replacement
             this[name] = data
         }
     }.build()
 }
 
+@DslMarker
+annotation class TaskBuildScope
+
 /**
  * A builder for [TaskModel]
  */
+@TaskBuildScope
 class TaskModelBuilder(val name: String, meta: Meta = EmptyMeta) {
     /**
      * Meta for current task. By default uses the whole input meta
@@ -63,12 +72,20 @@ class TaskModelBuilder(val name: String, meta: Meta = EmptyMeta) {
     var meta: MetaBuilder = meta.builder()
     val dependencies = HashSet<Dependency>()
 
+    var target: String by this.meta.string(key = MODEL_TARGET_KEY, default = "")
+
     /**
      * Add dependency for
      */
-    fun dependsOn(name: String, meta: Meta, placement: Name = EmptyName) {
+    fun dependsOn(name: String, meta: Meta = this.meta, placement: Name = EmptyName) {
         dependencies.add(TaskModelDependency(name, meta, placement))
     }
+
+    fun dependsOn(task: Task<*>, meta: Meta = this.meta, placement: Name = EmptyName) =
+        dependsOn(task.name, meta, placement)
+
+    fun dependsOn(task: Task<*>, placement: Name = EmptyName, metaBuilder: MetaBuilder.() -> Unit) =
+        dependsOn(task.name, buildMeta(metaBuilder), placement)
 
     /**
      * Add custom data dependency
@@ -89,9 +106,12 @@ class TaskModelBuilder(val name: String, meta: Meta = EmptyMeta) {
     /**
      * Add all data as root node
      */
-    fun allData() {
-        dependencies.add(DataDependency.all)
+    fun allData(to: Name = EmptyName) {
+        dependencies.add(AllDataDependency(to))
     }
 
     fun build(): TaskModel = TaskModel(name, meta.seal(), dependencies)
 }
+
+
+val TaskModel.target get() = meta[MODEL_TARGET_KEY]?.string ?: ""

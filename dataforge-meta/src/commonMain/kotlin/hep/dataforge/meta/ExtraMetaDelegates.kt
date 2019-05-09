@@ -33,4 +33,4 @@ fun Configurable.stringList(vararg default: String = emptyArray(), key: String? 
 fun <T : Metoid> Metoid.child(key: String? = null, converter: (Meta) -> T) = ChildDelegate(meta, key, converter)
 
 fun <T : Configurable> Configurable.child(key: String? = null, converter: (Meta) -> T) =
-    ChildConfigDelegate(config, key, converter)
+    MutableMorphDelegate(config, key, converter)

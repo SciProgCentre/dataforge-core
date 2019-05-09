@@ -2,9 +2,10 @@ package hep.dataforge.context
 
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
+import hep.dataforge.names.appendLeft
 import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
-import hep.dataforge.provider.provideAll
+import hep.dataforge.provider.top
 import hep.dataforge.values.Value
 import kotlinx.coroutines.CoroutineScope
 import mu.KLogger
@@ -66,10 +67,10 @@ open class Context(final override val name: String, val parent: Context? = Globa
         }
     }
 
-    override fun listTop(target: String): Sequence<Name> {
+    override fun listNames(target: String): Sequence<Name> {
         return when (target) {
             Plugin.PLUGIN_TARGET -> plugins.asSequence().map { it.name.toName() }
-            Value.TYPE -> properties.asValueSequence().map { it.first }
+            Value.TYPE -> properties.values().map { it.first }
             else -> emptySequence()
         }
     }
@@ -118,12 +119,13 @@ open class Context(final override val name: String, val parent: Context? = Globa
 /**
  * A sequences of all objects provided by plugins with given target and type
  */
-fun Context.members(target: String): Sequence<Any> =
-    plugins.asSequence().flatMap { it.provideAll(target) }
+fun Context.content(target: String): Map<Name, Any> = content<Any>(target)
 
-@JvmName("typedMembers")
-inline fun <reified T : Any> Context.members(target: String) =
-    members(target).filterIsInstance<T>()
+@JvmName("typedContent")
+inline fun <reified T : Any> Context.content(target: String): Map<Name, T> =
+    plugins.flatMap { plugin ->
+        plugin.top<T>(target).entries.map { (it.key.appendLeft(plugin.name)) to it.value }
+    }.associate { it }
 
 
 /**

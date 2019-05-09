@@ -1,8 +1,8 @@
 plugins {
-    kotlin("multiplatform")
+    `npm-multiplatform`
 }
 
-val coroutinesVersion: String by rootProject.extra
+val coroutinesVersion: String = Versions.coroutinesVersion
 
 kotlin {
     jvm()
@@ -11,6 +11,7 @@ kotlin {
         val commonMain by getting{
             dependencies {
                 api(project(":dataforge-meta"))
+                api(kotlin("reflect"))
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutinesVersion")
             }
         }
