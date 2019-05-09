@@ -12,7 +12,6 @@ allprojects {
 
 subprojects {
     if (name.startsWith("dataforge")) {
-        apply(plugin = "npm-bintray")
-        apply(plugin = "npm-artifactory")
+        apply(plugin = "npm-publish")
     } 
 }
