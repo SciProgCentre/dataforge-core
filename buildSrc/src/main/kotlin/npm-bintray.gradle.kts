@@ -67,9 +67,9 @@ bintray {
     // this is a problem of this plugin
     pkg(delegateClosureOf<PackageConfig> {
         userOrg = "mipt-npm"
-        repo = "scientifik"
-        name = "scientifik.kmath"
-        issueTrackerUrl = "https://github.com/mipt-npm/kmath/issues"
+        repo = "dataforge"
+        name = project.name
+        issueTrackerUrl = "https://github.com/altavir/dataforge-core/issues"
         setLicenses("Apache-2.0")
         vcsUrl = vcs
         version(delegateClosureOf<VersionConfig> {
@@ -94,4 +94,11 @@ bintray {
         }
 
     }
+
+    val publications = project.publishing.publications.filter { !it.name.contains("-test") }.map {
+        println("Uploading artifact '$it.groupId:$it.artifactId:$it.version' from publication '$it.name'")
+        it.name.toString()
+    }.toTypedArray()
+
+    setPublications(*publications)
 }

@@ -21,11 +21,6 @@ artifactory {
 
         defaults(delegateClosureOf<GroovyObject>{
             invokeMethod("publications", arrayOf("jvm", "js", "kotlinMultiplatform", "metadata"))
-            //TODO: This property is not available for ArtifactoryTask
-            //setProperty("publishBuildInfo", false)
-            setProperty("publishArtifacts", true)
-            setProperty("publishPom", true)
-            setProperty("publishIvy", false)
         })
     })
     resolve(delegateClosureOf<ResolverConfig> {
