@@ -1,15 +1,15 @@
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinMultiplatformPlugin
 
 plugins {
     id("org.jetbrains.dokka")
     `maven-publish`
 }
 
-plugins.withType(KotlinMultiplatformPlugin::class){
-    configure<KotlinMultiplatformExtension>{
+afterEvaluate {
+
+    extensions.findByType<KotlinMultiplatformExtension>()?.apply{
         val dokka by tasks.getting(DokkaTask::class) {
             outputFormat = "html"
             outputDirectory = "$buildDir/javadoc"
@@ -33,42 +33,43 @@ plugins.withType(KotlinMultiplatformPlugin::class){
             }
         }
 
-        val javadocJar by tasks.registering(Jar::class) {
+        val kdocJar by tasks.registering(Jar::class) {
             group = JavaBasePlugin.DOCUMENTATION_GROUP
             dependsOn(dokka)
             archiveClassifier.set("javadoc")
             from("$buildDir/javadoc")
         }
 
-        configure<PublishingExtension>{
+        configure<PublishingExtension> {
 
             targets.all {
                 val publication = publications.findByName(name) as MavenPublication
 
                 // Patch publications with fake javadoc
-                publication.artifact(javadocJar.get())
+                publication.artifact(kdocJar.get())
             }
         }
     }
-}
 
-plugins.withType(KotlinPlatformJvmPlugin::class){
-    val dokka by tasks.getting(DokkaTask::class) {
-        outputFormat = "html"
-        outputDirectory = "$buildDir/javadoc"
-        jdkVersion = 8
-    }
 
-    val javadocJar by tasks.registering(Jar::class) {
-        group = JavaBasePlugin.DOCUMENTATION_GROUP
-        dependsOn(dokka)
-        archiveClassifier.set("javadoc")
-        from("$buildDir/javadoc")
-    }
+    extensions.findByType<KotlinJvmProjectExtension>()?.apply{
+        val dokka by tasks.getting(DokkaTask::class) {
+            outputFormat = "html"
+            outputDirectory = "$buildDir/javadoc"
+            jdkVersion = 8
+        }
 
-    configure<PublishingExtension>{
-        publications.filterIsInstance<MavenPublication>().forEach {publication ->
-            publication.artifact(javadocJar.get())
+        val kdocJar by tasks.registering(Jar::class) {
+            group = JavaBasePlugin.DOCUMENTATION_GROUP
+            dependsOn(dokka)
+            archiveClassifier.set("javadoc")
+            from("$buildDir/javadoc")
+        }
+
+        configure<PublishingExtension> {
+            publications.filterIsInstance<MavenPublication>().forEach { publication ->
+                publication.artifact(kdocJar.get())
+            }
         }
     }
 }

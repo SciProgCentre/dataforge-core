@@ -41,6 +41,6 @@ interface Configurable {
 
 fun <T : Configurable> T.configure(meta: Meta): T = this.apply { config.update(meta) }
 
-fun <T : Configurable> T.configure(action: Config.() -> Unit): T = this.apply { config.apply(action) }
+fun <T : Configurable> T.configure(action: MetaBuilder.() -> Unit): T = configure(buildMeta(action))
 
 open class SimpleConfigurable(override val config: Config) : Configurable
