@@ -18,17 +18,18 @@ plugins {
 }
 
 val vcs = "https://github.com/altavir/dataforge-core"
+val bintrayRepo = "https://bintray.com/mipt-npm/dataforge"
 
 // Configure publishing
 publishing {
     repositories {
-        maven("https://bintray.com/mipt-npm/dataforge")
+        maven(bintrayRepo)
     }
 
     // Process each publication we have in this project
     publications.filterIsInstance<MavenPublication>().forEach { publication ->
 
-        // use type safe pom config GSL insterad of old dynamic
+        // use type safe pom config GSL instead of old dynamic
         publication.pom {
             name.set(project.name)
             description.set(project.description)
@@ -70,7 +71,7 @@ bintray {
         userOrg = "mipt-npm"
         repo = "dataforge"
         name = project.name
-        issueTrackerUrl = "https://github.com/altavir/dataforge-core/issues"
+        issueTrackerUrl = "$vcs/issues"
         setLicenses("Apache-2.0")
         vcsUrl = vcs
         version.apply {
@@ -80,6 +81,7 @@ bintray {
         }
     }
 
+    //workaround bintray bug
     afterEvaluate {
         setPublications(*publishing.publications.names.toTypedArray())
     }

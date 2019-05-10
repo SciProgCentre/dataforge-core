@@ -11,6 +11,7 @@ allprojects {
 }
 
 subprojects {
+    apply(plugin = "dokka-publish")
     if (name.startsWith("dataforge")) {
         apply(plugin = "npm-publish")
     } 

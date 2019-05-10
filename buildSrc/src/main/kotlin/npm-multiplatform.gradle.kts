@@ -1,4 +1,7 @@
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.`maven-publish`
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.kotlin
 
 plugins {
     kotlin("multiplatform")
@@ -73,8 +76,6 @@ kotlin {
             languageSettings.enableLanguageFeature("InlineClasses")
         }
     }
-
-    apply(plugin = "dokka-publish")
 
     // Apply JS test configuration
     val runJsTests by ext(false)
