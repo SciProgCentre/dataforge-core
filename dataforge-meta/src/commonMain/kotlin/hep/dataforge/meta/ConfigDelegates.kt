@@ -10,25 +10,19 @@ import kotlin.jvm.JvmName
 /**
  * A property delegate that uses custom key
  */
-fun Configurable.value(default: Any = Null, key: String? = null) =
+fun Configurable.value(default: Any = Null, key: String? = null): MutableValueDelegate<Config> =
     MutableValueDelegate(config, key, Value.of(default))
 
-fun <T> Configurable.value(default: T? = null, key: String? = null, transform: (Value?) -> T) =
+fun <T> Configurable.value(default: T? = null, key: String? = null, transform: (Value?) -> T): ReadWriteDelegateWrapper<Value?, T> =
     MutableValueDelegate(config, key, Value.of(default)).transform(reader = transform)
 
-fun Configurable.stringList(key: String? = null) =
-    value(key) { it?.list?.map { value -> value.string } ?: emptyList() }
-
-fun Configurable.numberList(key: String? = null) =
-    value(key) { it?.list?.map { value -> value.number } ?: emptyList() }
-
-fun Configurable.string(default: String? = null, key: String? = null) =
+fun Configurable.string(default: String? = null, key: String? = null): MutableStringDelegate<Config> =
     MutableStringDelegate(config, key, default)
 
-fun Configurable.boolean(default: Boolean? = null, key: String? = null) =
+fun Configurable.boolean(default: Boolean? = null, key: String? = null): MutableBooleanDelegate<Config> =
     MutableBooleanDelegate(config, key, default)
 
-fun Configurable.number(default: Number? = null, key: String? = null) =
+fun Configurable.number(default: Number? = null, key: String? = null): MutableNumberDelegate<Config> =
     MutableNumberDelegate(config, key, default)
 
 /* Number delegates*/
@@ -111,3 +105,19 @@ fun <T : Specific> Configurable.spec(spec: Specification<T>, key: String? = null
 
 fun <T : Specific> Configurable.spec(builder: (Config) -> T, key: String? = null) =
     MutableMorphDelegate(config, key) { specification(builder).wrap(it) }
+
+
+/*
+ * Extra delegates for special cases
+ */
+
+fun Configurable.stringList(key: String? = null): ReadWriteDelegateWrapper<Value?, List<String>> =
+    value(emptyList(), key) { it?.list?.map { value -> value.string } ?: emptyList() }
+
+fun Configurable.numberList(key: String? = null): ReadWriteDelegateWrapper<Value?, List<Number>> =
+    value(emptyList(), key) { it?.list?.map { value -> value.number } ?: emptyList() }
+
+fun <T : Metoid> Metoid.child(key: String? = null, converter: (Meta) -> T) = ChildDelegate(meta, key, converter)
+
+fun <T : Configurable> Configurable.child(key: String? = null, converter: (Meta) -> T) =
+    MutableMorphDelegate(config, key, converter)
