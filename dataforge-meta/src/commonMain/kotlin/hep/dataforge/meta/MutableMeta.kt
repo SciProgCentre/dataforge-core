@@ -96,11 +96,20 @@ fun <M : MutableMeta<M>> MutableMeta<M>.remove(name: Name) = set(name, null)
 fun <M : MutableMeta<M>> MutableMeta<M>.remove(name: String) = remove(name.toName())
 
 fun <M : MutableMeta<M>> MutableMeta<M>.setValue(name: Name, value: Value) = set(name, MetaItem.ValueItem(value))
-fun <M : MutableMeta<M>> MutableMeta<M>.setItem(name: String, item: MetaItem<M>) = set(name.toName(), item)
+//fun <M : MutableMeta<M>> MutableMeta<M>.setItem(name: String, item: MetaItem<M>) = set(name.toName(), item)
 fun <M : MutableMeta<M>> MutableMeta<M>.setValue(name: String, value: Value) =
     set(name.toName(), MetaItem.ValueItem(value))
 
-fun <M : MutableMeta<M>> MutableMeta<M>.setItem(token: NameToken, item: MetaItem<M>?) = set(token.asName(), item)
+//fun <M : MutableMeta<M>> MutableMeta<M>.setItem(token: NameToken, item: MetaItem<M>?) = set(token.asName(), item)
+
+fun <M : MutableMetaNode<M>> MutableMetaNode<M>.setItem(name: Name, item: MetaItem<*>) {
+    when (item) {
+        is MetaItem.ValueItem<*> -> setValue(name, item.value)
+        is MetaItem.NodeItem<*> -> setNode(name, item.node)
+    }
+}
+
+fun <M : MutableMetaNode<M>> MutableMetaNode<M>.setItem(name: String, item: MetaItem<*>) = setItem(name.toName(), item)
 
 fun <M : MutableMetaNode<M>> MutableMetaNode<M>.setNode(name: Name, node: Meta) =
     set(name, MetaItem.NodeItem(wrap(name, node)))
@@ -110,13 +119,10 @@ fun <M : MutableMetaNode<M>> MutableMetaNode<M>.setNode(name: String, node: Meta
 /**
  * Universal set method
  */
-operator fun <M : MutableMetaNode<M>> M.set(name: Name, value: Any?) {
+operator fun <M : MutableMetaNode<M>> MutableMetaNode<M>.set(name: Name, value: Any?) {
     when (value) {
         null -> remove(name)
-        is MetaItem<*> -> when (value) {
-            is MetaItem.ValueItem<*> -> setValue(name, value.value)
-            is MetaItem.NodeItem<*> -> setNode(name, value.node)
-        }
+        is MetaItem<*> -> setItem(name, value)
         is Meta -> setNode(name, value)
         is Specific -> setNode(name, value.config)
         else -> setValue(name, Value.of(value))

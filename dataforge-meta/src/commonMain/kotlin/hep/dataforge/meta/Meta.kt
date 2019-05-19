@@ -94,16 +94,31 @@ fun Meta.getAll(name: String): Map<String, MetaItem<out Meta>> = getAll(name.toN
  * Get a sequence of [Name]-[Value] pairs
  */
 fun Meta.values(): Sequence<Pair<Name, Value>> {
-    return items.asSequence().flatMap { entry ->
-        val item = entry.value
+    return items.asSequence().flatMap { (key, item) ->
         when (item) {
-            is ValueItem -> sequenceOf(entry.key.asName() to item.value)
-            is NodeItem -> item.node.values().map { pair -> (entry.key.asName() + pair.first) to pair.second }
+            is ValueItem -> sequenceOf(key.asName() to item.value)
+            is NodeItem -> item.node.values().map { pair -> (key.asName() + pair.first) to pair.second }
         }
     }
 }
 
-operator fun Meta.iterator(): Iterator<Pair<Name, Value>> = values().iterator()
+/**
+ * Get a sequence of all [Name]-[MetaItem] pairs for all items including nodes
+ */
+fun Meta.sequence(): Sequence<Pair<Name, MetaItem<*>>> {
+    return sequence {
+        items.forEach { (key, item) ->
+            yield(key.asName() to item)
+            if(item is NodeItem<*>) {
+                yieldAll(item.node.sequence().map { (innerKey, innerItem)->
+                    (key + innerKey) to innerItem
+                })
+            }
+        }
+    }
+}
+
+operator fun Meta.iterator(): Iterator<Pair<Name, MetaItem<*>>> = sequence().iterator()
 
 /**
  * A meta node that ensures that all of its descendants has at least the same type

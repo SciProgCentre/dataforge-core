@@ -46,4 +46,12 @@ fun Meta.builder(): MetaBuilder {
     }
 }
 
+/**
+ * Build a [MetaBuilder] using given transformation
+ */
 fun buildMeta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)
+
+/**
+ * Build meta using given source meta as a base
+ */
+fun buildMeta(source: Meta, builder: MetaBuilder.() -> Unit): MetaBuilder = source.builder().apply(builder)
