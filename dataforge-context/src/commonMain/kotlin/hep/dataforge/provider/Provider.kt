@@ -85,11 +85,12 @@ inline fun <reified T : Any> Provider.provide(target: String, name: Name): T? {
 inline fun <reified T : Any> Provider.provide(target: String, name: String): T? =
     provide(target, name.toName())
 
+
+fun Provider.top(target: String): Map<Name, Any> = top<Any>(target)
+
 /**
  *  A top level content with names
  */
-fun Provider.top(target: String): Map<Name, Any> = top<Any>(target)
-
 @JvmName("typedTop")
 inline fun <reified T : Any> Provider.top(target: String): Map<Name, T> {
     return listNames(target).associate {

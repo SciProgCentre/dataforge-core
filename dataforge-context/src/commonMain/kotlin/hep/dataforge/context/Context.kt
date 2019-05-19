@@ -116,11 +116,11 @@ open class Context(final override val name: String, val parent: Context? = Globa
     }
 }
 
+fun Context.content(target: String): Map<Name, Any> = content<Any>(target)
+
 /**
  * A sequences of all objects provided by plugins with given target and type
  */
-fun Context.content(target: String): Map<Name, Any> = content<Any>(target)
-
 @JvmName("typedContent")
 inline fun <reified T : Any> Context.content(target: String): Map<Name, T> =
     plugins.flatMap { plugin ->

@@ -26,7 +26,7 @@ interface WorkspaceBuilder {
 /**
  * Set the context for future workspcace
  */
-fun WorkspaceBuilder.context(name: String, block: ContextBuilder.() -> Unit = {}) {
+fun WorkspaceBuilder.context(name: String = "WORKSPACE", block: ContextBuilder.() -> Unit = {}) {
     context = ContextBuilder(name, parentContext).apply(block).build()
 }
 

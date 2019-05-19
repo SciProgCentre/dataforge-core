@@ -207,7 +207,7 @@ class TaskBuilder(val name: String) {
         }
 }
 
-fun task(name: String, builder: TaskBuilder.() -> Unit): GenericTask<Any> {
+fun Workspace.Companion.task(name: String, builder: TaskBuilder.() -> Unit): GenericTask<Any> {
     return TaskBuilder(name).apply(builder).build()
 }
 

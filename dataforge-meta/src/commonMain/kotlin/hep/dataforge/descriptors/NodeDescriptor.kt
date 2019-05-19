@@ -104,7 +104,7 @@ class NodeDescriptor(override val config: Config) : Specific {
      */
     val nodes: Map<String, NodeDescriptor>
         get() = config.getAll("node".toName()).entries.associate { (name, node) ->
-            name to NodeDescriptor.wrap(node.node ?: error("Node descriptor must be a node"))
+            name to wrap(node.node ?: error("Node descriptor must be a node"))
         }
 
 
@@ -114,7 +114,7 @@ class NodeDescriptor(override val config: Config) : Specific {
     }
 
     fun node(name: String, block: NodeDescriptor.() -> Unit) {
-        node(name, NodeDescriptor.build { this.name = name }.apply(block))
+        node(name, build { this.name = name }.apply(block))
     }
 
 
