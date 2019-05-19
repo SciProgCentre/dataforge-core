@@ -1,20 +1,17 @@
 package hep.dataforge.workspace
 
-import hep.dataforge.context.AbstractPlugin
 import hep.dataforge.context.PluginTag
 import hep.dataforge.data.first
 import hep.dataforge.data.get
 import hep.dataforge.meta.boolean
 import hep.dataforge.meta.get
-import hep.dataforge.names.Name
-import hep.dataforge.names.toName
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 
 class SimpleWorkspaceTest {
-    val testPlugin = object : AbstractPlugin() {
+    val testPlugin = object : WorkspacePlugin() {
         override val tag: PluginTag = PluginTag("test")
 
         val contextTask = Workspace.task("test") {
@@ -22,28 +19,12 @@ class SimpleWorkspaceTest {
                 context.logger.info { "Test: $it" }
             }
         }
-
-        override fun provideTop(target: String, name: Name): Any? {
-            return if (target == Task.TYPE && name == "test".toName()) {
-                contextTask
-            } else {
-                null
-            }
-        }
-
-        override fun listNames(target: String): Sequence<Name> {
-            return if(target== Task.TYPE){
-                sequenceOf(contextTask.name.toName())
-            } else{
-                emptySequence()
-            }
-        }
-
+        override val tasks: Collection<Task<*>> = listOf(contextTask)
     }
 
     val workspace = SimpleWorkspace.build {
 
-        context{
+        context {
             plugin(testPlugin)
         }
 
