@@ -8,12 +8,11 @@ import kotlinx.io.core.readText
 import kotlinx.io.core.writeText
 
 object BinaryMetaFormat : MetaFormat {
-    override fun write(obj: Meta, out: Output) {
-        out.writeMeta(obj)
-    }
+    override val name: String = "bin"
+    override val key: Short = 0x4249//BI
 
-    override fun read(input: Input): Meta {
-        return (input.readMetaItem() as MetaItem.NodeItem).node
+    override fun Input.readObject(): Meta {
+        return (readMetaItem() as MetaItem.NodeItem).node
     }
 
     private fun Output.writeChar(char: Char) = writeByte(char.toByte())
@@ -70,7 +69,7 @@ object BinaryMetaFormat : MetaFormat {
         }
     }
 
-    private fun Output.writeMeta(meta: Meta) {
+    override fun Output.writeObject(meta: Meta) {
         writeChar('M')
         writeInt(meta.items.size)
         meta.items.forEach { (key, item) ->
@@ -80,7 +79,7 @@ object BinaryMetaFormat : MetaFormat {
                     writeValue(item.value)
                 }
                 is MetaItem.NodeItem -> {
-                    writeMeta(item.node)
+                    writeObject(item.node)
                 }
             }
         }
@@ -122,11 +121,4 @@ object BinaryMetaFormat : MetaFormat {
             else -> error("Unknown serialization key character: $keyChar")
         }
     }
-}
-
-class BinaryMetaFormatFactory : MetaFormatFactory {
-    override val name: String = "bin"
-    override val key: Short = 0x4249//BI
-
-    override fun build(): MetaFormat = BinaryMetaFormat
 }

@@ -14,13 +14,16 @@ import kotlinx.serialization.json.*
 
 object JsonMetaFormat : MetaFormat {
 
-    override fun write(obj: Meta, out: Output) {
+    override val name: String = "json"
+    override val key: Short = 0x4a53//"JS"
+
+    override fun Output.writeObject(obj: Meta) {
         val str = obj.toJson().toString()
-        out.writeText(str)
+        writeText(str)
     }
 
-    override fun read(input: Input): Meta {
-        val str = input.readText()
+    override fun Input.readObject(): Meta {
+        val str = readText()
         val json = Json.plain.parseJson(str)
 
         if (json is JsonObject) {
@@ -97,11 +100,4 @@ class JsonMeta(val json: JsonObject) : Meta {
         json.forEach { (key, value) -> map[key] = value }
         map.mapKeys { it.key.toName().first()!! }
     }
-}
-
-class JsonMetaFormatFactory : MetaFormatFactory {
-    override val name: String = "json"
-    override val key: Short = 0x4a53//"JS"
-
-    override fun build() = JsonMetaFormat
 }

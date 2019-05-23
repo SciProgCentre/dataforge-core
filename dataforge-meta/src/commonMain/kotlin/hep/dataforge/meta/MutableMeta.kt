@@ -95,12 +95,13 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : AbstractMetaNode<M>(), 
 fun <M : MutableMeta<M>> MutableMeta<M>.remove(name: Name) = set(name, null)
 fun <M : MutableMeta<M>> MutableMeta<M>.remove(name: String) = remove(name.toName())
 
-fun <M : MutableMeta<M>> MutableMeta<M>.setValue(name: Name, value: Value) = set(name, MetaItem.ValueItem(value))
-//fun <M : MutableMeta<M>> MutableMeta<M>.setItem(name: String, item: MetaItem<M>) = set(name.toName(), item)
+fun <M : MutableMeta<M>> MutableMeta<M>.setValue(name: Name, value: Value) =
+    set(name, MetaItem.ValueItem(value))
 fun <M : MutableMeta<M>> MutableMeta<M>.setValue(name: String, value: Value) =
     set(name.toName(), MetaItem.ValueItem(value))
 
 //fun <M : MutableMeta<M>> MutableMeta<M>.setItem(token: NameToken, item: MetaItem<M>?) = set(token.asName(), item)
+//fun <M : MutableMeta<M>> MutableMeta<M>.setItem(name: String, item: MetaItem<M>) = set(name.toName(), item)
 
 fun <M : MutableMetaNode<M>> MutableMetaNode<M>.setItem(name: Name, item: MetaItem<*>) {
     when (item) {
