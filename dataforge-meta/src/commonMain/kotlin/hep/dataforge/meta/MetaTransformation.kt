@@ -26,6 +26,9 @@ interface TransformationRule {
     fun <M : MutableMetaNode<M>> transformItem(name: Name, item: MetaItem<*>?, target: M): Unit
 }
 
+/**
+ * A transformation which transforms an element with given [name] to itself.
+ */
 data class SelfTransformationRule(val name: Name) : TransformationRule {
     override fun matches(name: Name, item: MetaItem<*>?): Boolean {
         return name == name
@@ -38,6 +41,9 @@ data class SelfTransformationRule(val name: Name) : TransformationRule {
     }
 }
 
+/**
+ * A transformation which transforms element with specific name
+ */
 data class SingleItemTransformationRule(
     val from: Name,
     val to: Name,
@@ -59,14 +65,31 @@ data class SingleItemTransformationRule(
 class MetaTransformation {
     private val transformations = HashSet<TransformationRule>()
 
+
     /**
      * Produce new meta using only those items that match transformation rules
      */
-    fun produce(source: Meta): Meta = buildMeta {
+    fun transform(source: Meta): Meta = buildMeta {
         transformations.forEach { rule ->
             rule.selectItems(source).forEach { name ->
                 rule.transformItem(name, source[name], this)
             }
         }
+    }
+
+    /**
+     * Transform a meta, replacing all elements found in rules with transformed entries
+     */
+    fun apply(source: Meta): Meta = buildMeta(source) {
+        transformations.forEach { rule ->
+            rule.selectItems(source).forEach { name ->
+                remove(name)
+                rule.transformItem(name, source[name], this)
+            }
+        }
+    }
+
+    companion object{
+
     }
 }

@@ -70,11 +70,7 @@ class TaggedEnvelopeFormat(
             val tag = Tag(metaFormat.key, metaBytes.size.toUInt(), obj.data?.size ?: 0.toULong())
             out.writePacket(tag.toBytes())
             out.writeFully(metaBytes)
-            obj.data?.read {
-                while (!endOfInput){
-                    out.writeByte(readByte())
-                }
-            }
+            obj.data?.read { copyTo(out) }
         }
     }
 }
