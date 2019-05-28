@@ -327,7 +327,7 @@ class MutableSafeEnumvDelegate<M : MutableMeta<M>, E : Enum<E>>(
 
 //Child node delegate
 
-class MutableNodeDelegate<M : MutableMetaNode<M>>(
+class MutableNodeDelegate<M : MutableMeta<M>>(
     val meta: M,
     private val key: String? = null
 ) : ReadWriteProperty<Any?, Meta?> {
@@ -340,7 +340,7 @@ class MutableNodeDelegate<M : MutableMetaNode<M>>(
     }
 }
 
-class MutableMorphDelegate<M : MutableMetaNode<M>, T : Configurable>(
+class MutableMorphDelegate<M : MutableMeta<M>, T : Configurable>(
     val meta: M,
     private val key: String? = null,
     private val converter: (Meta) -> T
@@ -390,7 +390,7 @@ fun <M : MutableMeta<M>> M.boolean(default: Boolean? = null, key: String? = null
 fun <M : MutableMeta<M>> M.number(default: Number? = null, key: String? = null) =
     MutableNumberDelegate(this, key, default)
 
-fun <M : MutableMetaNode<M>> M.node(key: String? = null) = MutableNodeDelegate(this, key)
+fun <M : MutableMeta<M>> M.node(key: String? = null) = MutableNodeDelegate(this, key)
 
 @JvmName("safeString")
 fun <M : MutableMeta<M>> M.string(default: String, key: String? = null) =

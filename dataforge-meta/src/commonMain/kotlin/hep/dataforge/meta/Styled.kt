@@ -11,7 +11,15 @@ import kotlin.reflect.KProperty
  * @param base - unchangeable base
  * @param style - the style
  */
-class Styled(val base: Meta, val style: Config = Config().empty()) : MutableMeta<Styled> {
+class Styled(val base: Meta, val style: Config = Config().empty()) : AbstractMutableMeta<Styled>() {
+    override fun wrap(name: Name, meta: Meta): Styled {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun empty(): Styled {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override val items: Map<NameToken, MetaItem<Styled>>
         get() = (base.items.keys + style.items.keys).associate { key ->
             val value = base.items[key]

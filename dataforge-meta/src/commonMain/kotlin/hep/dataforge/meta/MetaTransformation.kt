@@ -23,7 +23,7 @@ interface TransformationRule {
     /**
      * Apply transformation for a single item (Node or Value) and return resulting tree with absolute path
      */
-    fun <M : MutableMetaNode<M>> transformItem(name: Name, item: MetaItem<*>?, target: M): Unit
+    fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem<*>?, target: M): Unit
 }
 
 /**
@@ -36,7 +36,7 @@ data class SelfTransformationRule(val name: Name) : TransformationRule {
 
     override fun selectItems(meta: Meta): Sequence<Name> = sequenceOf(name)
 
-    override fun <M : MutableMetaNode<M>> transformItem(name: Name, item: MetaItem<*>?, target: M) {
+    override fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem<*>?, target: M) {
         if (name == this.name) target[name] = item
     }
 }
@@ -47,7 +47,7 @@ data class SelfTransformationRule(val name: Name) : TransformationRule {
 data class SingleItemTransformationRule(
     val from: Name,
     val to: Name,
-    val transform: MutableMetaNode<*>.(MetaItem<*>?) -> Unit
+    val transform: MutableMeta<*>.(MetaItem<*>?) -> Unit
 ) : TransformationRule {
     override fun matches(name: Name, item: MetaItem<*>?): Boolean {
         return name == from
@@ -55,7 +55,7 @@ data class SingleItemTransformationRule(
 
     override fun selectItems(meta: Meta): Sequence<Name> = sequenceOf(from)
 
-    override fun <M : MutableMetaNode<M>> transformItem(name: Name, item: MetaItem<*>?, target: M) {
+    override fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem<*>?, target: M) {
         if (name == this.from) {
             target.transform(item)
         }

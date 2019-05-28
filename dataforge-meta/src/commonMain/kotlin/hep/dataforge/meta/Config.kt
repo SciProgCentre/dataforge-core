@@ -9,7 +9,7 @@ import hep.dataforge.names.asName
 /**
  * Mutable meta representing object state
  */
-open class Config : MutableMetaNode<Config>() {
+open class Config : AbstractMutableMeta<Config>() {
 
     /**
      * Attach configuration node instead of creating one

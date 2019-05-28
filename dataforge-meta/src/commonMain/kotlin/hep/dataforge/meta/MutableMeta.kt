@@ -10,6 +10,13 @@ internal data class MetaListener(
 
 
 interface MutableMeta<M : MutableMeta<M>> : MetaNode<M> {
+    /**
+     * Transform given meta to node type of this meta tree
+     * @param name the name of the node where meta should be attached. Needed for correct assignment validators and styles
+     * @param meta the node itself
+     */
+    fun wrap(name: Name, meta: Meta): M
+
     override val items: Map<NameToken, MetaItem<M>>
     operator fun set(name: Name, item: MetaItem<M>?)
     fun onChange(owner: Any? = null, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit)
@@ -21,7 +28,7 @@ interface MutableMeta<M : MutableMeta<M>> : MetaNode<M> {
  *
  * Changes in Meta are not thread safe.
  */
-abstract class MutableMetaNode<M : MutableMetaNode<M>> : AbstractMetaNode<M>(), MutableMeta<M> {
+abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), MutableMeta<M> {
     private val listeners = HashSet<MetaListener>()
 
     /**
@@ -63,13 +70,6 @@ abstract class MutableMetaNode<M : MutableMetaNode<M>> : AbstractMetaNode<M>(), 
     }
 
     /**
-     * Transform given meta to node type of this meta tree
-     * @param name the name of the node where meta should be attached. Needed for correct assignment validators and styles
-     * @param meta the node itself
-     */
-    internal abstract fun wrap(name: Name, meta: Meta): M
-
-    /**
      * Create empty node
      */
     internal abstract fun empty(): M
@@ -97,30 +97,31 @@ fun <M : MutableMeta<M>> MutableMeta<M>.remove(name: String) = remove(name.toNam
 
 fun <M : MutableMeta<M>> MutableMeta<M>.setValue(name: Name, value: Value) =
     set(name, MetaItem.ValueItem(value))
+
 fun <M : MutableMeta<M>> MutableMeta<M>.setValue(name: String, value: Value) =
     set(name.toName(), MetaItem.ValueItem(value))
 
 //fun <M : MutableMeta<M>> MutableMeta<M>.setItem(token: NameToken, item: MetaItem<M>?) = set(token.asName(), item)
 //fun <M : MutableMeta<M>> MutableMeta<M>.setItem(name: String, item: MetaItem<M>) = set(name.toName(), item)
 
-fun <M : MutableMetaNode<M>> MutableMetaNode<M>.setItem(name: Name, item: MetaItem<*>) {
+fun <M : MutableMeta<M>> MutableMeta<M>.setItem(name: Name, item: MetaItem<*>) {
     when (item) {
         is MetaItem.ValueItem<*> -> setValue(name, item.value)
         is MetaItem.NodeItem<*> -> setNode(name, item.node)
     }
 }
 
-fun <M : MutableMetaNode<M>> MutableMetaNode<M>.setItem(name: String, item: MetaItem<*>) = setItem(name.toName(), item)
+fun <M : MutableMeta<M>> MutableMeta<M>.setItem(name: String, item: MetaItem<*>) = setItem(name.toName(), item)
 
-fun <M : MutableMetaNode<M>> MutableMetaNode<M>.setNode(name: Name, node: Meta) =
+fun <M : MutableMeta<M>> MutableMeta<M>.setNode(name: Name, node: Meta) =
     set(name, MetaItem.NodeItem(wrap(name, node)))
 
-fun <M : MutableMetaNode<M>> MutableMetaNode<M>.setNode(name: String, node: Meta) = setNode(name.toName(), node)
+fun <M : MutableMeta<M>> MutableMeta<M>.setNode(name: String, node: Meta) = setNode(name.toName(), node)
 
 /**
  * Universal set method
  */
-operator fun <M : MutableMetaNode<M>> MutableMetaNode<M>.set(name: Name, value: Any?) {
+operator fun <M : MutableMeta<M>> MutableMeta<M>.set(name: Name, value: Any?) {
     when (value) {
         null -> remove(name)
         is MetaItem<*> -> setItem(name, value)
@@ -130,9 +131,9 @@ operator fun <M : MutableMetaNode<M>> MutableMetaNode<M>.set(name: Name, value: 
     }
 }
 
-operator fun <M : MutableMetaNode<M>> M.set(name: NameToken, value: Any?) = set(name.asName(), value)
+operator fun <M : MutableMeta<M>> M.set(name: NameToken, value: Any?) = set(name.asName(), value)
 
-operator fun <M : MutableMetaNode<M>> M.set(key: String, value: Any?) = set(key.toName(), value)
+operator fun <M : MutableMeta<M>> M.set(key: String, value: Any?) = set(key.toName(), value)
 
 /**
  * Update existing mutable node with another node. The rules are following:
@@ -140,7 +141,7 @@ operator fun <M : MutableMetaNode<M>> M.set(key: String, value: Any?) = set(key.
  *  * node updates node and replaces anything but node
  *  * node list updates node list if number of nodes in the list is the same and replaces anything otherwise
  */
-fun <M : MutableMetaNode<M>> M.update(meta: Meta) {
+fun <M : MutableMeta<M>> M.update(meta: Meta) {
     meta.items.forEach { entry ->
         val value = entry.value
         when (value) {
@@ -153,7 +154,7 @@ fun <M : MutableMetaNode<M>> M.update(meta: Meta) {
 
 /* Same name siblings generation */
 
-fun <M : MutableMeta<M>> M.setIndexed(
+fun <M : MutableMeta<M>> M.setIndexedItems(
     name: Name,
     items: Iterable<MetaItem<M>>,
     indexFactory: MetaItem<M>.(index: Int) -> String = { it.toString() }
@@ -167,21 +168,21 @@ fun <M : MutableMeta<M>> M.setIndexed(
     }
 }
 
-fun <M : MutableMetaNode<M>> M.setIndexed(
+fun <M : MutableMeta<M>> M.setIndexed(
     name: Name,
     metas: Iterable<Meta>,
     indexFactory: MetaItem<M>.(index: Int) -> String = { it.toString() }
 ) {
-    setIndexed(name, metas.map { MetaItem.NodeItem(wrap(name, it)) }, indexFactory)
+    setIndexedItems(name, metas.map { MetaItem.NodeItem(wrap(name, it)) }, indexFactory)
 }
 
-operator fun <M : MutableMetaNode<M>> M.set(name: Name, metas: Iterable<Meta>) = setIndexed(name, metas)
-operator fun <M : MutableMetaNode<M>> M.set(name: String, metas: Iterable<Meta>) = setIndexed(name.toName(), metas)
+operator fun <M : MutableMeta<M>> M.set(name: Name, metas: Iterable<Meta>) = setIndexed(name, metas)
+operator fun <M : MutableMeta<M>> M.set(name: String, metas: Iterable<Meta>) = setIndexed(name.toName(), metas)
 
 /**
  * Append the node with a same-name-sibling, automatically generating numerical index
  */
-fun <M : MutableMetaNode<M>> M.append(name: Name, value: Any?) {
+fun <M : MutableMeta<M>> M.append(name: Name, value: Any?) {
     require(!name.isEmpty()) { "Name could not be empty for append operation" }
     val newIndex = name.last()!!.index
     if (newIndex.isNotEmpty()) {
@@ -192,4 +193,4 @@ fun <M : MutableMetaNode<M>> M.append(name: Name, value: Any?) {
     }
 }
 
-fun <M : MutableMetaNode<M>> M.append(name: String, value: Any?) = append(name.toName(), value)
+fun <M : MutableMeta<M>> M.append(name: String, value: Any?) = append(name.toName(), value)
