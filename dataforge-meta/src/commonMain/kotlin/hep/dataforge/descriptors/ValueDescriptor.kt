@@ -126,7 +126,7 @@ class ValueDescriptor(override val config: Config) : Specific {
         override fun wrap(config: Config): ValueDescriptor = ValueDescriptor(config)
 
         inline fun <reified E : Enum<E>> enum(name: String) =
-            ValueDescriptor.build {
+            build {
                 this.name = name
                 type(ValueType.STRING)
                 this.allowedValues = enumValues<E>().map { Value.of(it.name) }

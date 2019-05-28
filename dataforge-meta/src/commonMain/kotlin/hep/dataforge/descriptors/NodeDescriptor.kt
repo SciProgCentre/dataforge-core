@@ -83,12 +83,12 @@ class NodeDescriptor(override val config: Config) : Specific {
      * The list of value descriptors
      */
     val values: Map<String, ValueDescriptor>
-        get() = config.getAll("value".toName()).entries.associate { (name, node) ->
+        get() = config.getAll(VALUE_KEY.toName()).entries.associate { (name, node) ->
             name to ValueDescriptor.wrap(node.node ?: error("Value descriptor must be a node"))
         }
 
     fun value(name: String, descriptor: ValueDescriptor) {
-        val token = NameToken("value", name)
+        val token = NameToken(VALUE_KEY, name)
         config[token] = descriptor.config
     }
 
@@ -103,13 +103,13 @@ class NodeDescriptor(override val config: Config) : Specific {
      * The map of children node descriptors
      */
     val nodes: Map<String, NodeDescriptor>
-        get() = config.getAll("node".toName()).entries.associate { (name, node) ->
+        get() = config.getAll(NODE_KEY.toName()).entries.associate { (name, node) ->
             name to wrap(node.node ?: error("Node descriptor must be a node"))
         }
 
 
     fun node(name: String, descriptor: NodeDescriptor) {
-        val token = NameToken("node", name)
+        val token = NameToken(NODE_KEY, name)
         config[token] = descriptor.config
     }
 
@@ -122,7 +122,9 @@ class NodeDescriptor(override val config: Config) : Specific {
 
     companion object : Specification<NodeDescriptor> {
 
-        override fun wrap(config: Config): NodeDescriptor = NodeDescriptor(config)
+        const val NODE_KEY = "node"
+        const val VALUE_KEY = "value"
 
+        override fun wrap(config: Config): NodeDescriptor = NodeDescriptor(config)
     }
 }
