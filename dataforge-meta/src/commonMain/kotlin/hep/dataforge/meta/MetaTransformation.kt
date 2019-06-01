@@ -1,6 +1,7 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.Name
+import hep.dataforge.names.startsWith
 
 /**
  * A transformation for meta item or a group of items
@@ -27,17 +28,18 @@ interface TransformationRule {
 }
 
 /**
- * A transformation which transforms an element with given [name] to itself.
+ * A transformation which keeps all elements, matching [selector] unchanged.
  */
-data class SelfTransformationRule(val name: Name) : TransformationRule {
+data class KeepTransformationRule(val selector: (Name) -> Boolean) : TransformationRule {
     override fun matches(name: Name, item: MetaItem<*>?): Boolean {
-        return name == name
+        return selector(name)
     }
 
-    override fun selectItems(meta: Meta): Sequence<Name> = sequenceOf(name)
+    override fun selectItems(meta: Meta): Sequence<Name> =
+        meta.sequence().map { it.first }.filter(selector)
 
     override fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem<*>?, target: M) {
-        if (name == this.name) target[name] = item
+        if (selector(name)) target[name] = item
     }
 }
 
@@ -46,8 +48,7 @@ data class SelfTransformationRule(val name: Name) : TransformationRule {
  */
 data class SingleItemTransformationRule(
     val from: Name,
-    val to: Name,
-    val transform: MutableMeta<*>.(MetaItem<*>?) -> Unit
+    val transform: MutableMeta<*>.(Name, MetaItem<*>?) -> Unit
 ) : TransformationRule {
     override fun matches(name: Name, item: MetaItem<*>?): Boolean {
         return name == from
@@ -57,14 +58,29 @@ data class SingleItemTransformationRule(
 
     override fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem<*>?, target: M) {
         if (name == this.from) {
-            target.transform(item)
+            target.transform(name, item)
         }
     }
 }
 
-class MetaTransformation {
-    private val transformations = HashSet<TransformationRule>()
+data class RegexpItemTransformationRule(
+    val from: Regex,
+    val transform: MutableMeta<*>.(MatchResult, MetaItem<*>?) -> Unit
+) : TransformationRule {
+    override fun matches(name: Name, item: MetaItem<*>?): Boolean {
+        return from.matches(name.toString())
+    }
 
+    override fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem<*>?, target: M) {
+        val match = from.matchEntire(name.toString())
+        if (match != null) {
+            target.transform(match, item)
+        }
+    }
+
+}
+
+inline class MetaTransformation(val transformations: Collection<TransformationRule>) {
 
     /**
      * Produce new meta using only those items that match transformation rules
@@ -89,7 +105,36 @@ class MetaTransformation {
         }
     }
 
-    companion object{
+    /**
+     * Listens for changes in the source node and translates them into second node if transformation set contains a corresponding rule.
+     */
+    fun <M : MutableMeta<M>> bind(source: MutableMeta<*>, target: M) {
+        source.onChange(target) { name, oldItem, newItem ->
+            transformations.forEach { t ->
+                if (t.matches(name, newItem)) {
+                    t.transformItem(name, newItem, target)
+                }
+            }
+        }
+    }
 
+    companion object {
+
+    }
+}
+
+class MetaTransformationBuilder {
+    val transformations = HashSet<TransformationRule>()
+
+    fun keep(selector: (Name) -> Boolean) {
+        transformations.add(KeepTransformationRule(selector))
+    }
+
+    fun keep(name: Name) {
+        keep{it == name}
+    }
+
+    fun keepNode(name: Name){
+        keep{it.startsWith(name)}
     }
 }

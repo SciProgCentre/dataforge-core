@@ -123,3 +123,13 @@ fun Name.withIndex(index: String): Name {
 
 operator fun <T> Map<Name, T>.get(name: String) = get(name.toName())
 operator fun <T> MutableMap<Name, T>.set(name: String, value: T) = set(name.toName(), value)
+
+/* Name comparison operations */
+
+fun Name.startsWith(token: NameToken): Boolean = first() == token
+
+fun Name.endsWith(token: NameToken): Boolean = last() == token
+
+fun Name.startsWith(name: Name): Boolean = tokens.subList(0, name.length) == name.tokens
+
+fun Name.endsWith(name: Name): Boolean = tokens.subList(length - name.length, length) == name.tokens

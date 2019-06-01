@@ -126,5 +126,7 @@ class NodeDescriptor(override val config: Config) : Specific {
         const val VALUE_KEY = "value"
 
         override fun wrap(config: Config): NodeDescriptor = NodeDescriptor(config)
+
+        //TODO infer descriptor from spec
     }
 }
