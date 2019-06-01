@@ -1,7 +1,6 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.Name
-import hep.dataforge.names.startsWith
 
 /**
  * A transformation for meta item or a group of items
@@ -63,9 +62,9 @@ data class SingleItemTransformationRule(
     }
 }
 
-data class RegexpItemTransformationRule(
+data class RegexItemTransformationRule(
     val from: Regex,
-    val transform: MutableMeta<*>.(MatchResult, MetaItem<*>?) -> Unit
+    val transform: MutableMeta<*>.(name: Name, MatchResult, MetaItem<*>?) -> Unit
 ) : TransformationRule {
     override fun matches(name: Name, item: MetaItem<*>?): Boolean {
         return from.matches(name.toString())
@@ -74,7 +73,7 @@ data class RegexpItemTransformationRule(
     override fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem<*>?, target: M) {
         val match = from.matchEntire(name.toString())
         if (match != null) {
-            target.transform(match, item)
+            target.transform(name, match, item)
         }
     }
 
@@ -122,7 +121,8 @@ inline class MetaTransformation(val transformations: Collection<TransformationRu
     }
 
     companion object {
-
+        fun make(block: MetaTransformationBuilder.() -> Unit): MetaTransformation =
+            MetaTransformationBuilder().apply(block).build()
     }
 }
 
@@ -143,12 +143,28 @@ class MetaTransformationBuilder {
      * Keep specific item (including its descendants)
      */
     fun keep(name: Name) {
-        keep{it == name}
+        keep { it == name }
     }
 
-    fun move(from: Name, to: Name){
+    /**
+     * Keep nodes by regex
+     */
+    fun keep(regex: String) {
+        transformations.add(RegexItemTransformationRule(regex.toRegex()) { name, _, metaItem ->
+            setItem(name, metaItem)
+        })
+    }
+
+    /**
+     * Move an item from [from] to [to], optionally applying [operation] it defined
+     */
+    fun move(from: Name, to: Name, operation: (MetaItem<*>?) -> Any? = { it }) {
         transformations.add(
-            SingleItemTransformationRule(from){ _, item -> setItem(to, item)}
+            SingleItemTransformationRule(from) { _, item ->
+                set(to, operation(item))
+            }
         )
     }
+
+    fun build() = MetaTransformation(transformations)
 }
