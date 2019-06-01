@@ -61,13 +61,13 @@ class SimpleWorkspaceTest {
                 allData()
             }
             joinByGroup<Int, Double> { context ->
-                group("even", filter = { name, data -> name.toString().toInt() % 2 == 0 }) {
+                group("even", filter = { name, _ -> name.toString().toInt() % 2 == 0 }) {
                     result { data ->
                         context.logger.info { "Starting even" }
                         data.values.average()
                     }
                 }
-                group("odd", filter = { name, data -> name.toString().toInt() % 2 == 1 }) {
+                group("odd", filter = { name, _ -> name.toString().toInt() % 2 == 1 }) {
                     result { data ->
                         context.logger.info { "Starting odd" }
                         data.values.average()

@@ -90,6 +90,7 @@ object BinaryMetaFormat : MetaFormat {
         return readText(max = length)
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun Input.readMetaItem(): MetaItem<MetaBuilder> {
         val keyChar = readByte().toChar()
         return when (keyChar) {
@@ -119,6 +120,6 @@ object BinaryMetaFormat : MetaFormat {
                 MetaItem.NodeItem(meta)
             }
             else -> error("Unknown serialization key character: $keyChar")
-        }
+        } as MetaItem<MetaBuilder>
     }
 }

@@ -80,6 +80,9 @@ data class RegexpItemTransformationRule(
 
 }
 
+/**
+ * A set of [TransformationRule] to either transform static meta or create dynamically updated [MutableMeta]
+ */
 inline class MetaTransformation(val transformations: Collection<TransformationRule>) {
 
     /**
@@ -109,7 +112,7 @@ inline class MetaTransformation(val transformations: Collection<TransformationRu
      * Listens for changes in the source node and translates them into second node if transformation set contains a corresponding rule.
      */
     fun <M : MutableMeta<M>> bind(source: MutableMeta<*>, target: M) {
-        source.onChange(target) { name, oldItem, newItem ->
+        source.onChange(target) { name, _, newItem ->
             transformations.forEach { t ->
                 if (t.matches(name, newItem)) {
                     t.transformItem(name, newItem, target)
@@ -123,18 +126,29 @@ inline class MetaTransformation(val transformations: Collection<TransformationRu
     }
 }
 
+/**
+ * A builder for a set of transformation rules
+ */
 class MetaTransformationBuilder {
     val transformations = HashSet<TransformationRule>()
 
+    /**
+     * Keep all items with name satisfying the criteria
+     */
     fun keep(selector: (Name) -> Boolean) {
         transformations.add(KeepTransformationRule(selector))
     }
 
+    /**
+     * Keep specific item (including its descendants)
+     */
     fun keep(name: Name) {
         keep{it == name}
     }
 
-    fun keepNode(name: Name){
-        keep{it.startsWith(name)}
+    fun move(from: Name, to: Name){
+        transformations.add(
+            SingleItemTransformationRule(from){ _, item -> setItem(to, item)}
+        )
     }
 }

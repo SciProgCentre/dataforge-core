@@ -49,8 +49,7 @@ fun Value.toJson(): JsonElement {
 
 fun Meta.toJson(): JsonObject {
     val map = this.items.mapValues { entry ->
-        val value = entry.value
-        when (value) {
+        when (val value = entry.value) {
             is MetaItem.ValueItem -> value.value.toJson()
             is MetaItem.NodeItem -> value.node.toJson()
         }
@@ -70,8 +69,9 @@ class JsonMeta(val json: JsonObject) : Meta {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private operator fun MutableMap<String, MetaItem<JsonMeta>>.set(key: String, value: JsonElement) = when (value) {
-        is JsonPrimitive -> this[key] = MetaItem.ValueItem(value.toValue())
+        is JsonPrimitive -> this[key] = MetaItem.ValueItem(value.toValue()) as MetaItem<JsonMeta>
         is JsonObject -> this[key] = MetaItem.NodeItem(value.toMeta())
         is JsonArray -> {
             when {
@@ -82,12 +82,12 @@ class JsonMeta(val json: JsonObject) : Meta {
                             (it as JsonPrimitive).toValue()
                         }
                     )
-                    this[key] = MetaItem.ValueItem(listValue)
+                    this[key] = MetaItem.ValueItem(listValue) as MetaItem<JsonMeta>
                 }
                 else -> value.forEachIndexed { index, jsonElement ->
                     when (jsonElement) {
                         is JsonObject -> this["$key[$index]"] = MetaItem.NodeItem(JsonMeta(jsonElement))
-                        is JsonPrimitive -> this["$key[$index]"] = MetaItem.ValueItem(jsonElement.toValue())
+                        is JsonPrimitive -> this["$key[$index]"] = MetaItem.ValueItem(jsonElement.toValue()) as MetaItem<JsonMeta>
                         is JsonArray -> TODO("Nested arrays not supported")
                     }
                 }

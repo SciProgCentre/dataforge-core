@@ -1,6 +1,5 @@
 package hep.dataforge.meta
 
-import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.values.Value
 
@@ -8,7 +7,7 @@ import hep.dataforge.values.Value
  * DSL builder for meta. Is not intended to store mutable state
  */
 class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
-    override fun wrap(name: Name, meta: Meta): MetaBuilder = meta.builder()
+    override fun wrapNode(meta: Meta): MetaBuilder = meta.builder()
     override fun empty(): MetaBuilder = MetaBuilder()
 
     infix fun String.to(value: Any) {
@@ -39,7 +38,7 @@ fun Meta.builder(): MetaBuilder {
         items.mapValues { entry ->
             val item = entry.value
             builder[entry.key.asName()] = when (item) {
-                is MetaItem.ValueItem -> MetaItem.ValueItem<MetaBuilder>(item.value)
+                is MetaItem.ValueItem -> item.value
                 is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.builder())
             }
         }

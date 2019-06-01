@@ -121,6 +121,11 @@ fun Name.withIndex(index: String): Name {
     return Name(tokens)
 }
 
+/**
+ * Fast [String]-based accessor for item map
+ */
+operator fun <T> Map<NameToken, T>.get(body: String, query: String = ""): T? = get(NameToken(body, query))
+
 operator fun <T> Map<Name, T>.get(name: String) = get(name.toName())
 operator fun <T> MutableMap<Name, T>.set(name: String, value: T) = set(name.toName(), value)
 

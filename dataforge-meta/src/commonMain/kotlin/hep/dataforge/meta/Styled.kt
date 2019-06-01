@@ -12,14 +12,11 @@ import kotlin.reflect.KProperty
  * @param style - the style
  */
 class Styled(val base: Meta, val style: Config = Config().empty()) : AbstractMutableMeta<Styled>() {
-    override fun wrap(name: Name, meta: Meta): Styled {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun wrapNode(meta: Meta): Styled  = Styled(meta)
 
-    override fun empty(): Styled {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun empty(): Styled  = Styled(EmptyMeta)
 
+    @Suppress("UNCHECKED_CAST")
     override val items: Map<NameToken, MetaItem<Styled>>
         get() = (base.items.keys + style.items.keys).associate { key ->
             val value = base.items[key]
@@ -27,10 +24,10 @@ class Styled(val base: Meta, val style: Config = Config().empty()) : AbstractMut
             val item: MetaItem<Styled> = when (value) {
                 null -> when (styleValue) {
                     null -> error("Should be unreachable")
-                    is MetaItem.ValueItem -> MetaItem.ValueItem(styleValue.value)
                     is MetaItem.NodeItem -> MetaItem.NodeItem(Styled(style.empty(), styleValue.node))
+                    else -> styleValue.value as MetaItem<Styled>
                 }
-                is MetaItem.ValueItem -> MetaItem.ValueItem(value.value)
+                is MetaItem.ValueItem -> value as MetaItem<Styled>
                 is MetaItem.NodeItem -> MetaItem.NodeItem(
                     Styled(value.node, styleValue?.node ?: Config.empty())
                 )
@@ -38,7 +35,7 @@ class Styled(val base: Meta, val style: Config = Config().empty()) : AbstractMut
             key to item
         }
 
-    override fun set(name: Name, item: MetaItem<Styled>?) {
+    override fun set(name: Name, item: MetaItem<*>?) {
         if (item == null) {
             style.remove(name)
         } else {

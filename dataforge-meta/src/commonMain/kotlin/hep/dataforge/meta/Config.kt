@@ -1,6 +1,5 @@
 package hep.dataforge.meta
 
-import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.asName
 
@@ -9,12 +8,12 @@ import hep.dataforge.names.asName
 /**
  * Mutable meta representing object state
  */
-open class Config : AbstractMutableMeta<Config>() {
+class Config : AbstractMutableMeta<Config>() {
 
     /**
      * Attach configuration node instead of creating one
      */
-    override fun wrap(name: Name, meta: Meta): Config = meta.toConfig()
+    override fun wrapNode(meta: Meta): Config = meta.toConfig()
 
     override fun empty(): Config = Config()
 
@@ -29,7 +28,7 @@ fun Meta.toConfig(): Config = this as? Config ?: Config().also { builder ->
     this.items.mapValues { entry ->
         val item = entry.value
         builder[entry.key.asName()] = when (item) {
-            is MetaItem.ValueItem -> MetaItem.ValueItem(item.value)
+            is MetaItem.ValueItem -> item.value
             is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.toConfig())
         }
     }

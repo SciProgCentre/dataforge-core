@@ -35,12 +35,13 @@ class DynamicMeta(val obj: dynamic) : Meta {
     private fun isArray(@Suppress("UNUSED_PARAMETER") obj: dynamic): Boolean =
         js("Array.isArray(obj)") as Boolean
 
+    @Suppress("UNCHECKED_CAST")
     private fun asItem(obj: dynamic): MetaItem<DynamicMeta>? {
-        if (obj == null) return MetaItem.ValueItem(Null)
-        return when (jsTypeOf(obj)) {
-            "boolean" -> MetaItem.ValueItem(Value.of(obj as Boolean))
-            "number" -> MetaItem.ValueItem(Value.of(obj as Number))
-            "string" -> MetaItem.ValueItem(Value.of(obj as String))
+        if (obj == null) return MetaItem.ValueItem(Null) as MetaItem<DynamicMeta>
+        return when (jsTypeOf(obj as? Any)) {
+            "boolean" -> MetaItem.ValueItem(Value.of(obj as Boolean)) as MetaItem<DynamicMeta>
+            "number" -> MetaItem.ValueItem(Value.of(obj as Number)) as MetaItem<DynamicMeta>
+            "string" -> MetaItem.ValueItem(Value.of(obj as String)) as MetaItem<DynamicMeta>
             "object" -> MetaItem.NodeItem(DynamicMeta(obj))
             else -> null
         }
