@@ -31,14 +31,14 @@ import hep.dataforge.names.toName
  *
  * @author Alexander Nozik
  */
-class NodeDescriptor(override val config: Config) : Specific {
+class NodeDescriptor(override val config: Config) : ItemDescriptor, Specific {
 
     /**
      * The name of this node
      *
      * @return
      */
-    var name: String by string { error("Anonymous descriptors are not allowed") }
+    override var name: String by string { error("Anonymous descriptors are not allowed") }
 
 
     /**
@@ -54,28 +54,28 @@ class NodeDescriptor(override val config: Config) : Specific {
      *
      * @return
      */
-    var multiple: Boolean by boolean(false)
+    override var multiple: Boolean by boolean(false)
 
     /**
      * True if the node is required
      *
      * @return
      */
-    var required: Boolean by boolean { default == null }
+    override var required: Boolean by boolean { default == null }
 
     /**
      * The node description
      *
      * @return
      */
-    var info: String? by string()
+    override var info: String? by string()
 
     /**
      * A list of tags for this node. Tags used to customize node usage
      *
      * @return
      */
-    var tags: List<String> by value{ value ->
+    override var tags: List<String> by value { value ->
         value?.list?.map { it.string } ?: emptyList()
     }
 
@@ -116,6 +116,8 @@ class NodeDescriptor(override val config: Config) : Specific {
     fun node(name: String, block: NodeDescriptor.() -> Unit) {
         node(name, build { this.name = name }.apply(block))
     }
+
+    val items: Map<String, ItemDescriptor> get() = nodes + values
 
 
     //override val descriptor: NodeDescriptor =  empty("descriptor")

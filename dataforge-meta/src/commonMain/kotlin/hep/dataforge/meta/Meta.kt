@@ -143,7 +143,8 @@ fun <M : MetaNode<M>> M.getAll(name: Name): Map<String, MetaItem<M>> {
 
 fun <M : MetaNode<M>> M.getAll(name: String): Map<String, MetaItem<M>> = getAll(name.toName())
 
-operator fun <M : MetaNode<M>> MetaNode<M>.get(name: Name): MetaItem<M>? {
+operator fun <M : MetaNode<M>> MetaNode<M>?.get(name: Name): MetaItem<M>? {
+    if (this == null) return null
     return name.first()?.let { token ->
         val tail = name.cutFirst()
         when (tail.length) {
@@ -157,6 +158,12 @@ operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: String): MetaItem<M>? = if 
     null
 } else {
     this[key.toName()]
+}
+
+operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: NameToken): MetaItem<M>? = if (this == null) {
+    null
+} else {
+    this[key.asName()]
 }
 
 /**

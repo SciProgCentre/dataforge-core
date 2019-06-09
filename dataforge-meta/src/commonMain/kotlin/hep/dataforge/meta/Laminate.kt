@@ -19,7 +19,7 @@ class Laminate(layers: List<Meta>) : Meta {
 
     constructor(vararg layers: Meta) : this(layers.asList())
 
-    override val items: Map<NameToken, MetaItem<out Meta>>
+    override val items: Map<NameToken, MetaItem<Meta>>
         get() = layers.map { it.items.keys }.flatten().associateWith { key ->
             layers.asSequence().map { it.items[key] }.filterNotNull().let(replaceRule)
         }

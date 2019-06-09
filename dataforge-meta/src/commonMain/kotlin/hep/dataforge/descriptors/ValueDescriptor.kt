@@ -29,7 +29,7 @@ import hep.dataforge.values.ValueType
  *
  * @author Alexander Nozik
  */
-class ValueDescriptor(override val config: Config) : Specific {
+class ValueDescriptor(override val config: Config) : ItemDescriptor, Specific {
 
     /**
      * The default for this value. Null if there is no default.
@@ -47,28 +47,28 @@ class ValueDescriptor(override val config: Config) : Specific {
      *
      * @return
      */
-    var multiple: Boolean by boolean(false)
+    override var multiple: Boolean by boolean(false)
 
     /**
      * True if the value is required
      *
      * @return
      */
-    var required: Boolean by boolean { default == null }
+    override var required: Boolean by boolean { default == null }
 
     /**
      * Value name
      *
      * @return
      */
-    var name: String by string { error("Anonymous descriptors are not allowed") }
+    override var name: String by string { error("Anonymous descriptors are not allowed") }
 
     /**
      * The value info
      *
      * @return
      */
-    var info: String? by string()
+    override var info: String? by string()
 
     /**
      * A list of allowed ValueTypes. Empty if any value type allowed
@@ -83,7 +83,7 @@ class ValueDescriptor(override val config: Config) : Specific {
         this.type = listOf(*t)
     }
 
-    var tags: List<String> by value { value ->
+    override var tags: List<String> by value { value ->
         value?.list?.map { it.string } ?: emptyList()
     }
 
