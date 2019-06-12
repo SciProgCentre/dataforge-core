@@ -14,7 +14,7 @@ fun Configurable.value(default: Any = Null, key: String? = null): MutableValueDe
     MutableValueDelegate(config, key, Value.of(default))
 
 fun <T> Configurable.value(default: T? = null, key: String? = null, transform: (Value?) -> T): ReadWriteDelegateWrapper<Value?, T> =
-    MutableValueDelegate(config, key, Value.of(default)).transform(reader = transform)
+    MutableValueDelegate(config, key, default?.let { Value.of(it)}).transform(reader = transform)
 
 fun Configurable.string(default: String? = null, key: String? = null): MutableStringDelegate<Config> =
     MutableStringDelegate(config, key, default)
