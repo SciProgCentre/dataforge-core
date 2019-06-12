@@ -97,7 +97,7 @@ object True : Value {
     override val value: Any? get() = true
     override val type: ValueType get() = ValueType.BOOLEAN
     override val number: Number get() = 1.0
-    override val string: String get() = "+"
+    override val string: String get() = "true"
 
     override fun toString(): String = value.toString()
 }
@@ -109,7 +109,7 @@ object False : Value {
     override val value: Any? get() = false
     override val type: ValueType get() = ValueType.BOOLEAN
     override val number: Number get() = -1.0
-    override val string: String get() = "-"
+    override val string: String get() = "false"
 }
 
 val Value.boolean get() = this == True || this.list.firstOrNull() == True || (type == ValueType.STRING && string.toBoolean())

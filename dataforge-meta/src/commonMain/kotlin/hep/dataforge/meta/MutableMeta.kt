@@ -50,7 +50,9 @@ abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), 
     protected open fun replaceItem(key: NameToken, oldItem: MetaItem<M>?, newItem: MetaItem<M>?) {
         if (newItem == null) {
             _items.remove(key)
-            oldItem?.node?.removeListener(this)
+            if(oldItem!= null && oldItem is MetaItem.NodeItem<M>) {
+                oldItem.node.removeListener(this)
+            }
         } else {
             _items[key] = newItem
             if (newItem is MetaItem.NodeItem) {
@@ -65,8 +67,8 @@ abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), 
     @Suppress("UNCHECKED_CAST")
     protected fun wrapItem(item: MetaItem<*>?): MetaItem<M>? = when (item) {
         null -> null
-        is MetaItem.ValueItem -> item as MetaItem<M>
-        is MetaItem.NodeItem<*> -> MetaItem.NodeItem(wrapNode(item.node))
+        is MetaItem.ValueItem -> item
+        is MetaItem.NodeItem -> MetaItem.NodeItem(wrapNode(item.node))
     }
 
     /**
@@ -98,8 +100,11 @@ abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), 
     }
 }
 
-fun MutableMeta<*>.remove(name: Name) = set(name, null)
-fun MutableMeta<*>.remove(name: String) = remove(name.toName())
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MutableMeta<*>.remove(name: Name) = set(name, null)
+@Suppress("NOTHING_TO_INLINE")
+inline fun MutableMeta<*>.remove(name: String) = remove(name.toName())
 
 fun MutableMeta<*>.setValue(name: Name, value: Value) =
     set(name, MetaItem.ValueItem(value))
