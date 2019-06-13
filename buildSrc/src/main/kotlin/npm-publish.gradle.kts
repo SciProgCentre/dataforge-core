@@ -5,6 +5,7 @@ import groovy.lang.GroovyObject
 import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
 import org.jfrog.gradle.plugin.artifactory.dsl.ResolverConfig
+import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask
 
 // Old bintray.gradle script converted to real Gradle plugin (precompiled script plugin)
 // It now has own dependencies and support type safe accessors
@@ -133,4 +134,20 @@ artifactory {
             setProperty("password", artifactoryPassword)
         })
     })
+}
+
+// Fixed module artifact uploading to artifactory
+tasks.withType<ArtifactoryTask> {
+    doFirst {
+        publishing.publications
+            .filterIsInstance<MavenPublication>()
+            .forEach { publication ->
+                val moduleFile = buildDir.resolve("publications/${publication.name}/module.json")
+                if (moduleFile.exists()) {
+                    publication.artifact(object : FileBasedMavenArtifact(moduleFile) {
+                        override fun getDefaultExtension() = "module"
+                    })
+                }
+            }
+    }
 }
