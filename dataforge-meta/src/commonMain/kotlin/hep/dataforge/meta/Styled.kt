@@ -16,7 +16,6 @@ class Styled(val base: Meta, val style: Config = Config().empty()) : AbstractMut
 
     override fun empty(): Styled  = Styled(EmptyMeta)
 
-    @Suppress("UNCHECKED_CAST")
     override val items: Map<NameToken, MetaItem<Styled>>
         get() = (base.items.keys + style.items.keys).associate { key ->
             val value = base.items[key]
@@ -25,7 +24,7 @@ class Styled(val base: Meta, val style: Config = Config().empty()) : AbstractMut
                 null -> when (styleValue) {
                     null -> error("Should be unreachable")
                     is MetaItem.NodeItem -> MetaItem.NodeItem(Styled(style.empty(), styleValue.node))
-                    else -> styleValue.value as MetaItem<Styled>
+                    is MetaItem.ValueItem -> styleValue
                 }
                 is MetaItem.ValueItem -> value as MetaItem<Styled>
                 is MetaItem.NodeItem -> MetaItem.NodeItem(

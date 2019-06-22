@@ -1,5 +1,5 @@
 plugins {
-    `npm-multiplatform`
+    id("scientifik.mpp")
 }
 
 val coroutinesVersion: String = Versions.coroutinesVersion

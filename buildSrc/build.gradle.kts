@@ -7,7 +7,7 @@ repositories {
     jcenter()
 }
 
-val kotlinVersion = "1.3.31"
+val kotlinVersion = "1.3.40"
 
 // Add plugins used in buildSrc as dependencies, also we should specify version only here
 dependencies {
@@ -17,4 +17,17 @@ dependencies {
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:0.9.18")
     implementation("com.moowork.gradle:gradle-node-plugin:1.3.1")
     implementation("org.openjfx:javafx-plugin:0.0.7")
+}
+
+gradlePlugin{
+    plugins {
+        create("scientifik-publish") {
+            id = "scientifik.publish"
+            implementationClass = "ScientifikPublishPlugin"
+        }
+        create("scientifik-mpp"){
+            id = "scientifik.mpp"
+            implementationClass = "ScientifikMPPlugin"
+        }
+    }
 }

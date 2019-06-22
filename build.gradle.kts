@@ -1,4 +1,4 @@
-val dataforgeVersion by extra("0.1.3-dev-5")
+val dataforgeVersion by extra("0.1.3-dev-6")
 
 allprojects {
     repositories {
@@ -11,8 +11,7 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = "dokka-publish")
     if (name.startsWith("dataforge")) {
-        apply(plugin = "npm-publish")
+        apply(plugin = "scientifik.publish")
     } 
 }

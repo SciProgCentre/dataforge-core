@@ -1,12 +1,10 @@
 plugins {
-    `npm-multiplatform`
+    id("scientifik.mpp")
 }
 
 val htmlVersion by rootProject.extra("0.6.12")
 
 kotlin {
-    jvm()
-    js()
     sourceSets {
         val commonMain by getting {
             dependencies {

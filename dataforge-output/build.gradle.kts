@@ -1,10 +1,8 @@
 plugins {
-    `npm-multiplatform`
+    id("scientifik.mpp")
 }
 
 kotlin {
-    jvm()
-    js()
     sourceSets {
         val commonMain by getting{
             dependencies {
