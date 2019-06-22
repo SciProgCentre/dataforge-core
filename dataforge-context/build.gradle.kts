@@ -7,9 +7,6 @@ description = "Context and provider definitions"
 val coroutinesVersion: String  = Versions.coroutinesVersion
 
 kotlin {
-    jvm()
-    js()
-
     sourceSets {
         val commonMain by getting {
             dependencies {

@@ -1,4 +1,5 @@
 import com.jfrog.bintray.gradle.BintrayExtension
+import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -14,6 +15,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
 import org.jfrog.gradle.plugin.artifactory.dsl.ResolverConfig
+import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask
 
 
 open class ScientifikExtension {
@@ -65,21 +67,14 @@ open class ScientifikPublishPlugin : Plugin<Project> {
                         url.set(extension.vcs)
                     }
                 }
-
-                val moduleFile = project.buildDir.resolve("publications/${publication.name}/module.json")
-                if (moduleFile.exists()) {
-                    publication.artifact(object : FileBasedMavenArtifact(moduleFile) {
-                        override fun getDefaultExtension() = "module"
-                    })
-                }
             }
         }
 
-        if(extension.dokka){
+        if (extension.dokka) {
             project.plugins.apply("org.jetbrains.dokka")
 
             project.afterEvaluate {
-                extensions.findByType<KotlinMultiplatformExtension>()?.apply{
+                extensions.findByType<KotlinMultiplatformExtension>()?.apply {
                     val dokka by tasks.getting(DokkaTask::class) {
                         outputFormat = "html"
                         outputDirectory = "$buildDir/javadoc"
@@ -122,7 +117,7 @@ open class ScientifikPublishPlugin : Plugin<Project> {
                 }
 
 
-                extensions.findByType<KotlinJvmProjectExtension>()?.apply{
+                extensions.findByType<KotlinJvmProjectExtension>()?.apply {
                     val dokka by tasks.getting(DokkaTask::class) {
                         outputFormat = "html"
                         outputDirectory = "$buildDir/javadoc"

@@ -197,7 +197,7 @@ fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(items.mapValues 
 
 @Suppress("UNCHECKED_CAST")
 fun MetaItem<*>.seal(): MetaItem<SealedMeta> = when (this) {
-    is ValueItem -> this as MetaItem<SealedMeta>
+    is ValueItem -> this
     is NodeItem -> NodeItem(node.seal())
 }
 

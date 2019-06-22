@@ -2,6 +2,7 @@ package hep.dataforge.io
 
 import kotlinx.io.core.*
 
+@ExperimentalUnsignedTypes
 class TaggedEnvelopeFormat(
     val metaFormats: Collection<MetaFormat>,
     val outputMetaFormat: MetaFormat = metaFormats.first()

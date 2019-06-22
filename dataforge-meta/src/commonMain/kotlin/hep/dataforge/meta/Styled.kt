@@ -26,7 +26,7 @@ class Styled(val base: Meta, val style: Config = Config().empty()) : AbstractMut
                     is MetaItem.NodeItem -> MetaItem.NodeItem(Styled(style.empty(), styleValue.node))
                     is MetaItem.ValueItem -> styleValue
                 }
-                is MetaItem.ValueItem -> value as MetaItem<Styled>
+                is MetaItem.ValueItem -> value
                 is MetaItem.NodeItem -> MetaItem.NodeItem(
                     Styled(value.node, styleValue?.node ?: Config.empty())
                 )
