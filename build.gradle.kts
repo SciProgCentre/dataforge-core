@@ -1,3 +1,8 @@
+plugins {
+    id("scientifik.mpp") apply false
+    id("scientifik.publish") apply false
+}
+
 val dataforgeVersion by extra("0.1.3-dev-7")
 
 val bintrayRepo by extra("dataforge")

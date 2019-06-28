@@ -3,7 +3,3 @@ plugins {
 }
 
 description = "Meta definition and basic operations on meta"
-
-scientifik{
-    
-}
