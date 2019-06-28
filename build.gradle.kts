@@ -1,4 +1,7 @@
-val dataforgeVersion by extra("0.1.3-dev-6")
+val dataforgeVersion by extra("0.1.3-dev-7")
+
+val bintrayRepo by extra("dataforge")
+val vcs by extra("https://github.com/mipt-npm/dataforge-core")
 
 allprojects {
     repositories {

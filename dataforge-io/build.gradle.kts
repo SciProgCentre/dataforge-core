@@ -5,8 +5,8 @@ plugins {
 description = "IO for meta"
 
 
-val ioVersion: String = Versions.ioVersion
-val serializationVersion: String  = Versions.serializationVersion
+val ioVersion: String = Scientifik.ioVersion
+val serializationVersion: String  = Scientifik.serializationVersion
 
 kotlin {
     jvm()

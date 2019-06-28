@@ -2,7 +2,7 @@ plugins {
     id("scientifik.mpp")
 }
 
-val coroutinesVersion: String = Versions.coroutinesVersion
+val coroutinesVersion: String = Scientifik.coroutinesVersion
 
 kotlin {
     jvm()

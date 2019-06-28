@@ -113,8 +113,11 @@ class SafeEnumDelegate<E : Enum<E>>(
 
 //Child node delegate
 
-class ChildDelegate<T>(val meta: Meta, private val key: String? = null, private val converter: (Meta) -> T) :
-    ReadOnlyProperty<Any?, T?> {
+class ChildDelegate<T>(
+    val meta: Meta,
+    private val key: String? = null,
+    private val converter: (Meta) -> T
+) : ReadOnlyProperty<Any?, T?> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
         return meta[key ?: property.name]?.node?.let { converter(it) }
     }
@@ -163,6 +166,8 @@ fun Meta.number(key: String? = null, default: () -> Number) =
 inline fun <reified E : Enum<E>> Meta.enum(default: E, key: String? = null) =
     SafeEnumDelegate(this, key, default) { enumValueOf(it) }
 
+
+fun <T : Metoid> Metoid.child(key: String? = null, converter: (Meta) -> T) = ChildDelegate(meta, key, converter)
 
 /* Read-write delegates */
 

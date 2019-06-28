@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.values.DoubleArrayValue
 import hep.dataforge.values.Null
 import hep.dataforge.values.Value
 import kotlin.jvm.JvmName
@@ -13,8 +14,13 @@ import kotlin.jvm.JvmName
 fun Configurable.value(default: Any = Null, key: String? = null): MutableValueDelegate<Config> =
     MutableValueDelegate(config, key, Value.of(default))
 
-fun <T> Configurable.value(default: T? = null, key: String? = null, transform: (Value?) -> T): ReadWriteDelegateWrapper<Value?, T> =
-    MutableValueDelegate(config, key, default?.let { Value.of(it)}).transform(reader = transform)
+fun <T> Configurable.value(
+    default: T? = null,
+    key: String? = null,
+    writer: (T) -> Value = { Value.of(it) },
+    reader: (Value?) -> T
+): ReadWriteDelegateWrapper<Value?, T> =
+    MutableValueDelegate(config, key, default?.let { Value.of(it) }).transform(reader = reader, writer = writer)
 
 fun Configurable.string(default: String? = null, key: String? = null): MutableStringDelegate<Config> =
     MutableStringDelegate(config, key, default)
@@ -106,7 +112,6 @@ fun <T : Specific> Configurable.spec(spec: Specification<T>, key: String? = null
 fun <T : Specific> Configurable.spec(builder: (Config) -> T, key: String? = null) =
     MutableMorphDelegate(config, key) { specification(builder).wrap(it) }
 
-
 /*
  * Extra delegates for special cases
  */
@@ -117,7 +122,15 @@ fun Configurable.stringList(key: String? = null): ReadWriteDelegateWrapper<Value
 fun Configurable.numberList(key: String? = null): ReadWriteDelegateWrapper<Value?, List<Number>> =
     value(emptyList(), key) { it?.list?.map { value -> value.number } ?: emptyList() }
 
-fun <T : Metoid> Metoid.child(key: String? = null, converter: (Meta) -> T) = ChildDelegate(meta, key, converter)
+/**
+ * A special delegate for double arrays
+ */
+fun Configurable.doubleArray(key: String? = null): ReadWriteDelegateWrapper<Value?, DoubleArray> =
+    value(doubleArrayOf(), key) {
+        (it as? DoubleArrayValue)?.value
+            ?: it?.list?.map { value -> value.number.toDouble() }?.toDoubleArray()
+            ?: doubleArrayOf()
+    }
 
 fun <T : Configurable> Configurable.child(key: String? = null, converter: (Meta) -> T) =
     MutableMorphDelegate(config, key, converter)

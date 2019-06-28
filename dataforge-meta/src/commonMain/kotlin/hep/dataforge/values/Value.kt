@@ -110,6 +110,8 @@ object False : Value {
     override val type: ValueType get() = ValueType.BOOLEAN
     override val number: Number get() = -1.0
     override val string: String get() = "false"
+
+    override fun toString(): String = True.value.toString()
 }
 
 val Value.boolean get() = this == True || this.list.firstOrNull() == True || (type == ValueType.STRING && string.toBoolean())
@@ -206,9 +208,6 @@ fun String.asValue(): Value = StringValue(this)
 
 fun Iterable<Value>.asValue(): Value = ListValue(this.toList())
 
-//TODO maybe optimized storage performance
-fun DoubleArray.asValue(): Value = ListValue(map{NumberValue(it)})
-
 fun IntArray.asValue(): Value = ListValue(map{NumberValue(it)})
 
 fun LongArray.asValue(): Value = ListValue(map{NumberValue(it)})
@@ -253,17 +252,4 @@ fun String.parseValue(): Value {
 
     //Give up and return a StringValue
     return StringValue(this)
-}
-
-class LazyParsedValue(override val string: String) : Value {
-    private val parsedValue by lazy { string.parseValue() }
-
-    override val value: Any?
-        get() = parsedValue.value
-    override val type: ValueType
-        get() = parsedValue.type
-    override val number: Number
-        get() = parsedValue.number
-
-    override fun toString(): String = value.toString()
 }

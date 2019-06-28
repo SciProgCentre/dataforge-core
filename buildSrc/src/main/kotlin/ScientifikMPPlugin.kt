@@ -1,15 +1,10 @@
-import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getValue
 import org.gradle.kotlin.dsl.getting
 import org.gradle.kotlin.dsl.invoke
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask
 
 open class ScientifikMPPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -29,7 +24,7 @@ open class ScientifikMPPlugin : Plugin<Project> {
                     kotlinOptions {
                         sourceMap = true
                         sourceMapEmbedSources = "always"
-                        moduleKind = "commonjs"
+                        moduleKind = "umd"
                     }
                 }
             }
@@ -71,26 +66,11 @@ open class ScientifikMPPlugin : Plugin<Project> {
 
             targets.all {
                 sourceSets.all {
-                    languageSettings.progressiveMode = true
-                    languageSettings.enableLanguageFeature("InlineClasses")
-                }
-            }
-        }
-
-
-        project.tasks.filter { it is ArtifactoryTask || it is BintrayUploadTask }.forEach {
-            it.doFirst {
-                project.configure<PublishingExtension> {
-                    publications
-                        .filterIsInstance<MavenPublication>()
-                        .forEach { publication ->
-                            val moduleFile = project.buildDir.resolve("publications/${publication.name}/module.json")
-                            if (moduleFile.exists()) {
-                                publication.artifact(object : FileBasedMavenArtifact(moduleFile) {
-                                    override fun getDefaultExtension() = "module"
-                                })
-                            }
-                        }
+                    languageSettings.apply{
+                        progressiveMode = true
+                        enableLanguageFeature("InlineClasses")
+                        useExperimentalAnnotation("ExperimentalUnsignedType")
+                    }
                 }
             }
         }

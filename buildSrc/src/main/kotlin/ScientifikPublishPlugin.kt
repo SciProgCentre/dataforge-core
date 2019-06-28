@@ -19,10 +19,21 @@ import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask
 
 
 open class ScientifikExtension {
-    var vcs = "https://github.com/altavir/dataforge-core"
-    var bintrayRepo = "dataforge"
-    var dokka = true
+    var vcs: String? = null
+    var bintrayRepo: String? = null
+    var kdoc: Boolean = true
 }
+
+// recursively search up the project chain for configuration
+private val Project.bintrayRepo: String?
+    get() = extensions.findByType<ScientifikExtension>()?.bintrayRepo
+        ?: parent?.bintrayRepo
+        ?: (findProperty("bintrayRepo") as? String)
+
+private val Project.vcs: String?
+    get() = extensions.findByType<ScientifikExtension>()?.vcs
+        ?: parent?.vcs
+        ?: (findProperty("vcs") as? String)
 
 open class ScientifikPublishPlugin : Plugin<Project> {
 
@@ -31,11 +42,16 @@ open class ScientifikPublishPlugin : Plugin<Project> {
         project.plugins.apply("maven-publish")
         val extension = project.extensions.create<ScientifikExtension>("scientifik")
 
+        val bintrayRepo = project.bintrayRepo
+        val vcs = project.vcs
 
+        if (bintrayRepo == null || vcs == null) {
+            project.logger.warn("[${project.name}] Missing deployment configuration. Skipping publish.")
+        }
 
         project.configure<PublishingExtension> {
             repositories {
-                maven("https://bintray.com/mipt-npm/${extension.bintrayRepo}")
+                maven("https://bintray.com/mipt-npm/$bintrayRepo")
             }
 
             // Process each publication we have in this project
@@ -45,7 +61,7 @@ open class ScientifikPublishPlugin : Plugin<Project> {
                 publication.pom {
                     name.set(project.name)
                     description.set(project.description)
-                    url.set(extension.vcs)
+                    url.set(vcs)
 
                     licenses {
                         license {
@@ -70,7 +86,7 @@ open class ScientifikPublishPlugin : Plugin<Project> {
             }
         }
 
-        if (extension.dokka) {
+        if (extension.kdoc) {
             project.plugins.apply("org.jetbrains.dokka")
 
             project.afterEvaluate {
@@ -96,6 +112,7 @@ open class ScientifikPublishPlugin : Plugin<Project> {
                             path = sourceSets["jvmMain"].kotlin.srcDirs.first().toString()
                             platforms = listOf("JVM")
                         }
+
                     }
 
                     val kdocJar by tasks.registering(Jar::class) {
@@ -112,6 +129,21 @@ open class ScientifikPublishPlugin : Plugin<Project> {
 
                             // Patch publications with fake javadoc
                             publication.artifact(kdocJar.get())
+                        }
+
+                        tasks.filter { it is ArtifactoryTask || it is BintrayUploadTask }.forEach {
+                            it.doFirst {
+                                publications.filterIsInstance<MavenPublication>()
+                                    .forEach { publication ->
+                                        val moduleFile =
+                                            buildDir.resolve("publications/${publication.name}/module.json")
+                                        if (moduleFile.exists()) {
+                                            publication.artifact(object : FileBasedMavenArtifact(moduleFile) {
+                                                override fun getDefaultExtension() = "module"
+                                            })
+                                        }
+                                    }
+                            }
                         }
                     }
                 }
@@ -152,7 +184,7 @@ open class ScientifikPublishPlugin : Plugin<Project> {
             // this is a problem of this plugin
             pkg.apply {
                 userOrg = "mipt-npm"
-                repo = extension.bintrayRepo
+                repo = bintrayRepo
                 name = project.name
                 issueTrackerUrl = "${extension.vcs}/issues"
                 setLicenses("Apache-2.0")
