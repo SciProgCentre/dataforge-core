@@ -1,6 +1,9 @@
 package hep.dataforge.output
 
-import hep.dataforge.context.*
+import hep.dataforge.context.AbstractPlugin
+import hep.dataforge.context.Context
+import hep.dataforge.context.PluginFactory
+import hep.dataforge.context.PluginTag
 import hep.dataforge.context.PluginTag.Companion.DATAFORGE_GROUP
 import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
@@ -13,7 +16,7 @@ import kotlin.reflect.KClass
 /**
  * A manager for outputs
  */
-interface OutputManager : Plugin {
+interface OutputManager {
 
     /**
      * Get an output specialized for given type, name and stage.
