@@ -142,7 +142,8 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
         val loaded = get(type, recursive = false)
         return when {
             loaded == null -> {
-                val plugin = PluginRepository.list().first { it.type == type }.invoke(meta)
+                val plugin = PluginRepository.list().find { it.type == type }?.invoke(meta)
+                    ?: error("Plugin factory for class $type not found")
                 if (type.isInstance(plugin)) {
                     @Suppress("UNCHECKED_CAST")
                     load(plugin as T)

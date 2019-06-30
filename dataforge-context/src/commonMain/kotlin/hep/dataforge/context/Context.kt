@@ -148,14 +148,18 @@ object Global : Context("GLOBAL", null) {
     private val contextRegistry = HashMap<String, Context>()
 
     /**
-     * Get previously builder context o builder a new one
+     * Get previously built context
      *
      * @param name
      * @return
      */
-    fun getContext(name: String): Context {
-        return contextRegistry.getOrPut(name) { Context(name) }
+    fun getContext(name: String): Context? {
+        return contextRegistry[name]
     }
+
+    fun context(name: String, parent: Context = this, block: ContextBuilder.() -> Unit): Context =
+        ContextBuilder(name, parent).apply(block).build()
+
 }
 
 
