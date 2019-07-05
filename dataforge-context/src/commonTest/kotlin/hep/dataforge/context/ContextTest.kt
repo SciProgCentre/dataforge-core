@@ -12,17 +12,10 @@ class ContextTest {
     class DummyPlugin : AbstractPlugin() {
         override val tag get() = PluginTag("test")
 
-        override fun provideTop(target: String, name: Name): Any? {
-            return when (target) {
-                "test" -> return name
-                else -> super.provideTop(target, name)
-            }
-        }
-
-        override fun listNames(target: String): Sequence<Name> {
-            return when (target) {
-                "test" -> sequenceOf("a", "b", "c.d").map { it.toName() }
-                else -> super.listNames(target)
+        override fun provideTop(target: String): Map<Name, Any> {
+            return when(target){
+                "test" -> listOf("a", "b", "c.d").associate { it.toName() to it.toName() }
+                else -> emptyMap()
             }
         }
     }

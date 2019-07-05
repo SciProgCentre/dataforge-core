@@ -7,7 +7,6 @@ import hep.dataforge.data.DataNode
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
-import hep.dataforge.provider.top
 
 
 /**

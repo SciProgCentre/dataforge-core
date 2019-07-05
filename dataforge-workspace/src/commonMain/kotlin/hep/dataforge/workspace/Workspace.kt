@@ -29,26 +29,15 @@ interface Workspace : ContextAware, Provider {
      */
     val tasks: Map<Name, Task<*>>
 
-    override fun provideTop(target: String, name: Name): Any? {
+    override fun provideTop(target: String): Map<Name, Any> {
         return when (target) {
-            "target", Meta.TYPE -> targets[name.toString()]
-            Task.TYPE -> tasks[name]
-            Data.TYPE -> data[name]
-            DataNode.TYPE -> data.getNode(name)
-            else -> null
+            "target", Meta.TYPE -> targets.mapKeys { it.key.toName() }
+            Task.TYPE -> tasks
+            Data.TYPE -> data.data().toMap()
+            DataNode.TYPE -> data.nodes().toMap()
+            else -> emptyMap()
         }
     }
-
-    override fun listNames(target: String): Sequence<Name> {
-        return when (target) {
-            "target", Meta.TYPE -> targets.keys.asSequence().map { it.toName() }
-            Task.TYPE -> tasks.keys.asSequence().map { it }
-            Data.TYPE -> data.data().map { it.first }
-            DataNode.TYPE -> data.nodes().map { it.first }
-            else -> emptySequence()
-        }
-    }
-
 
     /**
      * Invoke a task in the workspace utilizing caching if possible
@@ -63,15 +52,6 @@ interface Workspace : ContextAware, Provider {
             context.deactivate(this)
         }
     }
-
-//    /**
-//     * Invoke a task in the workspace utilizing caching if possible
-//     */
-//    operator fun <R : Any> Task<R>.invoke(targetName: String): DataNode<R> {
-//        val target = targets[targetName] ?: error("A target with name $targetName not found in ${this@Workspace}")
-//        context.logger.info { "Running ${this.name} on $target" }
-//        return invoke(target)
-//    }
 
     companion object {
         const val TYPE = "workspace"

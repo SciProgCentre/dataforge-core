@@ -59,19 +59,11 @@ open class Context(final override val name: String, val parent: Context? = Globa
 
     override val defaultTarget: String get() = Plugin.PLUGIN_TARGET
 
-    override fun provideTop(target: String, name: Name): Any? {
-        return when (target) {
-            Plugin.PLUGIN_TARGET -> plugins[PluginTag.fromString(name.toString())]
-            Value.TYPE -> properties[name]?.value
-            else -> null
-        }
-    }
-
-    override fun listNames(target: String): Sequence<Name> {
-        return when (target) {
-            Plugin.PLUGIN_TARGET -> plugins.asSequence().map { it.name.toName() }
-            Value.TYPE -> properties.values().map { it.first }
-            else -> emptySequence()
+    override fun provideTop(target: String): Map<Name, Any> {
+        return when(target){
+            Value.TYPE -> properties.sequence().toMap()
+            Plugin.PLUGIN_TARGET -> plugins.sequence(true).associateBy { it.name.toName() }
+            else-> emptyMap()
         }
     }
 

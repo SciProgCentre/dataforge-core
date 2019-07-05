@@ -3,7 +3,7 @@ plugins {
     id("scientifik.publish") apply false
 }
 
-val dataforgeVersion by extra("0.1.3-dev-8")
+val dataforgeVersion by extra("0.1.3-dev-9")
 
 val bintrayRepo by extra("dataforge")
 val vcs by extra("https://github.com/mipt-npm/dataforge-core")
