@@ -1,7 +1,9 @@
 package hep.dataforge.io
 
+import hep.dataforge.meta.Meta
 import hep.dataforge.meta.buildMeta
 import hep.dataforge.meta.get
+import hep.dataforge.meta.seal
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -33,6 +35,8 @@ class MetaFormatTest {
         }
         val string = meta.toString(JsonMetaFormat)
         val result = JsonMetaFormat.parse(string)
+
+        assertEquals<Meta>(meta, meta.seal())
 
         meta.items.keys.forEach {
             if (meta[it] != result[it]) error("${meta[it]} != ${result[it]}")

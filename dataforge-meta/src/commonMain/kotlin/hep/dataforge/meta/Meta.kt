@@ -16,14 +16,10 @@ import hep.dataforge.values.boolean
  */
 sealed class MetaItem<out M : Meta> {
     data class ValueItem(val value: Value) : MetaItem<Nothing>(){
-        override fun toString(): String = value.string
+        override fun toString(): String = value.toString()
     }
     data class NodeItem<M : Meta>(val node: M) : MetaItem<M>(){
         override fun toString(): String = node.toString()
-
-        override fun equals(other: Any?): Boolean {
-            return this.node == (other as? NodeItem<*>).node
-        }
     }
 }
 

@@ -27,8 +27,7 @@ class HtmlOutput<T : Any>(override val context: Context, private val consumer: T
         } else {
             val value = cache[obj::class]
             if (value == null) {
-                val answer = context.top<HtmlBuilder<*>>().values
-                    .filter { it.type.isInstance(obj) }.firstOrNull()
+                val answer = context.top<HtmlBuilder<*>>(HTML_CONVERTER_TYPE).values.firstOrNull { it.type.isInstance(obj) }
                 if (answer != null) {
                     cache[obj::class] = answer
                     answer

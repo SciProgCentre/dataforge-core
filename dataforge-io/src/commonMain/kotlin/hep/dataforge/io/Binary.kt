@@ -7,7 +7,6 @@ import kotlinx.io.core.readBytes
 /**
  * A source of binary data
  */
-
 interface Binary {
     /**
      * The size of binary in bytes

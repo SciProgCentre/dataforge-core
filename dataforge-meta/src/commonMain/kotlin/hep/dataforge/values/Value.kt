@@ -188,7 +188,7 @@ class ListValue(override val list: List<Value>) : Value {
     override val number: Number get() = list.first().number
     override val string: String get() = list.first().string
 
-    override fun toString(): String = value.toString()
+    override fun toString(): String = list.joinToString (prefix = "[ ", postfix = " ]")
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
