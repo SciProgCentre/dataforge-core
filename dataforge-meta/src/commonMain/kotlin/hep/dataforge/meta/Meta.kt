@@ -15,8 +15,16 @@ import hep.dataforge.values.boolean
  * * a [NodeItem] (node)
  */
 sealed class MetaItem<out M : Meta> {
-    data class ValueItem(val value: Value) : MetaItem<Nothing>()
-    data class NodeItem<M : Meta>(val node: M) : MetaItem<M>()
+    data class ValueItem(val value: Value) : MetaItem<Nothing>(){
+        override fun toString(): String = value.string
+    }
+    data class NodeItem<M : Meta>(val node: M) : MetaItem<M>(){
+        override fun toString(): String = node.toString()
+
+        override fun equals(other: Any?): Boolean {
+            return this.node == (other as? NodeItem<*>).node
+        }
+    }
 }
 
 /**
@@ -174,12 +182,14 @@ abstract class AbstractMetaNode<M : MetaNode<M>> : MetaNode<M> {
         if (this === other) return true
         if (other !is Meta) return false
 
-        return this.items == other.items
+        return this.items == other.items//this.items.keys == other.items.keys && items.keys.all { this[it] == other[it] }
     }
 
     override fun hashCode(): Int {
         return items.hashCode()
     }
+
+    override fun toString(): String = items.toString()
 }
 
 /**

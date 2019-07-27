@@ -79,4 +79,14 @@ class Laminate(layers: List<Meta>) : Meta {
     }
 }
 
+/**
+ * Create a new [Laminate] adding given layer to the top
+ */
+fun Laminate.withTop(meta: Meta): Laminate = Laminate(listOf(meta) + layers)
+
+/**
+ * Create a new [Laminate] adding given layer to the bottom
+ */
+fun Laminate.withBottom(meta: Meta): Laminate = Laminate(layers + meta)
+
 //TODO add custom rules for Laminate merge

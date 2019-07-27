@@ -1,6 +1,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.meta.buildMeta
+import hep.dataforge.meta.get
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -12,10 +13,11 @@ class MetaFormatTest {
             "node" to {
                 "b" to "DDD"
                 "c" to 11.1
+                "array" to doubleArrayOf(1.0, 2.0, 3.0)
             }
         }
-        val string = meta.asString(BinaryMetaFormat)
-        val result = BinaryMetaFormat.parse(string)
+        val bytes = meta.toBytes(BinaryMetaFormat)
+        val result = BinaryMetaFormat.fromBytes(bytes)
         assertEquals(meta, result)
     }
 
@@ -26,11 +28,16 @@ class MetaFormatTest {
             "node" to {
                 "b" to "DDD"
                 "c" to 11.1
-                "array" to doubleArrayOf(1.0,2.0,3.0)
+                "array" to doubleArrayOf(1.0, 2.0, 3.0)
             }
         }
-        val string = meta.asString(JsonMetaFormat)
+        val string = meta.toString(JsonMetaFormat)
         val result = JsonMetaFormat.parse(string)
+
+        meta.items.keys.forEach {
+            if (meta[it] != result[it]) error("${meta[it]} != ${result[it]}")
+        }
+
         assertEquals(meta, result)
     }
 

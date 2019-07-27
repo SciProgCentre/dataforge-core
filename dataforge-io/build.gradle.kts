@@ -2,56 +2,25 @@ plugins {
     id("scientifik.mpp")
 }
 
-description = "IO for meta"
+description = "IO module"
 
+scientifik{
+    serialization = true
+    io = true
+}
 
-val ioVersion: String = Scientifik.ioVersion
-val serializationVersion: String  = Scientifik.serializationVersion
 
 kotlin {
-    jvm()
-    js()
     sourceSets {
         val commonMain by getting{
             dependencies {
                 api(project(":dataforge-meta"))
-                //implementation 'org.jetbrains.kotlin:kotlin-reflect'
-                api("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serializationVersion")
-                api("org.jetbrains.kotlinx:kotlinx-io:$ioVersion")
             }
         }
-        val commonTest by getting {
-            dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test-common")
-                implementation("org.jetbrains.kotlin:kotlin-test-annotations-common")
+        val jsMain by getting{
+            dependencies{
+                api(npm("text-encoding"))
             }
         }
-        val jvmMain by getting {
-            dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationVersion")
-                api("org.jetbrains.kotlinx:kotlinx-io-jvm:$ioVersion")
-            }
-        }
-        val jvmTest by getting {
-            dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test")
-                implementation("org.jetbrains.kotlin:kotlin-test-junit")
-            }
-        }
-        val jsMain by getting {
-            dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationVersion")
-                api("org.jetbrains.kotlinx:kotlinx-io-js:$ioVersion")
-            }
-        }
-        val jsTest by getting {
-            dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test-js")
-            }
-        }
-//        iosMain {
-//        }
-//        iosTest {
-//        }
     }
 }

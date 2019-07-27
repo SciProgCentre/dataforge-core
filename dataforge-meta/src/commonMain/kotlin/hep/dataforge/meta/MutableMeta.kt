@@ -12,8 +12,8 @@ internal data class MetaListener(
 interface MutableMeta<M : MutableMeta<M>> : MetaNode<M> {
     override val items: Map<NameToken, MetaItem<M>>
     operator fun set(name: Name, item: MetaItem<*>?)
-    fun onChange(owner: Any? = null, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit)
-    fun removeListener(owner: Any? = null)
+//    fun onChange(owner: Any? = null, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit)
+//    fun removeListener(owner: Any? = null)
 }
 
 /**
@@ -22,46 +22,20 @@ interface MutableMeta<M : MutableMeta<M>> : MetaNode<M> {
  * Changes in Meta are not thread safe.
  */
 abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), MutableMeta<M> {
-    private val listeners = HashSet<MetaListener>()
-
-    /**
-     * Add change listener to this meta. Owner is declared to be able to remove listeners later. Listener without owner could not be removed
-     */
-    override fun onChange(owner: Any?, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit) {
-        listeners.add(MetaListener(owner, action))
-    }
-
-    /**
-     * Remove all listeners belonging to given owner
-     */
-    override fun removeListener(owner: Any?) {
-        listeners.removeAll { it.owner === owner }
-    }
-
-    private val _items: MutableMap<NameToken, MetaItem<M>> = HashMap()
+    protected val _items: MutableMap<NameToken, MetaItem<M>> = HashMap()
 
     override val items: Map<NameToken, MetaItem<M>>
         get() = _items
 
-    protected fun itemChanged(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) {
-        listeners.forEach { it.action(name, oldItem, newItem) }
-    }
+    //protected abstract fun itemChanged(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?)
 
     protected open fun replaceItem(key: NameToken, oldItem: MetaItem<M>?, newItem: MetaItem<M>?) {
         if (newItem == null) {
             _items.remove(key)
-            if(oldItem!= null && oldItem is MetaItem.NodeItem<M>) {
-                oldItem.node.removeListener(this)
-            }
         } else {
             _items[key] = newItem
-            if (newItem is MetaItem.NodeItem) {
-                newItem.node.onChange(this) { name, oldChild, newChild ->
-                    itemChanged(key + name, oldChild, newChild)
-                }
-            }
         }
-        itemChanged(key.asName(), oldItem, newItem)
+        //itemChanged(key.asName(), oldItem, newItem)
     }
 
     @Suppress("UNCHECKED_CAST")

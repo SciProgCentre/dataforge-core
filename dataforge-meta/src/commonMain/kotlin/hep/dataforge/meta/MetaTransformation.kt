@@ -110,7 +110,7 @@ inline class MetaTransformation(val transformations: Collection<TransformationRu
     /**
      * Listens for changes in the source node and translates them into second node if transformation set contains a corresponding rule.
      */
-    fun <M : MutableMeta<M>> bind(source: MutableMeta<*>, target: M) {
+    fun <M : MutableMeta<M>> bind(source: Config, target: M) {
         source.onChange(target) { name, _, newItem ->
             transformations.forEach { t ->
                 if (t.matches(name, newItem)) {

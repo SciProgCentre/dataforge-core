@@ -12,9 +12,11 @@ class LazyParsedValue(override val string: String) : Value {
     override val number: Number get() = parsedValue.number
 
     override fun toString(): String = string
+
+    override fun equals(other: Any?): Boolean = other is Value && this.parsedValue == other
 }
 
-fun String.lazyParseValue(): LazyParsedValue  = LazyParsedValue(this)
+fun String.lazyParseValue(): LazyParsedValue = LazyParsedValue(this)
 
 /**
  * A performance optimized version of list value for doubles

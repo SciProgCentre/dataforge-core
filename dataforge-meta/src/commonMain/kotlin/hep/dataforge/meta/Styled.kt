@@ -42,12 +42,12 @@ class Styled(val base: Meta, val style: Config = Config().empty()) : AbstractMut
         }
     }
 
-    override fun onChange(owner: Any?, action: (Name, before: MetaItem<*>?, after: MetaItem<*>?) -> Unit) {
+    fun onChange(owner: Any?, action: (Name, before: MetaItem<*>?, after: MetaItem<*>?) -> Unit) {
         //TODO test correct behavior
         style.onChange(owner) { name, before, after -> action(name, before ?: base[name], after ?: base[name]) }
     }
 
-    override fun removeListener(owner: Any?) {
+    fun removeListener(owner: Any?) {
         style.removeListener(owner)
     }
 }

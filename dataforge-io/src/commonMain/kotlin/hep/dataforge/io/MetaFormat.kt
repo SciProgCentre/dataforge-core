@@ -13,14 +13,21 @@ interface MetaFormat : IOFormat<Meta> {
     val key: Short
 }
 
-fun Meta.asString(format: MetaFormat = JsonMetaFormat): String {
-    return buildPacket {
-        format.run { writeObject(this@asString) }
-    }.readText()
+fun Meta.toString(format: MetaFormat = JsonMetaFormat): String = buildPacket {
+    format.run { writeObject(this@toString) }
+}.readText()
+
+fun Meta.toBytes(format: MetaFormat = JsonMetaFormat): ByteReadPacket = buildPacket {
+    format.run { writeObject(this@toBytes) }
 }
+
 
 fun MetaFormat.parse(str: String): Meta {
     return ByteReadPacket(str.toByteArray()).readObject()
+}
+
+fun MetaFormat.fromBytes(packet: ByteReadPacket): Meta {
+    return packet.readObject()
 }
 
 

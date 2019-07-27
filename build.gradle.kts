@@ -1,19 +1,14 @@
 plugins {
-    id("scientifik.mpp") apply false
-    id("scientifik.publish") apply false
+    id("scientifik.mpp") version "0.1.4-dev" apply false
+    id("scientifik.publish") version "0.1.4-dev" apply false
 }
 
-val dataforgeVersion by extra("0.1.3-dev-9")
+val dataforgeVersion by extra("0.1.3-dev-10")
 
 val bintrayRepo by extra("dataforge")
-val vcs by extra("https://github.com/mipt-npm/dataforge-core")
+val githubProject by extra("dataforge-core")
 
 allprojects {
-    repositories {
-        jcenter()
-        maven("https://kotlin.bintray.com/kotlinx")
-    }
-
     group = "hep.dataforge"
     version = dataforgeVersion
 }

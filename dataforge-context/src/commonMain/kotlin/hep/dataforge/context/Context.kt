@@ -149,7 +149,7 @@ object Global : Context("GLOBAL", null) {
         return contextRegistry[name]
     }
 
-    fun context(name: String, parent: Context = this, block: ContextBuilder.() -> Unit): Context =
+    fun context(name: String, parent: Context = this, block: ContextBuilder.() -> Unit = {}): Context =
         ContextBuilder(name, parent).apply(block).build()
 
 }

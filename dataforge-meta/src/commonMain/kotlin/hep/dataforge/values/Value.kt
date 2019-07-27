@@ -43,6 +43,8 @@ interface Value {
     val list: List<Value>
         get() = listOf(this)
 
+    override fun equals(other: Any?): Boolean
+
     companion object {
         const val TYPE = "value"
 
@@ -82,6 +84,8 @@ object Null : Value {
     override val string: String get() = "@null"
 
     override fun toString(): String = value.toString()
+
+    override fun equals(other: Any?): Boolean = other === Null
 }
 
 /**
@@ -100,6 +104,9 @@ object True : Value {
     override val string: String get() = "true"
 
     override fun toString(): String = value.toString()
+
+    override fun equals(other: Any?): Boolean = other === True
+
 }
 
 /**
@@ -112,6 +119,8 @@ object False : Value {
     override val string: String get() = "false"
 
     override fun toString(): String = True.value.toString()
+
+    override fun equals(other: Any?): Boolean = other === False
 }
 
 val Value.boolean get() = this == True || this.list.firstOrNull() == True || (type == ValueType.STRING && string.toBoolean())
