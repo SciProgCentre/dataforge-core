@@ -7,6 +7,11 @@ import hep.dataforge.names.plus
 
 //TODO add validator to configuration
 
+data class MetaListener(
+    val owner: Any? = null,
+    val action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit
+)
+
 /**
  * Mutable meta representing object state
  */

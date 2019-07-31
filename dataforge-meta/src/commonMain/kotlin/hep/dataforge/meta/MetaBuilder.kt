@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.values.Value
 
@@ -26,6 +27,25 @@ class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
     }
 
     infix fun String.to(metaBuilder: MetaBuilder.() -> Unit) {
+        this@MetaBuilder[this] = MetaBuilder().apply(metaBuilder)
+    }
+
+    infix fun Name.to(value: Any) {
+        if (value is Meta) {
+            this@MetaBuilder[this] = value
+        }
+        this@MetaBuilder[this] = Value.of(value)
+    }
+
+    infix fun Name.to(meta: Meta) {
+        this@MetaBuilder[this] = meta
+    }
+
+    infix fun Name.to(value: Iterable<Meta>) {
+        this@MetaBuilder[this] = value.toList()
+    }
+
+    infix fun Name.to(metaBuilder: MetaBuilder.() -> Unit) {
         this@MetaBuilder[this] = MetaBuilder().apply(metaBuilder)
     }
 }

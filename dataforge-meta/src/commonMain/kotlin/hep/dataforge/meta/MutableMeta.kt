@@ -3,12 +3,6 @@ package hep.dataforge.meta
 import hep.dataforge.names.*
 import hep.dataforge.values.Value
 
-internal data class MetaListener(
-    val owner: Any? = null,
-    val action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit
-)
-
-
 interface MutableMeta<M : MutableMeta<M>> : MetaNode<M> {
     override val items: Map<NameToken, MetaItem<M>>
     operator fun set(name: Name, item: MetaItem<*>?)
