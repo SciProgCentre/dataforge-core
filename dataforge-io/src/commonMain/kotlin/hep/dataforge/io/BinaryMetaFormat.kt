@@ -1,5 +1,6 @@
 package hep.dataforge.io
 
+import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.meta.*
 import hep.dataforge.values.*
 import kotlinx.io.core.Input
@@ -11,7 +12,7 @@ object BinaryMetaFormat : MetaFormat {
     override val name: String = "bin"
     override val key: Short = 0x4249//BI
 
-    override fun Input.readObject(): Meta {
+    override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
         return (readMetaItem() as MetaItem.NodeItem).node
     }
 
@@ -69,7 +70,7 @@ object BinaryMetaFormat : MetaFormat {
         }
     }
 
-    override fun Output.writeObject(meta: Meta) {
+    override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {
         writeChar('M')
         writeInt(meta.items.size)
         meta.items.forEach { (key, item) ->

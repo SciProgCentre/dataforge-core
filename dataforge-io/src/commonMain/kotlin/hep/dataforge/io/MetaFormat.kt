@@ -1,9 +1,8 @@
 package hep.dataforge.io
 
+import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.meta.Meta
-import kotlinx.io.core.ByteReadPacket
-import kotlinx.io.core.buildPacket
-import kotlinx.io.core.toByteArray
+import kotlinx.io.core.*
 
 /**
  * A format for meta serialization
@@ -11,6 +10,15 @@ import kotlinx.io.core.toByteArray
 interface MetaFormat : IOFormat<Meta> {
     val name: String
     val key: Short
+
+    override fun Output.writeObject(obj: Meta) {
+        writeMeta(obj, null)
+    }
+
+    override fun Input.readObject(): Meta = readMeta(null)
+
+    fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?)
+    fun Input.readMeta(descriptor: NodeDescriptor?): Meta
 }
 
 fun Meta.toString(format: MetaFormat = JsonMetaFormat): String = buildPacket {

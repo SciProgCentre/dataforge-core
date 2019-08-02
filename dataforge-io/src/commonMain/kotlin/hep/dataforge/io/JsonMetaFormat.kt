@@ -1,5 +1,8 @@
 package hep.dataforge.io
 
+import hep.dataforge.descriptors.ItemDescriptor
+import hep.dataforge.descriptors.NodeDescriptor
+import hep.dataforge.descriptors.ValueDescriptor
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaItem
 import hep.dataforge.names.NameToken
@@ -10,6 +13,9 @@ import kotlinx.io.core.Output
 import kotlinx.io.core.readText
 import kotlinx.io.core.writeText
 import kotlinx.serialization.json.*
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 
 
 object JsonMetaFormat : MetaFormat {
@@ -17,12 +23,12 @@ object JsonMetaFormat : MetaFormat {
     override val name: String = "json"
     override val key: Short = 0x4a53//"JS"
 
-    override fun Output.writeObject(obj: Meta) {
-        val str = obj.toJson().toString()
+    override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {
+        val str = meta.toJson().toString()
         writeText(str)
     }
 
-    override fun Input.readObject(): Meta {
+    override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
         val str = readText()
         val json = Json.plain.parseJson(str)
 
@@ -34,8 +40,8 @@ object JsonMetaFormat : MetaFormat {
     }
 }
 
-fun Value.toJson(): JsonElement {
-    return if(isList()){
+fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
+    return if (isList()) {
         JsonArray(list.map { it.toJson() })
     } else {
         when (type) {
@@ -47,22 +53,35 @@ fun Value.toJson(): JsonElement {
     }
 }
 
-fun Meta.toJson(): JsonObject {
-    val map = this.items.mapValues { entry ->
-        when (val value = entry.value) {
-            is MetaItem.ValueItem -> value.value.toJson()
-            is MetaItem.NodeItem -> value.node.toJson()
+//Use theese methods to customize JSON key mapping
+private fun NameToken.toJsonKey(descriptor: ItemDescriptor?) = toString()
+private fun NodeDescriptor?.getDescriptor(key: String) = this?.items?.get(key)
+
+fun Meta.toJson(descriptor: NodeDescriptor? = null): JsonObject {
+
+    //TODO search for same name siblings and arrange them into arrays
+    val map = this.items.entries.associate {(name,item)->
+        val itemDescriptor = descriptor?.items?.get(name.body)
+        val key = name.toJsonKey(itemDescriptor)
+        val value =          when (item) {
+            is MetaItem.ValueItem -> {
+                item.value.toJson(itemDescriptor as? ValueDescriptor)
+            }
+            is MetaItem.NodeItem -> {
+                item.node.toJson(itemDescriptor as? NodeDescriptor)
+            }
         }
-    }.mapKeys { it.key.toString() }
+        key to value
+    }
     return JsonObject(map)
 }
 
 
-fun JsonObject.toMeta() = JsonMeta(this)
+fun JsonObject.toMeta(descriptor: NodeDescriptor? = null) = JsonMeta(this, descriptor)
 
-class JsonMeta(val json: JsonObject) : Meta {
+class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : Meta {
 
-    private fun JsonPrimitive.toValue(): Value {
+    private fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
         return when (this) {
             JsonNull -> Null
             else -> this.content.parseValue() // Optimize number and boolean parsing
@@ -70,25 +89,40 @@ class JsonMeta(val json: JsonObject) : Meta {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private operator fun MutableMap<String, MetaItem<JsonMeta>>.set(key: String, value: JsonElement) = when (value) {
-        is JsonPrimitive -> this[key] = MetaItem.ValueItem(value.toValue()) as MetaItem<JsonMeta>
-        is JsonObject -> this[key] = MetaItem.NodeItem(value.toMeta())
-        is JsonArray -> {
-            when {
-                value.all { it is JsonPrimitive } -> {
-                    val listValue = ListValue(
-                        value.map {
-                            //We already checked that all values are primitives
-                            (it as JsonPrimitive).toValue()
+    private operator fun MutableMap<String, MetaItem<JsonMeta>>.set(key: String, value: JsonElement): Unit {
+        val itemDescriptor = descriptor.getDescriptor(key)
+        //use name from descriptor in case descriptor name differs from json key
+        val name = itemDescriptor?.name ?: key
+        return when (value) {
+            is JsonPrimitive -> {
+                this[name] = MetaItem.ValueItem(value.toValue(itemDescriptor as? ValueDescriptor)) as MetaItem<JsonMeta>
+            }
+            is JsonObject -> {
+                this[name] = MetaItem.NodeItem(value.toMeta(itemDescriptor as? NodeDescriptor))
+            }
+            is JsonArray -> {
+                when {
+                    value.all { it is JsonPrimitive } -> {
+                        val listValue = ListValue(
+                            value.map {
+                                //We already checked that all values are primitives
+                                (it as JsonPrimitive).toValue(itemDescriptor as? ValueDescriptor)
+                            }
+                        )
+                        this[name] = MetaItem.ValueItem(listValue) as MetaItem<JsonMeta>
+                    }
+                    else -> value.forEachIndexed { index, jsonElement ->
+                        when (jsonElement) {
+                            is JsonObject -> {
+                                this["$name[$index]"] =
+                                    MetaItem.NodeItem(jsonElement.toMeta(itemDescriptor as? NodeDescriptor))
+                            }
+                            is JsonPrimitive -> {
+                                this["$name[$index]"] =
+                                    MetaItem.ValueItem(jsonElement.toValue(itemDescriptor as? ValueDescriptor))
+                            }
+                            is JsonArray -> TODO("Nested arrays not supported")
                         }
-                    )
-                    this[key] = MetaItem.ValueItem(listValue) as MetaItem<JsonMeta>
-                }
-                else -> value.forEachIndexed { index, jsonElement ->
-                    when (jsonElement) {
-                        is JsonObject -> this["$key[$index]"] = MetaItem.NodeItem(JsonMeta(jsonElement))
-                        is JsonPrimitive -> this["$key[$index]"] = MetaItem.ValueItem(jsonElement.toValue()) as MetaItem<JsonMeta>
-                        is JsonArray -> TODO("Nested arrays not supported")
                     }
                 }
             }

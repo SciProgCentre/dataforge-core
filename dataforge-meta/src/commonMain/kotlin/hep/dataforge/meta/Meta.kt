@@ -39,6 +39,9 @@ interface MetaRepr {
  *   * Same name siblings are supported via elements with the same [Name] but different queries
  */
 interface Meta : MetaRepr {
+    /**
+     * Top level items of meta tree
+     */
     val items: Map<NameToken, MetaItem<*>>
 
     override fun toMeta(): Meta = this
