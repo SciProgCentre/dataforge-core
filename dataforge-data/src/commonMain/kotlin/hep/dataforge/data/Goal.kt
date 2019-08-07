@@ -77,8 +77,8 @@ private class StaticGoalImpl<T>(override val scope: CoroutineScope, deferred: Co
  *
  * **Important:** Unlike regular deferred, the [Goal] is started lazily, so the actual calculation is called only when result is requested.
  */
-fun <R> CoroutineScope.createGoal(
-    dependencies: Collection<Goal<*>>,
+fun <R> CoroutineScope.goal(
+    dependencies: Collection<Goal<*>> = emptyList(),
     context: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.() -> R
 ): Goal<R> {
@@ -102,7 +102,7 @@ fun <R> CoroutineScope.createGoal(
 fun <T, R> Goal<T>.pipe(
     context: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(T) -> R
-): Goal<R> = createGoal(listOf(this), context) { block(await()) }
+): Goal<R> = goal(listOf(this), context) { block(await()) }
 
 /**
  * Create a joining goal.
@@ -112,7 +112,7 @@ fun <T, R> Collection<Goal<T>>.join(
     scope: CoroutineScope = first(),
     context: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Collection<T>) -> R
-): Goal<R> = scope.createGoal(this, context) {
+): Goal<R> = scope.goal(this, context) {
     block(map { it.await() })
 }
 
@@ -126,6 +126,6 @@ fun <K, T, R> Map<K, Goal<T>>.join(
     scope: CoroutineScope = values.first(),
     context: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Map<K, T>) -> R
-): Goal<R> = scope.createGoal(this.values, context) {
+): Goal<R> = scope.goal(this.values, context) {
     block(mapValues { it.value.await() })
 }

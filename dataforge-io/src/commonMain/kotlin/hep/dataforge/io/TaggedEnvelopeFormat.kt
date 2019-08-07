@@ -2,14 +2,10 @@ package hep.dataforge.io
 
 import kotlinx.io.core.*
 
-@ExperimentalUnsignedTypes
-class TaggedEnvelopeFormat(
-    val metaFormats: Collection<MetaFormat>,
-    val outputMetaFormat: MetaFormat = metaFormats.first()
-) : EnvelopeFormat {
+class TaggedEnvelopeFormat(val metaFormats: Collection<MetaFormat>) : EnvelopeFormat {
 
-    override fun Output.writeObject(obj: Envelope) {
-        write(obj, this, outputMetaFormat)
+    override fun Output.writeEnvelope(envelope: Envelope, format: MetaFormat) {
+        write(this, envelope, format)
     }
 
     /**
@@ -20,6 +16,7 @@ class TaggedEnvelopeFormat(
      */
     override fun Input.readObject(): Envelope = read(this, metaFormats)
 
+    override fun readPartial(input: Input): PartialEnvelope = Companion.readPartial(input, metaFormats)
 
     private data class Tag(
         val metaFormatKey: Short,
@@ -28,9 +25,10 @@ class TaggedEnvelopeFormat(
     )
 
     companion object {
-        private const val VERSION = "DF03"
+        const val VERSION = "DF03"
         private const val START_SEQUENCE = "#~"
         private const val END_SEQUENCE = "~#\r\n"
+        private const val TAG_SIZE = 26u
 
         private fun Tag.toBytes(): ByteReadPacket = buildPacket(24) {
             writeText(START_SEQUENCE)
@@ -66,12 +64,24 @@ class TaggedEnvelopeFormat(
             return SimpleEnvelope(meta, ArrayBinary(dataBytes))
         }
 
-        fun write(obj: Envelope, out: Output, metaFormat: MetaFormat) {
-            val metaBytes = metaFormat.writeBytes(obj.meta)
-            val tag = Tag(metaFormat.key, metaBytes.size.toUInt(), obj.data?.size ?: 0.toULong())
+        fun readPartial(input: Input, metaFormats: Collection<MetaFormat>): PartialEnvelope {
+            val tag = input.readTag()
+
+            val metaFormat = metaFormats.find { it.key == tag.metaFormatKey }
+                ?: error("Meta format with key ${tag.metaFormatKey} not found")
+
+            val metaPacket = ByteReadPacket(input.readBytes(tag.metaSize.toInt()))
+            val meta = metaFormat.run { metaPacket.readObject() }
+
+            return PartialEnvelope(meta, TAG_SIZE + tag.metaSize, tag.dataSize)
+        }
+
+        fun write(out: Output, envelope: Envelope, metaFormat: MetaFormat) {
+            val metaBytes = metaFormat.writeBytes(envelope.meta)
+            val tag = Tag(metaFormat.key, metaBytes.size.toUInt(), envelope.data?.size ?: 0.toULong())
             out.writePacket(tag.toBytes())
             out.writeFully(metaBytes)
-            obj.data?.read { copyTo(out) }
+            envelope.data?.read { copyTo(out) }
         }
     }
 }

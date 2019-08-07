@@ -1,6 +1,9 @@
 package hep.dataforge.names
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class NameTest {
     @Test
@@ -24,5 +27,15 @@ class NameTest {
         assertTrue { name1.startsWith(name2) }
         assertTrue { name1.endsWith(name3) }
         assertFalse { name1.startsWith(name3) }
+    }
+
+    @Test
+    fun escapeTest(){
+        val escapedName = "token\\.one.token2".toName()
+        val unescapedName = "token\\.one.token2".asName()
+
+        assertEquals(2, escapedName.length)
+        assertEquals(1, unescapedName.length)
+        assertEquals(escapedName, escapedName.toString().toName())
     }
 }

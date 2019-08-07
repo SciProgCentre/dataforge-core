@@ -3,15 +3,29 @@ package hep.dataforge.io
 import hep.dataforge.meta.Config
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.toConfig
-import kotlinx.serialization.Decoder
-import kotlinx.serialization.Encoder
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialDescriptor
+import hep.dataforge.names.Name
+import hep.dataforge.names.toName
+import kotlinx.serialization.*
+import kotlinx.serialization.internal.StringDescriptor
 import kotlinx.serialization.json.JsonObjectSerializer
+
+@Serializer(Name::class)
+object NameSerializer : KSerializer<Name> {
+    override val descriptor: SerialDescriptor = StringDescriptor
+
+    override fun deserialize(decoder: Decoder): Name {
+        return decoder.decodeString().toName()
+    }
+
+    override fun serialize(encoder: Encoder, obj: Name) {
+        encoder.encodeString(obj.toString())
+    }
+}
 
 /**
  * Serialized for meta
  */
+@Serializer(Meta::class)
 object MetaSerializer : KSerializer<Meta> {
     override val descriptor: SerialDescriptor = JsonObjectSerializer.descriptor
 
@@ -25,7 +39,8 @@ object MetaSerializer : KSerializer<Meta> {
     }
 }
 
-object ConfigSerializer: KSerializer<Config>{
+@Serializer(Config::class)
+object ConfigSerializer : KSerializer<Config> {
     override val descriptor: SerialDescriptor = JsonObjectSerializer.descriptor
 
     override fun deserialize(decoder: Decoder): Config {

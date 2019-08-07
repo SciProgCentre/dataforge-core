@@ -51,32 +51,55 @@ data class NameToken(val body: String, val index: String = "") {
         if (body.isEmpty()) error("Syntax error: Name token body is empty")
     }
 
+    private fun String.escape() =
+        replace("\\", "\\\\")
+            .replace(".", "\\.")
+            .replace("[", "\\[")
+            .replace("]", "\\]")
+
     override fun toString(): String = if (hasIndex()) {
-        "$body[$index]"
+        "${body.escape()}[$index]"
     } else {
-        body
+        body.escape()
     }
 
     fun hasIndex() = index.isNotEmpty()
 }
 
+/**
+ * Convert a [String] to name parsing it and extracting name tokens and index syntax.
+ * This operation is rather heavy so it should be used with care in high performance code.
+ */
 fun String.toName(): Name {
     if (isBlank()) return EmptyName
     val tokens = sequence {
         var bodyBuilder = StringBuilder()
         var queryBuilder = StringBuilder()
         var bracketCount: Int = 0
+        var escape: Boolean = false
         fun queryOn() = bracketCount > 0
 
-        asSequence().forEach {
-            if (queryOn()) {
-                when (it) {
-                    '[' -> bracketCount++
-                    ']' -> bracketCount--
+        for (it in this@toName) {
+            when {
+                escape -> {
+                    if (queryOn()) {
+                        queryBuilder.append(it)
+                    } else {
+                        bodyBuilder.append(it)
+                    }
+                    escape = false
                 }
-                if (queryOn()) queryBuilder.append(it)
-            } else {
-                when (it) {
+                it == '\\' -> {
+                    escape = true
+                }
+                queryOn() -> {
+                    when (it) {
+                        '[' -> bracketCount++
+                        ']' -> bracketCount--
+                    }
+                    if (queryOn()) queryBuilder.append(it)
+                }
+                else -> when (it) {
                     '.' -> {
                         yield(NameToken(bodyBuilder.toString(), queryBuilder.toString()))
                         bodyBuilder = StringBuilder()
@@ -94,6 +117,14 @@ fun String.toName(): Name {
         yield(NameToken(bodyBuilder.toString(), queryBuilder.toString()))
     }
     return Name(tokens.toList())
+}
+
+/**
+ * Convert the [String] to a [Name] by simply wrapping it in a single name token without parsing.
+ * The input string could contain dots and braces, but they are just escaped, not parsed.
+ */
+fun String.asName(): Name {
+    return NameToken(this).asName()
 }
 
 operator fun NameToken.plus(other: Name): Name = Name(listOf(this) + other.tokens)

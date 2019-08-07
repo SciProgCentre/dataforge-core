@@ -26,8 +26,10 @@ import kotlin.jvm.JvmName
  * Since plugins could contain mutable state, context has two states: active and inactive. No changes are allowed to active context.
  * @author Alexander Nozik
  */
-open class Context(final override val name: String, val parent: Context? = Global) : Named, MetaRepr, Provider,
-    CoroutineScope {
+open class Context(
+    final override val name: String,
+    val parent: Context? = Global
+) : Named, MetaRepr, Provider, CoroutineScope {
 
     private val config = Config()
 
@@ -60,10 +62,10 @@ open class Context(final override val name: String, val parent: Context? = Globa
     override val defaultTarget: String get() = Plugin.PLUGIN_TARGET
 
     override fun provideTop(target: String): Map<Name, Any> {
-        return when(target){
+        return when (target) {
             Value.TYPE -> properties.sequence().toMap()
             Plugin.PLUGIN_TARGET -> plugins.sequence(true).associateBy { it.name.toName() }
-            else-> emptyMap()
+            else -> emptyMap()
         }
     }
 
@@ -111,7 +113,7 @@ open class Context(final override val name: String, val parent: Context? = Globa
 fun Context.content(target: String): Map<Name, Any> = content<Any>(target)
 
 /**
- * A sequences of all objects provided by plugins with given target and type
+ * A map of all objects provided by plugins with given target and type
  */
 @JvmName("typedContent")
 inline fun <reified T : Any> Context.content(target: String): Map<Name, T> =

@@ -1,9 +1,12 @@
 package hep.dataforge.io
 
+import hep.dataforge.io.EnvelopeFormat.Companion.ENVELOPE_FORMAT_TYPE
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
+import hep.dataforge.provider.Type
 import kotlinx.io.core.Input
+import kotlinx.io.core.Output
 
 interface Envelope {
     val meta: Meta
@@ -46,4 +49,17 @@ val Envelope.dataType: String? get() = meta[Envelope.ENVELOPE_DATA_TYPE_KEY].str
  */
 val Envelope.description: String? get() = meta[Envelope.ENVELOPE_DESCRIPTION_KEY].string
 
-typealias EnvelopeFormat = IOFormat<Envelope>
+data class PartialEnvelope(val meta: Meta, val dataOffset: UInt, val dataSize: ULong?)
+
+@Type(ENVELOPE_FORMAT_TYPE)
+interface EnvelopeFormat : IOFormat<Envelope>{
+    fun readPartial(input: Input): PartialEnvelope
+
+    fun Output.writeEnvelope(envelope: Envelope, format: MetaFormat)
+
+    override fun Output.writeObject(obj: Envelope) = writeEnvelope(obj, JsonMetaFormat)
+
+    companion object {
+        const val ENVELOPE_FORMAT_TYPE = "envelopeFormat"
+    }
+}

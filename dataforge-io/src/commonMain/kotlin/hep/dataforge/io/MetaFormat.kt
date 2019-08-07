@@ -1,14 +1,18 @@
 package hep.dataforge.io
 
+import hep.dataforge.context.Named
 import hep.dataforge.descriptors.NodeDescriptor
+import hep.dataforge.io.MetaFormat.Companion.META_FORMAT_TYPE
 import hep.dataforge.meta.Meta
+import hep.dataforge.provider.Type
 import kotlinx.io.core.*
 
 /**
  * A format for meta serialization
  */
-interface MetaFormat : IOFormat<Meta> {
-    val name: String
+@Type(META_FORMAT_TYPE)
+interface MetaFormat : IOFormat<Meta>, Named {
+    override val name: String
     val key: Short
 
     override fun Output.writeObject(obj: Meta) {
@@ -17,8 +21,12 @@ interface MetaFormat : IOFormat<Meta> {
 
     override fun Input.readObject(): Meta = readMeta(null)
 
-    fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?)
-    fun Input.readMeta(descriptor: NodeDescriptor?): Meta
+    fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor? = null)
+    fun Input.readMeta(descriptor: NodeDescriptor? = null): Meta
+
+    companion object{
+        const val META_FORMAT_TYPE = "metaFormat"
+    }
 }
 
 fun Meta.toString(format: MetaFormat = JsonMetaFormat): String = buildPacket {

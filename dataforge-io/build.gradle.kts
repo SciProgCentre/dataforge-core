@@ -14,7 +14,7 @@ kotlin {
     sourceSets {
         val commonMain by getting{
             dependencies {
-                api(project(":dataforge-meta"))
+                api(project(":dataforge-context"))
             }
         }
         val jsMain by getting{
