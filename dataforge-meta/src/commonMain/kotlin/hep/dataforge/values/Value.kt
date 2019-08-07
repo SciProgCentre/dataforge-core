@@ -159,7 +159,7 @@ class StringValue(override val string: String) : Value {
 
     override fun hashCode(): Int = string.hashCode()
 
-    override fun toString(): String = value.toString()
+    override fun toString(): String = "\"${value.toString()}\""
 }
 
 class EnumValue<E : Enum<*>>(override val value: E) : Value {
@@ -188,11 +188,14 @@ class ListValue(override val list: List<Value>) : Value {
     override val number: Number get() = list.first().number
     override val string: String get() = list.first().string
 
-    override fun toString(): String = list.joinToString (prefix = "[ ", postfix = " ]")
+    override fun toString(): String = list.joinToString (prefix = "[", postfix = "]")
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Value) return false
+        if( other is DoubleArrayValue){
+
+        }
         return list == other.list
     }
 

@@ -4,6 +4,7 @@ import hep.dataforge.descriptors.ItemDescriptor
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.descriptors.ValueDescriptor
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBase
 import hep.dataforge.meta.MetaItem
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.toName
@@ -79,7 +80,7 @@ fun Meta.toJson(descriptor: NodeDescriptor? = null): JsonObject {
 
 fun JsonObject.toMeta(descriptor: NodeDescriptor? = null) = JsonMeta(this, descriptor)
 
-class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : Meta {
+class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : MetaBase() {
 
     private fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
         return when (this) {

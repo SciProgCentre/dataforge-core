@@ -42,7 +42,7 @@ class MetaFormatTest {
             if (meta[it] != result[it]) error("${meta[it]} != ${result[it]}")
         }
 
-        assertEquals(meta, result)
+        assertEquals<Meta>(meta, result)
     }
 
 }

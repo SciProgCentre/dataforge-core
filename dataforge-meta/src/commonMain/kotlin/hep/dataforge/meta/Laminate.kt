@@ -7,7 +7,7 @@ import hep.dataforge.names.NameToken
  *
  *
  */
-class Laminate(layers: List<Meta>) : Meta {
+class Laminate(layers: List<Meta>) : MetaBase() {
 
     val layers: List<Meta> = layers.flatMap {
         if (it is Laminate) {

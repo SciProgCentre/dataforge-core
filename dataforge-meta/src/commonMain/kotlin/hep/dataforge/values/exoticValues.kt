@@ -31,10 +31,9 @@ class DoubleArrayValue(override val value: DoubleArray) : Value {
         if (this === other) return true
         if (other !is Value) return false
 
-        return if (other is DoubleArrayValue) {
-            value.contentEquals(other.value)
-        } else {
-            list == other.list
+        return when (other) {
+            is DoubleArrayValue -> value.contentEquals(other.value)
+            else -> list == other.list
         }
     }
 
@@ -42,7 +41,7 @@ class DoubleArrayValue(override val value: DoubleArray) : Value {
         return value.contentHashCode()
     }
 
-    override fun toString(): String = value.toString()
+    override fun toString(): String = list.joinToString (prefix = "[", postfix = "]")
 }
 
 fun DoubleArray.asValue(): DoubleArrayValue = DoubleArrayValue(this)

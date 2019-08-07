@@ -29,7 +29,7 @@ fun Meta.toDynamic(): dynamic {
     return res
 }
 
-class DynamicMeta(val obj: dynamic) : Meta {
+class DynamicMeta(val obj: dynamic) : MetaBase() {
     private fun keys() = js("Object.keys(this.obj)") as Array<String>
 
     private fun isArray(@Suppress("UNUSED_PARAMETER") obj: dynamic): Boolean =

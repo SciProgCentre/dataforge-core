@@ -15,10 +15,11 @@ import hep.dataforge.values.boolean
  * * a [NodeItem] (node)
  */
 sealed class MetaItem<out M : Meta> {
-    data class ValueItem(val value: Value) : MetaItem<Nothing>(){
+    data class ValueItem(val value: Value) : MetaItem<Nothing>() {
         override fun toString(): String = value.toString()
     }
-    data class NodeItem<M : Meta>(val node: M) : MetaItem<M>(){
+
+    data class NodeItem<M : Meta>(val node: M) : MetaItem<M>() {
         override fun toString(): String = node.toString()
     }
 }
@@ -45,6 +46,12 @@ interface Meta : MetaRepr {
     val items: Map<NameToken, MetaItem<*>>
 
     override fun toMeta(): Meta = this
+
+    override fun equals(other: Any?): Boolean
+
+    override fun hashCode(): Int
+
+    override fun toString(): String
 
     companion object {
         const val TYPE = "meta"
@@ -174,22 +181,25 @@ operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: NameToken): MetaItem<M>? = 
 }
 
 /**
- * Equals and hash code implementation for meta node
+ * Equals, hashcode and to string for any meta
  */
-abstract class AbstractMetaNode<M : MetaNode<M>> : MetaNode<M> {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Meta) return false
+abstract class MetaBase: Meta{
 
-        return this.items == other.items//this.items.keys == other.items.keys && items.keys.all { this[it] == other[it] }
+    override fun equals(other: Any?): Boolean  = if(other is Meta) {
+        items == other.items
+    } else {
+        false
     }
 
-    override fun hashCode(): Int {
-        return items.hashCode()
-    }
+    override fun hashCode(): Int  = items.hashCode()
 
     override fun toString(): String = items.toString()
 }
+
+/**
+ * Equals and hash code implementation for meta node
+ */
+abstract class AbstractMetaNode<M : MetaNode<M>> : MetaNode<M>, MetaBase()
 
 /**
  * The meta implementation which is guaranteed to be immutable.
@@ -210,7 +220,7 @@ fun MetaItem<*>.seal(): MetaItem<SealedMeta> = when (this) {
     is NodeItem -> NodeItem(node.seal())
 }
 
-object EmptyMeta : Meta {
+object EmptyMeta : MetaBase() {
     override val items: Map<NameToken, MetaItem<*>> = emptyMap()
 }
 
