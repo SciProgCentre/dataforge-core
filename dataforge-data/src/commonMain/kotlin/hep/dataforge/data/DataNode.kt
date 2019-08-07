@@ -1,7 +1,25 @@
 package hep.dataforge.data
 
 import hep.dataforge.names.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 import kotlin.reflect.KClass
+
+sealed class DataItem<out T : Any> {
+    abstract val type: KClass<out T>
+
+    class Node<out T : Any>(val value: DataNode<T>) : DataItem<T>() {
+        override val type: KClass<out T> get() = value.type
+    }
+
+    class Leaf<out T : Any>(val value: Data<T>) : DataItem<T>() {
+        override val type: KClass<out T> get() = value.type
+    }
+}
 
 /**
  * A tree-like data structure grouped into the node. All data inside the node must inherit its type
@@ -13,93 +31,89 @@ interface DataNode<out T : Any> {
      */
     val type: KClass<out T>
 
-    /**
-     * Get the specific data if it exists
-     */
-    operator fun get(name: Name): Data<T>?
-
-    /**
-     * Get a subnode with given name if it exists.
-     */
-    fun getNode(name: Name): DataNode<T>?
-
-    /**
-     * Walk the tree upside down and provide all data nodes with full names
-     */
-    fun data(): Sequence<Pair<Name, Data<T>>>
-
-    /**
-     * A sequence of all nodes in the tree walking upside down, excluding self
-     */
-    fun nodes(): Sequence<Pair<Name, DataNode<T>>>
-
-    operator fun iterator(): Iterator<Pair<Name, Data<T>>> = data().iterator()
+    val items: Map<NameToken, DataItem<T>>
 
     companion object {
         const val TYPE = "dataNode"
 
         fun <T : Any> build(type: KClass<out T>, block: DataTreeBuilder<T>.() -> Unit) =
-            DataTreeBuilder<T>(type).apply(block).build()
+            DataTreeBuilder(type).apply(block).build()
 
         fun <T : Any> builder(type: KClass<out T>) = DataTreeBuilder(type)
     }
 }
 
-internal sealed class DataTreeItem<out T : Any> {
-    class Node<out T : Any>(val tree: DataTree<T>) : DataTreeItem<T>()
-    class Value<out T : Any>(val value: Data<T>) : DataTreeItem<T>()
+val <T : Any> DataItem<T>?.node: DataNode<T>? get() = (this as? DataItem.Node<T>)?.value
+val <T : Any> DataItem<T>?.data: Data<T>? get() = (this as? DataItem.Leaf<T>)?.value
+
+/**
+ * Start computation for all goals in data node
+ */
+fun DataNode<*>.startAll(): Unit = items.values.forEach {
+    when (it) {
+        is DataItem.Node<*> -> it.value.startAll()
+        is DataItem.Leaf<*> -> it.value.task.start()
+    }
 }
+
+fun DataNode<*>.joinAll(scope: CoroutineScope): Job = scope.launch {
+    startAll()
+    items.forEach {
+        when (val value = it.value) {
+            is DataItem.Node -> value.value.joinAll(this).join()
+            is DataItem.Leaf -> value.value.task.await()
+        }
+    }
+}
+
+operator fun <T : Any> DataNode<T>.get(name: Name): DataItem<T>? = when (name.length) {
+    0 -> error("Empty name")
+    1 -> (items[name.first()] as? DataItem.Leaf)
+    else -> get(name.first()!!.asName()).node?.get(name.cutFirst())
+}
+
+/**
+ * Sequence of all children including nodes
+ */
+fun <T : Any> DataNode<T>.asSequence(): Sequence<Pair<Name, DataItem<T>>> = sequence {
+    items.forEach { (head, item) ->
+        yield(head.asName() to item)
+        if (item is DataItem.Node) {
+            val subSequence = item.value.asSequence()
+                .map { (name, data) -> (head.asName() + name) to data }
+            yieldAll(subSequence)
+        }
+    }
+}
+
+/**
+ * Sequence of data entries
+ */
+fun <T : Any> DataNode<T>.dataSequence(): Sequence<Pair<Name, Data<T>>> = sequence {
+    items.forEach { (head, item) ->
+        when (item) {
+            is DataItem.Leaf -> yield(head.asName() to item.value)
+            is DataItem.Node -> {
+                val subSequence = item.value.dataSequence()
+                    .map { (name, data) -> (head.asName() + name) to data }
+                yieldAll(subSequence)
+            }
+        }
+    }
+}
+
+operator fun <T : Any> DataNode<T>.iterator(): Iterator<Pair<Name, DataItem<T>>> = asSequence().iterator()
 
 class DataTree<out T : Any> internal constructor(
     override val type: KClass<out T>,
-    private val items: Map<NameToken, DataTreeItem<T>>
+    override val items: Map<NameToken, DataItem<T>>
 ) : DataNode<T> {
     //TODO add node-level meta?
-
-    override fun get(name: Name): Data<T>? = when (name.length) {
-        0 -> error("Empty name")
-        1 -> (items[name.first()] as? DataTreeItem.Value)?.value
-        else -> getNode(name.first()!!.asName())?.get(name.cutFirst())
-    }
-
-    override fun getNode(name: Name): DataTree<T>? = when (name.length) {
-        0 -> this
-        1 -> (items[name.first()] as? DataTreeItem.Node)?.tree
-        else -> getNode(name.first()!!.asName())?.getNode(name.cutFirst())
-    }
-
-    override fun data(): Sequence<Pair<Name, Data<T>>> {
-        return sequence {
-            items.forEach { (head, tree) ->
-                when (tree) {
-                    is DataTreeItem.Value -> yield(head.asName() to tree.value)
-                    is DataTreeItem.Node -> {
-                        val subSequence =
-                            tree.tree.data().map { (name, data) -> (head.asName() + name) to data }
-                        yieldAll(subSequence)
-                    }
-                }
-            }
-        }
-    }
-
-    override fun nodes(): Sequence<Pair<Name, DataNode<T>>> {
-        return sequence {
-            items.forEach { (head, tree) ->
-                if (tree is DataTreeItem.Node) {
-                    yield(head.asName() to tree.tree)
-                    val subSequence =
-                        tree.tree.nodes().map { (name, node) -> (head.asName() + name) to node }
-                    yieldAll(subSequence)
-                }
-            }
-        }
-    }
 }
 
 private sealed class DataTreeBuilderItem<out T : Any> {
     class Node<T : Any>(val tree: DataTreeBuilder<T>) : DataTreeBuilderItem<T>()
-    class Value<T : Any>(val value: Data<T>) : DataTreeBuilderItem<T>()
+    class Leaf<T : Any>(val value: Data<T>) : DataTreeBuilderItem<T>()
 }
 
 /**
@@ -115,7 +129,7 @@ class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
 
     operator fun set(token: NameToken, data: Data<T>) {
         if (map.containsKey(token)) error("Tree entry with name $token is not empty")
-        map[token] = DataTreeBuilderItem.Value(data)
+        map[token] = DataTreeBuilderItem.Leaf(data)
     }
 
     private fun buildNode(token: NameToken): DataTreeBuilder<T> {
@@ -152,6 +166,11 @@ class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
 
     operator fun set(name: Name, node: DataNode<T>) = set(name, node.builder())
 
+    operator fun set(name: Name, item: DataItem<T>) = when (item) {
+        is DataItem.Node<T> -> set(name, item.value.builder())
+        is DataItem.Leaf<T> -> set(name, item.value)
+    }
+
     /**
      * Append data to node
      */
@@ -162,14 +181,16 @@ class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
      */
     infix fun String.to(node: DataNode<T>) = set(toName(), node)
 
+    infix fun String.to(item: DataItem<T>) = set(toName(), item)
+
     /**
      * Build and append node
      */
     infix fun String.to(block: DataTreeBuilder<T>.() -> Unit) = set(toName(), DataTreeBuilder<T>(type).apply(block))
 
 
-    fun update(node: DataNode<T>){
-        node.data().forEach {
+    fun update(node: DataNode<T>) {
+        node.dataSequence().forEach {
             //TODO check if the place is occupied
             this[it.first] = it.second
         }
@@ -178,8 +199,8 @@ class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
     fun build(): DataTree<T> {
         val resMap = map.mapValues { (_, value) ->
             when (value) {
-                is DataTreeBuilderItem.Value -> DataTreeItem.Value(value.value)
-                is DataTreeBuilderItem.Node -> DataTreeItem.Node(value.tree.build())
+                is DataTreeBuilderItem.Leaf -> DataItem.Leaf(value.value)
+                is DataTreeBuilderItem.Node -> DataItem.Node(value.tree.build())
             }
         }
         return DataTree(type, resMap)
@@ -190,27 +211,20 @@ class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
  * Generate a mutable builder from this node. Node content is not changed
  */
 fun <T : Any> DataNode<T>.builder(): DataTreeBuilder<T> = DataTreeBuilder(type).apply {
-    data().forEach { (name, data) -> this[name] = data }
+    dataSequence().forEach { (name, data) -> this[name] = data }
 }
 
-/**
- * Start computation for all goals in data node
- */
-fun DataNode<*>.startAll() = data().forEach { (_, data) -> data.goal.start() }
-
 fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNode<T> = DataNode.build(type) {
-    data().forEach { (name, data) ->
+    dataSequence().forEach { (name, data) ->
         if (predicate(name, data)) {
             this[name] = data
         }
     }
 }
 
-fun <T: Any> DataNode<T>.first(): Data<T> = data().first().second
+fun <T : Any> DataNode<T>.first(): Data<T>? = dataSequence().first().second
 
 /**
  * Check that node is compatible with given type meaning that each element could be cast to the type
  */
 expect fun DataNode<*>.checkType(type: KClass<*>)
-
-//fun <T : Any, R: T> DataNode<T>.filterIsInstance(type: KClass<R>): DataNode<R> = filter{_,data -> type.}

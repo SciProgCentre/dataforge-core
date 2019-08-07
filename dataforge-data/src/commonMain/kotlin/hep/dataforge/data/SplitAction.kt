@@ -45,7 +45,7 @@ class SplitAction<T : Any, R : Any>(
         node.checkType(inputType)
 
         return DataNode.build(outputType) {
-            node.data().forEach { (name, data) ->
+            node.dataSequence().forEach { (name, data) ->
 
                 val laminate = Laminate(data.meta, meta)
 
@@ -58,7 +58,7 @@ class SplitAction<T : Any, R : Any>(
 
                     rule(env)
 
-                    val goal = data.goal.pipe(context = context) { env.result(it) }
+                    val goal = data.task.pipe(context) { env.result(it) }
 
                     val res = Data.of(outputType, goal, env.meta)
                     set(env.name, res)

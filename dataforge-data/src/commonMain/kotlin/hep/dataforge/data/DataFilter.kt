@@ -20,10 +20,10 @@ class DataFilter(override val config: Config) : Specific {
  * Apply meta-based filter to given data node
  */
 fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
-    val sourceNode = filter.from?.let { getNode(it.toName()) } ?: this@filter
+    val sourceNode = filter.from?.let { get(it.toName()).node } ?: this@filter
     val regex = filter.pattern.toRegex()
     val targetNode = DataTreeBuilder(type).apply {
-        sourceNode.data().forEach { (name, data) ->
+        sourceNode.dataSequence().forEach { (name, data) ->
             if (name.toString().matches(regex)) {
                 this[name] = data
             }

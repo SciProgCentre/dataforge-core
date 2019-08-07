@@ -35,7 +35,7 @@ class PipeAction<T : Any, R : Any>(
         node.checkType(inputType)
 
         return DataNode.build(outputType) {
-            node.data().forEach { (name, data) ->
+            node.dataSequence().forEach { (name, data) ->
                 //merging data meta with action meta (data meta is primary)
                 val oldMeta = meta.builder().apply { update(data.meta) }
                 // creating environment from old meta and name
@@ -47,7 +47,7 @@ class PipeAction<T : Any, R : Any>(
                 //getting new meta
                 val newMeta = builder.meta.seal()
                 //creating a goal with custom context if provided
-                val goal = data.goal.pipe(context) { builder.result(env, it) }
+                val goal = data.task.pipe(context) { builder.result(env, it) }
                 //setting the data node
                 this[newName] = Data.of(outputType, goal, newMeta)
             }
