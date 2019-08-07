@@ -6,9 +6,8 @@ import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.builder
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 
 
@@ -79,7 +78,7 @@ class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
 class JoinAction<T : Any, R : Any>(
     val inputType: KClass<T>,
     val outputType: KClass<R>,
-    val context: CoroutineContext = EmptyCoroutineContext,
+    val scope: CoroutineScope,
     private val action: JoinGroupBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
@@ -96,7 +95,7 @@ class JoinAction<T : Any, R : Any>(
 
                 val env = ActionEnv(groupName.toName(), laminate.builder())
 
-                val goal = goalMap.join(context) { group.result.invoke(env, it) }
+                val goal = goalMap.join(scope) { group.result.invoke(env, it) }
 
                 val res = Data.of(outputType, goal, env.meta)
 

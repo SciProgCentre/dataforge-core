@@ -6,9 +6,8 @@ import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.builder
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import kotlinx.coroutines.CoroutineScope
 import kotlin.collections.set
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 
 
@@ -37,7 +36,7 @@ class SplitBuilder<T : Any, R : Any>(val name: Name, val meta: Meta) {
 class SplitAction<T : Any, R : Any>(
     val inputType: KClass<T>,
     val outputType: KClass<R>,
-    val context: CoroutineContext = EmptyCoroutineContext,
+    val scope: CoroutineScope,
     private val action: SplitBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
@@ -58,7 +57,7 @@ class SplitAction<T : Any, R : Any>(
 
                     rule(env)
 
-                    val goal = data.task.pipe(context) { env.result(it) }
+                    val goal = data.task.pipe(scope) { env.result(it) }
 
                     val res = Data.of(outputType, goal, env.meta)
                     set(env.name, res)

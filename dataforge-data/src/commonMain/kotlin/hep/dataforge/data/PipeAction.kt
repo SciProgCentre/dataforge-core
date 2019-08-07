@@ -2,8 +2,7 @@ package hep.dataforge.data
 
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.coroutines.CoroutineScope
 import kotlin.reflect.KClass
 
 class ActionEnv(val name: Name, val meta: Meta)
@@ -27,7 +26,7 @@ class PipeBuilder<T, R>(var name: Name, var meta: MetaBuilder) {
 class PipeAction<T : Any, R : Any>(
     val inputType: KClass<T>,
     val outputType: KClass<R>,
-    val context: CoroutineContext = EmptyCoroutineContext,
+    val scope: CoroutineScope,
     private val block: PipeBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
@@ -47,7 +46,7 @@ class PipeAction<T : Any, R : Any>(
                 //getting new meta
                 val newMeta = builder.meta.seal()
                 //creating a goal with custom context if provided
-                val goal = data.task.pipe(context) { builder.result(env, it) }
+                val goal = data.task.pipe(scope) { builder.result(env, it) }
                 //setting the data node
                 this[newName] = Data.of(outputType, goal, newMeta)
             }
@@ -57,9 +56,9 @@ class PipeAction<T : Any, R : Any>(
 
 inline fun <reified T : Any, reified R : Any> DataNode<T>.pipe(
     meta: Meta,
-    context: CoroutineContext = EmptyCoroutineContext,
+    scope: CoroutineScope,
     noinline action: PipeBuilder<T, R>.() -> Unit
-): DataNode<R> = PipeAction(T::class, R::class, context, action).invoke(this, meta)
+): DataNode<R> = PipeAction(T::class, R::class, scope, action).invoke(this, meta)
 
 
 

@@ -2,7 +2,6 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
 import hep.dataforge.data.Data
-import hep.dataforge.data.goal
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.io.IOFormat
 import hep.dataforge.io.JsonMetaFormat
@@ -10,6 +9,7 @@ import hep.dataforge.io.MetaFormat
 import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import kotlinx.io.nio.asInput
@@ -58,7 +58,7 @@ suspend fun <T : Any> Context.readData(
         } else {
             null
         }
-        val goal = goal {
+        val goal = async {
             withContext(Dispatchers.IO) {
                 format.run {
                     Files.newByteChannel(path, StandardOpenOption.READ)

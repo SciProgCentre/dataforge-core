@@ -10,11 +10,12 @@ import kotlin.coroutines.EmptyCoroutineContext
  * **Important:** Unlike regular deferred, the [Deferred] is started lazily, so the actual calculation is called only when result is requested.
  */
 fun <T> goal(
-    context: CoroutineContext = EmptyCoroutineContext,
+    scope: CoroutineScope,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     dependencies: Collection<Job> = emptyList(),
     block: suspend CoroutineScope.() -> T
-): Deferred<T> = CoroutineScope(context).async(
-    CoroutineMonitor() + Dependencies(dependencies),
+): Deferred<T> = scope.async(
+    coroutineContext + CoroutineMonitor() + Dependencies(dependencies),
     start = CoroutineStart.LAZY
 ) {
     dependencies.forEach { job ->
@@ -30,9 +31,10 @@ fun <T> goal(
  * Create a one-to-one goal based on existing goal
  */
 fun <T, R> Deferred<T>.pipe(
-    context: CoroutineContext = EmptyCoroutineContext,
+    scope: CoroutineScope,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(T) -> R
-): Deferred<R> = goal(this + context,listOf(this)) {
+): Deferred<R> = goal(scope, coroutineContext, listOf(this)) {
     block(await())
 }
 
@@ -41,9 +43,10 @@ fun <T, R> Deferred<T>.pipe(
  * @param scope the scope for resulting goal. By default use first goal in list
  */
 fun <T, R> Collection<Deferred<T>>.join(
-    context: CoroutineContext = EmptyCoroutineContext,
+    scope: CoroutineScope,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Collection<T>) -> R
-): Deferred<R> = goal(context, this) {
+): Deferred<R> = goal(scope, coroutineContext, this) {
     block(map { it.await() })
 }
 
@@ -54,9 +57,10 @@ fun <T, R> Collection<Deferred<T>>.join(
  * @param R type of the result goal
  */
 fun <K, T, R> Map<K, Deferred<T>>.join(
-    context: CoroutineContext = EmptyCoroutineContext,
+    scope: CoroutineScope,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Map<K, T>) -> R
-): Deferred<R> = goal(context, this.values) {
+): Deferred<R> = goal(scope, coroutineContext, this.values) {
     block(mapValues { it.value.await() })
 }
 

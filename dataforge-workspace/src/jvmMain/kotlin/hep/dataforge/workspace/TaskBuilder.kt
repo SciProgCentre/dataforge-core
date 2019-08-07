@@ -85,7 +85,8 @@ class TaskBuilder(val name: String) {
             val context = this
             PipeAction(
                 inputType = T::class,
-                outputType = R::class
+                outputType = R::class,
+                scope = context
             ) { block(context) }
         }
     }
@@ -102,7 +103,8 @@ class TaskBuilder(val name: String) {
             val context = this
             PipeAction(
                 inputType = T::class,
-                outputType = R::class
+                outputType = R::class,
+                scope = context
             ) {
                 //TODO automatically append task meta
                 result = { data ->
@@ -123,7 +125,8 @@ class TaskBuilder(val name: String) {
         action(from, to) {
             JoinAction(
                 inputType = T::class,
-                outputType = R::class
+                outputType = R::class,
+                scope = this
             ) { block(this@action) }
         }
     }
@@ -141,6 +144,7 @@ class TaskBuilder(val name: String) {
             JoinAction(
                 inputType = T::class,
                 outputType = R::class,
+                scope = context,
                 action = {
                     result(
                         actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonymous"
@@ -163,7 +167,8 @@ class TaskBuilder(val name: String) {
         action(from, to) {
             SplitAction(
                 inputType = T::class,
-                outputType = R::class
+                outputType = R::class,
+                scope = this
             ) { block(this@action) }
         }
     }
