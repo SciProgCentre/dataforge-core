@@ -2,7 +2,7 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
 import hep.dataforge.data.Data
-import hep.dataforge.data.task
+import hep.dataforge.data.goal
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.io.IOFormat
 import hep.dataforge.io.JsonMetaFormat
@@ -58,7 +58,7 @@ suspend fun <T : Any> Context.readData(
         } else {
             null
         }
-        val goal = task {
+        val goal = goal {
             withContext(Dispatchers.IO) {
                 format.run {
                     Files.newByteChannel(path, StandardOpenOption.READ)

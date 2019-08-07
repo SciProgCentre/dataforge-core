@@ -27,7 +27,7 @@ class TaskBuilder(val name: String) {
             val localData = if (from.isEmpty()) {
                 node
             } else {
-                node.getNode(from.toName()) ?: return null
+                node[from.toName()].node ?: return null
             }
             return transform(workspace.context, model, localData)
         }

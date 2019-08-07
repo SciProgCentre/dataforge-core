@@ -92,13 +92,13 @@ class SimpleWorkspaceTest {
     fun testWorkspace() {
         val node = workspace.run("sum")
         val res = node.first()
-        assertEquals(328350, res.get())
+        assertEquals(328350, res?.get())
     }
 
     @Test
     fun testMetaPropagation() {
         val node = workspace.run("sum") { "testFlag" to true }
-        val res = node.first().get()
+        val res = node.first()?.get()
     }
 
     @Test

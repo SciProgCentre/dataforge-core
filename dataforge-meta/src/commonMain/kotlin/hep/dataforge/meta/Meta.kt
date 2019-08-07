@@ -186,7 +186,12 @@ operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: NameToken): MetaItem<M>? = 
 abstract class MetaBase: Meta{
 
     override fun equals(other: Any?): Boolean  = if(other is Meta) {
-        items == other.items
+        this.items == other.items
+//        val items = items
+//        val otherItems = other.items
+//        (items.keys == otherItems.keys) && items.keys.all {
+//            items[it] == otherItems[it]
+//        }
     } else {
         false
     }

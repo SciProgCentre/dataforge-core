@@ -9,11 +9,14 @@ import kotlin.coroutines.EmptyCoroutineContext
  *
  * **Important:** Unlike regular deferred, the [Deferred] is started lazily, so the actual calculation is called only when result is requested.
  */
-fun <T> CoroutineScope.task(
-    context: CoroutineContext,
+fun <T> goal(
+    context: CoroutineContext = EmptyCoroutineContext,
     dependencies: Collection<Job> = emptyList(),
     block: suspend CoroutineScope.() -> T
-): Deferred<T> = async(context + CoroutineMonitor() + Dependencies(dependencies), start = CoroutineStart.LAZY) {
+): Deferred<T> = CoroutineScope(context).async(
+    CoroutineMonitor() + Dependencies(dependencies),
+    start = CoroutineStart.LAZY
+) {
     dependencies.forEach { job ->
         job.start()
         job.invokeOnCompletion { error ->
@@ -29,7 +32,7 @@ fun <T> CoroutineScope.task(
 fun <T, R> Deferred<T>.pipe(
     context: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(T) -> R
-): Deferred<R> = CoroutineScope(this + context).task(context, listOf(this)) {
+): Deferred<R> = goal(this + context,listOf(this)) {
     block(await())
 }
 
@@ -38,10 +41,9 @@ fun <T, R> Deferred<T>.pipe(
  * @param scope the scope for resulting goal. By default use first goal in list
  */
 fun <T, R> Collection<Deferred<T>>.join(
-    scope: CoroutineScope,
     context: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Collection<T>) -> R
-): Deferred<R> = scope.task(context, this) {
+): Deferred<R> = goal(context, this) {
     block(map { it.await() })
 }
 
@@ -54,7 +56,7 @@ fun <T, R> Collection<Deferred<T>>.join(
 fun <K, T, R> Map<K, Deferred<T>>.join(
     context: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Map<K, T>) -> R
-): Deferred<R> = CoroutineScope(values.first() + context).task(context, this.values) {
+): Deferred<R> = goal(context, this.values) {
     block(mapValues { it.value.await() })
 }
 

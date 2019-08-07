@@ -3,6 +3,7 @@ package hep.dataforge.workspace
 import hep.dataforge.context.ContextAware
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
+import hep.dataforge.data.dataSequence
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.buildMeta
@@ -33,8 +34,8 @@ interface Workspace : ContextAware, Provider {
         return when (target) {
             "target", Meta.TYPE -> targets.mapKeys { it.key.toName() }
             Task.TYPE -> tasks
-            Data.TYPE -> data.data.toMap()
-            DataNode.TYPE -> data.nodes.toMap()
+            Data.TYPE -> data.dataSequence().toMap()
+            //DataNode.TYPE -> data.nodes.toMap()
             else -> emptyMap()
         }
     }
