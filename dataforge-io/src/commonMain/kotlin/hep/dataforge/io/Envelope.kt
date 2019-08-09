@@ -1,6 +1,8 @@
 package hep.dataforge.io
 
+import hep.dataforge.context.Named
 import hep.dataforge.io.EnvelopeFormat.Companion.ENVELOPE_FORMAT_TYPE
+import hep.dataforge.io.IOPlugin.Companion.defaultMetaFormats
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
@@ -49,15 +51,23 @@ val Envelope.dataType: String? get() = meta[Envelope.ENVELOPE_DATA_TYPE_KEY].str
  */
 val Envelope.description: String? get() = meta[Envelope.ENVELOPE_DESCRIPTION_KEY].string
 
+/**
+ * A partially read envelope with meta, but without data
+ */
+@ExperimentalUnsignedTypes
 data class PartialEnvelope(val meta: Meta, val dataOffset: UInt, val dataSize: ULong?)
 
 @Type(ENVELOPE_FORMAT_TYPE)
-interface EnvelopeFormat : IOFormat<Envelope>{
-    fun readPartial(input: Input): PartialEnvelope
+interface EnvelopeFormat : IOFormat<Envelope>, Named {
+    fun Input.readPartial(formats: Collection<MetaFormat> = defaultMetaFormats): PartialEnvelope
 
-    fun Output.writeEnvelope(envelope: Envelope, format: MetaFormat)
+    fun Input.readEnvelope(formats: Collection<MetaFormat> = defaultMetaFormats): Envelope
 
-    override fun Output.writeObject(obj: Envelope) = writeEnvelope(obj, JsonMetaFormat)
+    override fun Input.readThis(): Envelope  = readEnvelope()
+
+    fun Output.writeEnvelope(envelope: Envelope, format: MetaFormat = JsonMetaFormat)
+
+    override fun Output.writeThis(obj: Envelope) = writeEnvelope(obj)
 
     companion object {
         const val ENVELOPE_FORMAT_TYPE = "envelopeFormat"

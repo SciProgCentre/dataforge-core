@@ -62,7 +62,7 @@ suspend fun <T : Any> Context.readData(
                 format.run {
                     Files.newByteChannel(path, StandardOpenOption.READ)
                         .asInput()
-                        .readObject()
+                        .readThis()
                 }
             }
         }

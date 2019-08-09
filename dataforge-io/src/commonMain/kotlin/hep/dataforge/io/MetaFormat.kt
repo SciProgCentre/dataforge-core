@@ -15,11 +15,11 @@ interface MetaFormat : IOFormat<Meta>, Named {
     override val name: String
     val key: Short
 
-    override fun Output.writeObject(obj: Meta) {
+    override fun Output.writeThis(obj: Meta) {
         writeMeta(obj, null)
     }
 
-    override fun Input.readObject(): Meta = readMeta(null)
+    override fun Input.readThis(): Meta = readMeta(null)
 
     fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor? = null)
     fun Input.readMeta(descriptor: NodeDescriptor? = null): Meta
@@ -30,20 +30,20 @@ interface MetaFormat : IOFormat<Meta>, Named {
 }
 
 fun Meta.toString(format: MetaFormat = JsonMetaFormat): String = buildPacket {
-    format.run { writeObject(this@toString) }
+    format.run { writeThis(this@toString) }
 }.readText()
 
 fun Meta.toBytes(format: MetaFormat = JsonMetaFormat): ByteReadPacket = buildPacket {
-    format.run { writeObject(this@toBytes) }
+    format.run { writeThis(this@toBytes) }
 }
 
 
 fun MetaFormat.parse(str: String): Meta {
-    return ByteReadPacket(str.toByteArray()).readObject()
+    return ByteReadPacket(str.toByteArray()).readThis()
 }
 
 fun MetaFormat.fromBytes(packet: ByteReadPacket): Meta {
-    return packet.readObject()
+    return packet.readThis()
 }
 
 

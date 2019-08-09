@@ -80,7 +80,7 @@ object BinaryMetaFormat : MetaFormat {
                     writeValue(item.value)
                 }
                 is MetaItem.NodeItem -> {
-                    writeObject(item.node)
+                    writeThis(item.node)
                 }
             }
         }

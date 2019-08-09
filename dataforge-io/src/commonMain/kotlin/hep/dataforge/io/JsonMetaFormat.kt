@@ -56,15 +56,16 @@ fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
 
 //Use theese methods to customize JSON key mapping
 private fun NameToken.toJsonKey(descriptor: ItemDescriptor?) = toString()
+
 private fun NodeDescriptor?.getDescriptor(key: String) = this?.items?.get(key)
 
 fun Meta.toJson(descriptor: NodeDescriptor? = null): JsonObject {
 
     //TODO search for same name siblings and arrange them into arrays
-    val map = this.items.entries.associate {(name,item)->
+    val map = this.items.entries.associate { (name, item) ->
         val itemDescriptor = descriptor?.items?.get(name.body)
         val key = name.toJsonKey(itemDescriptor)
-        val value =          when (item) {
+        val value = when (item) {
             is MetaItem.ValueItem -> {
                 item.value.toJson(itemDescriptor as? ValueDescriptor)
             }
