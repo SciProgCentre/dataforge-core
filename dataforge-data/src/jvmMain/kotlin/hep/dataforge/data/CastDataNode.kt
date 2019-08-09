@@ -1,14 +1,23 @@
 package hep.dataforge.data
 
+import hep.dataforge.meta.Meta
 import hep.dataforge.names.NameToken
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
-fun <T : Any, R : Any> Data<T>.safeCast(type: KClass<R>): Data<R>? {
-    return if (type.isSubclassOf(type)) {
-        @Suppress("UNCHECKED_CAST")
-        Data.of(type, task as Deferred<R>, meta)
+@Suppress("UNCHECKED_CAST")
+fun <T : Any, R : Any> Data<T>.safeCast(type: KClass<out R>): Data<R>? {
+    return if (this.type.isSubclassOf(type)) {
+        return object : Data<R> {
+            override val meta: Meta get() = this@safeCast.meta
+            override val dependencies: Collection<Goal<*>> get() = this@safeCast.dependencies
+            override val result: Deferred<R>? get() = this@safeCast.result as Deferred<R>
+            override fun startAsync(scope: CoroutineScope): Deferred<R>  = this@safeCast.startAsync(scope)  as Deferred<R>
+            override fun reset() = this@safeCast.reset()
+            override val type: KClass<out R> = type
+        }
     } else {
         null
     }

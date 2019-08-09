@@ -6,8 +6,6 @@ import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.builder
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlin.reflect.KClass
 
 
@@ -78,7 +76,6 @@ class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
 class JoinAction<T : Any, R : Any>(
     val inputType: KClass<T>,
     val outputType: KClass<R>,
-    val scope: CoroutineScope,
     private val action: JoinGroupBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
@@ -89,15 +86,13 @@ class JoinAction<T : Any, R : Any>(
 
                 val laminate = Laminate(group.meta, meta)
 
-                val goalMap: Map<Name, Deferred<T>> = group.node.dataSequence().associate { it.first to it.second.task }
+                val dataMap = group.node.dataSequence().associate { it }
 
                 val groupName: String = group.name;
 
                 val env = ActionEnv(groupName.toName(), laminate.builder())
 
-                val goal = goalMap.join(scope) { group.result.invoke(env, it) }
-
-                val res = Data.of(outputType, goal, env.meta)
+                val res: DynamicData<R> = dataMap.join(outputType, meta = laminate) { group.result.invoke(env, it) }
 
                 set(env.name, res)
             }

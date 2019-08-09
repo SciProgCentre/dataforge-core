@@ -9,7 +9,6 @@ import hep.dataforge.io.MetaFormat
 import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import kotlinx.io.nio.asInput
@@ -58,7 +57,7 @@ suspend fun <T : Any> Context.readData(
         } else {
             null
         }
-        val goal = async {
+        Data(type, externalMeta ?: EmptyMeta){
             withContext(Dispatchers.IO) {
                 format.run {
                     Files.newByteChannel(path, StandardOpenOption.READ)
@@ -67,6 +66,5 @@ suspend fun <T : Any> Context.readData(
                 }
             }
         }
-        Data.of(type, goal, externalMeta ?: EmptyMeta)
     }
 }
