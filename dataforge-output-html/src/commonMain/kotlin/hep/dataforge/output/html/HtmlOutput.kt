@@ -27,7 +27,8 @@ class HtmlOutput<T : Any>(override val context: Context, private val consumer: T
         } else {
             val value = cache[obj::class]
             if (value == null) {
-                val answer = context.top<HtmlBuilder<*>>(HTML_CONVERTER_TYPE).values.firstOrNull { it.type.isInstance(obj) }
+                val answer =
+                    context.top<HtmlBuilder<*>>(HTML_CONVERTER_TYPE).values.firstOrNull { it.type.isInstance(obj) }
                 if (answer != null) {
                     cache[obj::class] = answer
                     answer
@@ -39,6 +40,7 @@ class HtmlOutput<T : Any>(override val context: Context, private val consumer: T
             }
         }
         context.launch(Dispatchers.Output) {
+            @Suppress("UNCHECKED_CAST")
             (builder as HtmlBuilder<T>).run { consumer.render(obj) }
         }
     }

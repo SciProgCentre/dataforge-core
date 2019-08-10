@@ -133,12 +133,12 @@ class NumberValue(override val number: Number) : Value {
     override fun equals(other: Any?): Boolean {
         if (other !is Value) return false
         return when (number) {
-            is Short -> number == other.number.toShort()
-            is Long -> number == other.number.toLong()
-            is Byte -> number == other.number.toByte()
-            is Int -> number == other.number.toInt()
-            is Float -> number == other.number.toFloat()
-            is Double -> number == other.number.toDouble()
+            is Short -> number.toShort() == other.number.toShort()
+            is Long -> number.toLong() == other.number.toLong()
+            is Byte -> number.toByte() == other.number.toByte()
+            is Int -> number.toInt() == other.number.toInt()
+            is Float -> number.toFloat() == other.number.toFloat()
+            is Double -> number.toDouble() == other.number.toDouble()
             else -> number.toString() == other.number.toString()
         }
     }
