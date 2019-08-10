@@ -8,6 +8,7 @@ import hep.dataforge.workspace.WorkspaceBuilder
 import java.io.File
 import kotlin.script.experimental.api.*
 import kotlin.script.experimental.host.toScriptSource
+import kotlin.script.experimental.jvm.defaultJvmScriptingHostConfiguration
 import kotlin.script.experimental.jvm.dependenciesFromCurrentContext
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
@@ -24,6 +25,7 @@ object Builders {
             jvm {
                 dependenciesFromCurrentContext(wholeClasspath = true)
             }
+            hostConfiguration(defaultJvmScriptingHostConfiguration)
         }
 
         val evaluationConfiguration = ScriptEvaluationConfiguration {
