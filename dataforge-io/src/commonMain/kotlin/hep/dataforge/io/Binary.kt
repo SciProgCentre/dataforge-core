@@ -2,6 +2,7 @@ package hep.dataforge.io
 
 import kotlinx.io.core.ByteReadPacket
 import kotlinx.io.core.Input
+import kotlinx.io.core.buildPacket
 import kotlinx.io.core.readBytes
 
 /**
@@ -52,9 +53,29 @@ object EmptyBinary : RandomAccessBinary {
 }
 
 class ArrayBinary(val array: ByteArray) : RandomAccessBinary {
-    override val size: ULong = array.size.toULong()
+    override val size: ULong get() = array.size.toULong()
 
     override fun <R> read(from: UInt, size: UInt, block: Input.() -> R): R {
         return ByteReadPacket(array, from.toInt(), size.toInt()).block()
     }
+}
+
+/**
+ * Read given binary as object using given format
+ */
+fun <T : Any> Binary.readWith(format: IOFormat<T>): T = format.run {
+    read {
+        readThis()
+    }
+}
+
+/**
+ * Write this object to a binary
+ * TODO make a lazy binary that does not use intermediate array
+ */
+fun <T: Any> T.writeWith(format: IOFormat<T>): Binary = format.run{
+    val packet = buildPacket {
+        writeThis(this@writeWith)
+    }
+    return@run ArrayBinary(packet.readBytes())
 }

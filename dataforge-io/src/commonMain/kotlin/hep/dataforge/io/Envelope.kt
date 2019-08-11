@@ -1,14 +1,9 @@
 package hep.dataforge.io
 
-import hep.dataforge.context.Named
-import hep.dataforge.io.EnvelopeFormat.Companion.ENVELOPE_FORMAT_TYPE
-import hep.dataforge.io.IOPlugin.Companion.defaultMetaFormats
+import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
-import hep.dataforge.provider.Type
-import kotlinx.io.core.Input
-import kotlinx.io.core.Output
 
 interface Envelope {
     val meta: Meta
@@ -52,24 +47,20 @@ val Envelope.dataType: String? get() = meta[Envelope.ENVELOPE_DATA_TYPE_KEY].str
 val Envelope.description: String? get() = meta[Envelope.ENVELOPE_DESCRIPTION_KEY].string
 
 /**
- * A partially read envelope with meta, but without data
+ * An envelope, which wraps existing envelope and adds one or several additional layers of meta
  */
-@ExperimentalUnsignedTypes
-data class PartialEnvelope(val meta: Meta, val dataOffset: UInt, val dataSize: ULong?)
+class ProxyEnvelope(val source: Envelope, vararg meta: Meta) : Envelope {
+    override val meta: Laminate = Laminate(*meta, source.meta)
+    override val data: Binary? get() = source.data
+}
 
-@Type(ENVELOPE_FORMAT_TYPE)
-interface EnvelopeFormat : IOFormat<Envelope>, Named {
-    fun Input.readPartial(formats: Collection<MetaFormat> = defaultMetaFormats): PartialEnvelope
-
-    fun Input.readEnvelope(formats: Collection<MetaFormat> = defaultMetaFormats): Envelope
-
-    override fun Input.readThis(): Envelope  = readEnvelope()
-
-    fun Output.writeEnvelope(envelope: Envelope, format: MetaFormat = JsonMetaFormat)
-
-    override fun Output.writeThis(obj: Envelope) = writeEnvelope(obj)
-
-    companion object {
-        const val ENVELOPE_FORMAT_TYPE = "envelopeFormat"
+/**
+ * Add few meta layers to existing envelope
+ */
+fun Envelope.withMetaLayers(vararg layers: Meta): Envelope {
+    return when {
+        layers.isEmpty() -> this
+        this is ProxyEnvelope -> ProxyEnvelope(source, *layers, *this.meta.layers.toTypedArray())
+        else -> ProxyEnvelope(this, *layers)
     }
 }

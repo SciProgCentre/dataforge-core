@@ -12,12 +12,12 @@ scientifik{
 
 kotlin {
     sourceSets {
-        val commonMain by getting{
+        commonMain{
             dependencies {
                 api(project(":dataforge-context"))
             }
         }
-        val jsMain by getting{
+        jsMain{
             dependencies{
                 api(npm("text-encoding"))
             }

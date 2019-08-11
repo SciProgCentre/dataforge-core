@@ -5,8 +5,6 @@ plugins {
 val coroutinesVersion: String = Scientifik.coroutinesVersion
 
 kotlin {
-    jvm()
-    js()
     sourceSets {
         val commonMain by getting{
             dependencies {

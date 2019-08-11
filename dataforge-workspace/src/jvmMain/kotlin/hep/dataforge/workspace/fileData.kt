@@ -1,11 +1,8 @@
 package hep.dataforge.workspace
 
-import hep.dataforge.context.Context
 import hep.dataforge.data.Data
 import hep.dataforge.descriptors.NodeDescriptor
-import hep.dataforge.io.IOFormat
-import hep.dataforge.io.JsonMetaFormat
-import hep.dataforge.io.MetaFormat
+import hep.dataforge.io.*
 import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlinx.coroutines.Dispatchers
@@ -44,11 +41,19 @@ suspend fun Meta.write(path: Path, format: MetaFormat, descriptor: NodeDescripto
     }
 }
 
-suspend fun <T : Any> Context.readData(
+/**
+ * Read data with supported envelope format and binary format. If envelope format is null, then read binary directly from file.
+ * @param type explicit type of data read
+ * @param format binary format
+ * @param envelopeFormat the format of envelope. If null, file is read directly
+ * @param metaFile the relative file for optional meta override
+ * @param metaFileFormat the meta format for override
+ */
+suspend fun <T : Any> Path.readData(
     type: KClass<out T>,
-    path: Path,
     format: IOFormat<T>,
-    metaFile: Path = path.resolveSibling("${path.fileName}.meta"),
+    envelopeFormat: EnvelopeFormat? = null,
+    metaFile: Path = resolveSibling("$fileName.meta"),
     metaFileFormat: MetaFormat = JsonMetaFormat
 ): Data<T> {
     return coroutineScope {
@@ -57,14 +62,31 @@ suspend fun <T : Any> Context.readData(
         } else {
             null
         }
-        Data(type, externalMeta ?: EmptyMeta){
-            withContext(Dispatchers.IO) {
-                format.run {
-                    Files.newByteChannel(path, StandardOpenOption.READ)
-                        .asInput()
-                        .readThis()
+        if (envelopeFormat == null) {
+            Data(type, externalMeta ?: EmptyMeta) {
+                withContext(Dispatchers.IO) {
+                    format.run {
+                        Files.newByteChannel(this@readData, StandardOpenOption.READ)
+                            .asInput()
+                            .readThis()
+                    }
                 }
+            }
+        } else {
+            withContext(Dispatchers.IO) {
+                readEnvelope(envelopeFormat).let {
+                    if (externalMeta == null) {
+                        it
+                    } else {
+                        it.withMetaLayers(externalMeta)
+                    }
+                }.toData(type, format)
             }
         }
     }
 }
+
+//suspend fun <T : Any> Path.writeData(
+//    data: Data<T>,
+//    format: IOFormat<T>,
+//    )
