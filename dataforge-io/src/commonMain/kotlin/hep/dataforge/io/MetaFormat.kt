@@ -29,7 +29,7 @@ interface MetaFormat : IOFormat<Meta>, Named {
     }
 }
 
-fun Meta.toString(format: MetaFormat = JsonMetaFormat): String = buildPacket {
+fun Meta.toString(format: MetaFormat): String = buildPacket {
     format.run { writeThis(this@toString) }
 }.readText()
 

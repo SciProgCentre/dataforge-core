@@ -25,8 +25,8 @@ object JsonMetaFormat : MetaFormat {
     override val key: Short = 0x4a53//"JS"
 
     override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {
-        val str = meta.toJson().toString()
-        writeText(str)
+        val json = meta.toJson(descriptor)
+        writeText(json.toString())
     }
 
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
@@ -78,17 +78,46 @@ fun Meta.toJson(descriptor: NodeDescriptor? = null): JsonObject {
     return JsonObject(map)
 }
 
+fun JsonObject.toMeta(descriptor: NodeDescriptor? = null): JsonMeta = JsonMeta(this, descriptor)
 
-fun JsonObject.toMeta(descriptor: NodeDescriptor? = null) = JsonMeta(this, descriptor)
+fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
+    return when (this) {
+        JsonNull -> Null
+        else -> this.content.parseValue() // Optimize number and boolean parsing
+    }
+}
 
-class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : MetaBase() {
-
-    private fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
-        return when (this) {
-            JsonNull -> Null
-            else -> this.content.parseValue() // Optimize number and boolean parsing
+fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<JsonMeta> = when (this) {
+    is JsonPrimitive -> {
+        val value = this.toValue(descriptor as? ValueDescriptor)
+        MetaItem.ValueItem(value)
+    }
+    is JsonObject -> {
+        val meta = toMeta(descriptor as? NodeDescriptor)
+        MetaItem.NodeItem(meta)
+    }
+    is JsonArray -> {
+        if (this.all { it is JsonPrimitive }) {
+            val value = if (isEmpty()) {
+                Null
+            } else {
+                ListValue(
+                    map<JsonElement, Value> {
+                        //We already checked that all values are primitives
+                        (it as JsonPrimitive).toValue(descriptor as? ValueDescriptor)
+                    }
+                )
+            }
+            MetaItem.ValueItem(value)
+        } else {
+            json {
+                "@value" to this@toMetaItem
+            }.toMetaItem(descriptor)
         }
     }
+}
+
+class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : MetaBase() {
 
     @Suppress("UNCHECKED_CAST")
     private operator fun MutableMap<String, MetaItem<JsonMeta>>.set(key: String, value: JsonElement): Unit {
@@ -114,17 +143,7 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
                         this[name] = MetaItem.ValueItem(listValue) as MetaItem<JsonMeta>
                     }
                     else -> value.forEachIndexed { index, jsonElement ->
-                        when (jsonElement) {
-                            is JsonObject -> {
-                                this["$name[$index]"] =
-                                    MetaItem.NodeItem(jsonElement.toMeta(itemDescriptor as? NodeDescriptor))
-                            }
-                            is JsonPrimitive -> {
-                                this["$name[$index]"] =
-                                    MetaItem.ValueItem(jsonElement.toValue(itemDescriptor as? ValueDescriptor))
-                            }
-                            is JsonArray -> TODO("Nested arrays not supported")
-                        }
+                        this["$name[$index]"] = jsonElement.toMetaItem(itemDescriptor)
                     }
                 }
             }
