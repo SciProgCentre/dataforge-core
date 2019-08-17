@@ -29,7 +29,7 @@ class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
      */
     fun byValue(tag: String, defaultTag: String = "@default", action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { node ->
-            GroupBuilder.byValue(tag, defaultTag).invoke(node).map {
+            GroupRule.byValue(tag, defaultTag).invoke(node).map {
                 JoinGroup<T, R>(it.key, it.value).apply(action)
             }
         }

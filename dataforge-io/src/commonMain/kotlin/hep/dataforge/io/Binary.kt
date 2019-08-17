@@ -25,6 +25,7 @@ interface Binary {
 /**
  * A [Binary] with addition random access functionality. It by default allows multiple [read] operations.
  */
+@ExperimentalUnsignedTypes
 interface RandomAccessBinary : Binary {
     /**
      * Read at most [size] of bytes starting at [from] offset from the beginning of the binary.
@@ -39,10 +40,12 @@ fun Binary.readAll(): ByteReadPacket = read {
     ByteReadPacket(this.readBytes())
 }
 
+@ExperimentalUnsignedTypes
 fun RandomAccessBinary.readPacket(from: UInt, size: UInt): ByteReadPacket = read(from, size) {
     ByteReadPacket(this.readBytes())
 }
 
+@ExperimentalUnsignedTypes
 object EmptyBinary : RandomAccessBinary {
 
     override val size: ULong = 0.toULong()
@@ -52,6 +55,7 @@ object EmptyBinary : RandomAccessBinary {
     }
 }
 
+@ExperimentalUnsignedTypes
 class ArrayBinary(val array: ByteArray) : RandomAccessBinary {
     override val size: ULong get() = array.size.toULong()
 
