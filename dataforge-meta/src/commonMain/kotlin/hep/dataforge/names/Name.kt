@@ -6,10 +6,9 @@ package hep.dataforge.names
  * The name is a dot separated list of strings like `token1.token2.token3`.
  * Each token could contain additional index in square brackets.
  */
-inline class Name constructor(val tokens: List<NameToken>) {
+class Name(val tokens: List<NameToken>) {
 
-    val length
-        get() = tokens.size
+    val length get() = tokens.size
 
     /**
      * First token of the name or null if it is empty
@@ -34,6 +33,23 @@ inline class Name constructor(val tokens: List<NameToken>) {
     operator fun get(i: Int): NameToken = tokens[i]
 
     override fun toString(): String = tokens.joinToString(separator = NAME_SEPARATOR) { it.toString() }
+
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is Name -> this.tokens == other.tokens
+            is NameToken -> this.length == 1 && this.tokens.first() == other
+            else -> false
+        }
+    }
+
+    override fun hashCode(): Int {
+        return if (tokens.size == 1) {
+            tokens.first().hashCode()
+        } else {
+            tokens.hashCode()
+        }
+    }
+
 
     companion object {
         const val NAME_SEPARATOR = "."
