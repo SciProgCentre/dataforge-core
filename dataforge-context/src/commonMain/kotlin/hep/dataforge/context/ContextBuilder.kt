@@ -18,11 +18,15 @@ class ContextBuilder(var name: String = "@anonimous", val parent: Context = Glob
         plugins.add(plugin)
     }
 
-    fun plugin(tag: PluginTag, action: MetaBuilder.() -> Unit) {
+    fun plugin(tag: PluginTag, action: MetaBuilder.() -> Unit = {}) {
         plugins.add(PluginRepository.fetch(tag, buildMeta(action)))
     }
 
-    fun plugin(name: String, group: String = "", version: String = "", action: MetaBuilder.() -> Unit) {
+    fun plugin(builder: PluginFactory<*>, action: MetaBuilder.() -> Unit = {}) {
+        plugins.add(builder.invoke(buildMeta(action)))
+    }
+
+    fun plugin(name: String, group: String = "", version: String = "", action: MetaBuilder.() -> Unit = {}) {
         plugin(PluginTag(name, group, version), action)
     }
 

@@ -8,8 +8,6 @@ import hep.dataforge.data.DataTreeBuilder
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
 
 @TaskBuildScope
 interface WorkspaceBuilder {
@@ -26,7 +24,7 @@ interface WorkspaceBuilder {
 /**
  * Set the context for future workspcace
  */
-fun WorkspaceBuilder.context(name: String, block: ContextBuilder.() -> Unit = {}) {
+fun WorkspaceBuilder.context(name: String = "WORKSPACE", block: ContextBuilder.() -> Unit = {}) {
     context = ContextBuilder(name, parentContext).apply(block).build()
 }
 
@@ -36,14 +34,14 @@ fun WorkspaceBuilder.data(name: Name, data: Data<Any>) {
 
 fun WorkspaceBuilder.data(name: String, data: Data<Any>) = data(name.toName(), data)
 
-fun WorkspaceBuilder.static(name: Name, data: Any, scope: CoroutineScope = GlobalScope, meta: Meta = EmptyMeta) =
-    data(name, Data.static(scope, data, meta))
+fun WorkspaceBuilder.static(name: Name, data: Any, meta: Meta = EmptyMeta) =
+    data(name, Data.static(data, meta))
 
-fun WorkspaceBuilder.static(name: Name, data: Any, scope: CoroutineScope = GlobalScope, block: MetaBuilder.() -> Unit = {}) =
-    data(name, Data.static(scope, data, buildMeta(block)))
+fun WorkspaceBuilder.static(name: Name, data: Any, block: MetaBuilder.() -> Unit = {}) =
+    data(name, Data.static(data, buildMeta(block)))
 
-fun WorkspaceBuilder.static(name: String, data: Any, scope: CoroutineScope = GlobalScope, block: MetaBuilder.() -> Unit = {}) =
-    data(name, Data.static(scope, data, buildMeta(block)))
+fun WorkspaceBuilder.static(name: String, data: Any, block: MetaBuilder.() -> Unit = {}) =
+    data(name, Data.static(data, buildMeta(block)))
 
 fun WorkspaceBuilder.data(name: Name, node: DataNode<Any>) {
     this.data[name] = node

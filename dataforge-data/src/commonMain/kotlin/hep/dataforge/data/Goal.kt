@@ -4,116 +4,102 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-/**
- * A special deferred with explicit dependencies and some additional information like progress and unique id
- */
-interface Goal<out T> : Deferred<T>, CoroutineScope {
-    val scope: CoroutineScope
-    override val coroutineContext get() = scope.coroutineContext
-
+interface Goal<out T> {
     val dependencies: Collection<Goal<*>>
+    /**
+     * Returns current running coroutine if the goal is started
+     */
+    val result: Deferred<T>?
 
-    val totalWork: Double get() = dependencies.sumByDouble { totalWork } + (monitor?.totalWork ?: 0.0)
-    val workDone: Double get() = dependencies.sumByDouble { workDone } + (monitor?.workDone ?: 0.0)
-    val status: String get() = monitor?.status ?: ""
-    val progress: Double get() = workDone / totalWork
+    /**
+     * Get ongoing computation or start a new one.
+     * Does not guarantee thread safety. In case of multi-thread access, could create orphan computations.
+     */
+    fun startAsync(scope: CoroutineScope): Deferred<T>
+
+    suspend fun CoroutineScope.await(): T = startAsync(this).await()
+
+    /**
+     * Reset the computation
+     */
+    fun reset()
 
     companion object {
-        /**
-         * Create goal wrapping static value. This goal is always completed
-         */
-        fun <T> static(scope: CoroutineScope, value: T): Goal<T> =
-            StaticGoalImpl(scope, CompletableDeferred(value))
+
     }
 }
 
-/**
- * A monitor of goal state that could be accessed only form inside the goal
- */
-class GoalMonitor : CoroutineContext.Element {
-    override val key: CoroutineContext.Key<*> get() = GoalMonitor
+fun Goal<*>.start(scope: CoroutineScope): Job = startAsync(scope)
 
-    var totalWork: Double = 1.0
-    var workDone: Double = 0.0
-    var status: String = ""
+val Goal<*>.isComplete get() = result?.isCompleted ?: false
 
-    /**
-     * Mark the goal as started
-     */
-    fun start() {
+suspend fun <T> Goal<T>.await(scope: CoroutineScope): T = scope.await()
 
-    }
-
-    /**
-     * Mark the goal as completed
-     */
-    fun finish() {
-        workDone = totalWork
-    }
-
-    companion object : CoroutineContext.Key<GoalMonitor>
-}
-
-val CoroutineScope.monitor: GoalMonitor? get() = coroutineContext[GoalMonitor]
-
-private class GoalImpl<T>(
-    override val scope: CoroutineScope,
-    override val dependencies: Collection<Goal<*>>,
-    deferred: Deferred<T>
-) : Goal<T>, Deferred<T> by deferred
-
-private class StaticGoalImpl<T>(override val scope: CoroutineScope, deferred: CompletableDeferred<T>) : Goal<T>,
-    Deferred<T> by deferred {
+open class StaticGoal<T>(val value: T) : Goal<T> {
     override val dependencies: Collection<Goal<*>> get() = emptyList()
-    override val status: String get() = ""
-    override val totalWork: Double get() = 0.0
-    override val workDone: Double get() = 0.0
+    override val result: Deferred<T> = CompletableDeferred(value)
+
+    override fun startAsync(scope: CoroutineScope): Deferred<T> = result
+
+    override fun reset() {
+        //doNothing
+    }
 }
 
+open class DynamicGoal<T>(
+    val coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    override val dependencies: Collection<Goal<*>> = emptyList(),
+    val block: suspend CoroutineScope.() -> T
+) : Goal<T> {
 
-/**
- * Create a new [Goal] with given [dependencies] and execution [block]. The block takes monitor as parameter.
- * The goal block runs in a supervised scope, meaning that when it fails, it won't affect external scope.
- *
- * **Important:** Unlike regular deferred, the [Goal] is started lazily, so the actual calculation is called only when result is requested.
- */
-fun <R> CoroutineScope.createGoal(
-    dependencies: Collection<Goal<*>>,
-    context: CoroutineContext = EmptyCoroutineContext,
-    block: suspend CoroutineScope.() -> R
-): Goal<R> {
-    val deferred = async(context + GoalMonitor(), start = CoroutineStart.LAZY) {
-        dependencies.forEach { it.start() }
-        monitor?.start()
-        //Running in supervisor scope in order to allow manual error handling
-        return@async supervisorScope {
-            block().also {
-                monitor?.finish()
-            }
+    final override var result: Deferred<T>? = null
+        private set
+
+    /**
+     * Get ongoing computation or start a new one.
+     * Does not guarantee thread safety. In case of multi-thread access, could create orphan computations.
+     */
+    override fun startAsync(scope: CoroutineScope): Deferred<T> {
+        val startedDependencies = this.dependencies.map { goal ->
+            goal.startAsync(scope)
         }
+        return result ?: scope.async(coroutineContext + CoroutineMonitor() + Dependencies(startedDependencies)) {
+            startedDependencies.forEach { deferred ->
+                deferred.invokeOnCompletion { error ->
+                    if (error != null) cancel(CancellationException("Dependency $deferred failed with error: ${error.message}"))
+                }
+            }
+            block()
+        }.also { result = it }
     }
 
-    return GoalImpl(this, dependencies, deferred)
+    /**
+     * Reset the computation
+     */
+    override fun reset() {
+        result?.cancel()
+        result = null
+    }
 }
 
 /**
  * Create a one-to-one goal based on existing goal
  */
 fun <T, R> Goal<T>.pipe(
-    context: CoroutineContext = EmptyCoroutineContext,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(T) -> R
-): Goal<R> = createGoal(listOf(this), context) { block(await()) }
+): Goal<R> = DynamicGoal(coroutineContext, listOf(this)) {
+    block(await(this))
+}
 
 /**
  * Create a joining goal.
- * @param scope the scope for resulting goal. By default use first goal in list
  */
 fun <T, R> Collection<Goal<T>>.join(
-    scope: CoroutineScope = first(),
-    context: CoroutineContext = EmptyCoroutineContext,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Collection<T>) -> R
-): Goal<R> = scope.createGoal(this, context) {
-    block(map { it.await() })
+): Goal<R> = DynamicGoal(coroutineContext, this) {
+    block(map { this.run { it.await(this) } })
 }
 
 /**
@@ -123,9 +109,9 @@ fun <T, R> Collection<Goal<T>>.join(
  * @param R type of the result goal
  */
 fun <K, T, R> Map<K, Goal<T>>.join(
-    scope: CoroutineScope = values.first(),
-    context: CoroutineContext = EmptyCoroutineContext,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Map<K, T>) -> R
-): Goal<R> = scope.createGoal(this.values, context) {
-    block(mapValues { it.value.await() })
+): Goal<R> = DynamicGoal(coroutineContext, this.values) {
+    block(mapValues { it.value.await(this) })
 }
+

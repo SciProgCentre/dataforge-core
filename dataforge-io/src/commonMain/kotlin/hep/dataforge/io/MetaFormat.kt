@@ -1,33 +1,49 @@
 package hep.dataforge.io
 
+import hep.dataforge.context.Named
+import hep.dataforge.descriptors.NodeDescriptor
+import hep.dataforge.io.MetaFormat.Companion.META_FORMAT_TYPE
 import hep.dataforge.meta.Meta
-import kotlinx.io.core.BytePacketBuilder
-import kotlinx.io.core.ByteReadPacket
-import kotlinx.io.core.toByteArray
+import hep.dataforge.provider.Type
+import kotlinx.io.core.*
 
 /**
  * A format for meta serialization
  */
-interface MetaFormat: IOFormat<Meta>
-
-/**
- * ServiceLoader compatible factory
- */
-interface MetaFormatFactory {
-    val name: String
+@Type(META_FORMAT_TYPE)
+interface MetaFormat : IOFormat<Meta>, Named {
+    override val name: String
     val key: Short
 
-    fun build(): MetaFormat
+    override fun Output.writeThis(obj: Meta) {
+        writeMeta(obj, null)
+    }
+
+    override fun Input.readThis(): Meta = readMeta(null)
+
+    fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor? = null)
+    fun Input.readMeta(descriptor: NodeDescriptor? = null): Meta
+
+    companion object{
+        const val META_FORMAT_TYPE = "metaFormat"
+    }
 }
 
-fun Meta.asString(format: MetaFormat = JsonMetaFormat): String {
-    val builder = BytePacketBuilder()
-    format.write(this, builder)
-    return builder.build().readText()
+fun Meta.toString(format: MetaFormat): String = buildPacket {
+    format.run { writeThis(this@toString) }
+}.readText()
+
+fun Meta.toBytes(format: MetaFormat = JsonMetaFormat): ByteReadPacket = buildPacket {
+    format.run { writeThis(this@toBytes) }
 }
+
 
 fun MetaFormat.parse(str: String): Meta {
-    return read(ByteReadPacket(str.toByteArray()))
+    return ByteReadPacket(str.toByteArray()).readThis()
+}
+
+fun MetaFormat.fromBytes(packet: ByteReadPacket): Meta {
+    return packet.readThis()
 }
 
 

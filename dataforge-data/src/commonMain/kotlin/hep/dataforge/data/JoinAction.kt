@@ -6,8 +6,6 @@ import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.builder
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 
 
@@ -31,7 +29,7 @@ class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
      */
     fun byValue(tag: String, defaultTag: String = "@default", action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { node ->
-            GroupBuilder.byValue(tag, defaultTag).invoke(node).map {
+            GroupRule.byValue(tag, defaultTag).invoke(node).map {
                 JoinGroup<T, R>(it.key, it.value).apply(action)
             }
         }
@@ -78,7 +76,6 @@ class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
 class JoinAction<T : Any, R : Any>(
     val inputType: KClass<T>,
     val outputType: KClass<R>,
-    val context: CoroutineContext = EmptyCoroutineContext,
     private val action: JoinGroupBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
@@ -89,17 +86,13 @@ class JoinAction<T : Any, R : Any>(
 
                 val laminate = Laminate(group.meta, meta)
 
-                val goalMap: Map<Name, Goal<T>> = group.node
-                    .data()
-                    .associate { it.first to it.second.goal }
+                val dataMap = group.node.dataSequence().associate { it }
 
                 val groupName: String = group.name;
 
                 val env = ActionEnv(groupName.toName(), laminate.builder())
 
-                val goal = goalMap.join(context = context) { group.result.invoke(env, it) }
-
-                val res = Data.of(outputType, goal, env.meta)
+                val res: DynamicData<R> = dataMap.join(outputType, meta = laminate) { group.result.invoke(env, it) }
 
                 set(env.name, res)
             }
@@ -108,4 +101,4 @@ class JoinAction<T : Any, R : Any>(
     }
 }
 
-operator fun <T> Map<Name,T>.get(name:String) = get(name.toName())
+operator fun <T> Map<Name, T>.get(name: String) = get(name.toName())

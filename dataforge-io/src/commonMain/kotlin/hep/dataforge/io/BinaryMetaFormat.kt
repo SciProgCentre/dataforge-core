@@ -1,5 +1,6 @@
 package hep.dataforge.io
 
+import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.meta.*
 import hep.dataforge.values.*
 import kotlinx.io.core.Input
@@ -8,12 +9,11 @@ import kotlinx.io.core.readText
 import kotlinx.io.core.writeText
 
 object BinaryMetaFormat : MetaFormat {
-    override fun write(obj: Meta, out: Output) {
-        out.writeMeta(obj)
-    }
+    override val name: String = "bin"
+    override val key: Short = 0x4249//BI
 
-    override fun read(input: Input): Meta {
-        return (input.readMetaItem() as MetaItem.NodeItem).node
+    override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
+        return (readMetaItem() as MetaItem.NodeItem).node
     }
 
     private fun Output.writeChar(char: Char) = writeByte(char.toByte())
@@ -70,7 +70,7 @@ object BinaryMetaFormat : MetaFormat {
         }
     }
 
-    private fun Output.writeMeta(meta: Meta) {
+    override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {
         writeChar('M')
         writeInt(meta.items.size)
         meta.items.forEach { (key, item) ->
@@ -80,7 +80,7 @@ object BinaryMetaFormat : MetaFormat {
                     writeValue(item.value)
                 }
                 is MetaItem.NodeItem -> {
-                    writeMeta(item.node)
+                    writeThis(item.node)
                 }
             }
         }
@@ -91,9 +91,9 @@ object BinaryMetaFormat : MetaFormat {
         return readText(max = length)
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun Input.readMetaItem(): MetaItem<MetaBuilder> {
-        val keyChar = readByte().toChar()
-        return when (keyChar) {
+        return when (val keyChar = readByte().toChar()) {
             'S' -> MetaItem.ValueItem(StringValue(readString()))
             'N' -> MetaItem.ValueItem(Null)
             '+' -> MetaItem.ValueItem(True)
@@ -122,11 +122,4 @@ object BinaryMetaFormat : MetaFormat {
             else -> error("Unknown serialization key character: $keyChar")
         }
     }
-}
-
-class BinaryMetaFormatFactory : MetaFormatFactory {
-    override val name: String = "bin"
-    override val key: Short = 0x4249//BI
-
-    override fun build(): MetaFormat = BinaryMetaFormat
 }

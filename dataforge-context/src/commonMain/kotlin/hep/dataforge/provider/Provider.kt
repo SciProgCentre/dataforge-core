@@ -17,7 +17,6 @@ package hep.dataforge.provider
 
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
-import kotlin.jvm.JvmName
 
 /**
  * A marker utility interface for providers.
@@ -42,29 +41,21 @@ interface Provider {
 
 
     /**
-     * Provide a top level element for this [Provider] or return null if element is not present
+     * A map of direct children for specific target
      */
-    fun provideTop(target: String, name: Name): Any?
-
-    /**
-     * [Sequence] of available names with given target. Only top level names are listed, no chain path.
-     *
-     * @param target
-     * @return
-     */
-    fun listNames(target: String): Sequence<Name>
+    fun provideTop(target: String): Map<Name, Any>
 }
 
 fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
     if (path.length == 0) throw IllegalArgumentException("Can't provide by empty path")
     val first = path.first()
-    val top = provideTop(targetOverride ?: first.target ?: defaultTarget, first.name)
+    val target = targetOverride ?: first.target ?: defaultTarget
+    val res = provideTop(target)[first.name] ?: return null
     return when (path.length) {
-        1 -> top
+        1 -> res
         else -> {
-            when (top) {
-                null -> null
-                is Provider -> top.provide(path.tail!!, targetOverride = defaultChainTarget)
+            when (res) {
+                is Provider -> res.provide(path.tail!!, targetOverride = defaultChainTarget)
                 else -> throw IllegalStateException("Chain path not supported: child is not a provider")
             }
         }
@@ -86,14 +77,11 @@ inline fun <reified T : Any> Provider.provide(target: String, name: String): T? 
     provide(target, name.toName())
 
 /**
- *  A top level content with names
+ *  Typed top level content
  */
-fun Provider.top(target: String): Map<Name, Any> = top<Any>(target)
-
-@JvmName("typedTop")
 inline fun <reified T : Any> Provider.top(target: String): Map<Name, T> {
-    return listNames(target).associate {
-        it to (provideTop(target, it) as? T ?: error("The element $it is declared but not provided"))
+    return provideTop(target).mapValues {
+        it.value as? T ?: error("The type of element $it is ${it::class} but ${T::class} is expected")
     }
 }
 

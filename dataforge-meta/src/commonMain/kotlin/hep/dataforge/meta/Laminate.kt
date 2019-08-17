@@ -7,7 +7,7 @@ import hep.dataforge.names.NameToken
  *
  *
  */
-class Laminate(layers: List<Meta>) : Meta {
+class Laminate(layers: List<Meta>) : MetaBase() {
 
     val layers: List<Meta> = layers.flatMap {
         if (it is Laminate) {
@@ -17,9 +17,9 @@ class Laminate(layers: List<Meta>) : Meta {
         }
     }
 
-    constructor(vararg layers: Meta) : this(layers.asList())
+    constructor(vararg layers: Meta?) : this(layers.filterNotNull())
 
-    override val items: Map<NameToken, MetaItem<out Meta>>
+    override val items: Map<NameToken, MetaItem<Meta>>
         get() = layers.map { it.items.keys }.flatten().associateWith { key ->
             layers.asSequence().map { it.items[key] }.filterNotNull().let(replaceRule)
         }
@@ -78,5 +78,15 @@ class Laminate(layers: List<Meta>) : Meta {
         val mergeRule: (Sequence<MetaItem<*>>) -> MetaItem<SealedMeta> = { it.merge() }
     }
 }
+
+/**
+ * Create a new [Laminate] adding given layer to the top
+ */
+fun Laminate.withTop(meta: Meta): Laminate = Laminate(listOf(meta) + layers)
+
+/**
+ * Create a new [Laminate] adding given layer to the bottom
+ */
+fun Laminate.withBottom(meta: Meta): Laminate = Laminate(layers + meta)
 
 //TODO add custom rules for Laminate merge

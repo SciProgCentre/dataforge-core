@@ -26,8 +26,10 @@ import kotlin.jvm.JvmName
  * Since plugins could contain mutable state, context has two states: active and inactive. No changes are allowed to active context.
  * @author Alexander Nozik
  */
-open class Context(final override val name: String, val parent: Context? = Global) : Named, MetaRepr, Provider,
-    CoroutineScope {
+open class Context(
+    final override val name: String,
+    val parent: Context? = Global
+) : Named, MetaRepr, Provider, CoroutineScope {
 
     private val config = Config()
 
@@ -59,19 +61,11 @@ open class Context(final override val name: String, val parent: Context? = Globa
 
     override val defaultTarget: String get() = Plugin.PLUGIN_TARGET
 
-    override fun provideTop(target: String, name: Name): Any? {
+    override fun provideTop(target: String): Map<Name, Any> {
         return when (target) {
-            Plugin.PLUGIN_TARGET -> plugins[PluginTag.fromString(name.toString())]
-            Value.TYPE -> properties[name]?.value
-            else -> null
-        }
-    }
-
-    override fun listNames(target: String): Sequence<Name> {
-        return when (target) {
-            Plugin.PLUGIN_TARGET -> plugins.asSequence().map { it.name.toName() }
-            Value.TYPE -> properties.values().map { it.first }
-            else -> emptySequence()
+            Value.TYPE -> properties.sequence().toMap()
+            Plugin.PLUGIN_TARGET -> plugins.sequence(true).associateBy { it.name.toName() }
+            else -> emptyMap()
         }
     }
 
@@ -116,11 +110,11 @@ open class Context(final override val name: String, val parent: Context? = Globa
     }
 }
 
-/**
- * A sequences of all objects provided by plugins with given target and type
- */
 fun Context.content(target: String): Map<Name, Any> = content<Any>(target)
 
+/**
+ * A map of all objects provided by plugins with given target and type
+ */
 @JvmName("typedContent")
 inline fun <reified T : Any> Context.content(target: String): Map<Name, T> =
     plugins.flatMap { plugin ->
@@ -148,14 +142,18 @@ object Global : Context("GLOBAL", null) {
     private val contextRegistry = HashMap<String, Context>()
 
     /**
-     * Get previously builder context o builder a new one
+     * Get previously built context
      *
      * @param name
      * @return
      */
-    fun getContext(name: String): Context {
-        return contextRegistry.getOrPut(name) { Context(name) }
+    fun getContext(name: String): Context? {
+        return contextRegistry[name]
     }
+
+    fun context(name: String, parent: Context = this, block: ContextBuilder.() -> Unit = {}): Context =
+        ContextBuilder(name, parent).apply(block).build()
+
 }
 
 

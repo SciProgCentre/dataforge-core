@@ -1,17 +1,14 @@
 plugins {
-    `npm-multiplatform`
+    id("scientifik.mpp")
 }
 
-val coroutinesVersion: String = Versions.coroutinesVersion
+val coroutinesVersion: String = Scientifik.coroutinesVersion
 
 kotlin {
-    jvm()
-    js()
     sourceSets {
         val commonMain by getting{
             dependencies {
                 api(project(":dataforge-meta"))
-                api(kotlin("reflect"))
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutinesVersion")
             }
         }
@@ -19,6 +16,7 @@ kotlin {
         val jvmMain by getting{
             dependencies {
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+                api(kotlin("reflect"))
             }
         }
 

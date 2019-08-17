@@ -43,6 +43,8 @@ interface Value {
     val list: List<Value>
         get() = listOf(this)
 
+    override fun equals(other: Any?): Boolean
+
     companion object {
         const val TYPE = "value"
 
@@ -82,6 +84,8 @@ object Null : Value {
     override val string: String get() = "@null"
 
     override fun toString(): String = value.toString()
+
+    override fun equals(other: Any?): Boolean = other === Null
 }
 
 /**
@@ -97,9 +101,12 @@ object True : Value {
     override val value: Any? get() = true
     override val type: ValueType get() = ValueType.BOOLEAN
     override val number: Number get() = 1.0
-    override val string: String get() = "+"
+    override val string: String get() = "true"
 
     override fun toString(): String = value.toString()
+
+    override fun equals(other: Any?): Boolean = other === True
+
 }
 
 /**
@@ -109,7 +116,11 @@ object False : Value {
     override val value: Any? get() = false
     override val type: ValueType get() = ValueType.BOOLEAN
     override val number: Number get() = -1.0
-    override val string: String get() = "-"
+    override val string: String get() = "false"
+
+    override fun toString(): String = True.value.toString()
+
+    override fun equals(other: Any?): Boolean = other === False
 }
 
 val Value.boolean get() = this == True || this.list.firstOrNull() == True || (type == ValueType.STRING && string.toBoolean())
@@ -122,12 +133,12 @@ class NumberValue(override val number: Number) : Value {
     override fun equals(other: Any?): Boolean {
         if (other !is Value) return false
         return when (number) {
-            is Short -> number == other.number.toShort()
-            is Long -> number == other.number.toLong()
-            is Byte -> number == other.number.toByte()
-            is Int -> number == other.number.toInt()
-            is Float -> number == other.number.toFloat()
-            is Double -> number == other.number.toDouble()
+            is Short -> number.toShort() == other.number.toShort()
+            is Long -> number.toLong() == other.number.toLong()
+            is Byte -> number.toByte() == other.number.toByte()
+            is Int -> number.toInt() == other.number.toInt()
+            is Float -> number.toFloat() == other.number.toFloat()
+            is Double -> number.toDouble() == other.number.toDouble()
             else -> number.toString() == other.number.toString()
         }
     }
@@ -148,7 +159,7 @@ class StringValue(override val string: String) : Value {
 
     override fun hashCode(): Int = string.hashCode()
 
-    override fun toString(): String = value.toString()
+    override fun toString(): String = "\"${value.toString()}\""
 }
 
 class EnumValue<E : Enum<*>>(override val value: E) : Value {
@@ -177,11 +188,14 @@ class ListValue(override val list: List<Value>) : Value {
     override val number: Number get() = list.first().number
     override val string: String get() = list.first().string
 
-    override fun toString(): String = value.toString()
+    override fun toString(): String = list.joinToString (prefix = "[", postfix = "]")
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Value) return false
+        if( other is DoubleArrayValue){
+
+        }
         return list == other.list
     }
 
@@ -205,9 +219,6 @@ fun Boolean.asValue(): Value = if (this) True else False
 fun String.asValue(): Value = StringValue(this)
 
 fun Iterable<Value>.asValue(): Value = ListValue(this.toList())
-
-//TODO maybe optimized storage performance
-fun DoubleArray.asValue(): Value = ListValue(map{NumberValue(it)})
 
 fun IntArray.asValue(): Value = ListValue(map{NumberValue(it)})
 
@@ -253,17 +264,4 @@ fun String.parseValue(): Value {
 
     //Give up and return a StringValue
     return StringValue(this)
-}
-
-class LazyParsedValue(override val string: String) : Value {
-    private val parsedValue by lazy { string.parseValue() }
-
-    override val value: Any?
-        get() = parsedValue.value
-    override val type: ValueType
-        get() = parsedValue.type
-    override val number: Number
-        get() = parsedValue.number
-
-    override fun toString(): String = value.toString()
 }

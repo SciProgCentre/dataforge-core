@@ -14,9 +14,14 @@ import hep.dataforge.values.boolean
  * * a [ValueItem] (leaf)
  * * a [NodeItem] (node)
  */
-sealed class MetaItem<M : Meta> {
-    data class ValueItem<M : Meta>(val value: Value) : MetaItem<M>()
-    data class NodeItem<M : Meta>(val node: M) : MetaItem<M>()
+sealed class MetaItem<out M : Meta> {
+    data class ValueItem(val value: Value) : MetaItem<Nothing>() {
+        override fun toString(): String = value.toString()
+    }
+
+    data class NodeItem<M : Meta>(val node: M) : MetaItem<M>() {
+        override fun toString(): String = node.toString()
+    }
 }
 
 /**
@@ -35,9 +40,18 @@ interface MetaRepr {
  *   * Same name siblings are supported via elements with the same [Name] but different queries
  */
 interface Meta : MetaRepr {
-    val items: Map<NameToken, MetaItem<out Meta>>
+    /**
+     * Top level items of meta tree
+     */
+    val items: Map<NameToken, MetaItem<*>>
 
     override fun toMeta(): Meta = this
+
+    override fun equals(other: Any?): Boolean
+
+    override fun hashCode(): Int
+
+    override fun toString(): String
 
     companion object {
         const val TYPE = "meta"
@@ -50,12 +64,7 @@ interface Meta : MetaRepr {
 
 /* Get operations*/
 
-/**
- * Fast [String]-based accessor for item map
- */
-operator fun <T> Map<NameToken, T>.get(body: String, query: String = ""): T? = get(NameToken(body, query))
-
-operator fun Meta?.get(name: Name): MetaItem<out Meta>? {
+operator fun Meta?.get(name: Name): MetaItem<*>? {
     if (this == null) return null
     return name.first()?.let { token ->
         val tail = name.cutFirst()
@@ -66,13 +75,13 @@ operator fun Meta?.get(name: Name): MetaItem<out Meta>? {
     }
 }
 
-operator fun Meta?.get(token: NameToken): MetaItem<out Meta>? = this?.items?.get(token)
-operator fun Meta?.get(key: String): MetaItem<out Meta>? = get(key.toName())
+operator fun Meta?.get(token: NameToken): MetaItem<*>? = this?.items?.get(token)
+operator fun Meta?.get(key: String): MetaItem<*>? = get(key.toName())
 
 /**
  * Get all items matching given name.
  */
-fun Meta.getAll(name: Name): Map<String, MetaItem<out Meta>> {
+fun Meta.getAll(name: Name): Map<String, MetaItem<*>> {
     val root = when (name.length) {
         0 -> error("Can't use empty name for that")
         1 -> this
@@ -88,22 +97,37 @@ fun Meta.getAll(name: Name): Map<String, MetaItem<out Meta>> {
         ?: emptyMap()
 }
 
-fun Meta.getAll(name: String): Map<String, MetaItem<out Meta>> = getAll(name.toName())
+fun Meta.getAll(name: String): Map<String, MetaItem<*>> = getAll(name.toName())
 
 /**
  * Get a sequence of [Name]-[Value] pairs
  */
 fun Meta.values(): Sequence<Pair<Name, Value>> {
-    return items.asSequence().flatMap { entry ->
-        val item = entry.value
+    return items.asSequence().flatMap { (key, item) ->
         when (item) {
-            is ValueItem -> sequenceOf(entry.key.asName() to item.value)
-            is NodeItem -> item.node.values().map { pair -> (entry.key.asName() + pair.first) to pair.second }
+            is ValueItem -> sequenceOf(key.asName() to item.value)
+            is NodeItem -> item.node.values().map { pair -> (key.asName() + pair.first) to pair.second }
         }
     }
 }
 
-operator fun Meta.iterator(): Iterator<Pair<Name, Value>> = values().iterator()
+/**
+ * Get a sequence of all [Name]-[MetaItem] pairs for all items including nodes
+ */
+fun Meta.sequence(): Sequence<Pair<Name, MetaItem<*>>> {
+    return sequence {
+        items.forEach { (key, item) ->
+            yield(key.asName() to item)
+            if (item is NodeItem<*>) {
+                yieldAll(item.node.sequence().map { (innerKey, innerItem) ->
+                    (key + innerKey) to innerItem
+                })
+            }
+        }
+    }
+}
+
+operator fun Meta.iterator(): Iterator<Pair<Name, MetaItem<*>>> = sequence().iterator()
 
 /**
  * A meta node that ensures that all of its descendants has at least the same type
@@ -115,7 +139,7 @@ interface MetaNode<M : MetaNode<M>> : Meta {
 /**
  * Get all items matching given name.
  */
-fun <M : MetaNode<M>> MetaNode<M>.getAll(name: Name): Map<String, MetaItem<M>> {
+fun <M : MetaNode<M>> M.getAll(name: Name): Map<String, MetaItem<M>> {
     val root: MetaNode<M>? = when (name.length) {
         0 -> error("Can't use empty name for that")
         1 -> this
@@ -133,7 +157,8 @@ fun <M : MetaNode<M>> MetaNode<M>.getAll(name: Name): Map<String, MetaItem<M>> {
 
 fun <M : MetaNode<M>> M.getAll(name: String): Map<String, MetaItem<M>> = getAll(name.toName())
 
-operator fun <M : MetaNode<M>> MetaNode<M>.get(name: Name): MetaItem<M>? {
+operator fun <M : MetaNode<M>> MetaNode<M>?.get(name: Name): MetaItem<M>? {
+    if (this == null) return null
     return name.first()?.let { token ->
         val tail = name.cutFirst()
         when (tail.length) {
@@ -143,23 +168,43 @@ operator fun <M : MetaNode<M>> MetaNode<M>.get(name: Name): MetaItem<M>? {
     }
 }
 
-operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: String): MetaItem<M>? = this?.let { get(key.toName()) }
+operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: String): MetaItem<M>? = if (this == null) {
+    null
+} else {
+    this[key.toName()]
+}
+
+operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: NameToken): MetaItem<M>? = if (this == null) {
+    null
+} else {
+    this[key.asName()]
+}
+
+/**
+ * Equals, hashcode and to string for any meta
+ */
+abstract class MetaBase: Meta{
+
+    override fun equals(other: Any?): Boolean  = if(other is Meta) {
+        this.items == other.items
+//        val items = items
+//        val otherItems = other.items
+//        (items.keys == otherItems.keys) && items.keys.all {
+//            items[it] == otherItems[it]
+//        }
+    } else {
+        false
+    }
+
+    override fun hashCode(): Int  = items.hashCode()
+
+    override fun toString(): String = items.toString()
+}
 
 /**
  * Equals and hash code implementation for meta node
  */
-abstract class AbstractMetaNode<M : MetaNode<M>> : MetaNode<M> {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Meta) return false
-
-        return this.items == other.items
-    }
-
-    override fun hashCode(): Int {
-        return items.hashCode()
-    }
-}
+abstract class AbstractMetaNode<M : MetaNode<M>> : MetaNode<M>, MetaBase()
 
 /**
  * The meta implementation which is guaranteed to be immutable.
@@ -174,13 +219,14 @@ class SealedMeta internal constructor(override val items: Map<NameToken, MetaIte
  */
 fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(items.mapValues { entry -> entry.value.seal() })
 
+@Suppress("UNCHECKED_CAST")
 fun MetaItem<*>.seal(): MetaItem<SealedMeta> = when (this) {
-    is MetaItem.ValueItem -> MetaItem.ValueItem(value)
-    is MetaItem.NodeItem -> MetaItem.NodeItem(node.seal())
+    is ValueItem -> this
+    is NodeItem -> NodeItem(node.seal())
 }
 
-object EmptyMeta : Meta {
-    override val items: Map<NameToken, MetaItem<out Meta>> = emptyMap()
+object EmptyMeta : MetaBase() {
+    override val items: Map<NameToken, MetaItem<*>> = emptyMap()
 }
 
 /**
@@ -188,8 +234,8 @@ object EmptyMeta : Meta {
  */
 
 val MetaItem<*>?.value
-    get() = (this as? MetaItem.ValueItem)?.value
-        ?: (this?.node?.get(VALUE_KEY) as? MetaItem.ValueItem)?.value
+    get() = (this as? ValueItem)?.value
+        ?: (this?.node?.get(VALUE_KEY) as? ValueItem)?.value
 
 val MetaItem<*>?.string get() = value?.string
 val MetaItem<*>?.boolean get() = value?.boolean
@@ -211,8 +257,8 @@ val MetaItem<*>?.stringList get() = value?.list?.map { it.string } ?: emptyList(
 val <M : Meta> MetaItem<M>?.node: M?
     get() = when (this) {
         null -> null
-        is MetaItem.ValueItem -> error("Trying to interpret value meta item as node item")
-        is MetaItem.NodeItem -> node
+        is ValueItem -> error("Trying to interpret value meta item as node item")
+        is NodeItem -> node
     }
 
 /**

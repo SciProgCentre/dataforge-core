@@ -1,11 +1,13 @@
 package hep.dataforge.meta
 
 /**
- * Marker interface for specifications
+ * Marker interface for classes with specifications
  */
-interface Specific : Configurable {
-    operator fun get(name: String): MetaItem<Config>? = config[name]
-}
+interface Specific : Configurable
+
+//TODO separate mutable config from immutable meta to allow free wrapping of meta
+
+operator fun Specific.get(name: String): MetaItem<*>? = config[name]
 
 /**
  * Allows to apply custom configuration in a type safe way to simple untyped configuration.
@@ -29,6 +31,7 @@ interface Specification<T : Specific> {
      */
     fun wrap(config: Config): T
 
+    //TODO replace by free wrapper
     fun wrap(meta: Meta): T = wrap(meta.toConfig())
 }
 
@@ -59,4 +62,4 @@ fun <C : Specific, S : Specification<C>> S.createStyle(action: C.() -> Unit): Me
 fun <C : Specific> Specific.spec(
     spec: Specification<C>,
     key: String? = null
-) = MutableMorphDelegate(config, key) { spec.wrap(it) }
+): MutableMorphDelegate<Config, C> = MutableMorphDelegate(config, key) { spec.wrap(it) }

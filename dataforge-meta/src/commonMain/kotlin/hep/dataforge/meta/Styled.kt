@@ -11,7 +11,11 @@ import kotlin.reflect.KProperty
  * @param base - unchangeable base
  * @param style - the style
  */
-class Styled(val base: Meta, val style: Config = Config().empty()) : MutableMeta<Styled> {
+class Styled(val base: Meta, val style: Config = Config().empty()) : AbstractMutableMeta<Styled>() {
+    override fun wrapNode(meta: Meta): Styled  = Styled(meta)
+
+    override fun empty(): Styled  = Styled(EmptyMeta)
+
     override val items: Map<NameToken, MetaItem<Styled>>
         get() = (base.items.keys + style.items.keys).associate { key ->
             val value = base.items[key]
@@ -19,10 +23,10 @@ class Styled(val base: Meta, val style: Config = Config().empty()) : MutableMeta
             val item: MetaItem<Styled> = when (value) {
                 null -> when (styleValue) {
                     null -> error("Should be unreachable")
-                    is MetaItem.ValueItem -> MetaItem.ValueItem(styleValue.value)
                     is MetaItem.NodeItem -> MetaItem.NodeItem(Styled(style.empty(), styleValue.node))
+                    is MetaItem.ValueItem -> styleValue
                 }
-                is MetaItem.ValueItem -> MetaItem.ValueItem(value.value)
+                is MetaItem.ValueItem -> value
                 is MetaItem.NodeItem -> MetaItem.NodeItem(
                     Styled(value.node, styleValue?.node ?: Config.empty())
                 )
@@ -30,7 +34,7 @@ class Styled(val base: Meta, val style: Config = Config().empty()) : MutableMeta
             key to item
         }
 
-    override fun set(name: Name, item: MetaItem<Styled>?) {
+    override fun set(name: Name, item: MetaItem<*>?) {
         if (item == null) {
             style.remove(name)
         } else {
@@ -38,12 +42,12 @@ class Styled(val base: Meta, val style: Config = Config().empty()) : MutableMeta
         }
     }
 
-    override fun onChange(owner: Any?, action: (Name, before: MetaItem<*>?, after: MetaItem<*>?) -> Unit) {
+    fun onChange(owner: Any?, action: (Name, before: MetaItem<*>?, after: MetaItem<*>?) -> Unit) {
         //TODO test correct behavior
         style.onChange(owner) { name, before, after -> action(name, before ?: base[name], after ?: base[name]) }
     }
 
-    override fun removeListener(owner: Any?) {
+    fun removeListener(owner: Any?) {
         style.removeListener(owner)
     }
 }

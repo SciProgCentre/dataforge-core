@@ -34,9 +34,7 @@ inline fun <reified T : Any> Provider.provideByType(name: Name): T? {
 
 inline fun <reified T : Any> Provider.top(): Map<Name, T> {
     val target = Types[T::class]
-    return listNames(target).associate { name ->
-        name to (provideByType<T>(name) ?: error("The element $name is declared but not provided"))
-    }
+    return top(target)
 }
 
 /**

@@ -51,7 +51,10 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
 
 
     /**
-     * Find a loaded plugin via its class
+     * Find a loaded plugin via its class. This method does not check if the result is unique and just returns first
+     * plugin matching the class condition.
+     * For safe search provide a tag since tags are checked on load and plugins with the same tag are not allowed
+     * in the same context.
      *
      * @param tag
      * @param type
@@ -59,15 +62,16 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
      * @return
      */
     @Suppress("UNCHECKED_CAST")
-    operator fun <T : Plugin> get(type: KClass<T>, recursive: Boolean = true): T? =
-        get(recursive) { type.isInstance(it) } as T?
+    operator fun <T : Any> get(type: KClass<T>, tag: PluginTag? = null, recursive: Boolean = true): T? =
+        get(recursive) { type.isInstance(it) && (tag == null || tag.matches(it.tag)) } as T?
 
-    inline fun <reified T : Plugin> get(recursive: Boolean = true): T? = get(T::class, recursive)
+    inline fun <reified T : Any> get(tag: PluginTag? = null, recursive: Boolean = true): T? =
+        get(T::class, tag, recursive)
 
 
     /**
      * Load given plugin into this manager and return loaded instance.
-     * Throw error if plugin of the same class already exists in manager
+     * Throw error if plugin of the same type and tag already exists in manager.
      *
      * @param plugin
      * @return
@@ -75,10 +79,12 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
     fun <T : Plugin> load(plugin: T): T {
         if (context.isActive) error("Can't load plugin into active context")
 
-        if (get(plugin::class, false) != null) {
-            throw  RuntimeException("Plugin of type ${plugin::class} already exists in ${context.name}")
+        if (get(plugin::class, plugin.tag, recursive = false) != null) {
+            error("Plugin of type ${plugin::class} already exists in ${context.name}")
         } else {
-            loadDependencies(plugin)
+            for (tag in plugin.dependsOn()) {
+                fetch(tag, true)
+            }
 
             logger.info { "Loading plugin ${plugin.name} into ${context.name}" }
             plugin.attach(context)
@@ -87,11 +93,14 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
         }
     }
 
-    private fun loadDependencies(plugin: Plugin) {
-        for (tag in plugin.dependsOn()) {
-            load(tag)
-        }
-    }
+    /**
+     * Load a plugin using its factory
+     */
+    fun <T : Plugin> load(factory: PluginFactory<T>, meta: Meta = EmptyMeta): T =
+        load(factory(meta))
+
+    fun <T : Plugin> load(factory: PluginFactory<T>, metaBuilder: MetaBuilder.() -> Unit): T =
+        load(factory, buildMeta(metaBuilder))
 
     /**
      * Remove a plugin from [PluginManager]
@@ -107,22 +116,11 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
     }
 
     /**
-     * Get plugin instance via plugin resolver and load it.
+     * Get an existing plugin with given meta or load new one using provided factory
      *
-     * @param tag
-     * @return
      */
-    fun load(tag: PluginTag, meta: Meta = EmptyMeta): Plugin {
-        val loaded = get(tag, false)
-        return when {
-            loaded == null -> load(PluginRepository.fetch(tag,meta))
-            loaded.meta == meta -> loaded // if meta is the same, return existing plugin
-            else -> throw RuntimeException("Can't load plugin with tag $tag. Plugin with this tag and different configuration already exists in context.")
-        }
-    }
-
-    fun load(factory: PluginFactory<*>, meta: Meta = EmptyMeta): Plugin{
-        val loaded = get(factory.tag, false)
+    fun <T : Plugin> fetch(factory: PluginFactory<T>, recursive: Boolean = true, meta: Meta = EmptyMeta): T {
+        val loaded = get(factory.type, factory.tag, recursive)
         return when {
             loaded == null -> load(factory(meta))
             loaded.meta == meta -> loaded // if meta is the same, return existing plugin
@@ -130,42 +128,12 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
         }
     }
 
-    /**
-     * Load plugin by its class and meta. Ignore if plugin with this meta is already loaded.
-     * Throw an exception if there exists plugin with the same type, but different meta
-     */
-    fun <T : Plugin> load(type: KClass<T>, meta: Meta = EmptyMeta): T {
-        val loaded = get(type, false)
-        return when {
-            loaded == null -> {
-                val plugin = PluginRepository.list().first { it.type == type }.invoke(meta)
-                if (type.isInstance(plugin)) {
-                    @Suppress("UNCHECKED_CAST")
-                    load(plugin as T)
-                } else {
-                    error("Corrupt type information in plugin repository")
-                }
-            }
-            loaded.meta == meta -> loaded // if meta is the same, return existing plugin
-            else -> throw RuntimeException("Can't load plugin with type $type. Plugin with this type and different configuration already exists in context.")
-        }
-    }
-
-    inline fun <reified T : Plugin> load(noinline metaBuilder: MetaBuilder.() -> Unit = {}): T {
-        return load(T::class, buildMeta(metaBuilder))
-    }
-
-    fun load(name: String, meta: Meta = EmptyMeta): Plugin {
-        return load(PluginTag.fromString(name), meta)
-    }
+    fun <T : Plugin> fetch(
+        factory: PluginFactory<T>,
+        recursive: Boolean = true,
+        metaBuilder: MetaBuilder.() -> Unit
+    ): T = fetch(factory, recursive, buildMeta(metaBuilder))
 
     override fun iterator(): Iterator<Plugin> = plugins.iterator()
-
-    /**
-     * Get a plugin if it exists or load it with given meta if it is not.
-     */
-    inline fun <reified T : Plugin> getOrLoad(noinline metaBuilder: MetaBuilder.() -> Unit = {}): T {
-        return get(true) ?: load(metaBuilder)
-    }
 
 }

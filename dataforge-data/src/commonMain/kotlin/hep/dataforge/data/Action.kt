@@ -1,7 +1,6 @@
 package hep.dataforge.data
 
 import hep.dataforge.meta.Meta
-import hep.dataforge.names.Name
 
 /**
  * A simple data transformation on a data node
@@ -33,20 +32,4 @@ infix fun <T : Any, I : Any, R : Any> Action<T, I>.then(action: Action<I, R>): A
             get() = this@then.isTerminal || action.isTerminal
     }
 }
-
-
-///**
-// * An action that performs the same transformation on each of input data nodes. Null results are ignored.
-// * The transformation is non-suspending because it is lazy.
-// */
-//class PipeAction<in T : Any, out R : Any>(val transform: (Name, Data<T>, Meta) -> Data<R>?) : Action<T, R> {
-//    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataNode.build {
-//        node.data().forEach { (name, data) ->
-//            val res = transform(name, data, meta)
-//            if (res != null) {
-//                set(name, res)
-//            }
-//        }
-//    }
-//}
 
