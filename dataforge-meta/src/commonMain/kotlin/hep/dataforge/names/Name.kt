@@ -139,9 +139,7 @@ fun String.toName(): Name {
  * Convert the [String] to a [Name] by simply wrapping it in a single name token without parsing.
  * The input string could contain dots and braces, but they are just escaped, not parsed.
  */
-fun String.asName(): Name {
-    return NameToken(this).asName()
-}
+fun String.asName(): Name = if(isBlank()) EmptyName else NameToken(this).asName()
 
 operator fun NameToken.plus(other: Name): Name = Name(listOf(this) + other.tokens)
 

@@ -4,6 +4,7 @@ import hep.dataforge.meta.Config
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.toConfig
 import hep.dataforge.names.Name
+import hep.dataforge.names.NameToken
 import hep.dataforge.names.toName
 import kotlinx.serialization.*
 import kotlinx.serialization.internal.StringDescriptor
@@ -11,7 +12,7 @@ import kotlinx.serialization.json.JsonObjectSerializer
 
 @Serializer(Name::class)
 object NameSerializer : KSerializer<Name> {
-    override val descriptor: SerialDescriptor = StringDescriptor
+    override val descriptor: SerialDescriptor = StringDescriptor.withName("Name")
 
     override fun deserialize(decoder: Decoder): Name {
         return decoder.decodeString().toName()
@@ -21,6 +22,9 @@ object NameSerializer : KSerializer<Name> {
         encoder.encodeString(obj.toString())
     }
 }
+
+@Serializer(NameToken::class)
+object NameTokenSerializer: KSerializer<NameToken>
 
 /**
  * Serialized for meta
