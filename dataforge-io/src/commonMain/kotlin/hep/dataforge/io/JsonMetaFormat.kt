@@ -54,7 +54,7 @@ fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
     }
 }
 
-//Use theese methods to customize JSON key mapping
+//Use these methods to customize JSON key mapping
 private fun NameToken.toJsonKey(descriptor: ItemDescriptor?) = toString()
 
 private fun NodeDescriptor?.getDescriptor(key: String) = this?.items?.get(key)

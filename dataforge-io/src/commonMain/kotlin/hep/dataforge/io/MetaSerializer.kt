@@ -24,7 +24,17 @@ object NameSerializer : KSerializer<Name> {
 }
 
 @Serializer(NameToken::class)
-object NameTokenSerializer: KSerializer<NameToken>
+object NameTokenSerializer : KSerializer<NameToken> {
+    override val descriptor: SerialDescriptor = StringDescriptor.withName("NameToken")
+
+    override fun deserialize(decoder: Decoder): NameToken {
+        return decoder.decodeString().toName().first()!!
+    }
+
+    override fun serialize(encoder: Encoder, obj: NameToken) {
+        encoder.encodeString(obj.toString())
+    }
+}
 
 /**
  * Serialized for meta

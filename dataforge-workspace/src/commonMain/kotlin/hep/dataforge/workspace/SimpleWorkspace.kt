@@ -20,7 +20,7 @@ class SimpleWorkspace(
 ) : Workspace {
 
     override val tasks: Map<Name, Task<*>> by lazy {
-        context.content<Task<*>>(Task.TYPE) + tasks.associate { it.name.toName() to it }
+        context.content<Task<*>>(Task.TYPE) + tasks.associateBy { it.name.toName() }
     }
 
     companion object {
