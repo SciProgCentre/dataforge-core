@@ -64,6 +64,16 @@ class ArrayBinary(val array: ByteArray) : RandomAccessBinary {
     }
 }
 
+class PacketBinary(val packet: ByteReadPacket): Binary{
+    override val size: ULong
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
+    override fun <R> read(block: Input.() -> R): R {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+}
+
 /**
  * Read given binary as object using given format
  */

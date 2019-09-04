@@ -6,10 +6,7 @@ import hep.dataforge.data.filter
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
 import hep.dataforge.meta.buildMeta
-import hep.dataforge.names.EmptyName
-import hep.dataforge.names.Name
-import hep.dataforge.names.get
-import hep.dataforge.names.isEmpty
+import hep.dataforge.names.*
 
 /**
  * A dependency of the task which allows to lazily create a data tree for single dependency
@@ -45,12 +42,18 @@ class AllDataDependency(val placement: Name = EmptyName) : Dependency() {
         "data" to "*"
         "to" to placement
     }
-
 }
 
-class TaskModelDependency(val name: String, val meta: Meta, val placement: Name = EmptyName) : Dependency() {
+abstract class TaskDependency(val meta: Meta, val placement: Name = EmptyName) : Dependency() {
+    abstract fun resolveTask(workspace: Workspace): Task<*>
+
+    /**
+     * A name of the dependency for logging and serialization
+     */
+    abstract val name: Name
+
     override fun apply(workspace: Workspace): DataNode<Any> {
-        val task = workspace.tasks[name] ?: error("Task with name $name is not found in the workspace")
+        val task = resolveTask(workspace)
         if (task.isTerminal) TODO("Support terminal task")
         val result = workspace.run(task, meta)
         return if (placement.isEmpty()) {
@@ -65,4 +68,19 @@ class TaskModelDependency(val name: String, val meta: Meta, val placement: Name 
         "meta" to meta
         "to" to placement
     }
+}
+
+class DirectTaskDependency(val task: Task<*>, meta: Meta, placement: Name) : TaskDependency(meta, placement) {
+    override fun resolveTask(workspace: Workspace): Task<*> = task
+
+    override val name: Name get() = DIRECT_TASK_NAME + task.name
+
+    companion object {
+        val DIRECT_TASK_NAME = "@direct".asName()
+    }
+}
+
+class WorkspaceTaskDependency(override val name: Name, meta: Meta, placement: Name) : TaskDependency(meta, placement) {
+    override fun resolveTask(workspace: Workspace): Task<*> =
+        workspace.tasks[name] ?: error("Task with name $name is not found in the workspace")
 }

@@ -1,9 +1,9 @@
 package hep.dataforge.io
 
-import hep.dataforge.meta.Laminate
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.get
-import hep.dataforge.meta.string
+import hep.dataforge.meta.*
+import kotlinx.io.core.Output
+import kotlinx.io.core.buildPacket
+import kotlinx.io.core.readBytes
 
 interface Envelope {
     val meta: Meta
@@ -20,6 +20,10 @@ interface Envelope {
         const val ENVELOPE_DESCRIPTION_KEY = "$ENVELOPE_NODE.description"
         //const val ENVELOPE_TIME_KEY = "@envelope.time"
 
+        /**
+         * Build a static envelope using provided builder
+         */
+        fun build(block: EnvelopeBuilder.() -> Unit) = EnvelopeBuilder().apply(block).build()
     }
 }
 
@@ -63,4 +67,29 @@ fun Envelope.withMetaLayers(vararg layers: Meta): Envelope {
         this is ProxyEnvelope -> ProxyEnvelope(source, *layers, *this.meta.layers.toTypedArray())
         else -> ProxyEnvelope(this, *layers)
     }
+}
+
+class EnvelopeBuilder {
+    private val metaBuilder = MetaBuilder()
+    var data: Binary? = null
+
+    fun meta(block: MetaBuilder.() -> Unit) {
+        metaBuilder.apply(block)
+    }
+
+    var type by metaBuilder.string(key = Envelope.ENVELOPE_TYPE_KEY)
+    var dataType by metaBuilder.string(key = Envelope.ENVELOPE_DATA_TYPE_KEY)
+    var description by metaBuilder.string(key = Envelope.ENVELOPE_DESCRIPTION_KEY)
+
+    /**
+     * Construct a binary and transform it into byte-array based buffer
+     */
+    fun data(block: Output.() -> Unit) {
+        val bytes = buildPacket {
+            block()
+        }
+        data = ArrayBinary(bytes.readBytes())
+    }
+
+    internal fun build() = SimpleEnvelope(metaBuilder.seal(), data)
 }

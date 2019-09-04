@@ -81,13 +81,13 @@ class TaskBuilder(val name: String) {
     inline fun <reified T : Any, reified R : Any> customPipe(
         from: String = "",
         to: String = "",
-        crossinline block: PipeBuilder<T, R>.(Context) -> Unit
+        crossinline block: PipeBuilder<T, R>.(TaskEnv) -> Unit
     ) {
         action(from, to) {
             PipeAction(
                 inputType = T::class,
                 outputType = R::class
-            ) { block(context) }
+            ) { block(this@action) }
         }
     }
 
@@ -118,13 +118,13 @@ class TaskBuilder(val name: String) {
     inline fun <reified T : Any, reified R : Any> joinByGroup(
         from: String = "",
         to: String = "",
-        crossinline block: JoinGroupBuilder<T, R>.(Context) -> Unit
+        crossinline block: JoinGroupBuilder<T, R>.(TaskEnv) -> Unit
     ) {
         action(from, to) {
             JoinAction(
                 inputType = T::class,
                 outputType = R::class
-            ) { block(context) }
+            ) { block(this@action) }
         }
     }
 
@@ -157,13 +157,13 @@ class TaskBuilder(val name: String) {
     inline fun <reified T : Any, reified R : Any> split(
         from: String = "",
         to: String = "",
-        crossinline block: SplitBuilder<T, R>.(Context) -> Unit
+        crossinline block: SplitBuilder<T, R>.(TaskEnv) -> Unit
     ) {
         action(from, to) {
             SplitAction(
                 inputType = T::class,
                 outputType = R::class
-            ) { block(context) }
+            ) { block(this@action) }
         }
     }
 

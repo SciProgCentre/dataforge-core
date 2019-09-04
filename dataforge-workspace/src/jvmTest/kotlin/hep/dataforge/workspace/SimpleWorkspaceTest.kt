@@ -60,16 +60,16 @@ class SimpleWorkspaceTest {
             model {
                 allData()
             }
-            joinByGroup<Int, Double> { context ->
+            joinByGroup<Int, Double> {env->
                 group("even", filter = { name, _ -> name.toString().toInt() % 2 == 0 }) {
                     result { data ->
-                        context.logger.info { "Starting even" }
+                        env.context.logger.info { "Starting even" }
                         data.values.average()
                     }
                 }
                 group("odd", filter = { name, _ -> name.toString().toInt() % 2 == 1 }) {
                     result { data ->
-                        context.logger.info { "Starting odd" }
+                        env.context.logger.info { "Starting odd" }
                         data.values.average()
                     }
                 }

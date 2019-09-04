@@ -35,9 +35,9 @@ data class TaskModel(
         "meta" to meta
         "dependsOn" to {
             val dataDependencies = dependencies.filterIsInstance<DataDependency>()
-            val taskDependencies = dependencies.filterIsInstance<TaskModelDependency>()
+            val taskDependencies = dependencies.filterIsInstance<TaskDependency>()
             setIndexed("data".toName(), dataDependencies.map { it.toMeta() })
-            setIndexed("task".toName(), taskDependencies.map { it.toMeta() }) { taskDependencies[it].name }
+            setIndexed("task".toName(), taskDependencies.map { it.toMeta() }) { taskDependencies[it].name.toString() }
             //TODO ensure all dependencies are listed
         }
     }
@@ -76,14 +76,15 @@ class TaskModelBuilder(val name: String, meta: Meta = EmptyMeta) {
     var target: String by this.meta.string(key = MODEL_TARGET_KEY, default = "")
 
     /**
-     * Add dependency for
+     * Add dependency for a task defined in a workspace and resolved by
      */
     fun dependsOn(name: String, meta: Meta = this.meta, placement: Name = EmptyName) {
-        dependencies.add(TaskModelDependency(name, meta, placement))
+        dependencies.add(WorkspaceTaskDependency(name.toName(), meta, placement))
     }
 
-    fun dependsOn(task: Task<*>, meta: Meta = this.meta, placement: Name = EmptyName) =
-        dependsOn(task.name, meta, placement)
+    fun dependsOn(task: Task<*>, meta: Meta = this.meta, placement: Name = EmptyName) {
+        dependencies.add(DirectTaskDependency(task, meta, placement))
+    }
 
     fun dependsOn(task: Task<*>, placement: Name = EmptyName, metaBuilder: MetaBuilder.() -> Unit) =
         dependsOn(task.name, buildMeta(metaBuilder), placement)
