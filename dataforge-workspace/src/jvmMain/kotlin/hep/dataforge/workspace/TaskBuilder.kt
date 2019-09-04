@@ -6,6 +6,7 @@ import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
+import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import kotlin.reflect.KClass
@@ -14,6 +15,7 @@ import kotlin.reflect.KClass
 class TaskBuilder(val name: String) {
     private var modelTransform: TaskModelBuilder.(Meta) -> Unit = { data("*") }
     var descriptor: NodeDescriptor? = null
+    private val dataTransforms: MutableList<DataTransformation> = ArrayList()
 
     /**
      * TODO will look better as extension class
@@ -33,8 +35,6 @@ class TaskBuilder(val name: String) {
         }
     }
 
-    private val dataTransforms: MutableList<DataTransformation> = ArrayList();
-
     fun model(modelTransform: TaskModelBuilder.(Meta) -> Unit) {
         this.modelTransform = modelTransform
     }
@@ -43,17 +43,19 @@ class TaskBuilder(val name: String) {
         inputType: KClass<T>,
         from: String = "",
         to: String = "",
-        block: TaskModel.(Context, DataNode<T>) -> DataNode<Any>
+        block: TaskEnv.(DataNode<T>) -> DataNode<Any>
     ) {
         dataTransforms += DataTransformation(from, to) { context, model, data ->
-            block(model, context, data.cast(inputType))
+            data.checkType(inputType)
+            val env = TaskEnv(EmptyName, model.meta, context)
+            env.block(data.cast(inputType))
         }
     }
 
     inline fun <reified T : Any> transform(
         from: String = "",
         to: String = "",
-        noinline block: TaskModel.(Context, DataNode<T>) -> DataNode<Any>
+        noinline block: TaskEnv.(DataNode<T>) -> DataNode<Any>
     ) {
         transform(T::class, from, to, block)
     }
@@ -64,10 +66,10 @@ class TaskBuilder(val name: String) {
     inline fun <reified T : Any, reified R : Any> action(
         from: String = "",
         to: String = "",
-        crossinline block: Context.() -> Action<T, R>
+        crossinline block: TaskEnv.() -> Action<T, R>
     ) {
-        transform(from, to) { context, data: DataNode<T> ->
-            block(context).invoke(data, meta)
+        transform(from, to) { data: DataNode<T> ->
+            block().invoke(data, meta)
         }
     }
 
@@ -82,7 +84,6 @@ class TaskBuilder(val name: String) {
         crossinline block: PipeBuilder<T, R>.(Context) -> Unit
     ) {
         action(from, to) {
-            val context = this
             PipeAction(
                 inputType = T::class,
                 outputType = R::class
@@ -99,7 +100,6 @@ class TaskBuilder(val name: String) {
         crossinline block: suspend TaskEnv.(T) -> R
     ) {
         action(from, to) {
-            val context = this
             PipeAction(
                 inputType = T::class,
                 outputType = R::class
@@ -124,7 +124,7 @@ class TaskBuilder(val name: String) {
             JoinAction(
                 inputType = T::class,
                 outputType = R::class
-            ) { block(this@action) }
+            ) { block(context) }
         }
     }
 
@@ -137,7 +137,6 @@ class TaskBuilder(val name: String) {
         crossinline block: suspend TaskEnv.(Map<Name, T>) -> R
     ) {
         action(from, to) {
-            val context = this
             JoinAction(
                 inputType = T::class,
                 outputType = R::class,
@@ -164,7 +163,7 @@ class TaskBuilder(val name: String) {
             SplitAction(
                 inputType = T::class,
                 outputType = R::class
-            ) { block(this@action) }
+            ) { block(context) }
         }
     }
 
@@ -187,7 +186,7 @@ class TaskBuilder(val name: String) {
                 val model = this
                 if (dataTransforms.isEmpty()) {
                     //return data node as is
-                    logger.warn("No transformation present, returning input data")
+                    logger.warn { "No transformation present, returning input data" }
                     data
                 } else {
                     val builder = DataTreeBuilder(Any::class)

@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
 @Suppress("UNCHECKED_CAST")
-fun <T : Any, R : Any> Data<T>.safeCast(type: KClass<out R>): Data<R>? {
+private fun <T : Any, R : Any> Data<T>.safeCast(type: KClass<out R>): Data<R>? {
     return if (this.type.isSubclassOf(type)) {
         return object : Data<R> {
             override val meta: Meta get() = this@safeCast.meta
@@ -22,20 +22,6 @@ fun <T : Any, R : Any> Data<T>.safeCast(type: KClass<out R>): Data<R>? {
         null
     }
 }
-
-/**
- * Filter a node by data and node type. Resulting node and its subnodes is guaranteed to have border type [type],
- * but could contain empty nodes
- */
-fun <T : Any, R : Any> DataNode<T>.cast(type: KClass<out R>): DataNode<R> {
-    return if (this is CastDataNode) {
-        origin.cast(type)
-    } else {
-        CastDataNode(this, type)
-    }
-}
-
-inline fun <T : Any, reified R : Any> DataNode<T>.cast(): DataNode<R> = cast(R::class)
 
 class CastDataNode<out T : Any>(val origin: DataNode<Any>, override val type: KClass<out T>) : DataNode<T> {
     override val items: Map<NameToken, DataItem<T>>  by lazy {

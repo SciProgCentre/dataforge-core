@@ -227,4 +227,6 @@ fun <T : Any> DataNode<T>.first(): Data<T>? = dataSequence().first().second
 /**
  * Check that node is compatible with given type meaning that each element could be cast to the type
  */
-expect fun DataNode<*>.checkType(type: KClass<*>)
+expect fun <T : Any> DataNode<*>.checkType(type: KClass<out T>)
+
+//expect fun <T : Any, R : Any> DataNode<T>.cast(type: KClass<out R>): DataNode<R>
