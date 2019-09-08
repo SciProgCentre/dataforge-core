@@ -3,6 +3,8 @@ package hep.dataforge.context
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
 import hep.dataforge.meta.buildMeta
+import hep.dataforge.names.Name
+import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
 
 /**
@@ -37,7 +39,7 @@ interface Plugin : Named, ContextAware, Provider, MetaRepr {
      *
      * @return
      */
-    override val name: String get() = tag.name
+    override val name: Name get() = tag.name.toName()
 
     /**
      * Plugin dependencies which are required to attach this plugin. Plugin
@@ -46,7 +48,7 @@ interface Plugin : Named, ContextAware, Provider, MetaRepr {
      *
      * @return
      */
-    fun dependsOn(): List<PluginFactory<*>> = emptyList()
+    fun dependsOn(): Collection<PluginFactory<*>>
 
     /**
      * Start this plugin and attach registration info to the context. This method

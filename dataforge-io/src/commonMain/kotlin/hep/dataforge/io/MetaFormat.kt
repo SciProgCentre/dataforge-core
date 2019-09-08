@@ -4,16 +4,21 @@ import hep.dataforge.context.Named
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.io.MetaFormat.Companion.META_FORMAT_TYPE
 import hep.dataforge.meta.Meta
+import hep.dataforge.names.Name
+import hep.dataforge.names.asName
 import hep.dataforge.provider.Type
 import kotlinx.io.core.*
+import kotlin.reflect.KClass
 
 /**
  * A format for meta serialization
  */
 @Type(META_FORMAT_TYPE)
 interface MetaFormat : IOFormat<Meta>, Named {
-    override val name: String
+    override val name: Name get() = "meta".asName()
     val key: Short
+
+    override val type: KClass<out Meta> get() = Meta::class
 
     override fun Output.writeThis(obj: Meta) {
         writeMeta(obj, null)
@@ -24,7 +29,7 @@ interface MetaFormat : IOFormat<Meta>, Named {
     fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor? = null)
     fun Input.readMeta(descriptor: NodeDescriptor? = null): Meta
 
-    companion object{
+    companion object {
         const val META_FORMAT_TYPE = "metaFormat"
     }
 }

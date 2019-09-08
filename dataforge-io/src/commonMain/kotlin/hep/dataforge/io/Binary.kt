@@ -4,6 +4,7 @@ import kotlinx.io.core.ByteReadPacket
 import kotlinx.io.core.Input
 import kotlinx.io.core.buildPacket
 import kotlinx.io.core.readBytes
+import kotlin.math.min
 
 /**
  * A source of binary data
@@ -30,6 +31,8 @@ interface RandomAccessBinary : Binary {
     /**
      * Read at most [size] of bytes starting at [from] offset from the beginning of the binary.
      * This method could be called multiple times simultaneously.
+     *
+     * If size
      */
     fun <R> read(from: UInt, size: UInt = UInt.MAX_VALUE, block: Input.() -> R): R
 
@@ -60,11 +63,12 @@ class ArrayBinary(val array: ByteArray) : RandomAccessBinary {
     override val size: ULong get() = array.size.toULong()
 
     override fun <R> read(from: UInt, size: UInt, block: Input.() -> R): R {
-        return ByteReadPacket(array, from.toInt(), size.toInt()).block()
+        val theSize = min(size, array.size.toUInt() - from)
+        return ByteReadPacket(array, from.toInt(), theSize.toInt()).block()
     }
 }
 
-class PacketBinary(val packet: ByteReadPacket): Binary{
+class PacketBinary(val packet: ByteReadPacket) : Binary {
     override val size: ULong
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
 
@@ -87,7 +91,7 @@ fun <T : Any> Binary.readWith(format: IOFormat<T>): T = format.run {
  * Write this object to a binary
  * TODO make a lazy binary that does not use intermediate array
  */
-fun <T: Any> T.writeWith(format: IOFormat<T>): Binary = format.run{
+fun <T : Any> T.writeWith(format: IOFormat<T>): Binary = format.run {
     val packet = buildPacket {
         writeThis(this@writeWith)
     }

@@ -77,6 +77,10 @@ class EnvelopeBuilder {
         metaBuilder.apply(block)
     }
 
+    fun meta(meta: Meta) {
+        metaBuilder.update(meta)
+    }
+
     var type by metaBuilder.string(key = Envelope.ENVELOPE_TYPE_KEY)
     var dataType by metaBuilder.string(key = Envelope.ENVELOPE_DATA_TYPE_KEY)
     var description by metaBuilder.string(key = Envelope.ENVELOPE_DESCRIPTION_KEY)

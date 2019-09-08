@@ -6,7 +6,9 @@ import hep.dataforge.descriptors.ValueDescriptor
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBase
 import hep.dataforge.meta.MetaItem
+import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
+import hep.dataforge.names.plus
 import hep.dataforge.names.toName
 import hep.dataforge.values.*
 import kotlinx.io.core.Input
@@ -21,7 +23,7 @@ import kotlin.collections.set
 
 object JsonMetaFormat : MetaFormat {
 
-    override val name: String = "json"
+    override val name: Name = super.name + "json"
     override val key: Short = 0x4a53//"JS"
 
     override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {

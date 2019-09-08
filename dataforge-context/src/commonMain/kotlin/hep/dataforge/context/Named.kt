@@ -15,6 +15,10 @@
  */
 package hep.dataforge.context
 
+import hep.dataforge.names.Name
+import hep.dataforge.names.asName
+import hep.dataforge.names.isEmpty
+
 /**
  * Any object that have name
  *
@@ -27,10 +31,9 @@ interface Named {
      *
      * @return
      */
-    val name: String
+    val name: Name
 
     companion object {
-        const val ANONYMOUS = ""
 
         /**
          * Get the name of given object. If object is Named its name is used,
@@ -39,11 +42,11 @@ interface Named {
          * @param obj
          * @return
          */
-        fun nameOf(obj: Any): String {
+        fun nameOf(obj: Any): Name {
             return if (obj is Named) {
                 obj.name
             } else {
-                obj.toString()
+                obj.toString().asName()
             }
         }
     }
@@ -54,4 +57,4 @@ interface Named {
  * @return
  */
 val Named.isAnonymous: Boolean
-    get() = this.name == Named.ANONYMOUS
+    get() = this.name.isEmpty()

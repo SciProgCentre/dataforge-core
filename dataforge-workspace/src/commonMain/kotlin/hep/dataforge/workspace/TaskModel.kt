@@ -23,7 +23,7 @@ import hep.dataforge.workspace.TaskModel.Companion.MODEL_TARGET_KEY
  * @param dependencies a list of direct dependencies for this task
  */
 data class TaskModel(
-    val name: String,
+    val name: Name,
     val meta: Meta,
     val dependencies: Collection<Dependency>
 ) : MetaRepr {
@@ -66,7 +66,7 @@ annotation class TaskBuildScope
  * A builder for [TaskModel]
  */
 @TaskBuildScope
-class TaskModelBuilder(val name: String, meta: Meta = EmptyMeta) {
+class TaskModelBuilder(val name: Name, meta: Meta = EmptyMeta) {
     /**
      * Meta for current task. By default uses the whole input meta
      */
@@ -78,9 +78,12 @@ class TaskModelBuilder(val name: String, meta: Meta = EmptyMeta) {
     /**
      * Add dependency for a task defined in a workspace and resolved by
      */
-    fun dependsOn(name: String, meta: Meta = this.meta, placement: Name = EmptyName) {
-        dependencies.add(WorkspaceTaskDependency(name.toName(), meta, placement))
+    fun dependsOn(name: Name, meta: Meta = this.meta, placement: Name = EmptyName) {
+        dependencies.add(WorkspaceTaskDependency(name, meta, placement))
     }
+
+    fun dependsOn(name: String, meta: Meta = this.meta, placement: Name = EmptyName) =
+        dependsOn(name.toName(),meta,placement)
 
     fun dependsOn(task: Task<*>, meta: Meta = this.meta, placement: Name = EmptyName) {
         dependencies.add(DirectTaskDependency(task, meta, placement))

@@ -1,8 +1,8 @@
 package hep.dataforge.workspace
 
 import hep.dataforge.context.AbstractPlugin
+import hep.dataforge.context.toMap
 import hep.dataforge.names.Name
-import hep.dataforge.names.toName
 
 /**
  * An abstract plugin with some additional boilerplate to effectively work with workspace context
@@ -12,7 +12,7 @@ abstract class WorkspacePlugin : AbstractPlugin() {
 
     override fun provideTop(target: String): Map<Name, Any> {
         return when(target){
-            Task.TYPE -> tasks.associateBy { it.name.toName() }
+            Task.TYPE -> tasks.toMap()
             else -> emptyMap()
         }
     }

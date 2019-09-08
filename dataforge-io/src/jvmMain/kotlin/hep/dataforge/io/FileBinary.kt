@@ -6,6 +6,7 @@ import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import kotlin.math.min
 
 @ExperimentalUnsignedTypes
 class FileBinary(val path: Path, private val offset: UInt = 0u, size: ULong? = null) : RandomAccessBinary {
@@ -14,7 +15,8 @@ class FileBinary(val path: Path, private val offset: UInt = 0u, size: ULong? = n
 
     override fun <R> read(from: UInt, size: UInt, block: Input.() -> R): R {
         FileChannel.open(path, StandardOpenOption.READ).use {
-            val buffer = it.map(FileChannel.MapMode.READ_ONLY, (from + offset).toLong(), size.toLong())
+            val theSize: UInt = min(size, Files.size(path).toUInt() - offset)
+            val buffer = it.map(FileChannel.MapMode.READ_ONLY, (from + offset).toLong(), theSize.toLong())
             return ByteReadPacket(buffer).block()
         }
     }

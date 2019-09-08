@@ -8,6 +8,7 @@ import hep.dataforge.meta.get
 import hep.dataforge.meta.string
 import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
+import hep.dataforge.names.asName
 import hep.dataforge.names.toName
 import kotlin.reflect.KClass
 
@@ -176,7 +177,7 @@ class TaskBuilder(val name: String) {
 
     internal fun build(): GenericTask<Any> =
         GenericTask(
-            name,
+            name.asName(),
             Any::class,
             descriptor ?: NodeDescriptor.empty(),
             modelTransform

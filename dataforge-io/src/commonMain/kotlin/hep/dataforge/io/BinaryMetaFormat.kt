@@ -2,6 +2,8 @@ package hep.dataforge.io
 
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.meta.*
+import hep.dataforge.names.Name
+import hep.dataforge.names.plus
 import hep.dataforge.values.*
 import kotlinx.io.core.Input
 import kotlinx.io.core.Output
@@ -9,7 +11,7 @@ import kotlinx.io.core.readText
 import kotlinx.io.core.writeText
 
 object BinaryMetaFormat : MetaFormat {
-    override val name: String = "bin"
+    override val name: Name = super.name + "bin"
     override val key: Short = 0x4249//BI
 
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
@@ -23,7 +25,7 @@ object BinaryMetaFormat : MetaFormat {
         writeText(str)
     }
 
-    private fun Output.writeValue(value: Value) {
+    fun Output.writeValue(value: Value) {
         if (value.isList()) {
             writeChar('L')
             writeInt(value.list.size)
@@ -92,7 +94,7 @@ object BinaryMetaFormat : MetaFormat {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun Input.readMetaItem(): MetaItem<MetaBuilder> {
+    fun Input.readMetaItem(): MetaItem<MetaBuilder> {
         return when (val keyChar = readByte().toChar()) {
             'S' -> MetaItem.ValueItem(StringValue(readString()))
             'N' -> MetaItem.ValueItem(Null)

@@ -2,11 +2,12 @@ package hep.dataforge.io.functions
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
-import hep.dataforge.io.*
+import hep.dataforge.io.Envelope
+import hep.dataforge.io.IOPlugin
+import hep.dataforge.io.Responder
+import hep.dataforge.io.type
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
-import hep.dataforge.meta.node
-import hep.dataforge.meta.string
 
 class RemoteFunctionServer(
     override val context: Context,
@@ -14,39 +15,38 @@ class RemoteFunctionServer(
 ) : ContextAware, Responder {
 
     private val plugin by lazy {
-        context.plugins.load(FunctionsPlugin)
+        context.plugins.load(IOPlugin)
     }
+
 
     override suspend fun respond(request: Envelope): Envelope {
         require(request.type == RemoteFunctionClient.REQUEST_TYPE) { "Unexpected message type: ${request.type}" }
-        val functionName = request.meta[RemoteFunctionClient.FUNCTION_NAME_KEY].string ?: ""
 
-        @Suppress("UNCHECKED_CAST") val spec = request.meta[RemoteFunctionClient.FUNCTION_SPEC_KEY].node?.let {
-            plugin.resolve(it) as FunctionSpec<Any, Any>
-        } ?: error("Function specification not found")
+        val inputFormat = plugin.getInputFormat<Any>(request.meta)
+        val outputFormat =  plugin.getOutputFormat<Any>(request.meta)
 
-        val size = request
-            .meta[RemoteFunctionClient.SIZE_KEY].int ?: 1
+        val size = request.meta[RemoteFunctionClient.SIZE_KEY].int ?: 1
 
         val input = request.data?.read {
-            spec.inputFormat.run {
+            inputFormat.run {
                 List(size) {
                     readThis()
                 }
             }
         } ?: error("Input is empty")
 
-        val output = functionServer.callMany<Any, Any>(functionName, spec, input)
+        val output = functionServer.callMany<Any, Any>(
+            request.meta,
+            input
+        )
 
         return Envelope.build {
-            type = RemoteFunctionClient.RESPONSE_TYPE
             meta {
-                RemoteFunctionClient.FUNCTION_NAME_KEY to functionName
-                RemoteFunctionClient.FUNCTION_SPEC_KEY to spec.toMeta()
-                RemoteFunctionClient.SIZE_KEY to output.size
+                meta(request.meta)
             }
+            type = RemoteFunctionClient.RESPONSE_TYPE
             data {
-                spec.outputFormat.run {
+                outputFormat.run {
                     output.forEach {
                         writeThis(it)
                     }

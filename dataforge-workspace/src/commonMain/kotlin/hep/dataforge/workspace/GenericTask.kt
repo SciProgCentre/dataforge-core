@@ -1,17 +1,18 @@
 package hep.dataforge.workspace
 
-import hep.dataforge.data.*
+import hep.dataforge.data.DataNode
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.node
+import hep.dataforge.names.Name
 import kotlin.reflect.KClass
 
 //data class TaskEnv(val workspace: Workspace, val model: TaskModel)
 
 
 class GenericTask<R : Any>(
-    override val name: String,
+    override val name: Name,
     override val type: KClass<out R>,
     override val descriptor: NodeDescriptor,
     private val modelTransform: TaskModelBuilder.(Meta) -> Unit,

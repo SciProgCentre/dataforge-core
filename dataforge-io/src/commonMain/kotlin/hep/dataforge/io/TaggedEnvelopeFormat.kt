@@ -1,5 +1,7 @@
 package hep.dataforge.io
 
+import hep.dataforge.names.Name
+import hep.dataforge.names.plus
 import kotlinx.io.core.*
 
 
@@ -10,7 +12,7 @@ object TaggedEnvelopeFormat : EnvelopeFormat {
     private const val END_SEQUENCE = "~#\r\n"
     private const val TAG_SIZE = 26u
 
-    override val name: String get() = VERSION
+    override val name: Name = super.name + VERSION
 
     private fun Tag.toBytes(): ByteReadPacket = buildPacket(24) {
         writeText(START_SEQUENCE)
