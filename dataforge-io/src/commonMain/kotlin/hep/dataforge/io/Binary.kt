@@ -39,8 +39,8 @@ interface RandomAccessBinary : Binary {
     override fun <R> read(block: Input.() -> R): R = read(0.toUInt(), UInt.MAX_VALUE, block)
 }
 
-fun Binary.readAll(): ByteReadPacket = read {
-    ByteReadPacket(this.readBytes())
+fun Binary.toBytes(): ByteArray = read {
+    this.readBytes()
 }
 
 @ExperimentalUnsignedTypes
@@ -56,26 +56,17 @@ object EmptyBinary : RandomAccessBinary {
     override fun <R> read(from: UInt, size: UInt, block: Input.() -> R): R {
         error("The binary is empty")
     }
+
 }
 
 @ExperimentalUnsignedTypes
-class ArrayBinary(val array: ByteArray) : RandomAccessBinary {
+inline class ArrayBinary(val array: ByteArray) : RandomAccessBinary {
     override val size: ULong get() = array.size.toULong()
 
     override fun <R> read(from: UInt, size: UInt, block: Input.() -> R): R {
         val theSize = min(size, array.size.toUInt() - from)
         return ByteReadPacket(array, from.toInt(), theSize.toInt()).block()
     }
-}
-
-class PacketBinary(val packet: ByteReadPacket) : Binary {
-    override val size: ULong
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-
-    override fun <R> read(block: Input.() -> R): R {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
 }
 
 /**
@@ -87,13 +78,9 @@ fun <T : Any> Binary.readWith(format: IOFormat<T>): T = format.run {
     }
 }
 
-/**
- * Write this object to a binary
- * TODO make a lazy binary that does not use intermediate array
- */
-fun <T : Any> T.writeWith(format: IOFormat<T>): Binary = format.run {
+fun <T : Any> IOFormat<T>.writeBinary(obj: T): Binary {
     val packet = buildPacket {
-        writeThis(this@writeWith)
+        writeThis(obj)
     }
-    return@run ArrayBinary(packet.readBytes())
+    return ArrayBinary(packet.readBytes())
 }

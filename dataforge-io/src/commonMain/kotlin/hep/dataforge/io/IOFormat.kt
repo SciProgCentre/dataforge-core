@@ -36,6 +36,7 @@ interface IOFormat<T : Any> : Named {
 
 fun <T : Any> IOFormat<T>.writePacket(obj: T): ByteReadPacket = buildPacket { writeThis(obj) }
 fun <T : Any> IOFormat<T>.writeBytes(obj: T): ByteArray = buildPacket { writeThis(obj) }.readBytes()
+fun <T: Any> IOFormat<T>.readBytes(array: ByteArray): T = ByteReadPacket(array).readThis()
 
 
 object DoubleIOFormat : IOFormat<Double> {

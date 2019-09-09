@@ -187,11 +187,6 @@ abstract class MetaBase: Meta{
 
     override fun equals(other: Any?): Boolean  = if(other is Meta) {
         this.items == other.items
-//        val items = items
-//        val otherItems = other.items
-//        (items.keys == otherItems.keys) && items.keys.all {
-//            items[it] == otherItems[it]
-//        }
     } else {
         false
     }

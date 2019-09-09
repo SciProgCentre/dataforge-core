@@ -3,16 +3,28 @@ package hep.dataforge.io.tcp
 import hep.dataforge.context.Global
 import hep.dataforge.io.Envelope
 import hep.dataforge.io.Responder
+import hep.dataforge.io.TaggedEnvelopeFormat
+import hep.dataforge.io.writeBytes
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.runBlocking
 import org.junit.AfterClass
 import org.junit.BeforeClass
+import org.junit.Test
+import kotlin.test.assertEquals
 import kotlin.time.ExperimentalTime
 
+@ExperimentalStdlibApi
 object EchoResponder : Responder {
-    override suspend fun respond(request: Envelope): Envelope = request
+    override suspend fun respond(request: Envelope): Envelope {
+        val string = TaggedEnvelopeFormat.run { writeBytes(request).decodeToString() }
+        println("ECHO:")
+        println(string)
+        return request
+    }
 }
 
 @ExperimentalTime
+@ExperimentalStdlibApi
 class EnvelopeServerTest {
     companion object {
         @JvmStatic
@@ -32,27 +44,25 @@ class EnvelopeServerTest {
     }
 
 
-//    @Test
-//    fun doEchoTest() {
-//        val client = EnvelopeClient(Global, host = "localhost", port = 7778)
-//        val request = Envelope.build {
-//            type = "test.echo"
-//            meta {
-//                "test.value" to 22
-//            }
-//            data {
-//                writeDouble(22.7)
-//            }
-//        }
-//        val response = runBlocking {
-//            client.respond(request)
-//        }
-//
-//        assertEquals(request.meta, response.meta)
-//        assertEquals(request.data, response.data)
-//
-//        runBlocking {
-//            client.close()
-//        }
-//    }
+    @Test
+    fun doEchoTest() {
+        val client = EnvelopeClient(Global, host = "localhost", port = 7778)
+        val request = Envelope.build {
+            type = "test.echo"
+            meta {
+                "test.value" to 22
+            }
+            data {
+                writeDouble(22.7)
+            }
+        }
+        runBlocking {
+            val response = client.respond(request)
+
+
+            assertEquals(request.meta, response.meta)
+//            assertEquals(request.data?.toBytes()?.decodeToString(), response.data?.toBytes()?.decodeToString())
+            client.close()
+        }
+    }
 }

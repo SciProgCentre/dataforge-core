@@ -10,7 +10,7 @@ object TaggedEnvelopeFormat : EnvelopeFormat {
     const val VERSION = "DF03"
     private const val START_SEQUENCE = "#~"
     private const val END_SEQUENCE = "~#\r\n"
-    private const val TAG_SIZE = 26u
+    private const val TAG_SIZE = 24u
 
     override val name: Name = super.name + VERSION
 
@@ -31,6 +31,8 @@ object TaggedEnvelopeFormat : EnvelopeFormat {
         val metaFormatKey = readShort()
         val metaLength = readUInt()
         val dataLength = readULong()
+        val end = readTextExactBytes(4)
+        if (end != END_SEQUENCE) error("The input is not an envelope")
         return Tag(metaFormatKey, metaLength, dataLength)
     }
 
@@ -55,10 +57,9 @@ object TaggedEnvelopeFormat : EnvelopeFormat {
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
         val metaPacket = ByteReadPacket(readBytes(tag.metaSize.toInt()))
-        val meta = metaFormat.run { metaPacket.readThis() }
-
         val dataBytes = readBytes(tag.dataSize.toInt())
 
+        val meta = metaFormat.run { metaPacket.readThis() }
         return SimpleEnvelope(meta, ArrayBinary(dataBytes))
     }
 
