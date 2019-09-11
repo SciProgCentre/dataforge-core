@@ -39,7 +39,7 @@ class SplitAction<T : Any, R : Any>(
 ) : Action<T, R> {
 
     override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
-        node.checkType(inputType)
+        node.ensureType(inputType)
 
         return DataNode.build(outputType) {
             node.dataSequence().forEach { (name, data) ->

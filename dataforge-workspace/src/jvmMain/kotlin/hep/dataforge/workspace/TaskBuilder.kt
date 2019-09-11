@@ -47,7 +47,7 @@ class TaskBuilder(val name: String) {
         block: TaskEnv.(DataNode<T>) -> DataNode<Any>
     ) {
         dataTransforms += DataTransformation(from, to) { context, model, data ->
-            data.checkType(inputType)
+            data.ensureType(inputType)
             val env = TaskEnv(EmptyName, model.meta, context)
             env.block(data.safeCast(inputType))
         }

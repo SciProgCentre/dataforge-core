@@ -2,6 +2,7 @@ package hep.dataforge.data
 
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
 
 /**
@@ -12,11 +13,15 @@ fun <T : Any> Data<T>.get(): T = runBlocking { await() }
 /**
  * Check that node is compatible with given type meaning that each element could be cast to the type
  */
-actual fun <T : Any> DataNode<*>.checkType(type: KClass<out T>) {
-    if (!type.isSuperclassOf(type)) {
-        error("$type expected, but $type received")
-    }
-}
+actual fun <R : Any> DataNode<*>.canCast(type: KClass<out R>): Boolean =
+    type.isSuperclassOf(type)
+
+actual fun <R : Any> Data<*>.canCast(type: KClass<out R>): Boolean =
+    this.type.isSubclassOf(type)
+
+
+fun <R : Any> Data<*>.safeCast(type: KClass<out R>): Data<R>? =
+    if (canCast(type)) cast(type) else null
 
 /**
  * Filter a node by data and node type. Resulting node and its subnodes is guaranteed to have border type [type],
@@ -30,8 +35,6 @@ fun <R : Any> DataNode<*>.safeCast(type: KClass<out R>): DataNode<R> {
     }
 }
 
-inline fun <reified R : Any> DataNode<*>.cast(): DataNode<R> = safeCast(R::class)
-
 fun <R : Any> DataItem<*>?.safeCast(type: KClass<out R>): DataItem<R>? = when (this) {
     null -> null
     is DataItem.Node -> DataItem.Node(this.value.safeCast(type))
@@ -39,3 +42,5 @@ fun <R : Any> DataItem<*>?.safeCast(type: KClass<out R>): DataItem<R>? = when (t
         this.value.safeCast(type) ?: error("Can't cast data with type ${this.value.type} to $type")
     )
 }
+
+inline fun <reified R : Any> DataItem<*>?.safeCast(): DataItem<R>? = safeCast(R::class)
