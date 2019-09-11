@@ -72,6 +72,8 @@ operator fun <T : Any> DataNode<T>.get(name: Name): DataItem<T>? = when (name.le
     else -> get(name.first()!!.asName()).node?.get(name.cutFirst())
 }
 
+operator fun <T : Any> DataNode<T>.get(name: String): DataItem<T>? = get(name.toString())
+
 /**
  * Sequence of all children including nodes
  */

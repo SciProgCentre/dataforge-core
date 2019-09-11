@@ -5,11 +5,22 @@ import hep.dataforge.names.toName
 
 
 class DataFilter(override val config: Config) : Specific {
+    /**
+     * A source node for the filter
+     */
     var from by string()
+    /**
+     * A target placement for the filtered node
+     */
     var to by string()
+    /**
+     * A regular expression pattern for the filter
+     */
     var pattern by string("*.")
 //    val prefix by string()
 //    val suffix by string()
+
+    fun isEmpty(): Boolean = config.isEmpty()
 
     companion object : Specification<DataFilter> {
         override fun wrap(config: Config): DataFilter = DataFilter(config)

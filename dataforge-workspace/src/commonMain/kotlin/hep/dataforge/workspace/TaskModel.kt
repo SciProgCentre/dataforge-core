@@ -12,6 +12,7 @@ import hep.dataforge.data.dataSequence
 import hep.dataforge.meta.*
 import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
+import hep.dataforge.names.asName
 import hep.dataforge.names.toName
 import hep.dataforge.workspace.TaskModel.Companion.MODEL_TARGET_KEY
 
@@ -43,7 +44,7 @@ data class TaskModel(
     }
 
     companion object {
-        const val MODEL_TARGET_KEY = "@target"
+        val MODEL_TARGET_KEY = "@target".asName()
     }
 }
 
@@ -83,7 +84,7 @@ class TaskModelBuilder(val name: Name, meta: Meta = EmptyMeta) {
     }
 
     fun dependsOn(name: String, meta: Meta = this.meta, placement: Name = EmptyName) =
-        dependsOn(name.toName(),meta,placement)
+        dependsOn(name.toName(), meta, placement)
 
     fun dependsOn(task: Task<*>, meta: Meta = this.meta, placement: Name = EmptyName) {
         dependencies.add(DirectTaskDependency(task, meta, placement))
