@@ -43,10 +43,9 @@ class EnvelopeServerTest {
         }
     }
 
-
     @Test
     fun doEchoTest() {
-        val client = EnvelopeClient(Global, host = "localhost", port = 7778)
+
         val request = Envelope.build {
             type = "test.echo"
             meta {
@@ -56,6 +55,7 @@ class EnvelopeServerTest {
                 writeDouble(22.7)
             }
         }
+        val client = EnvelopeClient(Global, host = "localhost", port = 7778)
         runBlocking {
             val response = client.respond(request)
 

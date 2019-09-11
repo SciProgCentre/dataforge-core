@@ -4,6 +4,7 @@ import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
@@ -34,7 +35,7 @@ interface Data<out T : Any> : Goal<T>, MetaRepr {
             block: suspend CoroutineScope.() -> T
         ): Data<T> = DynamicData(type, meta, context, dependencies, block)
 
-        operator inline fun <reified T : Any> invoke(
+        inline operator fun <reified T : Any> invoke(
             meta: Meta = EmptyMeta,
             context: CoroutineContext = EmptyCoroutineContext,
             dependencies: Collection<Data<*>> = emptyList(),
@@ -50,7 +51,7 @@ interface Data<out T : Any> : Goal<T>, MetaRepr {
             block: suspend CoroutineScope.() -> T
         ): Data<T> = NamedData(name, invoke(type, meta, context, dependencies, block))
 
-        operator inline fun <reified T : Any> invoke(
+        inline operator fun <reified T : Any> invoke(
             name: String,
             meta: Meta = EmptyMeta,
             context: CoroutineContext = EmptyCoroutineContext,
@@ -65,7 +66,7 @@ interface Data<out T : Any> : Goal<T>, MetaRepr {
 }
 
 
-fun <R : Any, T : R> Data<T>.cast(type: KClass<R>): Data<R> {
+fun <R : Any, T : R> Data<T>.upcast(type: KClass<out R>): Data<R> {
     return object : Data<R> by this {
         override val type: KClass<out R> = type
     }
@@ -74,8 +75,24 @@ fun <R : Any, T : R> Data<T>.cast(type: KClass<R>): Data<R> {
 /**
  * Upcast a [Data] to a supertype
  */
-inline fun <reified R : Any, T : R> Data<T>.cast(): Data<R> = cast(R::class)
+inline fun <reified R : Any, T : R> Data<T>.upcast(): Data<R> = upcast(R::class)
 
+/**
+ * Unsafe cast of data node
+ */
+@Suppress("UNCHECKED_CAST")
+fun <R: Any> Data<*>.cast(type: KClass<out R>): Data<R>{
+    return object : Data<R> {
+        override val meta: Meta get() = this@cast.meta
+        override val dependencies: Collection<Goal<*>> get() = this@cast.dependencies
+        override val result: Deferred<R>? get() = this@cast.result as Deferred<R>
+        override fun startAsync(scope: CoroutineScope): Deferred<R> = this@cast.startAsync(scope) as Deferred<R>
+        override fun reset() = this@cast.reset()
+        override val type: KClass<out R> = type
+    }
+}
+
+inline fun <reified R : Any, T : R> Data<T>.cast(): Data<R> = cast(R::class)
 
 class DynamicData<T : Any>(
     override val type: KClass<out T>,
