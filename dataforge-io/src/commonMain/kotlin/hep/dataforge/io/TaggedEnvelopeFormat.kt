@@ -4,7 +4,6 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.plus
 import kotlinx.io.core.*
 
-
 @ExperimentalUnsignedTypes
 object TaggedEnvelopeFormat : EnvelopeFormat {
     const val VERSION = "DF03"

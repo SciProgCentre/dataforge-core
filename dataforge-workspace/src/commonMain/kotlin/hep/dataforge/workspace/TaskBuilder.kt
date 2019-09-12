@@ -41,7 +41,7 @@ class TaskBuilder(val name: String) {
     }
 
     fun <T : Any> transform(
-        inputType: KClass<T>,
+        inputType: KClass<out T>,
         from: String = "",
         to: String = "",
         block: TaskEnv.(DataNode<T>) -> DataNode<Any>
@@ -49,7 +49,7 @@ class TaskBuilder(val name: String) {
         dataTransforms += DataTransformation(from, to) { context, model, data ->
             data.ensureType(inputType)
             val env = TaskEnv(EmptyName, model.meta, context)
-            env.block(data.safeCast(inputType))
+            env.block(data.cast(inputType))
         }
     }
 
