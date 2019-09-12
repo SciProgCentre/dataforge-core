@@ -39,7 +39,7 @@ class AllDataDependency(val placement: Name = EmptyName) : Dependency() {
     }
 
     override fun toMeta() = buildMeta {
-        "data" to "*"
+        "data" to "@all"
         "to" to placement
     }
 }

@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
 
 @TaskBuildScope
 class TaskBuilder(val name: String) {
-    private var modelTransform: TaskModelBuilder.(Meta) -> Unit = { data("*") }
+    private var modelTransform: TaskModelBuilder.(Meta) -> Unit = { allData() }
     var descriptor: NodeDescriptor? = null
     private val dataTransforms: MutableList<DataTransformation> = ArrayList()
 
@@ -38,6 +38,20 @@ class TaskBuilder(val name: String) {
 
     fun model(modelTransform: TaskModelBuilder.(Meta) -> Unit) {
         this.modelTransform = modelTransform
+    }
+
+    /**
+     * Add a transformation on untyped data
+     */
+    fun rawTransform(
+        from: String = "",
+        to: String = "",
+        block: TaskEnv.(DataNode<*>) -> DataNode<*>
+    ) {
+        dataTransforms += DataTransformation(from, to){context, model, data->
+            val env = TaskEnv(EmptyName, model.meta, context)
+            env.block(data)
+        }
     }
 
     fun <T : Any> transform(
