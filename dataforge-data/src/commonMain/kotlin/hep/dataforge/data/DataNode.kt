@@ -1,5 +1,8 @@
 package hep.dataforge.data
 
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaRepr
+import hep.dataforge.meta.buildMeta
 import hep.dataforge.names.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -9,22 +12,26 @@ import kotlin.collections.component2
 import kotlin.collections.set
 import kotlin.reflect.KClass
 
-sealed class DataItem<out T : Any> {
+sealed class DataItem<out T : Any> : MetaRepr {
     abstract val type: KClass<out T>
 
     class Node<out T : Any>(val value: DataNode<T>) : DataItem<T>() {
         override val type: KClass<out T> get() = value.type
+
+        override fun toMeta(): Meta  = value.toMeta()
     }
 
     class Leaf<out T : Any>(val value: Data<T>) : DataItem<T>() {
         override val type: KClass<out T> get() = value.type
+
+        override fun toMeta(): Meta  = value.toMeta()
     }
 }
 
 /**
  * A tree-like data structure grouped into the node. All data inside the node must inherit its type
  */
-interface DataNode<out T : Any> {
+interface DataNode<out T : Any>: MetaRepr {
 
     /**
      * The minimal common ancestor to all data in the node
@@ -32,6 +39,15 @@ interface DataNode<out T : Any> {
     val type: KClass<out T>
 
     val items: Map<NameToken, DataItem<T>>
+
+    override fun toMeta(): Meta = buildMeta {
+        "type" to (type.simpleName?:"undefined")
+        "items" to {
+            this@DataNode.items.forEach {
+                it.key.toString() to it.value.toMeta()
+            }
+        }
+    }
 
     companion object {
         const val TYPE = "dataNode"
@@ -68,7 +84,7 @@ fun DataNode<*>.joinAll(scope: CoroutineScope): Job = scope.launch {
 
 operator fun <T : Any> DataNode<T>.get(name: Name): DataItem<T>? = when (name.length) {
     0 -> error("Empty name")
-    1 -> (items[name.first()] as? DataItem.Leaf)
+    1 -> items[name.first()]
     else -> get(name.first()!!.asName()).node?.get(name.cutFirst())
 }
 
@@ -110,7 +126,9 @@ class DataTree<out T : Any> internal constructor(
     override val type: KClass<out T>,
     override val items: Map<NameToken, DataItem<T>>
 ) : DataNode<T> {
-    //TODO add node-level meta?
+    override fun toString(): String {
+        return super.toString()
+    }
 }
 
 private sealed class DataTreeBuilderItem<out T : Any> {

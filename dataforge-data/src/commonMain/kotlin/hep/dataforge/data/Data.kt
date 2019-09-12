@@ -1,8 +1,6 @@
 package hep.dataforge.data
 
-import hep.dataforge.meta.EmptyMeta
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaRepr
+import hep.dataforge.meta.*
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -11,7 +9,7 @@ import kotlin.reflect.KClass
 /**
  * A data element characterized by its meta
  */
-interface Data<out T : Any> : Goal<T>, MetaRepr {
+interface Data<out T : Any> : Goal<T>, MetaRepr{
     /**
      * Type marker for the data. The type is known before the calculation takes place so it could be checked.
      */
@@ -21,7 +19,12 @@ interface Data<out T : Any> : Goal<T>, MetaRepr {
      */
     val meta: Meta
 
-    override fun toMeta(): Meta = meta
+    override fun toMeta(): Meta  = buildMeta {
+        "type" to (type.simpleName?:"undefined")
+        if(!meta.isEmpty()) {
+            "meta" to meta
+        }
+    }
 
     companion object {
         const val TYPE = "data"
