@@ -1,11 +1,11 @@
 package hep.dataforge.workspace
 
 import hep.dataforge.context.PluginTag
-import hep.dataforge.data.first
-import hep.dataforge.data.get
+import hep.dataforge.data.*
 import hep.dataforge.meta.boolean
 import hep.dataforge.meta.get
-import org.junit.Test
+import hep.dataforge.names.asName
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -33,7 +33,7 @@ class SimpleWorkspaceTest {
         }
 
 
-        task("square") {
+        val square = task("square") {
             model {
                 allData()
             }
@@ -43,6 +43,37 @@ class SimpleWorkspaceTest {
                 }
                 context.logger.info { "Starting square on $data" }
                 data * data
+            }
+        }
+
+        val linear = task("linear") {
+            model {
+                allData()
+            }
+            pipe<Int, Int> { data ->
+                context.logger.info { "Starting linear on $data" }
+                data * 2 + 1
+            }
+        }
+
+        val fullSquare = task("fullsquare") {
+            model {
+                dependsOn("square", placement = "square".asName())
+                dependsOn("linear", placement = "linear".asName())
+            }
+            transform<Any> { data ->
+                val squareNode = data["square"].withType<Int>().node!!
+                val linearNode = data["linear"].withType<Int>().node!!
+                return@transform DataNode.build(Int::class) {
+                    squareNode.dataSequence().forEach { (name, _) ->
+                        val newData = Data{
+                            val squareValue = squareNode[name].data!!.get()
+                            val linearValue = linearNode[name].data!!.get()
+                            squareValue+linearValue
+                        }
+                        set(name,newData)
+                    }
+                }
             }
         }
 
@@ -60,7 +91,7 @@ class SimpleWorkspaceTest {
             model {
                 allData()
             }
-            joinByGroup<Int, Double> {env->
+            joinByGroup<Int, Double> { env ->
                 group("even", filter = { name, _ -> name.toString().toInt() % 2 == 0 }) {
                     result { data ->
                         env.context.logger.info { "Starting even" }
@@ -106,5 +137,11 @@ class SimpleWorkspaceTest {
         val tasks = workspace.tasks
         assertTrue { tasks["test.test"] != null }
         //val node = workspace.run("test.test", "empty")
+    }
+
+    @Test
+    fun testFullSquare(){
+        val node = workspace.run("fullsquare")
+        println(node.toMeta())
     }
 }
