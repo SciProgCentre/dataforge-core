@@ -22,16 +22,16 @@ class PipeBuilder<T, R>(var name: Name, var meta: MetaBuilder) {
 }
 
 
-class PipeAction<T : Any, R : Any>(
-    val inputType: KClass<T>,
-    val outputType: KClass<R>,
+class PipeAction<T : Any, out R : Any>(
+    val inputType: KClass<out T>,
+    val outputType: KClass<out R>,
     private val block: PipeBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
     override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
         node.ensureType(inputType)
 
-        return DataNode.build(outputType) {
+        return DataNode.invoke(outputType) {
             node.dataSequence().forEach { (name, data) ->
                 //merging data meta with action meta (data meta is primary)
                 val oldMeta = meta.builder().apply { update(data.meta) }
@@ -53,7 +53,7 @@ class PipeAction<T : Any, R : Any>(
 
 inline fun <reified T : Any, reified R : Any> DataNode<T>.pipe(
     meta: Meta,
-    noinline action: PipeBuilder<T, R>.() -> Unit
+    noinline action: PipeBuilder<in T, out R>.() -> Unit
 ): DataNode<R> = PipeAction(T::class, R::class, action).invoke(this, meta)
 
 

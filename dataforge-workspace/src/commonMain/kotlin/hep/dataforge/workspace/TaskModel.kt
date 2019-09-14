@@ -36,7 +36,7 @@ data class TaskModel(
         "meta" to meta
         "dependsOn" to {
             val dataDependencies = dependencies.filterIsInstance<DataDependency>()
-            val taskDependencies = dependencies.filterIsInstance<TaskDependency>()
+            val taskDependencies = dependencies.filterIsInstance<TaskDependency<*>>()
             setIndexed("data".toName(), dataDependencies.map { it.toMeta() })
             setIndexed("task".toName(), taskDependencies.map { it.toMeta() }) { taskDependencies[it].name.toString() }
             //TODO ensure all dependencies are listed

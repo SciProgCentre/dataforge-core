@@ -12,12 +12,12 @@ class TypeFilteredDataNode<out T : Any>(val origin: DataNode<*>, override val ty
         origin.items.mapNotNull { (key, item) ->
             when (item) {
                 is DataItem.Leaf -> {
-                    (item.value.withType(type))?.let {
+                    (item.value.filterIsInstance(type))?.let {
                         key to DataItem.Leaf(it)
                     }
                 }
                 is DataItem.Node -> {
-                    key to DataItem.Node(item.value.withType(type))
+                    key to DataItem.Node(item.value.filterIsInstance(type))
                 }
             }
         }.associate { it }

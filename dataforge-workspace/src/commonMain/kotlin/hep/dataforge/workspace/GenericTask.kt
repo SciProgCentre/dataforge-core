@@ -20,7 +20,7 @@ class GenericTask<R : Any>(
 ) : Task<R> {
 
     private fun gather(workspace: Workspace, model: TaskModel): DataNode<Any> {
-        return DataNode.build(Any::class) {
+        return DataNode.invoke(Any::class) {
             model.dependencies.forEach { dep ->
                 update(dep.apply(workspace))
             }

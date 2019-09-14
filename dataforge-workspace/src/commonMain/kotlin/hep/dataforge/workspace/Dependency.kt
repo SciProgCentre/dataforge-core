@@ -21,7 +21,7 @@ class DataDependency(val filter: DataFilter, val placement: Name = EmptyName) : 
         return if (placement.isEmpty()) {
             result
         } else {
-            DataNode.build(Any::class) { this[placement] = result }
+            DataNode.invoke(Any::class) { this[placement] = result }
         }
     }
 
@@ -35,7 +35,7 @@ class AllDataDependency(val placement: Name = EmptyName) : Dependency() {
     override fun apply(workspace: Workspace): DataNode<Any> = if (placement.isEmpty()) {
         workspace.data
     } else {
-        DataNode.build(Any::class) { this[placement] = workspace.data }
+        DataNode.invoke(Any::class) { this[placement] = workspace.data }
     }
 
     override fun toMeta() = buildMeta {
@@ -44,22 +44,25 @@ class AllDataDependency(val placement: Name = EmptyName) : Dependency() {
     }
 }
 
-abstract class TaskDependency(val meta: Meta, val placement: Name = EmptyName) : Dependency() {
-    abstract fun resolveTask(workspace: Workspace): Task<*>
+abstract class TaskDependency<out T : Any>(
+    val meta: Meta,
+    val placement: Name = EmptyName
+) : Dependency() {
+    abstract fun resolveTask(workspace: Workspace): Task<T>
 
     /**
      * A name of the dependency for logging and serialization
      */
     abstract val name: Name
 
-    override fun apply(workspace: Workspace): DataNode<Any> {
+    override fun apply(workspace: Workspace): DataNode<T> {
         val task = resolveTask(workspace)
         if (task.isTerminal) TODO("Support terminal task")
         val result = workspace.run(task, meta)
         return if (placement.isEmpty()) {
             result
         } else {
-            DataNode.build(Any::class) { this[placement] = result }
+            DataNode(task.type) { this[placement] = result }
         }
     }
 
@@ -70,8 +73,12 @@ abstract class TaskDependency(val meta: Meta, val placement: Name = EmptyName) :
     }
 }
 
-class DirectTaskDependency(val task: Task<*>, meta: Meta, placement: Name) : TaskDependency(meta, placement) {
-    override fun resolveTask(workspace: Workspace): Task<*> = task
+class DirectTaskDependency<T : Any>(
+    val task: Task<T>,
+    meta: Meta,
+    placement: Name
+) : TaskDependency<T>(meta, placement) {
+    override fun resolveTask(workspace: Workspace): Task<T> = task
 
     override val name: Name get() = DIRECT_TASK_NAME + task.name
 
@@ -80,7 +87,7 @@ class DirectTaskDependency(val task: Task<*>, meta: Meta, placement: Name) : Tas
     }
 }
 
-class WorkspaceTaskDependency(override val name: Name, meta: Meta, placement: Name) : TaskDependency(meta, placement) {
+class WorkspaceTaskDependency(override val name: Name, meta: Meta, placement: Name) : TaskDependency<Any>(meta, placement) {
     override fun resolveTask(workspace: Workspace): Task<*> =
         workspace.tasks[name] ?: error("Task with name $name is not found in the workspace")
 }

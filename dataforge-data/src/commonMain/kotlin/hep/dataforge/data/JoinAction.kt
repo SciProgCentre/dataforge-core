@@ -74,14 +74,14 @@ class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
  * The same rules as for KPipe
  */
 class JoinAction<T : Any, R : Any>(
-    val inputType: KClass<T>,
-    val outputType: KClass<R>,
+    val inputType: KClass<out T>,
+    val outputType: KClass<out R>,
     private val action: JoinGroupBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
     override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
         node.ensureType(inputType)
-        return DataNode.build(outputType) {
+        return DataNode.invoke(outputType) {
             JoinGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
 
                 val laminate = Laminate(group.meta, meta)

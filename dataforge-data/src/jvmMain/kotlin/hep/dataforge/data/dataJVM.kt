@@ -22,18 +22,18 @@ actual fun <R : Any> Data<*>.canCast(type: KClass<out R>): Boolean =
 /**
  * Cast the node to given type if the cast is possible or return null
  */
-fun <R : Any> Data<*>.withType(type: KClass<out R>): Data<R>? =
+fun <R : Any> Data<*>.filterIsInstance(type: KClass<out R>): Data<R>? =
     if (canCast(type)) cast(type) else null
 
 /**
  * Filter a node by data and node type. Resulting node and its subnodes is guaranteed to have border type [type],
  * but could contain empty nodes
  */
-fun <R : Any> DataNode<*>.withType(type: KClass<out R>): DataNode<R> {
+fun <R : Any> DataNode<*>.filterIsInstance(type: KClass<out R>): DataNode<R> {
     return if (canCast(type)) {
         cast(type)
     } else if (this is TypeFilteredDataNode) {
-        origin.withType(type)
+        origin.filterIsInstance(type)
     } else {
         TypeFilteredDataNode(this, type)
     }
@@ -42,10 +42,10 @@ fun <R : Any> DataNode<*>.withType(type: KClass<out R>): DataNode<R> {
 /**
  * Filter all elements of given data item that could be cast to given type. If no elements are available, return null.
  */
-fun <R : Any> DataItem<*>?.withType(type: KClass<out R>): DataItem<R>? = when (this) {
+fun <R : Any> DataItem<*>?.filterIsInstance(type: KClass<out R>): DataItem<R>? = when (this) {
     null -> null
-    is DataItem.Node -> DataItem.Node(this.value.withType(type))
-    is DataItem.Leaf -> this.value.withType(type)?.let { DataItem.Leaf(it) }
+    is DataItem.Node -> DataItem.Node(this.value.filterIsInstance(type))
+    is DataItem.Leaf -> this.value.filterIsInstance(type)?.let { DataItem.Leaf(it) }
 }
 
-inline fun <reified R : Any> DataItem<*>?.withType(): DataItem<R>? = this@withType.withType(R::class)
+inline fun <reified R : Any> DataItem<*>?.filterIsInstance(): DataItem<R>? = this@filterIsInstance.filterIsInstance(R::class)
