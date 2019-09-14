@@ -87,7 +87,11 @@ class DirectTaskDependency<T : Any>(
     }
 }
 
-class WorkspaceTaskDependency(override val name: Name, meta: Meta, placement: Name) : TaskDependency<Any>(meta, placement) {
+class WorkspaceTaskDependency(
+    override val name: Name,
+    meta: Meta,
+    placement: Name
+) : TaskDependency<Any>(meta, placement) {
     override fun resolveTask(workspace: Workspace): Task<*> =
         workspace.tasks[name] ?: error("Task with name $name is not found in the workspace")
 }

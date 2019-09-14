@@ -8,13 +8,15 @@ import hep.dataforge.meta.get
 import hep.dataforge.meta.string
 import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
-import hep.dataforge.names.asName
+import hep.dataforge.names.isEmpty
 import hep.dataforge.names.toName
+import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
 @TaskBuildScope
-class TaskBuilder<R : Any>(val name: String, val type: KClass<out R>) {
+class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     private var modelTransform: TaskModelBuilder.(Meta) -> Unit = { allData() }
+//    private val additionalDependencies = HashSet<Dependency>()
     var descriptor: NodeDescriptor? = null
     private val dataTransforms: MutableList<DataTransformation> = ArrayList()
 
@@ -30,11 +32,15 @@ class TaskBuilder<R : Any>(val name: String, val type: KClass<out R>) {
             val localData = if (from.isEmpty()) {
                 node
             } else {
-                node[from.toName()].node ?: return null
+                node[from].node ?: return null
             }
             return transform(workspace.context, model, localData)
         }
     }
+
+//    override fun add(dependency: Dependency) {
+//        additionalDependencies.add(dependency)
+//    }
 
     fun model(modelTransform: TaskModelBuilder.(Meta) -> Unit) {
         this.modelTransform = modelTransform
@@ -43,13 +49,14 @@ class TaskBuilder<R : Any>(val name: String, val type: KClass<out R>) {
     /**
      * Add a transformation on untyped data
      */
-    fun rawTransform(
+    @JvmName("rawTransform")
+    fun transform(
         from: String = "",
         to: String = "",
         block: TaskEnv.(DataNode<*>) -> DataNode<R>
     ) {
         dataTransforms += DataTransformation(from, to) { context, model, data ->
-            val env = TaskEnv(EmptyName, model.meta, context)
+            val env = TaskEnv(EmptyName, model.meta, context, data)
             env.block(data)
         }
     }
@@ -62,7 +69,7 @@ class TaskBuilder<R : Any>(val name: String, val type: KClass<out R>) {
     ) {
         dataTransforms += DataTransformation(from, to) { context, model, data ->
             data.ensureType(inputType)
-            val env = TaskEnv(EmptyName, model.meta, context)
+            val env = TaskEnv(EmptyName, model.meta, context, data)
             env.block(data.cast(inputType))
         }
     }
@@ -88,7 +95,14 @@ class TaskBuilder<R : Any>(val name: String, val type: KClass<out R>) {
         }
     }
 
-    class TaskEnv(val name: Name, val meta: Meta, val context: Context)
+    class TaskEnv(val name: Name, val meta: Meta, val context: Context, val data: DataNode<Any>) {
+        operator fun <T : Any> DirectTaskDependency<T>.invoke(): DataNode<T> = if(placement.isEmpty()){
+            data.cast(task.type)
+        } else {
+            data[placement].node?.cast(task.type)
+                ?: error("Could not find results of direct task dependency $this at \"$placement\"")
+        }
+    }
 
     /**
      * A customized pipe action with ability to change meta and name
@@ -121,7 +135,7 @@ class TaskBuilder<R : Any>(val name: String, val type: KClass<out R>) {
             ) {
                 //TODO automatically append task meta
                 result = { data ->
-                    TaskEnv(name, meta, context).block(data)
+                    block(data)
                 }
             }
         }
@@ -133,7 +147,7 @@ class TaskBuilder<R : Any>(val name: String, val type: KClass<out R>) {
     inline fun <reified T : Any> joinByGroup(
         from: String = "",
         to: String = "",
-        crossinline block: JoinGroupBuilder<T, R>.(TaskEnv) -> Unit
+        crossinline block: JoinGroupBuilder<T, R>.(TaskEnv) -> Unit        //TODO needs KEEP-176
     ) {
         action(from, to) {
             JoinAction(
@@ -159,7 +173,7 @@ class TaskBuilder<R : Any>(val name: String, val type: KClass<out R>) {
                     result(
                         actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonymous"
                     ) { data ->
-                        TaskEnv(name, meta, context).block(data)
+                        block(data)
                     }
                 }
             )
@@ -172,7 +186,7 @@ class TaskBuilder<R : Any>(val name: String, val type: KClass<out R>) {
     inline fun <reified T : Any> split(
         from: String = "",
         to: String = "",
-        crossinline block: SplitBuilder<T, R>.(TaskEnv) -> Unit
+        crossinline block: SplitBuilder<T, R>.(TaskEnv) -> Unit  //TODO needs KEEP-176
     ) {
         action(from, to) {
             SplitAction(
@@ -189,9 +203,14 @@ class TaskBuilder<R : Any>(val name: String, val type: KClass<out R>) {
         this.descriptor = NodeDescriptor.build(transform)
     }
 
-    internal fun build(): GenericTask<R> =
-        GenericTask(
-            name.asName(),
+    internal fun build(): GenericTask<R> {
+//        val actualTransform: TaskModelBuilder.(Meta) -> Unit = {
+//            modelTransform
+//            dependencies.addAll(additionalDependencies)
+//        }
+
+        return GenericTask(
+            name,
             type,
             descriptor ?: NodeDescriptor.empty(),
             modelTransform
@@ -220,15 +239,14 @@ class TaskBuilder<R : Any>(val name: String, val type: KClass<out R>) {
                 }
             }
         }
+    }
 }
 
 fun <T : Any> Workspace.Companion.task(
     name: String,
     type: KClass<out T>,
     builder: TaskBuilder<T>.() -> Unit
-): GenericTask<T> {
-    return TaskBuilder(name, type).apply(builder).build()
-}
+): GenericTask<T> = TaskBuilder(name.toName(), type).apply(builder).build()
 
 
 //TODO add delegates to build gradle-like tasks

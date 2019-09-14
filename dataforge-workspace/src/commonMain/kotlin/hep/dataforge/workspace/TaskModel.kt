@@ -63,58 +63,88 @@ fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> {
 @DslMarker
 annotation class TaskBuildScope
 
+interface TaskDependencyContainer {
+    val defaultMeta: Meta
+    fun add(dependency: Dependency)
+}
+
+/**
+ * Add dependency for a task defined in a workspace and resolved by
+ */
+fun TaskDependencyContainer.dependsOn(
+    name: Name,
+    placement: Name = EmptyName,
+    meta: Meta = defaultMeta
+): WorkspaceTaskDependency =
+    WorkspaceTaskDependency(name, meta, placement).also { add(it) }
+
+fun TaskDependencyContainer.dependsOn(
+    name: String,
+    placement: Name = EmptyName,
+    meta: Meta = defaultMeta
+): WorkspaceTaskDependency =
+    dependsOn(name.toName(), placement, meta)
+
+fun <T : Any> TaskDependencyContainer.dependsOn(
+    task: Task<T>,
+    placement: Name = EmptyName,
+    meta: Meta = defaultMeta
+): DirectTaskDependency<T> =
+    DirectTaskDependency(task, meta, placement).also { add(it) }
+
+fun <T : Any> TaskDependencyContainer.dependsOn(
+    task: Task<T>,
+    placement: String,
+    meta: Meta = defaultMeta
+): DirectTaskDependency<T> =
+    DirectTaskDependency(task, meta, placement.toName()).also { add(it) }
+
+fun <T : Any> TaskDependencyContainer.dependsOn(
+    task: Task<T>,
+    placement: Name = EmptyName,
+    metaBuilder: MetaBuilder.() -> Unit
+): DirectTaskDependency<T> =
+    dependsOn(task, placement, buildMeta(metaBuilder))
+
+/**
+ * Add custom data dependency
+ */
+fun TaskDependencyContainer.data(action: DataFilter.() -> Unit): DataDependency =
+    DataDependency(DataFilter.build(action)).also { add(it) }
+
+/**
+ * User-friendly way to add data dependency
+ */
+fun TaskDependencyContainer.data(pattern: String? = null, from: String? = null, to: String? = null): DataDependency =
+    data {
+        pattern?.let { this.pattern = it }
+        from?.let { this.from = it }
+        to?.let { this.to = it }
+    }
+
+/**
+ * Add all data as root node
+ */
+fun TaskDependencyContainer.allData(to: Name = EmptyName) = AllDataDependency(to).also { add(it) }
+
 /**
  * A builder for [TaskModel]
  */
-@TaskBuildScope
-class TaskModelBuilder(val name: Name, meta: Meta = EmptyMeta) {
+class TaskModelBuilder(val name: Name, meta: Meta = EmptyMeta) : TaskDependencyContainer {
     /**
      * Meta for current task. By default uses the whole input meta
      */
     var meta: MetaBuilder = meta.builder()
     val dependencies = HashSet<Dependency>()
 
+    override val defaultMeta: Meta get() = meta
+
+    override fun add(dependency: Dependency) {
+        dependencies.add(dependency)
+    }
+
     var target: String by this.meta.string(key = MODEL_TARGET_KEY, default = "")
 
-    /**
-     * Add dependency for a task defined in a workspace and resolved by
-     */
-    fun dependsOn(name: Name, meta: Meta = this.meta, placement: Name = EmptyName) {
-        dependencies.add(WorkspaceTaskDependency(name, meta, placement))
-    }
-
-    fun dependsOn(name: String, meta: Meta = this.meta, placement: Name = EmptyName) =
-        dependsOn(name.toName(), meta, placement)
-
-    fun dependsOn(task: Task<*>, meta: Meta = this.meta, placement: Name = EmptyName) {
-        dependencies.add(DirectTaskDependency(task, meta, placement))
-    }
-
-    fun dependsOn(task: Task<*>, placement: Name = EmptyName, metaBuilder: MetaBuilder.() -> Unit) =
-        dependsOn(task.name, buildMeta(metaBuilder), placement)
-
-    /**
-     * Add custom data dependency
-     */
-    fun data(action: DataFilter.() -> Unit) {
-        dependencies.add(DataDependency(DataFilter.build(action)))
-    }
-
-    /**
-     * User-friendly way to add data dependency
-     */
-    fun data(pattern: String? = null, from: String? = null, to: String? = null) = data {
-        pattern?.let { this.pattern = it }
-        from?.let { this.from = it }
-        to?.let { this.to = it }
-    }
-
-    /**
-     * Add all data as root node
-     */
-    fun allData(to: Name = EmptyName) {
-        dependencies.add(AllDataDependency(to))
-    }
 
     fun build(): TaskModel = TaskModel(name, meta.seal(), dependencies)
 }

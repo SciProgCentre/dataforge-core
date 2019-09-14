@@ -8,6 +8,7 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
 import hep.dataforge.names.isEmpty
+import hep.dataforge.names.toName
 import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
@@ -70,9 +71,7 @@ fun <T : Any> WorkspaceBuilder.task(
     name: String,
     type: KClass<out T>,
     builder: TaskBuilder<T>.() -> Unit
-): Task<T> {
-    return TaskBuilder(name, type).apply(builder).build().also { tasks.add(it) }
-}
+): Task<T> = TaskBuilder(name.toName(), type).apply(builder).build().also { tasks.add(it) }
 
 inline fun <reified T : Any> WorkspaceBuilder.task(
     name: String,

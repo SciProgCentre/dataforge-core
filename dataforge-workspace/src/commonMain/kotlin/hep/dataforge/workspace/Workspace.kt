@@ -1,6 +1,8 @@
 package hep.dataforge.workspace
 
+import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
+import hep.dataforge.context.Global
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.dataSequence
@@ -56,6 +58,8 @@ interface Workspace : ContextAware, Provider {
 
     companion object {
         const val TYPE = "workspace"
+        operator fun invoke(parent: Context = Global, block: SimpleWorkspaceBuilder.() -> Unit): SimpleWorkspace =
+            SimpleWorkspaceBuilder(parent).apply(block).build()
     }
 }
 
@@ -73,3 +77,6 @@ fun Workspace.run(task: String, meta: Meta) =
 
 fun Workspace.run(task: String, block: MetaBuilder.() -> Unit = {}) =
     run(task, buildMeta(block))
+
+fun <T: Any> Workspace.run(task: Task<T>, metaBuilder: MetaBuilder.() -> Unit = {}): DataNode<T> =
+    run(task, buildMeta(metaBuilder))

@@ -4,7 +4,6 @@ import hep.dataforge.context.PluginTag
 import hep.dataforge.data.*
 import hep.dataforge.meta.boolean
 import hep.dataforge.meta.get
-import hep.dataforge.names.asName
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -22,7 +21,7 @@ class SimpleWorkspaceTest {
         override val tasks: Collection<Task<*>> = listOf(contextTask)
     }
 
-    val workspace = SimpleWorkspace.build {
+    val workspace = Workspace {
 
         context {
             plugin(testPlugin)
@@ -35,10 +34,7 @@ class SimpleWorkspaceTest {
         }
 
 
-        val square = task("square") {
-            model {
-                allData()
-            }
+        val square = task<Int>("square") {
             pipe<Int> { data ->
                 if (meta["testFlag"].boolean == true) {
                     println("flag")
@@ -48,24 +44,21 @@ class SimpleWorkspaceTest {
             }
         }
 
-        val linear = task("linear") {
-            model {
-                allData()
-            }
+        val linear = task<Int>("linear") {
             pipe<Int> { data ->
                 context.logger.info { "Starting linear on $data" }
                 data * 2 + 1
             }
         }
 
-        val fullSquare = task("fullsquare") {
+        val fullSquare = task<Int>("fullsquare") {
             model {
-                dependsOn("square", placement = "square".asName())
-                dependsOn("linear", placement = "linear".asName())
+                val squareDep = dependsOn(square, placement = "square")
+                val linearDep = dependsOn(linear, placement = "linear")
             }
-            transform<Any> { data ->
-                val squareNode = data["square"].filterIsInstance<Int>().node!!
-                val linearNode = data["linear"].filterIsInstance<Int>().node!!
+            transform { data ->
+                val squareNode = data["square"].node!!.cast<Int>()//squareDep()
+                val linearNode = data["linear"].node!!.cast<Int>()//linearDep()
                 return@transform DataNode(Int::class) {
                     squareNode.dataSequence().forEach { (name, _) ->
                         val newData = Data {
@@ -79,9 +72,9 @@ class SimpleWorkspaceTest {
             }
         }
 
-        task("sum") {
+        task<Int>("sum") {
             model {
-                dependsOn("square")
+                dependsOn(square)
             }
             join<Int> { data ->
                 context.logger.info { "Starting sum" }
@@ -89,10 +82,7 @@ class SimpleWorkspaceTest {
             }
         }
 
-        task<Double>("average") {
-            model {
-                allData()
-            }
+        val average = task<Double>("average") {
             joinByGroup<Int> { env ->
                 group("even", filter = { name, _ -> name.toString().toInt() % 2 == 0 }) {
                     result { data ->
@@ -111,7 +101,7 @@ class SimpleWorkspaceTest {
 
         task("delta") {
             model {
-                dependsOn("average")
+                dependsOn(average)
             }
             join<Double> { data ->
                 data["even"]!! - data["odd"]!!

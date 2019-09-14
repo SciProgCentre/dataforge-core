@@ -1,7 +1,6 @@
 package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
-import hep.dataforge.context.Global
 import hep.dataforge.context.content
 import hep.dataforge.context.toMap
 import hep.dataforge.data.DataNode
@@ -24,7 +23,6 @@ class SimpleWorkspace(
     }
 
     companion object {
-        fun build(parent: Context = Global, block: SimpleWorkspaceBuilder.() -> Unit): SimpleWorkspace =
-            SimpleWorkspaceBuilder(parent).apply(block).build()
+
     }
 }

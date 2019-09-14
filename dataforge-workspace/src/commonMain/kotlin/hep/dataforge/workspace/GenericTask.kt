@@ -55,7 +55,7 @@ class GenericTask<R : Any>(
     override fun build(workspace: Workspace, taskConfig: Meta): TaskModel {
         val taskMeta = taskConfig[name]?.node ?: taskConfig
         val builder = TaskModelBuilder(name, taskMeta)
-        modelTransform.invoke(builder, taskMeta)
+        builder.modelTransform(taskMeta)
         return builder.build()
     }
     //TODO add validation
