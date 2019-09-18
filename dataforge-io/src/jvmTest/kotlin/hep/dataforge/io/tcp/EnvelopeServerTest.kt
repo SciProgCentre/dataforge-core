@@ -46,7 +46,7 @@ class EnvelopeServerTest {
     @Test
     fun doEchoTest() {
 
-        val request = Envelope.build {
+        val request = Envelope.invoke {
             type = "test.echo"
             meta {
                 "test.value" to 22

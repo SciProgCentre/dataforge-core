@@ -22,7 +22,7 @@ class FileEnvelope internal constructor(val path: Path, val format: EnvelopeForm
     override val data: Binary? = FileBinary(path, partialEnvelope.dataOffset, partialEnvelope.dataSize)
 }
 
-fun Path.readEnvelope(format: EnvelopeFormat) = FileEnvelope(this, format)
+fun Path.readEnvelope(format: EnvelopeFormat = TaggedEnvelopeFormat) = FileEnvelope(this, format)
 
 fun Path.writeEnvelope(
     envelope: Envelope,

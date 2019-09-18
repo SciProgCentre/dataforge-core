@@ -5,8 +5,8 @@ plugins {
 description = "IO module"
 
 scientifik{
-    serialization = true
-    io = true
+    withSerialization()
+    withIO()
 }
 
 

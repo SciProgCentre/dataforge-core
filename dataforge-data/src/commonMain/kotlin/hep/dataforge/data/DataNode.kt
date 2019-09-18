@@ -140,7 +140,7 @@ private sealed class DataTreeBuilderItem<out T : Any> {
 /**
  * A builder for a DataTree.
  */
-class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
+class DataTreeBuilder<T : Any>(val type: KClass<out T>) {
     private val map = HashMap<NameToken, DataTreeBuilderItem<T>>()
 
     operator fun set(token: NameToken, node: DataTreeBuilder<out T>) {

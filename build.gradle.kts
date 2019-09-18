@@ -1,9 +1,9 @@
 plugins {
-    id("scientifik.mpp") version "0.1.7-dev" apply false
-    id("scientifik.publish") version "0.1.7-dev" apply false
+    id("scientifik.mpp") version "0.1.7" apply false
+    id("scientifik.publish") version "0.1.7" apply false
 }
 
-val dataforgeVersion by extra("0.1.4-dev-2")
+val dataforgeVersion by extra("0.1.4-dev-3")
 
 val bintrayRepo by extra("dataforge")
 val githubProject by extra("dataforge-core")

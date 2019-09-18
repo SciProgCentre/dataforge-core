@@ -26,7 +26,7 @@ interface Envelope {
         /**
          * Build a static envelope using provided builder
          */
-        fun build(block: EnvelopeBuilder.() -> Unit) = EnvelopeBuilder().apply(block).build()
+        operator fun invoke(block: EnvelopeBuilder.() -> Unit) = EnvelopeBuilder().apply(block).build()
     }
 }
 
@@ -97,6 +97,7 @@ class EnvelopeBuilder {
 
     var type by metaBuilder.string(key = Envelope.ENVELOPE_TYPE_KEY)
     var dataType by metaBuilder.string(key = Envelope.ENVELOPE_DATA_TYPE_KEY)
+    var dataID by metaBuilder.string(key = Envelope.ENVELOPE_DATA_ID_KEY)
     var description by metaBuilder.string(key = Envelope.ENVELOPE_DESCRIPTION_KEY)
 
     /**

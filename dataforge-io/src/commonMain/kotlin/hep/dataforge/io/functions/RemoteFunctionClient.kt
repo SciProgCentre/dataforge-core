@@ -12,7 +12,7 @@ class RemoteFunctionClient(override val context: Context, val responder: Respond
     private fun <T : Any> IOPlugin.encodeOne(
         meta: Meta,
         value: T
-    ): Envelope = Envelope.build {
+    ): Envelope = Envelope.invoke {
         meta(meta)
         type = REQUEST_TYPE
         data {
@@ -26,7 +26,7 @@ class RemoteFunctionClient(override val context: Context, val responder: Respond
     private fun <T : Any> IOPlugin.encodeMany(
         meta: Meta,
         values: List<T>
-    ): Envelope = Envelope.build {
+    ): Envelope = Envelope.invoke {
         meta(meta)
         type = REQUEST_TYPE
         meta {

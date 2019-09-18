@@ -21,3 +21,5 @@ class FileBinary(val path: Path, private val offset: UInt = 0u, size: ULong? = n
         }
     }
 }
+
+fun Path.asBinary(offset: UInt = 0u, size: ULong? = null): FileBinary = FileBinary(this, offset, size)

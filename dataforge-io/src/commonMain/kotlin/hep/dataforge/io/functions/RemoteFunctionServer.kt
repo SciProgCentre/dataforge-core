@@ -40,7 +40,7 @@ class RemoteFunctionServer(
             input
         )
 
-        return Envelope.build {
+        return Envelope.invoke {
             meta {
                 meta(request.meta)
             }
