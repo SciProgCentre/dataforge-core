@@ -3,7 +3,10 @@ package hep.dataforge.workspace
 import hep.dataforge.context.PluginTag
 import hep.dataforge.data.*
 import hep.dataforge.meta.boolean
+import hep.dataforge.meta.builder
 import hep.dataforge.meta.get
+import hep.dataforge.meta.int
+import hep.dataforge.names.plus
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -13,12 +16,11 @@ class SimpleWorkspaceTest {
     val testPlugin = object : WorkspacePlugin() {
         override val tag: PluginTag = PluginTag("test")
 
-        val contextTask = Workspace.task("test", Any::class) {
+        val contextTask = task("test", Any::class) {
             pipe<Any> {
                 context.logger.info { "Test: $it" }
             }
         }
-        override val tasks: Collection<Task<*>> = listOf(contextTask)
     }
 
     val workspace = Workspace {
@@ -105,6 +107,18 @@ class SimpleWorkspaceTest {
             }
             join<Double> { data ->
                 data["even"]!! - data["odd"]!!
+            }
+        }
+
+        val customPipeTask = task<Int>("custom") {
+            customPipe<Int> {
+                meta = meta.builder().apply {
+                    "newValue" to 22
+                }
+                name += "new"
+                result {
+                    meta["value"].int ?: 0 + it
+                }
             }
         }
 

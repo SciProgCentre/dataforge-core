@@ -242,11 +242,3 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     }
 }
 
-fun <T : Any> Workspace.Companion.task(
-    name: String,
-    type: KClass<out T>,
-    builder: TaskBuilder<T>.() -> Unit
-): GenericTask<T> = TaskBuilder(name.toName(), type).apply(builder).build()
-
-
-//TODO add delegates to build gradle-like tasks
