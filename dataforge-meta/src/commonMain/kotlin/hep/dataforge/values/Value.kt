@@ -45,6 +45,8 @@ interface Value {
 
     override fun equals(other: Any?): Boolean
 
+    override fun hashCode(): Int
+
     companion object {
         const val TYPE = "value"
 
@@ -86,13 +88,8 @@ object Null : Value {
     override fun toString(): String = value.toString()
 
     override fun equals(other: Any?): Boolean = other === Null
+    override fun hashCode(): Int = 0
 }
-
-/**
- * Check if value is null
- */
-fun Value.isNull(): Boolean = this == Null
-
 
 /**
  * Singleton true value
@@ -106,7 +103,7 @@ object True : Value {
     override fun toString(): String = value.toString()
 
     override fun equals(other: Any?): Boolean = other === True
-
+    override fun hashCode(): Int = 1
 }
 
 /**
@@ -121,9 +118,8 @@ object False : Value {
     override fun toString(): String = True.value.toString()
 
     override fun equals(other: Any?): Boolean = other === False
+    override fun hashCode(): Int = -1
 }
-
-val Value.boolean get() = this == True || this.list.firstOrNull() == True || (type == ValueType.STRING && string.toBoolean())
 
 class NumberValue(override val number: Number) : Value {
     override val value: Any? get() = number
@@ -183,18 +179,18 @@ class ListValue(override val list: List<Value>) : Value {
         }
     }
 
-    override val value: Any? get() = list
+    override val value: List<Value> get() = list
     override val type: ValueType get() = list.first().type
     override val number: Number get() = list.first().number
     override val string: String get() = list.first().string
 
-    override fun toString(): String = list.joinToString (prefix = "[", postfix = "]")
+    override fun toString(): String = list.joinToString(prefix = "[", postfix = "]")
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Value) return false
-        if( other is DoubleArrayValue){
-
+        if (other is DoubleArrayValue) {
+            return DoubleArray(list.size) { list[it].number.toDouble() }.contentEquals(other.value)
         }
         return list == other.list
     }
@@ -206,12 +202,6 @@ class ListValue(override val list: List<Value>) : Value {
 
 }
 
-/**
- * Check if value is list
- */
-fun Value.isList(): Boolean = this.list.size > 1
-
-
 fun Number.asValue(): Value = NumberValue(this)
 
 fun Boolean.asValue(): Value = if (this) True else False
@@ -220,15 +210,15 @@ fun String.asValue(): Value = StringValue(this)
 
 fun Iterable<Value>.asValue(): Value = ListValue(this.toList())
 
-fun IntArray.asValue(): Value = ListValue(map{NumberValue(it)})
+fun IntArray.asValue(): Value = ListValue(map { NumberValue(it) })
 
-fun LongArray.asValue(): Value = ListValue(map{NumberValue(it)})
+fun LongArray.asValue(): Value = ListValue(map { NumberValue(it) })
 
-fun ShortArray.asValue(): Value = ListValue(map{NumberValue(it)})
+fun ShortArray.asValue(): Value = ListValue(map { NumberValue(it) })
 
-fun FloatArray.asValue(): Value = ListValue(map{NumberValue(it)})
+fun FloatArray.asValue(): Value = ListValue(map { NumberValue(it) })
 
-fun ByteArray.asValue(): Value = ListValue(map{NumberValue(it)})
+fun ByteArray.asValue(): Value = ListValue(map { NumberValue(it) })
 
 
 /**
