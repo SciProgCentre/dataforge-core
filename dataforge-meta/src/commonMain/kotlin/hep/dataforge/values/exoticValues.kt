@@ -14,6 +14,8 @@ class LazyParsedValue(override val string: String) : Value {
     override fun toString(): String = string
 
     override fun equals(other: Any?): Boolean = other is Value && this.parsedValue == other
+
+    override fun hashCode(): Int  = string.hashCode()
 }
 
 fun String.lazyParseValue(): LazyParsedValue = LazyParsedValue(this)

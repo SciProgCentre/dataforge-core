@@ -10,7 +10,7 @@ class DynamicMetaTest {
     fun testDynamicMeta() {
         val d = js("{}")
         d.a = 22
-        d.array = arrayOf(1,2,3)
+        d.array = arrayOf(1, 2, 3)
         d.b = "myString"
         d.ob = js("{}")
         d.ob.childNode = 18
@@ -18,7 +18,7 @@ class DynamicMetaTest {
 
         val meta = DynamicMeta(d)
         assertEquals(true, meta["ob.booleanNode"].boolean)
-        assertEquals(2,meta["array[1]"].int)
+        assertEquals(2, meta["array[1]"].int)
     }
 
 }

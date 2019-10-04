@@ -7,6 +7,7 @@ import hep.dataforge.values.Value
 /**
  * DSL builder for meta. Is not intended to store mutable state
  */
+@DFBuilder
 class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
     override fun wrapNode(meta: Meta): MetaBuilder = if (meta is MetaBuilder) meta else meta.builder()
     override fun empty(): MetaBuilder = MetaBuilder()

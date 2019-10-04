@@ -140,6 +140,7 @@ private sealed class DataTreeBuilderItem<out T : Any> {
 /**
  * A builder for a DataTree.
  */
+@DFBuilder
 class DataTreeBuilder<T : Any>(val type: KClass<out T>) {
     private val map = HashMap<NameToken, DataTreeBuilderItem<T>>()
 
@@ -207,7 +208,7 @@ class DataTreeBuilder<T : Any>(val type: KClass<out T>) {
     /**
      * Build and append node
      */
-    infix fun String.to(block: DataTreeBuilder<out T>.() -> Unit) = set(toName(), DataTreeBuilder<T>(type).apply(block))
+    infix fun String.to(block: DataTreeBuilder<T>.() -> Unit) = set(toName(), DataTreeBuilder(type).apply(block))
 
 
     fun update(node: DataNode<T>) {

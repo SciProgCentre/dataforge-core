@@ -1,6 +1,7 @@
 package hep.dataforge.io
 
 import java.nio.file.Files
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -20,6 +21,7 @@ class FileEnvelopeTest {
     }
 
     @Test
+    @Ignore
     fun testFileWriteRead() {
         val tmpPath = Files.createTempFile("dataforge_test", ".df")
         tmpPath.writeEnvelope(envelope)

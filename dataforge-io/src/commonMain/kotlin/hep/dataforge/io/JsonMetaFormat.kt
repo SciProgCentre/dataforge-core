@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package hep.dataforge.io
 
 import hep.dataforge.descriptors.ItemDescriptor
@@ -43,6 +45,9 @@ object JsonMetaFormat : MetaFormat {
     }
 }
 
+/**
+ * @param descriptor reserved for custom serialization in future
+ */
 fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
     return if (isList()) {
         JsonArray(list.map { it.toJson() })

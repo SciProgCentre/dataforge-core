@@ -7,19 +7,19 @@ import kotlin.test.assertTrue
 internal class DataTreeBuilderTest{
     @Test
     fun testDataUpdate(){
-        val updateData = DataNode.build(Any::class){
+        val updateData = DataNode<Any>{
             "update" to {
                 "a" to Data.static("a")
                 "b" to Data.static("b")
             }
         }
 
-        val node = DataNode.build(Any::class){
-            "primary" to {
-                "a" to Data.static("a")
-                "b" to Data.static("b")
+        val node = DataNode<Any>{
+            node("primary"){
+                static("a","a")
+                static("b","b")
             }
-            "root" to Data.static("root")
+            static("root","root")
             update(updateData)
         }
 
