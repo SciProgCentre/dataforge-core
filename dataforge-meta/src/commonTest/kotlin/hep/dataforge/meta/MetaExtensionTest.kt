@@ -1,6 +1,7 @@
 package hep.dataforge.meta
 
-import org.junit.Test
+import kotlin.test.Test
+
 
 class MetaExtensionTest {
 
@@ -15,7 +16,7 @@ class MetaExtensionTest {
     }
     @Test
     fun testEnumByString(){
-        val meta = buildMeta{"enum" to TestEnum.test.toString()}
+        val meta = buildMeta{"enum" to TestEnum.test.name}
         println(meta["enum"].enum<TestEnum>())
     }
 
