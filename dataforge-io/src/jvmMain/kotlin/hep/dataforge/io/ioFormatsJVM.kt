@@ -5,6 +5,7 @@ import hep.dataforge.io.functions.FunctionServer
 import hep.dataforge.io.functions.FunctionServer.Companion.FUNCTION_NAME_KEY
 import hep.dataforge.io.functions.FunctionServer.Companion.INPUT_FORMAT_KEY
 import hep.dataforge.io.functions.FunctionServer.Companion.OUTPUT_FORMAT_KEY
+import hep.dataforge.io.functions.function
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.buildMeta
 import hep.dataforge.names.Name

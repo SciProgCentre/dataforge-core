@@ -6,17 +6,19 @@ import hep.dataforge.io.*
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
+import kotlin.reflect.KClass
 
 class RemoteFunctionClient(override val context: Context, val responder: Responder) : FunctionServer, ContextAware {
 
     private fun <T : Any> IOPlugin.encodeOne(
         meta: Meta,
-        value: T
+        value: T,
+        valueType: KClass<out T> = value::class
     ): Envelope = Envelope.invoke {
         meta(meta)
         type = REQUEST_TYPE
         data {
-            val inputFormat: IOFormat<T> = getInputFormat<T>(meta)
+            val inputFormat: IOFormat<T> = getInputFormat(meta, valueType)
             inputFormat.run {
                 writeThis(value)
             }
@@ -25,7 +27,8 @@ class RemoteFunctionClient(override val context: Context, val responder: Respond
 
     private fun <T : Any> IOPlugin.encodeMany(
         meta: Meta,
-        values: List<T>
+        values: List<T>,
+        valueType: KClass<out T>
     ): Envelope = Envelope.invoke {
         meta(meta)
         type = REQUEST_TYPE
@@ -33,7 +36,7 @@ class RemoteFunctionClient(override val context: Context, val responder: Respond
             SIZE_KEY to values.size
         }
         data {
-            val inputFormat: IOFormat<T> = getInputFormat<T>(meta)
+            val inputFormat: IOFormat<T> = getInputFormat(meta, valueType)
             inputFormat.run {
                 values.forEach {
                     writeThis(it)
@@ -42,14 +45,14 @@ class RemoteFunctionClient(override val context: Context, val responder: Respond
         }
     }
 
-    private fun <R : Any> IOPlugin.decode(envelope: Envelope): List<R> {
+    private fun <R : Any> IOPlugin.decode(envelope: Envelope, valueType: KClass<out R>): List<R> {
         require(envelope.type == RESPONSE_TYPE) { "Unexpected message type: ${envelope.type}" }
         val size = envelope.meta[SIZE_KEY].int ?: 1
 
         return if (size == 0) {
             emptyList()
         } else {
-            val outputFormat: IOFormat<R> = getOutputFormat<R>(envelope.meta)
+            val outputFormat: IOFormat<R> = getOutputFormat(envelope.meta, valueType)
             envelope.data?.read {
                 List<R>(size) {
                     outputFormat.run {
@@ -66,20 +69,24 @@ class RemoteFunctionClient(override val context: Context, val responder: Respond
 
     override suspend fun <T : Any, R : Any> call(
         meta: Meta,
-        arg: T
+        arg: T,
+        inputType: KClass<out T>,
+        outputType: KClass<out R>
     ): R = plugin.run {
         val request = encodeOne(meta, arg)
         val response = responder.respond(request)
-        return decode<R>(response).first()
+        return decode<R>(response, outputType).first()
     }
 
     override suspend fun <T : Any, R : Any> callMany(
         meta: Meta,
-        arg: List<T>
+        arg: List<T>,
+        inputType: KClass<out T>,
+        outputType: KClass<out R>
     ): List<R> = plugin.run {
-        val request = encodeMany(meta, arg)
+        val request = encodeMany(meta, arg, inputType)
         val response = responder.respond(request)
-        return decode<R>(response)
+        return decode<R>(response, outputType)
     }
 
     companion object {

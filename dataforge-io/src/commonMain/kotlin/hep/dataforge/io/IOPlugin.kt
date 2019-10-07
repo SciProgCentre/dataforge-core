@@ -31,9 +31,13 @@ class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         context.content<IOFormat<*>>(IOFormat.TYPE)
     }
 
-    fun resolveIOFormat(item: MetaItem<*>): IOFormat<*>? {
+    fun <T: Any> resolveIOFormat(item: MetaItem<*>, type: KClass<out T>): IOFormat<T>? {
         val key = item.string ?: error("Not a string value!")
-        return ioFormats[key]
+        return ioFormats[key]?.let {
+            @Suppress("UNCHECKED_CAST")
+            if(it.type!= type) error("Format type ${it.type} is not the same as requested type ${type}")
+            else it as IOFormat<T>
+        }
     }
 
     companion object : PluginFactory<IOPlugin> {

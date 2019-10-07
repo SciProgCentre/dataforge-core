@@ -23,7 +23,7 @@ class RemoteFunctionServer(
         require(request.type == RemoteFunctionClient.REQUEST_TYPE) { "Unexpected message type: ${request.type}" }
 
         val inputFormat = plugin.getInputFormat<Any>(request.meta)
-        val outputFormat =  plugin.getOutputFormat<Any>(request.meta)
+        val outputFormat = plugin.getOutputFormat<Any>(request.meta)
 
         val size = request.meta[RemoteFunctionClient.SIZE_KEY].int ?: 1
 
