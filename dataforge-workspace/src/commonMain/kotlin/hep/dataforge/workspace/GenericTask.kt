@@ -19,20 +19,20 @@ class GenericTask<R : Any>(
     private val dataTransform: Workspace.() -> TaskModel.(DataNode<Any>) -> DataNode<R>
 ) : Task<R> {
 
-    private fun gather(workspace: Workspace, model: TaskModel): DataNode<Any> {
-        return DataNode.invoke(Any::class) {
-            model.dependencies.forEach { dep ->
-                update(dep.apply(workspace))
-            }
-        }
-    }
+//    private fun gather(workspace: Workspace, model: TaskModel): DataNode<Any> {
+//        return DataNode.invoke(Any::class) {
+//            model.dependencies.forEach { dep ->
+//                update(dep.apply(workspace))
+//            }
+//        }
+//    }
 
     override fun run(workspace: Workspace, model: TaskModel): DataNode<R> {
         //validate model
         validate(model)
 
         // gather data
-        val input = gather(workspace, model)
+        val input = model.buildInput(workspace)// gather(workspace, model)
 
         //execute
         workspace.context.logger.info{"Starting task '$name' on ${model.target} with meta: \n${model.meta}"}

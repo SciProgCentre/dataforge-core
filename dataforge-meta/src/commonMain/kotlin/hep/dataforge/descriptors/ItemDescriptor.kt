@@ -32,13 +32,11 @@ sealed class ItemDescriptor(override val config: Config) : Specific {
     var info: String? by string()
 
     /**
-     * A list of tags for this item. Tags used to customize item usage
+     * Additional attributes of an item. For example validation and widget parameters
      *
      * @return
      */
-    var tags: List<String> by value { value ->
-        value?.list?.map { it.string } ?: emptyList()
-    }
+    var attributes by node()
 
     /**
      * True if the item is required
@@ -54,7 +52,7 @@ sealed class ItemDescriptor(override val config: Config) : Specific {
  *
  * @author Alexander Nozik
  */
-class NodeDescriptor(config: Config) : ItemDescriptor(config){
+class NodeDescriptor(config: Config) : ItemDescriptor(config) {
 
     /**
      * True if the node is required
@@ -68,7 +66,7 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config){
      *
      * @return
      */
-    var default: Meta? by node()
+    var default: Config? by node()
 
     /**
      * The list of value descriptors
@@ -79,7 +77,7 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config){
         }
 
     fun value(name: String, descriptor: ValueDescriptor) {
-        if(items.keys.contains(name)) error("The key $name already exists in descriptor")
+        if (items.keys.contains(name)) error("The key $name already exists in descriptor")
         val token = NameToken(VALUE_KEY, name)
         config[token] = descriptor.config
     }
@@ -101,7 +99,7 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config){
 
 
     fun node(name: String, descriptor: NodeDescriptor) {
-        if(items.keys.contains(name)) error("The key $name already exists in descriptor")
+        if (items.keys.contains(name)) error("The key $name already exists in descriptor")
         val token = NameToken(NODE_KEY, name)
         config[token] = descriptor.config
     }
@@ -117,7 +115,7 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config){
 
     companion object : Specification<NodeDescriptor> {
 
-//        const val ITEM_KEY = "item"
+        //        const val ITEM_KEY = "item"
         const val NODE_KEY = "node"
         const val VALUE_KEY = "value"
 
@@ -135,7 +133,7 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config){
  *
  * @author Alexander Nozik
  */
-class ValueDescriptor(config: Config) : ItemDescriptor(config){
+class ValueDescriptor(config: Config) : ItemDescriptor(config) {
 
 
     /**

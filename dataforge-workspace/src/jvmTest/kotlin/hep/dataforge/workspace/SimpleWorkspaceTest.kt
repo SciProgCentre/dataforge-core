@@ -35,6 +35,14 @@ class SimpleWorkspaceTest {
             }
         }
 
+        val filterTask = task<Int>("filterOne") {
+            model {
+                data("myData\\[12\\]")
+            }
+            pipe<Int>{
+                it
+            }
+        }
 
         val square = task<Int>("square") {
             pipe<Int> { data ->
@@ -149,5 +157,11 @@ class SimpleWorkspaceTest {
     fun testFullSquare() {
         val node = workspace.run("fullsquare")
         println(node.toMeta())
+    }
+
+    @Test
+    fun testGather() {
+        val node = workspace.run("filterOne")
+        assertEquals(12, node.first()?.get())
     }
 }

@@ -138,7 +138,7 @@ fun Meta.boolean(default: Boolean? = null, key: String? = null) = BooleanDelegat
 
 fun Meta.number(default: Number? = null, key: String? = null) = NumberDelegate(this, key, default)
 
-fun Meta.child(key: String? = null) = ChildDelegate(this, key) { it }
+fun Meta.node(key: String? = null) = ChildDelegate(this, key) { it }
 
 @JvmName("safeString")
 fun Meta.string(default: String, key: String? = null) =
@@ -169,7 +169,7 @@ inline fun <reified E : Enum<E>> Meta.enum(default: E, key: String? = null) =
     SafeEnumDelegate(this, key, default) { enumValueOf(it) }
 
 
-fun <T : Metoid> Metoid.child(key: String? = null, converter: (Meta) -> T) = ChildDelegate(meta, key, converter)
+fun <T : Metoid> Metoid.node(key: String? = null, converter: (Meta) -> T) = ChildDelegate(meta, key, converter)
 
 /* Read-write delegates */
 
@@ -337,12 +337,12 @@ class MutableSafeEnumvDelegate<M : MutableMeta<M>, E : Enum<E>>(
 class MutableNodeDelegate<M : MutableMeta<M>>(
     val meta: M,
     private val key: Name? = null
-) : ReadWriteProperty<Any?, Meta?> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): Meta? {
+) : ReadWriteProperty<Any?, M?> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): M? {
         return meta[key ?: property.name.asName()]?.node
     }
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Meta?) {
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: M?) {
         meta[key ?: property.name.asName()] = value
     }
 }

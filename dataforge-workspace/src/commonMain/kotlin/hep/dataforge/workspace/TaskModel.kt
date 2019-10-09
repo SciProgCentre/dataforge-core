@@ -8,7 +8,6 @@ package hep.dataforge.workspace
 import hep.dataforge.data.DataFilter
 import hep.dataforge.data.DataTree
 import hep.dataforge.data.DataTreeBuilder
-import hep.dataforge.data.dataSequence
 import hep.dataforge.meta.*
 import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
@@ -53,9 +52,8 @@ data class TaskModel(
  */
 fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> {
     return DataTreeBuilder(Any::class).apply {
-        dependencies.asSequence().flatMap { it.apply(workspace).dataSequence() }.forEach { (name, data) ->
-            //TODO add concise error on replacement
-            this[name] = data
+        dependencies.forEach { dep ->
+            update(dep.apply(workspace))
         }
     }.build()
 }
