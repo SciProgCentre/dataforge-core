@@ -59,6 +59,8 @@ interface Meta : MetaRepr {
          * A key for single value node
          */
         const val VALUE_KEY = "@value"
+
+        val empty: EmptyMeta = EmptyMeta
     }
 }
 
@@ -183,15 +185,15 @@ operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: NameToken): MetaItem<M>? = 
 /**
  * Equals, hashcode and to string for any meta
  */
-abstract class MetaBase: Meta{
+abstract class MetaBase : Meta {
 
-    override fun equals(other: Any?): Boolean  = if(other is Meta) {
+    override fun equals(other: Any?): Boolean = if (other is Meta) {
         this.items == other.items
     } else {
         false
     }
 
-    override fun hashCode(): Int  = items.hashCode()
+    override fun hashCode(): Int = items.hashCode()
 
     override fun toString(): String = items.toString()
 }
@@ -228,7 +230,7 @@ object EmptyMeta : MetaBase() {
  * Unsafe methods to access values and nodes directly from [MetaItem]
  */
 
-val MetaItem<*>?.value
+val MetaItem<*>?.value: Value?
     get() = (this as? ValueItem)?.value
         ?: (this?.node?.get(VALUE_KEY) as? ValueItem)?.value
 
@@ -252,7 +254,7 @@ val MetaItem<*>?.stringList get() = value?.list?.map { it.string } ?: emptyList(
 val <M : Meta> MetaItem<M>?.node: M?
     get() = when (this) {
         null -> null
-        is ValueItem -> error("Trying to interpret value meta item as node item")
+        is ValueItem -> null//error("Trying to interpret value meta item as node item")
         is NodeItem -> node
     }
 

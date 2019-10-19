@@ -17,7 +17,7 @@ import kotlin.time.ExperimentalTime
 @ExperimentalStdlibApi
 object EchoResponder : Responder {
     override suspend fun respond(request: Envelope): Envelope {
-        val string = TaggedEnvelopeFormat.run { writeBytes(request).decodeToString() }
+        val string = TaggedEnvelopeFormat().run { writeBytes(request).decodeToString() }
         println("ECHO:")
         println(string)
         return request

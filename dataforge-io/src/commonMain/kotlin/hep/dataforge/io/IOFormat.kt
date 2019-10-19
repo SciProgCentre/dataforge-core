@@ -1,12 +1,13 @@
 package hep.dataforge.io
 
+import hep.dataforge.context.Context
+import hep.dataforge.context.Factory
 import hep.dataforge.context.Named
-import hep.dataforge.io.IOFormat.Companion.TYPE
+import hep.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
+import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaItem
-import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
-import hep.dataforge.names.toName
 import hep.dataforge.provider.Type
 import hep.dataforge.values.Value
 import kotlinx.io.core.*
@@ -19,27 +20,33 @@ import kotlin.reflect.KClass
 /**
  * And interface for serialization facilities
  */
-@Type(TYPE)
-interface IOFormat<T : Any> : Named {
+
+interface IOFormat<T : Any> {
+    fun Output.writeThis(obj: T)
+    fun Input.readThis(): T
+
+
+}
+
+fun <T : Any> IOFormat<T>.writePacket(obj: T): ByteReadPacket = buildPacket { writeThis(obj) }
+fun <T : Any> IOFormat<T>.writeBytes(obj: T): ByteArray = buildPacket { writeThis(obj) }.readBytes()
+fun <T : Any> IOFormat<T>.readBytes(array: ByteArray): T = ByteReadPacket(array).readThis()
+
+@Type(IO_FORMAT_TYPE)
+interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
     /**
      * Explicit type for dynamic type checks
      */
     val type: KClass<out T>
 
-    fun Output.writeThis(obj: T)
-    fun Input.readThis(): T
-
     companion object {
-        const val TYPE = "ioFormat"
+        const val IO_FORMAT_TYPE = "io.format"
     }
 }
 
-fun <T : Any> IOFormat<T>.writePacket(obj: T): ByteReadPacket = buildPacket { writeThis(obj) }
-fun <T : Any> IOFormat<T>.writeBytes(obj: T): ByteArray = buildPacket { writeThis(obj) }.readBytes()
-fun <T: Any> IOFormat<T>.readBytes(array: ByteArray): T = ByteReadPacket(array).readThis()
 
-
-object DoubleIOFormat : IOFormat<Double> {
+object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
+    override fun invoke(meta: Meta, context: Context): IOFormat<Double> = this
 
     override val name: Name = "double".asName()
 
@@ -52,7 +59,8 @@ object DoubleIOFormat : IOFormat<Double> {
     override fun Input.readThis(): Double = readDouble()
 }
 
-object ValueIOFormat : IOFormat<Value> {
+object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
+    override fun invoke(meta: Meta, context: Context): IOFormat<Value> = this
 
     override val name: Name = "value".asName()
 
@@ -73,11 +81,11 @@ object ValueIOFormat : IOFormat<Value> {
  */
 @ImplicitReflectionSerializer
 class SerializerIOFormat<T : Any>(
-    override val type: KClass<T>,
+    type: KClass<T>,
     val serializer: KSerializer<T> = type.serializer()
 ) : IOFormat<T> {
 
-    override val name: Name = type.simpleName?.toName() ?: EmptyName
+    //override val name: Name = type.simpleName?.toName() ?: EmptyName
 
 
     override fun Output.writeThis(obj: T) {

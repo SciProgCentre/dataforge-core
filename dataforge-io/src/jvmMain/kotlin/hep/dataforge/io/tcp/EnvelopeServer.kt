@@ -2,10 +2,12 @@ package hep.dataforge.io.tcp
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
-import hep.dataforge.io.EnvelopeFormat
+import hep.dataforge.io.EnvelopeFormatFactory
 import hep.dataforge.io.Responder
 import hep.dataforge.io.TaggedEnvelopeFormat
 import hep.dataforge.io.type
+import hep.dataforge.meta.EmptyMeta
+import hep.dataforge.meta.Meta
 import kotlinx.coroutines.*
 import kotlinx.io.streams.writePacket
 import java.net.ServerSocket
@@ -17,10 +19,13 @@ class EnvelopeServer(
     val port: Int,
     val responder: Responder,
     val scope: CoroutineScope,
-    val format: EnvelopeFormat = TaggedEnvelopeFormat
+    formatFactory: EnvelopeFormatFactory = TaggedEnvelopeFormat,
+    formatMeta: Meta = EmptyMeta
 ) : ContextAware {
 
     private var job: Job? = null
+
+    private val format = formatFactory(formatMeta, context = context)
 
     fun start() {
         if (job == null) {

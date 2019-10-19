@@ -2,6 +2,7 @@
 
 package hep.dataforge.io
 
+import hep.dataforge.context.Context
 import hep.dataforge.descriptors.ItemDescriptor
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.descriptors.ValueDescriptor
@@ -23,25 +24,31 @@ import kotlin.collections.component2
 import kotlin.collections.set
 
 
-object JsonMetaFormat : MetaFormat {
-
-    override val name: Name = super.name + "json"
-    override val key: Short = 0x4a53//"JS"
+class JsonMetaFormat(private val json: Json = Json.plain) : MetaFormat {
 
     override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {
-        val json = meta.toJson(descriptor)
-        writeText(json.toString())
+        val jsonObject = meta.toJson(descriptor)
+        writeText(json.stringify(JsonObjectSerializer, jsonObject))
     }
 
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
         val str = readText()
-        val json = Json.plain.parseJson(str)
+        val jsonElement = json.parseJson(str)
 
-        if (json is JsonObject) {
-            return json.toMeta()
+        if (jsonElement is JsonObject) {
+            return jsonElement.toMeta()
         } else {
             TODO("Non-object root not supported")
         }
+    }
+
+    companion object : MetaFormatFactory {
+        val default = JsonMetaFormat()
+
+        override fun invoke(meta: Meta, context: Context): MetaFormat = default
+
+        override val name: Name = super.name + "json"
+        override val key: Short = 0x4a53//"JS"
     }
 }
 

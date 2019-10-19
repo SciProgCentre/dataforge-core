@@ -1,17 +1,29 @@
 package hep.dataforge.io
 
+import hep.dataforge.context.Context
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.get
+import hep.dataforge.meta.string
 import hep.dataforge.names.Name
 import hep.dataforge.names.plus
+import hep.dataforge.names.toName
 import kotlinx.io.core.*
 
 @ExperimentalUnsignedTypes
-object TaggedEnvelopeFormat : EnvelopeFormat {
-    const val VERSION = "DF03"
-    private const val START_SEQUENCE = "#~"
-    private const val END_SEQUENCE = "~#\r\n"
-    private const val TAG_SIZE = 24u
+class TaggedEnvelopeFormat(val io: IOPlugin, meta: Meta) : EnvelopeFormat {
 
-    override val name: Name = super.name + VERSION
+    private val metaFormat: MetaFormat
+
+    private val metaFormatKey: Short
+
+    init {
+        val metaName = meta["name"].string?.toName() ?: JsonMetaFormat.name
+        val metaFormatFactory = io.metaFormatFactories.find { it.name == metaName }
+            ?: error("Meta format could not be resolved")
+
+        metaFormat = metaFormatFactory(meta, io.context)
+        metaFormatKey = metaFormatFactory.key
+    }
 
     private fun Tag.toBytes(): ByteReadPacket = buildPacket(24) {
         writeText(START_SEQUENCE)
@@ -35,12 +47,12 @@ object TaggedEnvelopeFormat : EnvelopeFormat {
         return Tag(metaFormatKey, metaLength, dataLength)
     }
 
-    override fun Output.writeEnvelope(envelope: Envelope, format: MetaFormat) {
-        val metaBytes = format.writeBytes(envelope.meta)
-        val tag = Tag(format.key, metaBytes.size.toUInt(), envelope.data?.size ?: 0.toULong())
+    override fun Output.writeThis(obj: Envelope) {
+        val metaBytes = metaFormat.writeBytes(obj.meta)
+        val tag = Tag(metaFormatKey, metaBytes.size.toUInt(), obj.data?.size ?: 0.toULong())
         writePacket(tag.toBytes())
         writeFully(metaBytes)
-        envelope.data?.read { copyTo(this@writeEnvelope) }
+        obj.data?.read { copyTo(this@writeThis) }
     }
 
     /**
@@ -49,10 +61,10 @@ object TaggedEnvelopeFormat : EnvelopeFormat {
      * @param input an input to read from
      * @param formats a collection of meta formats to resolve
      */
-    override fun Input.readEnvelope(formats: Collection<MetaFormat>): Envelope {
+    override fun Input.readThis(): Envelope {
         val tag = readTag()
 
-        val metaFormat = formats.find { it.key == tag.metaFormatKey }
+        val metaFormat = io.metaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
         val metaPacket = ByteReadPacket(readBytes(tag.metaSize.toInt()))
@@ -62,10 +74,10 @@ object TaggedEnvelopeFormat : EnvelopeFormat {
         return SimpleEnvelope(meta, ArrayBinary(dataBytes))
     }
 
-    override fun Input.readPartial(formats: Collection<MetaFormat>): PartialEnvelope {
+    override fun Input.readPartial(): PartialEnvelope {
         val tag = readTag()
 
-        val metaFormat = formats.find { it.key == tag.metaFormatKey }
+        val metaFormat = io.metaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
         val metaPacket = ByteReadPacket(readBytes(tag.metaSize.toInt()))
@@ -79,5 +91,21 @@ object TaggedEnvelopeFormat : EnvelopeFormat {
         val metaSize: UInt,
         val dataSize: ULong
     )
+
+    companion object : EnvelopeFormatFactory {
+        const val VERSION = "DF03"
+        private const val START_SEQUENCE = "#~"
+        private const val END_SEQUENCE = "~#\r\n"
+        private const val TAG_SIZE = 24u
+
+        override val name: Name = super.name + VERSION
+
+        override fun invoke(meta: Meta, context: Context): EnvelopeFormat {
+            val plugin = context.plugins.fetch(IOPlugin)
+            return TaggedEnvelopeFormat(plugin, meta)
+        }
+
+        val default = invoke()
+    }
 
 }

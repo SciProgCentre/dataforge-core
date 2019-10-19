@@ -1,5 +1,6 @@
 package hep.dataforge.io
 
+import hep.dataforge.context.Global
 import java.nio.file.Files
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -24,9 +25,9 @@ class FileEnvelopeTest {
     @Ignore
     fun testFileWriteRead() {
         val tmpPath = Files.createTempFile("dataforge_test", ".df")
-        tmpPath.writeEnvelope(envelope)
+        Global.io.writeEnvelopeFile(tmpPath,envelope)
         println(tmpPath.toUri())
-        val restored: Envelope = tmpPath.readEnvelope()
+        val restored: Envelope = Global.io.readEnvelopeFile(tmpPath)
         assertTrue { envelope.contentEquals(restored) }
     }
 }

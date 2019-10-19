@@ -38,7 +38,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
      * @param recursive search for parent [PluginManager] plugins
      * @param predicate condition for the plugin
      */
-    fun get(recursive: Boolean = true, predicate: (Plugin) -> Boolean): Plugin? = sequence(recursive).find(predicate)
+    fun find(recursive: Boolean = true, predicate: (Plugin) -> Boolean): Plugin? = sequence(recursive).find(predicate)
 
 
     /**
@@ -47,7 +47,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
      * @param tag
      * @return
      */
-    operator fun get(tag: PluginTag, recursive: Boolean = true): Plugin? = get(recursive) { tag.matches(it.tag) }
+    operator fun get(tag: PluginTag, recursive: Boolean = true): Plugin? = find(recursive) { tag.matches(it.tag) }
 
 
     /**
@@ -63,11 +63,13 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
      */
     @Suppress("UNCHECKED_CAST")
     operator fun <T : Any> get(type: KClass<T>, tag: PluginTag? = null, recursive: Boolean = true): T? =
-        get(recursive) { type.isInstance(it) && (tag == null || tag.matches(it.tag)) } as T?
+        find(recursive) { type.isInstance(it) && (tag == null || tag.matches(it.tag)) } as T?
 
-    inline fun <reified T : Any> get(tag: PluginTag? = null, recursive: Boolean = true): T? =
+    inline operator fun <reified T : Any> get(tag: PluginTag? = null, recursive: Boolean = true): T? =
         get(T::class, tag, recursive)
 
+    inline operator fun <reified T : Plugin> get(factory: PluginFactory<T>, recursive: Boolean = true): T? =
+        get(factory.type, factory.tag, recursive)
 
     /**
      * Load given plugin into this manager and return loaded instance.
@@ -97,7 +99,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
      * Load a plugin using its factory
      */
     fun <T : Plugin> load(factory: PluginFactory<T>, meta: Meta = EmptyMeta): T =
-        load(factory(meta))
+        load(factory(meta, context))
 
     fun <T : Plugin> load(factory: PluginFactory<T>, metaBuilder: MetaBuilder.() -> Unit): T =
         load(factory, buildMeta(metaBuilder))
@@ -122,7 +124,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
     fun <T : Plugin> fetch(factory: PluginFactory<T>, recursive: Boolean = true, meta: Meta = EmptyMeta): T {
         val loaded = get(factory.type, factory.tag, recursive)
         return when {
-            loaded == null -> load(factory(meta))
+            loaded == null -> load(factory(meta, context))
             loaded.meta == meta -> loaded // if meta is the same, return existing plugin
             else -> throw RuntimeException("Can't load plugin with tag ${factory.tag}. Plugin with this tag and different configuration already exists in context.")
         }
