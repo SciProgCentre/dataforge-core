@@ -10,20 +10,14 @@ import hep.dataforge.names.toName
 import kotlinx.io.core.*
 
 @ExperimentalUnsignedTypes
-class TaggedEnvelopeFormat(val io: IOPlugin, meta: Meta) : EnvelopeFormat {
-
-    private val metaFormat: MetaFormat
-
+class TaggedEnvelopeFormat(
+    val io: IOPlugin,
     private val metaFormatKey: Short
+) : EnvelopeFormat {
 
-    init {
-        val metaName = meta["name"].string?.toName() ?: JsonMetaFormat.name
-        val metaFormatFactory = io.metaFormatFactories.find { it.name == metaName }
-            ?: error("Meta format could not be resolved")
+    private val metaFormat =
+        io.metaFormat(metaFormatKey) ?: error("Meta format with key $metaFormatKey could not be resolved in $io")
 
-        metaFormat = metaFormatFactory(meta, io.context)
-        metaFormatKey = metaFormatFactory.key
-    }
 
     private fun Tag.toBytes(): ByteReadPacket = buildPacket(24) {
         writeText(START_SEQUENCE)
@@ -32,19 +26,6 @@ class TaggedEnvelopeFormat(val io: IOPlugin, meta: Meta) : EnvelopeFormat {
         writeUInt(metaSize)
         writeULong(dataSize)
         writeText(END_SEQUENCE)
-    }
-
-    private fun Input.readTag(): Tag {
-        val start = readTextExactBytes(2)
-        if (start != START_SEQUENCE) error("The input is not an envelope")
-        val version = readTextExactBytes(4)
-        if (version != VERSION) error("Wrong version of DataForge: expected $VERSION but found $version")
-        val metaFormatKey = readShort()
-        val metaLength = readUInt()
-        val dataLength = readULong()
-        val end = readTextExactBytes(4)
-        if (end != END_SEQUENCE) error("The input is not an envelope")
-        return Tag(metaFormatKey, metaLength, dataLength)
     }
 
     override fun Output.writeThis(obj: Envelope) {
@@ -101,8 +82,35 @@ class TaggedEnvelopeFormat(val io: IOPlugin, meta: Meta) : EnvelopeFormat {
         override val name: Name = super.name + VERSION
 
         override fun invoke(meta: Meta, context: Context): EnvelopeFormat {
-            val plugin = context.plugins.fetch(IOPlugin)
-            return TaggedEnvelopeFormat(plugin, meta)
+            val io = context.io
+
+            val metaFormatName = meta["name"].string?.toName() ?: JsonMetaFormat.name
+            val metaFormatFactory = io.metaFormatFactories.find { it.name == metaFormatName }
+                ?: error("Meta format could not be resolved")
+
+            return TaggedEnvelopeFormat(io, metaFormatFactory.key)
+        }
+
+        private fun Input.readTag(): Tag {
+            val start = readTextExactBytes(2)
+            if (start != START_SEQUENCE) error("The input is not an envelope")
+            val version = readTextExactBytes(4)
+            if (version != VERSION) error("Wrong version of DataForge: expected $VERSION but found $version")
+            val metaFormatKey = readShort()
+            val metaLength = readUInt()
+            val dataLength = readULong()
+            val end = readTextExactBytes(4)
+            if (end != END_SEQUENCE) error("The input is not an envelope")
+            return Tag(metaFormatKey, metaLength, dataLength)
+        }
+
+        override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
+            return try {
+                val tag = input.readTag()
+                TaggedEnvelopeFormat(io, tag.metaFormatKey)
+            } catch (ex: Exception) {
+                null
+            }
         }
 
         val default = invoke()

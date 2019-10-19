@@ -32,6 +32,12 @@ interface EnvelopeFormatFactory : IOFormatFactory<Envelope> {
 
     override fun invoke(meta: Meta, context: Context): EnvelopeFormat
 
+    /**
+     * Try to infer specific format from input and return null if the attempt is failed.
+     * This method does **not** return Input into initial state.
+     */
+    fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat?
+
     companion object {
         const val ENVELOPE_FORMAT_TYPE = "io.format.envelope"
     }
