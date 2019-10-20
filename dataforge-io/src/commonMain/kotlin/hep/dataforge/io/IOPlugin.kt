@@ -52,6 +52,7 @@ class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         val defaultEnvelopeFormats = listOf(TaggedEnvelopeFormat)
 
         override val tag: PluginTag = PluginTag("io", group = PluginTag.DATAFORGE_GROUP)
+
         override val type: KClass<out IOPlugin> = IOPlugin::class
         override fun invoke(meta: Meta, context: Context): IOPlugin = IOPlugin(meta)
     }

@@ -10,7 +10,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
-import kotlin.test.Ignore
 import kotlin.test.assertEquals
 import kotlin.time.ExperimentalTime
 
@@ -45,7 +44,6 @@ class EnvelopeServerTest {
     }
 
     @Test
-    @Ignore
     fun doEchoTest() {
 
         val request = Envelope.invoke {

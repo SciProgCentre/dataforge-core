@@ -69,6 +69,8 @@ inline class ArrayBinary(val array: ByteArray) : RandomAccessBinary {
     }
 }
 
+fun ByteArray.asBinary() = ArrayBinary(this)
+
 /**
  * Read given binary as object using given format
  */

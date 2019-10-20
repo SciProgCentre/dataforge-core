@@ -15,8 +15,8 @@ class TaggedEnvelopeFormat(
     private val metaFormatKey: Short
 ) : EnvelopeFormat {
 
-    private val metaFormat =
-        io.metaFormat(metaFormatKey) ?: error("Meta format with key $metaFormatKey could not be resolved in $io")
+    private val metaFormat = io.metaFormat(metaFormatKey)
+        ?: error("Meta format with key $metaFormatKey could not be resolved in $io")
 
 
     private fun Tag.toBytes(): ByteReadPacket = buildPacket(24) {
@@ -113,7 +113,7 @@ class TaggedEnvelopeFormat(
             }
         }
 
-        val default = invoke()
+        val default by lazy {  invoke()}
     }
 
 }
