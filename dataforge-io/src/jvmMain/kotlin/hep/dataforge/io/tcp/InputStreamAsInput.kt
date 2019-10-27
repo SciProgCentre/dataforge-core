@@ -17,7 +17,6 @@ internal class InputStreamAsInput(
 
 
     override fun fill(): IoBuffer? {
-
         val packet = stream.readPacketAtMost(4096)
         return pool.borrow().apply {
             resetForWrite(4096)

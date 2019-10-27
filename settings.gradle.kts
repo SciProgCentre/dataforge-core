@@ -12,7 +12,7 @@ pluginManagement {
         eachPlugin {
             when (requested.id.id) {
                 "kotlinx-atomicfu" -> useModule("org.jetbrains.kotlinx:atomicfu-gradle-plugin:${requested.version}")
-                "scientifik.mpp", "scientifik.publish" -> useModule("scientifik:gradle-tools:${requested.version}")
+                "scientifik.mpp", "scientifik.jvm", "scientifik.publish" -> useModule("scientifik:gradle-tools:${requested.version}")
             }
         }
     }
@@ -24,6 +24,7 @@ enableFeaturePreview("GRADLE_METADATA")
 include(
     ":dataforge-meta",
     ":dataforge-io",
+    ":dataforge-io:dataforge-io-yaml",
     ":dataforge-context",
     ":dataforge-data",
     ":dataforge-output",

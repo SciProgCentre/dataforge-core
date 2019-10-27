@@ -24,7 +24,7 @@ import kotlin.collections.component2
 import kotlin.collections.set
 
 
-class JsonMetaFormat(private val json: Json = Json.plain) : MetaFormat {
+class JsonMetaFormat(private val json: Json = Json.indented) : MetaFormat {
 
     override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {
         val jsonObject = meta.toJson(descriptor)
@@ -34,12 +34,7 @@ class JsonMetaFormat(private val json: Json = Json.plain) : MetaFormat {
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
         val str = readText()
         val jsonElement = json.parseJson(str)
-
-        if (jsonElement is JsonObject) {
-            return jsonElement.toMeta()
-        } else {
-            TODO("Non-object root not supported")
-        }
+        return jsonElement.toMeta()
     }
 
     companion object : MetaFormatFactory {
@@ -92,7 +87,12 @@ fun Meta.toJson(descriptor: NodeDescriptor? = null): JsonObject {
     return JsonObject(map)
 }
 
-fun JsonObject.toMeta(descriptor: NodeDescriptor? = null): JsonMeta = JsonMeta(this, descriptor)
+fun JsonElement.toMeta(descriptor: NodeDescriptor? = null): Meta {
+    return when (val item = toMetaItem(descriptor)) {
+        is MetaItem.NodeItem<*> -> item.node
+        is MetaItem.ValueItem ->item.value.toMeta()
+    }
+}
 
 fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
     return when (this) {
@@ -107,7 +107,7 @@ fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<JsonMet
         MetaItem.ValueItem(value)
     }
     is JsonObject -> {
-        val meta = toMeta(descriptor as? NodeDescriptor)
+        val meta = JsonMeta(this, descriptor as? NodeDescriptor)
         MetaItem.NodeItem(meta)
     }
     is JsonArray -> {
@@ -143,7 +143,7 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
                 this[name] = MetaItem.ValueItem(value.toValue(itemDescriptor as? ValueDescriptor)) as MetaItem<JsonMeta>
             }
             is JsonObject -> {
-                this[name] = MetaItem.NodeItem(value.toMeta(itemDescriptor as? NodeDescriptor))
+                this[name] = MetaItem.NodeItem(JsonMeta(value, itemDescriptor as? NodeDescriptor))
             }
             is JsonArray -> {
                 when {

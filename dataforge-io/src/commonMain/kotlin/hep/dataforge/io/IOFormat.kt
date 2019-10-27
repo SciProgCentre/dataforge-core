@@ -11,26 +11,54 @@ import hep.dataforge.names.asName
 import hep.dataforge.provider.Type
 import hep.dataforge.values.Value
 import kotlinx.io.core.*
+import kotlinx.io.pool.ObjectPool
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.serializer
+import kotlin.math.min
 import kotlin.reflect.KClass
 
 /**
- * And interface for serialization facilities
+ * And interface for reading and writing objects into with IO streams
  */
-
 interface IOFormat<T : Any> {
     fun Output.writeThis(obj: T)
     fun Input.readThis(): T
-
-
 }
 
-fun <T : Any> IOFormat<T>.writePacket(obj: T): ByteReadPacket = buildPacket { writeThis(obj) }
-fun <T : Any> IOFormat<T>.writeBytes(obj: T): ByteArray = buildPacket { writeThis(obj) }.readBytes()
-fun <T : Any> IOFormat<T>.readBytes(array: ByteArray): T = ByteReadPacket(array).readThis()
+fun <T : Any> Input.readWith(format: IOFormat<T>): T = format.run { readThis() }
+fun <T : Any> Output.writeWith(format: IOFormat<T>, obj: T) = format.run { writeThis(obj) }
+
+class ListIOFormat<T : Any>(val format: IOFormat<T>) : IOFormat<List<T>> {
+    override fun Output.writeThis(obj: List<T>) {
+        writeInt(obj.size)
+        format.run {
+            obj.forEach {
+                writeThis(it)
+            }
+        }
+    }
+
+    override fun Input.readThis(): List<T> {
+        val size = readInt()
+        return format.run {
+            List(size) { readThis() }
+        }
+    }
+}
+
+val <T : Any> IOFormat<T>.list get() = ListIOFormat(this)
+
+fun ObjectPool<IoBuffer>.fill(block: IoBuffer.() -> Unit): IoBuffer {
+    val buffer = borrow()
+    return try {
+        buffer.apply(block)
+    } catch (ex: Exception) {
+        //recycle(buffer)
+        throw ex
+    }
+}
 
 @Type(IO_FORMAT_TYPE)
 interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
@@ -44,6 +72,65 @@ interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
     }
 }
 
+@Deprecated("To be removed in io-2")
+inline fun buildPacketWithoutPool(headerSizeHint: Int = 0, block: BytePacketBuilder.() -> Unit): ByteReadPacket {
+    val builder = BytePacketBuilder(headerSizeHint, IoBuffer.NoPool)
+    block(builder)
+    return builder.build()
+}
+
+//@Suppress("EXPERIMENTAL_API_USAGE", "EXPERIMENTAL_OVERRIDE")
+//internal fun <R> Input.useAtMost(most: Int, reader: Input.() -> R): R {
+//    val limitedInput: Input = object : AbstractInput(
+//        IoBuffer.Pool.borrow(),
+//        remaining = most.toLong(),
+//        pool = IoBuffer.Pool
+//    ) {
+//        var read = 0
+//        override fun closeSource() {
+//            this@useAtMost.close()
+//        }
+//
+//        override fun fill(): IoBuffer? {
+//            if (read >= most) return null
+//            return IoBuffer.Pool.fill {
+//                reserveEndGap(IoBuffer.ReservedSize)
+//                read += this@useAtMost.peekTo(this, max = most - read)
+//            }
+//        }
+//
+//    }
+//    return limitedInput.reader()
+//}
+
+fun <T : Any> IOFormat<T>.writePacket(obj: T): ByteReadPacket = buildPacket { writeThis(obj) }
+fun <T : Any> IOFormat<T>.writeBytes(obj: T): ByteArray = buildPacket { writeThis(obj) }.readBytes()
+fun <T : Any> IOFormat<T>.readBytes(array: ByteArray): T {
+    //= ByteReadPacket(array).readThis()
+    val byteArrayInput: Input = object : AbstractInput(
+        IoBuffer.Pool.borrow(),
+        remaining = array.size.toLong(),
+        pool = IoBuffer.Pool
+    ) {
+        var written = 0
+        override fun closeSource() {
+            // do nothing
+        }
+
+        override fun fill(): IoBuffer? {
+            if (array.size - written <= 0) return null
+
+            return IoBuffer.Pool.fill {
+                reserveEndGap(IoBuffer.ReservedSize)
+                val toWrite = min(capacity, array.size - written)
+                writeFully(array, written, toWrite)
+                written += toWrite
+            }
+        }
+
+    }
+    return byteArrayInput.readThis()
+}
 
 object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
     override fun invoke(meta: Meta, context: Context): IOFormat<Double> = this

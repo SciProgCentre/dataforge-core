@@ -20,7 +20,7 @@ interface MetaFormat : IOFormat<Meta> {
         writeMeta(obj, null)
     }
 
-    override fun Input.readThis(): Meta = readMeta(null)
+    override fun Input.readThis(): Meta = readMeta()
 
     fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor? = null)
     fun Input.readMeta(descriptor: NodeDescriptor? = null): Meta

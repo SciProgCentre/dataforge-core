@@ -4,13 +4,11 @@ import hep.dataforge.meta.*
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.json
 import kotlinx.serialization.json.jsonArray
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MetaFormatTest {
     @Test
-    @Ignore
     fun testBinaryMetaFormat() {
         val meta = buildMeta {
             "a" to 22
