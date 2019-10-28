@@ -28,15 +28,21 @@ class StringDelegate(val meta: Meta, private val key: String? = null, private va
     }
 }
 
-class BooleanDelegate(val meta: Meta, private val key: String? = null, private val default: Boolean? = null) :
-    ReadOnlyProperty<Metoid, Boolean?> {
-    override fun getValue(thisRef: Metoid, property: KProperty<*>): Boolean? {
+class BooleanDelegate(
+    val meta: Meta,
+    private val key: String? = null,
+    private val default: Boolean? = null
+) : ReadOnlyProperty<Any?, Boolean?> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean? {
         return meta[key ?: property.name]?.boolean ?: default
     }
 }
 
-class NumberDelegate(val meta: Meta, private val key: String? = null, private val default: Number? = null) :
-    ReadOnlyProperty<Any?, Number?> {
+class NumberDelegate(
+    val meta: Meta,
+    private val key: String? = null,
+    private val default: Number? = null
+) : ReadOnlyProperty<Any?, Number?> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): Number? {
         return meta[key ?: property.name]?.number ?: default
     }
@@ -167,9 +173,6 @@ fun Meta.number(key: String? = null, default: () -> Number) =
 
 inline fun <reified E : Enum<E>> Meta.enum(default: E, key: String? = null) =
     SafeEnumDelegate(this, key, default) { enumValueOf(it) }
-
-
-fun <T : Metoid> Metoid.node(key: String? = null, converter: (Meta) -> T) = ChildDelegate(meta, key, converter)
 
 /* Read-write delegates */
 

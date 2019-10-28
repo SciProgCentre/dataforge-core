@@ -4,8 +4,6 @@ import hep.dataforge.names.NameToken
 
 /**
  * A meta laminate consisting of multiple immutable meta layers. For mutable front layer, use [Styled].
- *
- *
  */
 class Laminate(layers: List<Meta>) : MetaBase() {
 
