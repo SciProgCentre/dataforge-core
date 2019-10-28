@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.values.Value
 
 ///**
@@ -13,7 +14,7 @@ import hep.dataforge.values.Value
 /**
  * Convert meta to map of maps
  */
-fun Meta.toMap(): Map<String, Any?> {
+fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
     return items.entries.associate { (token, item) ->
         token.toString() to when (item) {
             is MetaItem.NodeItem -> item.node.toMap()
@@ -25,7 +26,7 @@ fun Meta.toMap(): Map<String, Any?> {
 /**
  * Convert map of maps to meta
  */
-fun Map<String, Any?>.toMeta(): Meta = buildMeta {
+fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = buildMeta {
     entries.forEach { (key, value) ->
         @Suppress("UNCHECKED_CAST")
         when (value) {

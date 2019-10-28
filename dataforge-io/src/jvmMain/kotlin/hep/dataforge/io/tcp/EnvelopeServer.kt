@@ -75,7 +75,7 @@ class EnvelopeServer(
             val outputStream = socket.getOutputStream()
             format.run {
                 while (socket.isConnected) {
-                    val request = input.readThis()
+                    val request = input.readObject()
                     logger.debug { "Accepted request with type ${request.type} from ${socket.remoteSocketAddress}" }
                     if (request.type == SHUTDOWN_ENVELOPE_TYPE) {
                         //Echo shutdown command
@@ -87,7 +87,7 @@ class EnvelopeServer(
                     runBlocking {
                         val response = responder.respond(request)
                         outputStream.writePacket {
-                            writeThis(response)
+                            writeObject(response)
                         }
                         logger.debug { "Sent response with type ${response.type} to ${socket.remoteSocketAddress}" }
                     }

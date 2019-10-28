@@ -23,27 +23,27 @@ import kotlin.reflect.KClass
  * And interface for reading and writing objects into with IO streams
  */
 interface IOFormat<T : Any> {
-    fun Output.writeThis(obj: T)
-    fun Input.readThis(): T
+    fun Output.writeObject(obj: T)
+    fun Input.readObject(): T
 }
 
-fun <T : Any> Input.readWith(format: IOFormat<T>): T = format.run { readThis() }
-fun <T : Any> Output.writeWith(format: IOFormat<T>, obj: T) = format.run { writeThis(obj) }
+fun <T : Any> Input.readWith(format: IOFormat<T>): T = format.run { readObject() }
+fun <T : Any> Output.writeWith(format: IOFormat<T>, obj: T) = format.run { writeObject(obj) }
 
 class ListIOFormat<T : Any>(val format: IOFormat<T>) : IOFormat<List<T>> {
-    override fun Output.writeThis(obj: List<T>) {
+    override fun Output.writeObject(obj: List<T>) {
         writeInt(obj.size)
         format.run {
             obj.forEach {
-                writeThis(it)
+                writeObject(it)
             }
         }
     }
 
-    override fun Input.readThis(): List<T> {
+    override fun Input.readObject(): List<T> {
         val size = readInt()
         return format.run {
-            List(size) { readThis() }
+            List(size) { readObject() }
         }
     }
 }
@@ -79,32 +79,8 @@ inline fun buildPacketWithoutPool(headerSizeHint: Int = 0, block: BytePacketBuil
     return builder.build()
 }
 
-//@Suppress("EXPERIMENTAL_API_USAGE", "EXPERIMENTAL_OVERRIDE")
-//internal fun <R> Input.useAtMost(most: Int, reader: Input.() -> R): R {
-//    val limitedInput: Input = object : AbstractInput(
-//        IoBuffer.Pool.borrow(),
-//        remaining = most.toLong(),
-//        pool = IoBuffer.Pool
-//    ) {
-//        var read = 0
-//        override fun closeSource() {
-//            this@useAtMost.close()
-//        }
-//
-//        override fun fill(): IoBuffer? {
-//            if (read >= most) return null
-//            return IoBuffer.Pool.fill {
-//                reserveEndGap(IoBuffer.ReservedSize)
-//                read += this@useAtMost.peekTo(this, max = most - read)
-//            }
-//        }
-//
-//    }
-//    return limitedInput.reader()
-//}
-
-fun <T : Any> IOFormat<T>.writePacket(obj: T): ByteReadPacket = buildPacket { writeThis(obj) }
-fun <T : Any> IOFormat<T>.writeBytes(obj: T): ByteArray = buildPacket { writeThis(obj) }.readBytes()
+fun <T : Any> IOFormat<T>.writePacket(obj: T): ByteReadPacket = buildPacket { writeObject(obj) }
+fun <T : Any> IOFormat<T>.writeBytes(obj: T): ByteArray = buildPacket { writeObject(obj) }.readBytes()
 fun <T : Any> IOFormat<T>.readBytes(array: ByteArray): T {
     //= ByteReadPacket(array).readThis()
     val byteArrayInput: Input = object : AbstractInput(
@@ -129,7 +105,7 @@ fun <T : Any> IOFormat<T>.readBytes(array: ByteArray): T {
         }
 
     }
-    return byteArrayInput.readThis()
+    return byteArrayInput.readObject()
 }
 
 object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
@@ -139,11 +115,11 @@ object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
 
     override val type: KClass<out Double> get() = Double::class
 
-    override fun Output.writeThis(obj: Double) {
+    override fun Output.writeObject(obj: Double) {
         writeDouble(obj)
     }
 
-    override fun Input.readThis(): Double = readDouble()
+    override fun Input.readObject(): Double = readDouble()
 }
 
 object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
@@ -153,11 +129,11 @@ object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
 
     override val type: KClass<out Value> get() = Value::class
 
-    override fun Output.writeThis(obj: Value) {
+    override fun Output.writeObject(obj: Value) {
         BinaryMetaFormat.run { writeValue(obj) }
     }
 
-    override fun Input.readThis(): Value {
+    override fun Input.readObject(): Value {
         return (BinaryMetaFormat.run { readMetaItem() } as? MetaItem.ValueItem)?.value
             ?: error("The item is not a value")
     }
@@ -175,12 +151,12 @@ class SerializerIOFormat<T : Any>(
     //override val name: Name = type.simpleName?.toName() ?: EmptyName
 
 
-    override fun Output.writeThis(obj: T) {
+    override fun Output.writeObject(obj: T) {
         val bytes = Cbor.plain.dump(serializer, obj)
         writeFully(bytes)
     }
 
-    override fun Input.readThis(): T {
+    override fun Input.readObject(): T {
         //FIXME reads the whole input
         val bytes = readBytes()
         return Cbor.plain.load(serializer, bytes)

@@ -16,11 +16,11 @@ import kotlin.reflect.KClass
 
 interface MetaFormat : IOFormat<Meta> {
 
-    override fun Output.writeThis(obj: Meta) {
+    override fun Output.writeObject(obj: Meta) {
         writeMeta(obj, null)
     }
 
-    override fun Input.readThis(): Meta = readMeta()
+    override fun Input.readObject(): Meta = readMeta()
 
     fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor? = null)
     fun Input.readMeta(descriptor: NodeDescriptor? = null): Meta
@@ -42,23 +42,23 @@ interface MetaFormatFactory : IOFormatFactory<Meta> {
 }
 
 fun Meta.toString(format: MetaFormat): String = buildPacket {
-    format.run { writeThis(this@toString) }
+    format.run { writeObject(this@toString) }
 }.readText()
 
 fun Meta.toString(formatFactory: MetaFormatFactory): String = toString(formatFactory())
 
 fun Meta.toBytes(format: MetaFormat = JsonMetaFormat.default): ByteReadPacket = buildPacket {
-    format.run { writeThis(this@toBytes) }
+    format.run { writeObject(this@toBytes) }
 }
 
 fun MetaFormat.parse(str: String): Meta {
-    return ByteReadPacket(str.toByteArray()).readThis()
+    return ByteReadPacket(str.toByteArray()).readObject()
 }
 
 fun MetaFormatFactory.parse(str: String): Meta = invoke().parse(str)
 
 fun MetaFormat.fromBytes(packet: ByteReadPacket): Meta {
-    return packet.readThis()
+    return packet.readObject()
 }
 
 

@@ -76,13 +76,13 @@ fun ByteArray.asBinary() = ArrayBinary(this)
  */
 fun <T : Any> Binary.readWith(format: IOFormat<T>): T = format.run {
     read {
-        readThis()
+        readObject()
     }
 }
 
 fun <T : Any> IOFormat<T>.writeBinary(obj: T): Binary {
     val packet = buildPacket {
-        writeThis(obj)
+        writeObject(obj)
     }
     return ArrayBinary(packet.readBytes())
 }

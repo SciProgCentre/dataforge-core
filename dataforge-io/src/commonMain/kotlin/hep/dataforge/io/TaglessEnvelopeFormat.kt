@@ -22,7 +22,7 @@ class TaglessEnvelopeFormat(
         writeText("#? $key: $value;\r\n")
     }
 
-    override fun Output.writeThis(obj: Envelope) {
+    override fun Output.writeObject(obj: Envelope) {
 
         //printing header
         writeText(TAGLESS_ENVELOPE_HEADER + "\r\n")
@@ -48,7 +48,7 @@ class TaglessEnvelopeFormat(
         }
     }
 
-    override fun Input.readThis(): Envelope {
+    override fun Input.readObject(): Envelope {
         var line: String = ""
         do {
             line = readUTF8Line() ?: error("Input does not contain tagless envelope header")
@@ -73,10 +73,10 @@ class TaglessEnvelopeFormat(
             val metaSize = properties.get(META_LENGTH_PROPERTY)?.toInt()
             meta = if (metaSize != null) {
                 val metaPacket = ByteReadPacket(readBytes(metaSize))
-                metaFormat.run { metaPacket.readThis() }
+                metaFormat.run { metaPacket.readObject() }
             } else {
                 metaFormat.run {
-                    readThis()
+                    readObject()
                 }
             }
         }
@@ -128,7 +128,7 @@ class TaglessEnvelopeFormat(
             meta = if (metaSize != null) {
                 val metaPacket = ByteReadPacket(readBytes(metaSize))
                 offset += metaSize.toUInt()
-                metaFormat.run { metaPacket.readThis() }
+                metaFormat.run { metaPacket.readObject() }
             } else {
                error("Can't partially read an envelope with undefined meta size")
             }

@@ -20,9 +20,9 @@ data class PartialEnvelope(val meta: Meta, val dataOffset: UInt, val dataSize: U
 interface EnvelopeFormat : IOFormat<Envelope> {
     fun Input.readPartial(): PartialEnvelope
 
-    override fun Input.readThis(): Envelope
+    override fun Input.readObject(): Envelope
 
-    override fun Output.writeThis(obj: Envelope)
+    override fun Output.writeObject(obj: Envelope)
 }
 
 @Type(ENVELOPE_FORMAT_TYPE)

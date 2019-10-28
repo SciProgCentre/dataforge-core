@@ -30,7 +30,7 @@ class RemoteFunctionServer(
         val input = request.data?.read {
             inputFormat.run {
                 List(size) {
-                    readThis()
+                    readObject()
                 }
             }
         } ?: error("Input is empty")
@@ -48,7 +48,7 @@ class RemoteFunctionServer(
             data {
                 outputFormat.run {
                     output.forEach {
-                        writeThis(it)
+                        writeObject(it)
                     }
                 }
             }

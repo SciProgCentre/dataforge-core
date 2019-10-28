@@ -46,7 +46,7 @@ fun IOPlugin.writeEnvelopeFile(
     ).asOutput()
 
     with(formatFactory(formatMeta, context)) {
-        output.writeThis(envelope)
+        output.writeObject(envelope)
     }
 }
 

@@ -63,7 +63,7 @@ fun <T : Any> IOPlugin.readData(
                 dataFormat.run {
                     Files.newByteChannel(path, StandardOpenOption.READ)
                         .asInput()
-                        .readThis()
+                        .readObject()
                 }
             }
         }

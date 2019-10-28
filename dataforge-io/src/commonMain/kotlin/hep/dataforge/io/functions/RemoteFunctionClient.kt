@@ -20,7 +20,7 @@ class RemoteFunctionClient(override val context: Context, val responder: Respond
         data {
             val inputFormat: IOFormat<T> = getInputFormat(meta, valueType)
             inputFormat.run {
-                writeThis(value)
+                writeObject(value)
             }
         }
     }
@@ -39,7 +39,7 @@ class RemoteFunctionClient(override val context: Context, val responder: Respond
             val inputFormat: IOFormat<T> = getInputFormat(meta, valueType)
             inputFormat.run {
                 values.forEach {
-                    writeThis(it)
+                    writeObject(it)
                 }
             }
         }
@@ -56,7 +56,7 @@ class RemoteFunctionClient(override val context: Context, val responder: Respond
             envelope.data?.read {
                 List<R>(size) {
                     outputFormat.run {
-                        readThis()
+                        readObject()
                     }
                 }
             } ?: error("Message does not contain data")
