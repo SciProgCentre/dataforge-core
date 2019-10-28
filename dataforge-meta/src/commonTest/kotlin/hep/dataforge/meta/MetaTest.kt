@@ -30,4 +30,23 @@ class MetaTest {
         }.seal()
         assertEquals<Meta>(meta1, meta2)
     }
+
+    @Test
+    fun metaToMap(){
+        val meta = buildMeta {
+            "a" to 22
+            "b" to {
+                "c" to "ddd"
+            }
+            "list" to (0..4).map {
+                buildMeta {
+                    "value" to it
+                }
+            }
+        }
+        val map = meta.toMap()
+        val reconstructed = map.toMeta()
+
+        assertEquals(meta,reconstructed)
+    }
 }

@@ -81,27 +81,6 @@ operator fun Meta?.get(token: NameToken): MetaItem<*>? = this?.items?.get(token)
 operator fun Meta?.get(key: String): MetaItem<*>? = get(key.toName())
 
 /**
- * Get all items matching given name.
- */
-fun Meta.getAll(name: Name): Map<String, MetaItem<*>> {
-    val root = when (name.length) {
-        0 -> error("Can't use empty name for that")
-        1 -> this
-        else -> (this[name.cutLast()] as? NodeItem<*>)?.node
-    }
-
-    val (body, index) = name.last()!!
-    val regex = index.toRegex()
-
-    return root?.items
-        ?.filter { it.key.body == body && (index.isEmpty() || regex.matches(it.key.index)) }
-        ?.mapKeys { it.key.index }
-        ?: emptyMap()
-}
-
-fun Meta.getAll(name: String): Map<String, MetaItem<*>> = getAll(name.toName())
-
-/**
  * Get a sequence of [Name]-[Value] pairs
  */
 fun Meta.values(): Sequence<Pair<Name, Value>> {
@@ -137,27 +116,6 @@ operator fun Meta.iterator(): Iterator<Pair<Name, MetaItem<*>>> = sequence().ite
 interface MetaNode<M : MetaNode<M>> : Meta {
     override val items: Map<NameToken, MetaItem<M>>
 }
-
-/**
- * Get all items matching given name.
- */
-fun <M : MetaNode<M>> M.getAll(name: Name): Map<String, MetaItem<M>> {
-    val root: MetaNode<M>? = when (name.length) {
-        0 -> error("Can't use empty name for that")
-        1 -> this
-        else -> (this[name.cutLast()] as? NodeItem<M>)?.node
-    }
-
-    val (body, index) = name.last()!!
-    val regex = index.toRegex()
-
-    return root?.items
-        ?.filter { it.key.body == body && (index.isEmpty() || regex.matches(it.key.index)) }
-        ?.mapKeys { it.key.index }
-        ?: emptyMap()
-}
-
-fun <M : MetaNode<M>> M.getAll(name: String): Map<String, MetaItem<M>> = getAll(name.toName())
 
 operator fun <M : MetaNode<M>> MetaNode<M>?.get(name: Name): MetaItem<M>? {
     if (this == null) return null
@@ -229,7 +187,6 @@ object EmptyMeta : MetaBase() {
 /**
  * Unsafe methods to access values and nodes directly from [MetaItem]
  */
-
 val MetaItem<*>?.value: Value?
     get() = (this as? ValueItem)?.value
         ?: (this?.node?.get(VALUE_KEY) as? ValueItem)?.value
@@ -257,12 +214,5 @@ val <M : Meta> MetaItem<M>?.node: M?
         is ValueItem -> null//error("Trying to interpret value meta item as node item")
         is NodeItem -> node
     }
-
-/**
- * Generic meta-holder object
- */
-interface Metoid {
-    val meta: Meta
-}
 
 fun Meta.isEmpty() = this === EmptyMeta || this.items.isEmpty()

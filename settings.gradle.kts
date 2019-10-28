@@ -24,7 +24,6 @@ enableFeaturePreview("GRADLE_METADATA")
 include(
     ":dataforge-meta",
     ":dataforge-io",
-    ":dataforge-io:dataforge-io-yaml",
     ":dataforge-context",
     ":dataforge-data",
     ":dataforge-output",
