@@ -16,7 +16,7 @@ class DataFilter(override val config: Config) : Specific {
     /**
      * A regular expression pattern for the filter
      */
-    var pattern by string("*.")
+    var pattern by string(".*")
 //    val prefix by string()
 //    val suffix by string()
 
