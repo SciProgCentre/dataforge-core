@@ -105,15 +105,15 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     }
 
     /**
-     * A customized pipe action with ability to change meta and name
+     * A customized map action with ability to change meta and name
      */
-    inline fun <reified T : Any> customPipe(
+    inline fun <reified T : Any> mapAction(
         from: String = "",
         to: String = "",
-        crossinline block: PipeBuilder<T, R>.(TaskEnv) -> Unit
+        crossinline block: MapActionBuilder<T, R>.(TaskEnv) -> Unit
     ) {
         action(from, to) {
-            PipeAction(
+            MapAction(
                 inputType = T::class,
                 outputType = type
             ) { block(this@action) }
@@ -121,15 +121,15 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     }
 
     /**
-     * A simple pipe action without changing meta or name
+     * A simple map action without changing meta or name
      */
-    inline fun <reified T : Any> pipe(
+    inline fun <reified T : Any> map(
         from: String = "",
         to: String = "",
         crossinline block: suspend TaskEnv.(T) -> R
     ) {
         action(from, to) {
-            PipeAction(
+            MapAction(
                 inputType = T::class,
                 outputType = type
             ) {
@@ -144,13 +144,13 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     /**
      * Join elements in gathered data by multiple groups
      */
-    inline fun <reified T : Any> joinByGroup(
+    inline fun <reified T : Any> reduceByGroup(
         from: String = "",
         to: String = "",
-        crossinline block: JoinGroupBuilder<T, R>.(TaskEnv) -> Unit        //TODO needs KEEP-176
+        crossinline block: ReduceGroupBuilder<T, R>.(TaskEnv) -> Unit        //TODO needs KEEP-176
     ) {
         action(from, to) {
-            JoinAction(
+            ReduceAction(
                 inputType = T::class,
                 outputType = type
             ) { block(this@action) }
@@ -160,13 +160,13 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     /**
      * Join all elemlents in gathered data matching input type
      */
-    inline fun <reified T : Any> join(
+    inline fun <reified T : Any> reduce(
         from: String = "",
         to: String = "",
         crossinline block: suspend TaskEnv.(Map<Name, T>) -> R
     ) {
         action(from, to) {
-            JoinAction(
+            ReduceAction(
                 inputType = T::class,
                 outputType = type,
                 action = {

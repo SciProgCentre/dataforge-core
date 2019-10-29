@@ -55,7 +55,7 @@ class SplitAction<T : Any, R : Any>(
 
                     rule(env)
 
-                    val res = data.pipe(outputType, meta = env.meta) { env.result(it) }
+                    val res = data.map(outputType, meta = env.meta) { env.result(it) }
                     set(env.name, res)
                 }
             }

@@ -85,7 +85,7 @@ class StaticData<T : Any>(
 
 class NamedData<out T : Any>(val name: String, data: Data<T>) : Data<T> by data
 
-fun <T : Any, R : Any> Data<T>.pipe(
+fun <T : Any, R : Any> Data<T>.map(
     outputType: KClass<out R>,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = this.meta,
@@ -98,7 +98,7 @@ fun <T : Any, R : Any> Data<T>.pipe(
 /**
  * Create a data pipe
  */
-inline fun <T : Any, reified R : Any> Data<T>.pipe(
+inline fun <T : Any, reified R : Any> Data<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = this.meta,
     noinline block: suspend CoroutineScope.(T) -> R
@@ -109,7 +109,7 @@ inline fun <T : Any, reified R : Any> Data<T>.pipe(
 /**
  * Create a joined data.
  */
-inline fun <T : Any, reified R : Any> Collection<Data<T>>.join(
+inline fun <T : Any, reified R : Any> Collection<Data<T>>.reduce(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta,
     noinline block: suspend CoroutineScope.(Collection<T>) -> R
@@ -119,10 +119,10 @@ inline fun <T : Any, reified R : Any> Collection<Data<T>>.join(
     coroutineContext,
     this
 ) {
-    block(map { this.run { it.await(this) } })
+    block(map { run { it.await(this) } })
 }
 
-fun <K, T : Any, R : Any> Map<K, Data<T>>.join(
+fun <K, T : Any, R : Any> Map<K, Data<T>>.reduce(
     outputType: KClass<out R>,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta,
@@ -143,7 +143,7 @@ fun <K, T : Any, R : Any> Map<K, Data<T>>.join(
  * @param T type of the input goal
  * @param R type of the result goal
  */
-inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.join(
+inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.reduce(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta,
     noinline block: suspend CoroutineScope.(Map<K, T>) -> R

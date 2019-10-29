@@ -85,7 +85,7 @@ open class DynamicGoal<T>(
 /**
  * Create a one-to-one goal based on existing goal
  */
-fun <T, R> Goal<T>.pipe(
+fun <T, R> Goal<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(T) -> R
 ): Goal<R> = DynamicGoal(coroutineContext, listOf(this)) {
@@ -95,11 +95,11 @@ fun <T, R> Goal<T>.pipe(
 /**
  * Create a joining goal.
  */
-fun <T, R> Collection<Goal<T>>.join(
+fun <T, R> Collection<Goal<T>>.reduce(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Collection<T>) -> R
 ): Goal<R> = DynamicGoal(coroutineContext, this) {
-    block(map { this.run { it.await(this) } })
+    block(map { run { it.await(this) } })
 }
 
 /**
@@ -108,7 +108,7 @@ fun <T, R> Collection<Goal<T>>.join(
  * @param T type of the input goal
  * @param R type of the result goal
  */
-fun <K, T, R> Map<K, Goal<T>>.join(
+fun <K, T, R> Map<K, Goal<T>>.reduce(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Map<K, T>) -> R
 ): Goal<R> = DynamicGoal(coroutineContext, this.values) {

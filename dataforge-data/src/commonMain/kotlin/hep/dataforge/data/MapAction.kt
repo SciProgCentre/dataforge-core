@@ -10,7 +10,7 @@ class ActionEnv(val name: Name, val meta: Meta)
 /**
  * Action environment
  */
-class PipeBuilder<T, R>(var name: Name, var meta: MetaBuilder) {
+class MapActionBuilder<T, R>(var name: Name, var meta: MetaBuilder) {
     lateinit var result: suspend ActionEnv.(T) -> R
 
     /**
@@ -22,10 +22,10 @@ class PipeBuilder<T, R>(var name: Name, var meta: MetaBuilder) {
 }
 
 
-class PipeAction<T : Any, out R : Any>(
+class MapAction<T : Any, out R : Any>(
     val inputType: KClass<out T>,
     val outputType: KClass<out R>,
-    private val block: PipeBuilder<T, R>.() -> Unit
+    private val block: MapActionBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
     override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
@@ -38,12 +38,12 @@ class PipeAction<T : Any, out R : Any>(
                 // creating environment from old meta and name
                 val env = ActionEnv(name, oldMeta)
                 //applying transformation from builder
-                val builder = PipeBuilder<T, R>(name, oldMeta).apply(block)
+                val builder = MapActionBuilder<T, R>(name, oldMeta).apply(block)
                 //getting new name
                 val newName = builder.name
                 //getting new meta
                 val newMeta = builder.meta.seal()
-                val newData = data.pipe(outputType, meta = newMeta) { builder.result(env, it) }
+                val newData = data.map(outputType, meta = newMeta) { builder.result(env, it) }
                 //setting the data node
                 this[newName] = newData
             }
@@ -51,10 +51,10 @@ class PipeAction<T : Any, out R : Any>(
     }
 }
 
-inline fun <reified T : Any, reified R : Any> DataNode<T>.pipe(
+inline fun <reified T : Any, reified R : Any> DataNode<T>.map(
     meta: Meta,
-    noinline action: PipeBuilder<in T, out R>.() -> Unit
-): DataNode<R> = PipeAction(T::class, R::class, action).invoke(this, meta)
+    noinline action: MapActionBuilder<in T, out R>.() -> Unit
+): DataNode<R> = MapAction(T::class, R::class, action).invoke(this, meta)
 
 
 

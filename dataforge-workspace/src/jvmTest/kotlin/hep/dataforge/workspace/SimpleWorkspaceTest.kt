@@ -17,7 +17,7 @@ class SimpleWorkspaceTest {
         override val tag: PluginTag = PluginTag("test")
 
         val contextTask = task("test", Any::class) {
-            pipe<Any> {
+            map<Any> {
                 context.logger.info { "Test: $it" }
             }
         }
@@ -39,13 +39,13 @@ class SimpleWorkspaceTest {
             model {
                 data("myData\\[12\\]")
             }
-            pipe<Int>{
+            map<Int>{
                 it
             }
         }
 
         val square = task<Int>("square") {
-            pipe<Int> { data ->
+            map<Int> { data ->
                 if (meta["testFlag"].boolean == true) {
                     println("flag")
                 }
@@ -55,7 +55,7 @@ class SimpleWorkspaceTest {
         }
 
         val linear = task<Int>("linear") {
-            pipe<Int> { data ->
+            map<Int> { data ->
                 context.logger.info { "Starting linear on $data" }
                 data * 2 + 1
             }
@@ -86,14 +86,14 @@ class SimpleWorkspaceTest {
             model {
                 dependsOn(square)
             }
-            join<Int> { data ->
+            reduce<Int> { data ->
                 context.logger.info { "Starting sum" }
                 data.values.sum()
             }
         }
 
         val average = task<Double>("average") {
-            joinByGroup<Int> { env ->
+            reduceByGroup<Int> { env ->
                 group("even", filter = { name, _ -> name.toString().toInt() % 2 == 0 }) {
                     result { data ->
                         env.context.logger.info { "Starting even" }
@@ -113,13 +113,13 @@ class SimpleWorkspaceTest {
             model {
                 dependsOn(average)
             }
-            join<Double> { data ->
+            reduce<Double> { data ->
                 data["even"]!! - data["odd"]!!
             }
         }
 
         val customPipeTask = task<Int>("custom") {
-            customPipe<Int> {
+            mapAction<Int> {
                 meta = meta.builder().apply {
                     "newValue" to 22
                 }

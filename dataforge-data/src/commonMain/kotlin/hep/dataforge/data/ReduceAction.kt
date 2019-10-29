@@ -21,7 +21,7 @@ class JoinGroup<T : Any, R : Any>(var name: String, internal val node: DataNode<
 
 }
 
-class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
+class ReduceGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
     private val groupRules: MutableList<(DataNode<T>) -> List<JoinGroup<T, R>>> = ArrayList();
 
     /**
@@ -73,16 +73,16 @@ class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
 /**
  * The same rules as for KPipe
  */
-class JoinAction<T : Any, R : Any>(
+class ReduceAction<T : Any, R : Any>(
     val inputType: KClass<out T>,
     val outputType: KClass<out R>,
-    private val action: JoinGroupBuilder<T, R>.() -> Unit
+    private val action: ReduceGroupBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
     override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
         node.ensureType(inputType)
         return DataNode.invoke(outputType) {
-            JoinGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
+            ReduceGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
 
                 val laminate = Laminate(group.meta, meta)
 
@@ -92,7 +92,7 @@ class JoinAction<T : Any, R : Any>(
 
                 val env = ActionEnv(groupName.toName(), laminate.builder())
 
-                val res: DynamicData<R> = dataMap.join(outputType, meta = laminate) { group.result.invoke(env, it) }
+                val res: DynamicData<R> = dataMap.reduce(outputType, meta = laminate) { group.result.invoke(env, it) }
 
                 set(env.name, res)
             }
