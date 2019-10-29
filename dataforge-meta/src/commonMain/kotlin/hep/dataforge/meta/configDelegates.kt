@@ -117,11 +117,11 @@ fun <T : Specific> Configurable.spec(builder: (Config) -> T, key: Name? = null) 
  * Extra delegates for special cases
  */
 
-fun Configurable.stringList(key: Name? = null): ReadWriteDelegateWrapper<Value?, List<String>> =
-    value(emptyList(), key) { it?.list?.map { value -> value.string } ?: emptyList() }
+fun Configurable.stringList(vararg strings: String, key: Name? = null): ReadWriteDelegateWrapper<Value?, List<String>> =
+    value(strings.asList(), key) { it?.list?.map { value -> value.string } ?: emptyList() }
 
-fun Configurable.numberList(key: Name? = null): ReadWriteDelegateWrapper<Value?, List<Number>> =
-    value(emptyList(), key) { it?.list?.map { value -> value.number } ?: emptyList() }
+fun Configurable.numberList(vararg numbers: Number, key: Name? = null): ReadWriteDelegateWrapper<Value?, List<Number>> =
+    value(numbers.asList(), key) { it?.list?.map { value -> value.number } ?: emptyList() }
 
 /**
  * A special delegate for double arrays

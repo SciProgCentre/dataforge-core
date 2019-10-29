@@ -41,7 +41,7 @@ interface Value {
      * get this value represented as List
      */
     val list: List<Value>
-        get() = listOf(this)
+        get() = if(this == Null) emptyList() else listOf(this)
 
     override fun equals(other: Any?): Boolean
 
@@ -60,7 +60,14 @@ interface Value {
                 true -> True
                 false -> False
                 is Number -> value.asValue()
-                is Iterable<*> -> ListValue(value.map { of(it) })
+                is Iterable<*> -> {
+                    val list = value.map { of(it) }
+                    if (list.isEmpty()) {
+                        Null
+                    } else {
+                        ListValue(list)
+                    }
+                }
                 is DoubleArray -> value.asValue()
                 is IntArray -> value.asValue()
                 is FloatArray -> value.asValue()
@@ -174,9 +181,7 @@ class EnumValue<E : Enum<*>>(override val value: E) : Value {
 
 class ListValue(override val list: List<Value>) : Value {
     init {
-        if (list.isEmpty()) {
-            throw IllegalArgumentException("Can't create list value from empty list")
-        }
+        require(list.isNotEmpty()) { "Can't create list value from empty list" }
     }
 
     override val value: List<Value> get() = list
@@ -208,17 +213,20 @@ fun Boolean.asValue(): Value = if (this) True else False
 
 fun String.asValue(): Value = StringValue(this)
 
-fun Iterable<Value>.asValue(): Value = ListValue(this.toList())
+fun Iterable<Value>.asValue(): Value {
+    val list = toList()
+    return if (list.isEmpty()) Null else ListValue(this.toList())
+}
 
-fun IntArray.asValue(): Value = ListValue(map { NumberValue(it) })
+fun IntArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun LongArray.asValue(): Value = ListValue(map { NumberValue(it) })
+fun LongArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun ShortArray.asValue(): Value = ListValue(map { NumberValue(it) })
+fun ShortArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun FloatArray.asValue(): Value = ListValue(map { NumberValue(it) })
+fun FloatArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun ByteArray.asValue(): Value = ListValue(map { NumberValue(it) })
+fun ByteArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
 
 /**

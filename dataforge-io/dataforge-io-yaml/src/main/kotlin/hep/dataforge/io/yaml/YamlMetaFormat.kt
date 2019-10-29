@@ -4,6 +4,7 @@ import hep.dataforge.context.Context
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.io.MetaFormat
 import hep.dataforge.io.MetaFormatFactory
+import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.toMap
 import hep.dataforge.meta.toMeta
@@ -29,6 +30,7 @@ private class InputAsStream(val input: Input) : InputStream() {
 
 private fun Input.asStream() = InputAsStream(this)
 
+@DFExperimental
 class YamlMetaFormat(val meta: Meta) : MetaFormat {
     private val yaml = Yaml()
 

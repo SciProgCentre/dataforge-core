@@ -2,13 +2,11 @@ package hep.dataforge.io.yaml
 
 import hep.dataforge.context.Context
 import hep.dataforge.io.*
-import hep.dataforge.meta.EmptyMeta
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.get
-import hep.dataforge.meta.string
+import hep.dataforge.meta.*
 import kotlinx.io.core.*
 import kotlinx.serialization.toUtf8Bytes
 
+@DFExperimental
 class FrontMatterEnvelopeFormat(
     val io: IOPlugin,
     val metaType: String = YamlMetaFormat.name.toString(),

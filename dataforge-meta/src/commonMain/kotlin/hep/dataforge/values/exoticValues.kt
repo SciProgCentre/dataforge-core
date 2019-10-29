@@ -46,4 +46,4 @@ class DoubleArrayValue(override val value: DoubleArray) : Value {
     override fun toString(): String = list.joinToString (prefix = "[", postfix = "]")
 }
 
-fun DoubleArray.asValue(): DoubleArrayValue = DoubleArrayValue(this)
+fun DoubleArray.asValue(): Value = if(isEmpty()) Null else DoubleArrayValue(this)
