@@ -105,8 +105,8 @@ open class Context(
 
     override fun toMeta(): Meta = buildMeta {
         "parent" to parent?.name
-        "properties" to properties.seal()
-        "plugins" to plugins.map { it.toMeta() }
+        "properties" put properties.seal()
+        "plugins" put plugins.map { it.toMeta() }
     }
 }
 

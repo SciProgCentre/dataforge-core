@@ -66,10 +66,10 @@ interface Plugin : Named, ContextAware, Provider, MetaRepr {
     fun detach()
 
     override fun toMeta(): Meta = buildMeta {
-        "context" to context.name
+        "context" put context.name.toString()
         "type" to this::class.simpleName
-        "tag" to tag
-        "meta" to meta
+        "tag" put tag
+        "meta" put meta
     }
 
     companion object {

@@ -72,7 +72,7 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config) {
      * The list of value descriptors
      */
     val values: Map<String, ValueDescriptor>
-        get() = config.getAll(VALUE_KEY.toName()).entries.associate { (name, node) ->
+        get() = config.getIndexed(VALUE_KEY.toName()).entries.associate { (name, node) ->
             name to ValueDescriptor.wrap(node.node ?: error("Value descriptor must be a node"))
         }
 
@@ -93,7 +93,7 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config) {
      * The map of children node descriptors
      */
     val nodes: Map<String, NodeDescriptor>
-        get() = config.getAll(NODE_KEY.toName()).entries.associate { (name, node) ->
+        get() = config.getIndexed(NODE_KEY.toName()).entries.associate { (name, node) ->
             name to wrap(node.node ?: error("Node descriptor must be a node"))
         }
 

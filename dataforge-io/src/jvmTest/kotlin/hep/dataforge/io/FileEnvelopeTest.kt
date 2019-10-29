@@ -9,8 +9,8 @@ import kotlin.test.assertTrue
 class FileEnvelopeTest {
     val envelope = Envelope {
         meta {
-            "a" to "AAA"
-            "b" to 22.2
+            "a" put "AAA"
+            "b" put 22.2
         }
         dataType = "hep.dataforge.test"
         dataID = "myData" // добавил только что

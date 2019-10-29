@@ -121,7 +121,7 @@ class SimpleWorkspaceTest {
         val customPipeTask = task<Int>("custom") {
             mapAction<Int> {
                 meta = meta.builder().apply {
-                    "newValue" to 22
+                    "newValue" put 22
                 }
                 name += "new"
                 result {
@@ -142,7 +142,7 @@ class SimpleWorkspaceTest {
 
     @Test
     fun testMetaPropagation() {
-        val node = workspace.run("sum") { "testFlag" to true }
+        val node = workspace.run("sum") { "testFlag" put true }
         val res = node.first()?.get()
     }
 

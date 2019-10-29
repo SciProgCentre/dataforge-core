@@ -20,9 +20,9 @@ interface Data<out T : Any> : Goal<T>, MetaRepr{
     val meta: Meta
 
     override fun toMeta(): Meta  = buildMeta {
-        "type" to (type.simpleName?:"undefined")
+        "type" put (type.simpleName?:"undefined")
         if(!meta.isEmpty()) {
-            "meta" to meta
+            "meta" put meta
         }
     }
 

@@ -33,7 +33,7 @@ class RemoteFunctionClient(override val context: Context, val responder: Respond
         meta(meta)
         type = REQUEST_TYPE
         meta {
-            SIZE_KEY to values.size
+            SIZE_KEY put values.size
         }
         data {
             val inputFormat: IOFormat<T> = getInputFormat(meta, valueType)

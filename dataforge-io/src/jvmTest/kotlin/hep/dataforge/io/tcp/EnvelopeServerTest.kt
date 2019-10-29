@@ -48,7 +48,7 @@ class EnvelopeServerTest {
         val request = Envelope.invoke {
             type = "test.echo"
             meta {
-                "test.value" to 22
+                "test.value" put 22
             }
             data {
                 writeDouble(22.7)

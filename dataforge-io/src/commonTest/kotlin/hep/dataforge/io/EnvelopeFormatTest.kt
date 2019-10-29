@@ -8,7 +8,7 @@ class EnvelopeFormatTest {
     val envelope = Envelope.invoke {
         type = "test.format"
         meta{
-            "d" to 22.2
+            "d" put 22.2
         }
         data{
             writeDouble(22.2)

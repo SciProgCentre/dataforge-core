@@ -26,8 +26,8 @@ class DataDependency(val filter: DataFilter, val placement: Name = EmptyName) : 
     }
 
     override fun toMeta(): Meta = buildMeta {
-        "data" to filter.config
-        "to" to placement
+        "data" put filter.config
+        "to" put placement.toString()
     }
 }
 
@@ -39,8 +39,8 @@ class AllDataDependency(val placement: Name = EmptyName) : Dependency() {
     }
 
     override fun toMeta() = buildMeta {
-        "data" to "@all"
-        "to" to placement
+        "data" put "@all"
+        "to" put placement.toString()
     }
 }
 
@@ -67,9 +67,9 @@ abstract class TaskDependency<out T : Any>(
     }
 
     override fun toMeta(): Meta = buildMeta {
-        "task" to name
-        "meta" to meta
-        "to" to placement
+        "task" put name.toString()
+        "meta" put meta
+        "to" put placement.toString()
     }
 }
 

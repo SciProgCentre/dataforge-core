@@ -34,4 +34,4 @@ val Value.doubleArray: DoubleArray
     }
 
 
-fun Value.toMeta() = buildMeta { Meta.VALUE_KEY to this }
+fun Value.toMeta() = buildMeta { Meta.VALUE_KEY put this }

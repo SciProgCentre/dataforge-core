@@ -39,10 +39,10 @@ interface DataNode<out T : Any> : MetaRepr {
     val items: Map<NameToken, DataItem<T>>
 
     override fun toMeta(): Meta = buildMeta {
-        "type" to (type.simpleName ?: "undefined")
-        "items" to {
+        "type" put (type.simpleName ?: "undefined")
+        "items" put {
             this@DataNode.items.forEach {
-                it.key.toString() to it.value.toMeta()
+                it.key.toString() put it.value.toMeta()
             }
         }
     }
@@ -196,19 +196,19 @@ class DataTreeBuilder<T : Any>(val type: KClass<out T>) {
     /**
      * Append data to node
      */
-    infix fun String.to(data: Data<T>) = set(toName(), data)
+    infix fun String.put(data: Data<T>) = set(toName(), data)
 
     /**
      * Append node
      */
-    infix fun String.to(node: DataNode<T>) = set(toName(), node)
+    infix fun String.put(node: DataNode<T>) = set(toName(), node)
 
-    infix fun String.to(item: DataItem<T>) = set(toName(), item)
+    infix fun String.put(item: DataItem<T>) = set(toName(), item)
 
     /**
      * Build and append node
      */
-    infix fun String.to(block: DataTreeBuilder<T>.() -> Unit) = set(toName(), DataTreeBuilder(type).apply(block))
+    infix fun String.put(block: DataTreeBuilder<T>.() -> Unit) = set(toName(), DataTreeBuilder(type).apply(block))
 
 
     fun update(node: DataNode<T>) {

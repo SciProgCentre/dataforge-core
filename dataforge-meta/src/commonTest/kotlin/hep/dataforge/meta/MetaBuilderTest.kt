@@ -9,13 +9,13 @@ class MetaBuilderTest {
     @Test
     fun testBuilder() {
         val meta = buildMeta {
-            "a" to 22
-            "b" to listOf(1, 2, 3)
+            "a" put 22
+            "b" put listOf(1, 2, 3)
             this["c"] = "myValue".asValue()
-            "node" to {
-                "e" to 12.2
-                "childNode" to {
-                    "f" to true
+            "node" put {
+                "e" put 12.2
+                "childNode" put {
+                    "f" put true
                 }
             }
         }
@@ -27,12 +27,12 @@ class MetaBuilderTest {
     fun testSNS(){
         val meta = buildMeta {
             repeat(10){
-                "b.a[$it]" to it
+                "b.a[$it]" put it
             }
         }.seal()
         assertEquals(10, meta.values().count())
 
-        val nodes = meta.getAll("b.a")
+        val nodes = meta.getIndexed("b.a")
 
         assertEquals(3, nodes["3"]?.int)
     }

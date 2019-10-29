@@ -31,9 +31,9 @@ data class TaskModel(
     //TODO add pre-run check of task result type?
 
     override fun toMeta(): Meta = buildMeta {
-        "name" to name
-        "meta" to meta
-        "dependsOn" to {
+        "name" put name.toString()
+        "meta" put meta
+        "dependsOn" put {
             val dataDependencies = dependencies.filterIsInstance<DataDependency>()
             val taskDependencies = dependencies.filterIsInstance<TaskDependency<*>>()
             setIndexed("data".toName(), dataDependencies.map { it.toMeta() })

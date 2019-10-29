@@ -27,12 +27,12 @@ class DynamicMetaTest {
     @Test
     fun testMetaToDynamic(){
         val meta = buildMeta {
-            "a" to 22
-            "array" to arrayOf(1, 2, 3)
-            "b" to "myString"
-            "ob" to {
-                "childNode" to 18
-                "booleanNode" to true
+            "a" put 22
+            "array" put listOf(1, 2, 3)
+            "b" put "myString"
+            "ob" put {
+                "childNode" put 18
+                "booleanNode" put true
             }
         }
 

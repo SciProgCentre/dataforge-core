@@ -8,9 +8,9 @@ internal class DataTreeBuilderTest{
     @Test
     fun testDataUpdate(){
         val updateData = DataNode<Any>{
-            "update" to {
-                "a" to Data.static("a")
-                "b" to Data.static("b")
+            "update" put {
+                "a" put Data.static("a")
+                "b" put Data.static("b")
             }
         }
 

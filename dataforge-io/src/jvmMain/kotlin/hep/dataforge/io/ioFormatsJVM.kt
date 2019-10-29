@@ -26,9 +26,9 @@ fun IOPlugin.resolveIOFormatName(type: KClass<*>): Name {
 }
 
 inline fun <reified T : Any, reified R : Any> IOPlugin.generateFunctionMeta(functionName: String): Meta = buildMeta {
-    FUNCTION_NAME_KEY to functionName
-    INPUT_FORMAT_KEY to resolveIOFormatName(T::class)
-    OUTPUT_FORMAT_KEY to resolveIOFormatName(R::class)
+    FUNCTION_NAME_KEY put functionName
+    INPUT_FORMAT_KEY put resolveIOFormatName(T::class).toString()
+    OUTPUT_FORMAT_KEY put resolveIOFormatName(R::class).toString()
 }
 
 inline fun <reified T : Any, reified R : Any> FunctionServer.function(

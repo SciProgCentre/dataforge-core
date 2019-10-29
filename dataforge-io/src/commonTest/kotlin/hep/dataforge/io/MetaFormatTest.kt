@@ -11,11 +11,11 @@ class MetaFormatTest {
     @Test
     fun testBinaryMetaFormat() {
         val meta = buildMeta {
-            "a" to 22
-            "node" to {
-                "b" to "DDD"
-                "c" to 11.1
-                "array" to doubleArrayOf(1.0, 2.0, 3.0)
+            "a" put 22
+            "node" put {
+                "b" put "DDD"
+                "c" put 11.1
+                "array" put doubleArrayOf(1.0, 2.0, 3.0)
             }
         }
         val bytes = meta.toBytes(BinaryMetaFormat)
@@ -26,11 +26,11 @@ class MetaFormatTest {
     @Test
     fun testJsonMetaFormat() {
         val meta = buildMeta {
-            "a" to 22
-            "node" to {
-                "b" to "DDD"
-                "c" to 11.1
-                "array" to doubleArrayOf(1.0, 2.0, 3.0)
+            "a" put 22
+            "node" put {
+                "b" put "DDD"
+                "c" put 11.1
+                "array" put doubleArrayOf(1.0, 2.0, 3.0)
             }
         }
         val string = meta.toString(JsonMetaFormat)

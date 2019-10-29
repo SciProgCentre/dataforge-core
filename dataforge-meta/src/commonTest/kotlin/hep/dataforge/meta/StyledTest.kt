@@ -9,8 +9,8 @@ class StyledTest{
     fun testSNS(){
         val meta = buildMeta {
             repeat(10){
-                "b.a[$it]" to {
-                    "d" to it
+                "b.a[$it]" put {
+                    "d" put it
                 }
             }
         }.seal().withStyle()
@@ -18,9 +18,9 @@ class StyledTest{
 
         val bNode = meta["b"].node
 
-        val aNodes = bNode?.getAll("a")
+        val aNodes = bNode?.getIndexed("a")
 
-        val allNodes = meta.getAll("b.a")
+        val allNodes = meta.getIndexed("b.a")
 
         assertEquals(3, aNodes?.get("3").node["d"].int)
         assertEquals(3, allNodes["3"].node["d"].int)

@@ -14,18 +14,18 @@ class YamlMetaFormatTest{
     @Test
     fun testYamlMetaFormat(){
         val meta = buildMeta {
-            "a" to 22
-            "node" to {
-                "b" to "DDD"
-                "c" to 11.1
-                "d" to {
-                    "d1" to {
-                        "d11" to "aaa"
-                        "d12" to "bbb"
+            "a" put 22
+            "node" put {
+                "b" put "DDD"
+                "c" put 11.1
+                "d" put {
+                    "d1" put {
+                        "d11" put "aaa"
+                        "d12" put "bbb"
                     }
-                    "d2" to 2
+                    "d2" put 2
                 }
-                "array" to doubleArrayOf(1.0, 2.0, 3.0)
+                "array" put doubleArrayOf(1.0, 2.0, 3.0)
             }
         }
         val string = meta.toString(YamlMetaFormat)

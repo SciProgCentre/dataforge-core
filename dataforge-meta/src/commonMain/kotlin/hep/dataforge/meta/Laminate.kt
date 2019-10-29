@@ -61,7 +61,7 @@ class Laminate(layers: List<Meta>) : MetaBase() {
                 }
                 else -> map {
                     when (it) {
-                        is MetaItem.ValueItem -> MetaItem.NodeItem(buildMeta { Meta.VALUE_KEY to it.value })
+                        is MetaItem.ValueItem -> MetaItem.NodeItem(buildMeta { Meta.VALUE_KEY put it.value })
                         is MetaItem.NodeItem -> it
                     }
                 }.merge()

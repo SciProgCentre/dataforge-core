@@ -62,7 +62,7 @@ fun WorkspaceBuilder.target(name: String, block: MetaBuilder.() -> Unit) {
 fun WorkspaceBuilder.target(name: String, base: String, block: MetaBuilder.() -> Unit) {
     val parentTarget = targets[base] ?: error("Base target with name $base not found")
     targets[name] = parentTarget.builder()
-        .apply { "@baseTarget" to base }
+        .apply { "@baseTarget" put base }
         .apply(block)
         .seal()
 }
