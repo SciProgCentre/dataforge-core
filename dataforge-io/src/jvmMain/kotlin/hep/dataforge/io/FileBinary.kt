@@ -13,6 +13,12 @@ class FileBinary(val path: Path, private val offset: UInt = 0u, size: ULong? = n
 
     override val size: ULong = size ?: (Files.size(path).toULong() - offset).toULong()
 
+    init {
+        if( size != null && Files.size(path) < offset.toLong() + size.toLong()){
+            error("Can't read binary from file. File is to short.")
+        }
+    }
+
     override fun <R> read(from: UInt, size: UInt, block: Input.() -> R): R {
         FileChannel.open(path, StandardOpenOption.READ).use {
             val theSize: UInt = min(size, Files.size(path).toUInt() - offset)
