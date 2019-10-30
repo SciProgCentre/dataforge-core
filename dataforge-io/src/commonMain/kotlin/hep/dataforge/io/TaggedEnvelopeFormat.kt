@@ -7,6 +7,7 @@ import hep.dataforge.meta.string
 import hep.dataforge.names.Name
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
+import kotlinx.io.charsets.Charsets
 import kotlinx.io.core.*
 
 @ExperimentalUnsignedTypes
@@ -30,10 +31,12 @@ class TaggedEnvelopeFormat(
 
     override fun Output.writeObject(obj: Envelope) {
         val metaBytes = metaFormat.writeBytes(obj.meta)
-        val tag = Tag(metaFormatKey, metaBytes.size.toUInt(), obj.data?.size ?: 0.toULong())
+        val tag = Tag(metaFormatKey, metaBytes.size.toUInt() + 2u, obj.data?.size ?: 0.toULong())
         writePacket(tag.toBytes())
         writeFully(metaBytes)
+        writeText("\r\n")
         obj.data?.read { copyTo(this@writeObject) }
+        flush()
     }
 
     /**
@@ -92,14 +95,14 @@ class TaggedEnvelopeFormat(
         }
 
         private fun Input.readTag(): Tag {
-            val start = readTextExactBytes(2)
+            val start = readTextExactBytes(2, charset = Charsets.ISO_8859_1)
             if (start != START_SEQUENCE) error("The input is not an envelope")
-            val version = readTextExactBytes(4)
+            val version = readTextExactBytes(4, charset = Charsets.ISO_8859_1)
             if (version != VERSION) error("Wrong version of DataForge: expected $VERSION but found $version")
             val metaFormatKey = readShort()
             val metaLength = readUInt()
             val dataLength = readULong()
-            val end = readTextExactBytes(4)
+            val end = readTextExactBytes(4, charset = Charsets.ISO_8859_1)
             if (end != END_SEQUENCE) error("The input is not an envelope")
             return Tag(metaFormatKey, metaLength, dataLength)
         }

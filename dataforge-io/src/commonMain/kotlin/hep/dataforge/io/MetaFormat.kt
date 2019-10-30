@@ -52,7 +52,7 @@ fun Meta.toBytes(format: MetaFormat = JsonMetaFormat.default): ByteReadPacket = 
 }
 
 fun MetaFormat.parse(str: String): Meta {
-    return ByteReadPacket(str.toByteArray()).readObject()
+    return buildPacket { writeText(str) }.readObject()
 }
 
 fun MetaFormatFactory.parse(str: String): Meta = invoke().parse(str)

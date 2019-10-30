@@ -1,9 +1,6 @@
 package hep.dataforge.io
 
-import kotlinx.io.core.ByteReadPacket
-import kotlinx.io.core.Input
-import kotlinx.io.core.buildPacket
-import kotlinx.io.core.readBytes
+import kotlinx.io.core.*
 import kotlin.math.min
 
 /**
@@ -45,7 +42,7 @@ fun Binary.toBytes(): ByteArray = read {
 
 @ExperimentalUnsignedTypes
 fun RandomAccessBinary.readPacket(from: UInt, size: UInt): ByteReadPacket = read(from, size) {
-    ByteReadPacket(this.readBytes())
+    buildPacket { copyTo(this) }
 }
 
 @ExperimentalUnsignedTypes
@@ -65,7 +62,9 @@ inline class ArrayBinary(val array: ByteArray) : RandomAccessBinary {
 
     override fun <R> read(from: UInt, size: UInt, block: Input.() -> R): R {
         val theSize = min(size, array.size.toUInt() - from)
-        return ByteReadPacket(array, from.toInt(), theSize.toInt()).block()
+        return buildPacket {
+            writeFully(array, from.toInt(), theSize.toInt())
+        }.block()
     }
 }
 

@@ -72,7 +72,9 @@ class TaglessEnvelopeFormat(
             val metaFormat = properties[META_TYPE_PROPERTY]?.let { io.metaFormat(it) } ?: JsonMetaFormat.default
             val metaSize = properties.get(META_LENGTH_PROPERTY)?.toInt()
             meta = if (metaSize != null) {
-                val metaPacket = ByteReadPacket(readBytes(metaSize))
+                val metaPacket = buildPacket {
+                    writeFully(readBytes(metaSize))
+                }
                 metaFormat.run { metaPacket.readObject() }
             } else {
                 metaFormat.run {
@@ -126,11 +128,13 @@ class TaglessEnvelopeFormat(
 
             val metaSize = properties.get(META_LENGTH_PROPERTY)?.toInt()
             meta = if (metaSize != null) {
-                val metaPacket = ByteReadPacket(readBytes(metaSize))
+                val metaPacket = buildPacket {
+                    writeFully(readBytes(metaSize))
+                }
                 offset += metaSize.toUInt()
                 metaFormat.run { metaPacket.readObject() }
             } else {
-               error("Can't partially read an envelope with undefined meta size")
+                error("Can't partially read an envelope with undefined meta size")
             }
         }
 
