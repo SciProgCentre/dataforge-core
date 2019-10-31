@@ -51,4 +51,9 @@ class MetaSerializerTest {
         val restored = Json.plain.parse(NameSerializer, string)
         assertEquals(restored, name)
     }
+
+    @Test
+    fun testMetaItemDescriptor(){
+        val descriptor = MetaItemSerializer.descriptor.getElementDescriptor(0)
+    }
 }

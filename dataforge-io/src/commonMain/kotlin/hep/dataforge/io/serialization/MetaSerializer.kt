@@ -14,12 +14,12 @@ import kotlinx.serialization.json.JsonOutput
 @Serializer(Value::class)
 object ValueSerializer : KSerializer<Value> {
     private val valueTypeSerializer = EnumSerializer(ValueType::class)
-    private val listSerializer by lazy {  ArrayListSerializer(ValueSerializer)}
+    private val listSerializer by lazy { ArrayListSerializer(ValueSerializer) }
 
     override val descriptor: SerialDescriptor = descriptor("Value") {
-        element("isList")
-        element("valueType")
-        element("value")
+        boolean("isList")
+        enum<ValueType>("valueType")
+        element("value", PolymorphicClassDescriptor)
     }
 
     private fun Decoder.decodeValue(): Value {
@@ -68,9 +68,10 @@ object ValueSerializer : KSerializer<Value> {
 @Serializer(MetaItem::class)
 object MetaItemSerializer : KSerializer<MetaItem<*>> {
     override val descriptor: SerialDescriptor = descriptor("MetaItem") {
-        element("isNode")
-        element("value")
+        boolean("isNode")
+        element("value", PolymorphicClassDescriptor)
     }
+
 
     override fun deserialize(decoder: Decoder): MetaItem<*> {
         val isNode = decoder.decodeBoolean()
