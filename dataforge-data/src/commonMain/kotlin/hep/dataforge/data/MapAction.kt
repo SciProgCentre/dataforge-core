@@ -7,7 +7,14 @@ import hep.dataforge.meta.seal
 import hep.dataforge.names.Name
 import kotlin.reflect.KClass
 
-data class ActionEnv(val name: Name, val actionMeta: Meta, val meta: Meta)
+/**
+ * Action environment includes data name, data meta and action configuration meta
+ */
+data class ActionEnv(
+    val name: Name,
+    val meta: Meta,
+    val actionMeta: Meta
+)
 
 
 /**
@@ -39,7 +46,7 @@ class MapAction<T : Any, out R : Any>(
                 /*
                  * Creating a new environment for action using **old** name, old meta and task meta
                  */
-                val env = ActionEnv(name, meta, data.meta)
+                val env = ActionEnv(name, data.meta, meta)
 
                 //applying transformation from builder
                 val builder = MapActionBuilder<T, R>(

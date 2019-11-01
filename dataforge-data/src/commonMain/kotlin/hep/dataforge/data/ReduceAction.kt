@@ -90,7 +90,7 @@ class ReduceAction<T : Any, R : Any>(
 
                 val groupMeta = group.meta
 
-                val env = ActionEnv(groupName.toName(), meta, groupMeta)
+                val env = ActionEnv(groupName.toName(), groupMeta, meta)
 
                 val res: DynamicData<R> = dataMap.reduce(
                     outputType,
