@@ -1,16 +1,19 @@
 package hep.dataforge.data
 
-import hep.dataforge.meta.*
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.builder
+import hep.dataforge.meta.seal
 import hep.dataforge.names.Name
 import kotlin.reflect.KClass
 
-class ActionEnv(val name: Name, val meta: Meta)
+data class ActionEnv(val name: Name, val actionMeta: Meta, val meta: Meta)
 
 
 /**
  * Action environment
  */
-class MapActionBuilder<T, R>(var name: Name, var meta: MetaBuilder) {
+class MapActionBuilder<T, R>(var name: Name, var meta: MetaBuilder, val actionMeta: Meta) {
     lateinit var result: suspend ActionEnv.(T) -> R
 
     /**
@@ -33,16 +36,24 @@ class MapAction<T : Any, out R : Any>(
 
         return DataNode.invoke(outputType) {
             node.dataSequence().forEach { (name, data) ->
-                //merging data meta with action meta (data meta is primary)
-                val oldMeta = meta.builder().apply { update(data.meta) }
-                // creating environment from old meta and name
-                val env = ActionEnv(name, oldMeta)
+                /*
+                 * Creating a new environment for action using **old** name, old meta and task meta
+                 */
+                val env = ActionEnv(name, meta, data.meta)
+
                 //applying transformation from builder
-                val builder = MapActionBuilder<T, R>(name, oldMeta).apply(block)
+                val builder = MapActionBuilder<T, R>(
+                    name,
+                    data.meta.builder(), // using data meta
+                    meta
+                ).apply(block)
+
                 //getting new name
                 val newName = builder.name
+
                 //getting new meta
                 val newMeta = builder.meta.seal()
+
                 val newData = data.map(outputType, meta = newMeta) { builder.result(env, it) }
                 //setting the data node
                 this[newName] = newData

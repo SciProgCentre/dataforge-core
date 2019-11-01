@@ -1,9 +1,7 @@
 package hep.dataforge.data
 
-import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.builder
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import kotlin.reflect.KClass
@@ -84,15 +82,20 @@ class ReduceAction<T : Any, R : Any>(
         return DataNode.invoke(outputType) {
             ReduceGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
 
-                val laminate = Laminate(group.meta, meta)
+                //val laminate = Laminate(group.meta, meta)
 
                 val dataMap = group.node.dataSequence().associate { it }
 
-                val groupName: String = group.name;
+                val groupName: String = group.name
 
-                val env = ActionEnv(groupName.toName(), laminate.builder())
+                val groupMeta = group.meta
 
-                val res: DynamicData<R> = dataMap.reduce(outputType, meta = laminate) { group.result.invoke(env, it) }
+                val env = ActionEnv(groupName.toName(), meta, groupMeta)
+
+                val res: DynamicData<R> = dataMap.reduce(
+                    outputType,
+                    meta = groupMeta
+                ) { group.result.invoke(env, it) }
 
                 set(env.name, res)
             }
