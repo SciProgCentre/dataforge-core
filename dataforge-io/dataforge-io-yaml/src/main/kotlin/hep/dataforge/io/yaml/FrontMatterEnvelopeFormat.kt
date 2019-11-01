@@ -2,19 +2,17 @@ package hep.dataforge.io.yaml
 
 import hep.dataforge.context.Context
 import hep.dataforge.io.*
-import hep.dataforge.meta.*
+import hep.dataforge.meta.DFExperimental
+import hep.dataforge.meta.EmptyMeta
+import hep.dataforge.meta.Meta
 import kotlinx.io.core.*
 import kotlinx.serialization.toUtf8Bytes
 
 @DFExperimental
 class FrontMatterEnvelopeFormat(
     val io: IOPlugin,
-    val metaType: String = YamlMetaFormat.name.toString(),
     meta: Meta = EmptyMeta
 ) : EnvelopeFormat {
-
-    val metaFormat = io.metaFormat(metaType, meta)
-        ?: error("Meta format with type $metaType could not be resolved in $io")
 
     override fun Input.readPartial(): PartialEnvelope {
         var line: String = ""
@@ -60,11 +58,12 @@ class FrontMatterEnvelopeFormat(
         return SimpleEnvelope(meta, data)
     }
 
-    override fun Output.writeObject(obj: Envelope) {
+    override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) {
+        val metaFormat = metaFormatFactory(formatMeta, io.context)
         writeText("$SEPARATOR\r\n")
-        metaFormat.run { writeObject(obj.meta) }
+        metaFormat.run { writeObject(envelope.meta) }
         writeText("$SEPARATOR\r\n")
-        obj.data?.read { copyTo(this@writeObject) }
+        envelope.data?.read { copyTo(this@writeEnvelope) }
     }
 
     companion object : EnvelopeFormatFactory {
@@ -73,8 +72,7 @@ class FrontMatterEnvelopeFormat(
         private val metaTypeRegex = "---(\\w*)\\s*".toRegex()
 
         override fun invoke(meta: Meta, context: Context): EnvelopeFormat {
-            val metaFormatName: String = meta["name"].string ?: YamlMetaFormat.name.toString()
-            return FrontMatterEnvelopeFormat(context.io, metaFormatName, meta)
+            return FrontMatterEnvelopeFormat(context.io,  meta)
         }
 
         override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {

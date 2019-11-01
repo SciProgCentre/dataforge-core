@@ -8,33 +8,30 @@ import kotlinx.serialization.toUtf8Bytes
 
 class TaglessEnvelopeFormat(
     val io: IOPlugin,
-    val metaType: String = JsonMetaFormat.name.toString(),
     meta: Meta = EmptyMeta
 ) : EnvelopeFormat {
 
     private val metaStart = meta[META_START_PROPERTY].string ?: DEFAULT_META_START
     private val dataStart = meta[DATA_START_PROPERTY].string ?: DEFAULT_DATA_START
 
-    val metaFormat = io.metaFormat(metaType, meta)
-        ?: error("Meta format with type $metaType could not be resolved in $io")
-
     private fun Output.writeProperty(key: String, value: Any) {
         writeText("#? $key: $value;\r\n")
     }
 
-    override fun Output.writeObject(obj: Envelope) {
+    override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) {
+        val metaFormat = metaFormatFactory(formatMeta, io.context)
 
         //printing header
         writeText(TAGLESS_ENVELOPE_HEADER + "\r\n")
 
         //printing all properties
-        writeProperty(META_TYPE_PROPERTY, metaType)
+        writeProperty(META_TYPE_PROPERTY, metaFormatFactory.type)
         //TODO add optional metaFormat properties
-        writeProperty(DATA_LENGTH_PROPERTY, obj.data?.size ?: 0)
+        writeProperty(DATA_LENGTH_PROPERTY, envelope.data?.size ?: 0)
 
         //Printing meta
-        if (!obj.meta.isEmpty()) {
-            val metaBytes = metaFormat.writeBytes(obj.meta)
+        if (!envelope.meta.isEmpty()) {
+            val metaBytes = metaFormat.writeBytes(envelope.meta)
             writeProperty(META_LENGTH_PROPERTY, metaBytes.size)
             writeText(metaStart + "\r\n")
             writeFully(metaBytes)
@@ -42,7 +39,7 @@ class TaglessEnvelopeFormat(
         }
 
         //Printing data
-        obj.data?.let { data ->
+        envelope.data?.let { data ->
             writeText(dataStart + "\r\n")
             writeFully(data.toBytes())
         }
@@ -170,8 +167,7 @@ class TaglessEnvelopeFormat(
         override val name = TAGLESS_ENVELOPE_TYPE.asName()
 
         override fun invoke(meta: Meta, context: Context): EnvelopeFormat {
-            val metaFormatName: String = meta["name"].string ?: JsonMetaFormat.name.toString()
-            return TaglessEnvelopeFormat(context.io, metaFormatName, meta)
+            return TaglessEnvelopeFormat(context.io, meta)
         }
 
         val default by lazy { invoke() }

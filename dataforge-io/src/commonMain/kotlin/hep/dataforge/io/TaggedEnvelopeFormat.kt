@@ -13,12 +13,11 @@ import kotlinx.io.core.*
 @ExperimentalUnsignedTypes
 class TaggedEnvelopeFormat(
     val io: IOPlugin,
-    private val metaFormatKey: Short,
     val version: VERSION = TaggedEnvelopeFormat.VERSION.DF02
 ) : EnvelopeFormat {
 
-    private val metaFormat = io.metaFormat(metaFormatKey)
-        ?: error("Meta format with key $metaFormatKey could not be resolved in $io")
+//    private val metaFormat = io.metaFormat(metaFormatKey)
+//        ?: error("Meta format with key $metaFormatKey could not be resolved in $io")
 
 
     private fun Tag.toBytes(): ByteReadPacket = buildPacket(24) {
@@ -37,13 +36,14 @@ class TaggedEnvelopeFormat(
         writeText(END_SEQUENCE)
     }
 
-    override fun Output.writeObject(obj: Envelope) {
-        val metaBytes = metaFormat.writeBytes(obj.meta)
-        val tag = Tag(metaFormatKey, metaBytes.size.toUInt() + 2u, obj.data?.size ?: 0.toULong())
+    override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) {
+        val metaFormat = metaFormatFactory.invoke(formatMeta, io.context)
+        val metaBytes = metaFormat.writeBytes(envelope.meta)
+        val tag = Tag(metaFormatFactory.key, metaBytes.size.toUInt() + 2u, envelope.data?.size ?: 0.toULong())
         writePacket(tag.toBytes())
         writeFully(metaBytes)
         writeText("\r\n")
-        obj.data?.read { copyTo(this@writeObject) }
+        envelope.data?.read { copyTo(this@writeEnvelope) }
         flush()
     }
 
@@ -102,7 +102,7 @@ class TaggedEnvelopeFormat(
             val metaFormatFactory = io.metaFormatFactories.find { it.name == metaFormatName }
                 ?: error("Meta format could not be resolved")
 
-            return TaggedEnvelopeFormat(io, metaFormatFactory.key)
+            return TaggedEnvelopeFormat(io)
         }
 
         private fun Input.readTag(version: VERSION): Tag {
@@ -124,9 +124,9 @@ class TaggedEnvelopeFormat(
         override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
             return try {
                 val header = input.readTextExactBytes(6)
-                when(header.substring(2..5)){
-                    VERSION.DF02.name-> TaggedEnvelopeFormat(io, JsonMetaFormat.key,VERSION.DF02)
-                    VERSION.DF03.name-> TaggedEnvelopeFormat(io, JsonMetaFormat.key,VERSION.DF03)
+                when (header.substring(2..5)) {
+                    VERSION.DF02.name -> TaggedEnvelopeFormat(io, VERSION.DF02)
+                    VERSION.DF03.name -> TaggedEnvelopeFormat(io, VERSION.DF03)
                     else -> null
                 }
             } catch (ex: Exception) {
