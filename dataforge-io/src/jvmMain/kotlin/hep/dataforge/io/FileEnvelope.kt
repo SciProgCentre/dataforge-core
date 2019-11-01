@@ -1,5 +1,6 @@
 package hep.dataforge.io
 
+import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlinx.io.nio.asInput
 import kotlinx.io.nio.asOutput
@@ -14,7 +15,7 @@ class FileEnvelope internal constructor(val path: Path, val format: EnvelopeForm
 
     init {
         val input = Files.newByteChannel(path, StandardOpenOption.READ).asInput()
-        partialEnvelope = format.run { input.readPartial() }
+        partialEnvelope = format.run { input.use { it.readPartial()} }
     }
 
     override val meta: Meta get() = partialEnvelope.meta
@@ -22,22 +23,30 @@ class FileEnvelope internal constructor(val path: Path, val format: EnvelopeForm
     override val data: Binary? = FileBinary(path, partialEnvelope.dataOffset, partialEnvelope.dataSize)
 }
 
-fun Path.readEnvelope(format: EnvelopeFormat) = FileEnvelope(this, format)
+fun IOPlugin.readEnvelopeFile(
+    path: Path,
+    formatFactory: EnvelopeFormatFactory = TaggedEnvelopeFormat,
+    formatMeta: Meta = EmptyMeta
+): FileEnvelope {
+    val format = formatFactory(formatMeta, context)
+    return FileEnvelope(path, format)
+}
 
-fun Path.writeEnvelope(
+fun IOPlugin.writeEnvelopeFile(
+    path: Path,
     envelope: Envelope,
-    format: EnvelopeFormat = TaggedEnvelopeFormat,
-    metaFormat: MetaFormat = JsonMetaFormat
+    formatFactory: EnvelopeFormatFactory = TaggedEnvelopeFormat,
+    formatMeta: Meta = EmptyMeta
 ) {
     val output = Files.newByteChannel(
-        this,
+        path,
         StandardOpenOption.WRITE,
         StandardOpenOption.CREATE,
         StandardOpenOption.TRUNCATE_EXISTING
     ).asOutput()
 
-    with(format) {
-        output.writeEnvelope(envelope, metaFormat)
+    with(formatFactory(formatMeta, context)) {
+        output.writeObject(envelope)
     }
 }
 

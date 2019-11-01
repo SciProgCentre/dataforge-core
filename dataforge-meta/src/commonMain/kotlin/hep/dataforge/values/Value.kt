@@ -41,9 +41,11 @@ interface Value {
      * get this value represented as List
      */
     val list: List<Value>
-        get() = listOf(this)
+        get() = if(this == Null) emptyList() else listOf(this)
 
     override fun equals(other: Any?): Boolean
+
+    override fun hashCode(): Int
 
     companion object {
         const val TYPE = "value"
@@ -58,7 +60,14 @@ interface Value {
                 true -> True
                 false -> False
                 is Number -> value.asValue()
-                is Iterable<*> -> ListValue(value.map { of(it) })
+                is Iterable<*> -> {
+                    val list = value.map { of(it) }
+                    if (list.isEmpty()) {
+                        Null
+                    } else {
+                        ListValue(list)
+                    }
+                }
                 is DoubleArray -> value.asValue()
                 is IntArray -> value.asValue()
                 is FloatArray -> value.asValue()
@@ -86,13 +95,8 @@ object Null : Value {
     override fun toString(): String = value.toString()
 
     override fun equals(other: Any?): Boolean = other === Null
+    override fun hashCode(): Int = 0
 }
-
-/**
- * Check if value is null
- */
-fun Value.isNull(): Boolean = this == Null
-
 
 /**
  * Singleton true value
@@ -106,7 +110,7 @@ object True : Value {
     override fun toString(): String = value.toString()
 
     override fun equals(other: Any?): Boolean = other === True
-
+    override fun hashCode(): Int = 1
 }
 
 /**
@@ -121,9 +125,8 @@ object False : Value {
     override fun toString(): String = True.value.toString()
 
     override fun equals(other: Any?): Boolean = other === False
+    override fun hashCode(): Int = -1
 }
-
-val Value.boolean get() = this == True || this.list.firstOrNull() == True || (type == ValueType.STRING && string.toBoolean())
 
 class NumberValue(override val number: Number) : Value {
     override val value: Any? get() = number
@@ -178,23 +181,21 @@ class EnumValue<E : Enum<*>>(override val value: E) : Value {
 
 class ListValue(override val list: List<Value>) : Value {
     init {
-        if (list.isEmpty()) {
-            throw IllegalArgumentException("Can't create list value from empty list")
-        }
+        require(list.isNotEmpty()) { "Can't create list value from empty list" }
     }
 
-    override val value: Any? get() = list
+    override val value: List<Value> get() = list
     override val type: ValueType get() = list.first().type
     override val number: Number get() = list.first().number
     override val string: String get() = list.first().string
 
-    override fun toString(): String = list.joinToString (prefix = "[", postfix = "]")
+    override fun toString(): String = list.joinToString(prefix = "[", postfix = "]")
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Value) return false
-        if( other is DoubleArrayValue){
-
+        if (other is DoubleArrayValue) {
+            return DoubleArray(list.size) { list[it].number.toDouble() }.contentEquals(other.value)
         }
         return list == other.list
     }
@@ -206,29 +207,26 @@ class ListValue(override val list: List<Value>) : Value {
 
 }
 
-/**
- * Check if value is list
- */
-fun Value.isList(): Boolean = this.list.size > 1
-
-
 fun Number.asValue(): Value = NumberValue(this)
 
 fun Boolean.asValue(): Value = if (this) True else False
 
 fun String.asValue(): Value = StringValue(this)
 
-fun Iterable<Value>.asValue(): Value = ListValue(this.toList())
+fun Iterable<Value>.asValue(): Value {
+    val list = toList()
+    return if (list.isEmpty()) Null else ListValue(this.toList())
+}
 
-fun IntArray.asValue(): Value = ListValue(map{NumberValue(it)})
+fun IntArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun LongArray.asValue(): Value = ListValue(map{NumberValue(it)})
+fun LongArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun ShortArray.asValue(): Value = ListValue(map{NumberValue(it)})
+fun ShortArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun FloatArray.asValue(): Value = ListValue(map{NumberValue(it)})
+fun FloatArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun ByteArray.asValue(): Value = ListValue(map{NumberValue(it)})
+fun ByteArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
 
 /**

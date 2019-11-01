@@ -2,8 +2,8 @@ package hep.dataforge.context
 
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
-import hep.dataforge.names.appendLeft
-import hep.dataforge.names.toName
+import hep.dataforge.names.asName
+import hep.dataforge.names.plus
 import hep.dataforge.provider.Provider
 import hep.dataforge.provider.top
 import hep.dataforge.values.Value
@@ -27,7 +27,7 @@ import kotlin.jvm.JvmName
  * @author Alexander Nozik
  */
 open class Context(
-    final override val name: String,
+    final override val name: Name,
     val parent: Context? = Global
 ) : Named, MetaRepr, Provider, CoroutineScope {
 
@@ -45,7 +45,7 @@ open class Context(
     /**
      * Context logger
      */
-    val logger: KLogger = KotlinLogging.logger(name)
+    val logger: KLogger = KotlinLogging.logger(name.toString())
 
     /**
      * A [PluginManager] for current context
@@ -64,7 +64,7 @@ open class Context(
     override fun provideTop(target: String): Map<Name, Any> {
         return when (target) {
             Value.TYPE -> properties.sequence().toMap()
-            Plugin.PLUGIN_TARGET -> plugins.sequence(true).associateBy { it.name.toName() }
+            Plugin.PLUGIN_TARGET -> plugins.sequence(true).associateBy { it.name }
             else -> emptyMap()
         }
     }
@@ -105,8 +105,8 @@ open class Context(
 
     override fun toMeta(): Meta = buildMeta {
         "parent" to parent?.name
-        "properties" to properties.seal()
-        "plugins" to plugins.map { it.toMeta() }
+        "properties" put properties.seal()
+        "plugins" put plugins.map { it.toMeta() }
     }
 }
 
@@ -118,14 +118,14 @@ fun Context.content(target: String): Map<Name, Any> = content<Any>(target)
 @JvmName("typedContent")
 inline fun <reified T : Any> Context.content(target: String): Map<Name, T> =
     plugins.flatMap { plugin ->
-        plugin.top<T>(target).entries.map { (it.key.appendLeft(plugin.name)) to it.value }
+        plugin.top<T>(target).entries.map { (plugin.name + it.key) to it.value }
     }.associate { it }
 
 
 /**
  * A global root context. Closing [Global] terminates the framework.
  */
-object Global : Context("GLOBAL", null) {
+object Global : Context("GLOBAL".asName(), null) {
     /**
      * Closing all contexts
      *
@@ -173,7 +173,7 @@ interface ContextAware {
 
     val logger: KLogger
         get() = if (this is Named) {
-            KotlinLogging.logger(context.name + "." + (this as Named).name)
+            KotlinLogging.logger((context.name + this.name).toString())
         } else {
             context.logger
         }

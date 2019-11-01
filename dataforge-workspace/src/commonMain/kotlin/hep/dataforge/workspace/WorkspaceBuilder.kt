@@ -2,12 +2,15 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextBuilder
-import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataTreeBuilder
 import hep.dataforge.meta.*
+import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
+import hep.dataforge.names.isEmpty
 import hep.dataforge.names.toName
+import kotlin.jvm.JvmName
+import kotlin.reflect.KClass
 
 @TaskBuildScope
 interface WorkspaceBuilder {
@@ -28,32 +31,26 @@ fun WorkspaceBuilder.context(name: String = "WORKSPACE", block: ContextBuilder.(
     context = ContextBuilder(name, parentContext).apply(block).build()
 }
 
-fun WorkspaceBuilder.data(name: Name, data: Data<Any>) {
-    this.data[name] = data
+inline fun <reified T : Any> WorkspaceBuilder.data(
+    name: Name = EmptyName,
+    noinline block: DataTreeBuilder<T>.() -> Unit
+): DataNode<T> {
+    val node = DataTreeBuilder(T::class).apply(block)
+    if (name.isEmpty()) {
+        @Suppress("UNCHECKED_CAST")
+        data = node as DataTreeBuilder<Any>
+    } else {
+        data[name] = node
+    }
+    return node.build()
 }
 
-fun WorkspaceBuilder.data(name: String, data: Data<Any>) = data(name.toName(), data)
+@JvmName("rawData")
+fun WorkspaceBuilder.data(
+    name: Name = EmptyName,
+    block: DataTreeBuilder<Any>.() -> Unit
+): DataNode<Any> = data<Any>(name, block)
 
-fun WorkspaceBuilder.static(name: Name, data: Any, meta: Meta = EmptyMeta) =
-    data(name, Data.static(data, meta))
-
-fun WorkspaceBuilder.static(name: Name, data: Any, block: MetaBuilder.() -> Unit = {}) =
-    data(name, Data.static(data, buildMeta(block)))
-
-fun WorkspaceBuilder.static(name: String, data: Any, block: MetaBuilder.() -> Unit = {}) =
-    data(name, Data.static(data, buildMeta(block)))
-
-fun WorkspaceBuilder.data(name: Name, node: DataNode<Any>) {
-    this.data[name] = node
-}
-
-fun WorkspaceBuilder.data(name: String, node: DataNode<Any>) = data(name.toName(), node)
-
-fun WorkspaceBuilder.data(name: Name, block: DataTreeBuilder<Any>.() -> Unit) {
-    this.data[name] = DataNode.build(Any::class, block)
-}
-
-fun WorkspaceBuilder.data(name: String, block: DataTreeBuilder<Any>.() -> Unit) = data(name.toName(), block)
 
 fun WorkspaceBuilder.target(name: String, block: MetaBuilder.() -> Unit) {
     targets[name] = buildMeta(block).seal()
@@ -65,22 +62,34 @@ fun WorkspaceBuilder.target(name: String, block: MetaBuilder.() -> Unit) {
 fun WorkspaceBuilder.target(name: String, base: String, block: MetaBuilder.() -> Unit) {
     val parentTarget = targets[base] ?: error("Base target with name $base not found")
     targets[name] = parentTarget.builder()
-        .apply { "@baseTarget" to base }
+        .apply { "@baseTarget" put base }
         .apply(block)
         .seal()
 }
 
-fun WorkspaceBuilder.task(task: Task<Any>) {
-    this.tasks.add(task)
-}
+fun <T : Any> WorkspaceBuilder.task(
+    name: String,
+    type: KClass<out T>,
+    builder: TaskBuilder<T>.() -> Unit
+): Task<T> = TaskBuilder(name.toName(), type).apply(builder).build().also { tasks.add(it) }
 
+inline fun <reified T : Any> WorkspaceBuilder.task(
+    name: String,
+    noinline builder: TaskBuilder<T>.() -> Unit
+): Task<T> = task(name, T::class, builder)
+
+@JvmName("rawTask")
+fun WorkspaceBuilder.task(
+    name: String,
+    builder: TaskBuilder<Any>.() -> Unit
+): Task<Any> = task(name, Any::class, builder)
 
 /**
  * A builder for a simple workspace
  */
 class SimpleWorkspaceBuilder(override val parentContext: Context) : WorkspaceBuilder {
     override var context: Context = parentContext
-    override var data = DataTreeBuilder(Any::class)
+    override var data: DataTreeBuilder<Any> = DataTreeBuilder(Any::class)
     override var tasks: MutableSet<Task<Any>> = HashSet()
     override var targets: MutableMap<String, Meta> = HashMap()
 

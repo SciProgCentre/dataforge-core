@@ -1,5 +1,6 @@
 package hep.dataforge.data
 
+import hep.dataforge.meta.*
 import hep.dataforge.names.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -9,22 +10,26 @@ import kotlin.collections.component2
 import kotlin.collections.set
 import kotlin.reflect.KClass
 
-sealed class DataItem<out T : Any> {
+sealed class DataItem<out T : Any> : MetaRepr {
     abstract val type: KClass<out T>
 
     class Node<out T : Any>(val value: DataNode<T>) : DataItem<T>() {
         override val type: KClass<out T> get() = value.type
+
+        override fun toMeta(): Meta = value.toMeta()
     }
 
     class Leaf<out T : Any>(val value: Data<T>) : DataItem<T>() {
         override val type: KClass<out T> get() = value.type
+
+        override fun toMeta(): Meta = value.toMeta()
     }
 }
 
 /**
  * A tree-like data structure grouped into the node. All data inside the node must inherit its type
  */
-interface DataNode<out T : Any> {
+interface DataNode<out T : Any> : MetaRepr {
 
     /**
      * The minimal common ancestor to all data in the node
@@ -33,11 +38,23 @@ interface DataNode<out T : Any> {
 
     val items: Map<NameToken, DataItem<T>>
 
+    override fun toMeta(): Meta = buildMeta {
+        "type" put (type.simpleName ?: "undefined")
+        "items" put {
+            this@DataNode.items.forEach {
+                it.key.toString() put it.value.toMeta()
+            }
+        }
+    }
+
     companion object {
         const val TYPE = "dataNode"
 
-        fun <T : Any> build(type: KClass<out T>, block: DataTreeBuilder<T>.() -> Unit) =
+        operator fun <T : Any> invoke(type: KClass<out T>, block: DataTreeBuilder<T>.() -> Unit) =
             DataTreeBuilder(type).apply(block).build()
+
+        inline operator fun <reified T : Any> invoke(noinline block: DataTreeBuilder<T>.() -> Unit) =
+            DataTreeBuilder(T::class).apply(block).build()
 
         fun <T : Any> builder(type: KClass<out T>) = DataTreeBuilder(type)
     }
@@ -68,9 +85,11 @@ fun DataNode<*>.joinAll(scope: CoroutineScope): Job = scope.launch {
 
 operator fun <T : Any> DataNode<T>.get(name: Name): DataItem<T>? = when (name.length) {
     0 -> error("Empty name")
-    1 -> (items[name.first()] as? DataItem.Leaf)
+    1 -> items[name.first()]
     else -> get(name.first()!!.asName()).node?.get(name.cutFirst())
 }
+
+operator fun <T : Any> DataNode<T>.get(name: String): DataItem<T>? = get(name.toName())
 
 /**
  * Sequence of all children including nodes
@@ -108,7 +127,9 @@ class DataTree<out T : Any> internal constructor(
     override val type: KClass<out T>,
     override val items: Map<NameToken, DataItem<T>>
 ) : DataNode<T> {
-    //TODO add node-level meta?
+    override fun toString(): String {
+        return super.toString()
+    }
 }
 
 private sealed class DataTreeBuilderItem<out T : Any> {
@@ -119,10 +140,11 @@ private sealed class DataTreeBuilderItem<out T : Any> {
 /**
  * A builder for a DataTree.
  */
-class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
+@DFBuilder
+class DataTreeBuilder<T : Any>(val type: KClass<out T>) {
     private val map = HashMap<NameToken, DataTreeBuilderItem<T>>()
 
-    operator fun set(token: NameToken, node: DataTreeBuilder<T>) {
+    operator fun set(token: NameToken, node: DataTreeBuilder<out T>) {
         if (map.containsKey(token)) error("Tree entry with name $token is not empty")
         map[token] = DataTreeBuilderItem.Node(node)
     }
@@ -134,9 +156,9 @@ class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
 
     private fun buildNode(token: NameToken): DataTreeBuilder<T> {
         return if (!map.containsKey(token)) {
-            DataTreeBuilder<T>(type).also { map[token] = DataTreeBuilderItem.Node(it) }
+            DataTreeBuilder(type).also { map[token] = DataTreeBuilderItem.Node(it) }
         } else {
-            (map[token] as? DataTreeBuilderItem.Node ?: error("The node with name $token is occupied by leaf")).tree
+            (map[token] as? DataTreeBuilderItem.Node<T> ?: error("The node with name $token is occupied by leaf")).tree
         }
     }
 
@@ -156,7 +178,7 @@ class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
         }
     }
 
-    operator fun set(name: Name, node: DataTreeBuilder<T>) {
+    operator fun set(name: Name, node: DataTreeBuilder<out T>) {
         when (name.length) {
             0 -> error("Can't add data with empty name")
             1 -> set(name.first()!!, node)
@@ -174,19 +196,19 @@ class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
     /**
      * Append data to node
      */
-    infix fun String.to(data: Data<T>) = set(toName(), data)
+    infix fun String.put(data: Data<T>) = set(toName(), data)
 
     /**
      * Append node
      */
-    infix fun String.to(node: DataNode<T>) = set(toName(), node)
+    infix fun String.put(node: DataNode<T>) = set(toName(), node)
 
-    infix fun String.to(item: DataItem<T>) = set(toName(), item)
+    infix fun String.put(item: DataItem<T>) = set(toName(), item)
 
     /**
      * Build and append node
      */
-    infix fun String.to(block: DataTreeBuilder<T>.() -> Unit) = set(toName(), DataTreeBuilder<T>(type).apply(block))
+    infix fun String.put(block: DataTreeBuilder<T>.() -> Unit) = set(toName(), DataTreeBuilder(type).apply(block))
 
 
     fun update(node: DataNode<T>) {
@@ -207,6 +229,42 @@ class DataTreeBuilder<T : Any>(private val type: KClass<out T>) {
     }
 }
 
+fun <T : Any> DataTreeBuilder<T>.datum(name: Name, data: Data<T>) {
+    this[name] = data
+}
+
+fun <T : Any> DataTreeBuilder<T>.datum(name: String, data: Data<T>) {
+    this[name.toName()] = data
+}
+
+fun <T : Any> DataTreeBuilder<T>.static(name: Name, data: T, meta: Meta = EmptyMeta) {
+    this[name] = Data.static(data, meta)
+}
+
+fun <T : Any> DataTreeBuilder<T>.static(name: Name, data: T, block: MetaBuilder.() -> Unit = {}) {
+    this[name] = Data.static(data, buildMeta(block))
+}
+
+fun <T : Any> DataTreeBuilder<T>.static(name: String, data: T, block: MetaBuilder.() -> Unit = {}) {
+    this[name.toName()] = Data.static(data, buildMeta(block))
+}
+
+fun <T : Any> DataTreeBuilder<T>.node(name: Name, node: DataNode<T>) {
+    this[name] = node
+}
+
+fun <T : Any> DataTreeBuilder<T>.node(name: String, node: DataNode<T>) {
+    this[name.toName()] = node
+}
+
+inline fun <reified T : Any> DataTreeBuilder<T>.node(name: Name, noinline block: DataTreeBuilder<T>.() -> Unit) {
+    this[name] = DataNode(T::class, block)
+}
+
+inline fun <reified T : Any> DataTreeBuilder<T>.node(name: String, noinline block: DataTreeBuilder<T>.() -> Unit) {
+    this[name.toName()] = DataNode(T::class, block)
+}
+
 /**
  * Generate a mutable builder from this node. Node content is not changed
  */
@@ -214,7 +272,7 @@ fun <T : Any> DataNode<T>.builder(): DataTreeBuilder<T> = DataTreeBuilder(type).
     dataSequence().forEach { (name, data) -> this[name] = data }
 }
 
-fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNode<T> = DataNode.build(type) {
+fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNode<T> = DataNode.invoke(type) {
     dataSequence().forEach { (name, data) ->
         if (predicate(name, data)) {
             this[name] = data
@@ -223,8 +281,3 @@ fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNod
 }
 
 fun <T : Any> DataNode<T>.first(): Data<T>? = dataSequence().first().second
-
-/**
- * Check that node is compatible with given type meaning that each element could be cast to the type
- */
-expect fun DataNode<*>.checkType(type: KClass<*>)

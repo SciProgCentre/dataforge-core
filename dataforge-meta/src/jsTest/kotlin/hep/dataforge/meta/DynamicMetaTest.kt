@@ -1,7 +1,9 @@
 package hep.dataforge.meta
 
+import hep.dataforge.values.int
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 
 class DynamicMetaTest {
@@ -10,7 +12,7 @@ class DynamicMetaTest {
     fun testDynamicMeta() {
         val d = js("{}")
         d.a = 22
-        d.array = arrayOf(1,2,3)
+        d.array = arrayOf(1, 2, 3)
         d.b = "myString"
         d.ob = js("{}")
         d.ob.childNode = 18
@@ -18,7 +20,35 @@ class DynamicMetaTest {
 
         val meta = DynamicMeta(d)
         assertEquals(true, meta["ob.booleanNode"].boolean)
-        assertEquals(2,meta["array[1]"].int)
+        assertEquals(2, meta["array"].value?.list?.get(1)?.int)
+        assertEquals(4, meta.items.size)
+    }
+
+    @Test
+    fun testMetaToDynamic(){
+        val meta = buildMeta {
+            "a" put 22
+            "array" put listOf(1, 2, 3)
+            "b" put "myString"
+            "ob" put {
+                "childNode" put 18
+                "booleanNode" put true
+            }
+        }
+
+        val dynamic = meta.toDynamic()
+
+        assertEquals(2,dynamic.array[1])
+
+        assertEquals(22, dynamic.a)
+
+        val keys = js("Object.keys(dynamic)") as Array<String>
+
+        assertTrue { keys.contains("ob") }
+
+        assertEquals(18, dynamic.ob.childNode)
+
+        assertEquals<Meta>(meta, DynamicMeta(dynamic))
     }
 
 }

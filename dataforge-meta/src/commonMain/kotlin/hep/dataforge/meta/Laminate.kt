@@ -4,8 +4,6 @@ import hep.dataforge.names.NameToken
 
 /**
  * A meta laminate consisting of multiple immutable meta layers. For mutable front layer, use [Styled].
- *
- *
  */
 class Laminate(layers: List<Meta>) : MetaBase() {
 
@@ -63,7 +61,7 @@ class Laminate(layers: List<Meta>) : MetaBase() {
                 }
                 else -> map {
                     when (it) {
-                        is MetaItem.ValueItem -> MetaItem.NodeItem(buildMeta { Meta.VALUE_KEY to it.value })
+                        is MetaItem.ValueItem -> MetaItem.NodeItem(buildMeta { Meta.VALUE_KEY put it.value })
                         is MetaItem.NodeItem -> it
                     }
                 }.merge()

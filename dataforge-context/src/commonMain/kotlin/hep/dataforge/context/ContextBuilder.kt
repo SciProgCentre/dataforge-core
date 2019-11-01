@@ -2,11 +2,12 @@ package hep.dataforge.context
 
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.buildMeta
+import hep.dataforge.names.toName
 
 /**
  * A convenience builder for context
  */
-class ContextBuilder(var name: String = "@anonimous", val parent: Context = Global) {
+class ContextBuilder(var name: String = "@anonymous", val parent: Context = Global) {
     private val plugins = ArrayList<Plugin>()
     private var meta = MetaBuilder()
 
@@ -31,7 +32,7 @@ class ContextBuilder(var name: String = "@anonimous", val parent: Context = Glob
     }
 
     fun build(): Context {
-        return Context(name, parent).apply {
+        return Context(name.toName(), parent).apply {
             this@ContextBuilder.plugins.forEach {
                 plugins.load(it)
             }

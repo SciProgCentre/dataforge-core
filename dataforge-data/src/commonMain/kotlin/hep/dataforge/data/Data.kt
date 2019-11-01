@@ -1,8 +1,6 @@
 package hep.dataforge.data
 
-import hep.dataforge.meta.EmptyMeta
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaRepr
+import hep.dataforge.meta.*
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -11,7 +9,7 @@ import kotlin.reflect.KClass
 /**
  * A data element characterized by its meta
  */
-interface Data<out T : Any> : Goal<T>, MetaRepr {
+interface Data<out T : Any> : Goal<T>, MetaRepr{
     /**
      * Type marker for the data. The type is known before the calculation takes place so it could be checked.
      */
@@ -21,7 +19,12 @@ interface Data<out T : Any> : Goal<T>, MetaRepr {
      */
     val meta: Meta
 
-    override fun toMeta(): Meta = meta
+    override fun toMeta(): Meta  = buildMeta {
+        "type" put (type.simpleName?:"undefined")
+        if(!meta.isEmpty()) {
+            "meta" put meta
+        }
+    }
 
     companion object {
         const val TYPE = "data"
@@ -34,7 +37,7 @@ interface Data<out T : Any> : Goal<T>, MetaRepr {
             block: suspend CoroutineScope.() -> T
         ): Data<T> = DynamicData(type, meta, context, dependencies, block)
 
-        operator inline fun <reified T : Any> invoke(
+        inline operator fun <reified T : Any> invoke(
             meta: Meta = EmptyMeta,
             context: CoroutineContext = EmptyCoroutineContext,
             dependencies: Collection<Data<*>> = emptyList(),
@@ -50,7 +53,7 @@ interface Data<out T : Any> : Goal<T>, MetaRepr {
             block: suspend CoroutineScope.() -> T
         ): Data<T> = NamedData(name, invoke(type, meta, context, dependencies, block))
 
-        operator inline fun <reified T : Any> invoke(
+        inline operator fun <reified T : Any> invoke(
             name: String,
             meta: Meta = EmptyMeta,
             context: CoroutineContext = EmptyCoroutineContext,
@@ -63,18 +66,6 @@ interface Data<out T : Any> : Goal<T>, MetaRepr {
             StaticData(value, meta)
     }
 }
-
-
-fun <R : Any, T : R> Data<T>.cast(type: KClass<R>): Data<R> {
-    return object : Data<R> by this {
-        override val type: KClass<out R> = type
-    }
-}
-
-/**
- * Upcast a [Data] to a supertype
- */
-inline fun <reified R : Any, T : R> Data<T>.cast(): Data<R> = cast(R::class)
 
 
 class DynamicData<T : Any>(
@@ -94,7 +85,7 @@ class StaticData<T : Any>(
 
 class NamedData<out T : Any>(val name: String, data: Data<T>) : Data<T> by data
 
-fun <T : Any, R : Any> Data<T>.pipe(
+fun <T : Any, R : Any> Data<T>.map(
     outputType: KClass<out R>,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = this.meta,
@@ -107,7 +98,7 @@ fun <T : Any, R : Any> Data<T>.pipe(
 /**
  * Create a data pipe
  */
-inline fun <T : Any, reified R : Any> Data<T>.pipe(
+inline fun <T : Any, reified R : Any> Data<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = this.meta,
     noinline block: suspend CoroutineScope.(T) -> R
@@ -118,7 +109,7 @@ inline fun <T : Any, reified R : Any> Data<T>.pipe(
 /**
  * Create a joined data.
  */
-inline fun <T : Any, reified R : Any> Collection<Data<T>>.join(
+inline fun <T : Any, reified R : Any> Collection<Data<T>>.reduce(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta,
     noinline block: suspend CoroutineScope.(Collection<T>) -> R
@@ -128,10 +119,10 @@ inline fun <T : Any, reified R : Any> Collection<Data<T>>.join(
     coroutineContext,
     this
 ) {
-    block(map { this.run { it.await(this) } })
+    block(map { run { it.await(this) } })
 }
 
-fun <K, T : Any, R : Any> Map<K, Data<T>>.join(
+fun <K, T : Any, R : Any> Map<K, Data<T>>.reduce(
     outputType: KClass<out R>,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta,
@@ -152,7 +143,7 @@ fun <K, T : Any, R : Any> Map<K, Data<T>>.join(
  * @param T type of the input goal
  * @param R type of the result goal
  */
-inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.join(
+inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.reduce(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta,
     noinline block: suspend CoroutineScope.(Map<K, T>) -> R

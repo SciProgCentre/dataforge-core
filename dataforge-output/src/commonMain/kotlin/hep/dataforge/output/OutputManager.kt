@@ -70,7 +70,7 @@ class ConsoleOutputManager : AbstractPlugin(), OutputManager {
 
         override val type = ConsoleOutputManager::class
 
-        override fun invoke(meta:Meta) = ConsoleOutputManager()
+        override fun invoke(meta: Meta, context: Context) = ConsoleOutputManager()
     }
 }
 

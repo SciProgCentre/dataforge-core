@@ -59,6 +59,8 @@ interface Meta : MetaRepr {
          * A key for single value node
          */
         const val VALUE_KEY = "@value"
+
+        val empty: EmptyMeta = EmptyMeta
     }
 }
 
@@ -77,27 +79,6 @@ operator fun Meta?.get(name: Name): MetaItem<*>? {
 
 operator fun Meta?.get(token: NameToken): MetaItem<*>? = this?.items?.get(token)
 operator fun Meta?.get(key: String): MetaItem<*>? = get(key.toName())
-
-/**
- * Get all items matching given name.
- */
-fun Meta.getAll(name: Name): Map<String, MetaItem<*>> {
-    val root = when (name.length) {
-        0 -> error("Can't use empty name for that")
-        1 -> this
-        else -> (this[name.cutLast()] as? NodeItem<*>)?.node
-    }
-
-    val (body, index) = name.last()!!
-    val regex = index.toRegex()
-
-    return root?.items
-        ?.filter { it.key.body == body && (index.isEmpty() || regex.matches(it.key.index)) }
-        ?.mapKeys { it.key.index }
-        ?: emptyMap()
-}
-
-fun Meta.getAll(name: String): Map<String, MetaItem<*>> = getAll(name.toName())
 
 /**
  * Get a sequence of [Name]-[Value] pairs
@@ -136,27 +117,6 @@ interface MetaNode<M : MetaNode<M>> : Meta {
     override val items: Map<NameToken, MetaItem<M>>
 }
 
-/**
- * Get all items matching given name.
- */
-fun <M : MetaNode<M>> M.getAll(name: Name): Map<String, MetaItem<M>> {
-    val root: MetaNode<M>? = when (name.length) {
-        0 -> error("Can't use empty name for that")
-        1 -> this
-        else -> (this[name.cutLast()] as? NodeItem<M>)?.node
-    }
-
-    val (body, index) = name.last()!!
-    val regex = index.toRegex()
-
-    return root?.items
-        ?.filter { it.key.body == body && (index.isEmpty() || regex.matches(it.key.index)) }
-        ?.mapKeys { it.key.index }
-        ?: emptyMap()
-}
-
-fun <M : MetaNode<M>> M.getAll(name: String): Map<String, MetaItem<M>> = getAll(name.toName())
-
 operator fun <M : MetaNode<M>> MetaNode<M>?.get(name: Name): MetaItem<M>? {
     if (this == null) return null
     return name.first()?.let { token ->
@@ -183,20 +143,15 @@ operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: NameToken): MetaItem<M>? = 
 /**
  * Equals, hashcode and to string for any meta
  */
-abstract class MetaBase: Meta{
+abstract class MetaBase : Meta {
 
-    override fun equals(other: Any?): Boolean  = if(other is Meta) {
+    override fun equals(other: Any?): Boolean = if (other is Meta) {
         this.items == other.items
-//        val items = items
-//        val otherItems = other.items
-//        (items.keys == otherItems.keys) && items.keys.all {
-//            items[it] == otherItems[it]
-//        }
     } else {
         false
     }
 
-    override fun hashCode(): Int  = items.hashCode()
+    override fun hashCode(): Int = items.hashCode()
 
     override fun toString(): String = items.toString()
 }
@@ -232,8 +187,7 @@ object EmptyMeta : MetaBase() {
 /**
  * Unsafe methods to access values and nodes directly from [MetaItem]
  */
-
-val MetaItem<*>?.value
+val MetaItem<*>?.value: Value?
     get() = (this as? ValueItem)?.value
         ?: (this?.node?.get(VALUE_KEY) as? ValueItem)?.value
 
@@ -247,7 +201,7 @@ val MetaItem<*>?.long get() = number?.toLong()
 val MetaItem<*>?.short get() = number?.toShort()
 
 inline fun <reified E : Enum<E>> MetaItem<*>?.enum() = if (this is ValueItem && this.value is EnumValue<*>) {
-    this.value as E
+    this.value.value as E
 } else {
     string?.let { enumValueOf<E>(it) }
 }
@@ -257,17 +211,8 @@ val MetaItem<*>?.stringList get() = value?.list?.map { it.string } ?: emptyList(
 val <M : Meta> MetaItem<M>?.node: M?
     get() = when (this) {
         null -> null
-        is ValueItem -> error("Trying to interpret value meta item as node item")
+        is ValueItem -> null//error("Trying to interpret value meta item as node item")
         is NodeItem -> node
     }
-
-/**
- * Generic meta-holder object
- */
-interface Metoid {
-    val meta: Meta
-}
-
-fun Value.toMeta() = buildMeta { Meta.VALUE_KEY to this }
 
 fun Meta.isEmpty() = this === EmptyMeta || this.items.isEmpty()

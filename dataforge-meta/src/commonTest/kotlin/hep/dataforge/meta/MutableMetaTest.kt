@@ -7,12 +7,12 @@ class MutableMetaTest{
     @Test
     fun testRemove(){
         val meta = buildMeta {
-            "aNode" to {
-                "innerNode" to {
-                    "innerValue" to true
+            "aNode" put {
+                "innerNode" put {
+                    "innerValue" put true
                 }
-                "b" to 22
-                "c" to "StringValue"
+                "b" put 22
+                "c" put "StringValue"
             }
         }.toConfig()
 

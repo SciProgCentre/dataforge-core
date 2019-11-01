@@ -17,17 +17,36 @@ class MetaTest {
     @Test
     fun metaEqualityTest() {
         val meta1 = buildMeta {
-            "a" to 22
-            "b" to {
-                "c" to "ddd"
+            "a" put 22
+            "b" put {
+                "c" put "ddd"
             }
         }
         val meta2 = buildMeta {
-            "b" to {
-                "c" to "ddd"
+            "b" put {
+                "c" put "ddd"
             }
-            "a" to 22
+            "a" put 22
         }.seal()
         assertEquals<Meta>(meta1, meta2)
+    }
+
+    @Test
+    fun metaToMap(){
+        val meta = buildMeta {
+            "a" put 22
+            "b" put {
+                "c" put "ddd"
+            }
+            "list" put (0..4).map {
+                buildMeta {
+                    "value" put it
+                }
+            }
+        }
+        val map = meta.toMap()
+        val reconstructed = map.toMeta()
+
+        assertEquals(meta,reconstructed)
     }
 }

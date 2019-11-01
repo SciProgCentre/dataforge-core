@@ -1,5 +1,8 @@
 package hep.dataforge.meta
 
+import hep.dataforge.names.Name
+import kotlin.jvm.JvmName
+
 /**
  * Marker interface for classes with specifications
  */
@@ -61,5 +64,10 @@ fun <C : Specific, S : Specification<C>> S.createStyle(action: C.() -> Unit): Me
 
 fun <C : Specific> Specific.spec(
     spec: Specification<C>,
-    key: String? = null
+    key: Name? = null
 ): MutableMorphDelegate<Config, C> = MutableMorphDelegate(config, key) { spec.wrap(it) }
+
+fun <T: Specific> MetaItem<*>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(it)}
+
+@JvmName("configSpec")
+fun <T: Specific> MetaItem<Config>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(it)}

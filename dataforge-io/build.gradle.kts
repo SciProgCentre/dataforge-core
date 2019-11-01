@@ -5,8 +5,8 @@ plugins {
 description = "IO module"
 
 scientifik{
-    serialization = true
-    io = true
+    withSerialization()
+    withIO()
 }
 
 
@@ -15,6 +15,11 @@ kotlin {
         commonMain{
             dependencies {
                 api(project(":dataforge-context"))
+            }
+        }
+        jvmMain{
+            dependencies {
+
             }
         }
         jsMain{

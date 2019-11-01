@@ -33,15 +33,15 @@ class SplitBuilder<T : Any, R : Any>(val name: Name, val meta: Meta) {
 }
 
 class SplitAction<T : Any, R : Any>(
-    val inputType: KClass<T>,
-    val outputType: KClass<R>,
+    val inputType: KClass<out T>,
+    val outputType: KClass<out R>,
     private val action: SplitBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
     override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
-        node.checkType(inputType)
+        node.ensureType(inputType)
 
-        return DataNode.build(outputType) {
+        return DataNode.invoke(outputType) {
             node.dataSequence().forEach { (name, data) ->
 
                 val laminate = Laminate(data.meta, meta)
@@ -55,7 +55,7 @@ class SplitAction<T : Any, R : Any>(
 
                     rule(env)
 
-                    val res = data.pipe(outputType, meta = env.meta) { env.result(it) }
+                    val res = data.map(outputType, meta = env.meta) { env.result(it) }
                     set(env.name, res)
                 }
             }

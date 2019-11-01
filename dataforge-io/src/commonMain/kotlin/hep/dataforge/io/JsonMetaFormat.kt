@@ -1,12 +1,17 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package hep.dataforge.io
 
+import hep.dataforge.context.Context
 import hep.dataforge.descriptors.ItemDescriptor
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.descriptors.ValueDescriptor
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBase
 import hep.dataforge.meta.MetaItem
+import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
+import hep.dataforge.names.plus
 import hep.dataforge.names.toName
 import hep.dataforge.values.*
 import kotlinx.io.core.Input
@@ -19,28 +24,32 @@ import kotlin.collections.component2
 import kotlin.collections.set
 
 
-object JsonMetaFormat : MetaFormat {
-
-    override val name: String = "json"
-    override val key: Short = 0x4a53//"JS"
+class JsonMetaFormat(private val json: Json = Json.indented) : MetaFormat {
 
     override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {
-        val json = meta.toJson(descriptor)
-        writeText(json.toString())
+        val jsonObject = meta.toJson(descriptor)
+        writeText(json.stringify(JsonObjectSerializer, jsonObject))
     }
 
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
         val str = readText()
-        val json = Json.plain.parseJson(str)
+        val jsonElement = json.parseJson(str)
+        return jsonElement.toMeta()
+    }
 
-        if (json is JsonObject) {
-            return json.toMeta()
-        } else {
-            TODO("Non-object root not supported")
-        }
+    companion object : MetaFormatFactory {
+        val default = JsonMetaFormat()
+
+        override fun invoke(meta: Meta, context: Context): MetaFormat = default
+
+        override val name: Name = super.name + "json"
+        override val key: Short = 0x4a53//"JS"
     }
 }
 
+/**
+ * @param descriptor reserved for custom serialization in future
+ */
 fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
     return if (isList()) {
         JsonArray(list.map { it.toJson() })
@@ -54,7 +63,7 @@ fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
     }
 }
 
-//Use theese methods to customize JSON key mapping
+//Use these methods to customize JSON key mapping
 private fun NameToken.toJsonKey(descriptor: ItemDescriptor?) = toString()
 
 private fun NodeDescriptor?.getDescriptor(key: String) = this?.items?.get(key)
@@ -78,7 +87,12 @@ fun Meta.toJson(descriptor: NodeDescriptor? = null): JsonObject {
     return JsonObject(map)
 }
 
-fun JsonObject.toMeta(descriptor: NodeDescriptor? = null): JsonMeta = JsonMeta(this, descriptor)
+fun JsonElement.toMeta(descriptor: NodeDescriptor? = null): Meta {
+    return when (val item = toMetaItem(descriptor)) {
+        is MetaItem.NodeItem<*> -> item.node
+        is MetaItem.ValueItem ->item.value.toMeta()
+    }
+}
 
 fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
     return when (this) {
@@ -93,7 +107,7 @@ fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<JsonMet
         MetaItem.ValueItem(value)
     }
     is JsonObject -> {
-        val meta = toMeta(descriptor as? NodeDescriptor)
+        val meta = JsonMeta(this, descriptor as? NodeDescriptor)
         MetaItem.NodeItem(meta)
     }
     is JsonArray -> {
@@ -129,7 +143,7 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
                 this[name] = MetaItem.ValueItem(value.toValue(itemDescriptor as? ValueDescriptor)) as MetaItem<JsonMeta>
             }
             is JsonObject -> {
-                this[name] = MetaItem.NodeItem(value.toMeta(itemDescriptor as? NodeDescriptor))
+                this[name] = MetaItem.NodeItem(JsonMeta(value, itemDescriptor as? NodeDescriptor))
             }
             is JsonArray -> {
                 when {

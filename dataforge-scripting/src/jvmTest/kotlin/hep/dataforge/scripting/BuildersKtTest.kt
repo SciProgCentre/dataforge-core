@@ -3,7 +3,9 @@ package hep.dataforge.scripting
 import hep.dataforge.context.Global
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
-import hep.dataforge.workspace.*
+import hep.dataforge.workspace.SimpleWorkspaceBuilder
+import hep.dataforge.workspace.context
+import hep.dataforge.workspace.target
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -17,7 +19,7 @@ class BuildersKtTest {
             context("test")
 
             target("testTarget"){
-                "a" to 12
+                "a" put 12
             }
         }
     }
@@ -30,7 +32,7 @@ class BuildersKtTest {
             context("test")
 
             target("testTarget"){
-                "a" to 12
+                "a" put 12
             }
         """.trimIndent()
         val workspace = Builders.buildWorkspace(script)

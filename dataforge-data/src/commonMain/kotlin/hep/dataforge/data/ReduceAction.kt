@@ -1,9 +1,7 @@
 package hep.dataforge.data
 
-import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.builder
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import kotlin.reflect.KClass
@@ -21,7 +19,7 @@ class JoinGroup<T : Any, R : Any>(var name: String, internal val node: DataNode<
 
 }
 
-class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
+class ReduceGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
     private val groupRules: MutableList<(DataNode<T>) -> List<JoinGroup<T, R>>> = ArrayList();
 
     /**
@@ -73,26 +71,31 @@ class JoinGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
 /**
  * The same rules as for KPipe
  */
-class JoinAction<T : Any, R : Any>(
-    val inputType: KClass<T>,
-    val outputType: KClass<R>,
-    private val action: JoinGroupBuilder<T, R>.() -> Unit
+class ReduceAction<T : Any, R : Any>(
+    val inputType: KClass<out T>,
+    val outputType: KClass<out R>,
+    private val action: ReduceGroupBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
     override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
-        node.checkType(inputType)
-        return DataNode.build(outputType) {
-            JoinGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
+        node.ensureType(inputType)
+        return DataNode.invoke(outputType) {
+            ReduceGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
 
-                val laminate = Laminate(group.meta, meta)
+                //val laminate = Laminate(group.meta, meta)
 
                 val dataMap = group.node.dataSequence().associate { it }
 
-                val groupName: String = group.name;
+                val groupName: String = group.name
 
-                val env = ActionEnv(groupName.toName(), laminate.builder())
+                val groupMeta = group.meta
 
-                val res: DynamicData<R> = dataMap.join(outputType, meta = laminate) { group.result.invoke(env, it) }
+                val env = ActionEnv(groupName.toName(), groupMeta, meta)
+
+                val res: DynamicData<R> = dataMap.reduce(
+                    outputType,
+                    meta = groupMeta
+                ) { group.result.invoke(env, it) }
 
                 set(env.name, res)
             }

@@ -14,6 +14,8 @@ class LazyParsedValue(override val string: String) : Value {
     override fun toString(): String = string
 
     override fun equals(other: Any?): Boolean = other is Value && this.parsedValue == other
+
+    override fun hashCode(): Int  = string.hashCode()
 }
 
 fun String.lazyParseValue(): LazyParsedValue = LazyParsedValue(this)
@@ -44,4 +46,4 @@ class DoubleArrayValue(override val value: DoubleArray) : Value {
     override fun toString(): String = list.joinToString (prefix = "[", postfix = "]")
 }
 
-fun DoubleArray.asValue(): DoubleArrayValue = DoubleArrayValue(this)
+fun DoubleArray.asValue(): Value = if(isEmpty()) Null else DoubleArrayValue(this)
