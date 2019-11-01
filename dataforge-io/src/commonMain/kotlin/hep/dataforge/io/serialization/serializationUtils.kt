@@ -12,12 +12,12 @@ import kotlinx.serialization.internal.*
 inline class SerialDescriptorBuilder(private val impl: SerialClassDescImpl) {
     fun element(
         name: String,
-        descriptor: SerialDescriptor,
+        descriptor: SerialDescriptor?,
         isOptional: Boolean = false,
         vararg annotations: Annotation
     ) {
         impl.addElement(name, isOptional)
-        impl.pushDescriptor(descriptor)
+        descriptor?.let { impl.pushDescriptor(descriptor) }
         annotations.forEach {
             impl.pushAnnotation(it)
         }
@@ -57,7 +57,7 @@ inline class SerialDescriptorBuilder(private val impl: SerialClassDescImpl) {
     fun doubleArray(name: String, isOptional: Boolean = false, vararg annotations: Annotation) =
         element(name, DoubleArraySerializer.descriptor, isOptional, *annotations)
 
-    inline fun <reified E: Enum<E>> enum(name: String, isOptional: Boolean = false, vararg annotations: Annotation) =
+    inline fun <reified E : Enum<E>> enum(name: String, isOptional: Boolean = false, vararg annotations: Annotation) =
         element(name, EnumSerializer(E::class).descriptor, isOptional, *annotations)
 
     fun classAnnotation(a: Annotation) = impl.pushClassAnnotation(a)
@@ -65,7 +65,10 @@ inline class SerialDescriptorBuilder(private val impl: SerialClassDescImpl) {
     fun build(): SerialDescriptor = impl
 }
 
-inline fun KSerializer<*>.descriptor(name: String, block: SerialDescriptorBuilder.() -> Unit): SerialDescriptor =
+inline fun <reified T : Any> KSerializer<T>.descriptor(
+    name: String,
+    block: SerialDescriptorBuilder.() -> Unit
+): SerialDescriptor =
     SerialDescriptorBuilder(SerialClassDescImpl(name)).apply(block).build()
 
 fun Decoder.decodeStructure(

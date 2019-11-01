@@ -1,6 +1,7 @@
-package hep.dataforge.io
+package hep.dataforge.io.serialization
 
-import hep.dataforge.io.serialization.descriptor
+import hep.dataforge.io.toJson
+import hep.dataforge.io.toMeta
 import hep.dataforge.meta.*
 import hep.dataforge.names.NameToken
 import hep.dataforge.values.*
@@ -16,10 +17,10 @@ object ValueSerializer : KSerializer<Value> {
     private val valueTypeSerializer = EnumSerializer(ValueType::class)
     private val listSerializer by lazy { ArrayListSerializer(ValueSerializer) }
 
-    override val descriptor: SerialDescriptor = descriptor("Value") {
+    override val descriptor: SerialDescriptor = descriptor("hep.dataforge.values.Value") {
         boolean("isList")
         enum<ValueType>("valueType")
-        element("value", PolymorphicClassDescriptor)
+        element("value", null)
     }
 
     private fun Decoder.decodeValue(): Value {
@@ -69,7 +70,7 @@ object ValueSerializer : KSerializer<Value> {
 object MetaItemSerializer : KSerializer<MetaItem<*>> {
     override val descriptor: SerialDescriptor = descriptor("MetaItem") {
         boolean("isNode")
-        element("value", PolymorphicClassDescriptor)
+        element("value", null)
     }
 
 
@@ -93,17 +94,21 @@ object MetaItemSerializer : KSerializer<MetaItem<*>> {
 
 private class DeserializedMeta(override val items: Map<NameToken, MetaItem<*>>) : MetaBase()
 
-
 /**
  * Serialized for meta
  */
 @Serializer(Meta::class)
 object MetaSerializer : KSerializer<Meta> {
-    private val mapSerializer =
-        HashMapSerializer(StringSerializer, MetaItemSerializer)
+    private val mapSerializer = HashMapSerializer(
+        StringSerializer,
+        MetaItemSerializer
+    )
 
-    override val descriptor: SerialDescriptor =
-        NamedMapClassDescriptor("Meta", StringSerializer.descriptor, MetaItemSerializer.descriptor)
+    override val descriptor: SerialDescriptor = NamedMapClassDescriptor(
+        "hep.dataforge.meta.Meta",
+        StringSerializer.descriptor,
+        MetaItemSerializer.descriptor
+    )
 
     override fun deserialize(decoder: Decoder): Meta {
         return if (decoder is JsonInput) {
