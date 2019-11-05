@@ -17,6 +17,9 @@ object EnvelopeParts {
     const val PARTS_DATA_TYPE = "envelope.parts"
 }
 
+/**
+ * Append multiple serialized envelopes to the data block. Previous data is erased if it was present
+ */
 fun EnvelopeBuilder.parts(formatFactory: EnvelopeFormatFactory, envelopes: Collection<Envelope>) {
     dataType = PARTS_DATA_TYPE
     meta {
@@ -36,7 +39,10 @@ fun EnvelopeBuilder.parts(formatFactory: EnvelopeFormatFactory, envelopes: Colle
 fun EnvelopeBuilder.parts(formatFactory: EnvelopeFormatFactory, builder: suspend SequenceScope<Envelope>.() -> Unit) =
     parts(formatFactory, sequence(builder).toList())
 
-fun Envelope.parts(io: IOPlugin = Global.plugins.fetch(IOPlugin)): Sequence<Envelope> {
+/**
+ * If given envelope supports multipart data, return a sequence of those parts (could be empty). Otherwise return null.
+ */
+fun Envelope.parts(io: IOPlugin = Global.plugins.fetch(IOPlugin)): Sequence<Envelope>? {
     return when (dataType) {
         PARTS_DATA_TYPE -> {
             val size = meta[SIZE_KEY].int ?: error("Unsized parts not supported yet")
@@ -55,6 +61,6 @@ fun Envelope.parts(io: IOPlugin = Global.plugins.fetch(IOPlugin)): Sequence<Enve
                 } ?: emptySequence()
             }
         }
-        else -> emptySequence()
+        else -> null
     }
 }
