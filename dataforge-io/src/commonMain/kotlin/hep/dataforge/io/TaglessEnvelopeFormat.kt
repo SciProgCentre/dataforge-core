@@ -43,6 +43,7 @@ class TaglessEnvelopeFormat(
             writeText(dataStart + "\r\n")
             writeFully(data.toBytes())
         }
+        flush()
     }
 
     override fun Input.readObject(): Envelope {
