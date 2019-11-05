@@ -26,6 +26,9 @@ class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         context.content<EnvelopeFormatFactory>(ENVELOPE_FORMAT_TYPE).values
     }
 
+    fun envelopeFormat(name: Name, meta: Meta = EmptyMeta) =
+        envelopeFormatFactories.find { it.name == name }?.invoke(meta, context)
+
     override fun provideTop(target: String): Map<Name, Any> {
         return when (target) {
             META_FORMAT_TYPE -> defaultMetaFormats.toMap()
