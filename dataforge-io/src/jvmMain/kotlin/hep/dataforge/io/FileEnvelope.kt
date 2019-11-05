@@ -15,7 +15,7 @@ class FileEnvelope internal constructor(val path: Path, val format: EnvelopeForm
 
     init {
         val input = Files.newByteChannel(path, StandardOpenOption.READ).asInput()
-        partialEnvelope = format.run { input.readPartial() }
+        partialEnvelope = format.run { input.use { it.readPartial()} }
     }
 
     override val meta: Meta get() = partialEnvelope.meta

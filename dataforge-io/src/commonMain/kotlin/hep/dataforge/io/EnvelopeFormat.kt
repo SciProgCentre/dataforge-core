@@ -2,6 +2,7 @@ package hep.dataforge.io
 
 import hep.dataforge.context.Context
 import hep.dataforge.io.EnvelopeFormatFactory.Companion.ENVELOPE_FORMAT_TYPE
+import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
@@ -18,11 +19,15 @@ data class PartialEnvelope(val meta: Meta, val dataOffset: UInt, val dataSize: U
 
 
 interface EnvelopeFormat : IOFormat<Envelope> {
+    val defaultMetaFormat: MetaFormatFactory get() = JsonMetaFormat
+
     fun Input.readPartial(): PartialEnvelope
+
+    fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta = EmptyMeta)
 
     override fun Input.readObject(): Envelope
 
-    override fun Output.writeObject(obj: Envelope)
+    override fun Output.writeObject(obj: Envelope): Unit = writeEnvelope(obj, defaultMetaFormat)
 }
 
 @Type(ENVELOPE_FORMAT_TYPE)
