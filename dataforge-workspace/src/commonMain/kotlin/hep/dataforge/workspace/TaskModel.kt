@@ -58,9 +58,6 @@ fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> {
     }.build()
 }
 
-@DslMarker
-annotation class TaskBuildScope
-
 interface TaskDependencyContainer {
     val defaultMeta: Meta
     fun add(dependency: Dependency)

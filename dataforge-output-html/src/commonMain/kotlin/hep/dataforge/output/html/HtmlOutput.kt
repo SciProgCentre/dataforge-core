@@ -47,7 +47,7 @@ class HtmlOutput<T : Any>(override val context: Context, private val consumer: T
 }
 
 /**
- * A text or binary renderer based on [kotlinx.io.core.Output]
+ * A text or binary renderer based on [Output]
  */
 @Type(HTML_CONVERTER_TYPE)
 interface HtmlBuilder<T : Any> {

@@ -3,6 +3,7 @@ package hep.dataforge.workspace
 import hep.dataforge.context.Context
 import hep.dataforge.data.*
 import hep.dataforge.descriptors.NodeDescriptor
+import hep.dataforge.meta.DFBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
@@ -13,7 +14,7 @@ import hep.dataforge.names.toName
 import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
-@TaskBuildScope
+@DFBuilder
 class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     private var modelTransform: TaskModelBuilder.(Meta) -> Unit = { allData() }
 //    private val additionalDependencies = HashSet<Dependency>()

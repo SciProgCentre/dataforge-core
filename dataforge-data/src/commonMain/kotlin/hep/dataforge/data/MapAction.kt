@@ -1,9 +1,6 @@
 package hep.dataforge.data
 
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.builder
-import hep.dataforge.meta.seal
+import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import kotlin.reflect.KClass
 
@@ -20,6 +17,7 @@ data class ActionEnv(
 /**
  * Action environment
  */
+@DFBuilder
 class MapActionBuilder<T, R>(var name: Name, var meta: MetaBuilder, val actionMeta: Meta) {
     lateinit var result: suspend ActionEnv.(T) -> R
 
