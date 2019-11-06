@@ -28,4 +28,37 @@ class FileEnvelopeTest {
         val restored: Envelope = Global.io.readEnvelopeFile(tmpPath)
         assertTrue { envelope.contentEquals(restored) }
     }
+
+    @Test
+    fun testFileWriteTagged() {
+        val tmpPath = Files.createTempFile("dataforge_test", ".df")
+        Global.io.writeEnvelopeFile(tmpPath, envelope)
+        assertTrue { tmpPath.toFile().length() > 0 }
+    }
+
+    @Test
+    fun testFileWriteReadTagged() {
+        val tmpPath = Files.createTempFile("dataforge_test", ".df")
+        Global.io.writeEnvelopeFile(tmpPath, envelope)
+        println(tmpPath.toUri())
+        val restored: Envelope = Global.io.readEnvelopeFile(tmpPath)
+        assertTrue { envelope.contentEquals(restored) }
+    }
+
+    @Test
+    fun testFileWriteTagless() {
+        val tmpPath = Files.createTempFile("dataforge_test", ".df")
+        Global.io.writeEnvelopeFile(tmpPath, envelope, formatFactory = TaglessEnvelopeFormat)
+        assertTrue { tmpPath.toFile().length() > 0 }
+    }
+
+    @Test
+    fun testFileWriteReadTagless() {
+        val tmpPath = Files.createTempFile("dataforge_test", ".df")
+        Global.io.writeEnvelopeFile(tmpPath, envelope, formatFactory = TaglessEnvelopeFormat)
+        println(tmpPath.toUri())
+        val restored: Envelope = Global.io.readEnvelopeFile(tmpPath, formatFactory = TaglessEnvelopeFormat)
+        assertTrue { envelope.contentEquals(restored) }
+    }
+
 }
