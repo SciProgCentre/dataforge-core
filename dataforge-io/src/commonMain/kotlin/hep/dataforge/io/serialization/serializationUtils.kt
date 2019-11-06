@@ -1,9 +1,7 @@
 package hep.dataforge.io.serialization
 
-import kotlinx.serialization.CompositeDecoder
-import kotlinx.serialization.Decoder
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialDescriptor
+import hep.dataforge.meta.DFExperimental
+import kotlinx.serialization.*
 import kotlinx.serialization.internal.*
 
 /**
@@ -71,10 +69,24 @@ inline fun <reified T : Any> KSerializer<T>.descriptor(
 ): SerialDescriptor =
     SerialDescriptorBuilder(SerialClassDescImpl(name)).apply(block).build()
 
-fun Decoder.decodeStructure(
+@DFExperimental
+inline fun <R> Decoder.decodeStructure(
     desc: SerialDescriptor,
     vararg typeParams: KSerializer<*> = emptyArray(),
-    block: CompositeDecoder.() -> Unit
+    crossinline block:  CompositeDecoder.() -> R
+): R {
+    val decoder = beginStructure(desc, *typeParams)
+    val res = decoder.block()
+    decoder.endStructure(desc)
+    return res
+}
+
+inline fun Encoder.encodeStructure(
+    desc: SerialDescriptor,
+    vararg typeParams: KSerializer<*> = emptyArray(),
+    block: CompositeEncoder.() -> Unit
 ) {
-    beginStructure(desc, *typeParams).apply(block).endStructure(desc)
+    val encoder = beginStructure(desc, *typeParams)
+    encoder.block()
+    encoder.endStructure(desc)
 }
