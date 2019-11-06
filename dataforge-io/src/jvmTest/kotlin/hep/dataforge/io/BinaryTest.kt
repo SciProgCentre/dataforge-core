@@ -1,12 +1,10 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Global
-import kotlinx.io.core.readAvailable
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class BinaryTest {
     val envelope = Envelope {
@@ -56,27 +54,4 @@ class BinaryTest {
         val binary = Global.io.readEnvelopeFile(tmpPath).data!!
         assertEquals(binary.size.toInt(), binary.toBytes().size)
     }
-
-    @Test
-    fun testDataReading() {
-        println(System.getProperty("user.dir"))
-        val tmpPath = Files.createTempFile("dataforge_test", ".df")
-        Global.io.writeEnvelopeFile(tmpPath, envelopeFromFile)
-
-        val binary = Global.io.readEnvelopeFile(tmpPath).data!!
-
-        var sum = 0.0
-        binary.read {
-            val dst = DoubleArray(100) { 0.0 }
-            do {
-                val flag = readAvailable(dst)
-                println("$flag : ${dst[0]}")
-                dst.map {
-                    sum += it
-                }
-            } while (flag != -1)
-        }
-        assertTrue(sum > 0.0)
-    }
-
 }
