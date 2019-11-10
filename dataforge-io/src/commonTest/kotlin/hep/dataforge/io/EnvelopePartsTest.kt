@@ -23,9 +23,9 @@ class EnvelopePartsTest {
 
     @Test
     fun testParts() {
-        val bytes = TaggedEnvelopeFormat.default.writeBytes(partsEnvelope)
-        val reconstructed = TaggedEnvelopeFormat.default.readBytes(bytes)
-        val parts = reconstructed.parts().toList()
+        val bytes = TaggedEnvelopeFormat.writeBytes(partsEnvelope)
+        val reconstructed = TaggedEnvelopeFormat.readBytes(bytes)
+        val parts = reconstructed.parts()?.toList() ?: emptyList()
         assertEquals(2, parts[2].meta["value"].int)
     }
 

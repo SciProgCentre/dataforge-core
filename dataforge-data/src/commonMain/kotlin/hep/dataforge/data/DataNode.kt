@@ -64,21 +64,13 @@ val <T : Any> DataItem<T>?.node: DataNode<T>? get() = (this as? DataItem.Node<T>
 val <T : Any> DataItem<T>?.data: Data<T>? get() = (this as? DataItem.Leaf<T>)?.value
 
 /**
- * Start computation for all goals in data node
+ * Start computation for all goals in data node and return a job for the whole node
  */
-fun DataNode<*>.startAll(scope: CoroutineScope): Unit = items.values.forEach {
-    when (it) {
-        is DataItem.Node<*> -> it.value.startAll(scope)
-        is DataItem.Leaf<*> -> it.value.start(scope)
-    }
-}
-
-fun DataNode<*>.joinAll(scope: CoroutineScope): Job = scope.launch {
-    startAll(scope)
-    items.forEach {
-        when (val value = it.value) {
-            is DataItem.Node -> value.value.joinAll(this).join()
-            is DataItem.Leaf -> value.value.await(scope)
+fun DataNode<*>.launchAll(scope: CoroutineScope): Job = scope.launch {
+    items.values.forEach {
+        when (it) {
+            is DataItem.Node<*> -> it.value.launchAll(scope)
+            is DataItem.Leaf<*> -> it.value.start(scope)
         }
     }
 }

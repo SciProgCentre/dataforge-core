@@ -4,36 +4,16 @@ import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataTreeBuilder
 import hep.dataforge.data.datum
-import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.io.*
 import hep.dataforge.meta.EmptyMeta
-import hep.dataforge.meta.Meta
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.nio.asInput
-import kotlinx.io.nio.asOutput
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import kotlin.reflect.KClass
 
-/**
- * Read meta from file in a given [MetaFormat]
- */
-fun MetaFormat.readMetaFile(path: Path, descriptor: NodeDescriptor? = null): Meta {
-    return Files.newByteChannel(path, StandardOpenOption.READ)
-        .asInput()
-        .readMeta(descriptor)
-}
-
-/**
- * Write meta to file using given [MetaFormat]
- */
-fun MetaFormat.writeMetaFile(path: Path, meta: Meta, descriptor: NodeDescriptor? = null) {
-    return Files.newByteChannel(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW)
-        .asOutput()
-        .writeMeta(meta, descriptor)
-}
 
 /**
  * Read data with supported envelope format and binary format. If envelope format is null, then read binary directly from file.
@@ -50,10 +30,10 @@ fun <T : Any> IOPlugin.readData(
     dataFormat: IOFormat<T>,
     envelopeFormatFactory: EnvelopeFormatFactory? = null,
     metaFile: Path = path.resolveSibling("${path.fileName}.meta"),
-    metaFileFormat: MetaFormat = JsonMetaFormat.default
+    metaFileFormat: MetaFormat = JsonMetaFormat
 ): Data<T> {
     val externalMeta = if (Files.exists(metaFile)) {
-        metaFileFormat.readMetaFile(metaFile)
+        readMetaFile(metaFile)
     } else {
         null
     }

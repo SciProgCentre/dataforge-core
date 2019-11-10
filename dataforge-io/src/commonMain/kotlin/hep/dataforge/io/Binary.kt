@@ -8,7 +8,7 @@ import kotlin.math.min
  */
 interface Binary {
     /**
-     * The size of binary in bytes
+     * The size of binary in bytes. [ULong.MAX_VALUE] if size is not defined and input should be read until its end is reached
      */
     val size: ULong
 
@@ -18,6 +18,10 @@ interface Binary {
      * Some implementation may forbid this to be called twice. In this case second call will throw an exception.
      */
     fun <R> read(block: Input.() -> R): R
+
+    companion object {
+        val EMPTY = EmptyBinary
+    }
 }
 
 /**
@@ -48,12 +52,11 @@ fun RandomAccessBinary.readPacket(from: UInt, size: UInt): ByteReadPacket = read
 @ExperimentalUnsignedTypes
 object EmptyBinary : RandomAccessBinary {
 
-    override val size: ULong = 0.toULong()
+    override val size: ULong = 0u
 
     override fun <R> read(from: UInt, size: UInt, block: Input.() -> R): R {
         error("The binary is empty")
     }
-
 }
 
 @ExperimentalUnsignedTypes
@@ -79,9 +82,9 @@ fun <T : Any> Binary.readWith(format: IOFormat<T>): T = format.run {
     }
 }
 
-fun <T : Any> IOFormat<T>.writeBinary(obj: T): Binary {
-    val packet = buildPacket {
-        writeObject(obj)
-    }
-    return ArrayBinary(packet.readBytes())
-}
+//fun <T : Any> IOFormat<T>.writeBinary(obj: T): Binary {
+//    val packet = buildPacket {
+//        writeObject(obj)
+//    }
+//    return ArrayBinary(packet.readBytes())
+//}

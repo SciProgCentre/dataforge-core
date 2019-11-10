@@ -12,7 +12,7 @@ import hep.dataforge.names.toName
 import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
-@TaskBuildScope
+@DFBuilder
 interface WorkspaceBuilder {
     val parentContext: Context
     var context: Context

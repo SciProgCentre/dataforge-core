@@ -1,51 +1,93 @@
 package hep.dataforge.io
 
 import hep.dataforge.descriptors.NodeDescriptor
-import hep.dataforge.io.functions.FunctionServer
-import hep.dataforge.io.functions.FunctionServer.Companion.FUNCTION_NAME_KEY
-import hep.dataforge.io.functions.FunctionServer.Companion.INPUT_FORMAT_KEY
-import hep.dataforge.io.functions.FunctionServer.Companion.OUTPUT_FORMAT_KEY
-import hep.dataforge.io.functions.function
+import hep.dataforge.meta.DFExperimental
+import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.buildMeta
-import hep.dataforge.names.Name
+import kotlinx.io.nio.asInput
 import kotlinx.io.nio.asOutput
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import kotlin.reflect.KClass
 import kotlin.reflect.full.isSuperclassOf
+import kotlin.streams.asSequence
 
 inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
     return ioFormats.values.find { it.type.isSuperclassOf(T::class) } as IOFormat<T>?
 }
 
-fun IOPlugin.resolveIOFormatName(type: KClass<*>): Name {
-    return ioFormats.entries.find { it.value.type.isSuperclassOf(type) }?.key
-        ?: error("Can't resolve IOFormat for type $type")
+/**
+ * Read file containing meta using given [formatOverride] or file extension to infer meta type.
+ */
+fun IOPlugin.readMetaFile(path: Path, formatOverride: MetaFormat? = null, descriptor: NodeDescriptor? = null): Meta {
+    if (!Files.exists(path)) error("Meta file $path does not exist")
+    val extension = path.fileName.toString().substringAfterLast('.')
+
+    val metaFormat = formatOverride ?: metaFormat(extension) ?: error("Can't resolve meta format $extension")
+    return metaFormat.run {
+        Files.newByteChannel(path, StandardOpenOption.READ).asInput().use { it.readMeta(descriptor) }
+    }
 }
 
-inline fun <reified T : Any, reified R : Any> IOPlugin.generateFunctionMeta(functionName: String): Meta = buildMeta {
-    FUNCTION_NAME_KEY put functionName
-    INPUT_FORMAT_KEY put resolveIOFormatName(T::class).toString()
-    OUTPUT_FORMAT_KEY put resolveIOFormatName(R::class).toString()
-}
-
-inline fun <reified T : Any, reified R : Any> FunctionServer.function(
-    functionName: String
-): (suspend (T) -> R) {
-    val plugin = context.plugins.get<IOPlugin>() ?: error("IO plugin not loaded")
-    val meta = plugin.generateFunctionMeta<T, R>(functionName)
-    return function(meta)
+fun IOPlugin.writeMetaFile(
+    path: Path,
+    metaFormat: MetaFormat = JsonMetaFormat,
+    descriptor: NodeDescriptor? = null
+) {
+    metaFormat.run {
+        Files.newByteChannel(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW).asOutput().use {
+            it.writeMeta(meta, descriptor)
+        }
+    }
 }
 
 /**
- * Write meta to file in a given [format]
+ * Read and envelope from file if the file exists, return null if file does not exist.
  */
-fun Meta.write(path: Path, format: MetaFormat, descriptor: NodeDescriptor? = null) {
-    format.run {
-        Files.newByteChannel(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW)
-            .asOutput()
-            .writeMeta(this@write, descriptor)
+@DFExperimental
+fun IOPlugin.readEnvelopeFromFile(path: Path, readNonEnvelopes: Boolean = false): Envelope? {
+    if (!Files.exists(path)) return null
+
+    //read two-files directory
+    if (Files.isDirectory(path)) {
+        val metaFile = Files.list(path).asSequence()
+            .singleOrNull { it.fileName.toString().startsWith("meta") }
+
+        val meta = if (metaFile == null) {
+            EmptyMeta
+        } else {
+            readMetaFile(metaFile)
+        }
+
+        val dataFile = path.resolve("data")
+
+        val data: Binary? = if (Files.exists(dataFile)) {
+            dataFile.asBinary()
+        } else {
+            null
+        }
+
+        return SimpleEnvelope(meta, data)
+    }
+
+    val binary = path.asBinary()
+
+    val formats = envelopeFormatFactories.mapNotNull { factory ->
+        binary.read {
+            factory.peekFormat(this@readEnvelopeFromFile, this@read)
+        }
+    }
+    return when (formats.size) {
+        0 -> if (readNonEnvelopes) {
+            SimpleEnvelope(Meta.empty, binary)
+        } else {
+            null
+        }
+        1 -> formats.first().run {
+            binary.read {
+                readObject()
+            }
+        }
+        else -> error("Envelope format file recognition clash")
     }
 }
