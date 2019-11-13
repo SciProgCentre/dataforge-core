@@ -49,8 +49,8 @@ class FileBinaryTest {
         val tmpPath = Files.createTempFile("dataforge_test", ".df")
         Global.io.writeEnvelopeFile(tmpPath, envelope)
 
-        val binary = Global.io.readEnvelopeFile(tmpPath).data!!
-        assertEquals(binary.size?.toInt(), binary.toBytes().size)
+        val binary = Global.io.readEnvelopeFile(tmpPath)?.data!!
+        assertEquals(binary.size.toInt(), binary.toBytes().size)
     }
 
 }

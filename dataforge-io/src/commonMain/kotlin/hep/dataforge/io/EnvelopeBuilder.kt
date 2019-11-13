@@ -21,6 +21,7 @@ class EnvelopeBuilder {
     var dataType by metaBuilder.string(key = Envelope.ENVELOPE_DATA_TYPE_KEY)
     var dataID by metaBuilder.string(key = Envelope.ENVELOPE_DATA_ID_KEY)
     var description by metaBuilder.string(key = Envelope.ENVELOPE_DESCRIPTION_KEY)
+    var name by metaBuilder.string(key = Envelope.ENVELOPE_NAME_KEY)
 
     /**
      * Construct a binary and transform it into byte-array based buffer

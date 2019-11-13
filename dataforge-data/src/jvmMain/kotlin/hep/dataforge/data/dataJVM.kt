@@ -30,12 +30,10 @@ fun <R : Any> Data<*>.filterIsInstance(type: KClass<out R>): Data<R>? =
  * but could contain empty nodes
  */
 fun <R : Any> DataNode<*>.filterIsInstance(type: KClass<out R>): DataNode<R> {
-    return if (canCast(type)) {
-        cast(type)
-    } else if (this is TypeFilteredDataNode) {
-        origin.filterIsInstance(type)
-    } else {
-        TypeFilteredDataNode(this, type)
+    return when {
+        canCast(type) -> cast(type)
+        this is TypeFilteredDataNode -> origin.filterIsInstance(type)
+        else -> TypeFilteredDataNode(this, type)
     }
 }
 

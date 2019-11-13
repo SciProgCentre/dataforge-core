@@ -64,7 +64,10 @@ class TaggedEnvelopeFormat(
         val metaFormat = io.metaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
-        val metaPacket = ByteReadPacket(readBytes(tag.metaSize.toInt()))
+        val metaBytes = readBytes(tag.metaSize.toInt())
+        val metaPacket = buildPacket {
+            writeFully(metaBytes)
+        }
         val dataBytes = readBytes(tag.dataSize.toInt())
 
         val meta = metaFormat.run { metaPacket.readObject() }

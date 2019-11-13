@@ -21,6 +21,7 @@ interface Envelope {
         val ENVELOPE_DATA_TYPE_KEY = ENVELOPE_NODE_KEY + "dataType"
         val ENVELOPE_DATA_ID_KEY = ENVELOPE_NODE_KEY + "dataID"
         val ENVELOPE_DESCRIPTION_KEY = ENVELOPE_NODE_KEY + "description"
+        val ENVELOPE_NAME_KEY = ENVELOPE_NODE_KEY + "name"
         //const val ENVELOPE_TIME_KEY = "@envelope.time"
 
         /**

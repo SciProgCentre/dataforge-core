@@ -3,7 +3,6 @@ package hep.dataforge.io.tcp
 import kotlinx.io.core.AbstractInput
 import kotlinx.io.core.Input
 import kotlinx.io.core.IoBuffer
-import kotlinx.io.core.IoBuffer.Companion.NoPool
 import kotlinx.io.core.writePacket
 import kotlinx.io.streams.readPacketAtMost
 import java.io.InputStream
@@ -13,7 +12,7 @@ import java.io.InputStream
  */
 internal class InputStreamAsInput(
     private val stream: InputStream
-) : AbstractInput(pool = NoPool) {
+) : AbstractInput(pool = IoBuffer.Pool) {
 
 
     override fun fill(): IoBuffer? {

@@ -18,24 +18,41 @@ inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
 
 /**
  * Read file containing meta using given [formatOverride] or file extension to infer meta type.
+ * If [path] is a directory search for file starting with `meta` in it
  */
 fun IOPlugin.readMetaFile(path: Path, formatOverride: MetaFormat? = null, descriptor: NodeDescriptor? = null): Meta {
     if (!Files.exists(path)) error("Meta file $path does not exist")
-    val extension = path.fileName.toString().substringAfterLast('.')
+
+    val actualPath: Path = if (Files.isDirectory(path)) {
+        Files.list(path).asSequence().find { it.fileName.startsWith("meta") }
+            ?: error("The directory $path does not contain meta file")
+    } else {
+        path
+    }
+    val extension = actualPath.fileName.toString().substringAfterLast('.')
 
     val metaFormat = formatOverride ?: metaFormat(extension) ?: error("Can't resolve meta format $extension")
     return metaFormat.run {
-        Files.newByteChannel(path, StandardOpenOption.READ).asInput().use { it.readMeta(descriptor) }
+        Files.newByteChannel(actualPath, StandardOpenOption.READ).asInput().use { it.readMeta(descriptor) }
     }
 }
 
+/**
+ * Write meta to file using [metaFormat]. If [path] is a directory, write a file with name equals name of [metaFormat].
+ * Like "meta.json"
+ */
 fun IOPlugin.writeMetaFile(
     path: Path,
-    metaFormat: MetaFormat = JsonMetaFormat,
+    metaFormat: MetaFormatFactory = JsonMetaFormat,
     descriptor: NodeDescriptor? = null
 ) {
+    val actualPath = if (Files.isDirectory(path)) {
+        path.resolve(metaFormat.name.toString())
+    } else {
+        path
+    }
     metaFormat.run {
-        Files.newByteChannel(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW).asOutput().use {
+        Files.newByteChannel(actualPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW).asOutput().use {
             it.writeMeta(meta, descriptor)
         }
     }
@@ -43,9 +60,19 @@ fun IOPlugin.writeMetaFile(
 
 /**
  * Read and envelope from file if the file exists, return null if file does not exist.
+ *
+ * If file is directory, then expect two files inside:
+ * * **meta.<format name>** for meta
+ * * **data** for data
+ *
+ * If the file is envelope read it using [EnvelopeFormatFactory.peekFormat] functionality to infer format.
+ *
+ * If the file is not an envelope and [readNonEnvelopes] is true, return an Envelope without meta, using file as binary.
+ *
+ * Return null otherwise.
  */
 @DFExperimental
-fun IOPlugin.readEnvelopeFromFile(path: Path, readNonEnvelopes: Boolean = false): Envelope? {
+fun IOPlugin.readEnvelopeFile(path: Path, readNonEnvelopes: Boolean = false): Envelope? {
     if (!Files.exists(path)) return null
 
     //read two-files directory
@@ -74,7 +101,7 @@ fun IOPlugin.readEnvelopeFromFile(path: Path, readNonEnvelopes: Boolean = false)
 
     val formats = envelopeFormatFactories.mapNotNull { factory ->
         binary.read {
-            factory.peekFormat(this@readEnvelopeFromFile, this@read)
+            factory.peekFormat(this@readEnvelopeFile, this@read)
         }
     }
     return when (formats.size) {
@@ -89,5 +116,22 @@ fun IOPlugin.readEnvelopeFromFile(path: Path, readNonEnvelopes: Boolean = false)
             }
         }
         else -> error("Envelope format file recognition clash")
+    }
+}
+
+fun IOPlugin.writeEnvelopeFile(
+    path: Path,
+    envelope: Envelope,
+    format: EnvelopeFormat = TaggedEnvelopeFormat
+) {
+    val output = Files.newByteChannel(
+        path,
+        StandardOpenOption.WRITE,
+        StandardOpenOption.CREATE,
+        StandardOpenOption.TRUNCATE_EXISTING
+    ).asOutput()
+
+    with(format) {
+        output.writeObject(envelope)
     }
 }
