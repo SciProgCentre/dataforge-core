@@ -24,7 +24,7 @@ class FrontMatterEnvelopeFormat(
 
         val readMetaFormat =
             metaTypeRegex.matchEntire(line)?.groupValues?.first()
-                ?.let { io.metaFormat(it) } ?: YamlMetaFormat.default
+                ?.let { io.metaFormat(it) } ?: YamlMetaFormat
 
         val metaBlock = buildPacket {
             do {
@@ -45,7 +45,7 @@ class FrontMatterEnvelopeFormat(
 
         val readMetaFormat =
             metaTypeRegex.matchEntire(line)?.groupValues?.first()
-                ?.let { io.metaFormat(it) } ?: YamlMetaFormat.default
+                ?.let { io.metaFormat(it) } ?: YamlMetaFormat
 
         val metaBlock = buildPacket {
             do {
@@ -72,7 +72,7 @@ class FrontMatterEnvelopeFormat(
         private val metaTypeRegex = "---(\\w*)\\s*".toRegex()
 
         override fun invoke(meta: Meta, context: Context): EnvelopeFormat {
-            return FrontMatterEnvelopeFormat(context.io,  meta)
+            return FrontMatterEnvelopeFormat(context.io, meta)
         }
 
         override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
@@ -83,6 +83,17 @@ class FrontMatterEnvelopeFormat(
                 null
             }
         }
+
+        private val default by lazy { invoke() }
+
+        override fun Input.readPartial(): PartialEnvelope =
+            default.run { readPartial() }
+
+        override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) =
+            default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
+
+        override fun Input.readObject(): Envelope =
+            default.run { readObject() }
 
     }
 }

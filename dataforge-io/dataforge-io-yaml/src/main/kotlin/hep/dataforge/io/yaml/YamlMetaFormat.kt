@@ -45,12 +45,18 @@ class YamlMetaFormat(val meta: Meta) : MetaFormat {
     }
 
     companion object : MetaFormatFactory {
-        val default = YamlMetaFormat()
-
         override fun invoke(meta: Meta, context: Context): MetaFormat = YamlMetaFormat(meta)
 
         override val name: Name = super.name + "yaml"
 
         override val key: Short = 0x594d //YM
+
+        private val default = YamlMetaFormat()
+
+        override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) =
+            default.run { writeMeta(meta, descriptor) }
+
+        override fun Input.readMeta(descriptor: NodeDescriptor?): Meta =
+            default.run { readMeta(descriptor) }
     }
 }

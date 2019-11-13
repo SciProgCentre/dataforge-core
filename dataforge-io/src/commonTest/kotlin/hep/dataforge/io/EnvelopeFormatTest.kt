@@ -18,7 +18,7 @@ class EnvelopeFormatTest {
     @ExperimentalStdlibApi
     @Test
     fun testTaggedFormat(){
-        TaggedEnvelopeFormat.default.run {
+        TaggedEnvelopeFormat.run {
             val bytes = writeBytes(envelope)
             println(bytes.decodeToString())
             val res = readBytes(bytes)
@@ -32,7 +32,7 @@ class EnvelopeFormatTest {
 
     @Test
     fun testTaglessFormat(){
-        TaglessEnvelopeFormat.default.run {
+        TaglessEnvelopeFormat.run {
             val bytes = writeBytes(envelope)
             println(bytes.decodeToString())
             val res = readBytes(bytes)

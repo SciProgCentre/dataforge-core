@@ -38,12 +38,18 @@ class JsonMetaFormat(private val json: Json = Json.indented) : MetaFormat {
     }
 
     companion object : MetaFormatFactory {
-        val default = JsonMetaFormat()
-
         override fun invoke(meta: Meta, context: Context): MetaFormat = default
 
         override val name: Name = super.name + "json"
         override val key: Short = 0x4a53//"JS"
+
+        private val default = JsonMetaFormat()
+
+        override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) =
+            default.run { writeMeta(meta,descriptor) }
+
+        override fun Input.readMeta(descriptor: NodeDescriptor?): Meta =
+            default.run { readMeta(descriptor) }
     }
 }
 
@@ -90,7 +96,7 @@ fun Meta.toJson(descriptor: NodeDescriptor? = null): JsonObject {
 fun JsonElement.toMeta(descriptor: NodeDescriptor? = null): Meta {
     return when (val item = toMetaItem(descriptor)) {
         is MetaItem.NodeItem<*> -> item.node
-        is MetaItem.ValueItem ->item.value.toMeta()
+        is MetaItem.ValueItem -> item.value.toMeta()
     }
 }
 

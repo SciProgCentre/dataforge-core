@@ -39,7 +39,12 @@ class TaggedEnvelopeFormat(
     override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) {
         val metaFormat = metaFormatFactory.invoke(formatMeta, io.context)
         val metaBytes = metaFormat.writeBytes(envelope.meta)
-        val tag = Tag(metaFormatFactory.key, metaBytes.size.toUInt() + 2u, envelope.data?.size ?: 0.toULong())
+        val actualSize: ULong = if (envelope.data == null) {
+            0u
+        } else {
+            envelope.data?.size ?: ULong.MAX_VALUE
+        }
+        val tag = Tag(metaFormatFactory.key, metaBytes.size.toUInt() + 2u, actualSize)
         writePacket(tag.toBytes())
         writeFully(metaBytes)
         writeText("\r\n")
@@ -59,7 +64,10 @@ class TaggedEnvelopeFormat(
         val metaFormat = io.metaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
-        val metaPacket = ByteReadPacket(readBytes(tag.metaSize.toInt()))
+        val metaBytes = readBytes(tag.metaSize.toInt())
+        val metaPacket = buildPacket {
+            writeFully(metaBytes)
+        }
         val dataBytes = readBytes(tag.dataSize.toInt())
 
         val meta = metaFormat.run { metaPacket.readObject() }
@@ -134,7 +142,16 @@ class TaggedEnvelopeFormat(
             }
         }
 
-        val default by lazy { invoke() }
+        private val default by lazy { invoke() }
+
+        override fun Input.readPartial(): PartialEnvelope =
+            default.run { readPartial() }
+
+        override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) =
+            default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
+
+        override fun Input.readObject(): Envelope =
+            default.run { readObject() }
     }
 
 }

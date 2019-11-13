@@ -14,19 +14,23 @@ class EnvelopePartsTest {
             }
             data {
                 writeText("Hello World $it")
+                repeat(200){
+                    writeInt(it)
+                }
             }
         }
     }
     val partsEnvelope = Envelope {
-        parts(TaggedEnvelopeFormat, envelopes)
+        multipart(TaggedEnvelopeFormat, envelopes)
     }
 
     @Test
     fun testParts() {
-        val bytes = TaggedEnvelopeFormat.default.writeBytes(partsEnvelope)
-        val reconstructed = TaggedEnvelopeFormat.default.readBytes(bytes)
-        val parts = reconstructed.parts().toList()
+        val bytes = TaggedEnvelopeFormat.writeBytes(partsEnvelope)
+        val reconstructed = TaggedEnvelopeFormat.readBytes(bytes)
+        val parts = reconstructed.parts()?.toList() ?: emptyList()
         assertEquals(2, parts[2].meta["value"].int)
+        println(reconstructed.data!!.size)
     }
 
 }

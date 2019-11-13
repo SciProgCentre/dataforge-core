@@ -16,7 +16,6 @@ import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.serializer
-import kotlin.math.min
 import kotlin.reflect.KClass
 
 /**
@@ -80,33 +79,9 @@ inline fun buildPacketWithoutPool(headerSizeHint: Int = 0, block: BytePacketBuil
 }
 
 fun <T : Any> IOFormat<T>.writePacket(obj: T): ByteReadPacket = buildPacket { writeObject(obj) }
+//TODO Double buffer copy. fix all that with IO-2
 fun <T : Any> IOFormat<T>.writeBytes(obj: T): ByteArray = buildPacket { writeObject(obj) }.readBytes()
-fun <T : Any> IOFormat<T>.readBytes(array: ByteArray): T {
-    //= ByteReadPacket(array).readThis()
-    val byteArrayInput: Input = object : AbstractInput(
-        IoBuffer.Pool.borrow(),
-        remaining = array.size.toLong(),
-        pool = IoBuffer.Pool
-    ) {
-        var written = 0
-        override fun closeSource() {
-            // do nothing
-        }
-
-        override fun fill(): IoBuffer? {
-            if (array.size - written <= 0) return null
-
-            return IoBuffer.Pool.fill {
-                reserveEndGap(IoBuffer.ReservedSize)
-                val toWrite = min(capacity, array.size - written)
-                writeFully(array, written, toWrite)
-                written += toWrite
-            }
-        }
-
-    }
-    return byteArrayInput.readObject()
-}
+fun <T : Any> IOFormat<T>.readBytes(array: ByteArray): T = buildPacket { writeFully(array) }.readObject()
 
 object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
     override fun invoke(meta: Meta, context: Context): IOFormat<Double> = this

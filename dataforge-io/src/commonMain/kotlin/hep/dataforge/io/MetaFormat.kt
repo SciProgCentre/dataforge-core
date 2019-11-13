@@ -27,7 +27,7 @@ interface MetaFormat : IOFormat<Meta> {
 }
 
 @Type(META_FORMAT_TYPE)
-interface MetaFormatFactory : IOFormatFactory<Meta> {
+interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
     override val name: Name get() = "meta".asName()
 
     override val type: KClass<out Meta> get() = Meta::class
@@ -47,7 +47,7 @@ fun Meta.toString(format: MetaFormat): String = buildPacket {
 
 fun Meta.toString(formatFactory: MetaFormatFactory): String = toString(formatFactory())
 
-fun Meta.toBytes(format: MetaFormat = JsonMetaFormat.default): ByteReadPacket = buildPacket {
+fun Meta.toBytes(format: MetaFormat = JsonMetaFormat): ByteReadPacket = buildPacket {
     format.run { writeObject(this@toBytes) }
 }
 

@@ -52,6 +52,7 @@ inline fun <reified R : Any> Data<*>.cast(): Data<R> = cast(R::class)
 @Suppress("UNCHECKED_CAST")
 fun <R : Any> DataNode<*>.cast(type: KClass<out R>): DataNode<R> {
     return object : DataNode<R> {
+        override val meta: Meta get() = this@cast.meta
         override val type: KClass<out R> = type
         override val items: Map<NameToken, DataItem<R>> get() = this@cast.items as Map<NameToken, DataItem<R>>
     }

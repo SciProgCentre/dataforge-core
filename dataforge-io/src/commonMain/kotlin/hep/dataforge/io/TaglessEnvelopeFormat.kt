@@ -27,7 +27,13 @@ class TaglessEnvelopeFormat(
         //printing all properties
         writeProperty(META_TYPE_PROPERTY, metaFormatFactory.type)
         //TODO add optional metaFormat properties
-        writeProperty(DATA_LENGTH_PROPERTY, envelope.data?.size ?: 0)
+        val actualSize: ULong = if (envelope.data == null) {
+            0u
+        } else {
+            envelope.data?.size ?: ULong.MAX_VALUE
+        }
+
+        writeProperty(DATA_LENGTH_PROPERTY, actualSize)
 
         //Printing meta
         if (!envelope.meta.isEmpty()) {
@@ -67,7 +73,7 @@ class TaglessEnvelopeFormat(
         var meta: Meta = EmptyMeta
 
         if (line.startsWith(metaStart)) {
-            val metaFormat = properties[META_TYPE_PROPERTY]?.let { io.metaFormat(it) } ?: JsonMetaFormat.default
+            val metaFormat = properties[META_TYPE_PROPERTY]?.let { io.metaFormat(it) } ?: JsonMetaFormat
             val metaSize = properties.get(META_LENGTH_PROPERTY)?.toInt()
             meta = if (metaSize != null) {
                 val metaPacket = buildPacket {
@@ -122,7 +128,7 @@ class TaglessEnvelopeFormat(
         var meta: Meta = EmptyMeta
 
         if (line.startsWith(metaStart)) {
-            val metaFormat = properties[META_TYPE_PROPERTY]?.let { io.metaFormat(it) } ?: JsonMetaFormat.default
+            val metaFormat = properties[META_TYPE_PROPERTY]?.let { io.metaFormat(it) } ?: JsonMetaFormat
 
             val metaSize = properties.get(META_LENGTH_PROPERTY)?.toInt()
             meta = if (metaSize != null) {
@@ -171,7 +177,16 @@ class TaglessEnvelopeFormat(
             return TaglessEnvelopeFormat(context.io, meta)
         }
 
-        val default by lazy { invoke() }
+        private val default by lazy { invoke() }
+
+        override fun Input.readPartial(): PartialEnvelope =
+            default.run { readPartial() }
+
+        override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) =
+            default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
+
+        override fun Input.readObject(): Envelope =
+            default.run { readObject() }
 
         override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
             return try {

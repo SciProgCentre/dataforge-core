@@ -31,7 +31,7 @@ interface EnvelopeFormat : IOFormat<Envelope> {
 }
 
 @Type(ENVELOPE_FORMAT_TYPE)
-interface EnvelopeFormatFactory : IOFormatFactory<Envelope> {
+interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeFormat {
     override val name: Name get() = "envelope".asName()
     override val type: KClass<out Envelope> get() = Envelope::class
 

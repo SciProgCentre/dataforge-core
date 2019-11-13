@@ -29,7 +29,7 @@ class FileEnvelopeTest {
         val tmpPath = Files.createTempFile("dataforge_test", ".df")
         Global.io.writeEnvelopeFile(tmpPath,envelope)
         println(tmpPath.toUri())
-        val restored: Envelope = Global.io.readEnvelopeFile(tmpPath)
+        val restored: Envelope = Global.io.readEnvelopeFile(tmpPath)!!
         assertTrue { envelope.contentEquals(restored) }
     }
 

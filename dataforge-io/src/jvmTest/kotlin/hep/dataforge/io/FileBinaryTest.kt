@@ -39,7 +39,7 @@ class FileBinaryTest {
         }
         val binary = envelopeFromFile.data!!
         println(binary.toBytes().size)
-        assertEquals(binary.size.toInt(), binary.toBytes().size)
+        assertEquals(binary.size?.toInt(), binary.toBytes().size)
 
     }
 
@@ -49,7 +49,7 @@ class FileBinaryTest {
         val tmpPath = Files.createTempFile("dataforge_test", ".df")
         Global.io.writeEnvelopeFile(tmpPath, envelope)
 
-        val binary = Global.io.readEnvelopeFile(tmpPath).data!!
+        val binary = Global.io.readEnvelopeFile(tmpPath)?.data!!
         assertEquals(binary.size.toInt(), binary.toBytes().size)
     }
 
