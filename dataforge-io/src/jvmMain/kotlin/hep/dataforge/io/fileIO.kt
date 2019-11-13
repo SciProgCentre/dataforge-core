@@ -59,6 +59,24 @@ fun IOPlugin.writeMetaFile(
 }
 
 /**
+ * Return inferred [EnvelopeFormat] if only one format could read given file. If no format accepts file, return null. If
+ * multiple formats accepts file, throw an error.
+ */
+fun IOPlugin.peekBinaryFormat(binary: Binary): EnvelopeFormat? {
+    val formats = envelopeFormatFactories.mapNotNull { factory ->
+        binary.read {
+            factory.peekFormat(this@peekBinaryFormat, this@read)
+        }
+    }
+
+    return when (formats.size) {
+        0 -> null
+        1 -> formats.first()
+        else -> error("Envelope format binary recognition clash")
+    }
+}
+
+/**
  * Read and envelope from file if the file exists, return null if file does not exist.
  *
  * If file is directory, then expect two files inside:
@@ -72,7 +90,11 @@ fun IOPlugin.writeMetaFile(
  * Return null otherwise.
  */
 @DFExperimental
-fun IOPlugin.readEnvelopeFile(path: Path, readNonEnvelopes: Boolean = false): Envelope? {
+fun IOPlugin.readEnvelopeFile(
+    path: Path,
+    readNonEnvelopes: Boolean = false,
+    formatPeeker: IOPlugin.(Binary) -> EnvelopeFormat? = IOPlugin::peekBinaryFormat
+): Envelope? {
     if (!Files.exists(path)) return null
 
     //read two-files directory
@@ -99,24 +121,13 @@ fun IOPlugin.readEnvelopeFile(path: Path, readNonEnvelopes: Boolean = false): En
 
     val binary = path.asBinary()
 
-    val formats = envelopeFormatFactories.mapNotNull { factory ->
+    return formatPeeker(binary)?.run {
         binary.read {
-            factory.peekFormat(this@readEnvelopeFile, this@read)
+            readObject()
         }
-    }
-    return when (formats.size) {
-        0 -> if (readNonEnvelopes) {
-            SimpleEnvelope(Meta.empty, binary)
-        } else {
-            null
-        }
-        1 -> formats.first().run {
-            binary.read {
-                readObject()
-            }
-        }
-        else -> error("Envelope format file recognition clash")
-    }
+    } ?: if (readNonEnvelopes) { // if no format accepts file, read it as binary
+        SimpleEnvelope(Meta.empty, binary)
+    } else null
 }
 
 fun IOPlugin.writeEnvelopeFile(

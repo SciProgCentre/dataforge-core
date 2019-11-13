@@ -49,6 +49,7 @@ class TaglessEnvelopeFormat(
             writeText(dataStart + "\r\n")
             writeFully(data.toBytes())
         }
+        flush()
     }
 
     override fun Input.readObject(): Envelope {
@@ -191,7 +192,7 @@ class TaglessEnvelopeFormat(
             return try {
                 val buffer = ByteArray(TAGLESS_ENVELOPE_HEADER.length)
                 input.readFully(buffer)
-                return if (buffer.toString() == TAGLESS_ENVELOPE_HEADER) {
+                return if (String(buffer) == TAGLESS_ENVELOPE_HEADER) {
                     TaglessEnvelopeFormat(io)
                 } else {
                     null

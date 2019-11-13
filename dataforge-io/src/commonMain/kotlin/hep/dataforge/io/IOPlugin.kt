@@ -52,7 +52,7 @@ class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
 
     companion object : PluginFactory<IOPlugin> {
         val defaultMetaFormats: List<MetaFormatFactory> = listOf(JsonMetaFormat, BinaryMetaFormat)
-        val defaultEnvelopeFormats = listOf(TaggedEnvelopeFormat)
+        val defaultEnvelopeFormats = listOf(TaggedEnvelopeFormat, TaglessEnvelopeFormat)
 
         override val tag: PluginTag = PluginTag("io", group = PluginTag.DATAFORGE_GROUP)
 
