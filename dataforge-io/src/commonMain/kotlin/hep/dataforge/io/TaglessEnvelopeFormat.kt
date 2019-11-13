@@ -37,10 +37,10 @@ class TaglessEnvelopeFormat(
 
         //Printing meta
         if (!envelope.meta.isEmpty()) {
-            val metaBytes = metaFormat.writeBytes(envelope.meta)
-            writeProperty(META_LENGTH_PROPERTY, metaBytes.size)
+            val metaBytes = metaFormat.writePacket(envelope.meta)
+            writeProperty(META_LENGTH_PROPERTY, metaBytes.remaining)
             writeText(metaStart + "\r\n")
-            writeFully(metaBytes)
+            writePacket(metaBytes)
             writeText("\r\n")
         }
 
