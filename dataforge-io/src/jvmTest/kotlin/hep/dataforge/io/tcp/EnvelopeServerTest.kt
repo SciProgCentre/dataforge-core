@@ -7,9 +7,9 @@ import hep.dataforge.io.TaggedEnvelopeFormat
 import hep.dataforge.io.writeBytes
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.runBlocking
-import org.junit.AfterClass
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.ExperimentalTime
 
@@ -30,13 +30,13 @@ class EnvelopeServerTest {
         @JvmStatic
         val echoEnvelopeServer = EnvelopeServer(Global, 7778, EchoResponder, GlobalScope)
 
-        @BeforeClass
+        @BeforeAll
         @JvmStatic
         fun start() {
             echoEnvelopeServer.start()
         }
 
-        @AfterClass
+        @AfterAll
         @JvmStatic
         fun close() {
             echoEnvelopeServer.stop()

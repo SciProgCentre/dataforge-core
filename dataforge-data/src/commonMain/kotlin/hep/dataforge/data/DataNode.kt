@@ -15,20 +15,20 @@ sealed class DataItem<out T : Any> : MetaRepr {
 
     abstract val meta: Meta
 
-    class Node<out T : Any>(val value: DataNode<T>) : DataItem<T>() {
-        override val type: KClass<out T> get() = value.type
+    class Node<out T : Any>(val node: DataNode<T>) : DataItem<T>() {
+        override val type: KClass<out T> get() = node.type
 
-        override fun toMeta(): Meta = value.toMeta()
+        override fun toMeta(): Meta = node.toMeta()
 
-        override val meta: Meta get() = value.meta
+        override val meta: Meta get() = node.meta
     }
 
-    class Leaf<out T : Any>(val value: Data<T>) : DataItem<T>() {
-        override val type: KClass<out T> get() = value.type
+    class Leaf<out T : Any>(val data: Data<T>) : DataItem<T>() {
+        override val type: KClass<out T> get() = data.type
 
-        override fun toMeta(): Meta = value.toMeta()
+        override fun toMeta(): Meta = data.toMeta()
 
-        override val meta: Meta get() = value.meta
+        override val meta: Meta get() = data.meta
     }
 }
 
@@ -68,8 +68,8 @@ interface DataNode<out T : Any> : MetaRepr {
     }
 }
 
-val <T : Any> DataItem<T>?.node: DataNode<T>? get() = (this as? DataItem.Node<T>)?.value
-val <T : Any> DataItem<T>?.data: Data<T>? get() = (this as? DataItem.Leaf<T>)?.value
+val <T : Any> DataItem<T>?.node: DataNode<T>? get() = (this as? DataItem.Node<T>)?.node
+val <T : Any> DataItem<T>?.data: Data<T>? get() = (this as? DataItem.Leaf<T>)?.data
 
 /**
  * Start computation for all goals in data node and return a job for the whole node
@@ -77,8 +77,8 @@ val <T : Any> DataItem<T>?.data: Data<T>? get() = (this as? DataItem.Leaf<T>)?.v
 fun DataNode<*>.launchAll(scope: CoroutineScope): Job = scope.launch {
     items.values.forEach {
         when (it) {
-            is DataItem.Node<*> -> it.value.launchAll(scope)
-            is DataItem.Leaf<*> -> it.value.start(scope)
+            is DataItem.Node<*> -> it.node.launchAll(scope)
+            is DataItem.Leaf<*> -> it.data.start(scope)
         }
     }
 }
@@ -98,7 +98,7 @@ fun <T : Any> DataNode<T>.asSequence(): Sequence<Pair<Name, DataItem<T>>> = sequ
     items.forEach { (head, item) ->
         yield(head.asName() to item)
         if (item is DataItem.Node) {
-            val subSequence = item.value.asSequence()
+            val subSequence = item.node.asSequence()
                 .map { (name, data) -> (head.asName() + name) to data }
             yieldAll(subSequence)
         }
@@ -111,9 +111,9 @@ fun <T : Any> DataNode<T>.asSequence(): Sequence<Pair<Name, DataItem<T>>> = sequ
 fun <T : Any> DataNode<T>.dataSequence(): Sequence<Pair<Name, Data<T>>> = sequence {
     items.forEach { (head, item) ->
         when (item) {
-            is DataItem.Leaf -> yield(head.asName() to item.value)
+            is DataItem.Leaf -> yield(head.asName() to item.data)
             is DataItem.Node -> {
-                val subSequence = item.value.dataSequence()
+                val subSequence = item.node.dataSequence()
                     .map { (name, data) -> (head.asName() + name) to data }
                 yieldAll(subSequence)
             }
@@ -188,8 +188,8 @@ class DataTreeBuilder<T : Any>(val type: KClass<out T>) {
     operator fun set(name: Name, node: DataNode<T>) = set(name, node.builder())
 
     operator fun set(name: Name, item: DataItem<T>) = when (item) {
-        is DataItem.Node<T> -> set(name, item.value.builder())
-        is DataItem.Leaf<T> -> set(name, item.value)
+        is DataItem.Node<T> -> set(name, item.node.builder())
+        is DataItem.Leaf<T> -> set(name, item.data)
     }
 
     /**
@@ -222,6 +222,10 @@ class DataTreeBuilder<T : Any>(val type: KClass<out T>) {
     }
 
     fun meta(block: MetaBuilder.() -> Unit) = meta.apply(block)
+
+    fun meta(meta: Meta) {
+        this.meta = meta.builder()
+    }
 
     fun build(): DataTree<T> {
         val resMap = map.mapValues { (_, value) ->

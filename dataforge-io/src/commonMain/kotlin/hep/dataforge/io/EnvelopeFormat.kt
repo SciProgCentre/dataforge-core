@@ -23,11 +23,15 @@ interface EnvelopeFormat : IOFormat<Envelope> {
 
     fun Input.readPartial(): PartialEnvelope
 
-    fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta = EmptyMeta)
+    fun Output.writeEnvelope(
+        envelope: Envelope,
+        metaFormatFactory: MetaFormatFactory = defaultMetaFormat,
+        formatMeta: Meta = EmptyMeta
+    )
 
     override fun Input.readObject(): Envelope
 
-    override fun Output.writeObject(obj: Envelope): Unit = writeEnvelope(obj, defaultMetaFormat)
+    override fun Output.writeObject(obj: Envelope): Unit = writeEnvelope(obj)
 }
 
 @Type(ENVELOPE_FORMAT_TYPE)

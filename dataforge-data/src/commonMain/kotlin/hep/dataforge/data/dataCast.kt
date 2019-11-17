@@ -28,8 +28,8 @@ expect fun <R : Any> DataNode<*>.canCast(type: KClass<out R>): Boolean
 expect fun <R : Any> Data<*>.canCast(type: KClass<out R>): Boolean
 
 fun <R : Any> DataItem<*>.canCast(type: KClass<out R>): Boolean = when (this) {
-    is DataItem.Node -> value.canCast(type)
-    is DataItem.Leaf -> value.canCast(type)
+    is DataItem.Node -> node.canCast(type)
+    is DataItem.Leaf -> data.canCast(type)
 }
 
 /**

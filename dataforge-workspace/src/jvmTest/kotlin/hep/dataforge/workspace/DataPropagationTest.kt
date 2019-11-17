@@ -6,8 +6,8 @@ import hep.dataforge.context.PluginTag
 import hep.dataforge.data.*
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.asName
-import org.junit.Test
 import kotlin.reflect.KClass
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 

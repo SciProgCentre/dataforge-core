@@ -6,7 +6,7 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.buildMeta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.seal
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 
