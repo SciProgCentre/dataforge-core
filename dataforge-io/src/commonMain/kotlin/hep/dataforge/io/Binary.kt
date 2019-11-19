@@ -10,7 +10,7 @@ interface Binary {
     /**
      * The size of binary in bytes. [ULong.MAX_VALUE] if size is not defined and input should be read until its end is reached
      */
-    val size: ULong
+    val size: ULong get() = ULong.MAX_VALUE
 
     /**
      * Read continuous [Input] from this binary stating from the beginning.
@@ -41,7 +41,11 @@ interface RandomAccessBinary : Binary {
 }
 
 fun Binary.toBytes(): ByteArray = read {
-    this.readBytes()
+    readBytes()
+}
+
+fun Binary.contentToString(): String = read {
+    readText()
 }
 
 @ExperimentalUnsignedTypes

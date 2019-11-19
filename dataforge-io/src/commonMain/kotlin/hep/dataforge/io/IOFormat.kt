@@ -79,8 +79,10 @@ inline fun buildPacketWithoutPool(headerSizeHint: Int = 0, block: BytePacketBuil
 }
 
 fun <T : Any> IOFormat<T>.writePacket(obj: T): ByteReadPacket = buildPacket { writeObject(obj) }
-//TODO Double buffer copy. fix all that with IO-2
+
+@Deprecated("Not to be used outside tests due to double buffer write")
 fun <T : Any> IOFormat<T>.writeBytes(obj: T): ByteArray = buildPacket { writeObject(obj) }.readBytes()
+@Deprecated("Not to be used outside tests due to double buffer write")
 fun <T : Any> IOFormat<T>.readBytes(array: ByteArray): T = buildPacket { writeFully(array) }.readObject()
 
 object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {

@@ -26,11 +26,24 @@ class FileEnvelopeTest {
 
     @Test
     fun testFileWriteRead() {
-        val tmpPath = Files.createTempFile("dataforge_test", ".df")
-        Global.io.writeEnvelopeFile(tmpPath,envelope)
-        println(tmpPath.toUri())
-        val restored: Envelope = Global.io.readEnvelopeFile(tmpPath)!!
-        assertTrue { envelope.contentEquals(restored) }
+        Global.io.run {
+            val tmpPath = Files.createTempFile("dataforge_test", ".df")
+            writeEnvelopeFile(tmpPath, envelope)
+            println(tmpPath.toUri())
+            val restored: Envelope = readEnvelopeFile(tmpPath)!!
+            assertTrue { envelope.contentEquals(restored) }
+        }
+    }
+
+    @Test
+    fun testFileWriteReadTagless() {
+        Global.io.run {
+            val tmpPath = Files.createTempFile("dataforge_test_tagless", ".df")
+            writeEnvelopeFile(tmpPath, envelope, envelopeFormat = TaglessEnvelopeFormat)
+            println(tmpPath.toUri())
+            val restored: Envelope = readEnvelopeFile(tmpPath)!!
+            assertTrue { envelope.contentEquals(restored) }
+        }
     }
 
     @Test

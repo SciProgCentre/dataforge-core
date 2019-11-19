@@ -7,7 +7,7 @@ import hep.dataforge.meta.builder
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
 import hep.dataforge.names.plus
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

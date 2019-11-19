@@ -38,15 +38,15 @@ class TaggedEnvelopeFormat(
 
     override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) {
         val metaFormat = metaFormatFactory.invoke(formatMeta, io.context)
-        val metaBytes = metaFormat.writeBytes(envelope.meta)
+        val metaBytes = metaFormat.writePacket(envelope.meta)
         val actualSize: ULong = if (envelope.data == null) {
             0u
         } else {
             envelope.data?.size ?: ULong.MAX_VALUE
         }
-        val tag = Tag(metaFormatFactory.key, metaBytes.size.toUInt() + 2u, actualSize)
+        val tag = Tag(metaFormatFactory.key, metaBytes.remaining.toUInt() + 2u, actualSize)
         writePacket(tag.toBytes())
-        writeFully(metaBytes)
+        writePacket(metaBytes)
         writeText("\r\n")
         envelope.data?.read { copyTo(this@writeEnvelope) }
         flush()

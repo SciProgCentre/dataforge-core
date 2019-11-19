@@ -4,6 +4,9 @@ import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.isEmpty
+import kotlinx.io.core.Output
+import kotlinx.io.core.copyTo
 import kotlinx.io.nio.asInput
 import kotlinx.io.nio.asOutput
 import java.nio.file.Files
@@ -12,9 +15,14 @@ import java.nio.file.StandardOpenOption
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.streams.asSequence
 
+/**
+ * Resolve IOFormat based on type
+ */
+@DFExperimental
 inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
     return ioFormats.values.find { it.type.isSuperclassOf(T::class) } as IOFormat<T>?
 }
+
 
 /**
  * Read file containing meta using given [formatOverride] or file extension to infer meta type.
@@ -43,11 +51,12 @@ fun IOPlugin.readMetaFile(path: Path, formatOverride: MetaFormat? = null, descri
  */
 fun IOPlugin.writeMetaFile(
     path: Path,
+    meta: Meta,
     metaFormat: MetaFormatFactory = JsonMetaFormat,
     descriptor: NodeDescriptor? = null
 ) {
     val actualPath = if (Files.isDirectory(path)) {
-        path.resolve(metaFormat.name.toString())
+        path.resolve("@" + metaFormat.name.toString())
     } else {
         path
     }
@@ -57,6 +66,28 @@ fun IOPlugin.writeMetaFile(
         }
     }
 }
+
+/**
+ * Return inferred [EnvelopeFormat] if only one format could read given file. If no format accepts file, return null. If
+ * multiple formats accepts file, throw an error.
+ */
+fun IOPlugin.peekBinaryFormat(path: Path): EnvelopeFormat? {
+    val binary = path.asBinary()
+    val formats = envelopeFormatFactories.mapNotNull { factory ->
+        binary.read {
+            factory.peekFormat(this@peekBinaryFormat, this@read)
+        }
+    }
+
+    return when (formats.size) {
+        0 -> null
+        1 -> formats.first()
+        else -> error("Envelope format binary recognition clash")
+    }
+}
+
+val IOPlugin.Companion.META_FILE_NAME: String get() = "@meta"
+val IOPlugin.Companion.DATA_FILE_NAME: String get() = "@data"
 
 /**
  * Read and envelope from file if the file exists, return null if file does not exist.
@@ -72,13 +103,17 @@ fun IOPlugin.writeMetaFile(
  * Return null otherwise.
  */
 @DFExperimental
-fun IOPlugin.readEnvelopeFile(path: Path, readNonEnvelopes: Boolean = false): Envelope? {
+fun IOPlugin.readEnvelopeFile(
+    path: Path,
+    readNonEnvelopes: Boolean = false,
+    formatPeeker: IOPlugin.(Path) -> EnvelopeFormat? = IOPlugin::peekBinaryFormat
+): Envelope? {
     if (!Files.exists(path)) return null
 
     //read two-files directory
     if (Files.isDirectory(path)) {
         val metaFile = Files.list(path).asSequence()
-            .singleOrNull { it.fileName.toString().startsWith("meta") }
+            .singleOrNull { it.fileName.toString().startsWith(IOPlugin.META_FILE_NAME) }
 
         val meta = if (metaFile == null) {
             EmptyMeta
@@ -86,7 +121,7 @@ fun IOPlugin.readEnvelopeFile(path: Path, readNonEnvelopes: Boolean = false): En
             readMetaFile(metaFile)
         }
 
-        val dataFile = path.resolve("data")
+        val dataFile = path.resolve(IOPlugin.DATA_FILE_NAME)
 
         val data: Binary? = if (Files.exists(dataFile)) {
             dataFile.asBinary()
@@ -97,41 +132,76 @@ fun IOPlugin.readEnvelopeFile(path: Path, readNonEnvelopes: Boolean = false): En
         return SimpleEnvelope(meta, data)
     }
 
-    val binary = path.asBinary()
+    return formatPeeker(path)?.let { format ->
+        FileEnvelope(path, format)
+    } ?: if (readNonEnvelopes) { // if no format accepts file, read it as binary
+        SimpleEnvelope(Meta.empty, path.asBinary())
+    } else null
+}
 
-    val formats = envelopeFormatFactories.mapNotNull { factory ->
-        binary.read {
-            factory.peekFormat(this@readEnvelopeFile, this@read)
-        }
-    }
-    return when (formats.size) {
-        0 -> if (readNonEnvelopes) {
-            SimpleEnvelope(Meta.empty, binary)
-        } else {
-            null
-        }
-        1 -> formats.first().run {
-            binary.read {
-                readObject()
-            }
-        }
-        else -> error("Envelope format file recognition clash")
+private fun Path.useOutput(consumer: Output.() -> Unit) {
+    //TODO forbid rewrite?
+    Files.newByteChannel(
+        this,
+        StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING
+    ).asOutput().use {
+        it.consumer()
+        it.flush()
     }
 }
 
+/**
+ * Write a binary into file. Throws an error if file already exists
+ */
+fun <T : Any> IOFormat<T>.writeToFile(path: Path, obj: T) {
+    path.useOutput {
+        writeObject(obj)
+        flush()
+    }
+}
+
+/**
+ * Write envelope file to given [path] using [envelopeFormat] and optional [metaFormat]
+ */
+@DFExperimental
 fun IOPlugin.writeEnvelopeFile(
     path: Path,
     envelope: Envelope,
-    format: EnvelopeFormat = TaggedEnvelopeFormat
+    envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat,
+    metaFormat: MetaFormatFactory? = null
 ) {
-    val output = Files.newByteChannel(
-        path,
-        StandardOpenOption.WRITE,
-        StandardOpenOption.CREATE,
-        StandardOpenOption.TRUNCATE_EXISTING
-    ).asOutput()
+    path.useOutput {
+        with(envelopeFormat) {
+            writeEnvelope(envelope, metaFormat ?: envelopeFormat.defaultMetaFormat)
+        }
+    }
+}
 
-    with(format) {
-        output.writeObject(envelope)
+/**
+ * Write separate meta and data files to given directory [path]
+ */
+@DFExperimental
+fun IOPlugin.writeEnvelopeDirectory(
+    path: Path,
+    envelope: Envelope,
+    metaFormat: MetaFormatFactory = JsonMetaFormat
+) {
+    if (!Files.exists(path)) {
+        Files.createDirectories(path)
+    }
+    if (!Files.isDirectory(path)) {
+        error("Can't write envelope directory to file")
+    }
+    if (!envelope.meta.isEmpty()) {
+        writeMetaFile(path, envelope.meta, metaFormat)
+    }
+    val dataFile = path.resolve(IOPlugin.DATA_FILE_NAME)
+    dataFile.useOutput {
+        envelope.data?.read {
+            val copied = copyTo(this@useOutput)
+            if (envelope.data?.size != ULong.MAX_VALUE && copied != envelope.data?.size?.toLong()) {
+                error("The number of copied bytes does not equal data size")
+            }
+        }
     }
 }
