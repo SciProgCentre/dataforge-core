@@ -6,8 +6,9 @@ import hep.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
+import hep.dataforge.names.plus
 import hep.dataforge.provider.Type
-import kotlinx.io.core.*
+import kotlinx.io.*
 import kotlin.reflect.KClass
 
 /**
@@ -28,11 +29,13 @@ interface MetaFormat : IOFormat<Meta> {
 
 @Type(META_FORMAT_TYPE)
 interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
-    override val name: Name get() = "meta".asName()
+    val shortName: String
+
+    override val name: Name get() = "meta".asName() + shortName
 
     override val type: KClass<out Meta> get() = Meta::class
 
-    val key: Short
+    val key: Short get() = name.hashCode().toShort()
 
     override operator fun invoke(meta: Meta, context: Context): MetaFormat
 
@@ -41,24 +44,16 @@ interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
     }
 }
 
-fun Meta.toString(format: MetaFormat): String = buildPacket {
+fun Meta.toString(format: MetaFormat): String = buildBytes {
     format.run { writeObject(this@toString) }
-}.readText()
+}.toByteArray().decodeToString()
 
 fun Meta.toString(formatFactory: MetaFormatFactory): String = toString(formatFactory())
 
-fun Meta.toBytes(format: MetaFormat = JsonMetaFormat): ByteReadPacket = buildPacket {
-    format.run { writeObject(this@toBytes) }
-}
-
 fun MetaFormat.parse(str: String): Meta {
-    return buildPacket { writeText(str) }.readObject()
+    return str.encodeToByteArray().read { readObject() }
 }
 
-fun MetaFormatFactory.parse(str: String): Meta = invoke().parse(str)
-
-fun MetaFormat.fromBytes(packet: ByteReadPacket): Meta {
-    return packet.readObject()
-}
+fun MetaFormatFactory.parse(str: String, formatMeta: Meta): Meta = invoke(formatMeta).parse(str)
 
 

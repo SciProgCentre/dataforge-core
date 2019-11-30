@@ -6,10 +6,10 @@ import hep.dataforge.io.IOFormat
 import hep.dataforge.io.io
 import hep.dataforge.meta.DFExperimental
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.core.Input
-import kotlinx.io.core.Output
-import kotlinx.io.core.readText
-import kotlinx.io.core.writeText
+import kotlinx.io.Input
+import kotlinx.io.Output
+import kotlinx.io.readText
+import kotlinx.io.writeText
 import java.nio.file.Files
 import kotlin.test.Ignore
 import kotlin.test.Test

@@ -5,8 +5,6 @@ import hep.dataforge.io.serialization.MetaSerializer
 import hep.dataforge.io.serialization.NameSerializer
 import hep.dataforge.meta.buildMeta
 import hep.dataforge.names.toName
-import kotlinx.io.charsets.Charsets
-import kotlinx.io.core.String
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -41,7 +39,7 @@ class MetaSerializerTest {
         }
 
         val bytes = Cbor.dump(MetaSerializer, meta)
-        println(String(bytes, charset = Charsets.ISO_8859_1))
+        println(bytes.contentToString())
         val restored = Cbor.load(MetaSerializer, bytes)
         assertEquals(restored, meta)
     }

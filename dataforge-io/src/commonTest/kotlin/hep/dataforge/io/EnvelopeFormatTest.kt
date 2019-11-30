@@ -1,5 +1,7 @@
 package hep.dataforge.io
 
+import kotlinx.io.readDouble
+import kotlinx.io.writeDouble
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -12,16 +14,18 @@ class EnvelopeFormatTest {
         }
         data{
             writeDouble(22.2)
+//            repeat(2000){
+//                writeInt(it)
+//            }
         }
     }
 
-    @ExperimentalStdlibApi
     @Test
     fun testTaggedFormat(){
         TaggedEnvelopeFormat.run {
-            val bytes = writeBytes(envelope)
-            println(bytes.decodeToString())
-            val res = readBytes(bytes)
+            val byteArray = this.writeByteArray(envelope)
+            println(byteArray.decodeToString())
+            val res = readByteArray(byteArray)
             assertEquals(envelope.meta,res.meta)
             val double = res.data?.read {
                 readDouble()
@@ -33,9 +37,9 @@ class EnvelopeFormatTest {
     @Test
     fun testTaglessFormat(){
         TaglessEnvelopeFormat.run {
-            val bytes = writeBytes(envelope)
-            println(bytes.decodeToString())
-            val res = readBytes(bytes)
+            val byteArray = writeByteArray(envelope)
+            println(byteArray.decodeToString())
+            val res = readByteArray(byteArray)
             assertEquals(envelope.meta,res.meta)
             val double = res.data?.read {
                 readDouble()

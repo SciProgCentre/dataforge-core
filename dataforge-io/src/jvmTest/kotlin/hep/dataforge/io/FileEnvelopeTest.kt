@@ -1,6 +1,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Global
+import kotlinx.io.writeDouble
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertTrue

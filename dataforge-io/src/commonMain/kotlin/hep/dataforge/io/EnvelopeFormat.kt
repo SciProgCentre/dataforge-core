@@ -7,8 +7,8 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.provider.Type
-import kotlinx.io.core.Input
-import kotlinx.io.core.Output
+import kotlinx.io.Input
+import kotlinx.io.Output
 import kotlin.reflect.KClass
 
 /**

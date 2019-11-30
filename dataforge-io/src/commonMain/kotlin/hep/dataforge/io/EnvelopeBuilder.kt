@@ -1,9 +1,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.meta.*
-import kotlinx.io.core.Output
-import kotlinx.io.core.buildPacket
-import kotlinx.io.core.readBytes
+import kotlinx.io.*
 
 class EnvelopeBuilder {
     private val metaBuilder = MetaBuilder()
@@ -27,10 +25,10 @@ class EnvelopeBuilder {
      * Construct a binary and transform it into byte-array based buffer
      */
     fun data(block: Output.() -> Unit) {
-        val bytes = buildPacket {
+        val bytes = buildBytes {
             block()
         }
-        data = ArrayBinary(bytes.readBytes())
+        data = ArrayBinary(bytes.toByteArray())
     }
 
     internal fun build() = SimpleEnvelope(metaBuilder.seal(), data)

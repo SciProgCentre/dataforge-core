@@ -55,6 +55,7 @@ inline class SerialDescriptorBuilder(private val impl: SerialClassDescImpl) {
     fun doubleArray(name: String, isOptional: Boolean = false, vararg annotations: Annotation) =
         element(name, DoubleArraySerializer.descriptor, isOptional, *annotations)
 
+    @UseExperimental(InternalSerializationApi::class)
     inline fun <reified E : Enum<E>> enum(name: String, isOptional: Boolean = false, vararg annotations: Annotation) =
         element(name, EnumSerializer(E::class).descriptor, isOptional, *annotations)
 

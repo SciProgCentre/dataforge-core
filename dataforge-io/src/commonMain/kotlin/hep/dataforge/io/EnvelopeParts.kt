@@ -24,16 +24,24 @@ object EnvelopeParts {
 /**
  * Append multiple serialized envelopes to the data block. Previous data is erased if it was present
  */
-fun EnvelopeBuilder.multipart(format: EnvelopeFormatFactory, envelopes: Collection<Envelope>) {
+@DFExperimental
+fun EnvelopeBuilder.multipart(
+    envelopes: Collection<Envelope>,
+    format: EnvelopeFormatFactory,
+    formatMeta: Meta = EmptyMeta
+) {
     dataType = MULTIPART_DATA_TYPE
     meta {
         SIZE_KEY put envelopes.size
         FORMAT_NAME_KEY put format.name.toString()
+        if (!formatMeta.isEmpty()) {
+            FORMAT_META_KEY put formatMeta
+        }
     }
     data {
-        format.run {
+        format(formatMeta).run {
             envelopes.forEach {
-                writeObject(it)
+                writeEnvelope(it)
             }
         }
     }
@@ -43,18 +51,25 @@ fun EnvelopeBuilder.multipart(format: EnvelopeFormatFactory, envelopes: Collecti
  * Create a multipart partition in the envelope adding additional name-index mapping in meta
  */
 @DFExperimental
-fun EnvelopeBuilder.multipart(format: EnvelopeFormatFactory, envelopes: Map<String, Envelope>) {
+fun EnvelopeBuilder.multipart(
+    envelopes: Map<String, Envelope>,
+    format: EnvelopeFormatFactory,
+    formatMeta: Meta = EmptyMeta
+) {
     dataType = MULTIPART_DATA_TYPE
     meta {
         SIZE_KEY put envelopes.size
         FORMAT_NAME_KEY put format.name.toString()
+        if (!formatMeta.isEmpty()) {
+            FORMAT_META_KEY put formatMeta
+        }
     }
     data {
         format.run {
             var counter = 0
-            envelopes.forEach {(key, envelope)->
+            envelopes.forEach { (key, envelope) ->
                 writeObject(envelope)
-                meta{
+                meta {
                     append(INDEX_KEY, buildMeta {
                         "key" put key
                         "index" put counter
@@ -66,14 +81,17 @@ fun EnvelopeBuilder.multipart(format: EnvelopeFormatFactory, envelopes: Map<Stri
     }
 }
 
+@DFExperimental
 fun EnvelopeBuilder.multipart(
     formatFactory: EnvelopeFormatFactory,
+    formatMeta: Meta = EmptyMeta,
     builder: suspend SequenceScope<Envelope>.() -> Unit
-) = multipart(formatFactory, sequence(builder).toList())
+) = multipart(sequence(builder).toList(), formatFactory, formatMeta)
 
 /**
  * If given envelope supports multipart data, return a sequence of those parts (could be empty). Otherwise return null.
  */
+@DFExperimental
 fun Envelope.parts(io: IOPlugin = Global.plugins.fetch(IOPlugin)): Sequence<Envelope>? {
     return when (dataType) {
         MULTIPART_DATA_TYPE -> {

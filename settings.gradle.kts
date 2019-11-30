@@ -32,3 +32,5 @@ include(
     ":dataforge-workspace",
     ":dataforge-scripting"
 )
+
+//includeBuild("../kotlinx-io")

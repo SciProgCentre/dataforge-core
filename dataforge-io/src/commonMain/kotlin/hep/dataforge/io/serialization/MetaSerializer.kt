@@ -13,6 +13,7 @@ import kotlinx.serialization.json.JsonOutput
 
 
 @Serializer(Value::class)
+@UseExperimental(InternalSerializationApi::class)
 object ValueSerializer : KSerializer<Value> {
     private val valueTypeSerializer = EnumSerializer(ValueType::class)
     private val listSerializer by lazy { ArrayListSerializer(ValueSerializer) }

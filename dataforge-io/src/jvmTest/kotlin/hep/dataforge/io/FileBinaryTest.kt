@@ -1,6 +1,9 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Global
+import kotlinx.io.asBinary
+import kotlinx.io.toByteArray
+import kotlinx.io.writeDouble
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,11 +24,11 @@ class FileBinaryTest {
     @Test
     fun testSize() {
         val binary = envelope.data
-        assertEquals(binary?.size?.toInt(), binary?.toBytes()?.size)
+        assertEquals(binary?.size?.toInt(), binary?.toByteArray()?.size)
     }
 
     @Test
-    fun testFileData(){
+    fun testFileData() {
         val dataFile = Files.createTempFile("dataforge_test_bin", ".bin")
         dataFile.toFile().writeText("This is my binary")
         val envelopeFromFile = Envelope {
@@ -34,12 +37,12 @@ class FileBinaryTest {
                 "b" put 22.2
             }
             dataType = "hep.dataforge.satellite"
-            dataID = "cellDepositTest" // добавил только что
+            dataID = "cellDepositTest"
             data = dataFile.asBinary()
         }
         val binary = envelopeFromFile.data!!
-        println(binary.toBytes().size)
-        assertEquals(binary.size?.toInt(), binary.toBytes().size)
+        println(binary.toByteArray().size)
+        assertEquals(binary.size.toInt(), binary.toByteArray().size)
 
     }
 
@@ -50,7 +53,6 @@ class FileBinaryTest {
         Global.io.writeEnvelopeFile(tmpPath, envelope)
 
         val binary = Global.io.readEnvelopeFile(tmpPath)?.data!!
-        assertEquals(binary.size.toInt(), binary.toBytes().size)
+        assertEquals(binary.size.toInt(), binary.toByteArray().size)
     }
-
 }

@@ -20,7 +20,7 @@ class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         metaFormatFactories.find { it.key == key }?.invoke(meta)
 
     fun metaFormat(name: String, meta: Meta = EmptyMeta): MetaFormat? =
-        metaFormatFactories.find { it.name.last().toString() == name }?.invoke(meta)
+        metaFormatFactories.find { it.shortName == name }?.invoke(meta)
 
     val envelopeFormatFactories by lazy {
         context.content<EnvelopeFormatFactory>(ENVELOPE_FORMAT_TYPE).values

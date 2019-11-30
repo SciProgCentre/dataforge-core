@@ -10,12 +10,9 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.provider.Type
 import hep.dataforge.values.Value
-import kotlinx.io.core.*
+import kotlinx.io.*
+import kotlinx.io.buffer.Buffer
 import kotlinx.io.pool.ObjectPool
-import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.cbor.Cbor
-import kotlinx.serialization.serializer
 import kotlin.reflect.KClass
 
 /**
@@ -49,7 +46,7 @@ class ListIOFormat<T : Any>(val format: IOFormat<T>) : IOFormat<List<T>> {
 
 val <T : Any> IOFormat<T>.list get() = ListIOFormat(this)
 
-fun ObjectPool<IoBuffer>.fill(block: IoBuffer.() -> Unit): IoBuffer {
+fun ObjectPool<Buffer>.fill(block: Buffer.() -> Unit): Buffer {
     val buffer = borrow()
     return try {
         buffer.apply(block)
@@ -71,19 +68,11 @@ interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
     }
 }
 
-@Deprecated("To be removed in io-2")
-inline fun buildPacketWithoutPool(headerSizeHint: Int = 0, block: BytePacketBuilder.() -> Unit): ByteReadPacket {
-    val builder = BytePacketBuilder(headerSizeHint, IoBuffer.NoPool)
-    block(builder)
-    return builder.build()
-}
+fun <T : Any> IOFormat<T>.writeBytes(obj: T): Bytes = buildBytes { writeObject(obj) }
 
-fun <T : Any> IOFormat<T>.writePacket(obj: T): ByteReadPacket = buildPacket { writeObject(obj) }
 
-@Deprecated("Not to be used outside tests due to double buffer write")
-fun <T : Any> IOFormat<T>.writeBytes(obj: T): ByteArray = buildPacket { writeObject(obj) }.readBytes()
-@Deprecated("Not to be used outside tests due to double buffer write")
-fun <T : Any> IOFormat<T>.readBytes(array: ByteArray): T = buildPacket { writeFully(array) }.readObject()
+fun <T : Any> IOFormat<T>.writeByteArray(obj: T): ByteArray = buildBytes { writeObject(obj) }.toByteArray()
+fun <T : Any> IOFormat<T>.readByteArray(array: ByteArray): T = array.asBinary().read { readObject() }
 
 object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
     override fun invoke(meta: Meta, context: Context): IOFormat<Double> = this
@@ -117,25 +106,10 @@ object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
 }
 
 /**
- * Experimental
+ * Read given binary as object using given format
  */
-@ImplicitReflectionSerializer
-class SerializerIOFormat<T : Any>(
-    type: KClass<T>,
-    val serializer: KSerializer<T> = type.serializer()
-) : IOFormat<T> {
-
-    //override val name: Name = type.simpleName?.toName() ?: EmptyName
-
-
-    override fun Output.writeObject(obj: T) {
-        val bytes = Cbor.plain.dump(serializer, obj)
-        writeFully(bytes)
-    }
-
-    override fun Input.readObject(): T {
-        //FIXME reads the whole input
-        val bytes = readBytes()
-        return Cbor.plain.load(serializer, bytes)
+fun <T : Any> Binary.readWith(format: IOFormat<T>): T = format.run {
+    read {
+        readObject()
     }
 }

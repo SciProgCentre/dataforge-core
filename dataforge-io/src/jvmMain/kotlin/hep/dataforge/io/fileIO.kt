@@ -5,13 +5,9 @@ import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.isEmpty
-import kotlinx.io.core.Output
-import kotlinx.io.core.copyTo
-import kotlinx.io.nio.asInput
-import kotlinx.io.nio.asOutput
+import kotlinx.io.*
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardOpenOption
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.streams.asSequence
 
@@ -22,7 +18,6 @@ import kotlin.streams.asSequence
 inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
     return ioFormats.values.find { it.type.isSuperclassOf(T::class) } as IOFormat<T>?
 }
-
 
 /**
  * Read file containing meta using given [formatOverride] or file extension to infer meta type.
@@ -41,7 +36,9 @@ fun IOPlugin.readMetaFile(path: Path, formatOverride: MetaFormat? = null, descri
 
     val metaFormat = formatOverride ?: metaFormat(extension) ?: error("Can't resolve meta format $extension")
     return metaFormat.run {
-        Files.newByteChannel(actualPath, StandardOpenOption.READ).asInput().use { it.readMeta(descriptor) }
+        actualPath.read{
+            readMeta(descriptor)
+        }
     }
 }
 
@@ -61,8 +58,8 @@ fun IOPlugin.writeMetaFile(
         path
     }
     metaFormat.run {
-        Files.newByteChannel(actualPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW).asOutput().use {
-            it.writeMeta(meta, descriptor)
+        actualPath.write{
+            writeMeta(meta, descriptor)
         }
     }
 }
@@ -139,24 +136,12 @@ fun IOPlugin.readEnvelopeFile(
     } else null
 }
 
-private fun Path.useOutput(consumer: Output.() -> Unit) {
-    //TODO forbid rewrite?
-    Files.newByteChannel(
-        this,
-        StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING
-    ).asOutput().use {
-        it.consumer()
-        it.flush()
-    }
-}
-
 /**
  * Write a binary into file. Throws an error if file already exists
  */
 fun <T : Any> IOFormat<T>.writeToFile(path: Path, obj: T) {
-    path.useOutput {
+    path.write {
         writeObject(obj)
-        flush()
     }
 }
 
@@ -170,7 +155,7 @@ fun IOPlugin.writeEnvelopeFile(
     envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat,
     metaFormat: MetaFormatFactory? = null
 ) {
-    path.useOutput {
+    path.write {
         with(envelopeFormat) {
             writeEnvelope(envelope, metaFormat ?: envelopeFormat.defaultMetaFormat)
         }
@@ -196,10 +181,10 @@ fun IOPlugin.writeEnvelopeDirectory(
         writeMetaFile(path, envelope.meta, metaFormat)
     }
     val dataFile = path.resolve(IOPlugin.DATA_FILE_NAME)
-    dataFile.useOutput {
+    dataFile.write {
         envelope.data?.read {
-            val copied = copyTo(this@useOutput)
-            if (envelope.data?.size != ULong.MAX_VALUE && copied != envelope.data?.size?.toLong()) {
+            val copied = writeInput(this)
+            if (envelope.data?.size != Binary.INFINITE && copied != envelope.data?.size) {
                 error("The number of copied bytes does not equal data size")
             }
         }

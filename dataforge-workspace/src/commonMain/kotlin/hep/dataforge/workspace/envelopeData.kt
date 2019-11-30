@@ -2,10 +2,13 @@ package hep.dataforge.workspace
 
 import hep.dataforge.data.Data
 import hep.dataforge.data.await
-import hep.dataforge.io.*
+import hep.dataforge.io.Envelope
+import hep.dataforge.io.IOFormat
+import hep.dataforge.io.SimpleEnvelope
+import hep.dataforge.io.readWith
 import kotlinx.coroutines.coroutineScope
-import kotlinx.io.core.Input
-import kotlinx.io.core.buildPacket
+import kotlinx.io.Input
+import kotlinx.io.buildPacket
 import kotlin.reflect.KClass
 
 /**

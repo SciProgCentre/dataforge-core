@@ -5,7 +5,8 @@ import hep.dataforge.io.*
 import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
-import kotlinx.io.core.*
+import kotlinx.io.Input
+import kotlinx.io.Output
 import kotlinx.serialization.toUtf8Bytes
 
 @DFExperimental
@@ -18,7 +19,7 @@ class FrontMatterEnvelopeFormat(
         var line: String = ""
         var offset = 0u
         do {
-            line = readUTF8Line() ?: error("Input does not contain front matter separator")
+            line = readUtf8Line() ?: error("Input does not contain front matter separator")
             offset += line.toUtf8Bytes().size.toUInt()
         } while (!line.startsWith(SEPARATOR))
 
@@ -28,7 +29,7 @@ class FrontMatterEnvelopeFormat(
 
         val metaBlock = buildPacket {
             do {
-                line = readUTF8Line() ?: error("Input does not contain closing front matter separator")
+                line = readUtf8Line() ?: error("Input does not contain closing front matter separator")
                 appendln(line)
                 offset += line.toUtf8Bytes().size.toUInt()
             } while (!line.startsWith(SEPARATOR))
@@ -40,7 +41,7 @@ class FrontMatterEnvelopeFormat(
     override fun Input.readObject(): Envelope {
         var line: String = ""
         do {
-            line = readUTF8Line() ?: error("Input does not contain front matter separator")
+            line = readUtf8Line() ?: error("Input does not contain front matter separator")
         } while (!line.startsWith(SEPARATOR))
 
         val readMetaFormat =
@@ -49,7 +50,7 @@ class FrontMatterEnvelopeFormat(
 
         val metaBlock = buildPacket {
             do {
-                appendln(readUTF8Line() ?: error("Input does not contain closing front matter separator"))
+                appendln(readUtf8Line() ?: error("Input does not contain closing front matter separator"))
             } while (!line.startsWith(SEPARATOR))
         }
         val meta = readMetaFormat.fromBytes(metaBlock)
@@ -76,7 +77,7 @@ class FrontMatterEnvelopeFormat(
         }
 
         override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
-            val line = input.readUTF8Line(3, 30)
+            val line = input.readUtf8Line(3, 30)
             return if (line != null && line.startsWith("---")) {
                 invoke()
             } else {

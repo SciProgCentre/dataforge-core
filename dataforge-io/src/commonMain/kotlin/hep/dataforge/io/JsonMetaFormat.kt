@@ -9,15 +9,15 @@ import hep.dataforge.descriptors.ValueDescriptor
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBase
 import hep.dataforge.meta.MetaItem
-import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
-import hep.dataforge.names.plus
 import hep.dataforge.names.toName
 import hep.dataforge.values.*
-import kotlinx.io.core.Input
-import kotlinx.io.core.Output
-import kotlinx.io.core.readText
-import kotlinx.io.core.writeText
+import kotlinx.io.Input
+import kotlinx.io.Output
+import kotlinx.io.text.readUtf8String
+import kotlinx.io.text.writeUtf8String
+
+
 import kotlinx.serialization.json.*
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -28,11 +28,11 @@ class JsonMetaFormat(private val json: Json = Json.indented) : MetaFormat {
 
     override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {
         val jsonObject = meta.toJson(descriptor)
-        writeText(json.stringify(JsonObjectSerializer, jsonObject))
+        writeUtf8String(json.stringify(JsonObjectSerializer, jsonObject))
     }
 
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
-        val str = readText()
+        val str = readUtf8String()
         val jsonElement = json.parseJson(str)
         return jsonElement.toMeta()
     }
@@ -40,13 +40,13 @@ class JsonMetaFormat(private val json: Json = Json.indented) : MetaFormat {
     companion object : MetaFormatFactory {
         override fun invoke(meta: Meta, context: Context): MetaFormat = default
 
-        override val name: Name = super.name + "json"
+        override val shortName = "json"
         override val key: Short = 0x4a53//"JS"
 
         private val default = JsonMetaFormat()
 
         override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) =
-            default.run { writeMeta(meta,descriptor) }
+            default.run { writeMeta(meta, descriptor) }
 
         override fun Input.readMeta(descriptor: NodeDescriptor?): Meta =
             default.run { readMeta(descriptor) }

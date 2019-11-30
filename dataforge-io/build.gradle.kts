@@ -4,27 +4,30 @@ plugins {
 
 description = "IO module"
 
-scientifik{
+scientifik {
     withSerialization()
-    withIO()
+    //withIO()
 }
 
+val ioVersion by rootProject.extra("0.2.0-npm-dev-2")
 
 kotlin {
     sourceSets {
-        commonMain{
+        commonMain {
             dependencies {
                 api(project(":dataforge-context"))
+                api("org.jetbrains.kotlinx:kotlinx-io:$ioVersion")
+                //api("org.jetbrains.kotlinx:kotlinx-io-metadata:$ioVersion")
             }
         }
-        jvmMain{
+        jvmMain {
             dependencies {
-
+                //api("org.jetbrains.kotlinx:kotlinx-io-jvm:$ioVersion")
             }
         }
-        jsMain{
-            dependencies{
-                api(npm("text-encoding"))
+        jsMain {
+            dependencies {
+                //api("org.jetbrains.kotlinx:kotlinx-io-js:$ioVersion")
             }
         }
     }

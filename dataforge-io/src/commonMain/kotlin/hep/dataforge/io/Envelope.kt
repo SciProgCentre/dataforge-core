@@ -6,6 +6,7 @@ import hep.dataforge.meta.get
 import hep.dataforge.meta.string
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
+import kotlinx.io.Binary
 
 interface Envelope {
     val meta: Meta

@@ -8,12 +8,10 @@ import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.toMap
 import hep.dataforge.meta.toMeta
-import hep.dataforge.names.Name
-import hep.dataforge.names.plus
-import kotlinx.io.core.Input
-import kotlinx.io.core.Output
-import kotlinx.io.core.readUByte
-import kotlinx.io.core.writeText
+import kotlinx.io.Input
+import kotlinx.io.Output
+import kotlinx.io.readUByte
+import kotlinx.io.writeText
 import org.yaml.snakeyaml.Yaml
 import java.io.InputStream
 
@@ -47,7 +45,7 @@ class YamlMetaFormat(val meta: Meta) : MetaFormat {
     companion object : MetaFormatFactory {
         override fun invoke(meta: Meta, context: Context): MetaFormat = YamlMetaFormat(meta)
 
-        override val name: Name = super.name + "yaml"
+        override val shortName = "yaml"
 
         override val key: Short = 0x594d //YM
 

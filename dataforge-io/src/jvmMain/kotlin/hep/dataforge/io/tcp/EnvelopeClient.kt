@@ -7,7 +7,6 @@ import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
-import kotlinx.io.streams.writePacket
 import java.net.Socket
 import java.util.concurrent.Executors
 import kotlin.time.ExperimentalTime
@@ -52,14 +51,14 @@ class EnvelopeClient(
     override suspend fun respond(request: Envelope): Envelope = withContext(dispatcher) {
         //val address = InetSocketAddress(host,port)
         val socket = Socket(host, port)
-        val input = socket.getInputStream().asInput()
-        val output = socket.getOutputStream()
+        val inputStream = socket.getInputStream()
+        val outputStream = socket.getOutputStream()
         format.run {
-            output.writePacket {
+            outputStream.write {
                 writeObject(request)
             }
             logger.debug { "Sent request with type ${request.type} to ${socket.remoteSocketAddress}" }
-            val res = input.readObject()
+            val res = inputStream.readBlocking { readObject() }
             logger.debug { "Received response with type ${res.type} from ${socket.remoteSocketAddress}" }
             return@withContext res
         }

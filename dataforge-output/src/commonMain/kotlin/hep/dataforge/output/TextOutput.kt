@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
-class TextOutput(override val context: Context, private val output: kotlinx.io.core.Output) : Output<Any> {
+class TextOutput(override val context: Context, private val output: kotlinx.io.Output) : Output<Any> {
     private val cache = HashMap<KClass<*>, TextRenderer>()
 
     /**
@@ -40,7 +40,7 @@ class TextOutput(override val context: Context, private val output: kotlinx.io.c
 }
 
 /**
- * A text or binary renderer based on [kotlinx.io.core.Output]
+ * A text or binary renderer based on [kotlinx.io.Output]
  */
 @Type(TEXT_RENDERER_TYPE)
 interface TextRenderer {
@@ -53,7 +53,7 @@ interface TextRenderer {
      */
     val type: KClass<*>
 
-    suspend fun kotlinx.io.core.Output.render(obj: Any)
+    suspend fun kotlinx.io.Output.render(obj: Any)
 
     companion object {
         const val TEXT_RENDERER_TYPE = "dataforge.textRenderer"
@@ -64,7 +64,7 @@ object DefaultTextRenderer : TextRenderer {
     override val priority: Int = Int.MAX_VALUE
     override val type: KClass<*> = Any::class
 
-    override suspend fun kotlinx.io.core.Output.render(obj: Any) {
+    override suspend fun kotlinx.io.Output.render(obj: Any) {
         append(obj.toString())
         append('\n')
     }
