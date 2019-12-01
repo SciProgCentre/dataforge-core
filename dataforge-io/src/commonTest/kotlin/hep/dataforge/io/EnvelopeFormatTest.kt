@@ -24,7 +24,7 @@ class EnvelopeFormatTest {
     fun testTaggedFormat(){
         TaggedEnvelopeFormat.run {
             val byteArray = this.writeByteArray(envelope)
-            println(byteArray.decodeToString())
+            //println(byteArray.decodeToString())
             val res = readByteArray(byteArray)
             assertEquals(envelope.meta,res.meta)
             val double = res.data?.read {
@@ -38,7 +38,7 @@ class EnvelopeFormatTest {
     fun testTaglessFormat(){
         TaglessEnvelopeFormat.run {
             val byteArray = writeByteArray(envelope)
-            println(byteArray.decodeToString())
+            //println(byteArray.decodeToString())
             val res = readByteArray(byteArray)
             assertEquals(envelope.meta,res.meta)
             val double = res.data?.read {

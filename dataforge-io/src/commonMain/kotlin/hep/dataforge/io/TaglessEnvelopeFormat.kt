@@ -46,7 +46,7 @@ class TaglessEnvelopeFormat(
             writeProperty(META_LENGTH_PROPERTY, metaBytes.size + 2)
             writeUtf8String(metaStart + "\r\n")
             writeBinary(metaBytes)
-            writeUtf8String("\r\n")
+            writeRawString("\r\n")
         }
 
         //Printing data
@@ -71,12 +71,9 @@ class TaglessEnvelopeFormat(
                 val (key, value) = match.destructured
                 properties[key] = value
             }
-            try {
-                line = readUtf8Line()
-            } catch (ex: EOFException) {
-                //If can't read line, return envelope without data
-                return SimpleEnvelope(Meta.empty, null)
-            }
+            //If can't read line, return envelope without data
+            if (eof()) return SimpleEnvelope(Meta.empty, null)
+            line = readUtf8Line()
         }
 
         var meta: Meta = EmptyMeta

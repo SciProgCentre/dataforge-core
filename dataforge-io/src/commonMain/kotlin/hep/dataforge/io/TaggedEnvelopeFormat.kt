@@ -67,7 +67,7 @@ class TaggedEnvelopeFormat(
         val metaFormat = io.metaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
-        val meta: Meta = limit(tag.metaSize.toInt()).use {
+        val meta: Meta = limit(tag.metaSize.toInt()).run {
             metaFormat.run {
                 readObject()
             }
