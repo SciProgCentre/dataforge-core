@@ -73,9 +73,7 @@ class TaggedEnvelopeFormat(
             }
         }
 
-        val data = buildBytes {
-            writeInput(this@readObject, tag.dataSize.toInt())
-        }
+        val data = ByteArray(tag.dataSize.toInt()).also { readArray(it) }.asBinary()
 
         return SimpleEnvelope(meta, data)
     }

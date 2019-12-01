@@ -4,12 +4,15 @@ import hep.dataforge.context.Global
 import hep.dataforge.io.EnvelopeParts.FORMAT_META_KEY
 import hep.dataforge.io.EnvelopeParts.FORMAT_NAME_KEY
 import hep.dataforge.io.EnvelopeParts.INDEX_KEY
+import hep.dataforge.io.EnvelopeParts.MULTIPART_DATA_SEPARATOR
 import hep.dataforge.io.EnvelopeParts.MULTIPART_DATA_TYPE
 import hep.dataforge.io.EnvelopeParts.SIZE_KEY
 import hep.dataforge.meta.*
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
+import kotlinx.io.text.readRawString
+import kotlinx.io.text.writeRawString
 
 object EnvelopeParts {
     val MULTIPART_KEY = "multipart".asName()
@@ -17,6 +20,8 @@ object EnvelopeParts {
     val INDEX_KEY = Envelope.ENVELOPE_NODE_KEY + MULTIPART_KEY + "index"
     val FORMAT_NAME_KEY = Envelope.ENVELOPE_NODE_KEY + MULTIPART_KEY + "format"
     val FORMAT_META_KEY = Envelope.ENVELOPE_NODE_KEY + MULTIPART_KEY + "meta"
+
+    const val MULTIPART_DATA_SEPARATOR = "#~PART~#\r\n"
 
     const val MULTIPART_DATA_TYPE = "envelope.multipart"
 }
@@ -41,6 +46,7 @@ fun EnvelopeBuilder.multipart(
     data {
         format(formatMeta).run {
             envelopes.forEach {
+                writeRawString(MULTIPART_DATA_SEPARATOR)
                 writeEnvelope(it)
             }
         }
@@ -68,7 +74,8 @@ fun EnvelopeBuilder.multipart(
         format.run {
             var counter = 0
             envelopes.forEach { (key, envelope) ->
-                writeObject(envelope)
+                writeRawString(MULTIPART_DATA_SEPARATOR)
+                writeEnvelope(envelope)
                 meta {
                     append(INDEX_KEY, buildMeta {
                         "key" put key
@@ -105,6 +112,8 @@ fun Envelope.parts(io: IOPlugin = Global.plugins.fetch(IOPlugin)): Sequence<Enve
                 data?.read {
                     sequence {
                         repeat(size) {
+                            val separator = readRawString(MULTIPART_DATA_SEPARATOR.length)
+                            if(separator!= MULTIPART_DATA_SEPARATOR) error("Separator is expected")
                             yield(readObject())
                         }
                     }

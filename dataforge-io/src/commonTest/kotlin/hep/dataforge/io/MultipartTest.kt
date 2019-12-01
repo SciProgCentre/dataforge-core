@@ -18,24 +18,29 @@ class MultipartTest {
             }
             data {
                 writeUtf8String("Hello World $it")
-                repeat(2000) {
-                    writeInt(it)
-                }
+//                repeat(2000) {
+//                    writeInt(it)
+//                }
             }
         }
     }
+
     val partsEnvelope = Envelope {
         multipart(envelopes, TaggedEnvelopeFormat)
     }
 
     @Test
     fun testParts() {
-        val bytes = TaggedEnvelopeFormat.writeByteArray(partsEnvelope)
-        assertTrue { bytes.size > envelopes.sumBy { it.data!!.size.toInt() } }
-        val reconstructed = TaggedEnvelopeFormat.readByteArray(bytes)
-        val parts = reconstructed.parts()?.toList() ?: emptyList()
-        assertEquals(2, parts[2].meta["value"].int)
-        println(reconstructed.data!!.size)
+        TaggedEnvelopeFormat.run {
+            val singleEnvelopeData = writeBytes(envelopes[0])
+            val singleEnvelopeSize = singleEnvelopeData.size
+            val bytes = writeBytes(partsEnvelope)
+            assertTrue(5*singleEnvelopeSize < bytes.size)
+            val reconstructed = bytes.readWith(this)
+            val parts = reconstructed.parts()?.toList() ?: emptyList()
+            assertEquals(2, parts[2].meta["value"].int)
+            println(reconstructed.data!!.size)
+        }
     }
 
 }

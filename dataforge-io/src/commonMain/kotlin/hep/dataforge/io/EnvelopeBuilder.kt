@@ -22,13 +22,13 @@ class EnvelopeBuilder {
     var name by metaBuilder.string(key = Envelope.ENVELOPE_NAME_KEY)
 
     /**
-     * Construct a binary and transform it into byte-array based buffer
+     * Construct a data binary from given builder
      */
+    @ExperimentalIoApi
     fun data(block: Output.() -> Unit) {
-        val bytes = buildBytes {
-            block()
-        }
-        data = ArrayBinary(bytes.toByteArray())
+        val bytes = buildBytes(builder = block)
+        data = bytes.toByteArray().asBinary() //save data to byte array so
+        bytes.close()
     }
 
     internal fun build() = SimpleEnvelope(metaBuilder.seal(), data)
