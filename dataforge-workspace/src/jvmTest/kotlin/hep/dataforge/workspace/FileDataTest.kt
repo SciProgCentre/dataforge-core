@@ -8,8 +8,8 @@ import hep.dataforge.meta.DFExperimental
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.Input
 import kotlinx.io.Output
-import kotlinx.io.readText
-import kotlinx.io.writeText
+import kotlinx.io.text.readUtf8String
+import kotlinx.io.text.writeUtf8String
 import java.nio.file.Files
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -30,11 +30,11 @@ class FileDataTest {
 
     object StringIOFormat : IOFormat<String> {
         override fun Output.writeObject(obj: String) {
-            writeText(obj)
+            writeUtf8String(obj)
         }
 
         override fun Input.readObject(): String {
-            return readText()
+            return readUtf8String()
         }
 
     }

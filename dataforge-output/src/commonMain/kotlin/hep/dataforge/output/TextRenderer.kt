@@ -2,48 +2,50 @@ package hep.dataforge.output
 
 import hep.dataforge.context.Context
 import hep.dataforge.meta.Meta
-import hep.dataforge.output.TextRenderer.Companion.TEXT_RENDERER_TYPE
+import hep.dataforge.output.TextFormat.Companion.TEXT_RENDERER_TYPE
 import hep.dataforge.provider.Type
 import hep.dataforge.provider.top
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.io.Output
+import kotlinx.io.text.writeUtf8String
 import kotlin.reflect.KClass
 
-class TextOutput(override val context: Context, private val output: kotlinx.io.Output) : Output<Any> {
-    private val cache = HashMap<KClass<*>, TextRenderer>()
+class TextRenderer(override val context: Context, private val output: Output) : Renderer<Any> {
+    private val cache = HashMap<KClass<*>, TextFormat>()
 
     /**
-     * Find the first [TextRenderer] matching the given object type.
+     * Find the first [TextFormat] matching the given object type.
      */
     override fun render(obj: Any, meta: Meta) {
-        val renderer: TextRenderer = if (obj is CharSequence) {
-            DefaultTextRenderer
+        val format: TextFormat = if (obj is CharSequence) {
+            DefaultTextFormat
         } else {
             val value = cache[obj::class]
             if (value == null) {
                 val answer =
-                    context.top<TextRenderer>(TEXT_RENDERER_TYPE).values.firstOrNull { it.type.isInstance(obj) }
+                    context.top<TextFormat>(TEXT_RENDERER_TYPE).values.firstOrNull { it.type.isInstance(obj) }
                 if (answer != null) {
                     cache[obj::class] = answer
                     answer
                 } else {
-                    DefaultTextRenderer
+                    DefaultTextFormat
                 }
             } else {
                 value
             }
         }
         context.launch(Dispatchers.Output) {
-            renderer.run { output.render(obj) }
+            format.run { output.render(obj) }
         }
     }
 }
 
 /**
- * A text or binary renderer based on [kotlinx.io.Output]
+ * A text or binary renderer based on [Output]
  */
 @Type(TEXT_RENDERER_TYPE)
-interface TextRenderer {
+interface TextFormat {
     /**
      * The priority of this renderer compared to other renderers
      */
@@ -53,19 +55,18 @@ interface TextRenderer {
      */
     val type: KClass<*>
 
-    suspend fun kotlinx.io.Output.render(obj: Any)
+    suspend fun Output.render(obj: Any)
 
     companion object {
         const val TEXT_RENDERER_TYPE = "dataforge.textRenderer"
     }
 }
 
-object DefaultTextRenderer : TextRenderer {
+object DefaultTextFormat : TextFormat {
     override val priority: Int = Int.MAX_VALUE
     override val type: KClass<*> = Any::class
 
-    override suspend fun kotlinx.io.Output.render(obj: Any) {
-        append(obj.toString())
-        append('\n')
+    override suspend fun Output.render(obj: Any) {
+        writeUtf8String(obj.toString() + "\n")
     }
 }

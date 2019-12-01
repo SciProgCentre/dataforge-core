@@ -7,8 +7,7 @@ import hep.dataforge.io.IOFormat
 import hep.dataforge.io.SimpleEnvelope
 import hep.dataforge.io.readWith
 import kotlinx.coroutines.coroutineScope
-import kotlinx.io.Input
-import kotlinx.io.buildPacket
+import kotlinx.io.ArrayBinary
 import kotlin.reflect.KClass
 
 /**
@@ -22,15 +21,8 @@ suspend fun <T : Any> Data<T>.toEnvelope(format: IOFormat<T>): Envelope {
     val obj = coroutineScope {
         await(this)
     }
-    val binary = object : Binary {
-        override fun <R> read(block: Input.() -> R): R {
-            //TODO optimize away additional copy by creating inputs that reads directly from output
-            val packet = buildPacket {
-                format.run { writeObject(obj) }
-            }
-            return packet.block()
-        }
-
+    val binary = ArrayBinary.write {
+        format.run { writeObject(obj) }
     }
     return SimpleEnvelope(meta, binary)
 }

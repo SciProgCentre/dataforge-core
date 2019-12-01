@@ -7,11 +7,11 @@ import hep.dataforge.meta.Meta
 /**
  * A generic way to render any object in the output.
  *
- * An object could be rendered either in append or overlay mode. The mode is decided by the [Output]
+ * An object could be rendered either in append or overlay mode. The mode is decided by the [Renderer]
  * based on its configuration and provided meta
  *
  */
-interface Output<in T : Any> : ContextAware {
+interface Renderer<in T : Any> : ContextAware {
     /**
      * Render specific object with configuration.
      *
