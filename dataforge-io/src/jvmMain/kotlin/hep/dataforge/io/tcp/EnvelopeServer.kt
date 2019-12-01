@@ -78,6 +78,9 @@ class EnvelopeServer(
                     logger.debug { "Accepted request with type ${request.type} from ${socket.remoteSocketAddress}" }
                     if (request.type == SHUTDOWN_ENVELOPE_TYPE) {
                         //Echo shutdown command
+                        outputStream.write{
+                            writeObject(request)
+                        }
                         logger.info { "Accepted graceful shutdown signal from ${socket.inetAddress}" }
                         socket.close()
                         return@thread

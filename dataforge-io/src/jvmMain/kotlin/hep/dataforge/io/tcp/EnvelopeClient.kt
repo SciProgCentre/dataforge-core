@@ -38,7 +38,7 @@ class EnvelopeClient(
     suspend fun close() {
         try {
             respond(
-                Envelope.invoke {
+                Envelope {
                     type = EnvelopeServer.SHUTDOWN_ENVELOPE_TYPE
                 }
             )

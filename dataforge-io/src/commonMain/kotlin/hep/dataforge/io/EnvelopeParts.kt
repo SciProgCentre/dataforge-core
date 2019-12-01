@@ -21,7 +21,7 @@ object EnvelopeParts {
     val FORMAT_NAME_KEY = Envelope.ENVELOPE_NODE_KEY + MULTIPART_KEY + "format"
     val FORMAT_META_KEY = Envelope.ENVELOPE_NODE_KEY + MULTIPART_KEY + "meta"
 
-    const val MULTIPART_DATA_SEPARATOR = "#~PART~#\r\n"
+    const val MULTIPART_DATA_SEPARATOR = "\r\n#~PART~#\r\n"
 
     const val MULTIPART_DATA_TYPE = "envelope.multipart"
 }
@@ -113,7 +113,7 @@ fun Envelope.parts(io: IOPlugin = Global.plugins.fetch(IOPlugin)): Sequence<Enve
                     sequence {
                         repeat(size) {
                             val separator = readRawString(MULTIPART_DATA_SEPARATOR.length)
-                            if(separator!= MULTIPART_DATA_SEPARATOR) error("Separator is expected")
+                            if(separator!= MULTIPART_DATA_SEPARATOR) error("Separator is expected, but $separator found")
                             yield(readObject())
                         }
                     }

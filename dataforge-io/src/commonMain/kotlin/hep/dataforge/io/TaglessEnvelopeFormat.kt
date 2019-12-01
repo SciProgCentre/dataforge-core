@@ -106,9 +106,9 @@ class TaglessEnvelopeFormat(
             readArray(bytes)
             bytes.asBinary()
         } else {
-            buildBytes {
+            ArrayBinary.write {
                 writeInput(this@readObject)
-            }.toByteArray().asBinary()
+            }
         }
 
         return SimpleEnvelope(meta, data)

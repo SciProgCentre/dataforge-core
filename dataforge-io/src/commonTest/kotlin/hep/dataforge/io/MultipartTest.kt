@@ -3,6 +3,7 @@ package hep.dataforge.io
 import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
+import kotlinx.io.text.writeRawString
 import kotlinx.io.text.writeUtf8String
 
 import kotlin.test.Test
@@ -18,9 +19,9 @@ class MultipartTest {
             }
             data {
                 writeUtf8String("Hello World $it")
-//                repeat(2000) {
-//                    writeInt(it)
-//                }
+                repeat(300) {
+                    writeRawString("$it ")
+                }
             }
         }
     }
