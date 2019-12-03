@@ -91,7 +91,7 @@ fun <T : Any, R : Any> Data<T>.map(
     meta: Meta = this.meta,
     block: suspend CoroutineScope.(T) -> R
 ): Data<R> = DynamicData(outputType, meta, coroutineContext, listOf(this)) {
-    block(await(this))
+    block(await())
 }
 
 
@@ -103,7 +103,7 @@ inline fun <T : Any, reified R : Any> Data<T>.map(
     meta: Meta = this.meta,
     noinline block: suspend CoroutineScope.(T) -> R
 ): Data<R> = DynamicData(R::class, meta, coroutineContext, listOf(this)) {
-    block(await(this))
+    block(await())
 }
 
 /**
@@ -119,7 +119,7 @@ inline fun <T : Any, reified R : Any> Collection<Data<T>>.reduce(
     coroutineContext,
     this
 ) {
-    block(map { run { it.await(this) } })
+    block(map { run { it.await() } })
 }
 
 fun <K, T : Any, R : Any> Map<K, Data<T>>.reduce(
@@ -133,7 +133,7 @@ fun <K, T : Any, R : Any> Map<K, Data<T>>.reduce(
     coroutineContext,
     this.values
 ) {
-    block(mapValues { it.value.await(this) })
+    block(mapValues { it.value.await() })
 }
 
 
@@ -153,7 +153,7 @@ inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.reduce(
     coroutineContext,
     this.values
 ) {
-    block(mapValues { it.value.await(this) })
+    block(mapValues { it.value.await() })
 }
 
 

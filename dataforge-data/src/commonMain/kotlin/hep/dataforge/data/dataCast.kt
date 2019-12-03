@@ -41,7 +41,7 @@ fun <R : Any> Data<*>.cast(type: KClass<out R>): Data<R> {
         override val meta: Meta get() = this@cast.meta
         override val dependencies: Collection<Goal<*>> get() = this@cast.dependencies
         override val result: Deferred<R>? get() = this@cast.result as Deferred<R>
-        override fun startAsync(scope: CoroutineScope): Deferred<R> = this@cast.startAsync(scope) as Deferred<R>
+        override fun CoroutineScope.startAsync(): Deferred<R> = this@cast.run { startAsync() as Deferred<R> }
         override fun reset() = this@cast.reset()
         override val type: KClass<out R> = type
     }

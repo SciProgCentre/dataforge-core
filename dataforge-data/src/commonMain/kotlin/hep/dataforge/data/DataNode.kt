@@ -4,6 +4,7 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -55,6 +56,19 @@ interface DataNode<out T : Any> : MetaRepr {
         }
     }
 
+    /**
+     * Start computation for all goals in data node and return a job for the whole node
+     */
+    @Suppress("DeferredResultUnused")
+    fun CoroutineScope.startAll(): Job = launch {
+        items.values.forEach {
+            when (it) {
+                is DataItem.Node<*> -> it.node.run { startAll() }
+                is DataItem.Leaf<*> -> it.data.run { startAsync() }
+            }
+        }
+    }
+
     companion object {
         const val TYPE = "dataNode"
 
@@ -68,20 +82,10 @@ interface DataNode<out T : Any> : MetaRepr {
     }
 }
 
+suspend fun <T: Any> DataNode<T>.join(): Unit = coroutineScope { startAll().join() }
+
 val <T : Any> DataItem<T>?.node: DataNode<T>? get() = (this as? DataItem.Node<T>)?.node
 val <T : Any> DataItem<T>?.data: Data<T>? get() = (this as? DataItem.Leaf<T>)?.data
-
-/**
- * Start computation for all goals in data node and return a job for the whole node
- */
-fun DataNode<*>.launchAll(scope: CoroutineScope): Job = scope.launch {
-    items.values.forEach {
-        when (it) {
-            is DataItem.Node<*> -> it.node.launchAll(scope)
-            is DataItem.Leaf<*> -> it.data.start(scope)
-        }
-    }
-}
 
 operator fun <T : Any> DataNode<T>.get(name: Name): DataItem<T>? = when (name.length) {
     0 -> error("Empty name")

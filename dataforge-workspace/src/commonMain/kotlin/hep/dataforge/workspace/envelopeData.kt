@@ -6,7 +6,6 @@ import hep.dataforge.io.Envelope
 import hep.dataforge.io.IOFormat
 import hep.dataforge.io.SimpleEnvelope
 import hep.dataforge.io.readWith
-import kotlinx.coroutines.coroutineScope
 import kotlinx.io.ArrayBinary
 import kotlin.reflect.KClass
 
@@ -18,9 +17,7 @@ fun <T : Any> Envelope.toData(type: KClass<out T>, format: IOFormat<T>): Data<T>
 }
 
 suspend fun <T : Any> Data<T>.toEnvelope(format: IOFormat<T>): Envelope {
-    val obj = coroutineScope {
-        await(this)
-    }
+    val obj = await()
     val binary = ArrayBinary.write {
         format.run { writeObject(obj) }
     }

@@ -10,9 +10,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-class YamlMetaFormatTest{
+class YamlMetaFormatTest {
     @Test
-    fun testYamlMetaFormat(){
+    fun testYamlMetaFormat() {
         val meta = buildMeta {
             "a" put 22
             "node" put {
