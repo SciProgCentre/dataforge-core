@@ -9,7 +9,7 @@ scientifik {
     //withIO()
 }
 
-val ioVersion by rootProject.extra("0.2.0-npm-dev-3")
+val ioVersion by rootProject.extra("0.2.0-npm-dev-4")
 
 kotlin {
     sourceSets {
