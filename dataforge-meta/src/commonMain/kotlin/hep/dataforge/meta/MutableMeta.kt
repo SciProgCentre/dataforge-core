@@ -3,7 +3,7 @@ package hep.dataforge.meta
 import hep.dataforge.names.*
 import hep.dataforge.values.Value
 
-interface MutableMeta<M : MutableMeta<M>> : MetaNode<M> {
+interface MutableMeta<out M : MutableMeta<M>> : MetaNode<M> {
     override val items: Map<NameToken, MetaItem<M>>
     operator fun set(name: Name, item: MetaItem<*>?)
 //    fun onChange(owner: Any? = null, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit)
@@ -54,13 +54,14 @@ abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), 
             0 -> error("Can't setValue meta item for empty name")
             1 -> {
                 val token = name.first()!!
-                replaceItem(token, get(name), wrapItem(item))
+                @Suppress("UNCHECKED_CAST") val oldItem: MetaItem<M>? = get(name) as? MetaItem<M>
+                replaceItem(token, oldItem, wrapItem(item))
             }
             else -> {
                 val token = name.first()!!
                 //get existing or create new node. Query is ignored for new node
-                if(items[token] == null){
-                    replaceItem(token,null, MetaItem.NodeItem(empty()))
+                if (items[token] == null) {
+                    replaceItem(token, null, MetaItem.NodeItem(empty()))
                 }
                 items[token]?.node!![name.cutFirst()] = item
             }
@@ -71,6 +72,7 @@ abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), 
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MutableMeta<*>.remove(name: Name) = set(name, null)
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun MutableMeta<*>.remove(name: String) = remove(name.toName())
 

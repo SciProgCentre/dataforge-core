@@ -66,8 +66,14 @@ interface Meta : MetaRepr {
 
 /* Get operations*/
 
+/**
+ * Perform recursive item search using given [name]. Each [NameToken] is treated as a name in [Meta.items] of a parent node.
+ *
+ * If [name] is empty reture current [Meta] as a [NodeItem]
+ */
 operator fun Meta?.get(name: Name): MetaItem<*>? {
     if (this == null) return null
+    if (name.isEmpty()) return NodeItem(this)
     return name.first()?.let { token ->
         val tail = name.cutFirst()
         when (tail.length) {
@@ -78,6 +84,9 @@ operator fun Meta?.get(name: Name): MetaItem<*>? {
 }
 
 operator fun Meta?.get(token: NameToken): MetaItem<*>? = this?.items?.get(token)
+/**
+ * Parse [Name] from [key] using full name notation and pass it to [Meta.get]
+ */
 operator fun Meta?.get(key: String): MetaItem<*>? = get(key.toName())
 
 /**
@@ -113,12 +122,16 @@ operator fun Meta.iterator(): Iterator<Pair<Name, MetaItem<*>>> = sequence().ite
 /**
  * A meta node that ensures that all of its descendants has at least the same type
  */
-interface MetaNode<M : MetaNode<M>> : Meta {
+interface MetaNode<out M : MetaNode<M>> : Meta {
     override val items: Map<NameToken, MetaItem<M>>
 }
 
-operator fun <M : MetaNode<M>> MetaNode<M>?.get(name: Name): MetaItem<M>? {
+/**
+ * The same as [Meta.get], but with specific node type
+ */
+operator fun <M : MetaNode<M>> M?.get(name: Name): MetaItem<M>? {
     if (this == null) return null
+    if (name.isEmpty()) return NodeItem(this)
     return name.first()?.let { token ->
         val tail = name.cutFirst()
         when (tail.length) {
@@ -128,17 +141,9 @@ operator fun <M : MetaNode<M>> MetaNode<M>?.get(name: Name): MetaItem<M>? {
     }
 }
 
-operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: String): MetaItem<M>? = if (this == null) {
-    null
-} else {
-    this[key.toName()]
-}
+operator fun <M : MetaNode<M>> M?.get(key: String): MetaItem<M>? = this[key.toName()]
 
-operator fun <M : MetaNode<M>> MetaNode<M>?.get(key: NameToken): MetaItem<M>? = if (this == null) {
-    null
-} else {
-    this[key.asName()]
-}
+operator fun <M : MetaNode<M>> M?.get(key: NameToken): MetaItem<M>? = this[key.asName()]
 
 /**
  * Equals, hashcode and to string for any meta
