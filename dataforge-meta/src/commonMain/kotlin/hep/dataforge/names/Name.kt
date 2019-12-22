@@ -182,6 +182,8 @@ fun Name.startsWith(token: NameToken): Boolean = first() == token
 
 fun Name.endsWith(token: NameToken): Boolean = last() == token
 
-fun Name.startsWith(name: Name): Boolean = tokens.subList(0, name.length) == name.tokens
+fun Name.startsWith(name: Name): Boolean =
+    this.length >= name.length && tokens.subList(0, name.length) == name.tokens
 
-fun Name.endsWith(name: Name): Boolean = tokens.subList(length - name.length, length) == name.tokens
+fun Name.endsWith(name: Name): Boolean =
+    this.length >= name.length && tokens.subList(length - name.length, length) == name.tokens
