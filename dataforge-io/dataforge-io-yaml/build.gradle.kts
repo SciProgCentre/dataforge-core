@@ -1,8 +1,12 @@
+import scientifik.useSerialization
+
 plugins {
     id("scientifik.jvm")
 }
 
 description = "YAML meta IO"
+
+useSerialization()
 
 dependencies {
     api(project(":dataforge-io"))

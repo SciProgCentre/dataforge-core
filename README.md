@@ -1,3 +1,6 @@
+[![JetBrains Research](https://jb.gg/badges/research.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+
+[ ![Download](https://api.bintray.com/packages/mipt-npm/dataforge/dataforge-meta/images/download.svg) ](https://bintray.com/mipt-npm/dataforge/dataforge-meta/_latestVersion)
 
 [![DOI](https://zenodo.org/badge/148831678.svg)](https://zenodo.org/badge/latestdoi/148831678)
 

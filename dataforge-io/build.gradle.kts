@@ -1,13 +1,12 @@
+import scientifik.useSerialization
+
 plugins {
     id("scientifik.mpp")
 }
 
 description = "IO module"
 
-scientifik {
-    withSerialization()
-    //withIO()
-}
+useSerialization()
 
 val ioVersion by rootProject.extra("0.2.0-npm-dev-4")
 
