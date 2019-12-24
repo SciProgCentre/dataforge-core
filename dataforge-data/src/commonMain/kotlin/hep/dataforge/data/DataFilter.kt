@@ -54,4 +54,4 @@ fun <T : Any> DataNode<T>.filter(filter: Meta): DataNode<T> = filter(DataFilter.
  * Filter data using [DataFilter] builder
  */
 fun <T : Any> DataNode<T>.filter(filterBuilder: DataFilter.() -> Unit): DataNode<T> =
-    filter(DataFilter.build(filterBuilder))
+    filter(DataFilter.invoke(filterBuilder))

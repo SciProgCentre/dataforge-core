@@ -105,7 +105,7 @@ fun <T : Any> TaskDependencyContainer.dependsOn(
  * Add custom data dependency
  */
 fun TaskDependencyContainer.data(action: DataFilter.() -> Unit): DataDependency =
-    DataDependency(DataFilter.build(action)).also { add(it) }
+    DataDependency(DataFilter(action)).also { add(it) }
 
 /**
  * User-friendly way to add data dependency

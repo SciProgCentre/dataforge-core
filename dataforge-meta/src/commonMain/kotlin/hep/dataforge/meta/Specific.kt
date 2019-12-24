@@ -25,9 +25,9 @@ interface Specification<T : Specific> {
         return wrap(config).apply(action)
     }
 
-    fun build(action: T.() -> Unit) = update(Config(), action)
+    operator fun invoke(action: T.() -> Unit) = update(Config(), action)
 
-    fun empty() = build { }
+    fun empty() = wrap(Config())
 
     /**
      * Wrap generic configuration producing instance of desired type
@@ -67,7 +67,7 @@ fun <C : Specific> Specific.spec(
     key: Name? = null
 ): MutableMorphDelegate<Config, C> = MutableMorphDelegate(config, key) { spec.wrap(it) }
 
-fun <T: Specific> MetaItem<*>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(it)}
+fun <T : Specific> MetaItem<*>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(it) }
 
 @JvmName("configSpec")
-fun <T: Specific> MetaItem<Config>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(it)}
+fun <T : Specific> MetaItem<Config>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(it) }

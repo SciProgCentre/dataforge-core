@@ -201,7 +201,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
      * Use DSL to create a descriptor for this task
      */
     fun description(transform: NodeDescriptor.() -> Unit) {
-        this.descriptor = NodeDescriptor.build(transform)
+        this.descriptor = NodeDescriptor(transform)
     }
 
     internal fun build(): GenericTask<R> {

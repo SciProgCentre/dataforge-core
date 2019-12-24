@@ -86,7 +86,7 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config) {
      * Add a value descriptor using block for
      */
     fun value(name: String, block: ValueDescriptor.() -> Unit) {
-        value(name, ValueDescriptor.build { this.name = name }.apply(block))
+        value(name, ValueDescriptor { this.name = name }.apply(block))
     }
 
     /**
@@ -105,7 +105,7 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config) {
     }
 
     fun node(name: String, block: NodeDescriptor.() -> Unit) {
-        node(name, build { this.name = name }.apply(block))
+        node(name, invoke { this.name = name }.apply(block))
     }
 
     val items: Map<String, ItemDescriptor> get() = nodes + values
@@ -205,12 +205,11 @@ class ValueDescriptor(config: Config) : ItemDescriptor(config) {
 
         override fun wrap(config: Config): ValueDescriptor = ValueDescriptor(config)
 
-        inline fun <reified E : Enum<E>> enum(name: String) =
-            build {
-                this.name = name
-                type(ValueType.STRING)
-                this.allowedValues = enumValues<E>().map { Value.of(it.name) }
-            }
+        inline fun <reified E : Enum<E>> enum(name: String) = ValueDescriptor {
+            this.name = name
+            type(ValueType.STRING)
+            this.allowedValues = enumValues<E>().map { Value.of(it.name) }
+        }
 
 //        /**
 //         * Build a value descriptor from annotation

@@ -29,7 +29,7 @@ class MetaDelegateTest {
         testObject.config["myValue"] = "theString"
         testObject.enumValue = TestEnum.NO
 
-        testObject.inner = innerSpec.build { innerValue = "ddd"}
+        testObject.inner = innerSpec { innerValue = "ddd" }
 
         assertEquals("theString", testObject.myValue)
         assertEquals(TestEnum.NO, testObject.enumValue)

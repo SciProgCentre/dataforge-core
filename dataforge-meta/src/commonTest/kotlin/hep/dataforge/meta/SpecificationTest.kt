@@ -15,7 +15,7 @@ class SpecificationTest {
 
     @Test
     fun testSpecific(){
-        val testObject = TestSpecific.build {
+        val testObject = TestSpecific {
             list = emptyList()
         }
         assertEquals(emptyList(), testObject.list)
