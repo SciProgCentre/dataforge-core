@@ -7,7 +7,6 @@ import hep.dataforge.meta.DFBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
-import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
 import hep.dataforge.names.isEmpty
 import hep.dataforge.names.toName
@@ -57,7 +56,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
         block: TaskEnv.(DataNode<*>) -> DataNode<R>
     ) {
         dataTransforms += DataTransformation(from, to) { context, model, data ->
-            val env = TaskEnv(EmptyName, model.meta, context, data)
+            val env = TaskEnv(Name.EMPTY, model.meta, context, data)
             env.block(data)
         }
     }
@@ -70,7 +69,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     ) {
         dataTransforms += DataTransformation(from, to) { context, model, data ->
             data.ensureType(inputType)
-            val env = TaskEnv(EmptyName, model.meta, context, data)
+            val env = TaskEnv(Name.EMPTY, model.meta, context, data)
             env.block(data.cast(inputType))
         }
     }

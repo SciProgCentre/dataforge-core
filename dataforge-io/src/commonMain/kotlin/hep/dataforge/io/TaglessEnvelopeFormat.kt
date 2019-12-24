@@ -72,7 +72,7 @@ class TaglessEnvelopeFormat(
                 properties[key] = value
             }
             //If can't read line, return envelope without data
-            if (eof()) return SimpleEnvelope(Meta.empty, null)
+            if (eof()) return SimpleEnvelope(Meta.EMPTY, null)
             line = readUtf8Line()
         }
 
@@ -135,7 +135,7 @@ class TaglessEnvelopeFormat(
                 line = readUtf8Line()
                 offset += line.toUtf8Bytes().size.toUInt()
             } catch (ex: EOFException) {
-                return PartialEnvelope(Meta.empty, offset.toUInt(), 0.toULong())
+                return PartialEnvelope(Meta.EMPTY, offset.toUInt(), 0.toULong())
             }
         }
 
@@ -155,7 +155,7 @@ class TaglessEnvelopeFormat(
         }
 
         do {
-            line = readUtf8Line() ?: return PartialEnvelope(Meta.empty, offset.toUInt(), 0.toULong())
+            line = readUtf8Line() ?: return PartialEnvelope(Meta.EMPTY, offset.toUInt(), 0.toULong())
             offset += line.toUtf8Bytes().size.toUInt()
             //returning an Envelope without data if end of input is reached
         } while (!line.startsWith(dataStart))

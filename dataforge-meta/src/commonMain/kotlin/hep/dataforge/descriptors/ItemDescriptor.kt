@@ -1,8 +1,9 @@
 package hep.dataforge.descriptors
 
 import hep.dataforge.meta.*
+import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
-import hep.dataforge.names.toName
+import hep.dataforge.names.asName
 import hep.dataforge.values.False
 import hep.dataforge.values.True
 import hep.dataforge.values.Value
@@ -36,7 +37,7 @@ sealed class ItemDescriptor(override val config: Config) : Specific {
      *
      * @return
      */
-    var attributes by node()
+    var attributes by child()
 
     /**
      * True if the item is required
@@ -66,13 +67,54 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config) {
      *
      * @return
      */
-    var default: Config? by node()
+    var default: Config? by child()
+
+    /**
+     * The map of children node descriptors
+     */
+    val nodes: Map<String, NodeDescriptor>
+        get() = config.getIndexed(NODE_KEY.asName()).entries.associate { (name, node) ->
+            name to wrap(node.node ?: error("Node descriptor must be a node"))
+        }
+
+
+    fun node(name: String, descriptor: NodeDescriptor) {
+        if (items.keys.contains(name)) error("The key $name already exists in descriptor")
+        val token = NameToken(NODE_KEY, name)
+        config[token] = descriptor.config
+    }
+
+
+    fun node(name: String, block: NodeDescriptor.() -> Unit) {
+        val token = NameToken(NODE_KEY, name)
+        if (config[token] == null) {
+            config[token] = NodeDescriptor(block)
+        } else {
+            NodeDescriptor.update(config[token].node ?: error("Node expected"), block)
+        }
+    }
+
+    private fun buildNode(name: Name): NodeDescriptor {
+        return when (name.length) {
+            0 -> this
+            1 -> {
+                val token = NameToken(NODE_KEY, name.toString())
+                val config: Config = config[token].node ?: Config().also { config[token] = it }
+                wrap(config)
+            }
+            else -> buildNode(name.first()?.asName()!!).buildNode(name.cutFirst())
+        }
+    }
+
+    fun node(name: Name, block: NodeDescriptor.() -> Unit) {
+        buildNode(name).apply(block)
+    }
 
     /**
      * The list of value descriptors
      */
     val values: Map<String, ValueDescriptor>
-        get() = config.getIndexed(VALUE_KEY.toName()).entries.associate { (name, node) ->
+        get() = config.getIndexed(VALUE_KEY.asName()).entries.associate { (name, node) ->
             name to ValueDescriptor.wrap(node.node ?: error("Value descriptor must be a node"))
         }
 
@@ -89,23 +131,9 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config) {
         value(name, ValueDescriptor { this.name = name }.apply(block))
     }
 
-    /**
-     * The map of children node descriptors
-     */
-    val nodes: Map<String, NodeDescriptor>
-        get() = config.getIndexed(NODE_KEY.toName()).entries.associate { (name, node) ->
-            name to wrap(node.node ?: error("Node descriptor must be a node"))
-        }
-
-
-    fun node(name: String, descriptor: NodeDescriptor) {
-        if (items.keys.contains(name)) error("The key $name already exists in descriptor")
-        val token = NameToken(NODE_KEY, name)
-        config[token] = descriptor.config
-    }
-
-    fun node(name: String, block: NodeDescriptor.() -> Unit) {
-        node(name, invoke { this.name = name }.apply(block))
+    fun value(name: Name, block: ValueDescriptor.() -> Unit) {
+        require(name.length >= 1) { "Name length for value descriptor must be non-empty" }
+        buildNode(name.cutLast()).value(name.last().toString())
     }
 
     val items: Map<String, ItemDescriptor> get() = nodes + values

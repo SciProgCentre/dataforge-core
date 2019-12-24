@@ -60,7 +60,7 @@ interface Meta : MetaRepr {
          */
         const val VALUE_KEY = "@value"
 
-        val empty: EmptyMeta = EmptyMeta
+        val EMPTY: EmptyMeta = EmptyMeta
     }
 }
 

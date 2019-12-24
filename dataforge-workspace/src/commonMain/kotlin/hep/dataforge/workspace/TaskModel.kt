@@ -9,7 +9,6 @@ import hep.dataforge.data.DataFilter
 import hep.dataforge.data.DataTree
 import hep.dataforge.data.DataTreeBuilder
 import hep.dataforge.meta.*
-import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.names.toName
@@ -68,21 +67,21 @@ interface TaskDependencyContainer {
  */
 fun TaskDependencyContainer.dependsOn(
     name: Name,
-    placement: Name = EmptyName,
+    placement: Name = Name.EMPTY,
     meta: Meta = defaultMeta
 ): WorkspaceTaskDependency =
     WorkspaceTaskDependency(name, meta, placement).also { add(it) }
 
 fun TaskDependencyContainer.dependsOn(
     name: String,
-    placement: Name = EmptyName,
+    placement: Name = Name.EMPTY,
     meta: Meta = defaultMeta
 ): WorkspaceTaskDependency =
     dependsOn(name.toName(), placement, meta)
 
 fun <T : Any> TaskDependencyContainer.dependsOn(
     task: Task<T>,
-    placement: Name = EmptyName,
+    placement: Name = Name.EMPTY,
     meta: Meta = defaultMeta
 ): DirectTaskDependency<T> =
     DirectTaskDependency(task, meta, placement).also { add(it) }
@@ -96,7 +95,7 @@ fun <T : Any> TaskDependencyContainer.dependsOn(
 
 fun <T : Any> TaskDependencyContainer.dependsOn(
     task: Task<T>,
-    placement: Name = EmptyName,
+    placement: Name = Name.EMPTY,
     metaBuilder: MetaBuilder.() -> Unit
 ): DirectTaskDependency<T> =
     dependsOn(task, placement, buildMeta(metaBuilder))
@@ -120,7 +119,7 @@ fun TaskDependencyContainer.data(pattern: String? = null, from: String? = null, 
 /**
  * Add all data as root node
  */
-fun TaskDependencyContainer.allData(to: Name = EmptyName) = AllDataDependency(to).also { add(it) }
+fun TaskDependencyContainer.allData(to: Name = Name.EMPTY) = AllDataDependency(to).also { add(it) }
 
 /**
  * A builder for [TaskModel]

@@ -144,7 +144,7 @@ fun Meta.boolean(default: Boolean? = null, key: String? = null) = BooleanDelegat
 
 fun Meta.number(default: Number? = null, key: String? = null) = NumberDelegate(this, key, default)
 
-fun Meta.node(key: String? = null) = ChildDelegate(this, key) { it }
+fun Meta.child(key: String? = null) = ChildDelegate(this, key) { it }
 
 @JvmName("safeString")
 fun Meta.string(default: String, key: String? = null) =
@@ -400,7 +400,7 @@ fun <M : MutableMeta<M>> M.boolean(default: Boolean? = null, key: Name? = null) 
 fun <M : MutableMeta<M>> M.number(default: Number? = null, key: Name? = null) =
     MutableNumberDelegate(this, key, default)
 
-fun <M : MutableMeta<M>> M.node(key: Name? = null) =
+fun <M : MutableMeta<M>> M.child(key: Name? = null) =
     MutableNodeDelegate(this, key)
 
 @JvmName("safeString")

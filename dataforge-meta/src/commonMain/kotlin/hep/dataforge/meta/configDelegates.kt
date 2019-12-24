@@ -105,7 +105,7 @@ inline fun <reified E : Enum<E>> Configurable.enum(default: E, key: Name? = null
 
 /* Node delegates */
 
-fun Configurable.node(key: Name? = null): MutableNodeDelegate<Config> = MutableNodeDelegate(config, key)
+fun Configurable.child(key: Name? = null): MutableNodeDelegate<Config> = MutableNodeDelegate(config, key)
 
 fun <T : Specific> Configurable.spec(spec: Specification<T>, key: Name? = null) =
     MutableMorphDelegate(config, key) { spec.wrap(it) }
@@ -133,5 +133,5 @@ fun Configurable.doubleArray(key: Name? = null): ReadWriteDelegateWrapper<Value?
             ?: doubleArrayOf()
     }
 
-fun <T : Configurable> Configurable.node(key: Name? = null, converter: (Meta) -> T) =
+fun <T : Configurable> Configurable.child(key: Name? = null, converter: (Meta) -> T) =
     MutableMorphDelegate(config, key, converter)

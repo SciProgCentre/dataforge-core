@@ -132,7 +132,7 @@ fun IOPlugin.readEnvelopeFile(
     return formatPeeker(path)?.let { format ->
         FileEnvelope(path, format)
     } ?: if (readNonEnvelopes) { // if no format accepts file, read it as binary
-        SimpleEnvelope(Meta.empty, path.asBinary())
+        SimpleEnvelope(Meta.EMPTY, path.asBinary())
     } else null
 }
 

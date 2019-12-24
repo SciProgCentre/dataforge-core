@@ -53,6 +53,8 @@ class Name(val tokens: List<NameToken>) {
 
     companion object {
         const val NAME_SEPARATOR = "."
+
+        val EMPTY = Name(emptyList())
     }
 }
 
@@ -87,7 +89,7 @@ data class NameToken(val body: String, val index: String = "") {
  * This operation is rather heavy so it should be used with care in high performance code.
  */
 fun String.toName(): Name {
-    if (isBlank()) return EmptyName
+    if (isBlank()) return Name.EMPTY
     val tokens = sequence {
         var bodyBuilder = StringBuilder()
         var queryBuilder = StringBuilder()
@@ -139,7 +141,7 @@ fun String.toName(): Name {
  * Convert the [String] to a [Name] by simply wrapping it in a single name token without parsing.
  * The input string could contain dots and braces, but they are just escaped, not parsed.
  */
-fun String.asName(): Name = if (isBlank()) EmptyName else NameToken(this).asName()
+fun String.asName(): Name = if (isBlank()) Name.EMPTY else NameToken(this).asName()
 
 operator fun NameToken.plus(other: Name): Name = Name(listOf(this) + other.tokens)
 
@@ -152,8 +154,6 @@ operator fun Name.plus(other: NameToken): Name = Name(tokens + other)
 fun Name.appendLeft(other: String): Name = NameToken(other) + this
 
 fun NameToken.asName() = Name(listOf(this))
-
-val EmptyName = Name(emptyList())
 
 fun Name.isEmpty(): Boolean = this.length == 0
 
