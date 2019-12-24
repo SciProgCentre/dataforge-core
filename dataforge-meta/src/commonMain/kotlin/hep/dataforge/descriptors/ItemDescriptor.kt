@@ -12,13 +12,6 @@ import hep.dataforge.values.ValueType
 sealed class ItemDescriptor(override val config: Config) : Specific {
 
     /**
-     * The name of this item
-     *
-     * @return
-     */
-    var name: String by string { error("Anonymous descriptors are not allowed") }
-
-    /**
      * True if same name siblings with this name are allowed
      *
      * @return
@@ -128,12 +121,12 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config) {
      * Add a value descriptor using block for
      */
     fun value(name: String, block: ValueDescriptor.() -> Unit) {
-        value(name, ValueDescriptor { this.name = name }.apply(block))
+        value(name, ValueDescriptor(block))
     }
 
     fun value(name: Name, block: ValueDescriptor.() -> Unit) {
         require(name.length >= 1) { "Name length for value descriptor must be non-empty" }
-        buildNode(name.cutLast()).value(name.last().toString())
+        buildNode(name.cutLast()).value(name.last().toString(), block)
     }
 
     val items: Map<String, ItemDescriptor> get() = nodes + values
@@ -234,7 +227,6 @@ class ValueDescriptor(config: Config) : ItemDescriptor(config) {
         override fun wrap(config: Config): ValueDescriptor = ValueDescriptor(config)
 
         inline fun <reified E : Enum<E>> enum(name: String) = ValueDescriptor {
-            this.name = name
             type(ValueType.STRING)
             this.allowedValues = enumValues<E>().map { Value.of(it.name) }
         }

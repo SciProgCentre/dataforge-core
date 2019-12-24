@@ -72,7 +72,7 @@ fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
 //Use these methods to customize JSON key mapping
 private fun NameToken.toJsonKey(descriptor: ItemDescriptor?) = toString()
 
-private fun NodeDescriptor?.getDescriptor(key: String) = this?.items?.get(key)
+//private fun NodeDescriptor?.getDescriptor(key: String) = this?.items?.get(key)
 
 fun Meta.toJson(descriptor: NodeDescriptor? = null): JsonObject {
 
@@ -141,15 +141,13 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
 
     @Suppress("UNCHECKED_CAST")
     private operator fun MutableMap<String, MetaItem<JsonMeta>>.set(key: String, value: JsonElement): Unit {
-        val itemDescriptor = descriptor.getDescriptor(key)
-        //use name from descriptor in case descriptor name differs from json key
-        val name = itemDescriptor?.name ?: key
+        val itemDescriptor = descriptor?.items?.get(key)
         return when (value) {
             is JsonPrimitive -> {
-                this[name] = MetaItem.ValueItem(value.toValue(itemDescriptor as? ValueDescriptor)) as MetaItem<JsonMeta>
+                this[key] = MetaItem.ValueItem(value.toValue(itemDescriptor as? ValueDescriptor)) as MetaItem<JsonMeta>
             }
             is JsonObject -> {
-                this[name] = MetaItem.NodeItem(JsonMeta(value, itemDescriptor as? NodeDescriptor))
+                this[key] = MetaItem.NodeItem(JsonMeta(value, itemDescriptor as? NodeDescriptor))
             }
             is JsonArray -> {
                 when {
@@ -160,10 +158,10 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
                                 (it as JsonPrimitive).toValue(itemDescriptor as? ValueDescriptor)
                             }
                         )
-                        this[name] = MetaItem.ValueItem(listValue) as MetaItem<JsonMeta>
+                        this[key] = MetaItem.ValueItem(listValue) as MetaItem<JsonMeta>
                     }
                     else -> value.forEachIndexed { index, jsonElement ->
-                        this["$name[$index]"] = jsonElement.toMetaItem(itemDescriptor)
+                        this["$key[$index]"] = jsonElement.toMetaItem(itemDescriptor)
                     }
                 }
             }
