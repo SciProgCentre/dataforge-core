@@ -1,7 +1,10 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.Name
+import hep.dataforge.names.asName
 import kotlin.jvm.JvmName
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 /**
  * Marker interface for classes with specifications
@@ -61,13 +64,27 @@ fun <C : Specific, S : Specification<C>> Specific.update(spec: S, action: C.() -
 fun <C : Specific, S : Specification<C>> S.createStyle(action: C.() -> Unit): Meta =
     Config().also { update(it, action) }
 
+class SpecDelegate<T : Specific, S : Specification<T>>(
+    val target: Specific,
+    val spec: S,
+    val key: Name? = null
+) : ReadWriteProperty<Any?, T> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        return target.config[key ?: property.name.asName()]?.node?.let { spec.wrap(it) } ?: spec.empty()
+    }
 
-fun <C : Specific> Specific.spec(
-    spec: Specification<C>,
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+        target.config[key ?: property.name.asName()] = value.config
+    }
+}
+
+fun <T : Specific, S : Specification<T>> Specific.spec(
+    spec: S,
     key: Name? = null
-): MutableMorphDelegate<Config, C> = MutableMorphDelegate(config, key) { spec.wrap(it) }
+): SpecDelegate<T, S> = SpecDelegate(this, spec, key)
 
 fun <T : Specific> MetaItem<*>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(it) }
 
 @JvmName("configSpec")
 fun <T : Specific> MetaItem<Config>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(it) }
+

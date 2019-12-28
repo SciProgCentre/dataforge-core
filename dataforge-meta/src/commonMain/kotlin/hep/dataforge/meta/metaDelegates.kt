@@ -350,8 +350,8 @@ class MutableNodeDelegate<M : MutableMeta<M>>(
     }
 }
 
-class MutableMorphDelegate<M : MutableMeta<M>, T : Configurable>(
-    val meta: M,
+class MutableMorphDelegate<T : Configurable>(
+    val meta: MutableMeta<*>,
     private val key: Name? = null,
     private val converter: (Meta) -> T
 ) : ReadWriteProperty<Any?, T?> {
