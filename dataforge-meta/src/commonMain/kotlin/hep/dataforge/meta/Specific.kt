@@ -16,6 +16,13 @@ interface Specific : Configurable
 operator fun Specific.get(name: String): MetaItem<*>? = config[name]
 
 /**
+ * Editor for specific objects
+ */
+inline operator fun <S : Specific> S.invoke(block: S.() -> Unit): Unit {
+    run(block)
+}
+
+/**
  * Allows to apply custom configuration in a type safe way to simple untyped configuration.
  * By convention [Specific] companion should inherit this class
  *
@@ -69,8 +76,12 @@ class SpecDelegate<T : Specific, S : Specification<T>>(
     val spec: S,
     val key: Name? = null
 ) : ReadWriteProperty<Any?, T> {
+
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return target.config[key ?: property.name.asName()]?.node?.let { spec.wrap(it) } ?: spec.empty()
+        val name = key ?: property.name.asName()
+        return target.config[name]?.node?.let { spec.wrap(it) } ?: (spec.empty().also {
+            target.config[name] = it.config
+        })
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
