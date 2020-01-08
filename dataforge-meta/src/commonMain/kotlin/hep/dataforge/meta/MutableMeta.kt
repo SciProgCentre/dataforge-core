@@ -105,7 +105,7 @@ operator fun MutableMeta<*>.set(name: Name, value: Any?) {
         null -> remove(name)
         is MetaItem<*> -> setItem(name, value)
         is Meta -> setNode(name, value)
-        is Specific -> setNode(name, value.config)
+        is Configurable -> setNode(name, value.config)
         else -> setValue(name, Value.of(value))
     }
 }

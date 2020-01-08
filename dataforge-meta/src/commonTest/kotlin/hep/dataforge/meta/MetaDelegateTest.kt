@@ -13,14 +13,13 @@ class MetaDelegateTest {
     @Test
     fun delegateTest() {
 
-        class InnerSpec(override val config: Config) : Specific {
+        class InnerSpec : Scheme() {
             var innerValue by string()
         }
 
-        val innerSpec = specification(::InnerSpec)
+        val innerSpec = object : SchemeSpec<InnerSpec>(::InnerSpec){}
 
-        val testObject = object : Specific {
-            override val config: Config = Config()
+        val testObject = object : Scheme(Config()) {
             var myValue by string()
             var safeValue by double(2.2)
             var enumValue by enum(TestEnum.YES)

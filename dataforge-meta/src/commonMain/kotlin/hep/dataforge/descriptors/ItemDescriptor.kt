@@ -4,12 +4,13 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.asName
+import hep.dataforge.names.isEmpty
 import hep.dataforge.values.False
 import hep.dataforge.values.True
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
 
-sealed class ItemDescriptor(override val config: Config) : Specific {
+sealed class ItemDescriptor : Scheme() {
 
     /**
      * True if same name siblings with this name are allowed
@@ -30,7 +31,7 @@ sealed class ItemDescriptor(override val config: Config) : Specific {
      *
      * @return
      */
-    var attributes by child()
+    var attributes by config()
 
     /**
      * True if the item is required
@@ -46,7 +47,7 @@ sealed class ItemDescriptor(override val config: Config) : Specific {
  *
  * @author Alexander Nozik
  */
-class NodeDescriptor(config: Config) : ItemDescriptor(config) {
+class NodeDescriptor : ItemDescriptor() {
 
     /**
      * True if the node is required
@@ -60,7 +61,7 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config) {
      *
      * @return
      */
-    var default: Config? by child()
+    var default: Config? by nullableConfig()
 
     /**
      * The map of children node descriptors
@@ -134,18 +135,28 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config) {
 
     //override val descriptor: NodeDescriptor =  empty("descriptor")
 
-    companion object : Specification<NodeDescriptor> {
+    companion object : SchemeSpec<NodeDescriptor>(::NodeDescriptor) {
 
         //        const val ITEM_KEY = "item"
         const val NODE_KEY = "node"
         const val VALUE_KEY = "value"
 
-        override fun wrap(config: Config): NodeDescriptor = NodeDescriptor(config)
+        //override fun wrap(config: Config): NodeDescriptor = NodeDescriptor(config)
 
         //TODO infer descriptor from spec
     }
 }
 
+/**
+ * Get a descriptor item associated with given name or null if item for given name not provided
+ */
+operator fun ItemDescriptor.get(name: Name): ItemDescriptor? {
+    if (name.isEmpty()) return this
+    return when (this) {
+        is ValueDescriptor -> null // empty name already checked
+        is NodeDescriptor -> items[name.first()!!.toString()]?.get(name.cutFirst())
+    }
+}
 
 /**
  * A descriptor for meta value
@@ -154,7 +165,7 @@ class NodeDescriptor(config: Config) : ItemDescriptor(config) {
  *
  * @author Alexander Nozik
  */
-class ValueDescriptor(config: Config) : ItemDescriptor(config) {
+class ValueDescriptor : ItemDescriptor() {
 
 
     /**
@@ -180,8 +191,8 @@ class ValueDescriptor(config: Config) : ItemDescriptor(config) {
      *
      * @return
      */
-    var type: List<ValueType> by value {
-        it?.list?.map { v -> ValueType.valueOf(v.string) } ?: emptyList()
+    var type: List<ValueType> by item {
+        it?.value?.list?.map { v -> ValueType.valueOf(v.string) } ?: emptyList()
     }
 
     fun type(vararg t: ValueType) {
@@ -222,10 +233,7 @@ class ValueDescriptor(config: Config) : ItemDescriptor(config) {
         this.allowedValues = v.map { Value.of(it) }
     }
 
-    companion object : Specification<ValueDescriptor> {
-
-        override fun wrap(config: Config): ValueDescriptor = ValueDescriptor(config)
-
+    companion object : SchemeSpec<ValueDescriptor>(::ValueDescriptor) {
         inline fun <reified E : Enum<E>> enum(name: String) = ValueDescriptor {
             type(ValueType.STRING)
             this.allowedValues = enumValues<E>().map { Value.of(it.name) }

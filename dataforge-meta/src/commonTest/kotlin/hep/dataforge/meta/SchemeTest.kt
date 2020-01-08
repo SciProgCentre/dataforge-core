@@ -4,19 +4,22 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-class StyledTest{
+class SchemeTest{
     @Test
-    fun testSNS(){
-        val meta = buildMeta {
+    fun testMetaScheme(){
+        val styled = buildMeta {
             repeat(10){
                 "b.a[$it]" put {
                     "d" put it
                 }
             }
-        }.seal().withStyle()
+        }.toScheme()
+
+        val meta = styled.toMeta()
+
         assertEquals(10, meta.values().count())
 
-        val bNode = meta["b"].node
+        val bNode = styled.getProperty("b").node
 
         val aNodes = bNode?.getIndexed("a")
 

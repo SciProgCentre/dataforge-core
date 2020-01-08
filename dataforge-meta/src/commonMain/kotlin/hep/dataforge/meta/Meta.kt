@@ -5,6 +5,7 @@ import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.names.*
 import hep.dataforge.values.EnumValue
+import hep.dataforge.values.Null
 import hep.dataforge.values.Value
 import hep.dataforge.values.boolean
 
@@ -21,6 +22,17 @@ sealed class MetaItem<out M : Meta> {
 
     data class NodeItem<M : Meta>(val node: M) : MetaItem<M>() {
         override fun toString(): String = node.toString()
+    }
+
+    companion object {
+        fun of(arg: Any?): MetaItem<*> {
+            return when (arg) {
+                null -> ValueItem(Null)
+                is MetaItem<*> -> arg
+                is Meta -> NodeItem(arg)
+                else -> ValueItem(Value.of(arg))
+            }
+        }
     }
 }
 
@@ -45,7 +57,7 @@ interface Meta : MetaRepr {
      */
     val items: Map<NameToken, MetaItem<*>>
 
-    override fun toMeta(): Meta = this
+    override fun toMeta(): Meta = seal()
 
     override fun equals(other: Any?): Boolean
 
@@ -69,7 +81,7 @@ interface Meta : MetaRepr {
 /**
  * Perform recursive item search using given [name]. Each [NameToken] is treated as a name in [Meta.items] of a parent node.
  *
- * If [name] is empty reture current [Meta] as a [NodeItem]
+ * If [name] is empty return current [Meta] as a [NodeItem]
  */
 operator fun Meta?.get(name: Name): MetaItem<*>? {
     if (this == null) return null
@@ -129,17 +141,8 @@ interface MetaNode<out M : MetaNode<M>> : Meta {
 /**
  * The same as [Meta.get], but with specific node type
  */
-operator fun <M : MetaNode<M>> M?.get(name: Name): MetaItem<M>? {
-    if (this == null) return null
-    if (name.isEmpty()) return NodeItem(this)
-    return name.first()?.let { token ->
-        val tail = name.cutFirst()
-        when (tail.length) {
-            0 -> items[token]
-            else -> items[token]?.node?.get(tail)
-        }
-    }
-}
+@Suppress("UNCHECKED_CAST")
+operator fun <M : MetaNode<M>> M?.get(name: Name): MetaItem<M>? = (this as Meta)[name] as MetaItem<M>?
 
 operator fun <M : MetaNode<M>> M?.get(key: String): MetaItem<M>? = this[key.toName()]
 

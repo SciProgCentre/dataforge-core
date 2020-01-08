@@ -40,7 +40,7 @@ class Config : AbstractMutableMeta<Config>() {
     override fun replaceItem(key: NameToken, oldItem: MetaItem<Config>?, newItem: MetaItem<Config>?) {
         if (newItem == null) {
             _items.remove(key)
-            if(oldItem!= null && oldItem is MetaItem.NodeItem<Config>) {
+            if (oldItem != null && oldItem is MetaItem.NodeItem<Config>) {
                 oldItem.node.removeListener(this)
             }
         } else {
@@ -57,7 +57,7 @@ class Config : AbstractMutableMeta<Config>() {
     /**
      * Attach configuration node instead of creating one
      */
-    override fun wrapNode(meta: Meta): Config = meta.toConfig()
+    override fun wrapNode(meta: Meta): Config = meta.asConfig()
 
     override fun empty(): Config = Config()
 
@@ -68,22 +68,12 @@ class Config : AbstractMutableMeta<Config>() {
 
 operator fun Config.get(token: NameToken): MetaItem<Config>? = items[token]
 
-fun Meta.toConfig(): Config = this as? Config ?: Config().also { builder ->
+fun Meta.asConfig(): Config = this as? Config ?: Config().also { builder ->
     this.items.mapValues { entry ->
         val item = entry.value
         builder[entry.key.asName()] = when (item) {
             is MetaItem.ValueItem -> item.value
-            is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.toConfig())
+            is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.asConfig())
         }
     }
 }
-
-interface Configurable {
-    val config: Config
-}
-
-fun <T : Configurable> T.configure(meta: Meta): T = this.apply { config.update(meta) }
-
-fun <T : Configurable> T.configure(action: MetaBuilder.() -> Unit): T = configure(buildMeta(action))
-
-open class SimpleConfigurable(override val config: Config) : Configurable

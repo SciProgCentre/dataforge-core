@@ -22,6 +22,7 @@ val Value.boolean
 val Value.int get() = number.toInt()
 val Value.double get() = number.toDouble()
 val Value.float get() = number.toFloat()
+val Value.short get() = number.toShort()
 val Value.long get() = number.toLong()
 
 val Value.stringList: List<String> get() = list.map { it.string }

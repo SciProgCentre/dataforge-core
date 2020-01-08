@@ -4,7 +4,7 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.toName
 
 
-class DataFilter(override val config: Config) : Specific {
+class DataFilter : Scheme() {
     /**
      * A source node for the filter
      */
@@ -22,9 +22,7 @@ class DataFilter(override val config: Config) : Specific {
 
     fun isEmpty(): Boolean = config.isEmpty()
 
-    companion object : Specification<DataFilter> {
-        override fun wrap(config: Config): DataFilter = DataFilter(config)
-    }
+    companion object : SchemeSpec<DataFilter>(::DataFilter)
 }
 
 /**

@@ -133,7 +133,7 @@ object ConfigSerializer : KSerializer<Config> {
     override val descriptor: SerialDescriptor = MetaSerializer.descriptor
 
     override fun deserialize(decoder: Decoder): Config {
-        return MetaSerializer.deserialize(decoder).toConfig()
+        return MetaSerializer.deserialize(decoder).asConfig()
     }
 
     override fun serialize(encoder: Encoder, obj: Config) {
