@@ -5,6 +5,7 @@ import hep.dataforge.names.NameToken
 
 /**
  * A meta laminate consisting of multiple immutable meta layers. For mutable front layer, use [Scheme].
+ * If [layers] list contains a [Laminate] it is flat-mapped.
  */
 class Laminate(layers: List<Meta>) : MetaBase() {
 

@@ -1,5 +1,9 @@
 package hep.dataforge.meta
 
+import hep.dataforge.descriptors.Described
+import hep.dataforge.descriptors.NodeDescriptor
+import hep.dataforge.descriptors.defaultItem
+import hep.dataforge.descriptors.get
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 
@@ -9,7 +13,7 @@ import hep.dataforge.names.toName
  * It is not possible to know if some property is declared by provider just by looking on [Configurable],
  * this information should be provided externally.
  */
-interface Configurable {
+interface Configurable : Described {
     /**
      * Backing config
      */
@@ -19,12 +23,15 @@ interface Configurable {
      * Default meta item provider
      */
     fun getDefaultItem(name: Name): MetaItem<*>? = null
+
+    override val descriptor: NodeDescriptor? get() = null
 }
 
 /**
  * Get a property with default
  */
-fun Configurable.getProperty(name: Name): MetaItem<*>? = config[name] ?: getDefaultItem(name)
+fun Configurable.getProperty(name: Name): MetaItem<*>? =
+    config[name] ?: getDefaultItem(name) ?: descriptor?.get(name)?.defaultItem()
 
 fun Configurable.getProperty(key: String) = getProperty(key.toName())
 

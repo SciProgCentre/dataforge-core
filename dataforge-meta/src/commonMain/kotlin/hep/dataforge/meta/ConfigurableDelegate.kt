@@ -28,19 +28,6 @@ open class ConfigurableDelegate(
         val name = key ?: property.name.asName()
         owner.setProperty(name, value)
     }
-
-    fun <T> transform(
-        writer: (T) -> MetaItem<*>? = { MetaItem.of(it) },
-        reader: (MetaItem<*>?) -> T
-    ): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-            return reader(this@ConfigurableDelegate.getValue(thisRef, property))
-        }
-
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-            this@ConfigurableDelegate.setValue(thisRef, property, writer(value))
-        }
-    }
 }
 
 class LazyConfigurableDelegate(
@@ -55,7 +42,7 @@ class LazyConfigurableDelegate(
  * A property delegate that uses custom key
  */
 fun Configurable.item(default: Any?, key: Name? = null): ConfigurableDelegate =
-    ConfigurableDelegate(this, key, MetaItem.of(default))
+    ConfigurableDelegate(this, key, default?.let { MetaItem.of(it) })
 
 /**
  * Generation of item delegate with lazy default.
@@ -70,7 +57,7 @@ fun <T> Configurable.item(
     writer: (T) -> MetaItem<*>? = { MetaItem.of(it) },
     reader: (MetaItem<*>?) -> T
 ): ReadWriteProperty<Any?, T> =
-    ConfigurableDelegate(this, key, default?.let { MetaItem.of(it) }).transform(reader = reader, writer = writer)
+    ConfigurableDelegate(this, key, default?.let { MetaItem.of(it) }).map(reader = reader, writer = writer)
 
 fun Configurable.value(default: Any? = null, key: Name? = null): ReadWriteProperty<Any?, Value?> =
     item(default, key).transform { it.value }
@@ -81,7 +68,7 @@ fun <T> Configurable.value(
     writer: (T) -> Value? = { Value.of(it) },
     reader: (Value?) -> T
 ): ReadWriteProperty<Any?, T> =
-    ConfigurableDelegate(this, key, default?.let { MetaItem.of(it) }).transform(
+    ConfigurableDelegate(this, key, default?.let { MetaItem.of(it) }).map(
         reader = { reader(it.value) },
         writer = { writer(it)?.let { MetaItem.ValueItem(it) } }
     )
@@ -194,31 +181,9 @@ fun Configurable.doubleArray(vararg doubles: Double, key: Name? = null): ReadWri
 
 /* Node delegates */
 
-fun Configurable.nullableConfig(key: Name? = null): ReadWriteProperty<Any?, Config?> =
-    object : ReadWriteProperty<Any?, Config?> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Config? {
-            val name = key ?: property.name.asName()
-            return config[name].node
-        }
+fun Configurable.config(key: Name? = null): ReadWriteProperty<Any?, Config?> =
+    config.node(key)
 
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: Config?) {
-            val name = key ?: property.name.asName()
-            config[name] = value
-        }
-    }
-
-fun Configurable.config(key: Name? = null, default: Config.() -> Unit = {}): ReadWriteProperty<Any?, Config> =
-    object : ReadWriteProperty<Any?, Config> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Config {
-            val name = key ?: property.name.asName()
-            return config[name].node ?: Config().apply(default).also { config[name] = it }
-        }
-
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: Config) {
-            val name = key ?: property.name.asName()
-            config[name] = value
-        }
-    }
 
 fun <T : Configurable> Configurable.spec(spec: Specification<T>, key: Name? = null): ReadWriteProperty<Any?, T?> =
     object : ReadWriteProperty<Any?, T?> {

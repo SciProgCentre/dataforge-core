@@ -13,7 +13,7 @@ class SchemeTest{
                     "d" put it
                 }
             }
-        }.toScheme()
+        }.asScheme()
 
         val meta = styled.toMeta()
 

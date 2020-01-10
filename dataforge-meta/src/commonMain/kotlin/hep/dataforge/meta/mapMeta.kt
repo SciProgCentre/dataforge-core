@@ -3,14 +3,6 @@ package hep.dataforge.meta
 import hep.dataforge.descriptors.NodeDescriptor
 import hep.dataforge.values.Value
 
-///**
-// * Find all elements with given body
-// */
-//private fun Meta.byBody(body: String): Map<String, MetaItem<*>> =
-//    items.filter { it.key.body == body }.mapKeys { it.key.index }
-//
-//private fun Meta.distinctNames() = items.keys.map { it.body }.distinct()
-
 /**
  * Convert meta to map of maps
  */

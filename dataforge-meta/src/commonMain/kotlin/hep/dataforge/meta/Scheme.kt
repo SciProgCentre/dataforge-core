@@ -5,6 +5,9 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.plus
 
+/**
+ * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
+ */
 open class Scheme() : Configurable, Described {
     constructor(config: Config, defaultProvider: (Name) -> MetaItem<*>?) : this() {
         this.config = config
@@ -14,13 +17,14 @@ open class Scheme() : Configurable, Described {
     //constructor(config: Config, default: Meta) : this(config, { default[it] })
     constructor(config: Config) : this(config, { null })
 
-    final override lateinit var config: Config
+    final override var config: Config = Config()
         internal set
 
     lateinit var defaultProvider: (Name) -> MetaItem<*>?
         internal set
 
-    override val descriptor: NodeDescriptor? = null
+    final override var descriptor: NodeDescriptor? = null
+        internal set
 
     override fun getDefaultItem(name: Name): MetaItem<*>? {
         return defaultProvider(name) ?: descriptor?.get(name)?.defaultItem()
@@ -60,15 +64,21 @@ open class SchemeSpec<T : Scheme>(val builder: () -> T) : Specification<T> {
     }
 }
 
+/**
+ * A scheme that uses [Meta] as a default layer
+ */
 open class MetaScheme(
     val meta: Meta,
-    override val descriptor: NodeDescriptor? = null,
+    descriptor: NodeDescriptor? = null,
     config: Config = Config()
 ) : Scheme(config, meta::get) {
-    override val defaultLayer: Meta get() = meta
+    init {
+        this.descriptor = descriptor
+    }
+    override val defaultLayer: Meta get() = Laminate(meta, descriptor?.defaultItem().node)
 }
 
-fun Meta.toScheme() = MetaScheme(this)
+fun Meta.asScheme() = MetaScheme(this)
 
 fun <T : Configurable> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit) = spec.wrap(this).apply(block)
 

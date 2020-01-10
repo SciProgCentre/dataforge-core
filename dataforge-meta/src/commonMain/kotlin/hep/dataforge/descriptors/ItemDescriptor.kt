@@ -61,7 +61,7 @@ class NodeDescriptor : ItemDescriptor() {
      *
      * @return
      */
-    var default: Config? by nullableConfig()
+    var default: Config? by config()
 
     /**
      * The map of children node descriptors
