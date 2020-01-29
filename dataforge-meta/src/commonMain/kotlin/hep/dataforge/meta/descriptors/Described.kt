@@ -1,4 +1,4 @@
-package hep.dataforge.descriptors
+package hep.dataforge.meta.descriptors
 
 /**
  * An object which provides its descriptor

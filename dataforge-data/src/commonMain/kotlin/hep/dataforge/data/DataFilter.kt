@@ -1,6 +1,9 @@
 package hep.dataforge.data
 
 import hep.dataforge.meta.*
+import hep.dataforge.meta.scheme.Scheme
+import hep.dataforge.meta.scheme.SchemeSpec
+import hep.dataforge.meta.scheme.string
 import hep.dataforge.names.toName
 
 

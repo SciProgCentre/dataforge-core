@@ -3,6 +3,7 @@ package hep.dataforge.io
 import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
+import hep.dataforge.meta.scheme.int
 import kotlinx.io.text.writeRawString
 import kotlinx.io.text.writeUtf8String
 

@@ -1,4 +1,4 @@
-package hep.dataforge.descriptors
+package hep.dataforge.meta.descriptors
 
 import hep.dataforge.meta.MetaBase
 import hep.dataforge.meta.MetaItem

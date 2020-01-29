@@ -1,5 +1,8 @@
 package hep.dataforge.meta
 
+import hep.dataforge.meta.scheme.Scheme
+import hep.dataforge.meta.scheme.Specification
+import hep.dataforge.meta.scheme.numberList
 import hep.dataforge.names.Name
 import kotlin.test.Test
 import kotlin.test.assertEquals

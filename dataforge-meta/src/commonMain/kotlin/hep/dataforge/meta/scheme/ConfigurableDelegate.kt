@@ -1,5 +1,6 @@
-package hep.dataforge.meta
+package hep.dataforge.meta.scheme
 
+import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.values.*
@@ -41,23 +42,35 @@ class LazyConfigurableDelegate(
 /**
  * A property delegate that uses custom key
  */
-fun Configurable.item(default: Any?, key: Name? = null): ConfigurableDelegate =
-    ConfigurableDelegate(this, key, default?.let { MetaItem.of(it) })
+fun Configurable.item(default: Any? = null, key: Name? = null): ConfigurableDelegate =
+    ConfigurableDelegate(
+        this,
+        key,
+        default?.let { MetaItem.of(it) })
 
 /**
  * Generation of item delegate with lazy default.
  * Lazy default could be used also for validation
  */
 fun Configurable.lazyItem(key: Name? = null, default: () -> Any?): ConfigurableDelegate =
-    LazyConfigurableDelegate(this, key) { default()?.let { MetaItem.of(it) } }
+    LazyConfigurableDelegate(this, key) {
+        default()?.let {
+            MetaItem.of(it)
+        }
+    }
 
 fun <T> Configurable.item(
     default: T? = null,
     key: Name? = null,
-    writer: (T) -> MetaItem<*>? = { MetaItem.of(it) },
+    writer: (T) -> MetaItem<*>? = {
+        MetaItem.of(it)
+    },
     reader: (MetaItem<*>?) -> T
 ): ReadWriteProperty<Any?, T> =
-    ConfigurableDelegate(this, key, default?.let { MetaItem.of(it) }).map(reader = reader, writer = writer)
+    ConfigurableDelegate(
+        this,
+        key,
+        default?.let { MetaItem.of(it) }).map(reader = reader, writer = writer)
 
 fun Configurable.value(default: Any? = null, key: Name? = null): ReadWriteProperty<Any?, Value?> =
     item(default, key).transform { it.value }
@@ -68,9 +81,13 @@ fun <T> Configurable.value(
     writer: (T) -> Value? = { Value.of(it) },
     reader: (Value?) -> T
 ): ReadWriteProperty<Any?, T> =
-    ConfigurableDelegate(this, key, default?.let { MetaItem.of(it) }).map(
+    ConfigurableDelegate(
+        this,
+        key,
+        default?.let { MetaItem.of(it) }
+    ).map(
         reader = { reader(it.value) },
-        writer = { writer(it)?.let { MetaItem.ValueItem(it) } }
+        writer = { value -> writer(value)?.let { MetaItem.ValueItem(it) } }
     )
 
 fun Configurable.string(default: String? = null, key: Name? = null): ReadWriteProperty<Any?, String?> =
@@ -184,6 +201,10 @@ fun Configurable.doubleArray(vararg doubles: Double, key: Name? = null): ReadWri
 fun Configurable.config(key: Name? = null): ReadWriteProperty<Any?, Config?> =
     config.node(key)
 
+fun Configurable.node(key: Name? = null): ReadWriteProperty<Any?, Meta?> = item().map(
+    reader = { it.node },
+    writer = { it?.let { MetaItem.NodeItem(it) } }
+)
 
 fun <T : Configurable> Configurable.spec(spec: Specification<T>, key: Name? = null): ReadWriteProperty<Any?, T?> =
     object : ReadWriteProperty<Any?, T?> {

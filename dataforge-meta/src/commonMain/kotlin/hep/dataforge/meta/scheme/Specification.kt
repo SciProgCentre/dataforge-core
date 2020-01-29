@@ -1,5 +1,6 @@
-package hep.dataforge.meta
+package hep.dataforge.meta.scheme
 
+import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import kotlin.jvm.JvmName
 
@@ -33,7 +34,9 @@ interface Specification<T : Configurable> {
     /**
      * Wrap a configuration using static meta as default
      */
-    fun wrap(default: Meta): T = wrap(Config()){default[it]}
+    fun wrap(default: Meta): T = wrap(
+        Config()
+    ){default[it]}
 }
 
 /**
@@ -54,7 +57,8 @@ fun <C : Configurable, S : Specification<C>> Configurable.update(spec: S, action
 fun <C : Configurable, S : Specification<C>> S.createStyle(action: C.() -> Unit): Meta =
     Config().also { update(it, action) }
 
-fun <T : Configurable> MetaItem<*>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(Config(), it) }
+fun <T : Configurable> MetaItem<*>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(
+    Config(), it) }
 
 @JvmName("configSpec")
 fun <T : Configurable> MetaItem<Config>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(it) }

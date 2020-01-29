@@ -2,7 +2,7 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
 import hep.dataforge.data.*
-import hep.dataforge.descriptors.NodeDescriptor
+import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.DFBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get

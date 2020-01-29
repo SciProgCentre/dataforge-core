@@ -18,7 +18,7 @@ object ValueSerializer : KSerializer<Value> {
     private val valueTypeSerializer = EnumSerializer(ValueType::class)
     private val listSerializer by lazy { ArrayListSerializer(ValueSerializer) }
 
-    override val descriptor: SerialDescriptor = descriptor("hep.dataforge.values.Value") {
+    override val descriptor: SerialDescriptor = descriptor("Value") {
         boolean("isList")
         enum<ValueType>("valueType")
         element("value", null)

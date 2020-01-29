@@ -3,9 +3,9 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Context
-import hep.dataforge.descriptors.ItemDescriptor
-import hep.dataforge.descriptors.NodeDescriptor
-import hep.dataforge.descriptors.ValueDescriptor
+import hep.dataforge.meta.descriptors.ItemDescriptor
+import hep.dataforge.meta.descriptors.NodeDescriptor
+import hep.dataforge.meta.descriptors.ValueDescriptor
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBase
 import hep.dataforge.meta.MetaItem

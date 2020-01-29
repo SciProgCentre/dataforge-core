@@ -12,10 +12,15 @@ data class MetaListener(
     val action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit
 )
 
+interface ObservableMeta : Meta {
+    fun onChange(owner: Any?, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit)
+    fun removeListener(owner: Any?)
+}
+
 /**
  * Mutable meta representing object state
  */
-class Config : AbstractMutableMeta<Config>() {
+class Config : AbstractMutableMeta<Config>(), ObservableMeta {
 
     private val listeners = HashSet<MetaListener>()
 
@@ -26,14 +31,14 @@ class Config : AbstractMutableMeta<Config>() {
     /**
      * Add change listener to this meta. Owner is declared to be able to remove listeners later. Listener without owner could not be removed
      */
-    fun onChange(owner: Any?, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit) {
+    override fun onChange(owner: Any?, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit) {
         listeners.add(MetaListener(owner, action))
     }
 
     /**
      * Remove all listeners belonging to given owner
      */
-    fun removeListener(owner: Any?) {
+    override fun removeListener(owner: Any?) {
         listeners.removeAll { it.owner === owner }
     }
 

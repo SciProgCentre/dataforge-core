@@ -1,7 +1,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Context
-import hep.dataforge.descriptors.NodeDescriptor
+import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name

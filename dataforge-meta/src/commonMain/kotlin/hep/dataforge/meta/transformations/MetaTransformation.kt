@@ -1,5 +1,6 @@
-package hep.dataforge.meta
+package hep.dataforge.meta.transformations
 
+import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 
 /**
@@ -8,7 +9,7 @@ import hep.dataforge.names.Name
 interface TransformationRule {
 
     /**
-     * Check if this transformation
+     * Check if this transformation should be applied to a node with given name and value
      */
     fun matches(name: Name, item: MetaItem<*>?): Boolean
 
@@ -29,7 +30,8 @@ interface TransformationRule {
 /**
  * A transformation which keeps all elements, matching [selector] unchanged.
  */
-data class KeepTransformationRule(val selector: (Name) -> Boolean) : TransformationRule {
+data class KeepTransformationRule(val selector: (Name) -> Boolean) :
+    TransformationRule {
     override fun matches(name: Name, item: MetaItem<*>?): Boolean {
         return selector(name)
     }
@@ -87,25 +89,27 @@ inline class MetaTransformation(val transformations: Collection<TransformationRu
     /**
      * Produce new meta using only those items that match transformation rules
      */
-    fun transform(source: Meta): Meta = buildMeta {
-        transformations.forEach { rule ->
-            rule.selectItems(source).forEach { name ->
-                rule.transformItem(name, source[name], this)
+    fun transform(source: Meta): Meta =
+        buildMeta {
+            transformations.forEach { rule ->
+                rule.selectItems(source).forEach { name ->
+                    rule.transformItem(name, source[name], this)
+                }
             }
         }
-    }
 
     /**
      * Transform a meta, replacing all elements found in rules with transformed entries
      */
-    fun apply(source: Meta): Meta = buildMeta(source) {
-        transformations.forEach { rule ->
-            rule.selectItems(source).forEach { name ->
-                remove(name)
-                rule.transformItem(name, source[name], this)
+    fun apply(source: Meta): Meta =
+        buildMeta(source) {
+            transformations.forEach { rule ->
+                rule.selectItems(source).forEach { name ->
+                    remove(name)
+                    rule.transformItem(name, source[name], this)
+                }
             }
         }
-    }
 
     /**
      * Listens for changes in the source node and translates them into second node if transformation set contains a corresponding rule.
@@ -150,9 +154,10 @@ class MetaTransformationBuilder {
      * Keep nodes by regex
      */
     fun keep(regex: String) {
-        transformations.add(RegexItemTransformationRule(regex.toRegex()) { name, _, metaItem ->
-            setItem(name, metaItem)
-        })
+        transformations.add(
+            RegexItemTransformationRule(regex.toRegex()) { name, _, metaItem ->
+                    setItem(name, metaItem)
+                })
     }
 
     /**

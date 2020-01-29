@@ -1,9 +1,7 @@
-package hep.dataforge.meta
+package hep.dataforge.meta.scheme
 
-import hep.dataforge.descriptors.Described
-import hep.dataforge.descriptors.NodeDescriptor
-import hep.dataforge.descriptors.defaultItem
-import hep.dataforge.descriptors.get
+import hep.dataforge.meta.*
+import hep.dataforge.meta.descriptors.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 
@@ -24,6 +22,14 @@ interface Configurable : Described {
      */
     fun getDefaultItem(name: Name): MetaItem<*>? = null
 
+    /**
+     * Check if property with given [name] could be assigned to [value]
+     */
+    fun validateItem(name: Name, item: MetaItem<*>?): Boolean {
+        val descriptor = descriptor?.get(name)
+        return descriptor?.validateItem(item) ?: true
+    }
+
     override val descriptor: NodeDescriptor? get() = null
 }
 
@@ -39,7 +45,11 @@ fun Configurable.getProperty(key: String) = getProperty(key.toName())
  * Set a configurable property
  */
 fun Configurable.setProperty(name: Name, item: MetaItem<*>?) {
-    config[name] = item
+    if(validateItem(name,item)) {
+        config[name] = item
+    } else {
+        error("Validation failed for property $name with value $item")
+    }
 }
 
 fun Configurable.setProperty(key: String, item: MetaItem<*>?) {

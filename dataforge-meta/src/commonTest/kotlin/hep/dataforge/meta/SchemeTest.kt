@@ -1,5 +1,8 @@
 package hep.dataforge.meta
 
+import hep.dataforge.meta.scheme.asScheme
+import hep.dataforge.meta.scheme.getProperty
+import hep.dataforge.meta.scheme.toMeta
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

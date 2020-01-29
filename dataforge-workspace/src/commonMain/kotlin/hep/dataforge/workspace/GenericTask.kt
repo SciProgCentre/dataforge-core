@@ -1,7 +1,7 @@
 package hep.dataforge.workspace
 
 import hep.dataforge.data.DataNode
-import hep.dataforge.descriptors.NodeDescriptor
+import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.node

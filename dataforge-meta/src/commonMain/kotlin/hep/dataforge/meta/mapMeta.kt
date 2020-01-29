@@ -1,6 +1,6 @@
 package hep.dataforge.meta
 
-import hep.dataforge.descriptors.NodeDescriptor
+import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.values.Value
 
 /**

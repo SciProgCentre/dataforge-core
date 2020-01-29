@@ -1,6 +1,7 @@
-package hep.dataforge.descriptors
+package hep.dataforge.meta.descriptors
 
 import hep.dataforge.meta.*
+import hep.dataforge.meta.scheme.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.asName
@@ -42,6 +43,25 @@ sealed class ItemDescriptor : Scheme() {
 }
 
 /**
+ * Configure attributes of the descriptor
+ */
+fun ItemDescriptor.attributes(block: Config.() -> Unit) {
+    (attributes ?: Config().also { this.config = it }).apply(block)
+}
+
+/**
+ * Check if given item suits the descriptor
+ */
+fun ItemDescriptor.validateItem(item: MetaItem<*>?): Boolean {
+    return when (this) {
+        is ValueDescriptor -> isAllowedValue(item.value ?: return false)
+        is NodeDescriptor -> items.all { (key, d) ->
+            d.validateItem(item.node[key])
+        }
+    }
+}
+
+/**
  * Descriptor for meta node. Could contain additional information for viewing
  * and editing.
  *
@@ -61,7 +81,7 @@ class NodeDescriptor : ItemDescriptor() {
      *
      * @return
      */
-    var default: Config? by config()
+    var default by node()
 
     /**
      * The map of children node descriptors
@@ -71,15 +91,21 @@ class NodeDescriptor : ItemDescriptor() {
             name to wrap(node.node ?: error("Node descriptor must be a node"))
         }
 
-
-    fun node(name: String, descriptor: NodeDescriptor) {
+    /**
+     * Define a child item descriptor for this node
+     */
+    fun defineItem(name: String, descriptor: ItemDescriptor) {
         if (items.keys.contains(name)) error("The key $name already exists in descriptor")
-        val token = NameToken(NODE_KEY, name)
+        val token = when (descriptor) {
+            is NodeDescriptor -> NameToken(NODE_KEY, name)
+            is ValueDescriptor -> NameToken(VALUE_KEY, name)
+        }
         config[token] = descriptor.config
+
     }
 
 
-    fun node(name: String, block: NodeDescriptor.() -> Unit) {
+    fun defineNode(name: String, block: NodeDescriptor.() -> Unit) {
         val token = NameToken(NODE_KEY, name)
         if (config[token] == null) {
             config[token] = NodeDescriptor(block)
@@ -100,7 +126,7 @@ class NodeDescriptor : ItemDescriptor() {
         }
     }
 
-    fun node(name: Name, block: NodeDescriptor.() -> Unit) {
+    fun defineNode(name: Name, block: NodeDescriptor.() -> Unit) {
         buildNode(name).apply(block)
     }
 
@@ -112,28 +138,23 @@ class NodeDescriptor : ItemDescriptor() {
             name to ValueDescriptor.wrap(node.node ?: error("Value descriptor must be a node"))
         }
 
-    fun value(name: String, descriptor: ValueDescriptor) {
-        if (items.keys.contains(name)) error("The key $name already exists in descriptor")
-        val token = NameToken(VALUE_KEY, name)
-        config[token] = descriptor.config
-    }
 
     /**
      * Add a value descriptor using block for
      */
-    fun value(name: String, block: ValueDescriptor.() -> Unit) {
-        value(name, ValueDescriptor(block))
+    fun defineValue(name: String, block: ValueDescriptor.() -> Unit) {
+        defineItem(name, ValueDescriptor(block))
     }
 
-    fun value(name: Name, block: ValueDescriptor.() -> Unit) {
+    fun defineValue(name: Name, block: ValueDescriptor.() -> Unit) {
         require(name.length >= 1) { "Name length for value descriptor must be non-empty" }
-        buildNode(name.cutLast()).value(name.last().toString(), block)
+        buildNode(name.cutLast()).defineValue(name.last().toString(), block)
     }
 
     val items: Map<String, ItemDescriptor> get() = nodes + values
 
 
-    //override val descriptor: NodeDescriptor =  empty("descriptor")
+//override val descriptor: NodeDescriptor =  empty("descriptor")
 
     companion object : SchemeSpec<NodeDescriptor>(::NodeDescriptor) {
 

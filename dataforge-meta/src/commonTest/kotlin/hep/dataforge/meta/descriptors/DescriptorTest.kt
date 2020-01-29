@@ -1,4 +1,4 @@
-package hep.dataforge.descriptors
+package hep.dataforge.meta.descriptors
 
 import hep.dataforge.values.ValueType
 import kotlin.test.Test
@@ -7,14 +7,14 @@ import kotlin.test.assertEquals
 class DescriptorTest {
 
     val descriptor = NodeDescriptor {
-        node("aNode") {
+        defineNode("aNode") {
             info = "A root demo node"
-            value("b") {
+            defineValue("b") {
                 info = "b number value"
                 type(ValueType.NUMBER)
             }
-            node("otherNode") {
-                value("otherValue") {
+            defineNode("otherNode") {
+                defineValue("otherValue") {
                     type(ValueType.BOOLEAN)
                     default(false)
                     info = "default value"

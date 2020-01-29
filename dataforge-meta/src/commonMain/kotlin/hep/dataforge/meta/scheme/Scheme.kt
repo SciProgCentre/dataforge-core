@@ -1,6 +1,7 @@
-package hep.dataforge.meta
+package hep.dataforge.meta.scheme
 
-import hep.dataforge.descriptors.*
+import hep.dataforge.meta.*
+import hep.dataforge.meta.descriptors.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.plus
@@ -8,7 +9,7 @@ import hep.dataforge.names.plus
 /**
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
  */
-open class Scheme() : Configurable, Described {
+open class Scheme() : Configurable, Described, MetaRepr {
     constructor(config: Config, defaultProvider: (Name) -> MetaItem<*>?) : this() {
         this.config = config
         this.defaultProvider = defaultProvider
@@ -17,7 +18,8 @@ open class Scheme() : Configurable, Described {
     //constructor(config: Config, default: Meta) : this(config, { default[it] })
     constructor(config: Config) : this(config, { null })
 
-    final override var config: Config = Config()
+    final override var config: Config =
+        Config()
         internal set
 
     lateinit var defaultProvider: (Name) -> MetaItem<*>?
@@ -37,6 +39,8 @@ open class Scheme() : Configurable, Described {
      */
     open val defaultLayer: Meta get() = DefaultLayer(Name.EMPTY)
 
+    override fun toMeta(): Meta = config.seal()
+
     private inner class DefaultLayer(val path: Name) : MetaBase() {
         override val items: Map<NameToken, MetaItem<*>> =
             (descriptor?.get(path) as? NodeDescriptor)?.items?.entries?.associate { (key, descriptor) ->
@@ -55,7 +59,8 @@ open class Scheme() : Configurable, Described {
 /**
  * A specification for simplified generation of wrappers
  */
-open class SchemeSpec<T : Scheme>(val builder: () -> T) : Specification<T> {
+open class SchemeSpec<T : Scheme>(val builder: () -> T) :
+    Specification<T> {
     override fun wrap(config: Config, defaultProvider: (Name) -> MetaItem<*>?): T {
         return builder().apply {
             this.config = config
@@ -75,14 +80,18 @@ open class MetaScheme(
     init {
         this.descriptor = descriptor
     }
-    override val defaultLayer: Meta get() = Laminate(meta, descriptor?.defaultItem().node)
+
+    override val defaultLayer: Meta
+        get() = Laminate(meta, descriptor?.defaultItem().node)
 }
 
-fun Meta.asScheme() = MetaScheme(this)
+fun Meta.asScheme() =
+    MetaScheme(this)
 
 fun <T : Configurable> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit) = spec.wrap(this).apply(block)
 
 /**
  * Create a snapshot laminate
  */
-fun Scheme.toMeta(): Laminate = Laminate(config, defaultLayer)
+fun Scheme.toMeta(): Laminate =
+    Laminate(config, defaultLayer)

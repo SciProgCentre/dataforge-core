@@ -28,7 +28,8 @@ include(
     ":dataforge-context",
     ":dataforge-data",
     ":dataforge-output",
-    ":dataforge-output-html",
+    ":dataforge-output:dataforge-output-html",
+    ":dataforge-tables",
     ":dataforge-workspace",
     ":dataforge-scripting"
 )

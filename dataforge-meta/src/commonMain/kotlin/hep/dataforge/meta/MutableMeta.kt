@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.meta.scheme.Configurable
 import hep.dataforge.names.*
 import hep.dataforge.values.Value
 
@@ -160,7 +161,7 @@ operator fun MutableMeta<*>.set(name: String, metas: Iterable<Meta>): Unit = set
 /**
  * Append the node with a same-name-sibling, automatically generating numerical index
  */
-fun MutableMeta<*>.append(name: Name, value: Any?) {
+fun <M: MutableMeta<M>> M.append(name: Name, value: Any?) {
     require(!name.isEmpty()) { "Name could not be empty for append operation" }
     val newIndex = name.last()!!.index
     if (newIndex.isNotEmpty()) {
@@ -171,4 +172,4 @@ fun MutableMeta<*>.append(name: Name, value: Any?) {
     }
 }
 
-fun MutableMeta<*>.append(name: String, value: Any?) = append(name.toName(), value)
+fun <M: MutableMeta<M>> M.append(name: String, value: Any?) = append(name.toName(), value)
