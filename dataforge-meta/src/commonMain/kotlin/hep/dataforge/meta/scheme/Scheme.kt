@@ -39,7 +39,7 @@ open class Scheme() : Configurable, Described, MetaRepr {
      */
     open val defaultLayer: Meta get() = DefaultLayer(Name.EMPTY)
 
-    override fun toMeta(): Meta = config.seal()
+    override fun toMeta(): Meta = Laminate(config, defaultLayer)
 
     private inner class DefaultLayer(val path: Name) : MetaBase() {
         override val items: Map<NameToken, MetaItem<*>> =
