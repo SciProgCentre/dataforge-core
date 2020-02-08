@@ -16,9 +16,16 @@ class ListColumn<T : Any>(
     companion object {
         inline operator fun <reified T : Any> invoke(
             name: String,
-            data: List<T>,
-            noinline metaBuilder: ColumnScheme.() -> Unit
-        ): ListColumn<T> = ListColumn(name, data, T::class, ColumnScheme(metaBuilder).toMeta())
+            def: ColumnScheme,
+            data: List<T?>
+        ): ListColumn<T> = ListColumn(name, data, T::class, def.toMeta())
+
+        inline operator fun <reified T : Any> invoke(
+            name: String,
+            def: ColumnScheme,
+            size: Int,
+            dataBuilder: (Int) -> T?
+        ): ListColumn<T> = invoke(name, def, List(size, dataBuilder))
     }
 }
 
