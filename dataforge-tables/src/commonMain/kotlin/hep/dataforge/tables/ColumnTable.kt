@@ -5,7 +5,7 @@ import kotlin.reflect.KClass
 /**
  * @param C bottom type for all columns in the table
  */
-class ColumnTable<C: Any>(override val columns: Collection<Column<C>>) : Table {
+class ColumnTable<C : Any>(override val columns: Collection<Column<C>>) : Table<C> {
     private val rowsNum = columns.first().size
 
     init {
@@ -21,7 +21,7 @@ class ColumnTable<C: Any>(override val columns: Collection<Column<C>>) : Table {
     }
 }
 
-internal class VirtualRow(val table: Table, val index: Int) : Row {
+internal class VirtualRow<C : Any>(val table: Table<C>, val index: Int) : Row {
     override fun <T : Any> getValue(column: String, type: KClass<out T>): T? = table.getValue(index, column, type)
 }
 

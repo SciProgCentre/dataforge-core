@@ -25,7 +25,7 @@ class CastColumn<T : Any>(val origin: Column<*>, override val type: KClass<T>) :
     override fun get(index: Int): T? = type.cast(origin[index])
 }
 
-class ColumnProperty<T : Any>(val table: Table, val type: KClass<T>) : ReadOnlyProperty<Any?, Column<T>> {
+class ColumnProperty<C: Any, T : C>(val table: Table<C>, val type: KClass<T>) : ReadOnlyProperty<Any?, Column<T>> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): Column<T> {
         val name = property.name
         return (table.columns[name] ?: error("Column with name $name not found in the table")).cast(type)

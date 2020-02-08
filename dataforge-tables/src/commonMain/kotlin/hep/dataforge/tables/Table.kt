@@ -16,9 +16,9 @@ internal fun <T : Any> KClass<T>.cast(value: Any?): T? {
 typealias TableHeader = List<ColumnHeader<*>>
 
 
-interface Table {
+interface Table<out C: Any> {
     fun <T : Any> getValue(row: Int, column: String, type: KClass<out T>): T?
-    val columns: Collection<Column<*>>
+    val columns: Collection<Column<C>>
     val header: TableHeader get() = columns.toList()
     val rows: List<Row>
 
@@ -30,7 +30,7 @@ interface Table {
 
 operator fun Collection<Column<*>>.get(name: String): Column<*>? = find { it.name == name }
 
-inline operator fun <reified T : Any> Table.get(row: Int, column: String): T? = getValue(row, column, T::class)
+inline operator fun <C: Any, reified T : C> Table<C>.get(row: Int, column: String): T? = getValue(row, column, T::class)
 
 interface ColumnHeader<out T : Any> {
     val name: String
@@ -38,7 +38,7 @@ interface ColumnHeader<out T : Any> {
     val meta: Meta
 }
 
-operator fun <T : Any> Table.get(row: Int, column: Column<T>): T? = getValue(row, column.name, column.type)
+operator fun <C: Any, T : C> Table<C>.get(row: Int, column: Column<T>): T? = getValue(row, column.name, column.type)
 
 interface Column<out T : Any> : ColumnHeader<T> {
     val size: Int

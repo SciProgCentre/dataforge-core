@@ -3,10 +3,10 @@ package hep.dataforge.tables
 import hep.dataforge.meta.Meta
 import kotlin.reflect.KClass
 
-class ColumnTableBuilder(val size: Int) : Table {
-    private val _columns = ArrayList<Column<*>>()
+class ColumnTableBuilder<C: Any>(val size: Int) : Table<C> {
+    private val _columns = ArrayList<Column<C>>()
 
-    override val columns: List<Column<*>> get() = _columns
+    override val columns: List<Column<C>> get() = _columns
     override val rows: List<Row> get() = (0 until size).map {
         VirtualRow(this, it)
     }
@@ -19,7 +19,7 @@ class ColumnTableBuilder(val size: Int) : Table {
     /**
      * Add a fixed column to the end of the table
      */
-    fun add(column: Column<*>) {
+    fun add(column: Column<C>) {
         require(column.size == this.size) { "Required column size $size, but found ${column.size}" }
         _columns.add(column)
     }
@@ -27,7 +27,7 @@ class ColumnTableBuilder(val size: Int) : Table {
     /**
      * Insert a column at [index]
      */
-    fun insert(index: Int, column: Column<*>) {
+    fun insert(index: Int, column: Column<C>) {
         require(column.size == this.size) { "Required column size $size, but found ${column.size}" }
         _columns.add(index, column)
     }
