@@ -3,7 +3,10 @@ package hep.dataforge.tables
 import hep.dataforge.meta.Meta
 import kotlin.reflect.KClass
 
-class ColumnTableBuilder<C: Any>(val size: Int) : Table<C> {
+/**
+ * Mutable table with a fixed size, but dynamic columns
+ */
+class MutableColumnTable<C: Any>(val size: Int) : Table<C> {
     private val _columns = ArrayList<Column<C>>()
 
     override val columns: List<Column<C>> get() = _columns

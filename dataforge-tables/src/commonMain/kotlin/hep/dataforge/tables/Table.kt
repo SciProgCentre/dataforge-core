@@ -1,6 +1,8 @@
 package hep.dataforge.tables
 
 import hep.dataforge.meta.Meta
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlin.reflect.KClass
 
 //TODO to be removed in 1.3.70
@@ -13,24 +15,34 @@ internal fun <T : Any> KClass<T>.cast(value: Any?): T? {
     }
 }
 
-typealias TableHeader = List<ColumnHeader<*>>
+typealias TableHeader<C> = List<ColumnHeader<C>>
 
+/**
+ * Finite or infinite row set. Rows are produced in a lazy suspendable [Flow].
+ * Each row must contain at least all the fields mentioned in [header].
+ */
+interface Rows {
+    val header: TableHeader<*>
+    fun rowFlow(): Flow<Row>
+}
 
-interface Table<out C: Any> {
+interface Table<out C : Any> : Rows {
     fun <T : Any> getValue(row: Int, column: String, type: KClass<out T>): T?
     val columns: Collection<Column<C>>
-    val header: TableHeader get() = columns.toList()
+    override val header: TableHeader<C> get() = columns.toList()
     val rows: List<Row>
+    override fun rowFlow(): Flow<Row> = rows.asFlow()
 
     /**
-     * Apply query to a table and return lazy Flow
+     * Apply typed query to this table and return lazy [Flow] of resulting rows. The flow could be empty.
      */
-    //fun find(query: Any): Flow<Row>
+    //fun select(query: Any): Flow<Row> = error("Query of type ${query::class} is not supported by this table")
 }
 
 operator fun Collection<Column<*>>.get(name: String): Column<*>? = find { it.name == name }
 
-inline operator fun <C: Any, reified T : C> Table<C>.get(row: Int, column: String): T? = getValue(row, column, T::class)
+inline operator fun <C : Any, reified T : C> Table<C>.get(row: Int, column: String): T? =
+    getValue(row, column, T::class)
 
 interface ColumnHeader<out T : Any> {
     val name: String
@@ -38,7 +50,7 @@ interface ColumnHeader<out T : Any> {
     val meta: Meta
 }
 
-operator fun <C: Any, T : C> Table<C>.get(row: Int, column: Column<T>): T? = getValue(row, column.name, column.type)
+operator fun <C : Any, T : C> Table<C>.get(row: Int, column: Column<T>): T? = getValue(row, column.name, column.type)
 
 interface Column<out T : Any> : ColumnHeader<T> {
     val size: Int
@@ -58,4 +70,4 @@ interface Row {
 }
 
 inline operator fun <reified T : Any> Row.get(column: String): T? = getValue(column, T::class)
-operator fun <T : Any> Row.get(column: Column<T>): T? = getValue(column.name, column.type)
+operator fun <T : Any> Row.get(column: ColumnHeader<T>): T? = getValue(column.name, column.type)

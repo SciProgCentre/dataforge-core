@@ -168,8 +168,8 @@ fun Configurable.float(default: Float, key: Name? = null): ReadWriteProperty<Any
 /**
  * Enum delegate
  */
-inline fun <reified E : Enum<E>> Configurable.enum(default: E, key: Name? = null): ReadWriteProperty<Any?, E?> =
-    item(default, key).transform { it.enum<E>() }
+inline fun <reified E : Enum<E>> Configurable.enum(default: E, key: Name? = null): ReadWriteProperty<Any?, E> =
+    item(default, key).transform { it.enum<E>() ?: default }
 
 /*
  * Extra delegates for special cases

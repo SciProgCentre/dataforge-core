@@ -208,7 +208,7 @@ val MetaItem<*>?.int get() = number?.toInt()
 val MetaItem<*>?.long get() = number?.toLong()
 val MetaItem<*>?.short get() = number?.toShort()
 
-inline fun <reified E : Enum<E>> MetaItem<*>?.enum() = if (this is ValueItem && this.value is EnumValue<*>) {
+inline fun <reified E : Enum<E>> MetaItem<*>?.enum(): E? = if (this is ValueItem && this.value is EnumValue<*>) {
     this.value.value as E
 } else {
     string?.let { enumValueOf<E>(it) }
