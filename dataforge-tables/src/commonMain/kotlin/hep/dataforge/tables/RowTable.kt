@@ -13,12 +13,11 @@ internal class RowTableColumn<C : Any, T : C>(val table: Table<C>, val header: C
     override fun get(index: Int): T? = table.rows[index].getValue(name, type)
 }
 
-open class RowTable<C : Any, R : Row>(override val rows: List<R>, override val header: List<ColumnHeader<C>>) :
-    Table<C> {
-    override fun <T : Any> getValue(row: Int, column: String, type: KClass<out T>): T? =
+open class RowTable<C : Any>(override val rows: List<Row<C>>, override val header: List<ColumnHeader<C>>) : Table<C> {
+    override fun <T : C> getValue(row: Int, column: String, type: KClass<out T>): T? =
         rows[row].getValue(column, type)
 
     override val columns: List<Column<C>> get() = header.map { RowTableColumn(this, it) }
 }
 
-suspend fun Rows.collect(): Table<*> = this as? Table<*> ?: RowTable(rowFlow().toList(), header)
+suspend fun <C : Any> Rows<C>.collect(): Table<C> = this as? Table<C> ?: RowTable(rowFlow().toList(), header)

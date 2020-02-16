@@ -115,6 +115,8 @@ operator fun MutableMeta<*>.set(name: NameToken, value: Any?) = set(name.asName(
 
 operator fun MutableMeta<*>.set(key: String, value: Any?) = set(key.toName(), value)
 
+operator fun MutableMeta<*>.set(key: String, index: String, value: Any?) = set(key.toName().withIndex(index), value)
+
 /**
  * Update existing mutable node with another node. The rules are following:
  *  * value replaces anything
@@ -161,7 +163,7 @@ operator fun MutableMeta<*>.set(name: String, metas: Iterable<Meta>): Unit = set
 /**
  * Append the node with a same-name-sibling, automatically generating numerical index
  */
-fun <M: MutableMeta<M>> M.append(name: Name, value: Any?) {
+fun <M : MutableMeta<M>> M.append(name: Name, value: Any?) {
     require(!name.isEmpty()) { "Name could not be empty for append operation" }
     val newIndex = name.last()!!.index
     if (newIndex.isNotEmpty()) {
@@ -172,4 +174,4 @@ fun <M: MutableMeta<M>> M.append(name: Name, value: Any?) {
     }
 }
 
-fun <M: MutableMeta<M>> M.append(name: String, value: Any?) = append(name.toName(), value)
+fun <M : MutableMeta<M>> M.append(name: String, value: Any?) = append(name.toName(), value)

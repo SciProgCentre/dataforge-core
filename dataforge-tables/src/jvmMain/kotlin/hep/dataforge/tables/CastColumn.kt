@@ -8,7 +8,7 @@ import kotlin.reflect.full.cast
 import kotlin.reflect.full.isSubclassOf
 
 @Suppress("UNCHECKED_CAST")
-fun <T : Any> Column<*>.cast(type: KClass<T>): Column<T> {
+fun <T : Any> Column<*>.cast(type: KClass<out T>): Column<T> {
     return if (type.isSubclassOf(this.type)) {
         this as Column<T>
     } else {
@@ -16,7 +16,7 @@ fun <T : Any> Column<*>.cast(type: KClass<T>): Column<T> {
     }
 }
 
-class CastColumn<T : Any>(val origin: Column<*>, override val type: KClass<T>) : Column<T> {
+class CastColumn<T : Any>(val origin: Column<*>, override val type: KClass<out T>) : Column<T> {
     override val name: String get() = origin.name
     override val meta: Meta get() = origin.meta
     override val size: Int get() = origin.size
@@ -32,5 +32,5 @@ class ColumnProperty<C: Any, T : C>(val table: Table<C>, val type: KClass<T>) : 
     }
 }
 
-operator fun <T : Any> Collection<Column<*>>.get(header: ColumnHeader<T>): Column<T>? =
+operator fun <C: Any, T : C> Collection<Column<C>>.get(header: ColumnHeader<T>): Column<T>? =
     find { it.name == header.name }?.cast(header.type)

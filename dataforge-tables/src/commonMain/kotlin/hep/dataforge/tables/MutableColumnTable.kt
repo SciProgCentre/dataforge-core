@@ -10,11 +10,11 @@ class MutableColumnTable<C: Any>(val size: Int) : Table<C> {
     private val _columns = ArrayList<Column<C>>()
 
     override val columns: List<Column<C>> get() = _columns
-    override val rows: List<Row> get() = (0 until size).map {
+    override val rows: List<Row<C>> get() = (0 until size).map {
         VirtualRow(this, it)
     }
 
-    override fun <T : Any> getValue(row: Int, column: String, type: KClass<out T>): T? {
+    override fun <T : C> getValue(row: Int, column: String, type: KClass<out T>): T? {
         val value = columns[column]?.get(row)
         return type.cast(value)
     }

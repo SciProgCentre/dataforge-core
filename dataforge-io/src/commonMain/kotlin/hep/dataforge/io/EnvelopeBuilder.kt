@@ -18,8 +18,15 @@ class EnvelopeBuilder {
         metaBuilder.update(meta)
     }
 
+    /**
+     * The general purpose of the envelope
+     */
     var type by metaBuilder.string(key = Envelope.ENVELOPE_TYPE_KEY)
     var dataType by metaBuilder.string(key = Envelope.ENVELOPE_DATA_TYPE_KEY)
+
+    /**
+     * Data unique identifier to bypass identity checks
+     */
     var dataID by metaBuilder.string(key = Envelope.ENVELOPE_DATA_ID_KEY)
     var description by metaBuilder.string(key = Envelope.ENVELOPE_DESCRIPTION_KEY)
     var name by metaBuilder.string(key = Envelope.ENVELOPE_NAME_KEY)
@@ -32,5 +39,14 @@ class EnvelopeBuilder {
         data = ArrayBinary.write(builder = block)
     }
 
-    internal fun build() = SimpleEnvelope(metaBuilder.seal(), data)
+    fun build() = SimpleEnvelope(metaBuilder.seal(), data)
+
 }
+
+//@ExperimentalContracts
+//suspend fun EnvelopeBuilder.buildData(block: suspend Output.() -> Unit): Binary{
+//    contract {
+//        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+//    }
+//    val scope = CoroutineScope(coroutineContext)
+//}

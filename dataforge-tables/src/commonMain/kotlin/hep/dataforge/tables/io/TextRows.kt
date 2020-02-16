@@ -1,38 +1,56 @@
 package hep.dataforge.tables.io
 
-import hep.dataforge.meta.get
-import hep.dataforge.meta.int
-import hep.dataforge.meta.string
 import hep.dataforge.tables.*
 import hep.dataforge.values.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.io.Binary
 import kotlinx.io.ExperimentalIoApi
 import kotlinx.io.Output
 import kotlinx.io.RandomAccessBinary
 import kotlinx.io.text.forEachUtf8Line
 import kotlinx.io.text.readUtf8Line
+import kotlinx.io.text.readUtf8StringUntilDelimiter
 import kotlinx.io.text.writeUtf8String
 import kotlin.reflect.KClass
 
-private fun readLine(header: List<ColumnHeader<Value>>, line: String): Row {
-    val values = line.split("\\s+".toRegex()).map { it.parseValue() }
+/**
+ * Read a lin as a fixed width [Row]
+ */
+private fun readLine(header: ValueTableHeader, line: String): Row<Value> {
+    val values = line.trim().split("\\s+".toRegex()).map { it.lazyParseValue() }
 
     if (values.size == header.size) {
         val map = header.map { it.name }.zip(values).toMap()
         return MapRow(map)
     } else {
-        error("Can't read line $line. Expected ${header.size} values in a line, but found ${values.size}")
+        error("Can't read line \"$line\". Expected ${header.size} values in a line, but found ${values.size}")
     }
 }
 
-
+/**
+ * Finite or infinite [Rows] created from a fixed width text binary
+ */
 @ExperimentalIoApi
-class TextRows(override val header: List<ColumnHeader<Value>>, val binary: Binary) : Rows {
+class TextRows(override val header: ValueTableHeader, val binary: Binary) : Rows<Value> {
 
-    override fun rowFlow(): Flow<Row> = binary.read {
+    /**
+     * A flow of indexes of string start offsets ignoring empty strings
+     */
+    fun indexFlow(): Flow<Int> = binary.read {
+        var counter: Int = 0
+        flow {
+            val string = readUtf8StringUntilDelimiter('\n')
+            counter += string.length
+            if (!string.isBlank()) {
+                emit(counter)
+            }
+        }
+    }
+
+    override fun rowFlow(): Flow<Row<Value>> = binary.read {
         flow {
             forEachUtf8Line { line ->
                 if (line.isNotBlank()) {
@@ -42,35 +60,57 @@ class TextRows(override val header: List<ColumnHeader<Value>>, val binary: Binar
             }
         }
     }
+
+    companion object
 }
 
+/**
+ * Create a row offset index for [TextRows]
+ */
+@ExperimentalIoApi
+suspend fun TextRows.buildRowIndex(): List<Int> = indexFlow().toList()
+
+/**
+ * Finite table created from [RandomAccessBinary] with fixed width text table
+ */
 @ExperimentalIoApi
 class TextTable(
-    override val header: List<ColumnHeader<Value>>,
+    override val header: ValueTableHeader,
     val binary: RandomAccessBinary,
     val index: List<Int>
 ) : Table<Value> {
 
     override val columns: Collection<Column<Value>> get() = header.map { RowTableColumn(this, it) }
 
-    override val rows: List<Row> get() = index.map { readAt(it) }
+    override val rows: List<Row<Value>> get() = index.map { readAt(it) }
 
-    override fun rowFlow(): Flow<Row> = TextRows(header, binary).rowFlow()
+    override fun rowFlow(): Flow<Row<Value>> = TextRows(header, binary).rowFlow()
 
-    private fun readAt(offset: Int): Row {
+    private fun readAt(offset: Int): Row<Value> {
         return binary.read(offset) {
             val line = readUtf8Line()
             return@read readLine(header, line)
         }
     }
 
-    override fun <T : Any> getValue(row: Int, column: String, type: KClass<out T>): T? {
+    override fun <T : Value> getValue(row: Int, column: String, type: KClass<out T>): T? {
         val offset = index[row]
         return type.cast(readAt(offset)[column])
     }
+
+    companion object {
+        suspend operator fun invoke(header: ValueTableHeader, binary: RandomAccessBinary): TextTable {
+            val index = TextRows(header, binary).buildRowIndex()
+            return TextTable(header, binary, index)
+        }
+    }
 }
 
-fun Output.writeValue(value: Value, width: Int, left: Boolean = true) {
+
+/**
+ * Write a fixed width value to the output
+ */
+private fun Output.writeValue(value: Value, width: Int, left: Boolean = true) {
     require(width > 5) { "Width could not be less than 5" }
     val str: String = when (value.type) {
         ValueType.NUMBER -> value.number.toString() //TODO apply decimal format
@@ -90,31 +130,20 @@ fun Output.writeValue(value: Value, width: Int, left: Boolean = true) {
     writeUtf8String(padded)
 }
 
-val ColumnHeader<Value>.valueType: ValueType? get() = meta["valueType"].string?.let { ValueType.valueOf(it) }
-
-private val ColumnHeader<Value>.width: Int
-    get() = meta["columnWidth"].int ?: when (valueType) {
-        ValueType.NUMBER -> 8
-        ValueType.STRING -> 16
-        ValueType.BOOLEAN -> 5
-        ValueType.NULL -> 5
-        null -> 16
-    }
-
-
 /**
  * Write rows without header to the output
  */
-suspend fun Output.writeRows(rows: Rows) {
+suspend fun Output.writeRows(rows: Rows<Value>) {
     @Suppress("UNCHECKED_CAST") val header = rows.header.map {
         if (it.type != Value::class) error("Expected Value column, but found ${it.type}") else (it as ColumnHeader<Value>)
     }
     val widths: List<Int> = header.map {
-        it.width
+        it.textWidth
     }
     rows.rowFlow().collect { row ->
         header.forEachIndexed { index, columnHeader ->
             writeValue(row[columnHeader] ?: Null, widths[index])
         }
+        writeUtf8String("\r\n")
     }
 }
