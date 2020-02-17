@@ -11,25 +11,27 @@ class MetaDelegateTest {
         NO
     }
 
+    class InnerSpec : Scheme() {
+        var innerValue by string()
+        companion object: SchemeSpec<InnerSpec>(::InnerSpec)
+    }
+
+    class TestScheme : Scheme() {
+        var myValue by string()
+        var safeValue by double(2.2)
+        var enumValue by enum(TestEnum.YES)
+        var inner by spec(InnerSpec)
+        companion object: SchemeSpec<TestScheme>(::TestScheme)
+    }
+
     @Test
     fun delegateTest() {
 
-        class InnerSpec : Scheme() {
-            var innerValue by string()
-        }
-
-        val innerSpec = object : SchemeSpec<InnerSpec>(::InnerSpec){}
-
-        val testObject = object : Scheme(Config()) {
-            var myValue by string()
-            var safeValue by double(2.2)
-            var enumValue by enum(TestEnum.YES)
-            var inner by spec(innerSpec)
-        }
+        val testObject = TestScheme.empty()
         testObject.config["myValue"] = "theString"
         testObject.enumValue = TestEnum.NO
 
-        testObject.inner = innerSpec { innerValue = "ddd" }
+        testObject.inner = InnerSpec { innerValue = "ddd" }
 
         assertEquals("theString", testObject.myValue)
         assertEquals(TestEnum.NO, testObject.enumValue)
