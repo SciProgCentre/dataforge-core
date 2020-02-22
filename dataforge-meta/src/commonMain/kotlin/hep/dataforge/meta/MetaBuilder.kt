@@ -141,7 +141,14 @@ fun Meta.edit(builder: MetaBuilder.() -> Unit): MetaBuilder = builder().apply(bu
 /**
  * Build a [MetaBuilder] using given transformation
  */
+@Deprecated("To be replaced with fake constructor", ReplaceWith("Meta"))
 fun buildMeta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)
+
+/**
+ * Build a [MetaBuilder] using given transformation
+ */
+@Suppress("FunctionName")
+fun Meta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)
 
 /**
  * Build meta using given source meta as a base

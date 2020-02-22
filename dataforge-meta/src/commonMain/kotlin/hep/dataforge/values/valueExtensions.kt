@@ -1,7 +1,6 @@
 package hep.dataforge.values
 
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.buildMeta
 
 /**
  * Check if value is null
@@ -35,4 +34,4 @@ val Value.doubleArray: DoubleArray
     }
 
 
-fun Value.toMeta() = buildMeta { Meta.VALUE_KEY put this }
+fun Value.toMeta() = Meta { Meta.VALUE_KEY put this }

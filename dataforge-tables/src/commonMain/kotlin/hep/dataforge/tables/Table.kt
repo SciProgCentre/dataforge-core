@@ -45,7 +45,7 @@ operator fun Collection<Column<*>>.get(name: String): Column<*>? = find { it.nam
 inline operator fun <C : Any, reified T : C> Table<C>.get(row: Int, column: String): T? =
     getValue(row, column, T::class)
 
-operator fun <C : Any, T : C> Table<C>.get(row: Int, column: Column<T>): T? = getValue(row, column.name, column.type)
+operator fun <C : Any, T : C> Table<C>.get(row: Int, column: ColumnHeader<T>): T? = getValue(row, column.name, column.type)
 
 interface Column<T : Any> : ColumnHeader<T> {
     val size: Int
