@@ -49,8 +49,18 @@ fun <T, R> ReadWriteProperty<Any?, T>.map(reader: (T) -> R, writer: (R) -> T): R
 fun <R> ReadWriteProperty<Any?, MetaItem<*>?>.transform(reader: (MetaItem<*>?) -> R): ReadWriteProperty<Any?, R> =
     map(reader = reader, writer = { MetaItem.of(it) })
 
-fun <R> ReadWriteProperty<Any?, Value?>.transform(reader: (Value?) -> R) =
+fun <R> ReadWriteProperty<Any?, Value?>.transform(reader: (Value?) -> R): ReadWriteDelegateWrapper<Value?, R> =
     map(reader = reader, writer = { Value.of(it) })
+
+/**
+ * A delegate that throws
+ */
+fun <R : Any> ReadWriteProperty<Any?, R?>.notNull(default: () -> R): ReadWriteProperty<Any?, R> {
+    return ReadWriteDelegateWrapper(this,
+        reader = { it ?: default() },
+        writer = { it }
+    )
+}
 
 
 fun <M : MutableMeta<M>> M.item(default: Any? = null, key: Name? = null): MutableMetaDelegate<M> =

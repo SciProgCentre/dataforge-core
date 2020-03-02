@@ -59,8 +59,7 @@ open class Scheme() : Configurable, Described, MetaRepr {
 /**
  * A specification for simplified generation of wrappers
  */
-open class SchemeSpec<T : Scheme>(val builder: () -> T) :
-    Specification<T> {
+open class SchemeSpec<T : Scheme>(val builder: () -> T) : Specification<T> {
     override fun wrap(config: Config, defaultProvider: (Name) -> MetaItem<*>?): T {
         return builder().apply {
             this.config = config

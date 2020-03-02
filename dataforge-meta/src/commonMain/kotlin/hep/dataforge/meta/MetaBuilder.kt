@@ -15,6 +15,10 @@ class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
     override fun wrapNode(meta: Meta): MetaBuilder = if (meta is MetaBuilder) meta else meta.builder()
     override fun empty(): MetaBuilder = MetaBuilder()
 
+    infix fun String.put(item: MetaItem<*>?) {
+        set(this, item)
+    }
+
     infix fun String.put(value: Value?) {
         set(this, value)
     }
