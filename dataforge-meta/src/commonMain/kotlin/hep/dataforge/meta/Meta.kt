@@ -3,11 +3,13 @@ package hep.dataforge.meta
 import hep.dataforge.meta.Meta.Companion.VALUE_KEY
 import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
+import hep.dataforge.meta.serialization.toJson
 import hep.dataforge.names.*
 import hep.dataforge.values.EnumValue
 import hep.dataforge.values.Null
 import hep.dataforge.values.Value
 import hep.dataforge.values.boolean
+import kotlinx.serialization.Serializable
 
 
 /**
@@ -15,11 +17,14 @@ import hep.dataforge.values.boolean
  * * a [ValueItem] (leaf)
  * * a [NodeItem] (node)
  */
+@Serializable
 sealed class MetaItem<out M : Meta> {
+    @Serializable
     data class ValueItem(val value: Value) : MetaItem<Nothing>() {
         override fun toString(): String = value.toString()
     }
 
+    @Serializable
     data class NodeItem<M : Meta>(val node: M) : MetaItem<M>() {
         override fun toString(): String = node.toString()
     }
@@ -161,7 +166,7 @@ abstract class MetaBase : Meta {
 
     override fun hashCode(): Int = items.hashCode()
 
-    override fun toString(): String = items.toString()
+    override fun toString(): String = toJson().toString()
 }
 
 /**

@@ -6,6 +6,6 @@ package hep.dataforge.meta
 @DslMarker
 annotation class DFBuilder
 
-@Experimental(level = Experimental.Level.WARNING)
+@RequiresOptIn(level = RequiresOptIn.Level.WARNING)
 @Retention(AnnotationRetention.BINARY)
 annotation class DFExperimental

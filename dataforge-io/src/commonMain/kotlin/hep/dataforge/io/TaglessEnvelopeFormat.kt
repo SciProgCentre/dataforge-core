@@ -119,7 +119,7 @@ class TaglessEnvelopeFormat(
         var line: String
         do {
             line = readUtf8Line()// ?: error("Input does not contain tagless envelope header")
-            offset += line.toUtf8Bytes().size.toUInt()
+            offset += line.encodeToByteArray().size.toUInt()
         } while (!line.startsWith(TAGLESS_ENVELOPE_HEADER))
         val properties = HashMap<String, String>()
 
@@ -133,7 +133,7 @@ class TaglessEnvelopeFormat(
             }
             try {
                 line = readUtf8Line()
-                offset += line.toUtf8Bytes().size.toUInt()
+                offset += line.encodeToByteArray().size.toUInt()
             } catch (ex: EOFException) {
                 return PartialEnvelope(Meta.EMPTY, offset.toUInt(), 0.toULong())
             }
@@ -156,7 +156,7 @@ class TaglessEnvelopeFormat(
 
         do {
             line = readUtf8Line() ?: return PartialEnvelope(Meta.EMPTY, offset.toUInt(), 0.toULong())
-            offset += line.toUtf8Bytes().size.toUInt()
+            offset += line.encodeToByteArray().size.toUInt()
             //returning an Envelope without data if end of input is reached
         } while (!line.startsWith(dataStart))
 

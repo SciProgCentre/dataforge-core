@@ -1,5 +1,7 @@
 package hep.dataforge.values
 
+import kotlinx.serialization.Serializable
+
 
 /**
  * The list of supported Value types.
@@ -7,6 +9,7 @@ package hep.dataforge.values
  * Time value and binary value are represented by string
  *
  */
+@Serializable
 enum class ValueType {
     NUMBER, STRING, BOOLEAN, NULL
 }

@@ -102,7 +102,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
         load(factory(meta, context))
 
     fun <T : Plugin> load(factory: PluginFactory<T>, metaBuilder: MetaBuilder.() -> Unit): T =
-        load(factory, buildMeta(metaBuilder))
+        load(factory, Meta(metaBuilder))
 
     /**
      * Remove a plugin from [PluginManager]
@@ -134,7 +134,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
         factory: PluginFactory<T>,
         recursive: Boolean = true,
         metaBuilder: MetaBuilder.() -> Unit
-    ): T = fetch(factory, recursive, buildMeta(metaBuilder))
+    ): T = fetch(factory, recursive, Meta(metaBuilder))
 
     override fun iterator(): Iterator<Plugin> = plugins.iterator()
 

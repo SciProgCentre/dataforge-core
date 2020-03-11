@@ -47,7 +47,7 @@ interface DataNode<out T : Any> : MetaRepr {
 
     val meta: Meta
 
-    override fun toMeta(): Meta = buildMeta {
+    override fun toMeta(): Meta = Meta {
         "type" put (type.simpleName ?: "undefined")
         "items" put {
             this@DataNode.items.forEach {
@@ -255,11 +255,11 @@ fun <T : Any> DataTreeBuilder<T>.static(name: Name, data: T, meta: Meta = EmptyM
 }
 
 fun <T : Any> DataTreeBuilder<T>.static(name: Name, data: T, block: MetaBuilder.() -> Unit = {}) {
-    this[name] = Data.static(data, buildMeta(block))
+    this[name] = Data.static(data, Meta(block))
 }
 
 fun <T : Any> DataTreeBuilder<T>.static(name: String, data: T, block: MetaBuilder.() -> Unit = {}) {
-    this[name.toName()] = Data.static(data, buildMeta(block))
+    this[name.toName()] = Data.static(data, Meta(block))
 }
 
 fun <T : Any> DataTreeBuilder<T>.node(name: Name, node: DataNode<T>) {

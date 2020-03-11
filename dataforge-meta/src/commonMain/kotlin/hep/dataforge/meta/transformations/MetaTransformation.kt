@@ -90,7 +90,7 @@ inline class MetaTransformation(val transformations: Collection<TransformationRu
      * Produce new meta using only those items that match transformation rules
      */
     fun transform(source: Meta): Meta =
-        buildMeta {
+        Meta {
             transformations.forEach { rule ->
                 rule.selectItems(source).forEach { name ->
                     rule.transformItem(name, source[name], this)
@@ -102,7 +102,7 @@ inline class MetaTransformation(val transformations: Collection<TransformationRu
      * Transform a meta, replacing all elements found in rules with transformed entries
      */
     fun apply(source: Meta): Meta =
-        buildMeta(source) {
+        source.edit {
             transformations.forEach { rule ->
                 rule.selectItems(source).forEach { name ->
                     remove(name)
@@ -156,8 +156,8 @@ class MetaTransformationBuilder {
     fun keep(regex: String) {
         transformations.add(
             RegexItemTransformationRule(regex.toRegex()) { name, _, metaItem ->
-                    setItem(name, metaItem)
-                })
+                setItem(name, metaItem)
+            })
     }
 
     /**

@@ -1,11 +1,14 @@
 package hep.dataforge.names
 
+import kotlinx.serialization.*
+
 
 /**
  * The general interface for working with names.
  * The name is a dot separated list of strings like `token1.token2.token3`.
  * Each token could contain additional index in square brackets.
  */
+@Serializable
 class Name(val tokens: List<NameToken>) {
 
     val length get() = tokens.size
@@ -51,10 +54,21 @@ class Name(val tokens: List<NameToken>) {
     }
 
 
-    companion object {
+    @Serializer(Name::class)
+    companion object: KSerializer<Name> {
         const val NAME_SEPARATOR = "."
 
         val EMPTY = Name(emptyList())
+
+        override val descriptor: SerialDescriptor = PrimitiveDescriptor("Name", PrimitiveKind.STRING)
+
+        override fun deserialize(decoder: Decoder): Name {
+            return decoder.decodeString().toName()
+        }
+
+        override fun serialize(encoder: Encoder, value: Name) {
+            encoder.encodeString(value.toString())
+        }
     }
 }
 
@@ -63,6 +77,7 @@ class Name(val tokens: List<NameToken>) {
  * Following symbols are prohibited in name tokens: `{}.:\`.
  * A name token could have appendix in square brackets called *index*
  */
+@Serializable
 data class NameToken(val body: String, val index: String = "") {
 
     init {
@@ -82,6 +97,19 @@ data class NameToken(val body: String, val index: String = "") {
     }
 
     fun hasIndex() = index.isNotEmpty()
+
+    @Serializer(NameToken::class)
+    companion object :KSerializer<NameToken>{
+        override val descriptor: SerialDescriptor = PrimitiveDescriptor("NameToken", PrimitiveKind.STRING)
+
+        override fun deserialize(decoder: Decoder): NameToken {
+            return decoder.decodeString().toName().first()!!
+        }
+
+        override fun serialize(encoder: Encoder, value: NameToken) {
+            encoder.encodeString(value.toString())
+        }
+    }
 }
 
 /**

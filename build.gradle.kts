@@ -1,12 +1,12 @@
 
 plugins {
-    val toolsVersion = "0.3.1"
+    val toolsVersion = "0.4.0"
     id("scientifik.mpp") version toolsVersion apply false
     id("scientifik.jvm") version toolsVersion apply false
     id("scientifik.publish") version toolsVersion apply false
 }
 
-val dataforgeVersion by extra("0.1.5-dev-9")
+val dataforgeVersion by extra("0.1.5-dev-10")
 
 val bintrayRepo by extra("dataforge")
 val githubProject by extra("dataforge-core")

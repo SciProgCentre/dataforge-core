@@ -1,6 +1,7 @@
 package hep.dataforge.context
 
 import hep.dataforge.meta.DFBuilder
+import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.buildMeta
 import hep.dataforge.names.toName
@@ -22,11 +23,11 @@ class ContextBuilder(var name: String = "@anonymous", val parent: Context = Glob
     }
 
     fun plugin(tag: PluginTag, action: MetaBuilder.() -> Unit = {}) {
-        plugins.add(PluginRepository.fetch(tag, buildMeta(action)))
+        plugins.add(PluginRepository.fetch(tag, Meta(action)))
     }
 
     fun plugin(builder: PluginFactory<*>, action: MetaBuilder.() -> Unit = {}) {
-        plugins.add(builder.invoke(buildMeta(action)))
+        plugins.add(builder.invoke(Meta(action)))
     }
 
     fun plugin(name: String, group: String = "", version: String = "", action: MetaBuilder.() -> Unit = {}) {

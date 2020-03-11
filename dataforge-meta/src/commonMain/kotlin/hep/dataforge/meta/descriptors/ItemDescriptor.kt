@@ -255,10 +255,10 @@ class ValueDescriptor : ItemDescriptor() {
     }
 
     companion object : SchemeSpec<ValueDescriptor>(::ValueDescriptor) {
-        inline fun <reified E : Enum<E>> enum(name: String) = ValueDescriptor {
-            type(ValueType.STRING)
-            this.allowedValues = enumValues<E>().map { Value.of(it.name) }
-        }
+//        inline fun <reified E : Enum<E>> enum(name: String) = ValueDescriptor {
+//            type(ValueType.STRING)
+//            this.allowedValues = enumValues<E>().map { Value.of(it.name) }
+//        }
 
 //        /**
 //         * Build a value descriptor from annotation

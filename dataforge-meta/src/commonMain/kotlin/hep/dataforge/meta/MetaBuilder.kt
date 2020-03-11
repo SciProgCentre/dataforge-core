@@ -153,8 +153,3 @@ fun buildMeta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().appl
  */
 @Suppress("FunctionName")
 fun Meta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)
-
-/**
- * Build meta using given source meta as a base
- */
-fun buildMeta(source: Meta, builder: MetaBuilder.() -> Unit): MetaBuilder = source.builder().apply(builder)

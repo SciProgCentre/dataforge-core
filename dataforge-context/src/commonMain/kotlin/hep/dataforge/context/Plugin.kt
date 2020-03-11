@@ -65,7 +65,7 @@ interface Plugin : Named, ContextAware, Provider, MetaRepr {
      */
     fun detach()
 
-    override fun toMeta(): Meta = buildMeta {
+    override fun toMeta(): Meta = Meta {
         "context" put context.name.toString()
         "type" to this::class.simpleName
         "tag" put tag
