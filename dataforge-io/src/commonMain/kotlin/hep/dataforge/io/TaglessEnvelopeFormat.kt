@@ -8,7 +8,6 @@ import kotlinx.io.text.readRawString
 import kotlinx.io.text.readUtf8Line
 import kotlinx.io.text.writeRawString
 import kotlinx.io.text.writeUtf8String
-import kotlinx.serialization.toUtf8Bytes
 
 @ExperimentalIoApi
 class TaglessEnvelopeFormat(
@@ -155,7 +154,7 @@ class TaglessEnvelopeFormat(
         }
 
         do {
-            line = readUtf8Line() ?: return PartialEnvelope(Meta.EMPTY, offset.toUInt(), 0.toULong())
+            line = readUtf8Line() //?: return PartialEnvelope(Meta.EMPTY, offset.toUInt(), 0.toULong())
             offset += line.encodeToByteArray().size.toUInt()
             //returning an Envelope without data if end of input is reached
         } while (!line.startsWith(dataStart))

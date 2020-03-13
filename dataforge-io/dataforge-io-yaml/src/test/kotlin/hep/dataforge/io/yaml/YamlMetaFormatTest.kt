@@ -3,7 +3,6 @@ package hep.dataforge.io.yaml
 import hep.dataforge.io.parse
 import hep.dataforge.io.toString
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.buildMeta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.seal
 import kotlin.test.Test
@@ -13,7 +12,7 @@ import kotlin.test.assertEquals
 class YamlMetaFormatTest {
     @Test
     fun testYamlMetaFormat() {
-        val meta = buildMeta {
+        val meta = Meta {
             "a" put 22
             "node" put {
                 "b" put "DDD"

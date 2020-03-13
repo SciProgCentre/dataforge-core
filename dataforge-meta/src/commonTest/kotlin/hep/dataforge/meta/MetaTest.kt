@@ -16,13 +16,13 @@ class MetaTest {
 
     @Test
     fun metaEqualityTest() {
-        val meta1 = buildMeta {
+        val meta1 = Meta {
             "a" put 22
             "b" put {
                 "c" put "ddd"
             }
         }
-        val meta2 = buildMeta {
+        val meta2 = Meta {
             "b" put {
                 "c" put "ddd"
             }
@@ -33,13 +33,13 @@ class MetaTest {
 
     @Test
     fun metaToMap(){
-        val meta = buildMeta {
+        val meta = Meta {
             "a" put 22
             "b" put {
                 "c" put "ddd"
             }
             "list" put (0..4).map {
-                buildMeta {
+                Meta {
                     "value" put it
                 }
             }

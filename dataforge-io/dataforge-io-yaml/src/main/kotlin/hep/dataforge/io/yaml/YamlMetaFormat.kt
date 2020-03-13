@@ -1,13 +1,12 @@
 package hep.dataforge.io.yaml
 
 import hep.dataforge.context.Context
-import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.io.MetaFormat
 import hep.dataforge.io.MetaFormatFactory
 import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.toMap
-import hep.dataforge.meta.scheme.toMeta
 import hep.dataforge.meta.toMeta
 import kotlinx.io.Input
 import kotlinx.io.Output

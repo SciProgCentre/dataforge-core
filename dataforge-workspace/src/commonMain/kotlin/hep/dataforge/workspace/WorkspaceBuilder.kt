@@ -52,7 +52,7 @@ fun WorkspaceBuilder.data(
 
 
 fun WorkspaceBuilder.target(name: String, block: MetaBuilder.() -> Unit) {
-    targets[name] = buildMeta(block).seal()
+    targets[name] = Meta(block).seal()
 }
 
 /**

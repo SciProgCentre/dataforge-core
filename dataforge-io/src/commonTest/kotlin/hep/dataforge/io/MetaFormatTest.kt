@@ -20,7 +20,7 @@ fun MetaFormat.fromBytes(packet: Bytes): Meta {
 class MetaFormatTest {
     @Test
     fun testBinaryMetaFormat() {
-        val meta = buildMeta {
+        val meta = Meta {
             "a" put 22
             "node" put {
                 "b" put "DDD"
@@ -35,7 +35,7 @@ class MetaFormatTest {
 
     @Test
     fun testJsonMetaFormat() {
-        val meta = buildMeta {
+        val meta = Meta {
             "a" put 22
             "node" put {
                 "b" put "DDD"

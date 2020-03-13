@@ -2,7 +2,6 @@ package hep.dataforge.meta
 
 import hep.dataforge.meta.scheme.asScheme
 import hep.dataforge.meta.scheme.getProperty
-import hep.dataforge.meta.scheme.toMeta
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -10,7 +9,7 @@ import kotlin.test.assertEquals
 class SchemeTest{
     @Test
     fun testMetaScheme(){
-        val styled = buildMeta {
+        val styled = Meta {
             repeat(10){
                 "b.a[$it]" put {
                     "d" put it

@@ -15,7 +15,7 @@ import kotlinx.io.asBinary
 suspend fun Table<Value>.wrap(): Envelope = Envelope {
     meta {
         header.forEachIndexed { index, columnHeader ->
-            set("column", index.toString(), buildMeta {
+            set("column", index.toString(), Meta {
                 "name" put columnHeader.name
                 if (!columnHeader.meta.isEmpty()) {
                     "meta" put columnHeader.meta

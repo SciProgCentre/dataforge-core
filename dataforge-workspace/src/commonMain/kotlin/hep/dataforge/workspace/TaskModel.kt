@@ -29,7 +29,7 @@ data class TaskModel(
     //TODO provide a way to get task descriptor
     //TODO add pre-run check of task result type?
 
-    override fun toMeta(): Meta = buildMeta {
+    override fun toMeta(): Meta = Meta {
         "name" put name.toString()
         "meta" put meta
         "dependsOn" put {
@@ -98,7 +98,7 @@ fun <T : Any> TaskDependencyContainer.dependsOn(
     placement: Name = Name.EMPTY,
     metaBuilder: MetaBuilder.() -> Unit
 ): DirectTaskDependency<T> =
-    dependsOn(task, placement, buildMeta(metaBuilder))
+    dependsOn(task, placement, Meta(metaBuilder))
 
 /**
  * Add custom data dependency

@@ -5,7 +5,6 @@ import hep.dataforge.data.DataNode
 import hep.dataforge.data.filter
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
-import hep.dataforge.meta.buildMeta
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.names.isEmpty
@@ -28,7 +27,7 @@ class DataDependency(val filter: DataFilter, val placement: Name = Name.EMPTY) :
         }
     }
 
-    override fun toMeta(): Meta = buildMeta {
+    override fun toMeta(): Meta = Meta {
         "data" put filter.config
         "to" put placement.toString()
     }
@@ -41,7 +40,7 @@ class AllDataDependency(val placement: Name = Name.EMPTY) : Dependency() {
         DataNode.invoke(Any::class) { this[placement] = workspace.data }
     }
 
-    override fun toMeta() = buildMeta {
+    override fun toMeta() = Meta {
         "data" put "@all"
         "to" put placement.toString()
     }
@@ -69,7 +68,7 @@ abstract class TaskDependency<out T : Any>(
         }
     }
 
-    override fun toMeta(): Meta = buildMeta {
+    override fun toMeta(): Meta = Meta {
         "task" put name.toString()
         "meta" put meta
         "to" put placement.toString()

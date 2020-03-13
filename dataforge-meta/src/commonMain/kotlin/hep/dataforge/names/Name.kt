@@ -53,14 +53,13 @@ class Name(val tokens: List<NameToken>) {
         }
     }
 
-
     @Serializer(Name::class)
-    companion object: KSerializer<Name> {
+    companion object : KSerializer<Name> {
         const val NAME_SEPARATOR = "."
 
         val EMPTY = Name(emptyList())
 
-        override val descriptor: SerialDescriptor = PrimitiveDescriptor("Name", PrimitiveKind.STRING)
+        override val descriptor: SerialDescriptor = PrimitiveDescriptor("hep.dataforge.names.Name", PrimitiveKind.STRING)
 
         override fun deserialize(decoder: Decoder): Name {
             return decoder.decodeString().toName()
@@ -99,8 +98,8 @@ data class NameToken(val body: String, val index: String = "") {
     fun hasIndex() = index.isNotEmpty()
 
     @Serializer(NameToken::class)
-    companion object :KSerializer<NameToken>{
-        override val descriptor: SerialDescriptor = PrimitiveDescriptor("NameToken", PrimitiveKind.STRING)
+    companion object : KSerializer<NameToken> {
+        override val descriptor: SerialDescriptor = PrimitiveDescriptor("hep.dataforge.names.NameToken", PrimitiveKind.STRING)
 
         override fun deserialize(decoder: Decoder): NameToken {
             return decoder.decodeString().toName().first()!!

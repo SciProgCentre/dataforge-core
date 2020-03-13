@@ -77,7 +77,7 @@ fun EnvelopeBuilder.multipart(
                 writeRawString(MULTIPART_DATA_SEPARATOR)
                 writeEnvelope(envelope)
                 meta {
-                    append(INDEX_KEY, buildMeta {
+                    append(INDEX_KEY, Meta {
                         "key" put key
                         "index" put counter
                     })

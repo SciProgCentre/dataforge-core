@@ -3,13 +3,9 @@ package hep.dataforge.meta
 import hep.dataforge.meta.Meta.Companion.VALUE_KEY
 import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
-import hep.dataforge.meta.serialization.toJson
 import hep.dataforge.names.*
-import hep.dataforge.values.EnumValue
-import hep.dataforge.values.Null
-import hep.dataforge.values.Value
-import hep.dataforge.values.boolean
-import kotlinx.serialization.Serializable
+import hep.dataforge.values.*
+import kotlinx.serialization.*
 
 
 /**
@@ -22,11 +18,33 @@ sealed class MetaItem<out M : Meta> {
     @Serializable
     data class ValueItem(val value: Value) : MetaItem<Nothing>() {
         override fun toString(): String = value.toString()
+
+        @Serializer(ValueItem::class)
+        companion object : KSerializer<ValueItem> {
+            override val descriptor: SerialDescriptor get() = ValueSerializer.descriptor
+
+            override fun deserialize(decoder: Decoder): ValueItem = ValueItem(ValueSerializer.deserialize(decoder))
+
+            override fun serialize(encoder: Encoder, value: ValueItem) {
+                ValueSerializer.serialize(encoder, value.value)
+            }
+        }
     }
 
     @Serializable
     data class NodeItem<M : Meta>(val node: M) : MetaItem<M>() {
         override fun toString(): String = node.toString()
+
+        @Serializer(NodeItem::class)
+        companion object : KSerializer<NodeItem<*>> {
+            override val descriptor: SerialDescriptor get() = ValueSerializer.descriptor
+
+            override fun deserialize(decoder: Decoder): NodeItem<*> = NodeItem(MetaSerializer.deserialize(decoder))
+
+            override fun serialize(encoder: Encoder, value: NodeItem<*>) {
+                MetaSerializer.serialize(encoder, value.node)
+            }
+        }
     }
 
     companion object {
@@ -72,6 +90,7 @@ interface Meta : MetaRepr {
 
     companion object {
         const val TYPE = "meta"
+
         /**
          * A key for single value node
          */
@@ -101,6 +120,7 @@ operator fun Meta?.get(name: Name): MetaItem<*>? {
 }
 
 operator fun Meta?.get(token: NameToken): MetaItem<*>? = this?.items?.get(token)
+
 /**
  * Parse [Name] from [key] using full name notation and pass it to [Meta.get]
  */

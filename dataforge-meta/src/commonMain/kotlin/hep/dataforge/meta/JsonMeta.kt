@@ -1,8 +1,5 @@
-package hep.dataforge.meta.serialization
+package hep.dataforge.meta
 
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBase
-import hep.dataforge.meta.MetaItem
 import hep.dataforge.meta.descriptors.ItemDescriptor
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.descriptors.ValueDescriptor
@@ -52,12 +49,7 @@ fun Meta.toJson(descriptor: NodeDescriptor? = null): JsonObject {
     return JsonObject(map)
 }
 
-fun JsonElement.toMeta(descriptor: NodeDescriptor? = null): Meta {
-    return when (val item = toMetaItem(descriptor)) {
-        is MetaItem.NodeItem<*> -> item.node
-        is MetaItem.ValueItem -> item.value.toMeta()
-    }
-}
+fun JsonObject.toMeta(descriptor: NodeDescriptor? = null): Meta = JsonMeta(this, descriptor)
 
 fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
     return when (this) {
@@ -106,7 +98,12 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
                 this[key] = MetaItem.ValueItem(value.toValue(itemDescriptor as? ValueDescriptor)) as MetaItem<JsonMeta>
             }
             is JsonObject -> {
-                this[key] = MetaItem.NodeItem(JsonMeta(value, itemDescriptor as? NodeDescriptor))
+                this[key] = MetaItem.NodeItem(
+                    JsonMeta(
+                        value,
+                        itemDescriptor as? NodeDescriptor
+                    )
+                )
             }
             is JsonArray -> {
                 when {

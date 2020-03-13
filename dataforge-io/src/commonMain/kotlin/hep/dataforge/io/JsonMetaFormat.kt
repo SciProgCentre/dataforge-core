@@ -2,29 +2,20 @@
 
 package hep.dataforge.io
 
+
 import hep.dataforge.context.Context
-import hep.dataforge.meta.descriptors.ItemDescriptor
-import hep.dataforge.meta.descriptors.NodeDescriptor
-import hep.dataforge.meta.descriptors.ValueDescriptor
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBase
-import hep.dataforge.meta.MetaItem
-import hep.dataforge.meta.serialization.toJson
-import hep.dataforge.meta.serialization.toMeta
-import hep.dataforge.names.NameToken
-import hep.dataforge.names.toName
-import hep.dataforge.values.*
+import hep.dataforge.meta.descriptors.NodeDescriptor
+import hep.dataforge.meta.node
+import hep.dataforge.meta.toJson
+import hep.dataforge.meta.toMetaItem
 import kotlinx.io.Input
 import kotlinx.io.Output
 import kotlinx.io.text.readUtf8String
 import kotlinx.io.text.writeUtf8String
 import kotlinx.serialization.UnstableDefault
-
-
-import kotlinx.serialization.json.*
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.set
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObjectSerializer
 
 @OptIn(UnstableDefault::class)
 class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat {
@@ -37,11 +28,12 @@ class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat {
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
         val str = readUtf8String()
         val jsonElement = json.parseJson(str)
-        return jsonElement.toMeta()
+        val item = jsonElement.toMetaItem(descriptor)
+        return item.node ?: Meta.EMPTY
     }
 
     companion object : MetaFormatFactory {
-        val DEFAULT_JSON = Json{prettyPrint = true}
+        val DEFAULT_JSON = Json { prettyPrint = true }
 
         override fun invoke(meta: Meta, context: Context): MetaFormat = default
 

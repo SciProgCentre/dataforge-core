@@ -1,9 +1,9 @@
-import scientifik.useSerialization
+import scientifik.serialization
 
 plugins {
     id("scientifik.mpp")
 }
 
-useSerialization()
+serialization()
 
 description = "Meta definition and basic operations on meta"

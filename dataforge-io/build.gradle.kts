@@ -1,4 +1,5 @@
-import scientifik.useSerialization
+import scientifik.DependencySourceSet.TEST
+import scientifik.serialization
 
 plugins {
     id("scientifik.mpp")
@@ -6,7 +7,9 @@ plugins {
 
 description = "IO module"
 
-useSerialization()
+serialization(sourceSet = TEST){
+    cbor()
+}
 
 val ioVersion by rootProject.extra("0.2.0-npm-dev-4")
 
@@ -16,17 +19,6 @@ kotlin {
             dependencies {
                 api(project(":dataforge-context"))
                 api("org.jetbrains.kotlinx:kotlinx-io:$ioVersion")
-                //api("org.jetbrains.kotlinx:kotlinx-io-metadata:$ioVersion")
-            }
-        }
-        jvmMain {
-            dependencies {
-                //api("org.jetbrains.kotlinx:kotlinx-io-jvm:$ioVersion")
-            }
-        }
-        jsMain {
-            dependencies {
-                //api("org.jetbrains.kotlinx:kotlinx-io-js:$ioVersion")
             }
         }
     }

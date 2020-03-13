@@ -1,8 +1,11 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Context
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.MetaItem
 import hep.dataforge.meta.descriptors.NodeDescriptor
-import hep.dataforge.meta.*
+import hep.dataforge.meta.setItem
 import hep.dataforge.values.*
 import kotlinx.io.*
 import kotlinx.io.text.readUtf8String
@@ -112,7 +115,7 @@ object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
             }
             'M' -> {
                 val length = readInt()
-                val meta = buildMeta {
+                val meta = Meta {
                     (1..length).forEach { _ ->
                         val name = readString()
                         val item = readMetaItem()

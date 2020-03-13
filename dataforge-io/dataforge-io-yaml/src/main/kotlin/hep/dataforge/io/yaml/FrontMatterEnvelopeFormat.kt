@@ -21,7 +21,7 @@ class FrontMatterEnvelopeFormat(
         var line: String = ""
         var offset = 0u
         do {
-            line = readUtf8Line() ?: error("Input does not contain front matter separator")
+            line = readUtf8Line() //?: error("Input does not contain front matter separator")
             offset += line.toUtf8Bytes().size.toUInt()
         } while (!line.startsWith(SEPARATOR))
 
@@ -46,7 +46,7 @@ class FrontMatterEnvelopeFormat(
     override fun Input.readObject(): Envelope {
         var line: String = ""
         do {
-            line = readUtf8Line() ?: error("Input does not contain front matter separator")
+            line = readUtf8Line() //?: error("Input does not contain front matter separator")
         } while (!line.startsWith(SEPARATOR))
 
         val readMetaFormat =
@@ -89,7 +89,7 @@ class FrontMatterEnvelopeFormat(
 
         override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
             val line = input.readUtf8Line()
-            return if (line != null && line.startsWith("---")) {
+            return if (line.startsWith("---")) {
                 invoke()
             } else {
                 null

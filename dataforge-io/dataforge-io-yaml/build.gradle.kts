@@ -1,4 +1,4 @@
-import scientifik.useSerialization
+import scientifik.serialization
 
 plugins {
     id("scientifik.jvm")
@@ -6,9 +6,11 @@ plugins {
 
 description = "YAML meta IO"
 
-useSerialization()
+serialization{
+    yaml()
+}
 
 dependencies {
     api(project(":dataforge-io"))
-    api("org.yaml:snakeyaml:1.25")
+    api("org.yaml:snakeyaml:1.26")
 }

@@ -20,7 +20,7 @@ fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
  * Convert map of maps to meta
  */
 @DFExperimental
-fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = buildMeta {
+fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = Meta {
     entries.forEach { (key, value) ->
         @Suppress("UNCHECKED_CAST")
         when (value) {

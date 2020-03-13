@@ -39,7 +39,7 @@ open class Scheme() : Configurable, Described, MetaRepr {
      */
     open val defaultLayer: Meta get() = DefaultLayer(Name.EMPTY)
 
-    override fun toMeta(): Meta = Laminate(config, defaultLayer)
+    override fun toMeta(): Laminate = Laminate(config, defaultLayer)
 
     private inner class DefaultLayer(val path: Name) : MetaBase() {
         override val items: Map<NameToken, MetaItem<*>> =
@@ -88,9 +88,3 @@ fun Meta.asScheme() =
     MetaScheme(this)
 
 fun <T : Configurable> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit) = spec.wrap(this).apply(block)
-
-/**
- * Create a snapshot laminate
- */
-fun Scheme.toMeta(): Laminate =
-    Laminate(config, defaultLayer)

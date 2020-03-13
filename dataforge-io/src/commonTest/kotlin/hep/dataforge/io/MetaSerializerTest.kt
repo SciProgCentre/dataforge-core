@@ -1,9 +1,9 @@
 package hep.dataforge.io
 
-import hep.dataforge.io.serialization.MetaItemSerializer
-import hep.dataforge.io.serialization.MetaSerializer
-import hep.dataforge.io.serialization.NameSerializer
-import hep.dataforge.meta.buildMeta
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaItem
+import hep.dataforge.meta.MetaSerializer
+import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.json.Json
@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 class MetaSerializerTest {
     @Test
     fun testMetaSerialization() {
-        val meta = buildMeta {
+        val meta = Meta {
             "a" put 22
             "node" put {
                 "b" put "DDD"
@@ -29,7 +29,7 @@ class MetaSerializerTest {
 
     @Test
     fun testCborSerialization() {
-        val meta = buildMeta {
+        val meta = Meta {
             "a" put 22
             "node" put {
                 "b" put "DDD"
@@ -47,13 +47,13 @@ class MetaSerializerTest {
     @Test
     fun testNameSerialization() {
         val name = "a.b.c".toName()
-        val string = Json.indented.stringify(NameSerializer, name)
-        val restored = Json.plain.parse(NameSerializer, string)
+        val string = Json.indented.stringify(Name.serializer(), name)
+        val restored = Json.plain.parse(Name.serializer(), string)
         assertEquals(restored, name)
     }
 
     @Test
-    fun testMetaItemDescriptor(){
-        val descriptor = MetaItemSerializer.descriptor.getElementDescriptor(0)
+    fun testMetaItemDescriptor() {
+        val descriptor = MetaItem.serializer(MetaSerializer).descriptor.getElementDescriptor(0)
     }
 }
