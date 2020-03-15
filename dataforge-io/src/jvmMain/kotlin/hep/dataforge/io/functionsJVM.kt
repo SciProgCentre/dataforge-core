@@ -3,7 +3,6 @@ package hep.dataforge.io
 import hep.dataforge.io.functions.FunctionServer
 import hep.dataforge.io.functions.function
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.buildMeta
 import hep.dataforge.names.Name
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSuperclassOf
@@ -14,7 +13,7 @@ fun IOPlugin.resolveIOFormatName(type: KClass<*>): Name {
         ?: error("Can't resolve IOFormat for type $type")
 }
 
-inline fun <reified T : Any, reified R : Any> IOPlugin.generateFunctionMeta(functionName: String): Meta = buildMeta {
+inline fun <reified T : Any, reified R : Any> IOPlugin.generateFunctionMeta(functionName: String): Meta = Meta {
     FunctionServer.FUNCTION_NAME_KEY put functionName
     FunctionServer.INPUT_FORMAT_KEY put resolveIOFormatName(T::class).toString()
     FunctionServer.OUTPUT_FORMAT_KEY put resolveIOFormatName(R::class).toString()

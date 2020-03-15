@@ -8,8 +8,6 @@ import kotlinx.serialization.json.JsonObjectSerializer
 import kotlinx.serialization.json.JsonOutput
 
 
-private class DeserializedMeta(override val items: Map<NameToken, MetaItem<Meta>>) : MetaBase()
-
 /**
  * Serialized for meta
  */
@@ -26,7 +24,9 @@ object MetaSerializer : KSerializer<Meta> {
         return if (decoder is JsonInput) {
             JsonObjectSerializer.deserialize(decoder).toMeta()
         } else {
-            DeserializedMeta(mapSerializer.deserialize(decoder))
+            object : MetaBase() {
+                override val items: Map<NameToken, MetaItem<*>> = mapSerializer.deserialize(decoder)
+            }
         }
     }
 
@@ -36,18 +36,5 @@ object MetaSerializer : KSerializer<Meta> {
         } else {
             mapSerializer.serialize(encoder, value.items)
         }
-    }
-}
-
-@Serializer(Config::class)
-object ConfigSerializer : KSerializer<Config> {
-    override val descriptor: SerialDescriptor get() = MetaSerializer.descriptor
-
-    override fun deserialize(decoder: Decoder): Config {
-        return MetaSerializer.deserialize(decoder).asConfig()
-    }
-
-    override fun serialize(encoder: Encoder, value: Config) {
-        MetaSerializer.serialize(encoder, value)
     }
 }

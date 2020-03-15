@@ -4,6 +4,7 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
+import kotlinx.serialization.*
 
 //TODO add validator to configuration
 
@@ -20,6 +21,7 @@ interface ObservableMeta : Meta {
 /**
  * Mutable meta representing object state
  */
+@Serializable
 class Config : AbstractMutableMeta<Config>(), ObservableMeta {
 
     private val listeners = HashSet<MetaListener>()
@@ -66,8 +68,19 @@ class Config : AbstractMutableMeta<Config>(), ObservableMeta {
 
     override fun empty(): Config = Config()
 
-    companion object {
+    @Serializer(Config::class)
+    companion object ConfigSerializer : KSerializer<Config> {
+
         fun empty(): Config = Config()
+        override val descriptor: SerialDescriptor get() = MetaSerializer.descriptor
+
+        override fun deserialize(decoder: Decoder): Config {
+            return MetaSerializer.deserialize(decoder).asConfig()
+        }
+
+        override fun serialize(encoder: Encoder, value: Config) {
+            MetaSerializer.serialize(encoder, value)
+        }
     }
 }
 

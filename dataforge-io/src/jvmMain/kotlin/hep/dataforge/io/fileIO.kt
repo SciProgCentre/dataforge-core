@@ -1,9 +1,9 @@
 package hep.dataforge.io
 
-import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.isEmpty
 import kotlinx.io.*
 import java.nio.file.Files
@@ -14,6 +14,7 @@ import kotlin.streams.asSequence
 /**
  * Resolve IOFormat based on type
  */
+@Suppress("UNCHECKED_CAST")
 @DFExperimental
 inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
     return ioFormats.values.find { it.type.isSuperclassOf(T::class) } as IOFormat<T>?

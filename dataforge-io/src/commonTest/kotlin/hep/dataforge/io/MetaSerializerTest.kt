@@ -11,17 +11,17 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MetaSerializerTest {
+    val meta = Meta {
+        "a" put 22
+        "node" put {
+            "b" put "DDD"
+            "c" put 11.1
+            "array" put doubleArrayOf(1.0, 2.0, 3.0)
+        }
+    }
+
     @Test
     fun testMetaSerialization() {
-        val meta = Meta {
-            "a" put 22
-            "node" put {
-                "b" put "DDD"
-                "c" put 11.1
-                "array" put doubleArrayOf(1.0, 2.0, 3.0)
-            }
-        }
-
         val string = Json.indented.stringify(MetaSerializer, meta)
         val restored = Json.plain.parse(MetaSerializer, string)
         assertEquals(restored, meta)
@@ -29,15 +29,6 @@ class MetaSerializerTest {
 
     @Test
     fun testCborSerialization() {
-        val meta = Meta {
-            "a" put 22
-            "node" put {
-                "b" put "DDD"
-                "c" put 11.1
-                "array" put doubleArrayOf(1.0, 2.0, 3.0)
-            }
-        }
-
         val bytes = Cbor.dump(MetaSerializer, meta)
         println(bytes.contentToString())
         val restored = Cbor.load(MetaSerializer, bytes)

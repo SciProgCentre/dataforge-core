@@ -15,6 +15,7 @@ import kotlinx.serialization.*
  */
 @Serializable
 sealed class MetaItem<out M : Meta> {
+
     @Serializable
     data class ValueItem(val value: Value) : MetaItem<Nothing>() {
         override fun toString(): String = value.toString()
@@ -32,12 +33,13 @@ sealed class MetaItem<out M : Meta> {
     }
 
     @Serializable
-    data class NodeItem<M : Meta>(val node: M) : MetaItem<M>() {
+    data class NodeItem<M : Meta>(@Serializable(MetaSerializer::class) val node: M) : MetaItem<M>() {
+        //Fixing serializer for node could cause class cast problems, but it should not since Meta descendants are not serializeable
         override fun toString(): String = node.toString()
 
         @Serializer(NodeItem::class)
-        companion object : KSerializer<NodeItem<*>> {
-            override val descriptor: SerialDescriptor get() = ValueSerializer.descriptor
+        companion object : KSerializer<NodeItem<out Meta>> {
+            override val descriptor: SerialDescriptor get() = MetaSerializer.descriptor
 
             override fun deserialize(decoder: Decoder): NodeItem<*> = NodeItem(MetaSerializer.deserialize(decoder))
 
@@ -199,8 +201,9 @@ abstract class AbstractMetaNode<M : MetaNode<M>> : MetaNode<M>, MetaBase()
  *
  * If the argument is possibly mutable node, it is copied on creation
  */
-class SealedMeta internal constructor(override val items: Map<NameToken, MetaItem<SealedMeta>>) :
-    AbstractMetaNode<SealedMeta>()
+class SealedMeta internal constructor(
+    override val items: Map<NameToken, MetaItem<SealedMeta>>
+) : AbstractMetaNode<SealedMeta>()
 
 /**
  * Generate sealed node from [this]. If it is already sealed return it as is
