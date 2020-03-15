@@ -134,14 +134,11 @@ private fun Output.writeValue(value: Value, width: Int, left: Boolean = true) {
  * Write rows without header to the output
  */
 suspend fun Output.writeRows(rows: Rows<Value>) {
-    @Suppress("UNCHECKED_CAST") val header = rows.header.map {
-        if (it.type != Value::class) error("Expected Value column, but found ${it.type}") else (it as ColumnHeader<Value>)
-    }
-    val widths: List<Int> = header.map {
+    val widths: List<Int> = rows.header.map {
         it.textWidth
     }
     rows.rowFlow().collect { row ->
-        header.forEachIndexed { index, columnHeader ->
+        rows.header.forEachIndexed { index, columnHeader ->
             writeValue(row[columnHeader] ?: Null, widths[index])
         }
         writeUtf8String("\r\n")
