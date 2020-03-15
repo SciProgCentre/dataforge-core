@@ -6,7 +6,7 @@ plugins {
     id("scientifik.publish") version toolsVersion apply false
 }
 
-val dataforgeVersion by extra("0.1.5-dev-10")
+val dataforgeVersion by extra("0.1.5-dev-11")
 
 val bintrayRepo by extra("dataforge")
 val githubProject by extra("dataforge-core")
