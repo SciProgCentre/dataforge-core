@@ -4,6 +4,7 @@ import hep.dataforge.meta.*
 import hep.dataforge.meta.descriptors.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import hep.dataforge.values.Value
 
 /**
  * A container that holds a [Config] and a default item provider.
@@ -45,12 +46,15 @@ fun Configurable.getProperty(key: String) = getProperty(key.toName())
  * Set a configurable property
  */
 fun Configurable.setProperty(name: Name, item: MetaItem<*>?) {
-    if(validateItem(name,item)) {
+    if (validateItem(name, item)) {
         config[name] = item
     } else {
         error("Validation failed for property $name with value $item")
     }
 }
+
+fun Configurable.setProperty(name: Name, value: Value) = setProperty(name, MetaItem.ValueItem(value))
+fun Configurable.setProperty(name: Name, meta: Meta) = setProperty(name, MetaItem.NodeItem(meta))
 
 fun Configurable.setProperty(key: String, item: MetaItem<*>?) {
     setProperty(key.toName(), item)
@@ -58,4 +62,4 @@ fun Configurable.setProperty(key: String, item: MetaItem<*>?) {
 
 fun <T : Configurable> T.configure(meta: Meta): T = this.apply { config.update(meta) }
 
-fun <T : Configurable> T.configure(action: Config.() -> Unit): T = apply { config.apply(action) }
+inline fun <T : Configurable> T.configure(action: Config.() -> Unit): T = apply { config.apply(action) }

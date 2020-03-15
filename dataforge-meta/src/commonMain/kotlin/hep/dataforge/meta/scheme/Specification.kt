@@ -29,14 +29,14 @@ interface Specification<T : Configurable> {
     /**
      * Wrap a configuration using static meta as default
      */
-    fun wrap(config: Config = Config(), default: Meta): T = wrap(config){default[it]}
+    fun wrap(config: Config = Config(), default: Meta): T = wrap(config) { default[it] }
 
     /**
      * Wrap a configuration using static meta as default
      */
     fun wrap(default: Meta): T = wrap(
         Config()
-    ){default[it]}
+    ) { default[it] }
 }
 
 /**
@@ -57,8 +57,11 @@ fun <C : Configurable, S : Specification<C>> Configurable.update(spec: S, action
 fun <C : Configurable, S : Specification<C>> S.createStyle(action: C.() -> Unit): Meta =
     Config().also { update(it, action) }
 
-fun <T : Configurable> MetaItem<*>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(
-    Config(), it) }
+fun <T : Configurable> MetaItem<*>.spec(spec: Specification<T>): T? = node?.let {
+    spec.wrap(
+        Config(), it
+    )
+}
 
 @JvmName("configSpec")
 fun <T : Configurable> MetaItem<Config>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(it) }

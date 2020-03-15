@@ -168,14 +168,13 @@ fun Configurable.float(default: Float, key: Name? = null): ReadWriteProperty<Any
 /**
  * Enum delegate
  */
-inline fun <reified E : Enum<E>> Configurable.enum(default: E, key: Name? = null): ReadWriteProperty<Any?, E> {
-    return item(default, key).transform { it.enum<E>() ?: default }
-}
+fun <E : Enum<E>> Configurable.enum(
+    default: E, key: Name? = null, resolve: MetaItem<*>.() -> E?
+): ReadWriteProperty<Any?, E> = item(default, key).transform {it?.resolve() ?: default }
 
 /*
  * Extra delegates for special cases
  */
-
 fun Configurable.stringList(vararg strings: String, key: Name? = null): ReadWriteProperty<Any?, List<String>> =
     item(listOf(*strings), key) {
         it?.value?.stringList ?: emptyList()

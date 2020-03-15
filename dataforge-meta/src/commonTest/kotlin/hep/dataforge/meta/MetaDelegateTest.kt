@@ -13,15 +13,17 @@ class MetaDelegateTest {
 
     class InnerSpec : Scheme() {
         var innerValue by string()
-        companion object: SchemeSpec<InnerSpec>(::InnerSpec)
+
+        companion object : SchemeSpec<InnerSpec>(::InnerSpec)
     }
 
     class TestScheme : Scheme() {
         var myValue by string()
         var safeValue by double(2.2)
-        var enumValue by enum(TestEnum.YES)
+        var enumValue by enum(TestEnum.YES) { enum<TestEnum>() }
         var inner by spec(InnerSpec)
-        companion object: SchemeSpec<TestScheme>(::TestScheme)
+
+        companion object : SchemeSpec<TestScheme>(::TestScheme)
     }
 
     @Test
