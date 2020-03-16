@@ -18,11 +18,10 @@ open class Scheme() : Configurable, Described, MetaRepr {
     //constructor(config: Config, default: Meta) : this(config, { default[it] })
     constructor(config: Config) : this(config, { null })
 
-    final override var config: Config =
-        Config()
+    final override var config: Config = Config()
         internal set
 
-    lateinit var defaultProvider: (Name) -> MetaItem<*>?
+    var defaultProvider: (Name) -> MetaItem<*>? = { null }
         internal set
 
     final override var descriptor: NodeDescriptor? = null
@@ -53,8 +52,9 @@ open class Scheme() : Configurable, Described, MetaRepr {
                 token to item
             } ?: emptyMap()
     }
-
 }
+
+inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit) = apply(block)
 
 /**
  * A specification for simplified generation of wrappers

@@ -67,6 +67,7 @@ fun ItemDescriptor.validateItem(item: MetaItem<*>?): Boolean {
  *
  * @author Alexander Nozik
  */
+@DFBuilder
 class NodeDescriptor : ItemDescriptor() {
 
     /**

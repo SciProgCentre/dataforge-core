@@ -32,33 +32,36 @@ interface Configurable : Described {
     }
 
     override val descriptor: NodeDescriptor? get() = null
-}
 
-/**
- * Get a property with default
- */
-fun Configurable.getProperty(name: Name): MetaItem<*>? =
-    config[name] ?: getDefaultItem(name) ?: descriptor?.get(name)?.defaultItem()
+    /**
+     * Get a property with default
+     */
+    fun getProperty(name: Name): MetaItem<*>? =
+        config[name] ?: getDefaultItem(name) ?: descriptor?.get(name)?.defaultItem()
 
-fun Configurable.getProperty(key: String) = getProperty(key.toName())
-
-/**
- * Set a configurable property
- */
-fun Configurable.setProperty(name: Name, item: MetaItem<*>?) {
-    if (validateItem(name, item)) {
-        config[name] = item
-    } else {
-        error("Validation failed for property $name with value $item")
+    /**
+     * Set a configurable property
+     */
+    fun setProperty(name: Name, item: MetaItem<*>?) {
+        if (validateItem(name, item)) {
+            config[name] = item
+        } else {
+            error("Validation failed for property $name with value $item")
+        }
     }
 }
 
-fun Configurable.setProperty(name: Name, value: Value) = setProperty(name, MetaItem.ValueItem(value))
-fun Configurable.setProperty(name: Name, meta: Meta) = setProperty(name, MetaItem.NodeItem(meta))
+fun Configurable.getProperty(key: String) = getProperty(key.toName())
+
+fun Configurable.setProperty(name: Name, value: Value?) = setProperty(name, value?.let { MetaItem.ValueItem(value) })
+fun Configurable.setProperty(name: Name, meta: Meta?) = setProperty(name, meta?.let { MetaItem.NodeItem(meta) })
 
 fun Configurable.setProperty(key: String, item: MetaItem<*>?) {
     setProperty(key.toName(), item)
 }
+
+fun Configurable.setProperty(key: String, value: Value?) = setProperty(key, value?.let { MetaItem.ValueItem(value) })
+fun Configurable.setProperty(key: String, meta: Meta?) = setProperty(key, meta?.let { MetaItem.NodeItem(meta) })
 
 fun <T : Configurable> T.configure(meta: Meta): T = this.apply { config.update(meta) }
 

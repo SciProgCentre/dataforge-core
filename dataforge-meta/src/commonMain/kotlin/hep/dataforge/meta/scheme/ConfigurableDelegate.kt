@@ -170,7 +170,7 @@ fun Configurable.float(default: Float, key: Name? = null): ReadWriteProperty<Any
  */
 fun <E : Enum<E>> Configurable.enum(
     default: E, key: Name? = null, resolve: MetaItem<*>.() -> E?
-): ReadWriteProperty<Any?, E> = item(default, key).transform {it?.resolve() ?: default }
+): ReadWriteProperty<Any?, E> = item(default, key).transform { it?.resolve() ?: default }
 
 /*
  * Extra delegates for special cases
@@ -206,17 +206,31 @@ fun Configurable.node(key: Name? = null): ReadWriteProperty<Any?, Meta?> = item(
     writer = { it?.let { MetaItem.NodeItem(it) } }
 )
 
-fun <T : Configurable> Configurable.spec(spec: Specification<T>, key: Name? = null): ReadWriteProperty<Any?, T?> =
-    object : ReadWriteProperty<Any?, T?> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-            val name = key ?: property.name.asName()
-            return config[name].node?.let { spec.wrap(it) }
-        }
-
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
-            val name = key ?: property.name.asName()
-            config[name] = value?.config
-        }
-
+fun <T : Configurable> Configurable.spec(
+    spec: Specification<T>, key: Name? = null
+): ReadWriteProperty<Any?, T?> = object : ReadWriteProperty<Any?, T?> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
+        val name = key ?: property.name.asName()
+        return config[name].node?.let { spec.wrap(it) }
     }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+        val name = key ?: property.name.asName()
+        config[name] = value?.config
+    }
+}
+
+fun <T : Configurable> Configurable.spec(
+    spec: Specification<T>, default: T, key: Name? = null
+): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        val name = key ?: property.name.asName()
+        return config[name].node?.let { spec.wrap(it) }?:default
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+        val name = key ?: property.name.asName()
+        config[name] = value.config
+    }
+}
 
