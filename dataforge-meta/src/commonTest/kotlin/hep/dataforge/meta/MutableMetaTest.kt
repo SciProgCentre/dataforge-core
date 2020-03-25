@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 class MutableMetaTest{
     @Test
     fun testRemove(){
-        val meta = buildMeta {
+        val meta = Meta {
             "aNode" put {
                 "innerNode" put {
                     "innerValue" put true
@@ -14,7 +14,7 @@ class MutableMetaTest{
                 "b" put 22
                 "c" put "StringValue"
             }
-        }.toConfig()
+        }.asConfig()
 
         meta.remove("aNode.c")
         assertEquals(meta["aNode.c"], null)

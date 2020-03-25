@@ -1,11 +1,14 @@
 package hep.dataforge.names
 
+import kotlinx.serialization.*
+
 
 /**
  * The general interface for working with names.
  * The name is a dot separated list of strings like `token1.token2.token3`.
  * Each token could contain additional index in square brackets.
  */
+@Serializable
 class Name(val tokens: List<NameToken>) {
 
     val length get() = tokens.size
@@ -50,9 +53,21 @@ class Name(val tokens: List<NameToken>) {
         }
     }
 
-
-    companion object {
+    @Serializer(Name::class)
+    companion object : KSerializer<Name> {
         const val NAME_SEPARATOR = "."
+
+        val EMPTY = Name(emptyList())
+
+        override val descriptor: SerialDescriptor = PrimitiveDescriptor("hep.dataforge.names.Name", PrimitiveKind.STRING)
+
+        override fun deserialize(decoder: Decoder): Name {
+            return decoder.decodeString().toName()
+        }
+
+        override fun serialize(encoder: Encoder, value: Name) {
+            encoder.encodeString(value.toString())
+        }
     }
 }
 
@@ -61,6 +76,7 @@ class Name(val tokens: List<NameToken>) {
  * Following symbols are prohibited in name tokens: `{}.:\`.
  * A name token could have appendix in square brackets called *index*
  */
+@Serializable
 data class NameToken(val body: String, val index: String = "") {
 
     init {
@@ -80,6 +96,19 @@ data class NameToken(val body: String, val index: String = "") {
     }
 
     fun hasIndex() = index.isNotEmpty()
+
+    @Serializer(NameToken::class)
+    companion object : KSerializer<NameToken> {
+        override val descriptor: SerialDescriptor = PrimitiveDescriptor("hep.dataforge.names.NameToken", PrimitiveKind.STRING)
+
+        override fun deserialize(decoder: Decoder): NameToken {
+            return decoder.decodeString().toName().first()!!
+        }
+
+        override fun serialize(encoder: Encoder, value: NameToken) {
+            encoder.encodeString(value.toString())
+        }
+    }
 }
 
 /**
@@ -87,7 +116,7 @@ data class NameToken(val body: String, val index: String = "") {
  * This operation is rather heavy so it should be used with care in high performance code.
  */
 fun String.toName(): Name {
-    if (isBlank()) return EmptyName
+    if (isBlank()) return Name.EMPTY
     val tokens = sequence {
         var bodyBuilder = StringBuilder()
         var queryBuilder = StringBuilder()
@@ -139,7 +168,7 @@ fun String.toName(): Name {
  * Convert the [String] to a [Name] by simply wrapping it in a single name token without parsing.
  * The input string could contain dots and braces, but they are just escaped, not parsed.
  */
-fun String.asName(): Name = if (isBlank()) EmptyName else NameToken(this).asName()
+fun String.asName(): Name = if (isBlank()) Name.EMPTY else NameToken(this).asName()
 
 operator fun NameToken.plus(other: Name): Name = Name(listOf(this) + other.tokens)
 
@@ -152,8 +181,6 @@ operator fun Name.plus(other: NameToken): Name = Name(tokens + other)
 fun Name.appendLeft(other: String): Name = NameToken(other) + this
 
 fun NameToken.asName() = Name(listOf(this))
-
-val EmptyName = Name(emptyList())
 
 fun Name.isEmpty(): Boolean = this.length == 0
 
@@ -182,6 +209,8 @@ fun Name.startsWith(token: NameToken): Boolean = first() == token
 
 fun Name.endsWith(token: NameToken): Boolean = last() == token
 
-fun Name.startsWith(name: Name): Boolean = tokens.subList(0, name.length) == name.tokens
+fun Name.startsWith(name: Name): Boolean =
+    this.length >= name.length && tokens.subList(0, name.length) == name.tokens
 
-fun Name.endsWith(name: Name): Boolean = tokens.subList(length - name.length, length) == name.tokens
+fun Name.endsWith(name: Name): Boolean =
+    this.length >= name.length && tokens.subList(length - name.length, length) == name.tokens

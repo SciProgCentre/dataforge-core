@@ -1,18 +1,18 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Context
-import hep.dataforge.descriptors.NodeDescriptor
-import hep.dataforge.meta.*
-import hep.dataforge.names.Name
-import hep.dataforge.names.plus
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.MetaItem
+import hep.dataforge.meta.descriptors.NodeDescriptor
+import hep.dataforge.meta.setItem
 import hep.dataforge.values.*
-import kotlinx.io.core.Input
-import kotlinx.io.core.Output
-import kotlinx.io.core.readText
-import kotlinx.io.core.writeText
+import kotlinx.io.*
+import kotlinx.io.text.readUtf8String
+import kotlinx.io.text.writeUtf8String
 
 object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
-    override val name: Name = super.name + "bin"
+    override val shortName: String = "bin"
     override val key: Short = 0x4249//BI
 
     override fun invoke(meta: Meta, context: Context): MetaFormat = this
@@ -25,7 +25,7 @@ object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
 
     private fun Output.writeString(str: String) {
         writeInt(str.length)
-        writeText(str)
+        writeUtf8String(str)
     }
 
     fun Output.writeValue(value: Value) {
@@ -93,7 +93,7 @@ object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
 
     private fun Input.readString(): String {
         val length = readInt()
-        return readText(max = length)
+        return readUtf8String(length)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -115,7 +115,7 @@ object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
             }
             'M' -> {
                 val length = readInt()
-                val meta = buildMeta {
+                val meta = Meta {
                     (1..length).forEach { _ ->
                         val name = readString()
                         val item = readMetaItem()

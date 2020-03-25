@@ -11,12 +11,12 @@ class MetaExtensionTest {
 
     @Test
     fun testEnum(){
-        val meta = buildMeta{"enum" put TestEnum.test}
+        val meta = Meta{"enum" put TestEnum.test}
         meta["enum"].enum<TestEnum>()
     }
     @Test
     fun testEnumByString(){
-        val meta = buildMeta{"enum" put TestEnum.test.name}
+        val meta = Meta{"enum" put TestEnum.test.name}
         println(meta["enum"].enum<TestEnum>())
     }
 

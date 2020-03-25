@@ -36,7 +36,7 @@ data class PluginTag(
 
     override fun toString(): String = listOf(group, name, version).joinToString(separator = ":")
 
-    override fun toMeta(): Meta = buildMeta {
+    override fun toMeta(): Meta = Meta {
         "name" put name
         "group" put group
         "version" put version

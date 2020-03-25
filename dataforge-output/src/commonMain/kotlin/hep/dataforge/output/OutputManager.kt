@@ -1,13 +1,9 @@
 package hep.dataforge.output
 
-import hep.dataforge.context.AbstractPlugin
-import hep.dataforge.context.Context
-import hep.dataforge.context.PluginFactory
-import hep.dataforge.context.PluginTag
+import hep.dataforge.context.*
 import hep.dataforge.context.PluginTag.Companion.DATAFORGE_GROUP
 import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
-import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -22,14 +18,14 @@ interface OutputManager {
      * Get an output specialized for given type, name and stage.
      * @param stage represents the node or directory for the output. Empty means root node.
      * @param name represents the name inside the node.
-     * @param meta configuration for [Output] (not for rendered object)
+     * @param meta configuration for [Renderer] (not for rendered object)
      */
     operator fun <T : Any> get(
         type: KClass<out T>,
         name: Name,
-        stage: Name = EmptyName,
+        stage: Name = Name.EMPTY,
         meta: Meta = EmptyMeta
-    ): Output<T>
+    ): Renderer<T>
 }
 
 /**
@@ -42,28 +38,35 @@ val Context.output: OutputManager get() = plugins.get() ?: ConsoleOutputManager(
  */
 inline operator fun <reified T : Any> OutputManager.get(
     name: Name,
-    stage: Name = EmptyName,
+    stage: Name = Name.EMPTY,
     meta: Meta = EmptyMeta
-): Output<T> {
+): Renderer<T> {
     return get(T::class, name, stage, meta)
 }
 
 /**
  * Directly render an object using the most suitable renderer
  */
-fun OutputManager.render(obj: Any, name: Name, stage: Name = EmptyName, meta: Meta = EmptyMeta) =
+fun OutputManager.render(obj: Any, name: Name, stage: Name = Name.EMPTY, meta: Meta = EmptyMeta) =
     get(obj::class, name, stage).render(obj, meta)
 
 /**
  * System console output.
- * The [ConsoleOutput] is used when no other [OutputManager] is provided.
+ * The [CONSOLE_RENDERER] is used when no other [OutputManager] is provided.
  */
-expect val ConsoleOutput: Output<Any>
+val CONSOLE_RENDERER: Renderer<Any> = object : Renderer<Any> {
+    override fun render(obj: Any, meta: Meta) {
+        println(obj)
+    }
+
+    override val context: Context get() = Global
+
+}
 
 class ConsoleOutputManager : AbstractPlugin(), OutputManager {
     override val tag: PluginTag get() = ConsoleOutputManager.tag
 
-    override fun <T : Any> get(type: KClass<out T>, name: Name, stage: Name, meta: Meta): Output<T> = ConsoleOutput
+    override fun <T : Any> get(type: KClass<out T>, name: Name, stage: Name, meta: Meta): Renderer<T> = CONSOLE_RENDERER
 
     companion object : PluginFactory<ConsoleOutputManager> {
         override val tag = PluginTag("output.console", group = DATAFORGE_GROUP)

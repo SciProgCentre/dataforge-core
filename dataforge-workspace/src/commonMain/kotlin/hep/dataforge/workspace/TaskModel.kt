@@ -9,7 +9,6 @@ import hep.dataforge.data.DataFilter
 import hep.dataforge.data.DataTree
 import hep.dataforge.data.DataTreeBuilder
 import hep.dataforge.meta.*
-import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.names.toName
@@ -30,7 +29,7 @@ data class TaskModel(
     //TODO provide a way to get task descriptor
     //TODO add pre-run check of task result type?
 
-    override fun toMeta(): Meta = buildMeta {
+    override fun toMeta(): Meta = Meta {
         "name" put name.toString()
         "meta" put meta
         "dependsOn" put {
@@ -58,9 +57,6 @@ fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> {
     }.build()
 }
 
-@DslMarker
-annotation class TaskBuildScope
-
 interface TaskDependencyContainer {
     val defaultMeta: Meta
     fun add(dependency: Dependency)
@@ -71,21 +67,21 @@ interface TaskDependencyContainer {
  */
 fun TaskDependencyContainer.dependsOn(
     name: Name,
-    placement: Name = EmptyName,
+    placement: Name = Name.EMPTY,
     meta: Meta = defaultMeta
 ): WorkspaceTaskDependency =
     WorkspaceTaskDependency(name, meta, placement).also { add(it) }
 
 fun TaskDependencyContainer.dependsOn(
     name: String,
-    placement: Name = EmptyName,
+    placement: Name = Name.EMPTY,
     meta: Meta = defaultMeta
 ): WorkspaceTaskDependency =
     dependsOn(name.toName(), placement, meta)
 
 fun <T : Any> TaskDependencyContainer.dependsOn(
     task: Task<T>,
-    placement: Name = EmptyName,
+    placement: Name = Name.EMPTY,
     meta: Meta = defaultMeta
 ): DirectTaskDependency<T> =
     DirectTaskDependency(task, meta, placement).also { add(it) }
@@ -99,16 +95,16 @@ fun <T : Any> TaskDependencyContainer.dependsOn(
 
 fun <T : Any> TaskDependencyContainer.dependsOn(
     task: Task<T>,
-    placement: Name = EmptyName,
+    placement: Name = Name.EMPTY,
     metaBuilder: MetaBuilder.() -> Unit
 ): DirectTaskDependency<T> =
-    dependsOn(task, placement, buildMeta(metaBuilder))
+    dependsOn(task, placement, Meta(metaBuilder))
 
 /**
  * Add custom data dependency
  */
 fun TaskDependencyContainer.data(action: DataFilter.() -> Unit): DataDependency =
-    DataDependency(DataFilter.build(action)).also { add(it) }
+    DataDependency(DataFilter(action)).also { add(it) }
 
 /**
  * User-friendly way to add data dependency
@@ -123,7 +119,7 @@ fun TaskDependencyContainer.data(pattern: String? = null, from: String? = null, 
 /**
  * Add all data as root node
  */
-fun TaskDependencyContainer.allData(to: Name = EmptyName) = AllDataDependency(to).also { add(it) }
+fun TaskDependencyContainer.allData(to: Name = Name.EMPTY) = AllDataDependency(to).also { add(it) }
 
 /**
  * A builder for [TaskModel]

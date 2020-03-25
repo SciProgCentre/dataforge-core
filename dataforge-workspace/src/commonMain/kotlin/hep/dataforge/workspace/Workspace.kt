@@ -8,7 +8,6 @@ import hep.dataforge.data.DataNode
 import hep.dataforge.data.dataSequence
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.buildMeta
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
@@ -76,7 +75,7 @@ fun Workspace.run(task: String, meta: Meta) =
     tasks[task.toName()]?.let { run(it, meta) } ?: error("Task with name $task not found")
 
 fun Workspace.run(task: String, block: MetaBuilder.() -> Unit = {}) =
-    run(task, buildMeta(block))
+    run(task, Meta(block))
 
 fun <T: Any> Workspace.run(task: Task<T>, metaBuilder: MetaBuilder.() -> Unit = {}): DataNode<T> =
-    run(task, buildMeta(metaBuilder))
+    run(task, Meta(metaBuilder))

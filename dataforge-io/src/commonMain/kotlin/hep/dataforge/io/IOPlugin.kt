@@ -20,11 +20,14 @@ class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         metaFormatFactories.find { it.key == key }?.invoke(meta)
 
     fun metaFormat(name: String, meta: Meta = EmptyMeta): MetaFormat? =
-        metaFormatFactories.find { it.name.toString() == name }?.invoke(meta)
+        metaFormatFactories.find { it.shortName == name }?.invoke(meta)
 
     val envelopeFormatFactories by lazy {
         context.content<EnvelopeFormatFactory>(ENVELOPE_FORMAT_TYPE).values
     }
+
+    fun envelopeFormat(name: Name, meta: Meta = EmptyMeta) =
+        envelopeFormatFactories.find { it.name == name }?.invoke(meta, context)
 
     override fun provideTop(target: String): Map<Name, Any> {
         return when (target) {
@@ -49,7 +52,7 @@ class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
 
     companion object : PluginFactory<IOPlugin> {
         val defaultMetaFormats: List<MetaFormatFactory> = listOf(JsonMetaFormat, BinaryMetaFormat)
-        val defaultEnvelopeFormats = listOf(TaggedEnvelopeFormat)
+        val defaultEnvelopeFormats = listOf(TaggedEnvelopeFormat, TaglessEnvelopeFormat)
 
         override val tag: PluginTag = PluginTag("io", group = PluginTag.DATAFORGE_GROUP)
 

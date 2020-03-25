@@ -2,7 +2,7 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Named
 import hep.dataforge.data.DataNode
-import hep.dataforge.descriptors.Described
+import hep.dataforge.meta.descriptors.Described
 import hep.dataforge.meta.Meta
 import hep.dataforge.provider.Type
 import hep.dataforge.workspace.Task.Companion.TYPE

@@ -4,19 +4,20 @@ import hep.dataforge.context.Global
 import hep.dataforge.io.Envelope
 import hep.dataforge.io.Responder
 import hep.dataforge.io.TaggedEnvelopeFormat
-import hep.dataforge.io.writeBytes
+import hep.dataforge.io.writeByteArray
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.runBlocking
+import kotlinx.io.writeDouble
 import org.junit.AfterClass
 import org.junit.BeforeClass
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.ExperimentalTime
 
 @ExperimentalStdlibApi
 object EchoResponder : Responder {
     override suspend fun respond(request: Envelope): Envelope {
-        val string = TaggedEnvelopeFormat().run { writeBytes(request).decodeToString() }
+        val string = TaggedEnvelopeFormat().run { writeByteArray(request).decodeToString() }
         println("ECHO:")
         println(string)
         return request
@@ -43,7 +44,7 @@ class EnvelopeServerTest {
         }
     }
 
-    @Test
+    @Test(timeout = 1000)
     fun doEchoTest() {
         val request = Envelope.invoke {
             type = "test.echo"

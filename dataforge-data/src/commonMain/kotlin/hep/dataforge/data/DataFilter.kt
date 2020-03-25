@@ -1,10 +1,13 @@
 package hep.dataforge.data
 
 import hep.dataforge.meta.*
+import hep.dataforge.meta.scheme.Scheme
+import hep.dataforge.meta.scheme.SchemeSpec
+import hep.dataforge.meta.scheme.string
 import hep.dataforge.names.toName
 
 
-class DataFilter(override val config: Config) : Specific {
+class DataFilter : Scheme() {
     /**
      * A source node for the filter
      */
@@ -22,9 +25,7 @@ class DataFilter(override val config: Config) : Specific {
 
     fun isEmpty(): Boolean = config.isEmpty()
 
-    companion object : Specification<DataFilter> {
-        override fun wrap(config: Config): DataFilter = DataFilter(config)
-    }
+    companion object : SchemeSpec<DataFilter>(::DataFilter)
 }
 
 /**
@@ -54,4 +55,4 @@ fun <T : Any> DataNode<T>.filter(filter: Meta): DataNode<T> = filter(DataFilter.
  * Filter data using [DataFilter] builder
  */
 fun <T : Any> DataNode<T>.filter(filterBuilder: DataFilter.() -> Unit): DataNode<T> =
-    filter(DataFilter.build(filterBuilder))
+    filter(DataFilter.invoke(filterBuilder))

@@ -7,8 +7,8 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.provider.Type
-import kotlinx.io.core.Input
-import kotlinx.io.core.Output
+import kotlinx.io.Input
+import kotlinx.io.Output
 import kotlin.reflect.KClass
 
 /**
@@ -23,15 +23,19 @@ interface EnvelopeFormat : IOFormat<Envelope> {
 
     fun Input.readPartial(): PartialEnvelope
 
-    fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta = EmptyMeta)
+    fun Output.writeEnvelope(
+        envelope: Envelope,
+        metaFormatFactory: MetaFormatFactory = defaultMetaFormat,
+        formatMeta: Meta = EmptyMeta
+    )
 
     override fun Input.readObject(): Envelope
 
-    override fun Output.writeObject(obj: Envelope): Unit = writeEnvelope(obj, defaultMetaFormat)
+    override fun Output.writeObject(obj: Envelope): Unit = writeEnvelope(obj)
 }
 
 @Type(ENVELOPE_FORMAT_TYPE)
-interface EnvelopeFormatFactory : IOFormatFactory<Envelope> {
+interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeFormat {
     override val name: Name get() = "envelope".asName()
     override val type: KClass<out Envelope> get() = Envelope::class
 

@@ -1,9 +1,11 @@
 package hep.dataforge.meta
 
+import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 
 /**
- * A meta laminate consisting of multiple immutable meta layers. For mutable front layer, use [Styled].
+ * A meta laminate consisting of multiple immutable meta layers. For mutable front layer, use [Scheme].
+ * If [layers] list contains a [Laminate] it is flat-mapped.
  */
 class Laminate(layers: List<Meta>) : MetaBase() {
 
@@ -17,10 +19,11 @@ class Laminate(layers: List<Meta>) : MetaBase() {
 
     constructor(vararg layers: Meta?) : this(layers.filterNotNull())
 
-    override val items: Map<NameToken, MetaItem<Meta>>
-        get() = layers.map { it.items.keys }.flatten().associateWith { key ->
+    override val items: Map<NameToken, MetaItem<Meta>> by lazy {
+        layers.map { it.items.keys }.flatten().associateWith { key ->
             layers.asSequence().map { it.items[key] }.filterNotNull().let(replaceRule)
         }
+    }
 
     /**
      * Generate sealed meta using [mergeRule]
@@ -61,7 +64,7 @@ class Laminate(layers: List<Meta>) : MetaBase() {
                 }
                 else -> map {
                     when (it) {
-                        is MetaItem.ValueItem -> MetaItem.NodeItem(buildMeta { Meta.VALUE_KEY put it.value })
+                        is MetaItem.ValueItem -> MetaItem.NodeItem(Meta { Meta.VALUE_KEY put it.value })
                         is MetaItem.NodeItem -> it
                     }
                 }.merge()
@@ -75,6 +78,16 @@ class Laminate(layers: List<Meta>) : MetaBase() {
          */
         val mergeRule: (Sequence<MetaItem<*>>) -> MetaItem<SealedMeta> = { it.merge() }
     }
+}
+
+/**
+ * Performance optimized version of get method
+ */
+fun Laminate.getFirst(name: Name): MetaItem<*>? {
+    layers.forEach { layer ->
+        layer[name]?.let { return it }
+    }
+    return null
 }
 
 /**

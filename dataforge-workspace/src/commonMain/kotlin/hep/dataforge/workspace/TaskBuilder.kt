@@ -2,18 +2,18 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
 import hep.dataforge.data.*
-import hep.dataforge.descriptors.NodeDescriptor
+import hep.dataforge.meta.descriptors.NodeDescriptor
+import hep.dataforge.meta.DFBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
-import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
 import hep.dataforge.names.isEmpty
 import hep.dataforge.names.toName
 import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
-@TaskBuildScope
+@DFBuilder
 class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     private var modelTransform: TaskModelBuilder.(Meta) -> Unit = { allData() }
 //    private val additionalDependencies = HashSet<Dependency>()
@@ -56,7 +56,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
         block: TaskEnv.(DataNode<*>) -> DataNode<R>
     ) {
         dataTransforms += DataTransformation(from, to) { context, model, data ->
-            val env = TaskEnv(EmptyName, model.meta, context, data)
+            val env = TaskEnv(Name.EMPTY, model.meta, context, data)
             env.block(data)
         }
     }
@@ -69,7 +69,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     ) {
         dataTransforms += DataTransformation(from, to) { context, model, data ->
             data.ensureType(inputType)
-            val env = TaskEnv(EmptyName, model.meta, context, data)
+            val env = TaskEnv(Name.EMPTY, model.meta, context, data)
             env.block(data.cast(inputType))
         }
     }
@@ -200,7 +200,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
      * Use DSL to create a descriptor for this task
      */
     fun description(transform: NodeDescriptor.() -> Unit) {
-        this.descriptor = NodeDescriptor.build(transform)
+        this.descriptor = NodeDescriptor(transform)
     }
 
     internal fun build(): GenericTask<R> {

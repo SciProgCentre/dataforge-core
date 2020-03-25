@@ -5,8 +5,10 @@ import hep.dataforge.data.DataNode
 import hep.dataforge.data.filter
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
-import hep.dataforge.meta.buildMeta
-import hep.dataforge.names.*
+import hep.dataforge.names.Name
+import hep.dataforge.names.asName
+import hep.dataforge.names.isEmpty
+import hep.dataforge.names.plus
 
 /**
  * A dependency of the task which allows to lazily create a data tree for single dependency
@@ -15,7 +17,7 @@ sealed class Dependency : MetaRepr {
     abstract fun apply(workspace: Workspace): DataNode<Any>
 }
 
-class DataDependency(val filter: DataFilter, val placement: Name = EmptyName) : Dependency() {
+class DataDependency(val filter: DataFilter, val placement: Name = Name.EMPTY) : Dependency() {
     override fun apply(workspace: Workspace): DataNode<Any> {
         val result = workspace.data.filter(filter)
         return if (placement.isEmpty()) {
@@ -25,20 +27,20 @@ class DataDependency(val filter: DataFilter, val placement: Name = EmptyName) : 
         }
     }
 
-    override fun toMeta(): Meta = buildMeta {
+    override fun toMeta(): Meta = Meta {
         "data" put filter.config
         "to" put placement.toString()
     }
 }
 
-class AllDataDependency(val placement: Name = EmptyName) : Dependency() {
+class AllDataDependency(val placement: Name = Name.EMPTY) : Dependency() {
     override fun apply(workspace: Workspace): DataNode<Any> = if (placement.isEmpty()) {
         workspace.data
     } else {
         DataNode.invoke(Any::class) { this[placement] = workspace.data }
     }
 
-    override fun toMeta() = buildMeta {
+    override fun toMeta() = Meta {
         "data" put "@all"
         "to" put placement.toString()
     }
@@ -46,7 +48,7 @@ class AllDataDependency(val placement: Name = EmptyName) : Dependency() {
 
 abstract class TaskDependency<out T : Any>(
     val meta: Meta,
-    val placement: Name = EmptyName
+    val placement: Name = Name.EMPTY
 ) : Dependency() {
     abstract fun resolveTask(workspace: Workspace): Task<T>
 
@@ -66,7 +68,7 @@ abstract class TaskDependency<out T : Any>(
         }
     }
 
-    override fun toMeta(): Meta = buildMeta {
+    override fun toMeta(): Meta = Meta {
         "task" put name.toString()
         "meta" put meta
         "to" put placement.toString()

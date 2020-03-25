@@ -5,14 +5,13 @@ import hep.dataforge.context.ContextBuilder
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataTreeBuilder
 import hep.dataforge.meta.*
-import hep.dataforge.names.EmptyName
 import hep.dataforge.names.Name
 import hep.dataforge.names.isEmpty
 import hep.dataforge.names.toName
 import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
-@TaskBuildScope
+@DFBuilder
 interface WorkspaceBuilder {
     val parentContext: Context
     var context: Context
@@ -32,7 +31,7 @@ fun WorkspaceBuilder.context(name: String = "WORKSPACE", block: ContextBuilder.(
 }
 
 inline fun <reified T : Any> WorkspaceBuilder.data(
-    name: Name = EmptyName,
+    name: Name = Name.EMPTY,
     noinline block: DataTreeBuilder<T>.() -> Unit
 ): DataNode<T> {
     val node = DataTreeBuilder(T::class).apply(block)
@@ -47,13 +46,13 @@ inline fun <reified T : Any> WorkspaceBuilder.data(
 
 @JvmName("rawData")
 fun WorkspaceBuilder.data(
-    name: Name = EmptyName,
+    name: Name = Name.EMPTY,
     block: DataTreeBuilder<Any>.() -> Unit
 ): DataNode<Any> = data<Any>(name, block)
 
 
 fun WorkspaceBuilder.target(name: String, block: MetaBuilder.() -> Unit) {
-    targets[name] = buildMeta(block).seal()
+    targets[name] = Meta(block).seal()
 }
 
 /**

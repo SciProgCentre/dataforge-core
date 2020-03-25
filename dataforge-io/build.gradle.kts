@@ -1,30 +1,24 @@
+import scientifik.DependencySourceSet.TEST
+import scientifik.serialization
+
 plugins {
     id("scientifik.mpp")
 }
 
 description = "IO module"
 
-scientifik{
-    withSerialization()
-    withIO()
+serialization(sourceSet = TEST){
+    cbor()
 }
 
+val ioVersion by rootProject.extra("0.2.0-npm-dev-4")
 
 kotlin {
     sourceSets {
-        commonMain{
+        commonMain {
             dependencies {
                 api(project(":dataforge-context"))
-            }
-        }
-        jvmMain{
-            dependencies {
-
-            }
-        }
-        jsMain{
-            dependencies{
-                api(npm("text-encoding"))
+                api("org.jetbrains.kotlinx:kotlinx-io:$ioVersion")
             }
         }
     }

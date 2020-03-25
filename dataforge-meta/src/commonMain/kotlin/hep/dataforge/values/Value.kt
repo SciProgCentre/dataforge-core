@@ -1,5 +1,7 @@
 package hep.dataforge.values
 
+import kotlinx.serialization.Serializable
+
 
 /**
  * The list of supported Value types.
@@ -7,6 +9,7 @@ package hep.dataforge.values
  * Time value and binary value are represented by string
  *
  */
+@Serializable
 enum class ValueType {
     NUMBER, STRING, BOOLEAN, NULL
 }
@@ -41,7 +44,7 @@ interface Value {
      * get this value represented as List
      */
     val list: List<Value>
-        get() = if(this == Null) emptyList() else listOf(this)
+        get() = if (this == Null) emptyList() else listOf(this)
 
     override fun equals(other: Any?): Boolean
 
@@ -227,6 +230,8 @@ fun ShortArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { Numbe
 fun FloatArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
 fun ByteArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
+
+fun <E : Enum<E>> E.asValue(): Value = EnumValue(this)
 
 
 /**

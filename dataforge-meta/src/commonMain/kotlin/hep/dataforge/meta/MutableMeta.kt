@@ -1,9 +1,10 @@
 package hep.dataforge.meta
 
+import hep.dataforge.meta.scheme.Configurable
 import hep.dataforge.names.*
 import hep.dataforge.values.Value
 
-interface MutableMeta<M : MutableMeta<M>> : MetaNode<M> {
+interface MutableMeta<out M : MutableMeta<M>> : MetaNode<M> {
     override val items: Map<NameToken, MetaItem<M>>
     operator fun set(name: Name, item: MetaItem<*>?)
 //    fun onChange(owner: Any? = null, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit)
@@ -54,13 +55,14 @@ abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), 
             0 -> error("Can't setValue meta item for empty name")
             1 -> {
                 val token = name.first()!!
-                replaceItem(token, get(name), wrapItem(item))
+                @Suppress("UNCHECKED_CAST") val oldItem: MetaItem<M>? = get(name) as? MetaItem<M>
+                replaceItem(token, oldItem, wrapItem(item))
             }
             else -> {
                 val token = name.first()!!
                 //get existing or create new node. Query is ignored for new node
-                if(items[token] == null){
-                    replaceItem(token,null, MetaItem.NodeItem(empty()))
+                if (items[token] == null) {
+                    replaceItem(token, null, MetaItem.NodeItem(empty()))
                 }
                 items[token]?.node!![name.cutFirst()] = item
             }
@@ -71,6 +73,7 @@ abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), 
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MutableMeta<*>.remove(name: Name) = set(name, null)
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun MutableMeta<*>.remove(name: String) = remove(name.toName())
 
@@ -103,7 +106,7 @@ operator fun MutableMeta<*>.set(name: Name, value: Any?) {
         null -> remove(name)
         is MetaItem<*> -> setItem(name, value)
         is Meta -> setNode(name, value)
-        is Specific -> setNode(name, value.config)
+        is Configurable -> setNode(name, value.config)
         else -> setValue(name, Value.of(value))
     }
 }
@@ -111,6 +114,8 @@ operator fun MutableMeta<*>.set(name: Name, value: Any?) {
 operator fun MutableMeta<*>.set(name: NameToken, value: Any?) = set(name.asName(), value)
 
 operator fun MutableMeta<*>.set(key: String, value: Any?) = set(key.toName(), value)
+
+operator fun MutableMeta<*>.set(key: String, index: String, value: Any?) = set(key.toName().withIndex(index), value)
 
 /**
  * Update existing mutable node with another node. The rules are following:
@@ -158,7 +163,7 @@ operator fun MutableMeta<*>.set(name: String, metas: Iterable<Meta>): Unit = set
 /**
  * Append the node with a same-name-sibling, automatically generating numerical index
  */
-fun MutableMeta<*>.append(name: Name, value: Any?) {
+fun <M : MutableMeta<M>> M.append(name: Name, value: Any?) {
     require(!name.isEmpty()) { "Name could not be empty for append operation" }
     val newIndex = name.last()!!.index
     if (newIndex.isNotEmpty()) {
@@ -169,4 +174,4 @@ fun MutableMeta<*>.append(name: Name, value: Any?) {
     }
 }
 
-fun MutableMeta<*>.append(name: String, value: Any?) = append(name.toName(), value)
+fun <M : MutableMeta<M>> M.append(name: String, value: Any?) = append(name.toName(), value)

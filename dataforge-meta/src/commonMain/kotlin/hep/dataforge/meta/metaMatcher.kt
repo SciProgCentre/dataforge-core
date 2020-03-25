@@ -26,26 +26,13 @@ fun Meta.getIndexed(name: Name): Map<String, MetaItem<*>> {
 @DFExperimental
 fun Meta.getIndexed(name: String): Map<String, MetaItem<*>> = this@getIndexed.getIndexed(name.toName())
 
-
 /**
  * Get all items matching given name.
  */
+@Suppress("UNCHECKED_CAST")
 @DFExperimental
-fun <M : MetaNode<M>> M.getIndexed(name: Name): Map<String, MetaItem<M>> {
-    val root: MetaNode<M>? = when (name.length) {
-        0 -> error("Can't use empty name for that")
-        1 -> this
-        else -> (this[name.cutLast()] as? MetaItem.NodeItem<M>)?.node
-    }
-
-    val (body, index) = name.last()!!
-    val regex = index.toRegex()
-
-    return root?.items
-        ?.filter { it.key.body == body && (index.isEmpty() || regex.matches(it.key.index)) }
-        ?.mapKeys { it.key.index }
-        ?: emptyMap()
-}
+fun <M : MetaNode<M>> M.getIndexed(name: Name): Map<String, MetaItem<M>> =
+    (this as Meta).getIndexed(name) as Map<String, MetaItem<M>>
 
 @DFExperimental
 fun <M : MetaNode<M>> M.getIndexed(name: String): Map<String, MetaItem<M>> = getIndexed(name.toName())

@@ -1,15 +1,7 @@
 package hep.dataforge.meta
 
-import hep.dataforge.descriptors.NodeDescriptor
+import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.values.Value
-
-///**
-// * Find all elements with given body
-// */
-//private fun Meta.byBody(body: String): Map<String, MetaItem<*>> =
-//    items.filter { it.key.body == body }.mapKeys { it.key.index }
-//
-//private fun Meta.distinctNames() = items.keys.map { it.body }.distinct()
 
 /**
  * Convert meta to map of maps
@@ -28,7 +20,7 @@ fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
  * Convert map of maps to meta
  */
 @DFExperimental
-fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = buildMeta {
+fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = Meta {
     entries.forEach { (key, value) ->
         @Suppress("UNCHECKED_CAST")
         when (value) {

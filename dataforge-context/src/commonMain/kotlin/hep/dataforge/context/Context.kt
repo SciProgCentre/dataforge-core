@@ -103,7 +103,7 @@ open class Context(
         plugins.forEach { it.detach() }
     }
 
-    override fun toMeta(): Meta = buildMeta {
+    override fun toMeta(): Meta = Meta {
         "parent" to parent?.name
         "properties" put properties.seal()
         "plugins" put plugins.map { it.toMeta() }

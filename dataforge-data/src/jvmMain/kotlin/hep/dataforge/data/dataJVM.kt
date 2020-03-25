@@ -30,12 +30,10 @@ fun <R : Any> Data<*>.filterIsInstance(type: KClass<out R>): Data<R>? =
  * but could contain empty nodes
  */
 fun <R : Any> DataNode<*>.filterIsInstance(type: KClass<out R>): DataNode<R> {
-    return if (canCast(type)) {
-        cast(type)
-    } else if (this is TypeFilteredDataNode) {
-        origin.filterIsInstance(type)
-    } else {
-        TypeFilteredDataNode(this, type)
+    return when {
+        canCast(type) -> cast(type)
+        this is TypeFilteredDataNode -> origin.filterIsInstance(type)
+        else -> TypeFilteredDataNode(this, type)
     }
 }
 
@@ -44,8 +42,8 @@ fun <R : Any> DataNode<*>.filterIsInstance(type: KClass<out R>): DataNode<R> {
  */
 fun <R : Any> DataItem<*>?.filterIsInstance(type: KClass<out R>): DataItem<R>? = when (this) {
     null -> null
-    is DataItem.Node -> DataItem.Node(this.value.filterIsInstance(type))
-    is DataItem.Leaf -> this.value.filterIsInstance(type)?.let { DataItem.Leaf(it) }
+    is DataItem.Node -> DataItem.Node(this.node.filterIsInstance(type))
+    is DataItem.Leaf -> this.data.filterIsInstance(type)?.let { DataItem.Leaf(it) }
 }
 
 inline fun <reified R : Any> DataItem<*>?.filterIsInstance(): DataItem<R>? = this@filterIsInstance.filterIsInstance(R::class)

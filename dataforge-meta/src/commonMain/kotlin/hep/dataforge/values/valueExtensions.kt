@@ -1,7 +1,6 @@
 package hep.dataforge.values
 
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.buildMeta
 
 /**
  * Check if value is null
@@ -22,6 +21,7 @@ val Value.boolean
 val Value.int get() = number.toInt()
 val Value.double get() = number.toDouble()
 val Value.float get() = number.toFloat()
+val Value.short get() = number.toShort()
 val Value.long get() = number.toLong()
 
 val Value.stringList: List<String> get() = list.map { it.string }
@@ -34,4 +34,4 @@ val Value.doubleArray: DoubleArray
     }
 
 
-fun Value.toMeta() = buildMeta { Meta.VALUE_KEY put this }
+fun Value.toMeta() = Meta { Meta.VALUE_KEY put this }

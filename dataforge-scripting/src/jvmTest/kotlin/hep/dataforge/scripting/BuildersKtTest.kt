@@ -3,10 +3,11 @@ package hep.dataforge.scripting
 import hep.dataforge.context.Global
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
+import hep.dataforge.meta.scheme.int
 import hep.dataforge.workspace.SimpleWorkspaceBuilder
 import hep.dataforge.workspace.context
 import hep.dataforge.workspace.target
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 

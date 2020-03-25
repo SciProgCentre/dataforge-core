@@ -1,16 +1,26 @@
 package hep.dataforge.io
 
 import hep.dataforge.meta.*
+import kotlinx.io.Bytes
+import kotlinx.io.buildBytes
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.json
 import kotlinx.serialization.json.jsonArray
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+fun Meta.toBytes(format: MetaFormat = JsonMetaFormat): Bytes = buildBytes {
+    format.run { writeObject(this@toBytes) }
+}
+
+fun MetaFormat.fromBytes(packet: Bytes): Meta {
+    return packet.read { readObject() }
+}
+
 class MetaFormatTest {
     @Test
     fun testBinaryMetaFormat() {
-        val meta = buildMeta {
+        val meta = Meta {
             "a" put 22
             "node" put {
                 "b" put "DDD"
@@ -25,7 +35,7 @@ class MetaFormatTest {
 
     @Test
     fun testJsonMetaFormat() {
-        val meta = buildMeta {
+        val meta = Meta {
             "a" put 22
             "node" put {
                 "b" put "DDD"

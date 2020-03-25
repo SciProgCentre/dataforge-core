@@ -9,7 +9,6 @@ import hep.dataforge.io.type
 import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlinx.coroutines.*
-import kotlinx.io.streams.writePacket
 import java.net.ServerSocket
 import java.net.Socket
 import kotlin.concurrent.thread
@@ -71,14 +70,17 @@ class EnvelopeServer(
 
     private fun readSocket(socket: Socket) {
         thread {
-            val input = socket.getInputStream().asInput()
+            val inputStream = socket.getInputStream()
             val outputStream = socket.getOutputStream()
             format.run {
                 while (socket.isConnected) {
-                    val request = input.readObject()
+                    val request = inputStream.readBlocking { readObject() }
                     logger.debug { "Accepted request with type ${request.type} from ${socket.remoteSocketAddress}" }
                     if (request.type == SHUTDOWN_ENVELOPE_TYPE) {
                         //Echo shutdown command
+                        outputStream.write{
+                            writeObject(request)
+                        }
                         logger.info { "Accepted graceful shutdown signal from ${socket.inetAddress}" }
                         socket.close()
                         return@thread
@@ -86,7 +88,7 @@ class EnvelopeServer(
                     }
                     runBlocking {
                         val response = responder.respond(request)
-                        outputStream.writePacket {
+                        outputStream.write {
                             writeObject(response)
                         }
                         logger.debug { "Sent response with type ${response.type} to ${socket.remoteSocketAddress}" }

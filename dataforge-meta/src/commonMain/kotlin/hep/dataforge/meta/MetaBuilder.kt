@@ -15,6 +15,10 @@ class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
     override fun wrapNode(meta: Meta): MetaBuilder = if (meta is MetaBuilder) meta else meta.builder()
     override fun empty(): MetaBuilder = MetaBuilder()
 
+    infix fun String.put(item: MetaItem<*>?) {
+        set(this, item)
+    }
+
     infix fun String.put(value: Value?) {
         set(this, value)
     }
@@ -141,9 +145,11 @@ fun Meta.edit(builder: MetaBuilder.() -> Unit): MetaBuilder = builder().apply(bu
 /**
  * Build a [MetaBuilder] using given transformation
  */
+@Deprecated("To be replaced with fake constructor", ReplaceWith("Meta"))
 fun buildMeta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)
 
 /**
- * Build meta using given source meta as a base
+ * Build a [MetaBuilder] using given transformation
  */
-fun buildMeta(source: Meta, builder: MetaBuilder.() -> Unit): MetaBuilder = source.builder().apply(builder)
+@Suppress("FunctionName")
+fun Meta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)
