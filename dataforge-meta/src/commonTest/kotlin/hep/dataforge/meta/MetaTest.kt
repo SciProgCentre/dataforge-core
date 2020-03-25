@@ -32,7 +32,7 @@ class MetaTest {
     }
 
     @Test
-    fun metaToMap(){
+    fun metaToMap() {
         val meta = Meta {
             "a" put 22
             "b" put {
@@ -47,6 +47,19 @@ class MetaTest {
         val map = meta.toMap()
         val reconstructed = map.toMeta()
 
-        assertEquals(meta,reconstructed)
+        assertEquals(meta, reconstructed)
+    }
+
+    @Test
+    fun indexed() {
+        val meta = Meta {
+            (0..20).forEach {
+                set("a[$it]", it)
+            }
+        }
+        val indexed = meta.getIndexed("a[1.]")
+        assertEquals(10, indexed.size)
+        assertEquals(null, indexed["8"])
+        assertEquals(12, indexed["12"].int)
     }
 }

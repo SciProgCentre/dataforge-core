@@ -6,7 +6,6 @@ import hep.dataforge.values.Value
 /**
  * Convert meta to map of maps
  */
-@DFExperimental
 fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
     return items.entries.associate { (token, item) ->
         token.toString() to when (item) {
@@ -19,7 +18,6 @@ fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
 /**
  * Convert map of maps to meta
  */
-@DFExperimental
 fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = Meta {
     entries.forEach { (key, value) ->
         @Suppress("UNCHECKED_CAST")

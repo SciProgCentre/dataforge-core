@@ -4,7 +4,8 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 
 /**
- * Get all items matching given name.
+ * Get all items matching given name. The index of the last element, if present is used as a [Regex],
+ * against which indexes of elements are matched.
  */
 fun Meta.getIndexed(name: Name): Map<String, MetaItem<*>> {
     val root = when (name.length) {
