@@ -1,6 +1,5 @@
 package hep.dataforge.tables
 
-import hep.dataforge.meta.enum
 import hep.dataforge.meta.scheme.Scheme
 import hep.dataforge.meta.scheme.SchemeSpec
 import hep.dataforge.meta.scheme.enum
@@ -14,5 +13,5 @@ open class ColumnScheme : Scheme() {
 }
 
 class ValueColumnScheme : ColumnScheme() {
-    var valueType by enum(ValueType.STRING){enum<ValueType>()}
+    var valueType by enum(ValueType.STRING)
 }

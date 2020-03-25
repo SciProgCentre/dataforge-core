@@ -60,8 +60,10 @@ inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit) = apply(block)
  * A specification for simplified generation of wrappers
  */
 open class SchemeSpec<T : Scheme>(val builder: () -> T) : Specification<T> {
+    override fun empty(): T = builder()
+
     override fun wrap(config: Config, defaultProvider: (Name) -> MetaItem<*>?): T {
-        return builder().apply {
+        return empty().apply {
             this.config = config
             this.defaultProvider = defaultProvider
         }

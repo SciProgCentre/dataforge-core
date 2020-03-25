@@ -59,7 +59,8 @@ class Name(val tokens: List<NameToken>) {
 
         val EMPTY = Name(emptyList())
 
-        override val descriptor: SerialDescriptor = PrimitiveDescriptor("hep.dataforge.names.Name", PrimitiveKind.STRING)
+        override val descriptor: SerialDescriptor =
+            PrimitiveDescriptor("hep.dataforge.names.Name", PrimitiveKind.STRING)
 
         override fun deserialize(decoder: Decoder): Name {
             return decoder.decodeString().toName()
@@ -99,7 +100,8 @@ data class NameToken(val body: String, val index: String = "") {
 
     @Serializer(NameToken::class)
     companion object : KSerializer<NameToken> {
-        override val descriptor: SerialDescriptor = PrimitiveDescriptor("hep.dataforge.names.NameToken", PrimitiveKind.STRING)
+        override val descriptor: SerialDescriptor =
+            PrimitiveDescriptor("hep.dataforge.names.NameToken", PrimitiveKind.STRING)
 
         override fun deserialize(decoder: Decoder): NameToken {
             return decoder.decodeString().toName().first()!!
@@ -188,8 +190,12 @@ fun Name.isEmpty(): Boolean = this.length == 0
  * Set or replace last token index
  */
 fun Name.withIndex(index: String): Name {
-    val tokens = ArrayList(tokens)
     val last = NameToken(tokens.last().body, index)
+    if (length == 0) error("Can't add index to empty name")
+    if (length == 1) {
+        return last.asName()
+    }
+    val tokens = ArrayList(tokens)
     tokens.removeAt(tokens.size - 1)
     tokens.add(last)
     return Name(tokens)

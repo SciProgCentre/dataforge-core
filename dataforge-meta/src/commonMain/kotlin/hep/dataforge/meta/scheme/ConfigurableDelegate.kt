@@ -168,9 +168,10 @@ fun Configurable.float(default: Float, key: Name? = null): ReadWriteProperty<Any
 /**
  * Enum delegate
  */
-fun <E : Enum<E>> Configurable.enum(
-    default: E, key: Name? = null, resolve: MetaItem<*>.() -> E?
-): ReadWriteProperty<Any?, E> = item(default, key).transform { it?.resolve() ?: default }
+inline fun <reified E : Enum<E>> Configurable.enum(
+    default: E, key: Name? = null
+): ReadWriteProperty<Any?, E> =
+    item(default, key).transform { item -> item?.string?.let { enumValueOf<E>(it) } ?: default }
 
 /*
  * Extra delegates for special cases
@@ -225,7 +226,7 @@ fun <T : Configurable> Configurable.spec(
 ): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
         val name = key ?: property.name.asName()
-        return config[name].node?.let { spec.wrap(it) }?:default
+        return config[name].node?.let { spec.wrap(it) } ?: default
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {

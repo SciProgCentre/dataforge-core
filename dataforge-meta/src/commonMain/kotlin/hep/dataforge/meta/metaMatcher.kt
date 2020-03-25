@@ -6,12 +6,11 @@ import hep.dataforge.names.toName
 /**
  * Get all items matching given name.
  */
-@DFExperimental
 fun Meta.getIndexed(name: Name): Map<String, MetaItem<*>> {
     val root = when (name.length) {
-        0 -> error("Can't use empty name for that")
+        0 -> error("Can't use empty name for 'getIndexed'")
         1 -> this
-        else -> (this[name.cutLast()] as? MetaItem.NodeItem<*>)?.node
+        else -> this[name.cutLast()].node
     }
 
     val (body, index) = name.last()!!
@@ -23,16 +22,13 @@ fun Meta.getIndexed(name: Name): Map<String, MetaItem<*>> {
         ?: emptyMap()
 }
 
-@DFExperimental
 fun Meta.getIndexed(name: String): Map<String, MetaItem<*>> = this@getIndexed.getIndexed(name.toName())
 
 /**
  * Get all items matching given name.
  */
 @Suppress("UNCHECKED_CAST")
-@DFExperimental
 fun <M : MetaNode<M>> M.getIndexed(name: Name): Map<String, MetaItem<M>> =
     (this as Meta).getIndexed(name) as Map<String, MetaItem<M>>
 
-@DFExperimental
 fun <M : MetaNode<M>> M.getIndexed(name: String): Map<String, MetaItem<M>> = getIndexed(name.toName())
