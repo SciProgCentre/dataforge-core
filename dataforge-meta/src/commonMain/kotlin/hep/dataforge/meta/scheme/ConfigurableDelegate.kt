@@ -171,7 +171,10 @@ fun Configurable.float(default: Float, key: Name? = null): ReadWriteProperty<Any
 inline fun <reified E : Enum<E>> Configurable.enum(
     default: E, key: Name? = null
 ): ReadWriteProperty<Any?, E> =
-    item(default, key).transform { item -> item?.string?.let { enumValueOf<E>(it) } ?: default }
+    item(default, key).transform { item -> item?.string?.let {str->
+        @Suppress("USELESS_CAST")
+        enumValueOf<E>(str)  as E
+    } ?: default }
 
 /*
  * Extra delegates for special cases
