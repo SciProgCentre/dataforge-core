@@ -17,8 +17,6 @@ interface Specification<T : Configurable> {
         return wrap(config).apply(action)
     }
 
-    operator fun invoke(action: T.() -> Unit) = empty().apply(action)
-
     fun empty() = wrap()
 
     /**
@@ -36,6 +34,8 @@ interface Specification<T : Configurable> {
      */
     fun wrap(default: Meta): T = wrap(Config()) { default[it] }
 }
+
+inline operator fun <T : Configurable> Specification<T>.invoke(action: T.() -> Unit) = empty().apply(action)
 
 /**
  * Apply specified configuration to configurable
