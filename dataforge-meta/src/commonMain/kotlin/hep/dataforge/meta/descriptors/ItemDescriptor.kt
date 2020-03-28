@@ -1,7 +1,6 @@
 package hep.dataforge.meta.descriptors
 
 import hep.dataforge.meta.*
-import hep.dataforge.meta.scheme.*
 import hep.dataforge.names.*
 import hep.dataforge.values.False
 import hep.dataforge.values.True

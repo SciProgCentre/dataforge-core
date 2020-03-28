@@ -1,6 +1,5 @@
-package hep.dataforge.meta.scheme
+package hep.dataforge.meta
 
-import hep.dataforge.meta.*
 import hep.dataforge.meta.descriptors.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
@@ -59,7 +58,8 @@ inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit) = apply(block)
 /**
  * A specification for simplified generation of wrappers
  */
-open class SchemeSpec<T : Scheme>(val builder: () -> T) : Specification<T> {
+open class SchemeSpec<T : Scheme>(val builder: () -> T) :
+    Specification<T> {
     override fun empty(): T = builder()
 
     override fun wrap(config: Config, defaultProvider: (Name) -> MetaItem<*>?): T {

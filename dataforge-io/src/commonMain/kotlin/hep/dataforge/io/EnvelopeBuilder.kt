@@ -34,7 +34,7 @@ class EnvelopeBuilder {
     /**
      * Construct a data binary from given builder
      */
-    @ExperimentalIoApi
+    @OptIn(ExperimentalIoApi::class)
     fun data(block: Output.() -> Unit) {
         data = ArrayBinary.write(builder = block)
     }

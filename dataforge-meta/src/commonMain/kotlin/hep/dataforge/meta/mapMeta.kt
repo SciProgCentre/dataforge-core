@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package hep.dataforge.meta
 
 import hep.dataforge.meta.descriptors.NodeDescriptor

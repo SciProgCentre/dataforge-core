@@ -5,6 +5,9 @@ import hep.dataforge.meta.MetaItem
 import hep.dataforge.names.NameToken
 import hep.dataforge.values.Null
 
+/**
+ * A [Meta] that wraps a descriptor node
+ */
 class DescriptorMeta(val descriptor: NodeDescriptor) : MetaBase() {
     override val items: Map<NameToken, MetaItem<*>>
         get() = descriptor.items.entries.associate { entry ->

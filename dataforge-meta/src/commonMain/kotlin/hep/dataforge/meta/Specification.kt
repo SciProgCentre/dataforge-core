@@ -1,6 +1,5 @@
-package hep.dataforge.meta.scheme
+package hep.dataforge.meta
 
-import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import kotlin.jvm.JvmName
 

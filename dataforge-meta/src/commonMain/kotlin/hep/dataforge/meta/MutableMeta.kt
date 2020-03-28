@@ -1,6 +1,5 @@
 package hep.dataforge.meta
 
-import hep.dataforge.meta.scheme.Configurable
 import hep.dataforge.names.*
 import hep.dataforge.values.Value
 

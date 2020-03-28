@@ -1,9 +1,10 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package hep.dataforge.meta
 
 import hep.dataforge.meta.descriptors.ItemDescriptor
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.descriptors.ValueDescriptor
-import hep.dataforge.meta.scheme.getProperty
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.toName
 import hep.dataforge.values.*
