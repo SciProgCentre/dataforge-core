@@ -31,6 +31,7 @@ class MetaTest {
         assertEquals<Meta>(meta1, meta2)
     }
 
+    @OptIn(DFExperimental::class)
     @Test
     fun metaToMap() {
         val meta = Meta {

@@ -34,7 +34,7 @@ class YamlMetaFormatTest {
         assertEquals<Meta>(meta, meta.seal())
 
         meta.items.keys.forEach {
-            if (meta[it] != result[it]) error("${meta[it]} != ${result[it]}")
+            assertEquals(meta[it],result[it],"${meta[it]} != ${result[it]}")
         }
 
         assertEquals(meta, result)
