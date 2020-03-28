@@ -68,6 +68,9 @@ open class SchemeSpec<T : Scheme>(val builder: () -> T) : Specification<T> {
             this.defaultProvider = defaultProvider
         }
     }
+
+    @Suppress("OVERRIDE_BY_INLINE")
+    final override inline operator fun invoke(action: T.() -> Unit) = empty().apply(action)
 }
 
 /**

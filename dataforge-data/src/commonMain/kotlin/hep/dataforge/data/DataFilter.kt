@@ -1,9 +1,11 @@
 package hep.dataforge.data
 
-import hep.dataforge.meta.*
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.isEmpty
 import hep.dataforge.meta.scheme.Scheme
 import hep.dataforge.meta.scheme.SchemeSpec
 import hep.dataforge.meta.scheme.string
+import hep.dataforge.meta.scheme.wrap
 import hep.dataforge.names.toName
 
 
@@ -55,4 +57,4 @@ fun <T : Any> DataNode<T>.filter(filter: Meta): DataNode<T> = filter(DataFilter.
  * Filter data using [DataFilter] builder
  */
 fun <T : Any> DataNode<T>.filter(filterBuilder: DataFilter.() -> Unit): DataNode<T> =
-    filter(DataFilter.invoke(filterBuilder))
+    filter(DataFilter(filterBuilder))

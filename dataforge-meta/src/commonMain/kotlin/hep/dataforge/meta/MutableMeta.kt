@@ -17,7 +17,7 @@ interface MutableMeta<out M : MutableMeta<M>> : MetaNode<M> {
  * Changes in Meta are not thread safe.
  */
 abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), MutableMeta<M> {
-    protected val _items: MutableMap<NameToken, MetaItem<M>> = HashMap()
+    protected val _items: MutableMap<NameToken, MetaItem<M>> = LinkedHashMap()
 
     override val items: Map<NameToken, MetaItem<M>>
         get() = _items

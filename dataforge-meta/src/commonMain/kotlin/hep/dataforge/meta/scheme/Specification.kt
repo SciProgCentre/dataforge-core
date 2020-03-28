@@ -10,13 +10,6 @@ import kotlin.jvm.JvmName
  *
  */
 interface Specification<T : Configurable> {
-    /**
-     * Update given configuration using given type as a builder
-     */
-    fun update(config: Config, action: T.() -> Unit): T {
-        return wrap(config).apply(action)
-    }
-
     fun empty() = wrap()
 
     /**
@@ -24,18 +17,24 @@ interface Specification<T : Configurable> {
      */
     fun wrap(config: Config = Config(), defaultProvider: (Name) -> MetaItem<*>? = { null }): T
 
-    /**
-     * Wrap a configuration using static meta as default
-     */
-    fun wrap(config: Config = Config(), default: Meta): T = wrap(config) { default[it] }
-
-    /**
-     * Wrap a configuration using static meta as default
-     */
-    fun wrap(default: Meta): T = wrap(Config()) { default[it] }
+    operator fun invoke(action: T.() -> Unit) = empty().apply(action)
 }
 
-inline operator fun <T : Configurable> Specification<T>.invoke(action: T.() -> Unit) = empty().apply(action)
+/**
+ * Update given configuration using given type as a builder
+ */
+fun <T : Configurable> Specification<T>.update(config: Config, action: T.() -> Unit): T = wrap(config).apply(action)
+
+/**
+ * Wrap a configuration using static meta as default
+ */
+fun <T : Configurable> Specification<T>.wrap(config: Config = Config(), default: Meta): T = wrap(config) { default[it] }
+
+/**
+ * Wrap a configuration using static meta as default
+ */
+fun <T : Configurable> Specification<T>.wrap(default: Meta): T = wrap(Config()) { default[it] }
+
 
 /**
  * Apply specified configuration to configurable
