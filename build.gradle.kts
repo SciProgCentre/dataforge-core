@@ -1,6 +1,6 @@
 
 plugins {
-    val toolsVersion = "0.4.0"
+    val toolsVersion = "0.4.1"
     id("scientifik.mpp") version toolsVersion apply false
     id("scientifik.jvm") version toolsVersion apply false
     id("scientifik.publish") version toolsVersion apply false

@@ -4,9 +4,7 @@ import hep.dataforge.context.Context
 import hep.dataforge.meta.*
 import hep.dataforge.names.asName
 import kotlinx.io.*
-import kotlinx.io.text.readRawString
 import kotlinx.io.text.readUtf8Line
-import kotlinx.io.text.writeRawString
 import kotlinx.io.text.writeUtf8String
 
 @ExperimentalIoApi
@@ -31,17 +29,13 @@ class TaglessEnvelopeFormat(
         //printing all properties
         writeProperty(META_TYPE_PROPERTY, metaFormatFactory.shortName)
         //TODO add optional metaFormat properties
-        val actualSize: Int = if (envelope.data == null) {
-            0
-        } else {
-            envelope.data?.size ?: Binary.INFINITE
-        }
+        val actualSize: Int = envelope.data?.size ?: 0
 
         writeProperty(DATA_LENGTH_PROPERTY, actualSize)
 
         //Printing meta
         if (!envelope.meta.isEmpty()) {
-            val metaBytes = metaFormat.writeBytes(envelope.meta)
+            val metaBytes = metaFormat.toBinary(envelope.meta)
             writeProperty(META_LENGTH_PROPERTY, metaBytes.size + 2)
             writeUtf8String(metaStart + "\r\n")
             writeBinary(metaBytes)
@@ -71,7 +65,7 @@ class TaglessEnvelopeFormat(
                 properties[key] = value
             }
             //If can't read line, return envelope without data
-            if (eof()) return SimpleEnvelope(Meta.EMPTY, null)
+            if (exhausted()) return SimpleEnvelope(Meta.EMPTY, null)
             line = readUtf8Line()
         }
 
@@ -102,11 +96,11 @@ class TaglessEnvelopeFormat(
 
         val data: Binary? = if (properties.containsKey(DATA_LENGTH_PROPERTY)) {
             val bytes = ByteArray(properties[DATA_LENGTH_PROPERTY]!!.toInt())
-            readArray(bytes)
+            readByteArray(bytes)
             bytes.asBinary()
         } else {
-            ArrayBinary.write {
-                writeInput(this@readObject)
+            Binary {
+                copyTo(this)
             }
         }
 

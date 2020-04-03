@@ -7,7 +7,6 @@ import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlinx.io.*
 import kotlinx.io.text.readUtf8Line
-import kotlinx.io.text.writeRawString
 import kotlinx.io.text.writeUtf8String
 import kotlinx.serialization.toUtf8Bytes
 
@@ -29,7 +28,8 @@ class FrontMatterEnvelopeFormat(
             metaTypeRegex.matchEntire(line)?.groupValues?.first()
                 ?.let { io.metaFormat(it) } ?: YamlMetaFormat
 
-        val meta = buildBytes {
+        //TODO replace by preview
+        val meta = Binary {
             do {
                 line = readUtf8Line()
                 writeUtf8String(line + "\r\n")
@@ -53,7 +53,7 @@ class FrontMatterEnvelopeFormat(
             metaTypeRegex.matchEntire(line)?.groupValues?.first()
                 ?.let { io.metaFormat(it) } ?: YamlMetaFormat
 
-        val meta = buildBytes {
+        val meta = Binary {
             do {
                 writeUtf8String(readUtf8Line()  + "\r\n")
             } while (!line.startsWith(SEPARATOR))
@@ -62,7 +62,7 @@ class FrontMatterEnvelopeFormat(
                 readMeta()
             }
         }
-        val bytes = readRemaining()
+        val bytes = readByteArray()
         val data = bytes.asBinary()
         return SimpleEnvelope(meta, data)
     }

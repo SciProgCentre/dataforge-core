@@ -1,10 +1,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.meta.*
-import kotlinx.io.ArrayBinary
-import kotlinx.io.Binary
-import kotlinx.io.ExperimentalIoApi
-import kotlinx.io.Output
+import kotlinx.io.*
 
 class EnvelopeBuilder {
     private val metaBuilder = MetaBuilder()
@@ -36,7 +33,9 @@ class EnvelopeBuilder {
      */
     @OptIn(ExperimentalIoApi::class)
     fun data(block: Output.() -> Unit) {
-        data = ArrayBinary.write(builder = block)
+        val arrayBuilder = ByteArrayOutput()
+        arrayBuilder.block()
+        data = arrayBuilder.toByteArray().asBinary()
     }
 
     fun build() = SimpleEnvelope(metaBuilder.seal(), data)

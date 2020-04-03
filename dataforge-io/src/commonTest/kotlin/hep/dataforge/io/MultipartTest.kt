@@ -3,7 +3,6 @@ package hep.dataforge.io
 import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
-import kotlinx.io.text.writeRawString
 import kotlinx.io.text.writeUtf8String
 
 import kotlin.test.Test
@@ -33,9 +32,9 @@ class MultipartTest {
     @Test
     fun testParts() {
         TaggedEnvelopeFormat.run {
-            val singleEnvelopeData = writeBytes(envelopes[0])
+            val singleEnvelopeData = toBinary(envelopes[0])
             val singleEnvelopeSize = singleEnvelopeData.size
-            val bytes = writeBytes(partsEnvelope)
+            val bytes = toBinary(partsEnvelope)
             assertTrue(5*singleEnvelopeSize < bytes.size)
             val reconstructed = bytes.readWith(this)
             val parts = reconstructed.parts()?.toList() ?: emptyList()

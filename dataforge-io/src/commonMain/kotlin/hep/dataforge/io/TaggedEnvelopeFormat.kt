@@ -8,8 +8,6 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
 import kotlinx.io.*
-import kotlinx.io.text.readRawString
-import kotlinx.io.text.writeRawString
 
 @ExperimentalIoApi
 class TaggedEnvelopeFormat(
@@ -21,7 +19,7 @@ class TaggedEnvelopeFormat(
 //        ?: error("Meta format with key $metaFormatKey could not be resolved in $io")
 
 
-    private fun Tag.toBytes() = buildBytes(24) {
+    private fun Tag.toBinary() = Binary(24) {
         writeRawString(START_SEQUENCE)
         writeRawString(version.name)
         writeShort(metaFormatKey)
@@ -39,14 +37,10 @@ class TaggedEnvelopeFormat(
 
     override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) {
         val metaFormat = metaFormatFactory.invoke(formatMeta, io.context)
-        val metaBytes = metaFormat.writeBytes(envelope.meta)
-        val actualSize: ULong = if (envelope.data == null) {
-            0
-        } else {
-            envelope.data?.size ?: Binary.INFINITE
-        }.toULong()
+        val metaBytes = metaFormat.toBinary(envelope.meta)
+        val actualSize: ULong = (envelope.data?.size ?: 0).toULong()
         val tag = Tag(metaFormatFactory.key, metaBytes.size.toUInt() + 2u, actualSize)
-        writeBinary(tag.toBytes())
+        writeBinary(tag.toBinary())
         writeBinary(metaBytes)
         writeRawString("\r\n")
         envelope.data?.let {
@@ -73,7 +67,7 @@ class TaggedEnvelopeFormat(
             }
         }
 
-        val data = ByteArray(tag.dataSize.toInt()).also { readArray(it) }.asBinary()
+        val data = ByteArray(tag.dataSize.toInt()).also { readByteArray(it) }.asBinary()
 
         return SimpleEnvelope(meta, data)
     }

@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.io.Binary
 import kotlinx.io.ExperimentalIoApi
 import kotlinx.io.Output
-import kotlinx.io.RandomAccessBinary
 import kotlinx.io.text.forEachUtf8Line
 import kotlinx.io.text.readUtf8Line
 import kotlinx.io.text.readUtf8StringUntilDelimiter
@@ -76,7 +75,7 @@ suspend fun TextRows.buildRowIndex(): List<Int> = indexFlow().toList()
 @ExperimentalIoApi
 class TextTable(
     override val header: ValueTableHeader,
-    val binary: RandomAccessBinary,
+    val binary: Binary,
     val index: List<Int>
 ) : Table<Value> {
 
@@ -99,7 +98,7 @@ class TextTable(
     }
 
     companion object {
-        suspend operator fun invoke(header: ValueTableHeader, binary: RandomAccessBinary): TextTable {
+        suspend operator fun invoke(header: ValueTableHeader, binary: Binary): TextTable {
             val index = TextRows(header, binary).buildRowIndex()
             return TextTable(header, binary, index)
         }

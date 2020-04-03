@@ -11,6 +11,7 @@ import hep.dataforge.meta.toJson
 import hep.dataforge.meta.toMetaItem
 import kotlinx.io.Input
 import kotlinx.io.Output
+import kotlinx.io.readByteArray
 import kotlinx.io.text.readUtf8String
 import kotlinx.io.text.writeUtf8String
 import kotlinx.serialization.UnstableDefault
@@ -26,7 +27,7 @@ class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat {
     }
 
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
-        val str = readUtf8String()
+        val str = readByteArray().decodeToString()
         val jsonElement = json.parseJson(str)
         val item = jsonElement.toMetaItem(descriptor)
         return item.node ?: Meta.EMPTY

@@ -11,7 +11,7 @@ serialization(sourceSet = TEST){
     cbor()
 }
 
-val ioVersion by rootProject.extra("0.2.0-npm-dev-4")
+val ioVersion by rootProject.extra("0.2.0-npm-dev-6")
 
 kotlin {
     sourceSets {

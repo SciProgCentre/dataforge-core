@@ -68,11 +68,7 @@ interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
     }
 }
 
-fun <T : Any> IOFormat<T>.writeBytes(obj: T): Bytes = buildBytes { writeObject(obj) }
-
-
-fun <T : Any> IOFormat<T>.writeByteArray(obj: T): ByteArray = buildBytes { writeObject(obj) }.toByteArray()
-fun <T : Any> IOFormat<T>.readByteArray(array: ByteArray): T = array.asBinary().read { readObject() }
+fun <T : Any> IOFormat<T>.toBinary(obj: T): Binary = Binary { writeObject(obj) }
 
 object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
     override fun invoke(meta: Meta, context: Context): IOFormat<Double> = this

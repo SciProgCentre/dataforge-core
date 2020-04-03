@@ -2,11 +2,7 @@ package hep.dataforge.workspace
 
 import hep.dataforge.data.Data
 import hep.dataforge.data.await
-import hep.dataforge.io.Envelope
-import hep.dataforge.io.IOFormat
-import hep.dataforge.io.SimpleEnvelope
-import hep.dataforge.io.readWith
-import kotlinx.io.ArrayBinary
+import hep.dataforge.io.*
 import kotlin.reflect.KClass
 
 /**
@@ -18,8 +14,6 @@ fun <T : Any> Envelope.toData(type: KClass<out T>, format: IOFormat<T>): Data<T>
 
 suspend fun <T : Any> Data<T>.toEnvelope(format: IOFormat<T>): Envelope {
     val obj = await()
-    val binary = ArrayBinary.write {
-        format.run { writeObject(obj) }
-    }
+    val binary = format.toBinary(obj)
     return SimpleEnvelope(meta, binary)
 }

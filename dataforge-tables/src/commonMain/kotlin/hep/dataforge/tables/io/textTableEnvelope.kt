@@ -1,12 +1,13 @@
 package hep.dataforge.tables.io
 
+import hep.dataforge.io.Binary
+import hep.dataforge.io.EmptyBinary
 import hep.dataforge.io.Envelope
 import hep.dataforge.meta.*
 import hep.dataforge.tables.SimpleColumnHeader
 import hep.dataforge.tables.Table
 import hep.dataforge.values.Value
 import kotlinx.io.ByteArrayOutput
-import kotlinx.io.EmptyBinary
 import kotlinx.io.ExperimentalIoApi
 import kotlinx.io.asBinary
 

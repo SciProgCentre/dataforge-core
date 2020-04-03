@@ -11,8 +11,6 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
-import kotlinx.io.text.readRawString
-import kotlinx.io.text.writeRawString
 
 object EnvelopeParts {
     val MULTIPART_KEY = "multipart".asName()

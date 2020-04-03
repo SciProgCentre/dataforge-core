@@ -8,8 +8,51 @@ import hep.dataforge.meta.isEmpty
 import kotlinx.io.*
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.streams.asSequence
+
+fun <R> Path.read(block: Input.() -> R): R = asBinary().read(block = block)
+
+/**
+ * Write a live output to a newly created file. If file does not exist, throws error
+ */
+fun Path.write(block: Output.() -> Unit): Unit {
+    val stream = Files.newOutputStream(this, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW)
+    stream.asOutput().use(block)
+}
+
+/**
+ * Create a new file or append to exiting one with given output [block]
+ */
+fun Path.append(block: Output.() -> Unit): Unit {
+    val stream = Files.newOutputStream(
+        this,
+        StandardOpenOption.WRITE, StandardOpenOption.APPEND, StandardOpenOption.CREATE
+    )
+    stream.asOutput().use(block)
+}
+
+/**
+ * Create a new file or replace existing one using given output [block]
+ */
+fun Path.rewrite(block: Output.() -> Unit): Unit {
+    val stream = Files.newOutputStream(
+        this,
+        StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE
+    )
+    stream.asOutput().use(block)
+}
+
+fun Path.readEnvelope(format: EnvelopeFormat): Envelope {
+    val partialEnvelope: PartialEnvelope = asBinary().read {
+        format.run { readPartial() }
+    }
+    val offset: Int = partialEnvelope.dataOffset.toInt()
+    val size: Int = partialEnvelope.dataSize?.toInt() ?: (Files.size(this).toInt() - offset)
+    val binary = FileBinary(this, offset, size)
+    return SimpleEnvelope(partialEnvelope.meta, binary)
+}
 
 /**
  * Resolve IOFormat based on type
@@ -37,7 +80,7 @@ fun IOPlugin.readMetaFile(path: Path, formatOverride: MetaFormat? = null, descri
 
     val metaFormat = formatOverride ?: metaFormat(extension) ?: error("Can't resolve meta format $extension")
     return metaFormat.run {
-        actualPath.read{
+        actualPath.read {
             readMeta(descriptor)
         }
     }
@@ -59,7 +102,7 @@ fun IOPlugin.writeMetaFile(
         path
     }
     metaFormat.run {
-        actualPath.write{
+        actualPath.write {
             writeMeta(meta, descriptor)
         }
     }
@@ -131,7 +174,7 @@ fun IOPlugin.readEnvelopeFile(
     }
 
     return formatPeeker(path)?.let { format ->
-        FileEnvelope(path, format)
+        path.readEnvelope(format)
     } ?: if (readNonEnvelopes) { // if no format accepts file, read it as binary
         SimpleEnvelope(Meta.EMPTY, path.asBinary())
     } else null
@@ -156,7 +199,7 @@ fun IOPlugin.writeEnvelopeFile(
     envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat,
     metaFormat: MetaFormatFactory? = null
 ) {
-    path.write {
+    path.rewrite {
         with(envelopeFormat) {
             writeEnvelope(envelope, metaFormat ?: envelopeFormat.defaultMetaFormat)
         }
@@ -184,8 +227,8 @@ fun IOPlugin.writeEnvelopeDirectory(
     val dataFile = path.resolve(IOPlugin.DATA_FILE_NAME)
     dataFile.write {
         envelope.data?.read {
-            val copied = writeInput(this)
-            if (envelope.data?.size != Binary.INFINITE && copied != envelope.data?.size) {
+            val copied = copyTo(this@write)
+            if (copied != envelope.data?.size) {
                 error("The number of copied bytes does not equal data size")
             }
         }

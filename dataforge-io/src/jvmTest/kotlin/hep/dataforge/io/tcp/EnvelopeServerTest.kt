@@ -4,7 +4,7 @@ import hep.dataforge.context.Global
 import hep.dataforge.io.Envelope
 import hep.dataforge.io.Responder
 import hep.dataforge.io.TaggedEnvelopeFormat
-import hep.dataforge.io.writeByteArray
+import hep.dataforge.io.toByteArray
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.writeDouble
@@ -17,7 +17,7 @@ import kotlin.time.ExperimentalTime
 @ExperimentalStdlibApi
 object EchoResponder : Responder {
     override suspend fun respond(request: Envelope): Envelope {
-        val string = TaggedEnvelopeFormat().run { writeByteArray(request).decodeToString() }
+        val string = TaggedEnvelopeFormat().run { toByteArray(request).decodeToString() }
         println("ECHO:")
         println(string)
         return request

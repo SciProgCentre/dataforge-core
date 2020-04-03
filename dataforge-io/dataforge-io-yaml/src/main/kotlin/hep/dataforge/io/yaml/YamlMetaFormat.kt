@@ -10,23 +10,11 @@ import hep.dataforge.meta.toMap
 import hep.dataforge.meta.toMeta
 import kotlinx.io.Input
 import kotlinx.io.Output
+import kotlinx.io.asInputStream
 import kotlinx.io.readUByte
 import kotlinx.io.text.writeUtf8String
 import org.yaml.snakeyaml.Yaml
 import java.io.InputStream
-
-private class InputAsStream(val input: Input) : InputStream() {
-    override fun read(): Int {
-        if (input.eof()) return -1
-        return input.readUByte().toInt()
-    }
-
-    override fun close() {
-        input.close()
-    }
-}
-
-private fun Input.asStream() = InputAsStream(this)
 
 @DFExperimental
 class YamlMetaFormat(val meta: Meta) : MetaFormat {
@@ -38,7 +26,7 @@ class YamlMetaFormat(val meta: Meta) : MetaFormat {
     }
 
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
-        val map: Map<String, Any?> = yaml.load(asStream())
+        val map: Map<String, Any?> = yaml.load(asInputStream())
         return map.toMeta(descriptor)
     }
 

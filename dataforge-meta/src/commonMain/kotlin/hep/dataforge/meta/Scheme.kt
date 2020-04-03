@@ -23,9 +23,6 @@ open class Scheme() : Configurable, Described, MetaRepr {
     var defaultProvider: (Name) -> MetaItem<*>? = { null }
         internal set
 
-    final override var descriptor: NodeDescriptor? = null
-        internal set
-
     override fun getDefaultItem(name: Name): MetaItem<*>? {
         return defaultProvider(name) ?: descriptor?.get(name)?.defaultItem()
     }
@@ -78,15 +75,10 @@ open class SchemeSpec<T : Scheme>(val builder: () -> T) :
  */
 open class MetaScheme(
     val meta: Meta,
-    descriptor: NodeDescriptor? = null,
+    override val descriptor: NodeDescriptor? = null,
     config: Config = Config()
 ) : Scheme(config, meta::get) {
-    init {
-        this.descriptor = descriptor
-    }
-
-    override val defaultLayer: Meta
-        get() = Laminate(meta, descriptor?.defaultItem().node)
+    override val defaultLayer: Meta get() = Laminate(meta, descriptor?.defaultItem().node)
 }
 
 fun Meta.asScheme() =
