@@ -4,8 +4,10 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Factory
 import hep.dataforge.context.Named
 import hep.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
+import hep.dataforge.io.IOPlugin.Companion.IO_FORMAT_NAME_KEY
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaItem
+import hep.dataforge.meta.MetaRepr
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.provider.Type
@@ -18,12 +20,20 @@ import kotlin.reflect.KClass
 /**
  * And interface for reading and writing objects into with IO streams
  */
-interface IOFormat<T : Any> {
+interface IOFormat<T : Any> : MetaRepr {
     fun Output.writeObject(obj: T)
     fun Input.readObject(): T
 }
 
 fun <T : Any> Input.readWith(format: IOFormat<T>): T = format.run { readObject() }
+
+/**
+ * Read given binary as object using given format
+ */
+fun <T : Any> Binary.readWith(format: IOFormat<T>): T = read {
+    readWith(format)
+}
+
 fun <T : Any> Output.writeWith(format: IOFormat<T>, obj: T) = format.run { writeObject(obj) }
 
 class ListIOFormat<T : Any>(val format: IOFormat<T>) : IOFormat<List<T>> {
@@ -42,6 +52,11 @@ class ListIOFormat<T : Any>(val format: IOFormat<T>) : IOFormat<List<T>> {
             List(size) { readObject() }
         }
     }
+
+    override fun toMeta(): Meta = Meta {
+        IO_FORMAT_NAME_KEY put "list"
+        "contentFormat" put format.toMeta()
+    }
 }
 
 val <T : Any> IOFormat<T>.list get() = ListIOFormat(this)
@@ -57,11 +72,15 @@ fun ObjectPool<Buffer>.fill(block: Buffer.() -> Unit): Buffer {
 }
 
 @Type(IO_FORMAT_TYPE)
-interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
+interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named, MetaRepr {
     /**
      * Explicit type for dynamic type checks
      */
     val type: KClass<out T>
+
+    override fun toMeta(): Meta = Meta {
+        IO_FORMAT_NAME_KEY put name.toString()
+    }
 
     companion object {
         const val IO_FORMAT_TYPE = "io.format"
@@ -98,14 +117,5 @@ object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
     override fun Input.readObject(): Value {
         return (BinaryMetaFormat.run { readMetaItem() } as? MetaItem.ValueItem)?.value
             ?: error("The item is not a value")
-    }
-}
-
-/**
- * Read given binary as object using given format
- */
-fun <T : Any> Binary.readWith(format: IOFormat<T>): T = format.run {
-    read {
-        readObject()
     }
 }

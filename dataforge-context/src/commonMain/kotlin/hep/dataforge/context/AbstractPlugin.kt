@@ -1,13 +1,12 @@
 package hep.dataforge.context
 
-import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
-abstract class AbstractPlugin(override val meta: Meta = EmptyMeta) : Plugin {
+abstract class AbstractPlugin(override val meta: Meta = Meta.EMPTY) : Plugin {
     private var _context: Context? = null
     private val dependencies = ArrayList<PluginFactory<*>>()
 

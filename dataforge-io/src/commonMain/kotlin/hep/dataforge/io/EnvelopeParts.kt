@@ -1,123 +1,121 @@
 package hep.dataforge.io
 
-import hep.dataforge.context.Global
-import hep.dataforge.io.EnvelopeParts.FORMAT_META_KEY
-import hep.dataforge.io.EnvelopeParts.FORMAT_NAME_KEY
-import hep.dataforge.io.EnvelopeParts.INDEX_KEY
-import hep.dataforge.io.EnvelopeParts.MULTIPART_DATA_SEPARATOR
-import hep.dataforge.io.EnvelopeParts.MULTIPART_DATA_TYPE
-import hep.dataforge.io.EnvelopeParts.SIZE_KEY
+import hep.dataforge.io.Envelope.Companion.ENVELOPE_NODE_KEY
+import hep.dataforge.io.PartDescriptor.Companion.DEFAULT_MULTIPART_DATA_SEPARATOR
+import hep.dataforge.io.PartDescriptor.Companion.MULTIPART_DATA_TYPE
+import hep.dataforge.io.PartDescriptor.Companion.MULTIPART_KEY
+import hep.dataforge.io.PartDescriptor.Companion.PARTS_KEY
+import hep.dataforge.io.PartDescriptor.Companion.PART_FORMAT_KEY
+import hep.dataforge.io.PartDescriptor.Companion.SEPARATOR_KEY
 import hep.dataforge.meta.*
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
-import hep.dataforge.names.toName
+import kotlinx.io.Binary
+import kotlinx.io.writeBinary
 
-object EnvelopeParts {
-    val MULTIPART_KEY = "multipart".asName()
-    val SIZE_KEY = Envelope.ENVELOPE_NODE_KEY + MULTIPART_KEY + "size"
-    val INDEX_KEY = Envelope.ENVELOPE_NODE_KEY + MULTIPART_KEY + "index"
-    val FORMAT_NAME_KEY = Envelope.ENVELOPE_NODE_KEY + MULTIPART_KEY + "format"
-    val FORMAT_META_KEY = Envelope.ENVELOPE_NODE_KEY + MULTIPART_KEY + "meta"
+private class PartDescriptor : Scheme() {
+    var offset by int(0)
+    var size by int(0)
+    var meta by node()
 
-    const val MULTIPART_DATA_SEPARATOR = "\r\n#~PART~#\r\n"
+    companion object : SchemeSpec<PartDescriptor>(::PartDescriptor) {
+        val MULTIPART_KEY = ENVELOPE_NODE_KEY + "multipart"
+        val PARTS_KEY = MULTIPART_KEY + "parts"
+        val SEPARATOR_KEY = MULTIPART_KEY + "separator"
 
-    const val MULTIPART_DATA_TYPE = "envelope.multipart"
+        const val DEFAULT_MULTIPART_DATA_SEPARATOR = "\r\n#~PART~#\r\n"
+
+        val PART_FORMAT_KEY = "format".asName()
+
+        const val MULTIPART_DATA_TYPE = "envelope.multipart"
+    }
 }
 
-/**
- * Append multiple serialized envelopes to the data block. Previous data is erased if it was present
- */
-@DFExperimental
+data class EnvelopePart(val binary: Binary, val description: Meta?)
+
+typealias EnvelopeParts = List<EnvelopePart>
+
 fun EnvelopeBuilder.multipart(
-    envelopes: Collection<Envelope>,
-    format: EnvelopeFormatFactory,
-    formatMeta: Meta = EmptyMeta
+    parts: EnvelopeParts,
+    separator: String = DEFAULT_MULTIPART_DATA_SEPARATOR
 ) {
     dataType = MULTIPART_DATA_TYPE
-    meta {
-        SIZE_KEY put envelopes.size
-        FORMAT_NAME_KEY put format.name.toString()
-        if (!formatMeta.isEmpty()) {
-            FORMAT_META_KEY put formatMeta
+
+    var offsetCounter = 0
+    val separatorSize = separator.length
+    val partDescriptors = parts.map { (binary, description) ->
+        offsetCounter += separatorSize
+        PartDescriptor {
+            offset = offsetCounter
+            size = binary.size
+            meta = description
+        }.also {
+            offsetCounter += binary.size
         }
     }
+
+    meta {
+        if (separator != DEFAULT_MULTIPART_DATA_SEPARATOR) {
+            SEPARATOR_KEY put separator
+        }
+        setIndexed(PARTS_KEY, partDescriptors.map { it.toMeta() })
+    }
+
     data {
-        format(formatMeta).run {
-            envelopes.forEach {
-                writeRawString(MULTIPART_DATA_SEPARATOR)
-                writeEnvelope(it)
-            }
+        parts.forEach {
+            writeRawString(separator)
+            writeBinary(it.binary)
         }
     }
 }
 
-/**
- * Create a multipart partition in the envelope adding additional name-index mapping in meta
- */
-@DFExperimental
-fun EnvelopeBuilder.multipart(
-    envelopes: Map<String, Envelope>,
-    format: EnvelopeFormatFactory,
-    formatMeta: Meta = EmptyMeta
+fun EnvelopeBuilder.envelopes(
+    envelopes: List<Envelope>,
+    format: EnvelopeFormat = TaggedEnvelopeFormat,
+    separator: String = DEFAULT_MULTIPART_DATA_SEPARATOR
 ) {
-    dataType = MULTIPART_DATA_TYPE
-    meta {
-        SIZE_KEY put envelopes.size
-        FORMAT_NAME_KEY put format.name.toString()
-        if (!formatMeta.isEmpty()) {
-            FORMAT_META_KEY put formatMeta
-        }
+    val parts = envelopes.map {
+        val binary = format.toBinary(it)
+        EnvelopePart(binary, null)
     }
-    data {
-        format.run {
-            var counter = 0
-            envelopes.forEach { (key, envelope) ->
-                writeRawString(MULTIPART_DATA_SEPARATOR)
-                writeEnvelope(envelope)
-                meta {
-                    append(INDEX_KEY, Meta {
-                        "key" put key
-                        "index" put counter
-                    })
-                }
-                counter++
-            }
+    meta{
+        set(MULTIPART_KEY + PART_FORMAT_KEY, format.toMeta())
+    }
+    multipart(parts, separator)
+}
+
+fun Envelope.parts(): EnvelopeParts {
+    if (data == null) return emptyList()
+    //TODO add zip folder reader
+    val parts = meta.getIndexed(PARTS_KEY).values.mapNotNull { it.node }.map {
+        PartDescriptor.wrap(it)
+    }
+    return if (parts.isEmpty()) {
+        listOf(EnvelopePart(data!!, meta[MULTIPART_KEY].node))
+    } else {
+        parts.map {
+            val binary = data!!.view(it.offset, it.size)
+            val meta = Laminate(it.meta, meta[MULTIPART_KEY].node)
+            EnvelopePart(binary, meta)
         }
     }
 }
 
-@DFExperimental
-fun EnvelopeBuilder.multipart(
-    formatFactory: EnvelopeFormatFactory,
-    formatMeta: Meta = EmptyMeta,
-    builder: suspend SequenceScope<Envelope>.() -> Unit
-) = multipart(sequence(builder).toList(), formatFactory, formatMeta)
+fun EnvelopePart.envelope(format: EnvelopeFormat): Envelope = binary.readWith(format)
+
+val EnvelopePart.name: String? get() = description?.get("name").string
 
 /**
- * If given envelope supports multipart data, return a sequence of those parts (could be empty). Otherwise return null.
+ * Represent envelope part by an envelope
  */
-@DFExperimental
-fun Envelope.parts(io: IOPlugin = Global.plugins.fetch(IOPlugin)): Sequence<Envelope>? {
-    return when (dataType) {
-        MULTIPART_DATA_TYPE -> {
-            val size = meta[SIZE_KEY].int ?: error("Unsized parts not supported yet")
-            val formatName = meta[FORMAT_NAME_KEY].string?.toName()
-                ?: error("Inferring parts format is not supported at the moment")
-            val formatMeta = meta[FORMAT_META_KEY].node ?: EmptyMeta
-            val format = io.envelopeFormat(formatName, formatMeta)
-                ?: error("Format $formatName is not resolved by $io")
-            return format.run {
-                data?.read {
-                    sequence {
-                        repeat(size) {
-                            val separator = readRawString(MULTIPART_DATA_SEPARATOR.length)
-                            if(separator!= MULTIPART_DATA_SEPARATOR) error("Separator is expected, but $separator found")
-                            yield(readObject())
-                        }
-                    }
-                } ?: emptySequence()
-            }
-        }
-        else -> null
+fun EnvelopePart.envelope(plugin: IOPlugin): Envelope {
+    val formatItem = description?.get(PART_FORMAT_KEY)
+    return if (formatItem != null) {
+        val format: EnvelopeFormat = plugin.resolveEnvelopeFormat(formatItem)
+            ?: error("Envelope format for $formatItem is not resolved")
+        binary.readWith(format)
+    } else {
+        error("Envelope description not found")
+        //SimpleEnvelope(description ?: Meta.EMPTY, binary)
     }
 }

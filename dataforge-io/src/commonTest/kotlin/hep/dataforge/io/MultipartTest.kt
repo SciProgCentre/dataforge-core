@@ -1,17 +1,19 @@
 package hep.dataforge.io
 
+import hep.dataforge.context.Global
 import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
 import kotlinx.io.text.writeUtf8String
-
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @DFExperimental
 class MultipartTest {
-    val envelopes = (0..5).map {
+    val io: IOPlugin = Global.io
+
+    val envelopes = (0 until 5).map {
         Envelope {
             meta {
                 "value" put it
@@ -26,19 +28,21 @@ class MultipartTest {
     }
 
     val partsEnvelope = Envelope {
-        multipart(envelopes, TaggedEnvelopeFormat)
+        envelopes(envelopes, TaglessEnvelopeFormat)
     }
 
     @Test
     fun testParts() {
-        TaggedEnvelopeFormat.run {
+        TaglessEnvelopeFormat.run {
             val singleEnvelopeData = toBinary(envelopes[0])
             val singleEnvelopeSize = singleEnvelopeData.size
             val bytes = toBinary(partsEnvelope)
-            assertTrue(5*singleEnvelopeSize < bytes.size)
+            assertTrue(envelopes.size * singleEnvelopeSize < bytes.size)
             val reconstructed = bytes.readWith(this)
-            val parts = reconstructed.parts()?.toList() ?: emptyList()
-            assertEquals(2, parts[2].meta["value"].int)
+            println(reconstructed.meta)
+            val parts = reconstructed.parts()
+            val envelope = parts[2].envelope(io)
+            assertEquals(2, envelope.meta["value"].int)
             println(reconstructed.data!!.size)
         }
     }

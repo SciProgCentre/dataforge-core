@@ -16,7 +16,7 @@ interface Specification<T : Configurable> {
      */
     fun wrap(config: Config = Config(), defaultProvider: (Name) -> MetaItem<*>? = { null }): T
 
-    operator fun invoke(action: T.() -> Unit) = empty().apply(action)
+    operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
 }
 
 /**
@@ -27,12 +27,16 @@ fun <T : Configurable> Specification<T>.update(config: Config, action: T.() -> U
 /**
  * Wrap a configuration using static meta as default
  */
-fun <T : Configurable> Specification<T>.wrap(config: Config = Config(), default: Meta): T = wrap(config) { default[it] }
+fun <T : Configurable> Specification<T>.wrap(config: Config = Config(), default: Meta = Meta.EMPTY): T =
+    wrap(config) { default[it] }
 
 /**
  * Wrap a configuration using static meta as default
  */
-fun <T : Configurable> Specification<T>.wrap(default: Meta): T = wrap(Config()) { default[it] }
+fun <T : Configurable> Specification<T>.wrap(source: Meta): T {
+    val default = source.seal()
+    return wrap(source.asConfig(), default)
+}
 
 
 /**

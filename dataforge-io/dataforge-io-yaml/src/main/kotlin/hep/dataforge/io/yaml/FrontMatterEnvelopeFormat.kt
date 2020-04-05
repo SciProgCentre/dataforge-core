@@ -3,7 +3,6 @@ package hep.dataforge.io.yaml
 import hep.dataforge.context.Context
 import hep.dataforge.io.*
 import hep.dataforge.meta.DFExperimental
-import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlinx.io.*
 import kotlinx.io.text.readUtf8Line
@@ -13,7 +12,7 @@ import kotlinx.serialization.toUtf8Bytes
 @DFExperimental
 class FrontMatterEnvelopeFormat(
     val io: IOPlugin,
-    meta: Meta = EmptyMeta
+    val meta: Meta = Meta.EMPTY
 ) : EnvelopeFormat {
 
     override fun Input.readPartial(): PartialEnvelope {
@@ -26,7 +25,7 @@ class FrontMatterEnvelopeFormat(
 
         val readMetaFormat =
             metaTypeRegex.matchEntire(line)?.groupValues?.first()
-                ?.let { io.metaFormat(it) } ?: YamlMetaFormat
+                ?.let { io.resolveMetaFormat(it) } ?: YamlMetaFormat
 
         //TODO replace by preview
         val meta = Binary {
@@ -51,11 +50,11 @@ class FrontMatterEnvelopeFormat(
 
         val readMetaFormat =
             metaTypeRegex.matchEntire(line)?.groupValues?.first()
-                ?.let { io.metaFormat(it) } ?: YamlMetaFormat
+                ?.let { io.resolveMetaFormat(it) } ?: YamlMetaFormat
 
         val meta = Binary {
             do {
-                writeUtf8String(readUtf8Line()  + "\r\n")
+                writeUtf8String(readUtf8Line() + "\r\n")
             } while (!line.startsWith(SEPARATOR))
         }.read {
             readMetaFormat.run {
@@ -78,6 +77,11 @@ class FrontMatterEnvelopeFormat(
         }
     }
 
+    override fun toMeta(): Meta = Meta {
+        IOPlugin.IO_FORMAT_NAME_KEY put name.toString()
+        IOPlugin.IO_FORMAT_META_KEY put meta
+    }
+
     companion object : EnvelopeFormatFactory {
         const val SEPARATOR = "---"
 
@@ -88,11 +92,13 @@ class FrontMatterEnvelopeFormat(
         }
 
         override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
-            val line = input.readUtf8Line()
-            return if (line.startsWith("---")) {
-                invoke()
-            } else {
-                null
+            return input.preview {
+                val line = readUtf8Line()
+                return@preview if (line.startsWith("---")) {
+                    invoke()
+                } else {
+                    null
+                }
             }
         }
 

@@ -3,6 +3,8 @@ package hep.dataforge.meta
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.DoubleArraySerializer
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 
 fun SerialDescriptorBuilder.boolean(name: String, isOptional: Boolean = false, vararg annotations: Annotation) =
     element(name, Boolean.serializer().descriptor, isOptional = isOptional, annotations = annotations.toList())
@@ -63,3 +65,5 @@ inline fun Encoder.encodeStructure(
     encoder.block()
     encoder.endStructure(desc)
 }
+
+val PRETTY_JSON = Json(JsonConfiguration(prettyPrint = true, useArrayPolymorphism = true))

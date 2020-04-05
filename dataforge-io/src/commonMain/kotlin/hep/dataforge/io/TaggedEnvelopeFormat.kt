@@ -2,6 +2,7 @@ package hep.dataforge.io
 
 import hep.dataforge.context.Context
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.enum
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
 import hep.dataforge.names.Name
@@ -9,7 +10,6 @@ import hep.dataforge.names.plus
 import hep.dataforge.names.toName
 import kotlinx.io.*
 
-@ExperimentalIoApi
 class TaggedEnvelopeFormat(
     val io: IOPlugin,
     val version: VERSION = VERSION.DF02
@@ -58,7 +58,7 @@ class TaggedEnvelopeFormat(
     override fun Input.readObject(): Envelope {
         val tag = readTag(version)
 
-        val metaFormat = io.metaFormat(tag.metaFormatKey)
+        val metaFormat = io.resolveMetaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
         val meta: Meta = limit(tag.metaSize.toInt()).run {
@@ -67,7 +67,7 @@ class TaggedEnvelopeFormat(
             }
         }
 
-        val data = ByteArray(tag.dataSize.toInt()).also { readByteArray(it) }.asBinary()
+        val data = readBinary(tag.dataSize.toInt())
 
         return SimpleEnvelope(meta, data)
     }
@@ -75,7 +75,7 @@ class TaggedEnvelopeFormat(
     override fun Input.readPartial(): PartialEnvelope {
         val tag = readTag(version)
 
-        val metaFormat = io.metaFormat(tag.metaFormatKey)
+        val metaFormat = io.resolveMetaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
         val meta: Meta = limit(tag.metaSize.toInt()).run {
@@ -98,6 +98,13 @@ class TaggedEnvelopeFormat(
         DF03(24u)
     }
 
+    override fun toMeta(): Meta = Meta {
+        IOPlugin.IO_FORMAT_NAME_KEY put name.toString()
+        IOPlugin.IO_FORMAT_META_KEY put {
+            "version" put version
+        }
+    }
+
     companion object : EnvelopeFormatFactory {
         private const val START_SEQUENCE = "#~"
         private const val END_SEQUENCE = "~#\r\n"
@@ -111,7 +118,9 @@ class TaggedEnvelopeFormat(
             //Check if appropriate factory exists
             io.metaFormatFactories.find { it.name == metaFormatName } ?: error("Meta format could not be resolved")
 
-            return TaggedEnvelopeFormat(io)
+            val version: VERSION = meta["version"].enum<VERSION>() ?: VERSION.DF02
+
+            return TaggedEnvelopeFormat(io, version)
         }
 
         private fun Input.readTag(version: VERSION): Tag {
@@ -132,11 +141,13 @@ class TaggedEnvelopeFormat(
 
         override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
             return try {
-                val header = input.readRawString(6)
-                when (header.substring(2..5)) {
-                    VERSION.DF02.name -> TaggedEnvelopeFormat(io, VERSION.DF02)
-                    VERSION.DF03.name -> TaggedEnvelopeFormat(io, VERSION.DF03)
-                    else -> null
+                input.preview {
+                    val header = readRawString(6)
+                    return@preview when (header.substring(2..5)) {
+                        VERSION.DF02.name -> TaggedEnvelopeFormat(io, VERSION.DF02)
+                        VERSION.DF03.name -> TaggedEnvelopeFormat(io, VERSION.DF03)
+                        else -> null
+                    }
                 }
             } catch (ex: Exception) {
                 null

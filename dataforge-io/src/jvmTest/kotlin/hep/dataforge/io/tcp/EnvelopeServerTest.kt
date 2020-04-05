@@ -46,7 +46,7 @@ class EnvelopeServerTest {
 
     @Test(timeout = 1000)
     fun doEchoTest() {
-        val request = Envelope.invoke {
+        val request = Envelope {
             type = "test.echo"
             meta {
                 "test.value" put 22

@@ -1,7 +1,6 @@
 package hep.dataforge.io
 
 import hep.dataforge.meta.DFExperimental
-import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.isEmpty
@@ -60,7 +59,7 @@ fun Path.readEnvelope(format: EnvelopeFormat): Envelope {
 @Suppress("UNCHECKED_CAST")
 @DFExperimental
 inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
-    return ioFormats.values.find { it.type.isSuperclassOf(T::class) } as IOFormat<T>?
+    return ioFormatFactories.find { it.type.isSuperclassOf(T::class) } as IOFormat<T>?
 }
 
 /**
@@ -78,7 +77,7 @@ fun IOPlugin.readMetaFile(path: Path, formatOverride: MetaFormat? = null, descri
     }
     val extension = actualPath.fileName.toString().substringAfterLast('.')
 
-    val metaFormat = formatOverride ?: metaFormat(extension) ?: error("Can't resolve meta format $extension")
+    val metaFormat = formatOverride ?: resolveMetaFormat(extension) ?: error("Can't resolve meta format $extension")
     return metaFormat.run {
         actualPath.read {
             readMeta(descriptor)
@@ -157,7 +156,7 @@ fun IOPlugin.readEnvelopeFile(
             .singleOrNull { it.fileName.toString().startsWith(IOPlugin.META_FILE_NAME) }
 
         val meta = if (metaFile == null) {
-            EmptyMeta
+            Meta.EMPTY
         } else {
             readMetaFile(metaFile)
         }

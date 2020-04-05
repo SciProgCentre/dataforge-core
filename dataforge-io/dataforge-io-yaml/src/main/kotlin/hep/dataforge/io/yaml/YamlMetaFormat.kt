@@ -1,6 +1,7 @@
 package hep.dataforge.io.yaml
 
 import hep.dataforge.context.Context
+import hep.dataforge.io.IOPlugin
 import hep.dataforge.io.MetaFormat
 import hep.dataforge.io.MetaFormatFactory
 import hep.dataforge.meta.DFExperimental
@@ -11,10 +12,8 @@ import hep.dataforge.meta.toMeta
 import kotlinx.io.Input
 import kotlinx.io.Output
 import kotlinx.io.asInputStream
-import kotlinx.io.readUByte
 import kotlinx.io.text.writeUtf8String
 import org.yaml.snakeyaml.Yaml
-import java.io.InputStream
 
 @DFExperimental
 class YamlMetaFormat(val meta: Meta) : MetaFormat {
@@ -28,6 +27,11 @@ class YamlMetaFormat(val meta: Meta) : MetaFormat {
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
         val map: Map<String, Any?> = yaml.load(asInputStream())
         return map.toMeta(descriptor)
+    }
+
+    override fun toMeta(): Meta  = Meta{
+        IOPlugin.IO_FORMAT_NAME_KEY put FrontMatterEnvelopeFormat.name.toString()
+        IOPlugin.IO_FORMAT_META_KEY put meta
     }
 
     companion object : MetaFormatFactory {
