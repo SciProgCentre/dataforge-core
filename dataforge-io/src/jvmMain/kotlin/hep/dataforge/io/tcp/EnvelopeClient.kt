@@ -3,7 +3,6 @@ package hep.dataforge.io.tcp
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
 import hep.dataforge.io.*
-import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -17,7 +16,7 @@ class EnvelopeClient(
     val host: String,
     val port: Int,
     formatFactory: EnvelopeFormatFactory = TaggedEnvelopeFormat,
-    formatMeta: Meta = EmptyMeta
+    formatMeta: Meta = Meta.EMPTY
 ) : Responder, ContextAware {
 
     private val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()

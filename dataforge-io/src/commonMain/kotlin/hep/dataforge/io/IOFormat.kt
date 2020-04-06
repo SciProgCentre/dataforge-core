@@ -3,8 +3,8 @@ package hep.dataforge.io
 import hep.dataforge.context.Context
 import hep.dataforge.context.Factory
 import hep.dataforge.context.Named
+import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
-import hep.dataforge.io.IOPlugin.Companion.IO_FORMAT_NAME_KEY
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaItem
 import hep.dataforge.meta.MetaRepr
@@ -23,6 +23,11 @@ import kotlin.reflect.KClass
 interface IOFormat<T : Any> : MetaRepr {
     fun Output.writeObject(obj: T)
     fun Input.readObject(): T
+
+    companion object{
+        val NAME_KEY = "name".asName()
+        val META_KEY = "meta".asName()
+    }
 }
 
 fun <T : Any> Input.readWith(format: IOFormat<T>): T = format.run { readObject() }
@@ -54,7 +59,7 @@ class ListIOFormat<T : Any>(val format: IOFormat<T>) : IOFormat<List<T>> {
     }
 
     override fun toMeta(): Meta = Meta {
-        IO_FORMAT_NAME_KEY put "list"
+        NAME_KEY put "list"
         "contentFormat" put format.toMeta()
     }
 }
@@ -79,7 +84,7 @@ interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named, MetaRepr {
     val type: KClass<out T>
 
     override fun toMeta(): Meta = Meta {
-        IO_FORMAT_NAME_KEY put name.toString()
+        NAME_KEY put name.toString()
     }
 
     companion object {

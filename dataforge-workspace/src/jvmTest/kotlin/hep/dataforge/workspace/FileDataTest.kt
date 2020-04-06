@@ -5,15 +5,16 @@ import hep.dataforge.data.*
 import hep.dataforge.io.IOFormat
 import hep.dataforge.io.io
 import hep.dataforge.meta.DFExperimental
+import hep.dataforge.meta.Meta
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.Input
 import kotlinx.io.Output
 import kotlinx.io.text.readUtf8String
 import kotlinx.io.text.writeUtf8String
 import java.nio.file.Files
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
 
 class FileDataTest {
     val dataNode = DataNode<String> {
@@ -37,6 +38,10 @@ class FileDataTest {
             return readUtf8String()
         }
 
+        override fun toMeta(): Meta = Meta {
+            IOFormat.NAME_KEY put "string"
+        }
+
     }
 
     @Test
@@ -56,7 +61,7 @@ class FileDataTest {
 
 
     @Test
-    @Ignore
+    @DFExperimental
     fun testZipWriteRead() {
         Global.io.run {
             val zip = Files.createTempFile("df_data_node", ".zip")

@@ -1,7 +1,6 @@
 package hep.dataforge.output
 
 import hep.dataforge.context.ContextAware
-import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 
 /**
@@ -18,5 +17,5 @@ interface Renderer<in T : Any> : ContextAware {
      * By convention actual render is called in asynchronous mode, so this method should never
      * block execution
      */
-    fun render(obj: T, meta: Meta = EmptyMeta)
+    fun render(obj: T, meta: Meta = Meta.EMPTY)
 }

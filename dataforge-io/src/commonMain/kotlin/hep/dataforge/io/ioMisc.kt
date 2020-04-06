@@ -19,9 +19,6 @@ inline fun buildByteArray(expectedSize: Int = 16, block: Output.() -> Unit): Byt
 inline fun Binary(expectedSize: Int = 16, block: Output.() -> Unit): Binary =
     buildByteArray(expectedSize, block).asBinary()
 
-@Deprecated("To be replaced by Binary.EMPTY", level = DeprecationLevel.WARNING)
-val EmptyBinary = ByteArrayBinary(ByteArray(0))
-
 /**
  * View section of a [Binary] as an independent binary
  */

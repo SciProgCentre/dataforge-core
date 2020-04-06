@@ -2,6 +2,8 @@ package hep.dataforge.io.yaml
 
 import hep.dataforge.context.Context
 import hep.dataforge.io.*
+import hep.dataforge.io.IOFormat.Companion.META_KEY
+import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import kotlinx.io.*
@@ -78,8 +80,8 @@ class FrontMatterEnvelopeFormat(
     }
 
     override fun toMeta(): Meta = Meta {
-        IOPlugin.IO_FORMAT_NAME_KEY put name.toString()
-        IOPlugin.IO_FORMAT_META_KEY put meta
+        NAME_KEY put name.toString()
+        META_KEY put meta
     }
 
     companion object : EnvelopeFormatFactory {

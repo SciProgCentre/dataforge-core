@@ -124,7 +124,7 @@ fun TaskDependencyContainer.allData(to: Name = Name.EMPTY) = AllDataDependency(t
 /**
  * A builder for [TaskModel]
  */
-class TaskModelBuilder(val name: Name, meta: Meta = EmptyMeta) : TaskDependencyContainer {
+class TaskModelBuilder(val name: Name, meta: Meta = Meta.EMPTY) : TaskDependencyContainer {
     /**
      * Meta for current task. By default uses the whole input meta
      */

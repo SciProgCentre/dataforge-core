@@ -1,6 +1,8 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Context
+import hep.dataforge.io.IOFormat.Companion.META_KEY
+import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.enum
 import hep.dataforge.meta.get
@@ -99,8 +101,8 @@ class TaggedEnvelopeFormat(
     }
 
     override fun toMeta(): Meta = Meta {
-        IOPlugin.IO_FORMAT_NAME_KEY put name.toString()
-        IOPlugin.IO_FORMAT_META_KEY put {
+        NAME_KEY put name.toString()
+        META_KEY put {
             "version" put version
         }
     }

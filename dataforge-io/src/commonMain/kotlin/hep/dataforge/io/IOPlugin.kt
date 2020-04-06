@@ -2,11 +2,12 @@ package hep.dataforge.io
 
 import hep.dataforge.context.*
 import hep.dataforge.io.EnvelopeFormatFactory.Companion.ENVELOPE_FORMAT_TYPE
+import hep.dataforge.io.IOFormat.Companion.META_KEY
+import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
 import hep.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
-import hep.dataforge.names.asName
 import hep.dataforge.names.toName
 import kotlin.reflect.KClass
 
@@ -18,12 +19,12 @@ class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     }
 
     fun <T : Any> resolveIOFormat(item: MetaItem<*>, type: KClass<out T>): IOFormat<T>? {
-        val key = item.string ?: item.node[IO_FORMAT_NAME_KEY]?.string ?: error("Format name not defined")
+        val key = item.string ?: item.node[NAME_KEY]?.string ?: error("Format name not defined")
         val name = key.toName()
         return ioFormatFactories.find { it.name == name }?.let {
             @Suppress("UNCHECKED_CAST")
             if (it.type != type) error("Format type ${it.type} is not the same as requested type $type")
-            else it.invoke(item.node[IO_FORMAT_META_KEY].node ?: Meta.EMPTY, context) as IOFormat<T>
+            else it.invoke(item.node[META_KEY].node ?: Meta.EMPTY, context) as IOFormat<T>
         }
     }
 
@@ -46,8 +47,8 @@ class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         envelopeFormatFactories.find { it.name == name }?.invoke(meta, context)
 
     fun resolveEnvelopeFormat(item: MetaItem<*>): EnvelopeFormat? {
-        val name = item.string ?: item.node[IO_FORMAT_NAME_KEY]?.string ?: error("Envelope format name not defined")
-        val meta = item.node[IO_FORMAT_META_KEY].node ?: Meta.EMPTY
+        val name = item.string ?: item.node[NAME_KEY]?.string ?: error("Envelope format name not defined")
+        val meta = item.node[META_KEY].node ?: Meta.EMPTY
         return resolveEnvelopeFormat(name.toName(), meta)
     }
 
@@ -60,9 +61,6 @@ class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     }
 
     companion object : PluginFactory<IOPlugin> {
-        val IO_FORMAT_NAME_KEY = "name".asName()
-        val IO_FORMAT_META_KEY = "meta".asName()
-
         val defaultMetaFormats: List<MetaFormatFactory> = listOf(JsonMetaFormat, BinaryMetaFormat)
         val defaultEnvelopeFormats = listOf(TaggedEnvelopeFormat, TaglessEnvelopeFormat)
 

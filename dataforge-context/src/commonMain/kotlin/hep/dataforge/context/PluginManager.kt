@@ -1,9 +1,7 @@
 package hep.dataforge.context
 
-import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.buildMeta
 import kotlin.reflect.KClass
 
 /**
@@ -98,7 +96,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
     /**
      * Load a plugin using its factory
      */
-    fun <T : Plugin> load(factory: PluginFactory<T>, meta: Meta = EmptyMeta): T =
+    fun <T : Plugin> load(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY): T =
         load(factory(meta, context))
 
     fun <T : Plugin> load(factory: PluginFactory<T>, metaBuilder: MetaBuilder.() -> Unit): T =
@@ -121,7 +119,7 @@ class PluginManager(override val context: Context) : ContextAware, Iterable<Plug
      * Get an existing plugin with given meta or load new one using provided factory
      *
      */
-    fun <T : Plugin> fetch(factory: PluginFactory<T>, recursive: Boolean = true, meta: Meta = EmptyMeta): T {
+    fun <T : Plugin> fetch(factory: PluginFactory<T>, recursive: Boolean = true, meta: Meta = Meta.EMPTY): T {
         val loaded = get(factory.type, factory.tag, recursive)
         return when {
             loaded == null -> load(factory(meta, context))

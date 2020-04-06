@@ -1,6 +1,8 @@
 package hep.dataforge.data
 
-import hep.dataforge.meta.*
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaRepr
+import hep.dataforge.meta.isEmpty
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -31,14 +33,14 @@ interface Data<out T : Any> : Goal<T>, MetaRepr{
 
         operator fun <T : Any> invoke(
             type: KClass<out T>,
-            meta: Meta = EmptyMeta,
+            meta: Meta = Meta.EMPTY,
             context: CoroutineContext = EmptyCoroutineContext,
             dependencies: Collection<Data<*>> = emptyList(),
             block: suspend CoroutineScope.() -> T
         ): Data<T> = DynamicData(type, meta, context, dependencies, block)
 
         inline operator fun <reified T : Any> invoke(
-            meta: Meta = EmptyMeta,
+            meta: Meta = Meta.EMPTY,
             context: CoroutineContext = EmptyCoroutineContext,
             dependencies: Collection<Data<*>> = emptyList(),
             noinline block: suspend CoroutineScope.() -> T
@@ -47,7 +49,7 @@ interface Data<out T : Any> : Goal<T>, MetaRepr{
         operator fun <T : Any> invoke(
             name: String,
             type: KClass<out T>,
-            meta: Meta = EmptyMeta,
+            meta: Meta = Meta.EMPTY,
             context: CoroutineContext = EmptyCoroutineContext,
             dependencies: Collection<Data<*>> = emptyList(),
             block: suspend CoroutineScope.() -> T
@@ -55,14 +57,14 @@ interface Data<out T : Any> : Goal<T>, MetaRepr{
 
         inline operator fun <reified T : Any> invoke(
             name: String,
-            meta: Meta = EmptyMeta,
+            meta: Meta = Meta.EMPTY,
             context: CoroutineContext = EmptyCoroutineContext,
             dependencies: Collection<Data<*>> = emptyList(),
             noinline block: suspend CoroutineScope.() -> T
         ): Data<T> =
             invoke(name, T::class, meta, context, dependencies, block)
 
-        fun <T : Any> static(value: T, meta: Meta = EmptyMeta): Data<T> =
+        fun <T : Any> static(value: T, meta: Meta = Meta.EMPTY): Data<T> =
             StaticData(value, meta)
     }
 }
@@ -70,7 +72,7 @@ interface Data<out T : Any> : Goal<T>, MetaRepr{
 
 class DynamicData<T : Any>(
     override val type: KClass<out T>,
-    override val meta: Meta = EmptyMeta,
+    override val meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
     dependencies: Collection<Data<*>> = emptyList(),
     block: suspend CoroutineScope.() -> T
@@ -78,7 +80,7 @@ class DynamicData<T : Any>(
 
 class StaticData<T : Any>(
     value: T,
-    override val meta: Meta = EmptyMeta
+    override val meta: Meta = Meta.EMPTY
 ) : Data<T>, StaticGoal<T>(value) {
     override val type: KClass<out T> get() = value::class
 }

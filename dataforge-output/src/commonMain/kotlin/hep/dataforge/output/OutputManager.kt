@@ -2,7 +2,6 @@ package hep.dataforge.output
 
 import hep.dataforge.context.*
 import hep.dataforge.context.PluginTag.Companion.DATAFORGE_GROUP
-import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import kotlinx.coroutines.CoroutineDispatcher
@@ -24,7 +23,7 @@ interface OutputManager {
         type: KClass<out T>,
         name: Name,
         stage: Name = Name.EMPTY,
-        meta: Meta = EmptyMeta
+        meta: Meta = Meta.EMPTY
     ): Renderer<T>
 }
 
@@ -39,7 +38,7 @@ val Context.output: OutputManager get() = plugins.get() ?: ConsoleOutputManager(
 inline operator fun <reified T : Any> OutputManager.get(
     name: Name,
     stage: Name = Name.EMPTY,
-    meta: Meta = EmptyMeta
+    meta: Meta = Meta.EMPTY
 ): Renderer<T> {
     return get(T::class, name, stage, meta)
 }
@@ -47,7 +46,7 @@ inline operator fun <reified T : Any> OutputManager.get(
 /**
  * Directly render an object using the most suitable renderer
  */
-fun OutputManager.render(obj: Any, name: Name, stage: Name = Name.EMPTY, meta: Meta = EmptyMeta) =
+fun OutputManager.render(obj: Any, name: Name, stage: Name = Name.EMPTY, meta: Meta = Meta.EMPTY) =
     get(obj::class, name, stage).render(obj, meta)
 
 /**

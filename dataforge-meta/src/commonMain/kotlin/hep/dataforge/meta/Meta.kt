@@ -188,7 +188,7 @@ abstract class MetaBase : Meta {
 
     override fun hashCode(): Int = items.hashCode()
 
-    override fun toString(): String = PRETTY_JSON.stringify(MetaSerializer, this)
+    override fun toString(): String = JSON_PRETTY.stringify(MetaSerializer, this)
 }
 
 /**

@@ -250,7 +250,7 @@ fun <T : Any> DataTreeBuilder<T>.datum(name: String, data: Data<T>) {
     this[name.toName()] = data
 }
 
-fun <T : Any> DataTreeBuilder<T>.static(name: Name, data: T, meta: Meta = EmptyMeta) {
+fun <T : Any> DataTreeBuilder<T>.static(name: Name, data: T, meta: Meta = Meta.EMPTY) {
     this[name] = Data.static(data, meta)
 }
 

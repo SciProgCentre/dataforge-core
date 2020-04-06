@@ -66,4 +66,5 @@ inline fun Encoder.encodeStructure(
     encoder.endStructure(desc)
 }
 
-val PRETTY_JSON = Json(JsonConfiguration(prettyPrint = true, useArrayPolymorphism = true))
+val JSON_PRETTY = Json(JsonConfiguration(prettyPrint = true, useArrayPolymorphism = true))
+val JSON_PLAIN = Json(JsonConfiguration(prettyPrint = true, useArrayPolymorphism = true))

@@ -1,7 +1,8 @@
 package hep.dataforge.io.yaml
 
 import hep.dataforge.context.Context
-import hep.dataforge.io.IOPlugin
+import hep.dataforge.io.IOFormat.Companion.META_KEY
+import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.io.MetaFormat
 import hep.dataforge.io.MetaFormatFactory
 import hep.dataforge.meta.DFExperimental
@@ -30,8 +31,8 @@ class YamlMetaFormat(val meta: Meta) : MetaFormat {
     }
 
     override fun toMeta(): Meta  = Meta{
-        IOPlugin.IO_FORMAT_NAME_KEY put FrontMatterEnvelopeFormat.name.toString()
-        IOPlugin.IO_FORMAT_META_KEY put meta
+        NAME_KEY put FrontMatterEnvelopeFormat.name.toString()
+        META_KEY put meta
     }
 
     companion object : MetaFormatFactory {

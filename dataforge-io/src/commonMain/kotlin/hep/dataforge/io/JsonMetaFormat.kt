@@ -4,6 +4,7 @@ package hep.dataforge.io
 
 
 import hep.dataforge.context.Context
+import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.node
@@ -26,7 +27,7 @@ class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat {
     }
 
     override fun toMeta(): Meta  = Meta{
-        IOPlugin.IO_FORMAT_NAME_KEY put name.toString()
+        NAME_KEY put name.toString()
     }
 
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {

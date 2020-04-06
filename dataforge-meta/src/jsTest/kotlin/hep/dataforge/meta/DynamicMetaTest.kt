@@ -26,7 +26,7 @@ class DynamicMetaTest {
 
     @Test
     fun testMetaToDynamic(){
-        val meta = buildMeta {
+        val meta = Meta {
             "a" put 22
             "array" put listOf(1, 2, 3)
             "b" put "myString"
