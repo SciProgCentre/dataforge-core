@@ -66,5 +66,7 @@ inline fun Encoder.encodeStructure(
     encoder.endStructure(desc)
 }
 
+@OptIn(UnstableDefault::class)
 val JSON_PRETTY = Json(JsonConfiguration(prettyPrint = true, useArrayPolymorphism = true))
+@OptIn(UnstableDefault::class)
 val JSON_PLAIN = Json(JsonConfiguration(prettyPrint = true, useArrayPolymorphism = true))

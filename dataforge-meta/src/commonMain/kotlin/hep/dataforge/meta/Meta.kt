@@ -98,7 +98,9 @@ interface Meta : MetaRepr {
          */
         const val VALUE_KEY = "@value"
 
-        val EMPTY = EmptyMeta
+        val EMPTY: Meta = object: MetaBase() {
+            override val items: Map<NameToken, MetaItem<*>> = emptyMap()
+        }
     }
 }
 
@@ -214,11 +216,6 @@ fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(items.mapValues 
 fun MetaItem<*>.seal(): MetaItem<SealedMeta> = when (this) {
     is ValueItem -> this
     is NodeItem -> NodeItem(node.seal())
-}
-
-@Deprecated("Use Meta.EMPTY instead", replaceWith = ReplaceWith("Meta.EMPTY"))
-object EmptyMeta : MetaBase() {
-    override val items: Map<NameToken, MetaItem<*>> = emptyMap()
 }
 
 /**
