@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 class MetaBuilderTest {
     @Test
     fun testBuilder() {
-        val meta = buildMeta {
+        val meta = Meta {
             "a" put 22
             "b" put listOf(1, 2, 3)
             this["c"] = "myValue".asValue()
@@ -25,7 +25,7 @@ class MetaBuilderTest {
 
     @Test
     fun testSNS(){
-        val meta = buildMeta {
+        val meta = Meta {
             repeat(10){
                 "b.a[$it]" put it
             }

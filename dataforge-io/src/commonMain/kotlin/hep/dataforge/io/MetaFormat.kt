@@ -1,14 +1,17 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Context
-import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
 import hep.dataforge.provider.Type
-import kotlinx.io.*
+import kotlinx.io.ByteArrayInput
+import kotlinx.io.Input
+import kotlinx.io.Output
+import kotlinx.io.use
 import kotlin.reflect.KClass
 
 /**
@@ -44,14 +47,14 @@ interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
     }
 }
 
-fun Meta.toString(format: MetaFormat): String = buildBytes {
+fun Meta.toString(format: MetaFormat): String = buildByteArray {
     format.run { writeObject(this@toString) }
-}.toByteArray().decodeToString()
+}.decodeToString()
 
 fun Meta.toString(formatFactory: MetaFormatFactory): String = toString(formatFactory())
 
 fun MetaFormat.parse(str: String): Meta {
-    return str.encodeToByteArray().read { readObject() }
+    return ByteArrayInput(str.encodeToByteArray()).use { it.readObject() }
 }
 
 fun MetaFormatFactory.parse(str: String, formatMeta: Meta): Meta = invoke(formatMeta).parse(str)

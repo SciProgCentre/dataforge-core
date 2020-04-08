@@ -3,9 +3,11 @@ package hep.dataforge.io
 import hep.dataforge.context.Context
 import hep.dataforge.context.Factory
 import hep.dataforge.context.Named
+import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaItem
+import hep.dataforge.meta.MetaRepr
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.provider.Type
@@ -18,12 +20,25 @@ import kotlin.reflect.KClass
 /**
  * And interface for reading and writing objects into with IO streams
  */
-interface IOFormat<T : Any> {
+interface IOFormat<T : Any> : MetaRepr {
     fun Output.writeObject(obj: T)
     fun Input.readObject(): T
+
+    companion object{
+        val NAME_KEY = "name".asName()
+        val META_KEY = "meta".asName()
+    }
 }
 
 fun <T : Any> Input.readWith(format: IOFormat<T>): T = format.run { readObject() }
+
+/**
+ * Read given binary as object using given format
+ */
+fun <T : Any> Binary.readWith(format: IOFormat<T>): T = read {
+    readWith(format)
+}
+
 fun <T : Any> Output.writeWith(format: IOFormat<T>, obj: T) = format.run { writeObject(obj) }
 
 class ListIOFormat<T : Any>(val format: IOFormat<T>) : IOFormat<List<T>> {
@@ -42,6 +57,11 @@ class ListIOFormat<T : Any>(val format: IOFormat<T>) : IOFormat<List<T>> {
             List(size) { readObject() }
         }
     }
+
+    override fun toMeta(): Meta = Meta {
+        NAME_KEY put "list"
+        "contentFormat" put format.toMeta()
+    }
 }
 
 val <T : Any> IOFormat<T>.list get() = ListIOFormat(this)
@@ -57,22 +77,22 @@ fun ObjectPool<Buffer>.fill(block: Buffer.() -> Unit): Buffer {
 }
 
 @Type(IO_FORMAT_TYPE)
-interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
+interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named, MetaRepr {
     /**
      * Explicit type for dynamic type checks
      */
     val type: KClass<out T>
+
+    override fun toMeta(): Meta = Meta {
+        NAME_KEY put name.toString()
+    }
 
     companion object {
         const val IO_FORMAT_TYPE = "io.format"
     }
 }
 
-fun <T : Any> IOFormat<T>.writeBytes(obj: T): Bytes = buildBytes { writeObject(obj) }
-
-
-fun <T : Any> IOFormat<T>.writeByteArray(obj: T): ByteArray = buildBytes { writeObject(obj) }.toByteArray()
-fun <T : Any> IOFormat<T>.readByteArray(array: ByteArray): T = array.asBinary().read { readObject() }
+fun <T : Any> IOFormat<T>.toBinary(obj: T): Binary = Binary { writeObject(obj) }
 
 object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
     override fun invoke(meta: Meta, context: Context): IOFormat<Double> = this
@@ -102,14 +122,5 @@ object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
     override fun Input.readObject(): Value {
         return (BinaryMetaFormat.run { readMetaItem() } as? MetaItem.ValueItem)?.value
             ?: error("The item is not a value")
-    }
-}
-
-/**
- * Read given binary as object using given format
- */
-fun <T : Any> Binary.readWith(format: IOFormat<T>): T = format.run {
-    read {
-        readObject()
     }
 }

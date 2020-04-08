@@ -98,7 +98,9 @@ interface Meta : MetaRepr {
          */
         const val VALUE_KEY = "@value"
 
-        val EMPTY: EmptyMeta = EmptyMeta
+        val EMPTY: Meta = object: MetaBase() {
+            override val items: Map<NameToken, MetaItem<*>> = emptyMap()
+        }
     }
 }
 
@@ -188,7 +190,7 @@ abstract class MetaBase : Meta {
 
     override fun hashCode(): Int = items.hashCode()
 
-    override fun toString(): String = toJson().toString()
+    override fun toString(): String = JSON_PRETTY.stringify(MetaSerializer, this)
 }
 
 /**
@@ -214,10 +216,6 @@ fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(items.mapValues 
 fun MetaItem<*>.seal(): MetaItem<SealedMeta> = when (this) {
     is ValueItem -> this
     is NodeItem -> NodeItem(node.seal())
-}
-
-object EmptyMeta : MetaBase() {
-    override val items: Map<NameToken, MetaItem<*>> = emptyMap()
 }
 
 /**
@@ -251,4 +249,4 @@ val <M : Meta> MetaItem<M>?.node: M?
         is NodeItem -> node
     }
 
-fun Meta.isEmpty() = this === EmptyMeta || this.items.isEmpty()
+fun Meta.isEmpty() = this === Meta.EMPTY || this.items.isEmpty()

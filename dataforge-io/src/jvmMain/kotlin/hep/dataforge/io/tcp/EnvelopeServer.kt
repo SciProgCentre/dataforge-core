@@ -6,7 +6,6 @@ import hep.dataforge.io.EnvelopeFormatFactory
 import hep.dataforge.io.Responder
 import hep.dataforge.io.TaggedEnvelopeFormat
 import hep.dataforge.io.type
-import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlinx.coroutines.*
 import java.net.ServerSocket
@@ -19,7 +18,7 @@ class EnvelopeServer(
     val responder: Responder,
     val scope: CoroutineScope,
     formatFactory: EnvelopeFormatFactory = TaggedEnvelopeFormat,
-    formatMeta: Meta = EmptyMeta
+    formatMeta: Meta = Meta.EMPTY
 ) : ContextAware {
 
     private var job: Job? = null
@@ -78,7 +77,7 @@ class EnvelopeServer(
                     logger.debug { "Accepted request with type ${request.type} from ${socket.remoteSocketAddress}" }
                     if (request.type == SHUTDOWN_ENVELOPE_TYPE) {
                         //Echo shutdown command
-                        outputStream.write{
+                        outputStream.write {
                             writeObject(request)
                         }
                         logger.info { "Accepted graceful shutdown signal from ${socket.inetAddress}" }

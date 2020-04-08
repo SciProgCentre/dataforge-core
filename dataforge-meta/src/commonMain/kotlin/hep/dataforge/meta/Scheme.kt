@@ -1,6 +1,5 @@
-package hep.dataforge.meta.scheme
+package hep.dataforge.meta
 
-import hep.dataforge.meta.*
 import hep.dataforge.meta.descriptors.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
@@ -22,9 +21,6 @@ open class Scheme() : Configurable, Described, MetaRepr {
         internal set
 
     var defaultProvider: (Name) -> MetaItem<*>? = { null }
-        internal set
-
-    final override var descriptor: NodeDescriptor? = null
         internal set
 
     override fun getDefaultItem(name: Name): MetaItem<*>? {
@@ -59,13 +55,19 @@ inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit) = apply(block)
 /**
  * A specification for simplified generation of wrappers
  */
-open class SchemeSpec<T : Scheme>(val builder: () -> T) : Specification<T> {
+open class SchemeSpec<T : Scheme>(val builder: () -> T) :
+    Specification<T> {
+    override fun empty(): T = builder()
+
     override fun wrap(config: Config, defaultProvider: (Name) -> MetaItem<*>?): T {
-        return builder().apply {
+        return empty().apply {
             this.config = config
             this.defaultProvider = defaultProvider
         }
     }
+
+    @Suppress("OVERRIDE_BY_INLINE")
+    final override inline operator fun invoke(action: T.() -> Unit) = empty().apply(action)
 }
 
 /**
@@ -73,15 +75,10 @@ open class SchemeSpec<T : Scheme>(val builder: () -> T) : Specification<T> {
  */
 open class MetaScheme(
     val meta: Meta,
-    descriptor: NodeDescriptor? = null,
+    override val descriptor: NodeDescriptor? = null,
     config: Config = Config()
 ) : Scheme(config, meta::get) {
-    init {
-        this.descriptor = descriptor
-    }
-
-    override val defaultLayer: Meta
-        get() = Laminate(meta, descriptor?.defaultItem().node)
+    override val defaultLayer: Meta get() = Laminate(meta, descriptor?.defaultItem().node)
 }
 
 fun Meta.asScheme() =

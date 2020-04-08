@@ -2,19 +2,19 @@ package hep.dataforge.io.yaml
 
 import hep.dataforge.context.Context
 import hep.dataforge.io.*
+import hep.dataforge.io.IOFormat.Companion.META_KEY
+import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.meta.DFExperimental
-import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlinx.io.*
 import kotlinx.io.text.readUtf8Line
-import kotlinx.io.text.writeRawString
 import kotlinx.io.text.writeUtf8String
 import kotlinx.serialization.toUtf8Bytes
 
 @DFExperimental
 class FrontMatterEnvelopeFormat(
     val io: IOPlugin,
-    meta: Meta = EmptyMeta
+    val meta: Meta = Meta.EMPTY
 ) : EnvelopeFormat {
 
     override fun Input.readPartial(): PartialEnvelope {
@@ -27,9 +27,10 @@ class FrontMatterEnvelopeFormat(
 
         val readMetaFormat =
             metaTypeRegex.matchEntire(line)?.groupValues?.first()
-                ?.let { io.metaFormat(it) } ?: YamlMetaFormat
+                ?.let { io.resolveMetaFormat(it) } ?: YamlMetaFormat
 
-        val meta = buildBytes {
+        //TODO replace by preview
+        val meta = Binary {
             do {
                 line = readUtf8Line()
                 writeUtf8String(line + "\r\n")
@@ -51,18 +52,18 @@ class FrontMatterEnvelopeFormat(
 
         val readMetaFormat =
             metaTypeRegex.matchEntire(line)?.groupValues?.first()
-                ?.let { io.metaFormat(it) } ?: YamlMetaFormat
+                ?.let { io.resolveMetaFormat(it) } ?: YamlMetaFormat
 
-        val meta = buildBytes {
+        val meta = Binary {
             do {
-                writeUtf8String(readUtf8Line()  + "\r\n")
+                writeUtf8String(readUtf8Line() + "\r\n")
             } while (!line.startsWith(SEPARATOR))
         }.read {
             readMetaFormat.run {
                 readMeta()
             }
         }
-        val bytes = readRemaining()
+        val bytes = readByteArray()
         val data = bytes.asBinary()
         return SimpleEnvelope(meta, data)
     }
@@ -78,6 +79,11 @@ class FrontMatterEnvelopeFormat(
         }
     }
 
+    override fun toMeta(): Meta = Meta {
+        NAME_KEY put name.toString()
+        META_KEY put meta
+    }
+
     companion object : EnvelopeFormatFactory {
         const val SEPARATOR = "---"
 
@@ -88,11 +94,13 @@ class FrontMatterEnvelopeFormat(
         }
 
         override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
-            val line = input.readUtf8Line()
-            return if (line.startsWith("---")) {
-                invoke()
-            } else {
-                null
+            return input.preview {
+                val line = readUtf8Line()
+                return@preview if (line.startsWith("---")) {
+                    invoke()
+                } else {
+                    null
+                }
             }
         }
 

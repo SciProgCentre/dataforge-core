@@ -1,16 +1,13 @@
 package hep.dataforge.meta.descriptors
 
 import hep.dataforge.meta.*
-import hep.dataforge.meta.scheme.*
-import hep.dataforge.names.Name
-import hep.dataforge.names.NameToken
-import hep.dataforge.names.asName
-import hep.dataforge.names.isEmpty
+import hep.dataforge.names.*
 import hep.dataforge.values.False
 import hep.dataforge.values.True
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
 
+@DFBuilder
 sealed class ItemDescriptor : Scheme() {
 
     /**
@@ -68,8 +65,7 @@ fun ItemDescriptor.validateItem(item: MetaItem<*>?): Boolean {
  * @author Alexander Nozik
  */
 @DFBuilder
-class NodeDescriptor : ItemDescriptor() {
-
+class NodeDescriptor private constructor() : ItemDescriptor() {
     /**
      * True if the node is required
      *
@@ -84,86 +80,98 @@ class NodeDescriptor : ItemDescriptor() {
      */
     var default by node()
 
+    val items: Map<String, ItemDescriptor>
+        get() = config.getIndexed(ITEM_KEY).mapValues { (_, item) ->
+            val node = item.node ?: error("Node descriptor must be a node")
+            if (node[IS_NODE_KEY].boolean == true) {
+                NodeDescriptor.wrap(node)
+            } else {
+                ValueDescriptor.wrap(node)
+            }
+        }
+
     /**
      * The map of children node descriptors
      */
+    @Suppress("UNCHECKED_CAST")
     val nodes: Map<String, NodeDescriptor>
-        get() = config.getIndexed(NODE_KEY.asName()).entries.associate { (name, node) ->
-            name to wrap(node.node ?: error("Node descriptor must be a node"))
+        get() = config.getIndexed(ITEM_KEY).entries.filter {
+            it.value.node[IS_NODE_KEY].boolean == true
+        }.associate { (name, item) ->
+            val node = item.node ?: error("Node descriptor must be a node")
+            name to NodeDescriptor.wrap(node)
         }
 
     /**
-     * Define a child item descriptor for this node
+     * The list of value descriptors
      */
-    fun defineItem(name: String, descriptor: ItemDescriptor) {
-        if (items.keys.contains(name)) error("The key $name already exists in descriptor")
-        val token = when (descriptor) {
-            is NodeDescriptor -> NameToken(NODE_KEY, name)
-            is ValueDescriptor -> NameToken(VALUE_KEY, name)
+    val values: Map<String, ValueDescriptor>
+        get() = config.getIndexed(ITEM_KEY).entries.filter {
+            it.value.node[IS_NODE_KEY].boolean != true
+        }.associate { (name, item) ->
+            val node = item.node ?: error("Node descriptor must be a node")
+            name to ValueDescriptor.wrap(node)
         }
-        config[token] = descriptor.config
-
-    }
-
-
-    fun defineNode(name: String, block: NodeDescriptor.() -> Unit) {
-        val token = NameToken(NODE_KEY, name)
-        if (config[token] == null) {
-            config[token] = NodeDescriptor(block)
-        } else {
-            NodeDescriptor.update(config[token].node ?: error("Node expected"), block)
-        }
-    }
 
     private fun buildNode(name: Name): NodeDescriptor {
         return when (name.length) {
             0 -> this
             1 -> {
-                val token = NameToken(NODE_KEY, name.toString())
-                val config: Config = config[token].node ?: Config().also { config[token] = it }
+                val token = NameToken(ITEM_KEY.toString(), name.toString())
+                val config: Config = config[token].node ?: Config().also {
+                    it[IS_NODE_KEY] = true
+                    config[token] = it
+                }
                 wrap(config)
             }
             else -> buildNode(name.first()?.asName()!!).buildNode(name.cutFirst())
         }
     }
 
-    fun defineNode(name: Name, block: NodeDescriptor.() -> Unit) {
-        buildNode(name).apply(block)
+    /**
+     * Define a child item descriptor for this node
+     */
+    private fun newItem(key: String, descriptor: ItemDescriptor) {
+        if (items.keys.contains(key)) error("The key $key already exists in descriptor")
+        val token = ITEM_KEY.withIndex(key)
+        config[token] = descriptor.config
     }
 
-    /**
-     * The list of value descriptors
-     */
-    val values: Map<String, ValueDescriptor>
-        get() = config.getIndexed(VALUE_KEY.asName()).entries.associate { (name, node) ->
-            name to ValueDescriptor.wrap(node.node ?: error("Value descriptor must be a node"))
-        }
+    fun defineItem(name: Name, descriptor: ItemDescriptor) {
+        buildNode(name.cutLast()).newItem(name.last().toString(), descriptor)
+    }
 
+    fun defineItem(name: String, descriptor: ItemDescriptor) {
+        defineItem(name.toName(), descriptor)
+    }
 
-    /**
-     * Add a value descriptor using block for
-     */
-    fun defineValue(name: String, block: ValueDescriptor.() -> Unit) {
-        defineItem(name, ValueDescriptor(block))
+    fun defineNode(name: Name, block: NodeDescriptor.() -> Unit) {
+        defineItem(name, NodeDescriptor(block))
+    }
+
+    fun defineNode(name: String, block: NodeDescriptor.() -> Unit) {
+        defineNode(name.toName(), block)
     }
 
     fun defineValue(name: Name, block: ValueDescriptor.() -> Unit) {
         require(name.length >= 1) { "Name length for value descriptor must be non-empty" }
-        buildNode(name.cutLast()).defineValue(name.last().toString(), block)
+        defineItem(name, ValueDescriptor(block))
     }
 
-    val items: Map<String, ItemDescriptor> get() = nodes + values
-
-
-//override val descriptor: NodeDescriptor =  empty("descriptor")
+    fun defineValue(name: String, block: ValueDescriptor.() -> Unit) {
+        defineValue(name.toName(), block)
+    }
 
     companion object : SchemeSpec<NodeDescriptor>(::NodeDescriptor) {
 
-        //        const val ITEM_KEY = "item"
-        const val NODE_KEY = "node"
-        const val VALUE_KEY = "value"
+        val ITEM_KEY = "item".asName()
+        val IS_NODE_KEY = "@isNode".asName()
 
-        //override fun wrap(config: Config): NodeDescriptor = NodeDescriptor(config)
+        override fun empty(): NodeDescriptor {
+            return super.empty().apply {
+                config[IS_NODE_KEY] = true
+            }
+        }
 
         //TODO infer descriptor from spec
     }
@@ -187,8 +195,8 @@ operator fun ItemDescriptor.get(name: Name): ItemDescriptor? {
  *
  * @author Alexander Nozik
  */
+@DFBuilder
 class ValueDescriptor : ItemDescriptor() {
-
 
     /**
      * True if the value is required
@@ -255,68 +263,5 @@ class ValueDescriptor : ItemDescriptor() {
         this.allowedValues = v.map { Value.of(it) }
     }
 
-    companion object : SchemeSpec<ValueDescriptor>(::ValueDescriptor) {
-//        inline fun <reified E : Enum<E>> enum(name: String) = ValueDescriptor {
-//            type(ValueType.STRING)
-//            this.allowedValues = enumValues<E>().map { Value.of(it.name) }
-//        }
-
-//        /**
-//         * Build a value descriptor from annotation
-//         */
-//        fun build(def: ValueDef): ValueDescriptor {
-//            val builder = MetaBuilder("value")
-//                .setValue("name", def.key)
-//
-//            if (def.type.isNotEmpty()) {
-//                builder.setValue("type", def.type)
-//            }
-//
-//            if (def.multiple) {
-//                builder.setValue("multiple", def.multiple)
-//            }
-//
-//            if (!def.info.isEmpty()) {
-//                builder.setValue("info", def.info)
-//            }
-//
-//            if (def.allowed.isNotEmpty()) {
-//                builder.setValue("allowedValues", def.allowed)
-//            } else if (def.enumeration != Any::class) {
-//                if (def.enumeration.java.isEnum) {
-//                    val values = def.enumeration.java.enumConstants
-//                    builder.setValue("allowedValues", values.map { it.toString() })
-//                } else {
-//                    throw RuntimeException("Only enumeration classes are allowed in 'enumeration' annotation property")
-//                }
-//            }
-//
-//            if (def.def.isNotEmpty()) {
-//                builder.setValue("default", def.def)
-//            } else if (!def.required) {
-//                builder.setValue("required", def.required)
-//            }
-//
-//            if (def.tags.isNotEmpty()) {
-//                builder.setValue("tags", def.tags)
-//            }
-//            return ValueDescriptor(builder)
-//        }
-//
-//        /**
-//         * Build empty value descriptor
-//         */
-//        fun empty(valueName: String): ValueDescriptor {
-//            val builder = MetaBuilder("value")
-//                .setValue("name", valueName)
-//            return ValueDescriptor(builder)
-//        }
-//
-//        /**
-//         * Merge two separate value descriptors
-//         */
-//        fun merge(primary: ValueDescriptor, secondary: ValueDescriptor): ValueDescriptor {
-//            return ValueDescriptor(Laminate(primary.meta, secondary.meta))
-//        }
-    }
+    companion object : SchemeSpec<ValueDescriptor>(::ValueDescriptor)
 }

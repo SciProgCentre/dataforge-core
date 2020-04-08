@@ -1,12 +1,14 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Global
+import hep.dataforge.meta.DFExperimental
 import kotlinx.io.writeDouble
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 
+@DFExperimental
 class FileEnvelopeTest {
     val envelope = Envelope {
         meta {

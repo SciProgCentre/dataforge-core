@@ -1,6 +1,5 @@
-package hep.dataforge.meta.scheme
+package hep.dataforge.meta
 
-import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import kotlin.jvm.JvmName
 
@@ -10,15 +9,6 @@ import kotlin.jvm.JvmName
  *
  */
 interface Specification<T : Configurable> {
-    /**
-     * Update given configuration using given type as a builder
-     */
-    fun update(config: Config, action: T.() -> Unit): T {
-        return wrap(config).apply(action)
-    }
-
-    operator fun invoke(action: T.() -> Unit) = update(Config(), action)
-
     fun empty() = wrap()
 
     /**
@@ -26,18 +16,28 @@ interface Specification<T : Configurable> {
      */
     fun wrap(config: Config = Config(), defaultProvider: (Name) -> MetaItem<*>? = { null }): T
 
-    /**
-     * Wrap a configuration using static meta as default
-     */
-    fun wrap(config: Config = Config(), default: Meta): T = wrap(config) { default[it] }
-
-    /**
-     * Wrap a configuration using static meta as default
-     */
-    fun wrap(default: Meta): T = wrap(
-        Config()
-    ) { default[it] }
+    operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
 }
+
+/**
+ * Update given configuration using given type as a builder
+ */
+fun <T : Configurable> Specification<T>.update(config: Config, action: T.() -> Unit): T = wrap(config).apply(action)
+
+/**
+ * Wrap a configuration using static meta as default
+ */
+fun <T : Configurable> Specification<T>.wrap(config: Config = Config(), default: Meta = Meta.EMPTY): T =
+    wrap(config) { default[it] }
+
+/**
+ * Wrap a configuration using static meta as default
+ */
+fun <T : Configurable> Specification<T>.wrap(source: Meta): T {
+    val default = source.seal()
+    return wrap(source.asConfig(), default)
+}
+
 
 /**
  * Apply specified configuration to configurable

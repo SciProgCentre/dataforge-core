@@ -1,62 +1,45 @@
 package hep.dataforge.io.tcp
 
-import kotlinx.io.Input
-import kotlinx.io.Output
-import kotlinx.io.asBinary
+import kotlinx.io.*
 import kotlinx.io.buffer.Buffer
-import kotlinx.io.buffer.get
 import kotlinx.io.buffer.set
 import java.io.InputStream
 import java.io.OutputStream
 
-private class InputStreamInput(val source: InputStream, val waitForInput: Boolean = false) : Input() {
+private class BlockingStreamInput(val source: InputStream) : Input() {
     override fun closeSource() {
         source.close()
     }
 
-    override fun fill(buffer: Buffer): Int {
-        if (waitForInput) {
-            while (source.available() == 0) {
-                //block until input is available
-            }
+    override fun fill(buffer: Buffer, startIndex: Int, endIndex: Int): Int {
+        while (source.available() == 0) {
+            //block until input is available
         }
-        var bufferPos = 0
-        do {
+        // Zero-copy attempt
+        if (buffer.buffer.hasArray()) {
+            val result = source.read(buffer.buffer.array(), startIndex, endIndex - startIndex)
+            return result.coerceAtLeast(0) // -1 when IS is closed
+        }
+
+        for (i in startIndex until endIndex) {
             val byte = source.read()
-            buffer[bufferPos] = byte.toByte()
-            bufferPos++
-        } while (byte > 0 && bufferPos < buffer.size && source.available() > 0)
-        return bufferPos
-    }
-}
-
-private class OutputStreamOutput(val out: OutputStream) : Output() {
-    override fun flush(source: Buffer, length: Int) {
-        for (i in 0..length) {
-            out.write(source[i].toInt())
+            if (byte == -1) return (i - startIndex)
+            buffer[i] = byte.toByte()
         }
-        out.flush()
-    }
-
-    override fun closeSource() {
-        out.flush()
-        out.close()
+        return endIndex - startIndex
     }
 }
-
 
 fun <R> InputStream.read(size: Int, block: Input.() -> R): R {
     val buffer = ByteArray(size)
     read(buffer)
-    return buffer.asBinary().read(block)
+    return buffer.asBinary().read(block = block)
 }
 
-fun <R> InputStream.read(block: Input.() -> R): R =
-    InputStreamInput(this, false).block()
+fun <R> InputStream.read(block: Input.() -> R): R = asInput().block()
 
-fun <R> InputStream.readBlocking(block: Input.() -> R): R =
-    InputStreamInput(this, true).block()
+fun <R> InputStream.readBlocking(block: Input.() -> R): R = BlockingStreamInput(this).block()
 
-fun OutputStream.write(block: Output.() -> Unit) {
-    OutputStreamOutput(this).block()
+inline fun OutputStream.write(block: Output.() -> Unit) {
+    asOutput().block()
 }

@@ -1,17 +1,5 @@
 package hep.dataforge.descriptors
 
-import hep.dataforge.meta.*
-import hep.dataforge.meta.descriptors.ItemDescriptor
-import hep.dataforge.meta.descriptors.NodeDescriptor
-import hep.dataforge.meta.descriptors.attributes
-import hep.dataforge.meta.scheme.ConfigurableDelegate
-import hep.dataforge.meta.scheme.Scheme
-import hep.dataforge.values.parseValue
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.memberProperties
-
 
 //inline fun <reified T : Scheme> T.buildDescriptor(): NodeDescriptor = NodeDescriptor {
 //    T::class.apply {

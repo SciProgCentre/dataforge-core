@@ -1,20 +1,19 @@
 package hep.dataforge.io
 
 import hep.dataforge.meta.*
-import kotlinx.io.Bytes
-import kotlinx.io.buildBytes
+import kotlinx.io.asBinary
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.json
 import kotlinx.serialization.json.jsonArray
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-fun Meta.toBytes(format: MetaFormat = JsonMetaFormat): Bytes = buildBytes {
-    format.run { writeObject(this@toBytes) }
+fun Meta.toByteArray(format: MetaFormat = JsonMetaFormat) = buildByteArray {
+    format.run { writeObject(this@toByteArray) }
 }
 
-fun MetaFormat.fromBytes(packet: Bytes): Meta {
-    return packet.read { readObject() }
+fun MetaFormat.fromByteArray(packet: ByteArray): Meta {
+    return packet.asBinary().read { readObject() }
 }
 
 class MetaFormatTest {
@@ -28,8 +27,8 @@ class MetaFormatTest {
                 "array" put doubleArrayOf(1.0, 2.0, 3.0)
             }
         }
-        val bytes = meta.toBytes(BinaryMetaFormat)
-        val result = BinaryMetaFormat.fromBytes(bytes)
+        val bytes = meta.toByteArray(BinaryMetaFormat)
+        val result = BinaryMetaFormat.fromByteArray(bytes)
         assertEquals(meta, result)
     }
 
@@ -56,12 +55,12 @@ class MetaFormatTest {
     }
 
     @Test
-    fun testJsonToMeta(){
-        val json = jsonArray{
+    fun testJsonToMeta() {
+        val json = jsonArray {
             //top level array
             +jsonArray {
                 +JsonPrimitive(88)
-                +json{
+                +json {
                     "c" to "aasdad"
                     "d" to true
                 }
@@ -77,7 +76,7 @@ class MetaFormatTest {
 
         assertEquals(true, meta["@value[0].@value[1].d"].boolean)
         assertEquals("value", meta["@value[1]"].string)
-        assertEquals(listOf(1.0,2.0,3.0),meta["@value[2"].value?.list?.map{it.number.toDouble()})
+        assertEquals(listOf(1.0, 2.0, 3.0), meta["@value[2"].value?.list?.map { it.number.toDouble() })
     }
 
 }

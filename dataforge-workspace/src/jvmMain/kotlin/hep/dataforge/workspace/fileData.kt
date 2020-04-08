@@ -6,16 +6,19 @@ import hep.dataforge.io.*
 import hep.dataforge.meta.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.io.asOutput
 import java.nio.file.FileSystem
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
+import java.nio.file.StandardOpenOption
 import java.nio.file.spi.FileSystemProvider
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlin.reflect.KClass
 
 typealias FileFormatResolver<T> = (Path, Meta) -> IOFormat<T>
 
-//private val zipFSProvider = ZipFileSystemProvider()
+
 
 private fun newZFS(path: Path): FileSystem {
     val fsProvider = FileSystemProvider.installedProviders().find { it.scheme == "jar" }
@@ -150,12 +153,43 @@ suspend fun <T : Any> IOPlugin.writeDataDirectory(
     }
 }
 
+
+private suspend fun <T : Any> ZipOutputStream.writeNode(
+    name: String,
+    item: DataItem<T>,
+    dataFormat: IOFormat<T>,
+    envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat
+) {
+    withContext(Dispatchers.IO) {
+        when (item) {
+            is DataItem.Leaf -> {
+                //TODO add directory-based envelope writer
+                val envelope = item.data.toEnvelope(dataFormat)
+                val entry = ZipEntry(name)
+                putNextEntry(entry)
+                envelopeFormat.run {
+                    asOutput().writeObject(envelope)
+                }
+            }
+            is DataItem.Node -> {
+                val entry = ZipEntry("$name/")
+                putNextEntry(entry)
+                closeEntry()
+                item.node.items.forEach { (token, item) ->
+                    val childName = "$name/$token"
+                    writeNode(childName, item, dataFormat, envelopeFormat)
+                }
+            }
+        }
+    }
+}
+
+@DFExperimental
 suspend fun <T : Any> IOPlugin.writeZip(
     path: Path,
     node: DataNode<T>,
     format: IOFormat<T>,
-    envelopeFormat: EnvelopeFormat? = null,
-    metaFormat: MetaFormatFactory? = null
+    envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat
 ) {
     withContext(Dispatchers.IO) {
         val actualFile = if (path.toString().endsWith(".zip")) {
@@ -163,21 +197,27 @@ suspend fun <T : Any> IOPlugin.writeZip(
         } else {
             path.resolveSibling(path.fileName.toString() + ".zip")
         }
-        if (Files.exists(actualFile) && Files.size(path) == 0.toLong()) {
-            Files.delete(path)
+        val fos = Files.newOutputStream(actualFile, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+        val zos = ZipOutputStream(fos)
+        zos.use {
+            it.writeNode("", DataItem.Node(node), format, envelopeFormat)
         }
-        //Files.createFile(actualFile)
-        newZFS(actualFile).use { zipfs ->
-            val internalTargetPath = zipfs.getPath("/")
-            Files.createDirectories(internalTargetPath)
-            val tmp = Files.createTempDirectory("df_zip")
-            writeDataDirectory(tmp, node, format, envelopeFormat, metaFormat)
-            Files.list(tmp).forEach { sourcePath ->
-                val targetPath = sourcePath.fileName.toString()
-                val internalTargetPath = internalTargetPath.resolve(targetPath)
-                Files.copy(sourcePath, internalTargetPath, StandardCopyOption.REPLACE_EXISTING)
-            }
-        }
+
+//        if (Files.exists(actualFile) && Files.size(path) == 0.toLong()) {
+//            Files.delete(path)
+//        }
+//        //Files.createFile(actualFile)
+//        newZFS(actualFile).use { zipfs ->
+//            val zipRootPath = zipfs.getPath("/")
+//            Files.createDirectories(zipRootPath)
+//            val tmp = Files.createTempDirectory("df_zip")
+//            writeDataDirectory(tmp, node, format, envelopeFormat, metaFormat)
+//            Files.list(tmp).forEach { sourcePath ->
+//                val targetPath = sourcePath.fileName.toString()
+//                val internalTargetPath = zipRootPath.resolve(targetPath)
+//                Files.copy(sourcePath, internalTargetPath, StandardCopyOption.REPLACE_EXISTING)
+//            }
+//        }
     }
 }
 

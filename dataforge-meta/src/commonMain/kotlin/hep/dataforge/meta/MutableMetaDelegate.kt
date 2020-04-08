@@ -34,9 +34,7 @@ class ReadWriteDelegateWrapper<T, R>(
     val reader: (T) -> R,
     val writer: (R) -> T
 ) : ReadWriteProperty<Any?, R> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): R {
-        return reader(delegate.getValue(thisRef, property))
-    }
+    override fun getValue(thisRef: Any?, property: KProperty<*>): R = reader(delegate.getValue(thisRef, property))
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: R) {
         delegate.setValue(thisRef, property, writer(value))

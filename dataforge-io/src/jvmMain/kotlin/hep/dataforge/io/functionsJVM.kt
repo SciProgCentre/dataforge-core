@@ -9,7 +9,7 @@ import kotlin.reflect.full.isSuperclassOf
 
 
 fun IOPlugin.resolveIOFormatName(type: KClass<*>): Name {
-    return ioFormats.entries.find { it.value.type.isSuperclassOf(type) }?.key
+    return ioFormatFactories.find { it.type.isSuperclassOf(type) }?.name
         ?: error("Can't resolve IOFormat for type $type")
 }
 

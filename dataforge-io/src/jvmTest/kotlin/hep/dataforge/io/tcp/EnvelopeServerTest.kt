@@ -4,12 +4,13 @@ import hep.dataforge.context.Global
 import hep.dataforge.io.Envelope
 import hep.dataforge.io.Responder
 import hep.dataforge.io.TaggedEnvelopeFormat
-import hep.dataforge.io.writeByteArray
+import hep.dataforge.io.toByteArray
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.writeDouble
-import org.junit.AfterClass
-import org.junit.BeforeClass
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Timeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.ExperimentalTime
@@ -17,7 +18,7 @@ import kotlin.time.ExperimentalTime
 @ExperimentalStdlibApi
 object EchoResponder : Responder {
     override suspend fun respond(request: Envelope): Envelope {
-        val string = TaggedEnvelopeFormat().run { writeByteArray(request).decodeToString() }
+        val string = TaggedEnvelopeFormat().run { toByteArray(request).decodeToString() }
         println("ECHO:")
         println(string)
         return request
@@ -31,22 +32,23 @@ class EnvelopeServerTest {
         @JvmStatic
         val echoEnvelopeServer = EnvelopeServer(Global, 7778, EchoResponder, GlobalScope)
 
-        @BeforeClass
+        @BeforeAll
         @JvmStatic
         fun start() {
             echoEnvelopeServer.start()
         }
 
-        @AfterClass
+        @AfterAll
         @JvmStatic
         fun close() {
             echoEnvelopeServer.stop()
         }
     }
 
-    @Test(timeout = 1000)
+    @Test
+    @Timeout(1)
     fun doEchoTest() {
-        val request = Envelope.invoke {
+        val request = Envelope {
             type = "test.echo"
             meta {
                 "test.value" put 22

@@ -22,7 +22,7 @@ interface TransformationRule {
         meta.sequence().filter { matches(it.first, it.second) }.map { it.first }
 
     /**
-     * Apply transformation for a single item (Node or Value) and return resulting tree with absolute path
+     * Apply transformation for a single item (Node or Value) to the target
      */
     fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem<*>?, target: M): Unit
 }
@@ -89,7 +89,7 @@ inline class MetaTransformation(val transformations: Collection<TransformationRu
     /**
      * Produce new meta using only those items that match transformation rules
      */
-    fun transform(source: Meta): Meta =
+    fun generate(source: Meta): Meta =
         Meta {
             transformations.forEach { rule ->
                 rule.selectItems(source).forEach { name ->
@@ -97,6 +97,20 @@ inline class MetaTransformation(val transformations: Collection<TransformationRu
                 }
             }
         }
+
+    /**
+     * Generate an observable configuration that contains only elements defined by transformation rules and changes with the source
+     */
+    @DFExperimental
+    fun generate(source: Config): ObservableMeta = Config().apply {
+        transformations.forEach { rule ->
+            rule.selectItems(source).forEach { name ->
+                rule.transformItem(name, source[name], this)
+            }
+        }
+
+        bind(source, this)
+    }
 
     /**
      * Transform a meta, replacing all elements found in rules with transformed entries

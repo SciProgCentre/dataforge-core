@@ -6,7 +6,6 @@ import hep.dataforge.io.*
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
-import hep.dataforge.meta.scheme.int
 import kotlin.reflect.KClass
 
 class RemoteFunctionClient(override val context: Context, val responder: Responder) : FunctionServer, ContextAware {

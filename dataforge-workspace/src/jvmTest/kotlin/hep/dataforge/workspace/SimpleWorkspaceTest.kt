@@ -6,7 +6,6 @@ import hep.dataforge.meta.boolean
 import hep.dataforge.meta.builder
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
-import hep.dataforge.meta.scheme.int
 import hep.dataforge.names.plus
 import kotlin.test.Test
 import kotlin.test.assertEquals

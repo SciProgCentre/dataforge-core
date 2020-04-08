@@ -1,6 +1,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Global
+import hep.dataforge.meta.DFExperimental
 import kotlinx.io.asBinary
 import kotlinx.io.toByteArray
 import kotlinx.io.writeDouble
@@ -46,6 +47,7 @@ class FileBinaryTest {
 
     }
 
+    @DFExperimental
     @Test
     fun testFileDataSizeRewriting() {
         println(System.getProperty("user.dir"))
@@ -53,6 +55,6 @@ class FileBinaryTest {
         Global.io.writeEnvelopeFile(tmpPath, envelope)
 
         val binary = Global.io.readEnvelopeFile(tmpPath)?.data!!
-        assertEquals(binary.size.toInt(), binary.toByteArray().size)
+        assertEquals(binary.size, binary.toByteArray().size)
     }
 }

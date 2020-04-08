@@ -5,8 +5,8 @@ import hep.dataforge.meta.*
 import hep.dataforge.tables.SimpleColumnHeader
 import hep.dataforge.tables.Table
 import hep.dataforge.values.Value
+import kotlinx.io.Binary
 import kotlinx.io.ByteArrayOutput
-import kotlinx.io.EmptyBinary
 import kotlinx.io.ExperimentalIoApi
 import kotlinx.io.asBinary
 
@@ -38,5 +38,5 @@ fun TextRows.Companion.readEnvelope(envelope: Envelope): TextRows {
         .map { (_, item) ->
             SimpleColumnHeader(item.node["name"].string!!, Value::class, item.node["meta"].node ?: Meta.EMPTY)
         }
-    return TextRows(header, envelope.data ?: EmptyBinary)
+    return TextRows(header, envelope.data ?: Binary.EMPTY)
 }

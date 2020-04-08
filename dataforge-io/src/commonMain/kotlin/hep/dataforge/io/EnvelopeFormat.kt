@@ -2,7 +2,6 @@ package hep.dataforge.io
 
 import hep.dataforge.context.Context
 import hep.dataforge.io.EnvelopeFormatFactory.Companion.ENVELOPE_FORMAT_TYPE
-import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
@@ -26,7 +25,7 @@ interface EnvelopeFormat : IOFormat<Envelope> {
     fun Output.writeEnvelope(
         envelope: Envelope,
         metaFormatFactory: MetaFormatFactory = defaultMetaFormat,
-        formatMeta: Meta = EmptyMeta
+        formatMeta: Meta = Meta.EMPTY
     )
 
     override fun Input.readObject(): Envelope

@@ -26,6 +26,6 @@ class DescriptorTest {
     @Test
     fun testAllowedValues() {
         val allowed = descriptor.nodes["aNode"]?.values?.get("b")?.allowedValues
-        assertEquals(allowed, emptyList())
+        assertEquals(emptyList(), allowed)
     }
 }

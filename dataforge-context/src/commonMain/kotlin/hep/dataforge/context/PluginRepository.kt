@@ -1,6 +1,5 @@
 package hep.dataforge.context
 
-import hep.dataforge.meta.EmptyMeta
 import hep.dataforge.meta.Meta
 import kotlin.reflect.KClass
 
@@ -23,7 +22,7 @@ expect object PluginRepository {
 /**
  * Fetch specific plugin and instantiate it with given meta
  */
-fun PluginRepository.fetch(tag: PluginTag, meta: Meta = EmptyMeta): Plugin =
+fun PluginRepository.fetch(tag: PluginTag, meta: Meta = Meta.EMPTY): Plugin =
     list().find { it.tag.matches(tag) }?.invoke(meta = meta)
         ?: error("Plugin with tag $tag not found in the repository")
 

@@ -1,12 +1,9 @@
 package hep.dataforge.io
 
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaItem
-import hep.dataforge.meta.MetaSerializer
+import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import kotlinx.serialization.cbor.Cbor
-import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -22,8 +19,8 @@ class MetaSerializerTest {
 
     @Test
     fun testMetaSerialization() {
-        val string = Json.indented.stringify(MetaSerializer, meta)
-        val restored = Json.plain.parse(MetaSerializer, string)
+        val string = JSON_PRETTY.stringify(MetaSerializer, meta)
+        val restored = JSON_PLAIN.parse(MetaSerializer, string)
         assertEquals(restored, meta)
     }
 
@@ -38,8 +35,8 @@ class MetaSerializerTest {
     @Test
     fun testNameSerialization() {
         val name = "a.b.c".toName()
-        val string = Json.indented.stringify(Name.serializer(), name)
-        val restored = Json.plain.parse(Name.serializer(), string)
+        val string = JSON_PRETTY.stringify(Name.serializer(), name)
+        val restored = JSON_PLAIN.parse(Name.serializer(), string)
         assertEquals(restored, name)
     }
 

@@ -4,6 +4,7 @@ package hep.dataforge.io
 
 
 import hep.dataforge.context.Context
+import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.node
@@ -11,7 +12,7 @@ import hep.dataforge.meta.toJson
 import hep.dataforge.meta.toMetaItem
 import kotlinx.io.Input
 import kotlinx.io.Output
-import kotlinx.io.text.readUtf8String
+import kotlinx.io.readByteArray
 import kotlinx.io.text.writeUtf8String
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
@@ -25,8 +26,12 @@ class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat {
         writeUtf8String(json.stringify(JsonObjectSerializer, jsonObject))
     }
 
+    override fun toMeta(): Meta  = Meta{
+        NAME_KEY put name.toString()
+    }
+
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
-        val str = readUtf8String()
+        val str = readByteArray().decodeToString()
         val jsonElement = json.parseJson(str)
         val item = jsonElement.toMetaItem(descriptor)
         return item.node ?: Meta.EMPTY
