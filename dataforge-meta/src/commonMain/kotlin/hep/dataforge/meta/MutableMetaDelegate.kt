@@ -99,6 +99,10 @@ fun <M : MutableMeta<M>> M.boolean(default: Boolean, key: Name? = null) =
 fun <M : MutableMeta<M>> M.number(default: Number, key: Name? = null) =
     item(default, key).transform { it.number!! }
 
+@JvmName("lazyValue")
+fun <M : MutableMeta<M>> M.string(key: Name? = null, default: () -> Value) =
+    lazyItem(key, default).transform { it.value!! }
+
 @JvmName("lazyString")
 fun <M : MutableMeta<M>> M.string(key: Name? = null, default: () -> String) =
     lazyItem(key, default).transform { it.string!! }

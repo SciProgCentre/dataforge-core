@@ -28,7 +28,7 @@ fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
 }
 
 //Use these methods to customize JSON key mapping
-private fun String.toJsonKey(descriptor: ItemDescriptor?) = descriptor?.getProperty("jsonName").string ?: toString()
+private fun String.toJsonKey(descriptor: ItemDescriptor?) = descriptor?.attributes["jsonName"].string ?: toString()
 
 //private fun NodeDescriptor?.getDescriptor(key: String) = this?.items?.get(key)
 
@@ -146,7 +146,7 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
     @Suppress("UNCHECKED_CAST")
     private operator fun MutableMap<String, MetaItem<JsonMeta>>.set(key: String, value: JsonElement): Unit {
         val itemDescriptor = descriptor?.items?.get(key)
-        return when (value) {
+        when (value) {
             is JsonPrimitive -> {
                 this[key] =
                     MetaItem.ValueItem(value.toValue(itemDescriptor as? ValueDescriptor)) as MetaItem<JsonMeta>

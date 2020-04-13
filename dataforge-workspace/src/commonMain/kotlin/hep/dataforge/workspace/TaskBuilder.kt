@@ -2,9 +2,9 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
 import hep.dataforge.data.*
-import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.DFBuilder
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
 import hep.dataforge.names.Name
@@ -200,7 +200,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
      * Use DSL to create a descriptor for this task
      */
     fun description(transform: NodeDescriptor.() -> Unit) {
-        this.descriptor = NodeDescriptor(transform)
+        this.descriptor = NodeDescriptor().apply(transform)
     }
 
     internal fun build(): GenericTask<R> {
@@ -212,7 +212,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
         return GenericTask(
             name,
             type,
-            descriptor ?: NodeDescriptor.empty(),
+            descriptor ?: NodeDescriptor(),
             modelTransform
         ) {
             val workspace = this
