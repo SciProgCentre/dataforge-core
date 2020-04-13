@@ -31,7 +31,7 @@ class MapActionBuilder<T, R>(var name: Name, var meta: MetaBuilder, val actionMe
 
 
 class MapAction<T : Any, out R : Any>(
-    val inputType: KClass<out T>,
+    val inputType: KClass<T>,
     val outputType: KClass<out R>,
     private val block: MapActionBuilder<T, R>.() -> Unit
 ) : Action<T, R> {

@@ -16,7 +16,8 @@ import kotlin.reflect.KClass
 @DFBuilder
 class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     private var modelTransform: TaskModelBuilder.(Meta) -> Unit = { allData() }
-//    private val additionalDependencies = HashSet<Dependency>()
+
+    //    private val additionalDependencies = HashSet<Dependency>()
     var descriptor: NodeDescriptor? = null
     private val dataTransforms: MutableList<DataTransformation> = ArrayList()
 
@@ -96,7 +97,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     }
 
     class TaskEnv(val name: Name, val meta: Meta, val context: Context, val data: DataNode<Any>) {
-        operator fun <T : Any> DirectTaskDependency<T>.invoke(): DataNode<T> = if(placement.isEmpty()){
+        operator fun <T : Any> DirectTaskDependency<T>.invoke(): DataNode<T> = if (placement.isEmpty()) {
             data.cast(task.type)
         } else {
             data[placement].node?.cast(task.type)
@@ -113,10 +114,13 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
         crossinline block: MapActionBuilder<T, R>.(TaskEnv) -> Unit
     ) {
         action(from, to) {
+            val env = this
             MapAction(
                 inputType = T::class,
                 outputType = type
-            ) { block(this@action) }
+            ) {
+                block(env)
+            }
         }
     }
 
@@ -150,10 +154,11 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
         crossinline block: ReduceGroupBuilder<T, R>.(TaskEnv) -> Unit        //TODO needs KEEP-176
     ) {
         action(from, to) {
+            val env = this
             ReduceAction(
                 inputType = T::class,
                 outputType = type
-            ) { block(this@action) }
+            ) { block(env) }
         }
     }
 
@@ -189,10 +194,11 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
         crossinline block: SplitBuilder<T, R>.(TaskEnv) -> Unit  //TODO needs KEEP-176
     ) {
         action(from, to) {
+            val env = this
             SplitAction(
                 inputType = T::class,
                 outputType = type
-            ) { block(this@action) }
+            ) { block(env) }
         }
     }
 
