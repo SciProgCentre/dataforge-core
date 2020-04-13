@@ -1,5 +1,6 @@
 package hep.dataforge.meta.descriptors
 
+import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.MetaBase
 import hep.dataforge.meta.MetaItem
 import hep.dataforge.names.NameToken
@@ -15,8 +16,10 @@ class DescriptorMeta(val descriptor: NodeDescriptor) : MetaBase() {
         }
 }
 
+fun NodeDescriptor.buildDefaultMeta() = Laminate(default, DescriptorMeta(this))
+
 fun NodeDescriptor.defaultItem(): MetaItem.NodeItem<*> =
-    MetaItem.NodeItem(default ?: DescriptorMeta(this))
+    MetaItem.NodeItem(buildDefaultMeta())
 
 fun ValueDescriptor.defaultItem(): MetaItem.ValueItem = MetaItem.ValueItem(default ?: Null)
 

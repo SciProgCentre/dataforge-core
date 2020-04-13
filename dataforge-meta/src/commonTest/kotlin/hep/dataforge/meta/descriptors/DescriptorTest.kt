@@ -1,5 +1,7 @@
 package hep.dataforge.meta.descriptors
 
+import hep.dataforge.meta.boolean
+import hep.dataforge.meta.get
 import hep.dataforge.values.ValueType
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,5 +32,11 @@ class DescriptorTest {
         assertNotNull(child)
         val allowed = descriptor.nodes["aNode"]?.values?.get("b")?.allowedValues
         assertEquals(emptyList(), allowed)
+    }
+
+    @Test
+    fun testDefaultMetaNode(){
+        val meta = descriptor.buildDefaultMeta()
+        assertEquals(false, meta["aNode.otherNode.otherValue"].boolean)
     }
 }
