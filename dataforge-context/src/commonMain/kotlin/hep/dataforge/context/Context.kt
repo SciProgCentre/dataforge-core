@@ -8,10 +8,11 @@ import hep.dataforge.provider.Provider
 import hep.dataforge.provider.top
 import hep.dataforge.values.Value
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import mu.KLogger
 import mu.KotlinLogging
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.jvm.JvmName
 
 /**
@@ -91,8 +92,9 @@ open class Context(
         config.action()
     }
 
-    override val coroutineContext: CoroutineContext
-        get() = EmptyCoroutineContext
+    override val coroutineContext: CoroutineContext = (parent ?: Global).coroutineContext.let { parenContext ->
+        parenContext + SupervisorJob(parenContext[Job])
+    }
 
     /**
      * Detach all plugins and terminate context
