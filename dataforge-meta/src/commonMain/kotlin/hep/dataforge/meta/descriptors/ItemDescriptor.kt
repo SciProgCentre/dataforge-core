@@ -25,18 +25,19 @@ sealed class ItemDescriptor(val config: Config) {
     var info: String? by config.string()
 
     /**
-     * Additional attributes of an item. For example validation and widget parameters
-     *
-     * @return
-     */
-    var attributes by config.node()
-
-    /**
      * True if the item is required
      *
      * @return
      */
     abstract var required: Boolean
+
+
+    /**
+     * Additional attributes of an item. For example validation and widget parameters
+     *
+     * @return
+     */
+    var attributes by config.node()
 }
 
 /**
@@ -166,12 +167,12 @@ class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) {
         value(name.toName(), block)
     }
 
-    companion object{
+    companion object {
 
         val ITEM_KEY = "item".asName()
         val IS_NODE_KEY = "@isNode".asName()
 
-        inline operator fun invoke(block: NodeDescriptor.()->Unit) = NodeDescriptor().apply(block)
+        inline operator fun invoke(block: NodeDescriptor.() -> Unit) = NodeDescriptor().apply(block)
 
         //TODO infer descriptor from spec
     }
@@ -251,9 +252,9 @@ class ValueDescriptor(config: Config = Config()) : ItemDescriptor(config) {
      * @return
      */
     var allowedValues: List<Value> by config.value().transform {
-        when{
+        when {
             it?.list != null -> it.list
-            type.size == 1 && type[0] === ValueType.BOOLEAN ->    listOf(True, False)
+            type.size == 1 && type[0] === ValueType.BOOLEAN -> listOf(True, False)
             else -> emptyList()
         }
     }
@@ -263,5 +264,15 @@ class ValueDescriptor(config: Config = Config()) : ItemDescriptor(config) {
      */
     fun allow(vararg v: Any) {
         this.allowedValues = v.map { Value.of(it) }
+    }
+}
+
+/**
+ * Merge two node descriptors into one using first one as primary
+ */
+operator fun NodeDescriptor.plus(other: NodeDescriptor): NodeDescriptor {
+    return NodeDescriptor().apply {
+        config.update(other.config)
+        config.update(this@plus.config)
     }
 }

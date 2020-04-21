@@ -64,4 +64,5 @@ fun Configurable.setProperty(key: String, meta: Meta?) = setProperty(key, meta?.
 
 fun <T : Configurable> T.configure(meta: Meta): T = this.apply { config.update(meta) }
 
+@DFBuilder
 inline fun <T : Configurable> T.configure(action: Config.() -> Unit): T = apply { config.apply(action) }

@@ -173,8 +173,8 @@ interface MetaNode<out M : MetaNode<M>> : Meta {
 operator fun <M : MetaNode<M>> M?.get(name: Name): MetaItem<M>? = if( this == null) {
     null
 } else {
-    @Suppress("UNCHECKED_CAST")
-    (this as Meta).get(name) as MetaItem<M>?
+    @Suppress("UNCHECKED_CAST", "ReplaceGetOrSet")
+    (this as Meta).get(name) as MetaItem<M>? // Do not change
 }
 
 operator fun <M : MetaNode<M>> M?.get(key: String): MetaItem<M>? = this[key.toName()]
