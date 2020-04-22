@@ -92,8 +92,10 @@ open class Context(
         config.action()
     }
 
-    override val coroutineContext: CoroutineContext = (parent ?: Global).coroutineContext.let { parenContext ->
-        parenContext + SupervisorJob(parenContext[Job])
+    override val coroutineContext: CoroutineContext by lazy {
+        (parent ?: Global).coroutineContext.let { parenContext ->
+            parenContext + SupervisorJob(parenContext[Job])
+        }
     }
 
     /**
