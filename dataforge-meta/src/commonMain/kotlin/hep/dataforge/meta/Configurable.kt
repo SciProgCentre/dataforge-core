@@ -50,6 +50,13 @@ interface Configurable : Described {
     }
 }
 
+/**
+ * Reset the property to its default value
+ */
+fun Configurable.resetProperty(name: Name) {
+    setProperty(name, null)
+}
+
 fun Configurable.getProperty(key: String) = getProperty(key.toName())
 
 fun Configurable.setProperty(name: Name, value: Value?) = setProperty(name, value?.let { MetaItem.ValueItem(value) })

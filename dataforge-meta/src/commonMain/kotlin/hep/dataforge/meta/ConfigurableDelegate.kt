@@ -201,8 +201,8 @@ fun Configurable.doubleArray(vararg doubles: Double, key: Name? = null): ReadWri
 
 /* Node delegates */
 
-fun Configurable.config(key: Name? = null): ReadWriteProperty<Any?, Config?> =
-    config.node(key)
+fun Configurable.config(default: Config? = null, key: Name? = null): ReadWriteProperty<Any?, Config?> =
+    config.node(default,key)
 
 fun Configurable.node(key: Name? = null): ReadWriteProperty<Any?, Meta?> = item(key).map(
     reader = { it.node },

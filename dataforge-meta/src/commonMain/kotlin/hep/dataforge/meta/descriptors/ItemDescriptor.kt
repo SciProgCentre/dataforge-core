@@ -48,9 +48,19 @@ fun ItemDescriptor.attributes(block: Config.() -> Unit) {
 }
 
 /**
+ * Set specific attribute in the descriptor
+ */
+fun ItemDescriptor.setAttribute(name: Name, value: Any?) {
+    attributes {
+        set(name, value)
+    }
+}
+
+/**
  * Check if given item suits the descriptor
  */
 fun ItemDescriptor.validateItem(item: MetaItem<*>?): Boolean {
+    if (item == null) return !required
     return when (this) {
         is ValueDescriptor -> isAllowedValue(item.value ?: return false)
         is NodeDescriptor -> items.all { (key, d) ->
