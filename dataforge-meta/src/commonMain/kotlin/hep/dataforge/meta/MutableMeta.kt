@@ -76,11 +76,9 @@ inline fun MutableMeta<*>.remove(name: Name) = set(name, null)
 @Suppress("NOTHING_TO_INLINE")
 inline fun MutableMeta<*>.remove(name: String) = remove(name.toName())
 
-fun MutableMeta<*>.setValue(name: Name, value: Value) =
-    set(name, MetaItem.ValueItem(value))
+fun MutableMeta<*>.setValue(name: Name, value: Value) = set(name, MetaItem.ValueItem(value))
 
-fun MutableMeta<*>.setValue(name: String, value: Value) =
-    set(name.toName(), MetaItem.ValueItem(value))
+fun MutableMeta<*>.setValue(name: String, value: Value) = set(name.toName(), value)
 
 fun MutableMeta<*>.setItem(name: Name, item: MetaItem<*>?) {
     when (item) {
@@ -98,7 +96,7 @@ fun MutableMeta<*>.setNode(name: Name, node: Meta) =
 fun MutableMeta<*>.setNode(name: String, node: Meta) = setNode(name.toName(), node)
 
 /**
- * Universal set method
+ * Universal unsafe set method
  */
 operator fun MutableMeta<*>.set(name: Name, value: Any?) {
     when (value) {
@@ -174,3 +172,16 @@ fun <M : MutableMeta<M>> M.append(name: Name, value: Any?) {
 }
 
 fun <M : MutableMeta<M>> M.append(name: String, value: Any?) = append(name.toName(), value)
+
+/**
+ * Apply existing node with given [builder] or create a new element with it.
+ */
+@DFExperimental
+fun <M : AbstractMutableMeta<M>> M.edit(name: Name, builder: M.() -> Unit) {
+    val item = when(val existingItem = get(name)){
+        null -> empty().also { set(name, it) }
+        is MetaItem.NodeItem<M> -> existingItem.node
+        else -> error("Can't edit value meta item")
+    }
+    item.apply(builder)
+}

@@ -28,7 +28,7 @@ class EnvelopeServer(
     fun start() {
         if (job == null) {
             logger.info { "Starting envelope server on port $port" }
-            val job = scope.launch(Dispatchers.IO) {
+            job = scope.launch(Dispatchers.IO) {
                 val serverSocket = ServerSocket(port)
                 //TODO add handshake and format negotiation
                 while (isActive && !serverSocket.isClosed) {

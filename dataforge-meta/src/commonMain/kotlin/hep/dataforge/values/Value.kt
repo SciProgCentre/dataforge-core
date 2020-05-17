@@ -125,7 +125,7 @@ object False : Value {
     override val number: Number get() = -1.0
     override val string: String get() = "false"
 
-    override fun toString(): String = True.value.toString()
+    override fun toString(): String = value.toString()
 
     override fun equals(other: Any?): Boolean = other === False
     override fun hashCode(): Int = -1

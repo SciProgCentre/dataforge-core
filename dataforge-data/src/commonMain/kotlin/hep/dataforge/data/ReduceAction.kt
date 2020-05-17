@@ -72,7 +72,7 @@ class ReduceGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
  * The same rules as for KPipe
  */
 class ReduceAction<T : Any, R : Any>(
-    val inputType: KClass<out T>,
+    val inputType: KClass<T>,
     val outputType: KClass<out R>,
     private val action: ReduceGroupBuilder<T, R>.() -> Unit
 ) : Action<T, R> {

@@ -50,6 +50,13 @@ interface Configurable : Described {
     }
 }
 
+/**
+ * Reset the property to its default value
+ */
+fun Configurable.resetProperty(name: Name) {
+    setProperty(name, null)
+}
+
 fun Configurable.getProperty(key: String) = getProperty(key.toName())
 
 fun Configurable.setProperty(name: Name, value: Value?) = setProperty(name, value?.let { MetaItem.ValueItem(value) })
@@ -64,4 +71,5 @@ fun Configurable.setProperty(key: String, meta: Meta?) = setProperty(key, meta?.
 
 fun <T : Configurable> T.configure(meta: Meta): T = this.apply { config.update(meta) }
 
+@DFBuilder
 inline fun <T : Configurable> T.configure(action: Config.() -> Unit): T = apply { config.apply(action) }

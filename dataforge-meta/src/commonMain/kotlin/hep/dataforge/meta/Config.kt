@@ -14,7 +14,7 @@ data class MetaListener(
 )
 
 interface ObservableMeta : Meta {
-    fun onChange(owner: Any?, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit)
+    fun onChange(owner: Any?, action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit)
     fun removeListener(owner: Any?)
 }
 

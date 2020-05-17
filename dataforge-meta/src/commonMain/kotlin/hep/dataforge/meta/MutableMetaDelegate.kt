@@ -84,8 +84,8 @@ fun <M : MutableMeta<M>> M.boolean(default: Boolean? = null, key: Name? = null):
 fun <M : MutableMeta<M>> M.number(default: Number? = null, key: Name? = null): ReadWriteProperty<Any?, Number?> =
     item(default, key).transform { it.number }
 
-inline fun <reified M : MutableMeta<M>> M.node(key: Name? = null) =
-    item(this, key).transform { it.node as? M }
+inline fun <reified M : MutableMeta<M>> M.node(default: M? = null, key: Name? = null) =
+    item(default, key = key).transform { it.node as? M }
 
 @JvmName("safeString")
 fun <M : MutableMeta<M>> M.string(default: String, key: Name? = null) =
@@ -98,6 +98,10 @@ fun <M : MutableMeta<M>> M.boolean(default: Boolean, key: Name? = null) =
 @JvmName("safeNumber")
 fun <M : MutableMeta<M>> M.number(default: Number, key: Name? = null) =
     item(default, key).transform { it.number!! }
+
+@JvmName("lazyValue")
+fun <M : MutableMeta<M>> M.string(key: Name? = null, default: () -> Value) =
+    lazyItem(key, default).transform { it.value!! }
 
 @JvmName("lazyString")
 fun <M : MutableMeta<M>> M.string(key: Name? = null, default: () -> String) =

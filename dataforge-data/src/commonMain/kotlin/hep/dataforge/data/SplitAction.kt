@@ -33,7 +33,7 @@ class SplitBuilder<T : Any, R : Any>(val name: Name, val meta: Meta) {
 }
 
 class SplitAction<T : Any, R : Any>(
-    val inputType: KClass<out T>,
+    val inputType: KClass<T>,
     val outputType: KClass<out R>,
     private val action: SplitBuilder<T, R>.() -> Unit
 ) : Action<T, R> {

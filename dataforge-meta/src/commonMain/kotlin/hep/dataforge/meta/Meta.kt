@@ -170,8 +170,12 @@ interface MetaNode<out M : MetaNode<M>> : Meta {
 /**
  * The same as [Meta.get], but with specific node type
  */
-@Suppress("UNCHECKED_CAST")
-operator fun <M : MetaNode<M>> M?.get(name: Name): MetaItem<M>? = (this as Meta)[name] as MetaItem<M>?
+operator fun <M : MetaNode<M>> M?.get(name: Name): MetaItem<M>? = if( this == null) {
+    null
+} else {
+    @Suppress("UNCHECKED_CAST", "ReplaceGetOrSet")
+    (this as Meta).get(name) as MetaItem<M>? // Do not change
+}
 
 operator fun <M : MetaNode<M>> M?.get(key: String): MetaItem<M>? = this[key.toName()]
 
