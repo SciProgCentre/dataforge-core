@@ -1,4 +1,4 @@
-import scientifik.serialization
+import scientifik.useSerialization
 
 plugins {
     id("scientifik.jvm")
@@ -6,7 +6,7 @@ plugins {
 
 description = "YAML meta IO"
 
-serialization{
+useSerialization{
     yaml()
 }
 
