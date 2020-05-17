@@ -1,5 +1,5 @@
 import scientifik.DependencySourceSet.TEST
-import scientifik.serialization
+import scientifik.useSerialization
 
 plugins {
     id("scientifik.mpp")
@@ -7,7 +7,7 @@ plugins {
 
 description = "IO module"
 
-serialization(sourceSet = TEST){
+useSerialization(sourceSet = TEST){
     cbor()
 }
 

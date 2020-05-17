@@ -1,4 +1,4 @@
-import scientifik.coroutines
+import scientifik.useCoroutines
 
 plugins {
     id("scientifik.mpp")
@@ -6,7 +6,8 @@ plugins {
 
 description = "Context and provider definitions"
 
-coroutines()
+
+useCoroutines()
 
 kotlin {
     sourceSets {
