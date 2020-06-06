@@ -4,7 +4,7 @@ package hep.dataforge.meta.descriptors
  * An object which provides its descriptor
  */
 interface Described {
-    val descriptor: NodeDescriptor?
+    val descriptor: ItemDescriptor?
 
     companion object {
         const val DESCRIPTOR_NODE = "@descriptor"

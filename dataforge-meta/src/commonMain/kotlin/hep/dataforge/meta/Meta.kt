@@ -16,8 +16,12 @@ import kotlinx.serialization.*
 @Serializable
 sealed class MetaItem<out M : Meta> {
 
+    abstract override fun equals(other: Any?): Boolean
+
+    abstract override fun hashCode(): Int
+
     @Serializable
-    data class ValueItem(val value: Value) : MetaItem<Nothing>() {
+    class ValueItem(val value: Value) : MetaItem<Nothing>() {
         override fun toString(): String = value.toString()
 
         @Serializer(ValueItem::class)
@@ -30,10 +34,18 @@ sealed class MetaItem<out M : Meta> {
                 ValueSerializer.serialize(encoder, value.value)
             }
         }
+
+        override fun equals(other: Any?): Boolean {
+            return this.value == (other as? ValueItem)?.value
+        }
+
+        override fun hashCode(): Int {
+            return value.hashCode()
+        }
     }
 
     @Serializable
-    data class NodeItem<M : Meta>(@Serializable(MetaSerializer::class) val node: M) : MetaItem<M>() {
+    class NodeItem<M : Meta>(@Serializable(MetaSerializer::class) val node: M) : MetaItem<M>() {
         //Fixing serializer for node could cause class cast problems, but it should not since Meta descendants are not serializeable
         override fun toString(): String = node.toString()
 
@@ -47,6 +59,10 @@ sealed class MetaItem<out M : Meta> {
                 MetaSerializer.serialize(encoder, value.node)
             }
         }
+
+        override fun equals(other: Any?): Boolean = node == (other as? NodeItem<*>)?.node
+
+        override fun hashCode(): Int = node.hashCode()
     }
 
     companion object {
