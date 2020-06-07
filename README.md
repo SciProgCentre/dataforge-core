@@ -63,17 +63,17 @@ In this section we will try to cover DataForge main ideas in the form of questio
 * **Context encapsulation**. Every DataForge task is executed in some context. The context isolates environment for the task and also works as dependency injection base and specifies interaction of the task with the external world.
 
 
-<hr>
+<!--<hr>
 
 **Q:** OK, but now I want to work directly with my measuring devices. How can I do that?
 
-**A:** The [dataforge-control](${site.url}/docs.html#control) module provides interfaces to interact with the hardware. Out of the box it supports safe communication with TCP/IP or COM/tty based devices. Specific device declaration could be done via additional modules. It is also possible to maintain data storage with [datforge-storage](${site.url}/docs.htm#storage) module.
+**A:** The [dataforge-control](${site.url}/docs.html#control) module provides interfaces to interact with the hardware. Out of the box it supports safe communication with TCP/IP or COM/tty based devices. Specific device declaration could be done via additional modules. It is also possible to maintain data storage with [datforge-storage](${site.url}/docs.htm#storage) module.-->
 
 <hr>
 
-**Q:** Declarations and metadata are good, but I want my scripts back!
+<!--**Q:** Declarations and metadata are good, but I want my scripts back!
 
-**A:** We can do that. [GRIND](${site.url}/docs.html#grind) provides a shell-like environment called GrindShell. It allows to run imperative scripts with full access to all of the DataForge functionality. Grind scripts are basically context-encapsulated. Also there are convenient feature wrappers called helpers that could be loaded into the shell when new features modules are added.
+**A:** We can do that. [GRIND](${site.url}/docs.html#grind) provides a shell-like environment called GrindShell. It allows to run imperative scripts with full access to all of the DataForge functionality. Grind scripts are basically context-encapsulated. Also there are convenient feature wrappers called helpers that could be loaded into the shell when new features modules are added.-->
 
 <hr>
 
@@ -88,12 +88,12 @@ In this section we will try to cover DataForge main ideas in the form of questio
 **Q:** How does DataForge compare to cluster computation frameworks like Hadoop or Spark?
 
 **A:** Again, it is not the purpose of DataForge to replace cluster software. DataForge has some internal parallelism mechanics and implementations, but they are most certainly worse then specially developed programs. Still, DataForge is not fixed on one single implementation. Your favourite parallel processing tool could be still used as a back-end for the DataForge. With full benefit of configuration tools, integrations and no performance overhead.
-
+<!--
 <hr>
 
 **Q:** Is it possible to use DataForge in notebook mode?
 
-**A:** Yes, it is. DataForge can be used as is from [beaker/beakerx](http://beakernotebook.com/) groovy kernel with minor additional adjustments. It is planned to provide separate DataForge kernel to `beakerx` which will automatically call a specific GRIND shell.
+**A:** Yes, it is. DataForge can be used as is from [beaker/beakerx](http://beakernotebook.com/) groovy kernel with minor additional adjustments. It is planned to provide separate DataForge kernel to `beakerx` which will automatically call a specific GRIND shell.-->
 
 <hr>
 
