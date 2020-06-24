@@ -61,5 +61,5 @@ interface Row<out T : Any> {
 
 fun <C : Any, T : C> Row<C>.getValue(column: String, type: KClass<out T>): T? = type.cast(getValue(column))
 
-inline operator fun <reified T : Any> Row<*>.get(column: String): T? = T::class.cast(getValue(column))
+inline operator fun <reified T : Any> Row<T>.get(column: String): T? = T::class.cast(getValue(column))
 operator fun <C : Any, T : C> Row<C>.get(column: ColumnHeader<T>): T? = getValue(column.name, column.type)
