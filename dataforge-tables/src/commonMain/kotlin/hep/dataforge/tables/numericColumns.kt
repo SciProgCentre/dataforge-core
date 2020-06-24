@@ -3,9 +3,8 @@ package hep.dataforge.tables
 import hep.dataforge.meta.Meta
 import kotlin.reflect.KClass
 
-//interface NumberColumn<N : Number> : Column<N>
 
-data class RealColumn(
+class RealColumn(
     override val name: String,
     val data: DoubleArray,
     override val meta: Meta = Meta.EMPTY
@@ -44,12 +43,7 @@ data class RealColumn(
     }
 }
 
-fun <T : Any> Column<T>.map(meta: Meta = this.meta, block: (T?) -> Double): RealColumn {
-    val data = DoubleArray(size) { block(get(it)) }
-    return RealColumn(name, data, meta)
-}
-
-data class IntColumn(
+class IntColumn(
     override val name: String,
     val data: IntArray,
     override val meta: Meta = Meta.EMPTY
@@ -86,9 +80,4 @@ data class IntColumn(
             noinline metaBuilder: ColumnScheme.() -> Unit
         ): IntColumn = IntColumn(name, data, ColumnScheme(metaBuilder).toMeta())
     }
-}
-
-fun <T : Any> Column<T>.map(meta: Meta = this.meta, block: (T?) -> Int): IntColumn {
-    val data = IntArray(size) { block(get(it)) }
-    return IntColumn(name, data, meta)
 }

@@ -13,7 +13,6 @@ import kotlinx.io.text.forEachUtf8Line
 import kotlinx.io.text.readUtf8Line
 import kotlinx.io.text.readUtf8StringUntilDelimiter
 import kotlinx.io.text.writeUtf8String
-import kotlin.reflect.KClass
 
 /**
  * Read a lin as a fixed width [Row]
@@ -92,9 +91,9 @@ class TextTable(
         }
     }
 
-    override fun <T : Value> getValue(row: Int, column: String, type: KClass<out T>): T? {
+    override fun getValue(row: Int, column: String): Value? {
         val offset = index[row]
-        return type.cast(readAt(offset)[column])
+        return readAt(offset)[column]
     }
 
     companion object {

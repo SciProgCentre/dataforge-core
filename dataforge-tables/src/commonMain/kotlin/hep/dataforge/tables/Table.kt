@@ -3,32 +3,23 @@ package hep.dataforge.tables
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlin.reflect.KClass
-
-//TODO to be removed in 1.3.70
-@Suppress("UNCHECKED_CAST")
-internal fun <T : Any> KClass<T>.cast(value: Any?): T? {
-    return when {
-        value == null -> null
-        !isInstance(value) -> error("Expected type is $this, but found ${value::class}")
-        else -> value as T
-    }
-}
+import kotlin.reflect.cast
 
 /**
  * Finite or infinite row set. Rows are produced in a lazy suspendable [Flow].
  * Each row must contain at least all the fields mentioned in [header].
  */
-interface Rows<C : Any> {
-    val header: TableHeader<C>
-    fun rowFlow(): Flow<Row<C>>
+interface Rows<out T : Any> {
+    val header: TableHeader<T>
+    fun rowFlow(): Flow<Row<T>>
 }
 
-interface Table<C : Any> : Rows<C> {
-    fun <T : C> getValue(row: Int, column: String, type: KClass<out T>): T?
-    val columns: Collection<Column<C>>
-    override val header: TableHeader<C> get() = columns.toList()
-    val rows: List<Row<C>>
-    override fun rowFlow(): Flow<Row<C>> = rows.asFlow()
+interface Table<out T : Any> : Rows<T> {
+    fun getValue(row: Int, column: String): T?
+    val columns: Collection<Column<T>>
+    override val header: TableHeader<T> get() = columns.toList()
+    val rows: List<Row<T>>
+    override fun rowFlow(): Flow<Row<T>> = rows.asFlow()
 
     /**
      * Apply typed query to this table and return lazy [Flow] of resulting rows. The flow could be empty.
@@ -40,14 +31,18 @@ interface Table<C : Any> : Rows<C> {
     }
 }
 
-operator fun Collection<Column<*>>.get(name: String): Column<*>? = find { it.name == name }
+fun <C : Any, T : C> Table<C>.getValue(row: Int, column: String, type: KClass<out T>): T? =
+    type.cast(getValue(row, column))
+
+operator fun <T : Any> Collection<Column<T>>.get(name: String): Column<T>? = find { it.name == name }
 
 inline operator fun <C : Any, reified T : C> Table<C>.get(row: Int, column: String): T? =
     getValue(row, column, T::class)
 
-operator fun <C : Any, T : C> Table<C>.get(row: Int, column: ColumnHeader<T>): T? = getValue(row, column.name, column.type)
+operator fun <C : Any, T : C> Table<C>.get(row: Int, column: ColumnHeader<T>): T? =
+    getValue(row, column.name, column.type)
 
-interface Column<T : Any> : ColumnHeader<T> {
+interface Column<out T : Any> : ColumnHeader<T> {
     val size: Int
     operator fun get(index: Int): T?
 }
@@ -60,9 +55,11 @@ operator fun <T : Any> Column<T>.iterator() = iterator {
     }
 }
 
-interface Row<C: Any> {
-    fun <T : C> getValue(column: String, type: KClass<out T>): T?
+interface Row<out T : Any> {
+    fun getValue(column: String): T?
 }
 
-inline operator fun <C : Any, reified T : C> Row<C>.get(column: String): T? = getValue(column, T::class)
+fun <C : Any, T : C> Row<C>.getValue(column: String, type: KClass<out T>): T? = type.cast(getValue(column))
+
+inline operator fun <reified T : Any> Row<*>.get(column: String): T? = T::class.cast(getValue(column))
 operator fun <C : Any, T : C> Row<C>.get(column: ColumnHeader<T>): T? = getValue(column.name, column.type)

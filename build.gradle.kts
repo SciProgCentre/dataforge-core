@@ -7,7 +7,7 @@ plugins {
     id("org.jetbrains.dokka") version "0.10.1"
 }
 
-val dataforgeVersion by extra("0.1.8-dev-4")
+val dataforgeVersion by extra("0.1.8-dev-5")
 
 val bintrayRepo by extra("dataforge")
 val githubProject by extra("dataforge-core")

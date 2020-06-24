@@ -183,6 +183,11 @@ fun Configurable.stringList(vararg strings: String, key: Name? = null): ReadWrit
         it?.value?.stringList ?: emptyList()
     }
 
+fun Configurable.stringListOrNull(vararg strings: String, key: Name? = null): ReadWriteProperty<Any?, List<String>?> =
+    item(listOf(*strings), key) {
+        it?.value?.stringList
+    }
+
 fun Configurable.numberList(vararg numbers: Number, key: Name? = null): ReadWriteProperty<Any?, List<Number>> =
     item(listOf(*numbers), key) { item ->
         item?.value?.list?.map { it.number } ?: emptyList()

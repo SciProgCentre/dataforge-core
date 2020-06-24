@@ -9,7 +9,7 @@ class MutableTable<C : Any>(
     override val header: MutableList<ColumnHeader<C>>
 ) : RowTable<C>(rows, header) {
 
-    fun <T : C> column(name: String, type: KClass<out T>, meta: Meta): ColumnHeader<T> {
+    fun <R : C> column(name: String, type: KClass<out R>, meta: Meta): ColumnHeader<R> {
         val column = SimpleColumnHeader(name, type, meta)
         header.add(column)
         return column
