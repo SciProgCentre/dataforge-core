@@ -95,6 +95,11 @@ class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) {
      */
     var default by config.node()
 
+    /**
+     * An index field by which this node is identified in case of same name siblings construct
+     */
+    var indexKey by config.string(DEFAULT_INDEX_KEY)
+
     val items: Map<String, ItemDescriptor>
         get() = config.getIndexed(ITEM_KEY).mapValues { (_, item) ->
             val node = item.node ?: error("Node descriptor must be a node")
@@ -181,6 +186,8 @@ class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) {
 
         val ITEM_KEY = "item".asName()
         val IS_NODE_KEY = "@isNode".asName()
+
+        const val DEFAULT_INDEX_KEY = "@index"
 
         inline operator fun invoke(block: NodeDescriptor.() -> Unit) = NodeDescriptor().apply(block)
 

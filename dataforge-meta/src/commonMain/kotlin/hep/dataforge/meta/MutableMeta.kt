@@ -135,12 +135,12 @@ fun <M : MutableMeta<M>> M.update(meta: Meta) {
 fun MutableMeta<*>.setIndexedItems(
     name: Name,
     items: Iterable<MetaItem<*>>,
-    indexFactory: MetaItem<*>.(index: Int) -> String = { it.toString() }
+    indexFactory: (MetaItem<*>, index: Int) -> String = {_, index-> index.toString() }
 ) {
     val tokens = name.tokens.toMutableList()
     val last = tokens.last()
     items.forEachIndexed { index, meta ->
-        val indexedToken = NameToken(last.body, last.index + meta.indexFactory(index))
+        val indexedToken = NameToken(last.body, last.index + indexFactory(meta, index))
         tokens[tokens.lastIndex] = indexedToken
         set(Name(tokens), meta)
     }
@@ -149,9 +149,9 @@ fun MutableMeta<*>.setIndexedItems(
 fun MutableMeta<*>.setIndexed(
     name: Name,
     metas: Iterable<Meta>,
-    indexFactory: MetaItem<*>.(index: Int) -> String = { it.toString() }
+    indexFactory: (Meta, index: Int) -> String = { _, index-> index.toString() }
 ) {
-    setIndexedItems(name, metas.map { MetaItem.NodeItem(it) }, indexFactory)
+    setIndexedItems(name, metas.map { MetaItem.NodeItem(it) }){item, index ->indexFactory(item.node!!, index)}
 }
 
 operator fun MutableMeta<*>.set(name: Name, metas: Iterable<Meta>): Unit = setIndexed(name, metas)

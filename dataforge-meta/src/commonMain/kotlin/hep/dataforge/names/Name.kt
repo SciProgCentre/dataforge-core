@@ -113,6 +113,8 @@ data class NameToken(val body: String, val index: String = "") {
     }
 }
 
+fun NameToken.withIndex(newIndex: String) = NameToken(body, newIndex)
+
 /**
  * Convert a [String] to name parsing it and extracting name tokens and index syntax.
  * This operation is rather heavy so it should be used with care in high performance code.
