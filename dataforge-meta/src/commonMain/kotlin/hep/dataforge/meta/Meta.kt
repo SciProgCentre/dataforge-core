@@ -85,6 +85,10 @@ interface MetaRepr {
     fun toMeta(): Meta
 }
 
+interface ItemProvider{
+    fun getItem(name: Name): MetaItem<*>?
+}
+
 /**
  * Generic meta tree representation. Elements are [MetaItem] objects that could be represented by three different entities:
  *  * [MetaItem.ValueItem] (leaf)
@@ -92,11 +96,22 @@ interface MetaRepr {
  *
  *   * Same name siblings are supported via elements with the same [Name] but different queries
  */
-interface Meta : MetaRepr {
+interface Meta : MetaRepr, ItemProvider {
     /**
      * Top level items of meta tree
      */
     val items: Map<NameToken, MetaItem<*>>
+
+    override fun getItem(name: Name): MetaItem<*>? {
+        if (name.isEmpty()) return NodeItem(this)
+        return name.first()?.let { token ->
+            val tail = name.cutFirst()
+            when (tail.length) {
+                0 -> items[token]
+                else -> items[token]?.node?.get(tail)
+            }
+        }
+    }
 
     override fun toMeta(): Meta = seal()
 
@@ -127,17 +142,7 @@ interface Meta : MetaRepr {
  *
  * If [name] is empty return current [Meta] as a [NodeItem]
  */
-operator fun Meta?.get(name: Name): MetaItem<*>? {
-    if (this == null) return null
-    if (name.isEmpty()) return NodeItem(this)
-    return name.first()?.let { token ->
-        val tail = name.cutFirst()
-        when (tail.length) {
-            0 -> items[token]
-            else -> items[token]?.node?.get(tail)
-        }
-    }
-}
+operator fun Meta?.get(name: Name): MetaItem<*>? = this?.getItem(name)
 
 operator fun Meta?.get(token: NameToken): MetaItem<*>? = this?.items?.get(token)
 

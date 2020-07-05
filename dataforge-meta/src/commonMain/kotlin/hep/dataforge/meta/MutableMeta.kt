@@ -3,9 +3,12 @@ package hep.dataforge.meta
 import hep.dataforge.names.*
 import hep.dataforge.values.Value
 
-interface MutableMeta<out M : MutableMeta<M>> : MetaNode<M> {
+interface MutableItemProvider : ItemProvider {
+    fun setItem(name: Name, item: MetaItem<*>?)
+}
+
+interface MutableMeta<out M : MutableMeta<M>> : MetaNode<M>, MutableItemProvider {
     override val items: Map<NameToken, MetaItem<M>>
-    operator fun set(name: Name, item: MetaItem<*>?)
 //    fun onChange(owner: Any? = null, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit)
 //    fun removeListener(owner: Any? = null)
 }
@@ -49,7 +52,7 @@ abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), 
      */
     internal abstract fun empty(): M
 
-    override operator fun set(name: Name, item: MetaItem<*>?) {
+    override fun setItem(name: Name, item: MetaItem<*>?) {
         when (name.length) {
             0 -> error("Can't setValue meta item for empty name")
             1 -> {
@@ -63,7 +66,7 @@ abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), 
                 if (items[token] == null) {
                     replaceItem(token, null, MetaItem.NodeItem(empty()))
                 }
-                items[token]?.node!![name.cutFirst()] = item
+                items[token]?.node!!.setItem(name.cutFirst(), item)
             }
         }
     }
@@ -71,27 +74,21 @@ abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), 
 
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MutableMeta<*>.remove(name: Name) = set(name, null)
+inline fun MutableMeta<*>.remove(name: Name) = setItem(name, null)
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MutableMeta<*>.remove(name: String) = remove(name.toName())
 
-fun MutableMeta<*>.setValue(name: Name, value: Value) = set(name, MetaItem.ValueItem(value))
+operator fun MutableMeta<*>.set(name: Name, item: MetaItem<*>?) = setItem(name, item)
+
+fun MutableMeta<*>.setValue(name: Name, value: Value) = setItem(name, MetaItem.ValueItem(value))
 
 fun MutableMeta<*>.setValue(name: String, value: Value) = set(name.toName(), value)
-
-fun MutableMeta<*>.setItem(name: Name, item: MetaItem<*>?) {
-    when (item) {
-        null -> remove(name)
-        is MetaItem.ValueItem -> setValue(name, item.value)
-        is MetaItem.NodeItem<*> -> setNode(name, item.node)
-    }
-}
 
 fun MutableMeta<*>.setItem(name: String, item: MetaItem<*>?) = setItem(name.toName(), item)
 
 fun MutableMeta<*>.setNode(name: Name, node: Meta) =
-    set(name, MetaItem.NodeItem(node))
+    setItem(name, MetaItem.NodeItem(node))
 
 fun MutableMeta<*>.setNode(name: String, node: Meta) = setNode(name.toName(), node)
 
@@ -135,23 +132,23 @@ fun <M : MutableMeta<M>> M.update(meta: Meta) {
 fun MutableMeta<*>.setIndexedItems(
     name: Name,
     items: Iterable<MetaItem<*>>,
-    indexFactory: MetaItem<*>.(index: Int) -> String = { it.toString() }
+    indexFactory: (MetaItem<*>, index: Int) -> String = { _, index -> index.toString() }
 ) {
     val tokens = name.tokens.toMutableList()
     val last = tokens.last()
     items.forEachIndexed { index, meta ->
-        val indexedToken = NameToken(last.body, last.index + meta.indexFactory(index))
+        val indexedToken = NameToken(last.body, last.index + indexFactory(meta, index))
         tokens[tokens.lastIndex] = indexedToken
-        set(Name(tokens), meta)
+        setItem(Name(tokens), meta)
     }
 }
 
 fun MutableMeta<*>.setIndexed(
     name: Name,
     metas: Iterable<Meta>,
-    indexFactory: MetaItem<*>.(index: Int) -> String = { it.toString() }
+    indexFactory: (Meta, index: Int) -> String = { _, index -> index.toString() }
 ) {
-    setIndexedItems(name, metas.map { MetaItem.NodeItem(it) }, indexFactory)
+    setIndexedItems(name, metas.map { MetaItem.NodeItem(it) }) { item, index -> indexFactory(item.node!!, index) }
 }
 
 operator fun MutableMeta<*>.set(name: Name, metas: Iterable<Meta>): Unit = setIndexed(name, metas)
@@ -178,7 +175,7 @@ fun <M : MutableMeta<M>> M.append(name: String, value: Any?) = append(name.toNam
  */
 @DFExperimental
 fun <M : AbstractMutableMeta<M>> M.edit(name: Name, builder: M.() -> Unit) {
-    val item = when(val existingItem = get(name)){
+    val item = when (val existingItem = get(name)) {
         null -> empty().also { set(name, it) }
         is MetaItem.NodeItem<M> -> existingItem.node
         else -> error("Can't edit value meta item")

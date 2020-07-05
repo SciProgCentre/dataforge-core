@@ -16,7 +16,6 @@ import kotlin.reflect.KClass
 @ExperimentalUnsignedTypes
 data class PartialEnvelope(val meta: Meta, val dataOffset: UInt, val dataSize: ULong?)
 
-
 interface EnvelopeFormat : IOFormat<Envelope> {
     val defaultMetaFormat: MetaFormatFactory get() = JsonMetaFormat
 
@@ -32,6 +31,10 @@ interface EnvelopeFormat : IOFormat<Envelope> {
 
     override fun Output.writeObject(obj: Envelope): Unit = writeEnvelope(obj)
 }
+
+fun EnvelopeFormat.readPartial(input: Input) = input.readPartial()
+
+fun EnvelopeFormat.read(input: Input) = input.readObject()
 
 @Type(ENVELOPE_FORMAT_TYPE)
 interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeFormat {

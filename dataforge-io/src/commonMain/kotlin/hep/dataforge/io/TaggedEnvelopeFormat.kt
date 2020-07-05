@@ -166,6 +166,8 @@ class TaggedEnvelopeFormat(
 
         override fun Input.readObject(): Envelope =
             default.run { readObject() }
+
+
     }
 
 }

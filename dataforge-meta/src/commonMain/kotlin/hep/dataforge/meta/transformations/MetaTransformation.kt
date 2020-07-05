@@ -40,7 +40,7 @@ data class KeepTransformationRule(val selector: (Name) -> Boolean) :
         meta.sequence().map { it.first }.filter(selector)
 
     override fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem<*>?, target: M) {
-        if (selector(name)) target[name] = item
+        if (selector(name)) target.setItem(name, item)
     }
 }
 
