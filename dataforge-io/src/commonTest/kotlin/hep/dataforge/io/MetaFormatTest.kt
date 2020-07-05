@@ -1,6 +1,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.meta.*
+import hep.dataforge.meta.JsonMeta.Companion.JSON_ARRAY_KEY
 import kotlinx.io.asBinary
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.json
@@ -74,9 +75,9 @@ class MetaFormatTest {
         }
         val meta = json.toMetaItem().node!!
 
-        assertEquals(true, meta["@value[0].@value[1].d"].boolean)
-        assertEquals("value", meta["@value[1]"].string)
-        assertEquals(listOf(1.0, 2.0, 3.0), meta["@value[2"].value?.list?.map { it.number.toDouble() })
+        assertEquals(true, meta["$JSON_ARRAY_KEY[0].$JSON_ARRAY_KEY[1].d"].boolean)
+        assertEquals("value", meta["$JSON_ARRAY_KEY[1]"].string)
+        assertEquals(listOf(1.0, 2.0, 3.0), meta["$JSON_ARRAY_KEY[2"].value?.list?.map { it.number.toDouble() })
     }
 
 }

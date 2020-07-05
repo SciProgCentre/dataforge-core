@@ -2,6 +2,7 @@
 
 package hep.dataforge.meta
 
+import hep.dataforge.meta.JsonMeta.Companion.JSON_ARRAY_KEY
 import hep.dataforge.meta.descriptors.ItemDescriptor
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.descriptors.ValueDescriptor
@@ -113,17 +114,15 @@ fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<JsonMet
             val value = if (isEmpty()) {
                 Null
             } else {
-                ListValue(
-                    map<JsonElement, Value> {
-                        //We already checked that all values are primitives
-                        (it as JsonPrimitive).toValue(descriptor as? ValueDescriptor)
-                    }
-                )
+                map<JsonElement, Value> {
+                    //We already checked that all values are primitives
+                    (it as JsonPrimitive).toValue(descriptor as? ValueDescriptor)
+                }.asValue()
             }
             MetaItem.ValueItem(value)
         } else {
             //We can't return multiple items therefore we create top level node
-            json { "@json" to this@toMetaItem }.toMetaItem(descriptor)
+            json { JSON_ARRAY_KEY to this@toMetaItem }.toMetaItem(descriptor)
         }
     }
 }
@@ -162,7 +161,8 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
                 } else value.forEachIndexed { index, jsonElement ->
                     val indexKey = (itemDescriptor as? NodeDescriptor)?.indexKey ?: NodeDescriptor.DEFAULT_INDEX_KEY
                     val indexValue: String = (jsonElement as? JsonObject)
-                        ?.get(indexKey)?.contentOrNull ?: index.toString() //In case index is non-string, the backward transformation will be broken.
+                        ?.get(indexKey)?.contentOrNull
+                        ?: index.toString() //In case index is non-string, the backward transformation will be broken.
 
                     val token = key.withIndex(indexValue)
                     map[token] = jsonElement.toMetaItem(itemDescriptor)
@@ -173,4 +173,11 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
     }
 
     override val items: Map<NameToken, MetaItem<JsonMeta>> by lazy(::buildItems)
+
+    companion object{
+        /**
+         * A key representing top-level json array of nodes, which could not be directly represented by a meta node
+         */
+        const val JSON_ARRAY_KEY = "@jsonArray"
+    }
 }

@@ -2,10 +2,7 @@ package hep.dataforge.meta.descriptors
 
 import hep.dataforge.meta.*
 import hep.dataforge.names.*
-import hep.dataforge.values.False
-import hep.dataforge.values.True
-import hep.dataforge.values.Value
-import hep.dataforge.values.ValueType
+import hep.dataforge.values.*
 
 @DFBuilder
 sealed class ItemDescriptor(val config: Config) {
@@ -241,9 +238,7 @@ class ValueDescriptor(config: Config = Config()) : ItemDescriptor(config) {
      *
      * @return
      */
-    var type: List<ValueType> by config.item().transform {
-        it?.value?.list?.map { v -> ValueType.valueOf(v.string) } ?: emptyList()
-    }
+    var type: List<ValueType>? by config.listValue { ValueType.valueOf(it.string) }
 
     fun type(vararg t: ValueType) {
         this.type = listOf(*t)
@@ -257,9 +252,8 @@ class ValueDescriptor(config: Config = Config()) : ItemDescriptor(config) {
      * @return
      */
     fun isAllowedValue(value: Value): Boolean {
-        return (type.isEmpty() || type.contains(ValueType.STRING) || type.contains(value.type)) && (allowedValues.isEmpty() || allowedValues.contains(
-            value
-        ))
+        return (type?.let { it.contains(ValueType.STRING) || it.contains(value.type) } ?: true)
+                && (allowedValues.isEmpty() || allowedValues.contains(value))
     }
 
     /**
@@ -268,13 +262,19 @@ class ValueDescriptor(config: Config = Config()) : ItemDescriptor(config) {
      *
      * @return
      */
-    var allowedValues: List<Value> by config.value().transform {
-        when {
-            it?.list != null -> it.list
-            type.size == 1 && type[0] === ValueType.BOOLEAN -> listOf(True, False)
-            else -> emptyList()
+    var allowedValues: List<Value> by config.item().convert(
+        reader = {
+            val value = it.value
+            when {
+                value?.list != null -> value.list
+                type?.let { type -> type.size == 1 && type[0] === ValueType.BOOLEAN} ?: false -> listOf(True, False)
+                else -> emptyList()
+            }
+        },
+        writer = {
+            MetaItem.ValueItem(it.asValue())
         }
-    }
+    )
 
     /**
      * Allow given list of value and forbid others
