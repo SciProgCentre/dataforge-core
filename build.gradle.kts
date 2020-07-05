@@ -1,6 +1,5 @@
-
 plugins {
-    val toolsVersion = "0.5.0"
+    val toolsVersion = "0.5.1"
     id("scientifik.mpp") version toolsVersion apply false
     id("scientifik.jvm") version toolsVersion apply false
     id("scientifik.publish") version toolsVersion apply false
@@ -11,6 +10,7 @@ val dataforgeVersion by extra("0.1.8")
 
 val bintrayRepo by extra("dataforge")
 val githubProject by extra("dataforge-core")
+val spaceRepo by extra("https://maven.jetbrains.space/mipt-npm/p/df/maven")
 
 allprojects {
     group = "hep.dataforge"
