@@ -41,6 +41,18 @@ fun ItemProvider.boolean(key: Name? = null): ReadOnlyProperty<Any?, Boolean?> =
 fun ItemProvider.number(key: Name? = null): ReadOnlyProperty<Any?, Number?> =
     item(key).convert(MetaConverter.number)
 
+fun ItemProvider.double(key: Name? = null): ReadOnlyProperty<Any?, Double?> =
+    item(key).convert(MetaConverter.double)
+
+fun ItemProvider.float(key: Name? = null): ReadOnlyProperty<Any?, Float?> =
+    item(key).convert(MetaConverter.float)
+
+fun ItemProvider.int(key: Name? = null): ReadOnlyProperty<Any?, Int?> =
+    item(key).convert(MetaConverter.int)
+
+fun ItemProvider.long(key: Name? = null): ReadOnlyProperty<Any?, Long?> =
+    item(key).convert(MetaConverter.long)
+
 fun ItemProvider.node(key: Name? = null): ReadOnlyProperty<Any?, Meta?> =
     item(key).convert(MetaConverter.meta)
 
@@ -52,6 +64,18 @@ fun ItemProvider.boolean(default: Boolean, key: Name? = null): ReadOnlyProperty<
 
 fun ItemProvider.number(default: Number, key: Name? = null): ReadOnlyProperty<Any?, Number> =
     item(key).convert(MetaConverter.number) { default }
+
+fun ItemProvider.double(default: Double, key: Name? = null): ReadOnlyProperty<Any?, Double> =
+    item(key).convert(MetaConverter.double) { default }
+
+fun ItemProvider.float(default: Float, key: Name? = null): ReadOnlyProperty<Any?, Float> =
+    item(key).convert(MetaConverter.float) { default }
+
+fun ItemProvider.int(default: Int, key: Name? = null): ReadOnlyProperty<Any?, Int> =
+    item(key).convert(MetaConverter.int) { default }
+
+fun ItemProvider.long(default: Long, key: Name? = null): ReadOnlyProperty<Any?, Long> =
+    item(key).convert(MetaConverter.long) { default }
 
 inline fun <reified E : Enum<E>> ItemProvider.enum(default: E, key: Name? = null): ReadOnlyProperty<Any?, E> =
     item(key).convert(MetaConverter.enum()) { default }

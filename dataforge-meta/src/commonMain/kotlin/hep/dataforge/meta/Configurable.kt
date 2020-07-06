@@ -56,6 +56,7 @@ interface Configurable : Described, MutableItemProvider {
 /**
  * Reset the property to its default value
  */
+@Deprecated("To be removed since unused", ReplaceWith("setItem(name, null)"))
 fun Configurable.resetProperty(name: Name) {
     setItem(name, null)
 }
