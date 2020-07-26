@@ -30,8 +30,6 @@ abstract class AbstractPlugin(override val meta: Meta = Meta.EMPTY) : Plugin {
         dependencies.add(factory)
         return PluginDependencyDelegate(factory.type)
     }
-
-    override fun provideTop(target: String): Map<Name, Any> = emptyMap()
 }
 
 fun <T : Named> Collection<T>.toMap(): Map<Name, T> = associate { it.name to it }

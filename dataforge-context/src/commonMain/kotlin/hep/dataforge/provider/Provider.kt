@@ -39,12 +39,10 @@ interface Provider {
      */
     val defaultChainTarget: String get() = ""
 
-
     /**
      * A map of direct children for specific target
      */
-    fun provideTop(target: String): Map<Name, Any> =
-        throw IllegalArgumentException("Target $target is not supported for $this")
+    fun provideTop(target: String): Map<Name, Any> = emptyMap()
 }
 
 fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
