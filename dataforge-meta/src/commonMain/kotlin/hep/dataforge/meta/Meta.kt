@@ -77,6 +77,9 @@ sealed class MetaItem<out M : Meta> {
     }
 }
 
+fun Value.asMetaItem() = ValueItem(this)
+fun <M:Meta> M.asMetaItem() = NodeItem(this)
+
 /**
  * The object that could be represented as [Meta]. Meta provided by [toMeta] method should fully represent object state.
  * Meaning that two states with the same meta are equal.
@@ -265,7 +268,7 @@ inline fun <reified E : Enum<E>> MetaItem<*>?.enum(): E? = if (this is ValueItem
     string?.let { enumValueOf<E>(it) }
 }
 
-val MetaItem<*>?.stringList get() = value?.list?.map { it.string } ?: emptyList()
+val MetaItem<*>.stringList get() = value?.list?.map { it.string }
 
 val <M : Meta> MetaItem<M>?.node: M?
     get() = when (this) {

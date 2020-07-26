@@ -5,7 +5,8 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.values.DoubleArrayValue
 import hep.dataforge.values.Value
-import hep.dataforge.values.stringList
+import hep.dataforge.values.asValue
+import hep.dataforge.values.doubleArray
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -71,18 +72,6 @@ inline fun <reified M : MutableMeta<M>> M.node(key: Name? = null): ReadWriteProp
     item(key).convert(reader = { it?.let { it.node as M } }, writer = { it?.let { MetaItem.NodeItem(it) } })
 
 
-@Deprecated("To be replaced by a converter")
-fun <T> MutableItemProvider.item(
-    default: T? = null,
-    key: Name? = null,
-    writer: (T) -> MetaItem<*>? = { MetaItem.of(it) },
-    reader: (MetaItem<*>?) -> T
-): ReadWriteProperty<Any?, T> = MutableItemDelegate(
-    this,
-    key,
-    default?.let { MetaItem.of(it) }
-).convert(reader = reader, writer = writer)
-
 fun Configurable.value(key: Name? = null): ReadWriteProperty<Any?, Value?> =
     item(key).convert(MetaConverter.value)
 
@@ -119,33 +108,39 @@ fun MutableItemProvider.float(default: Float, key: Name? = null): ReadWritePrope
 /*
  * Extra delegates for special cases
  */
-fun MutableItemProvider.stringList(vararg strings: String, key: Name? = null): ReadWriteProperty<Any?, List<String>> =
-    item(listOf(*strings), key) {
-        it?.value?.stringList ?: emptyList()
-    }
-
-fun MutableItemProvider.stringListOrNull(
-    vararg strings: String,
+fun MutableItemProvider.stringList(
+    vararg default: String,
     key: Name? = null
-): ReadWriteProperty<Any?, List<String>?> =
-    item(listOf(*strings), key) {
-        it?.value?.stringList
-    }
+): ReadWriteProperty<Any?, List<String>> = item(key).convert(
+    reader = { it?.stringList ?: listOf(*default) },
+    writer = { it.map { str -> str.asValue() }.asValue().asMetaItem() }
+)
 
-fun MutableItemProvider.numberList(vararg numbers: Number, key: Name? = null): ReadWriteProperty<Any?, List<Number>> =
-    item(listOf(*numbers), key) { item ->
-        item?.value?.list?.map { it.number } ?: emptyList()
-    }
+fun MutableItemProvider.stringList(
+    key: Name? = null
+): ReadWriteProperty<Any?, List<String>?> = item(key).convert(
+    reader = {  it?.stringList },
+    writer = { it?.map { str -> str.asValue() }?.asValue()?.asMetaItem() }
+)
+
+fun MutableItemProvider.numberList(
+    vararg default: Number,
+    key: Name? = null
+): ReadWriteProperty<Any?, List<Number>> = item(key).convert(
+    reader = { it?.value?.list?.map { value -> value.number } ?: listOf(*default) },
+    writer = { it.map { num -> num.asValue() }.asValue().asMetaItem() }
+)
 
 /**
  * A special delegate for double arrays
  */
-fun MutableItemProvider.doubleArray(vararg doubles: Double, key: Name? = null): ReadWriteProperty<Any?, DoubleArray> =
-    item(doubleArrayOf(*doubles), key) {
-        (it.value as? DoubleArrayValue)?.value
-            ?: it?.value?.list?.map { value -> value.number.toDouble() }?.toDoubleArray()
-            ?: doubleArrayOf()
-    }
+fun MutableItemProvider.doubleArray(
+    vararg default: Double,
+    key: Name? = null
+): ReadWriteProperty<Any?, DoubleArray> =item(key).convert(
+    reader = { it?.value?.doubleArray ?: doubleArrayOf(*default) },
+    writer = { DoubleArrayValue(it).asMetaItem() }
+)
 
 fun <T> MutableItemProvider.listValue(
     key: Name? = null,
