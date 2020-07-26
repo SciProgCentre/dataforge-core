@@ -78,7 +78,7 @@ class Name(val tokens: List<NameToken>) {
  * A name token could have appendix in square brackets called *index*
  */
 @Serializable
-data class NameToken(val body: String, val index: String = "") {
+data class NameToken(val body: String, val index: String? = null) {
 
     init {
         if (body.isEmpty()) error("Syntax error: Name token body is empty")
@@ -96,7 +96,7 @@ data class NameToken(val body: String, val index: String = "") {
         body.escape()
     }
 
-    fun hasIndex() = index.isNotEmpty()
+    fun hasIndex() = index != null
 
     @Serializer(NameToken::class)
     companion object : KSerializer<NameToken> {
@@ -150,7 +150,8 @@ fun String.toName(): Name {
                 }
                 else -> when (it) {
                     '.' -> {
-                        yield(NameToken(bodyBuilder.toString(), queryBuilder.toString()))
+                        val query = if(queryBuilder.isEmpty()) null else queryBuilder.toString()
+                        yield(NameToken(bodyBuilder.toString(), query))
                         bodyBuilder = StringBuilder()
                         queryBuilder = StringBuilder()
                     }
@@ -163,7 +164,8 @@ fun String.toName(): Name {
                 }
             }
         }
-        yield(NameToken(bodyBuilder.toString(), queryBuilder.toString()))
+        val query = if(queryBuilder.isEmpty()) null else queryBuilder.toString()
+        yield(NameToken(bodyBuilder.toString(), query))
     }
     return Name(tokens.toList())
 }
@@ -206,7 +208,7 @@ fun Name.withIndex(index: String): Name {
 /**
  * Fast [String]-based accessor for item map
  */
-operator fun <T> Map<NameToken, T>.get(body: String, query: String = ""): T? = get(NameToken(body, query))
+operator fun <T> Map<NameToken, T>.get(body: String, query: String? = null): T? = get(NameToken(body, query))
 
 operator fun <T> Map<Name, T>.get(name: String) = get(name.toName())
 operator fun <T> MutableMap<Name, T>.set(name: String, value: T) = set(name.toName(), value)

@@ -7,23 +7,25 @@ import hep.dataforge.names.toName
  * Get all items matching given name. The index of the last element, if present is used as a [Regex],
  * against which indexes of elements are matched.
  */
-fun Meta.getIndexed(name: Name): Map<String, MetaItem<*>> {
+fun Meta.getIndexed(name: Name): Map<String?, MetaItem<*>> {
     val root = when (name.length) {
         0 -> error("Can't use empty name for 'getIndexed'")
         1 -> this
-        else -> this[name.cutLast()].node
+        else -> this[name.cutLast()].node ?: return emptyMap()
     }
 
     val (body, index) = name.last()!!
-    val regex = index.toRegex()
-
-    return root?.items
-        ?.filter { it.key.body == body && (index.isEmpty() || regex.matches(it.key.index)) }
-        ?.mapKeys { it.key.index }
-        ?: emptyMap()
+    return if (index == null) {
+        root.items.filter { it.key.body == body }.mapKeys { it.key.index }
+    } else {
+        val regex = index.toRegex()
+        root.items
+            .filter { it.key.body == body && (regex.matches(it.key.index ?: "")) }
+            .mapKeys { it.key.index }
+    }
 }
 
-fun Meta.getIndexed(name: String): Map<String, MetaItem<*>> = this@getIndexed.getIndexed(name.toName())
+fun Meta.getIndexed(name: String): Map<String?, MetaItem<*>> = this@getIndexed.getIndexed(name.toName())
 
 /**
  * Get all items matching given name.

@@ -34,7 +34,7 @@ suspend fun Table<Value>.wrap(): Envelope = Envelope {
 @ExperimentalIoApi
 fun TextRows.Companion.readEnvelope(envelope: Envelope): TextRows {
     val header = envelope.meta.getIndexed("column")
-        .entries.sortedBy { it.key.toInt() }
+        .entries.sortedBy { it.key?.toInt() }
         .map { (_, item) ->
             SimpleColumnHeader(item.node["name"].string!!, Value::class, item.node["meta"].node ?: Meta.EMPTY)
         }

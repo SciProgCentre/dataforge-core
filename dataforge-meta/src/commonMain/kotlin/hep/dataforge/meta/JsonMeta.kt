@@ -52,7 +52,7 @@ private fun Meta.toJsonWithIndex(descriptor: NodeDescriptor?, indexValue: String
     fun addElement(key: String) {
         val itemDescriptor = descriptor?.items?.get(key)
         val jsonKey = key.toJsonKey(itemDescriptor)
-        val items: Map<String, MetaItem<*>> = getIndexed(key)
+        val items: Map<String?, MetaItem<*>> = getIndexed(key)
         when (items.size) {
             0 -> {
                 //do nothing
@@ -94,7 +94,11 @@ fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
                 true -> True
                 false -> False
                 is Number -> NumberValue(body as Number)
-                else -> StringValue(content)
+                else -> if (isString) {
+                    StringValue(content)
+                } else {
+                    content.parseValue()
+                }
             }
         }
     }
@@ -174,7 +178,7 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
 
     override val items: Map<NameToken, MetaItem<JsonMeta>> by lazy(::buildItems)
 
-    companion object{
+    companion object {
         /**
          * A key representing top-level json array of nodes, which could not be directly represented by a meta node
          */

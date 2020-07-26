@@ -26,7 +26,7 @@ interface Configurable : Described, MutableItemProvider {
     fun getDefaultItem(name: Name): MetaItem<*>? = null
 
     /**
-     * Check if property with given [name] could be assigned to [value]
+     * Check if property with given [name] could be assigned to [item]
      */
     fun validateItem(name: Name, item: MetaItem<*>?): Boolean {
         val descriptor = descriptor?.get(name)

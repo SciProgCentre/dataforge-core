@@ -21,7 +21,7 @@ class MetaSerializerTest {
     fun testMetaSerialization() {
         val string = JSON_PRETTY.stringify(MetaSerializer, meta)
         val restored = JSON_PLAIN.parse(MetaSerializer, string)
-        assertEquals(restored, meta)
+        assertEquals(meta, restored)
     }
 
     @Test
@@ -29,7 +29,7 @@ class MetaSerializerTest {
         val bytes = Cbor.dump(MetaSerializer, meta)
         println(bytes.contentToString())
         val restored = Cbor.load(MetaSerializer, bytes)
-        assertEquals(restored, meta)
+        assertEquals(meta, restored)
     }
 
     @Test
@@ -37,7 +37,7 @@ class MetaSerializerTest {
         val name = "a.b.c".toName()
         val string = JSON_PRETTY.stringify(Name.serializer(), name)
         val restored = JSON_PLAIN.parse(Name.serializer(), string)
-        assertEquals(restored, name)
+        assertEquals(name, restored)
     }
 
     @Test

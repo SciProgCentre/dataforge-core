@@ -71,6 +71,7 @@ inline fun <reified M : MutableMeta<M>> M.node(key: Name? = null): ReadWriteProp
     item(key).convert(reader = { it?.let { it.node as M } }, writer = { it?.let { MetaItem.NodeItem(it) } })
 
 
+@Deprecated("To be replaced by a converter")
 fun <T> MutableItemProvider.item(
     default: T? = null,
     key: Name? = null,
@@ -84,20 +85,6 @@ fun <T> MutableItemProvider.item(
 
 fun Configurable.value(key: Name? = null): ReadWriteProperty<Any?, Value?> =
     item(key).convert(MetaConverter.value)
-
-fun <T> MutableItemProvider.value(
-    default: T? = null,
-    key: Name? = null,
-    writer: (T) -> Value? = { Value.of(it) },
-    reader: (Value?) -> T
-): ReadWriteProperty<Any?, T> = MutableItemDelegate(
-    this,
-    key,
-    default?.let { MetaItem.of(it) }
-).convert(
-    reader = { reader(it.value) },
-    writer = { value -> writer(value)?.let { MetaItem.ValueItem(it) } }
-)
 
 /* Number delegates*/
 

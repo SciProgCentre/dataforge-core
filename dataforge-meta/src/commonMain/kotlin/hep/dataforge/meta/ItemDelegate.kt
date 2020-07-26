@@ -8,7 +8,7 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 /* Meta delegates */
-
+//TODO to be replaced in 1.4 by interfaces
 open class ItemDelegate(
     open val owner: ItemProvider,
     val key: Name? = null,

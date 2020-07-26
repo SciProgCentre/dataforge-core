@@ -160,7 +160,7 @@ operator fun MutableMeta<*>.set(name: String, metas: Iterable<Meta>): Unit = set
 fun <M : MutableMeta<M>> M.append(name: Name, value: Any?) {
     require(!name.isEmpty()) { "Name could not be empty for append operation" }
     val newIndex = name.last()!!.index
-    if (newIndex.isNotEmpty()) {
+    if (newIndex != null) {
         set(name, value)
     } else {
         val index = (getIndexed(name).keys.mapNotNull { it.toIntOrNull() }.max() ?: -1) + 1
