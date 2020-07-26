@@ -43,7 +43,8 @@ interface Provider {
     /**
      * A map of direct children for specific target
      */
-    fun provideTop(target: String): Map<Name, Any>
+    fun provideTop(target: String): Map<Name, Any> =
+        throw IllegalArgumentException("Target $target is not supported for $this")
 }
 
 fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
