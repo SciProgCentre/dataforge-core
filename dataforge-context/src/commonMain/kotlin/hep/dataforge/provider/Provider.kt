@@ -16,7 +16,6 @@
 package hep.dataforge.provider
 
 import hep.dataforge.names.Name
-import hep.dataforge.names.toName
 
 /**
  * A marker utility interface for providers.
@@ -64,16 +63,16 @@ fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
 /**
  * Type checked provide
  */
-inline fun <reified T : Any> Provider.provide(path: String): T? {
-    return provide(Path.parse(path)) as? T
+inline fun <reified T : Any> Provider.provide(path: String, targetOverride: String? = null): T? {
+    return provide(Path.parse(path), targetOverride) as? T
 }
-
-inline fun <reified T : Any> Provider.provide(target: String, name: Name): T? {
-    return provide(PathToken(name, target).toPath()) as? T
-}
-
-inline fun <reified T : Any> Provider.provide(target: String, name: String): T? =
-    provide(target, name.toName())
+//
+//inline fun <reified T : Any> Provider.provide(target: String, name: Name): T? {
+//    return provide(PathToken(name, target).toPath()) as? T
+//}
+//
+//inline fun <reified T : Any> Provider.provide(target: String, name: String): T? =
+//    provide(target, name.toName())
 
 /**
  *  Typed top level content

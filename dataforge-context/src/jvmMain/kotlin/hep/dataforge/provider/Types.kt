@@ -26,11 +26,11 @@ inline fun <reified T : Any> Provider.provideByType(name: String): T? {
     val target = Types[T::class]
     return provide(target, name)
 }
-
-inline fun <reified T : Any> Provider.provideByType(name: Name): T? {
-    val target = Types[T::class]
-    return provide(target, name)
-}
+//
+//inline fun <reified T : Any> Provider.provideByType(name: Name): T? {
+//    val target = Types[T::class]
+//    return provide(target, name)
+//}
 
 inline fun <reified T : Any> Provider.top(): Map<Name, T> {
     val target = Types[T::class]

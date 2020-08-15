@@ -8,6 +8,7 @@ import hep.dataforge.provider.Provider
 import hep.dataforge.provider.top
 import hep.dataforge.values.Value
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import mu.KLogger
@@ -92,7 +93,7 @@ open class Context(
         config.action()
     }
 
-    override val coroutineContext: CoroutineContext by lazy {
+    open override val coroutineContext: CoroutineContext by lazy {
         (parent ?: Global).coroutineContext.let { parenContext ->
             parenContext + SupervisorJob(parenContext[Job])
         }
@@ -130,6 +131,9 @@ inline fun <reified T : Any> Context.content(target: String): Map<Name, T> =
  * A global root context. Closing [Global] terminates the framework.
  */
 object Global : Context("GLOBAL".asName(), null) {
+
+    override val coroutineContext: CoroutineContext = GlobalScope.coroutineContext + SupervisorJob()
+
     /**
      * Closing all contexts
      *
