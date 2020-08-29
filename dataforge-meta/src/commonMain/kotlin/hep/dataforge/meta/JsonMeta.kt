@@ -61,9 +61,9 @@ private fun Meta.toJsonWithIndex(descriptor: NodeDescriptor?, indexValue: String
                 elementMap[jsonKey] = items.values.first().toJsonElement(itemDescriptor, null)
             }
             else -> {
-                val array = jsonArray {
+                val array = buildJsonArray {
                     items.forEach { (index, item) ->
-                        +item.toJsonElement(itemDescriptor, index)
+                        add(item.toJsonElement(itemDescriptor, index))
                     }
                 }
                 elementMap[jsonKey] = array
@@ -89,16 +89,11 @@ fun JsonObject.toMeta(descriptor: NodeDescriptor? = null): JsonMeta = JsonMeta(t
 fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
     return when (this) {
         JsonNull -> Null
-        is JsonLiteral -> {
-            when (body) {
-                true -> True
-                false -> False
-                is Number -> NumberValue(body as Number)
-                else -> if (isString) {
-                    StringValue(content)
-                } else {
-                    content.parseValue()
-                }
+        else -> {
+            if (isString) {
+                StringValue(content)
+            } else {
+                content.parseValue()
             }
         }
     }
@@ -126,7 +121,7 @@ fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<JsonMet
             MetaItem.ValueItem(value)
         } else {
             //We can't return multiple items therefore we create top level node
-            json { JSON_ARRAY_KEY to this@toMetaItem }.toMetaItem(descriptor)
+            buildJsonObject { put(JSON_ARRAY_KEY, this@toMetaItem) }.toMetaItem(descriptor)
         }
     }
 }
@@ -165,7 +160,7 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
                 } else value.forEachIndexed { index, jsonElement ->
                     val indexKey = (itemDescriptor as? NodeDescriptor)?.indexKey ?: NodeDescriptor.DEFAULT_INDEX_KEY
                     val indexValue: String = (jsonElement as? JsonObject)
-                        ?.get(indexKey)?.contentOrNull
+                        ?.get(indexKey)?.jsonPrimitive?.contentOrNull
                         ?: index.toString() //In case index is non-string, the backward transformation will be broken.
 
                     val token = key.withIndex(indexValue)

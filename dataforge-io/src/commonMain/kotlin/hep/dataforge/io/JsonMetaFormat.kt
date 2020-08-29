@@ -14,25 +14,24 @@ import kotlinx.io.Input
 import kotlinx.io.Output
 import kotlinx.io.readByteArray
 import kotlinx.io.text.writeUtf8String
-import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObjectSerializer
+import kotlinx.serialization.json.JsonObject
 
-@OptIn(UnstableDefault::class)
+
 class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat {
 
     override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {
         val jsonObject = meta.toJson(descriptor)
-        writeUtf8String(json.stringify(JsonObjectSerializer, jsonObject))
+        writeUtf8String(json.encodeToString(JsonObject.serializer(), jsonObject))
     }
 
-    override fun toMeta(): Meta  = Meta{
+    override fun toMeta(): Meta = Meta {
         NAME_KEY put name.toString()
     }
 
     override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
         val str = readByteArray().decodeToString()
-        val jsonElement = json.parseJson(str)
+        val jsonElement = json.parseToJsonElement(str)
         val item = jsonElement.toMetaItem(descriptor)
         return item.node ?: Meta.EMPTY
     }

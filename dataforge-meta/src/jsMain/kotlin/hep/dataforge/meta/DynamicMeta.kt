@@ -38,7 +38,7 @@ fun Meta.toDynamic(): dynamic {
     return res
 }
 
-class DynamicMeta(val obj: dynamic) : MetaBase() {
+public class DynamicMeta(public val obj: dynamic) : MetaBase() {
     private fun keys() = js("Object.keys(this.obj)") as Array<String>
 
     private fun isArray(@Suppress("UNUSED_PARAMETER") obj: dynamic): Boolean =
@@ -47,7 +47,7 @@ class DynamicMeta(val obj: dynamic) : MetaBase() {
     private fun isPrimitive(obj: dynamic): Boolean =
         (jsTypeOf(obj) != "object")
 
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     private fun asItem(obj: dynamic): MetaItem<DynamicMeta>? {
         return when {
             obj == null -> MetaItem.ValueItem(Null)

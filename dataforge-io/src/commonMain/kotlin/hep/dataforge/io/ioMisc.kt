@@ -9,7 +9,7 @@ fun Output.writeRawString(str: String) {
 
 fun Input.readRawString(size: Int): String {
     val array = CharArray(size) { readByte().toChar() }
-    return String(array)
+    return array.concatToString()
 }
 
 inline fun buildByteArray(expectedSize: Int = 16, block: Output.() -> Unit): ByteArray =

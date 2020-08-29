@@ -12,7 +12,8 @@ import java.net.ServerSocket
 import java.net.Socket
 import kotlin.concurrent.thread
 
-class EnvelopeServer(
+@Deprecated("To be replaced by flow-based server")
+public class EnvelopeServer(
     override val context: Context,
     val port: Int,
     val responder: Responder,
@@ -25,7 +26,7 @@ class EnvelopeServer(
 
     private val format = formatFactory(formatMeta, context = context)
 
-    fun start() {
+    public fun start() {
         if (job == null) {
             logger.info { "Starting envelope server on port $port" }
             job = scope.launch(Dispatchers.IO) {
@@ -40,7 +41,7 @@ class EnvelopeServer(
         }
     }
 
-    fun stop() {
+    public fun stop() {
         logger.info { "Stopping envelope server on port $port" }
         job?.cancel()
         job = null
@@ -97,7 +98,7 @@ class EnvelopeServer(
         }
     }
 
-    companion object {
-        const val SHUTDOWN_ENVELOPE_TYPE = "@shutdown"
+    public companion object {
+        public const val SHUTDOWN_ENVELOPE_TYPE = "@shutdown"
     }
 }

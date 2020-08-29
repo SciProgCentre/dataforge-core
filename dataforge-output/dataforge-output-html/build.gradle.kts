@@ -1,25 +1,15 @@
 plugins {
-    id("scientifik.mpp")
+    id("kscience.mpp")
 }
 
-val htmlVersion by rootProject.extra("0.6.12")
+val htmlVersion by rootProject.extra("0.7.2")
 
 kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
                 api(project(":dataforge-output"))
-                api("org.jetbrains.kotlinx:kotlinx-html-common:$htmlVersion")
-            }
-        }
-        val jsMain by getting {
-            dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-html-js:$htmlVersion")
-            }
-        }
-        val jvmMain by getting{
-            dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-html-jvm:$htmlVersion")
+                api("org.jetbrains.kotlinx:kotlinx-html:$htmlVersion")
             }
         }
     }

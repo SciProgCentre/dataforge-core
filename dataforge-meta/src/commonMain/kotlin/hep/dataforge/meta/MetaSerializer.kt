@@ -1,11 +1,15 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.NameToken
-import kotlinx.serialization.*
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.json.JsonInput
-import kotlinx.serialization.json.JsonObjectSerializer
-import kotlinx.serialization.json.JsonOutput
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.JsonObject
 
 
 /**
@@ -21,8 +25,8 @@ object MetaSerializer : KSerializer<Meta> {
     override val descriptor: SerialDescriptor get() = mapSerializer.descriptor
 
     override fun deserialize(decoder: Decoder): Meta {
-        return if (decoder is JsonInput) {
-            JsonObjectSerializer.deserialize(decoder).toMeta()
+        return if (decoder is JsonDecoder) {
+            JsonObject.serializer().deserialize(decoder).toMeta()
         } else {
             object : MetaBase() {
                 override val items: Map<NameToken, MetaItem<*>> = mapSerializer.deserialize(decoder)
@@ -31,8 +35,8 @@ object MetaSerializer : KSerializer<Meta> {
     }
 
     override fun serialize(encoder: Encoder, value: Meta) {
-        if (encoder is JsonOutput) {
-            JsonObjectSerializer.serialize(encoder, value.toJson())
+        if (encoder is JsonEncoder) {
+            JsonObject.serializer().serialize(encoder, value.toJson())
         } else {
             mapSerializer.serialize(encoder, value.items)
         }

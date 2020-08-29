@@ -163,7 +163,7 @@ fun <M : MutableMeta<M>> M.append(name: Name, value: Any?) {
     if (newIndex != null) {
         set(name, value)
     } else {
-        val index = (getIndexed(name).keys.mapNotNull { it.toIntOrNull() }.max() ?: -1) + 1
+        val index = (getIndexed(name).keys.mapNotNull { it.toIntOrNull() }.maxOrNull() ?: -1) + 1
         set(name.withIndex(index.toString()), value)
     }
 }

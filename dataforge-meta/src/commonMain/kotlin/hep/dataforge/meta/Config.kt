@@ -4,16 +4,26 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
-import kotlinx.serialization.*
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlin.collections.HashSet
+import kotlin.collections.forEach
+import kotlin.collections.mapValues
+import kotlin.collections.removeAll
+import kotlin.collections.set
 
 //TODO add validator to configuration
 
-data class MetaListener(
+public data class MetaListener(
     val owner: Any? = null,
     val action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit
 )
 
-interface ObservableMeta : Meta {
+public interface ObservableMeta : Meta {
     fun onChange(owner: Any?, action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit)
     fun removeListener(owner: Any?)
 }

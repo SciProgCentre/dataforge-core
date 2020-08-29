@@ -1,13 +1,14 @@
-import scientifik.useSerialization
 
 plugins {
-    id("scientifik.jvm")
+    id("kscience.jvm")
 }
 
 description = "YAML meta IO"
 
-useSerialization{
-    yaml()
+kscience {
+    useSerialization {
+        yaml()
+    }
 }
 
 dependencies {

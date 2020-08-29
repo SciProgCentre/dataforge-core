@@ -3,22 +3,27 @@ package hep.dataforge.values
 import hep.dataforge.meta.boolean
 import hep.dataforge.meta.enum
 import hep.dataforge.meta.string
-import kotlinx.serialization.*
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 @Serializer(Value::class)
 object ValueSerializer : KSerializer<Value> {
-    private val listSerializer by lazy { ValueSerializer.list }
+    private val listSerializer by lazy { ListSerializer(ValueSerializer) }
 
     override val descriptor: SerialDescriptor =
-        SerialDescriptor("hep.dataforge.values.Value") {
+        buildClassSerialDescriptor("hep.dataforge.values.Value") {
             boolean("isList")
             enum<ValueType>("valueType")
             string("value")
         }
 
     private fun Decoder.decodeValue(): Value {
-        return when (decode(ValueType.serializer())) {
+        return when (decodeSerializableValue(ValueType.serializer())) {
             ValueType.NULL -> Null
             ValueType.NUMBER -> decodeDouble().asValue() //TODO differentiate?
             ValueType.BOOLEAN -> decodeBoolean().asValue()
@@ -37,7 +42,7 @@ object ValueSerializer : KSerializer<Value> {
     }
 
     private fun Encoder.encodeValue(value: Value) {
-        encode(ValueType.serializer(), value.type)
+        encodeSerializableValue(ValueType.serializer(), value.type)
         when (value.type) {
             ValueType.NULL -> {
                 // do nothing

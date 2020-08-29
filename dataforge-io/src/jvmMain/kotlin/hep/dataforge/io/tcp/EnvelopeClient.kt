@@ -11,10 +11,11 @@ import java.util.concurrent.Executors
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
-class EnvelopeClient(
+@Deprecated("To be replaced by flow-based client")
+public class EnvelopeClient(
     override val context: Context,
-    val host: String,
-    val port: Int,
+    public val host: String,
+    public val port: Int,
     formatFactory: EnvelopeFormatFactory = TaggedEnvelopeFormat,
     formatMeta: Meta = Meta.EMPTY
 ) : Responder, ContextAware {
@@ -34,7 +35,7 @@ class EnvelopeClient(
 //        }
 //    }
 
-    suspend fun close() {
+    public suspend fun close() {
         try {
             respond(
                 Envelope {
@@ -47,6 +48,7 @@ class EnvelopeClient(
     }
 
 
+    @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun respond(request: Envelope): Envelope = withContext(dispatcher) {
         //val address = InetSocketAddress(host,port)
         val socket = Socket(host, port)

@@ -3,7 +3,6 @@ package hep.dataforge.context
 import hep.dataforge.meta.DFBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.buildMeta
 import hep.dataforge.names.toName
 
 /**

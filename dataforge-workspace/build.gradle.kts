@@ -1,10 +1,8 @@
 plugins {
-    id("scientifik.mpp")
+    id("kscience.mpp")
 }
 
 kotlin {
-    jvm()
-    js()
     sourceSets {
         val commonMain by getting{
             dependencies {

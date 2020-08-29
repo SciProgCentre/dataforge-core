@@ -5,7 +5,12 @@ import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.names.*
 import hep.dataforge.values.*
-import kotlinx.serialization.*
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 
 /**
@@ -218,7 +223,7 @@ abstract class MetaBase : Meta {
 
     override fun hashCode(): Int = items.hashCode()
 
-    override fun toString(): String = JSON_PRETTY.stringify(MetaSerializer, this)
+    override fun toString(): String = JSON_PRETTY.encodeToString(MetaSerializer, this)
 }
 
 /**

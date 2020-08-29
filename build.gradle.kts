@@ -1,9 +1,9 @@
 plugins {
-    val toolsVersion = "0.5.2"
-    id("scientifik.mpp") version toolsVersion apply false
-    id("scientifik.jvm") version toolsVersion apply false
-    id("scientifik.publish") version toolsVersion apply false
-    id("org.jetbrains.dokka") version "0.10.1"
+    val toolsVersion = "0.6.0"
+    id("kscience.mpp") version toolsVersion apply false
+    id("kscience.jvm") version toolsVersion apply false
+    id("kscience.publish") version toolsVersion apply false
+    id("org.jetbrains.dokka") version "1.4.0-rc"
     id("org.jetbrains.changelog") version "0.4.0"
 }
 
@@ -23,6 +23,6 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = "scientifik.publish")
+    apply(plugin = "kscience.publish")
     apply(plugin = "org.jetbrains.dokka")
 }

@@ -28,7 +28,7 @@ interface Envelope {
         /**
          * Build a static envelope using provided builder
          */
-        inline operator fun invoke(block: EnvelopeBuilder.() -> Unit) = EnvelopeBuilder().apply(block).build()
+        inline operator fun invoke(block: EnvelopeBuilder.() -> Unit) = EnvelopeBuilder().apply(block).seal()
     }
 }
 

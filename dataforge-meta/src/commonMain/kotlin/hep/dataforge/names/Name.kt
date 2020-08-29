@@ -1,6 +1,13 @@
 package hep.dataforge.names
 
-import kotlinx.serialization.*
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 
 /**
@@ -60,7 +67,7 @@ class Name(val tokens: List<NameToken>) {
         val EMPTY = Name(emptyList())
 
         override val descriptor: SerialDescriptor =
-            PrimitiveDescriptor("hep.dataforge.names.Name", PrimitiveKind.STRING)
+            PrimitiveSerialDescriptor("hep.dataforge.names.Name", PrimitiveKind.STRING)
 
         override fun deserialize(decoder: Decoder): Name {
             return decoder.decodeString().toName()
@@ -101,7 +108,7 @@ data class NameToken(val body: String, val index: String? = null) {
     @Serializer(NameToken::class)
     companion object : KSerializer<NameToken> {
         override val descriptor: SerialDescriptor =
-            PrimitiveDescriptor("hep.dataforge.names.NameToken", PrimitiveKind.STRING)
+            PrimitiveSerialDescriptor("hep.dataforge.names.NameToken", PrimitiveKind.STRING)
 
         override fun deserialize(decoder: Decoder): NameToken {
             return decoder.decodeString().toName().first()!!

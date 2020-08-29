@@ -1,9 +1,8 @@
 plugins {
-    id("scientifik.mpp")
+    id("kscience.mpp")
 }
 
 kotlin {
-    jvm()
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -13,7 +12,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                implementation(kotlin("scripting-jvm-host-embeddable"))
+                implementation(kotlin("scripting-jvm-host"))
                 implementation(kotlin("scripting-jvm"))
             }
         }

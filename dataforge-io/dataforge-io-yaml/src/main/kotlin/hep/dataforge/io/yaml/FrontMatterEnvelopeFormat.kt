@@ -9,7 +9,6 @@ import hep.dataforge.meta.Meta
 import kotlinx.io.*
 import kotlinx.io.text.readUtf8Line
 import kotlinx.io.text.writeUtf8String
-import kotlinx.serialization.toUtf8Bytes
 
 @DFExperimental
 class FrontMatterEnvelopeFormat(
@@ -22,7 +21,7 @@ class FrontMatterEnvelopeFormat(
         var offset = 0u
         do {
             line = readUtf8Line() //?: error("Input does not contain front matter separator")
-            offset += line.toUtf8Bytes().size.toUInt()
+            offset += line.toByteArray().size.toUInt()
         } while (!line.startsWith(SEPARATOR))
 
         val readMetaFormat =
@@ -34,7 +33,7 @@ class FrontMatterEnvelopeFormat(
             do {
                 line = readUtf8Line()
                 writeUtf8String(line + "\r\n")
-                offset += line.toUtf8Bytes().size.toUInt()
+                offset += line.toByteArray().size.toUInt()
             } while (!line.startsWith(SEPARATOR))
         }.read {
             readMetaFormat.run {

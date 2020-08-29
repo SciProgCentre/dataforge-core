@@ -6,21 +6,21 @@ pluginManagement {
         maven("https://dl.bintray.com/kotlin/kotlin-eap")
         maven("https://dl.bintray.com/kotlin/kotlinx")
         maven("https://dl.bintray.com/mipt-npm/scientifik")
+        maven("https://dl.bintray.com/mipt-npm/kscience")
         maven("https://dl.bintray.com/mipt-npm/dev")
     }
+
+    val toolsVersion = "0.6.0"
+
     resolutionStrategy {
         eachPlugin {
             when (requested.id.id) {
-                "kotlinx-atomicfu" -> useModule("org.jetbrains.kotlinx:atomicfu-gradle-plugin:${requested.version}")
-                "scientifik.mpp", "scientifik.jvm", "scientifik.publish" -> useModule("scientifik:gradle-tools:${requested.version}")
+                "kscience.mpp", "kscience.jvm", "kscience.js", "kscience.publish" -> useModule("ru.mipt.npm:gradle-tools:${toolsVersion}")
             }
         }
     }
 }
 
-enableFeaturePreview("GRADLE_METADATA")
-
-//rootProject.name = "dataforge-core"
 include(
     ":dataforge-meta",
     ":dataforge-io",
@@ -33,5 +33,3 @@ include(
     ":dataforge-workspace",
     ":dataforge-scripting"
 )
-
-//includeBuild("../kotlinx-io")
