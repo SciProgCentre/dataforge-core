@@ -1,7 +1,6 @@
 package hep.dataforge.meta
 
-import hep.dataforge.names.Name
-import hep.dataforge.names.toName
+import hep.dataforge.names.*
 
 /**
  * Get all items matching given name. The index of the last element, if present is used as a [Regex],
@@ -14,7 +13,7 @@ fun Meta.getIndexed(name: Name): Map<String?, MetaItem<*>> {
         else -> this[name.cutLast()].node ?: return emptyMap()
     }
 
-    val (body, index) = name.last()!!
+    val (body, index) = name.lastOrNull()!!
     return if (index == null) {
         root.items.filter { it.key.body == body }.mapKeys { it.key.index }
     } else {

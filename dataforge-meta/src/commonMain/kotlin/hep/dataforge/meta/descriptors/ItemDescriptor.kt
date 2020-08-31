@@ -141,7 +141,7 @@ class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) {
                 }
                 NodeDescriptor(config)
             }
-            else -> buildNode(name.first()?.asName()!!).buildNode(name.cutFirst())
+            else -> buildNode(name.firstOrNull()?.asName()!!).buildNode(name.cutFirst())
         }
     }
 
@@ -155,7 +155,7 @@ class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) {
     }
 
     fun item(name: Name, descriptor: ItemDescriptor) {
-        buildNode(name.cutLast()).newItem(name.last().toString(), descriptor)
+        buildNode(name.cutLast()).newItem(name.lastOrNull().toString(), descriptor)
     }
 
     fun item(name: String, descriptor: ItemDescriptor) {
@@ -199,7 +199,7 @@ operator fun ItemDescriptor.get(name: Name): ItemDescriptor? {
     if (name.isEmpty()) return this
     return when (this) {
         is ValueDescriptor -> null // empty name already checked
-        is NodeDescriptor -> items[name.first()!!.toString()]?.get(name.cutFirst())
+        is NodeDescriptor -> items[name.firstOrNull()!!.toString()]?.get(name.cutFirst())
     }
 }
 

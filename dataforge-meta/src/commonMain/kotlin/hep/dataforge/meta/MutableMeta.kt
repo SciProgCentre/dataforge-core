@@ -56,12 +56,12 @@ abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), 
         when (name.length) {
             0 -> error("Can't setValue meta item for empty name")
             1 -> {
-                val token = name.first()!!
+                val token = name.firstOrNull()!!
                 @Suppress("UNCHECKED_CAST") val oldItem: MetaItem<M>? = get(name) as? MetaItem<M>
                 replaceItem(token, oldItem, wrapItem(item))
             }
             else -> {
-                val token = name.first()!!
+                val token = name.firstOrNull()!!
                 //get existing or create new node. Query is ignored for new node
                 if (items[token] == null) {
                     replaceItem(token, null, MetaItem.NodeItem(empty()))
@@ -159,7 +159,7 @@ operator fun MutableMeta<*>.set(name: String, metas: Iterable<Meta>): Unit = set
  */
 fun <M : MutableMeta<M>> M.append(name: Name, value: Any?) {
     require(!name.isEmpty()) { "Name could not be empty for append operation" }
-    val newIndex = name.last()!!.index
+    val newIndex = name.lastOrNull()!!.index
     if (newIndex != null) {
         set(name, value)
     } else {

@@ -89,8 +89,8 @@ val <T : Any> DataItem<T>?.data: Data<T>? get() = (this as? DataItem.Leaf<T>)?.d
 
 operator fun <T : Any> DataNode<T>.get(name: Name): DataItem<T>? = when (name.length) {
     0 -> error("Empty name")
-    1 -> items[name.first()]
-    else -> get(name.first()!!.asName()).node?.get(name.cutFirst())
+    1 -> items[name.firstOrNull()]
+    else -> get(name.firstOrNull()!!.asName()).node?.get(name.cutFirst())
 }
 
 operator fun <T : Any> DataNode<T>.get(name: String): DataItem<T>? = get(name.toName())
@@ -168,24 +168,24 @@ class DataTreeBuilder<T : Any>(val type: KClass<out T>) {
     private fun buildNode(name: Name): DataTreeBuilder<T> {
         return when (name.length) {
             0 -> this
-            1 -> buildNode(name.first()!!)
-            else -> buildNode(name.first()!!).buildNode(name.cutFirst())
+            1 -> buildNode(name.firstOrNull()!!)
+            else -> buildNode(name.firstOrNull()!!).buildNode(name.cutFirst())
         }
     }
 
     operator fun set(name: Name, data: Data<T>) {
         when (name.length) {
             0 -> error("Can't add data with empty name")
-            1 -> set(name.first()!!, data)
-            2 -> buildNode(name.cutLast())[name.last()!!] = data
+            1 -> set(name.firstOrNull()!!, data)
+            2 -> buildNode(name.cutLast())[name.lastOrNull()!!] = data
         }
     }
 
     operator fun set(name: Name, node: DataTreeBuilder<out T>) {
         when (name.length) {
             0 -> error("Can't add data with empty name")
-            1 -> set(name.first()!!, node)
-            2 -> buildNode(name.cutLast())[name.last()!!] = node
+            1 -> set(name.firstOrNull()!!, node)
+            2 -> buildNode(name.cutLast())[name.lastOrNull()!!] = node
         }
     }
 

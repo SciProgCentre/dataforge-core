@@ -115,7 +115,7 @@ public interface Meta : MetaRepr, ItemProvider {
 
     override fun getItem(name: Name): MetaItem<*>? {
         if (name.isEmpty()) return NodeItem(this)
-        return name.first()?.let { token ->
+        return name.firstOrNull()?.let { token ->
             val tail = name.cutFirst()
             when (tail.length) {
                 0 -> items[token]
