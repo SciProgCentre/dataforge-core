@@ -4,16 +4,13 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlin.collections.HashSet
-import kotlin.collections.forEach
-import kotlin.collections.mapValues
-import kotlin.collections.removeAll
 import kotlin.collections.set
 
 //TODO add validator to configuration
@@ -24,15 +21,15 @@ public data class MetaListener(
 )
 
 public interface ObservableMeta : Meta {
-    fun onChange(owner: Any?, action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit)
-    fun removeListener(owner: Any?)
+    public fun onChange(owner: Any?, action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit)
+    public fun removeListener(owner: Any?)
 }
 
 /**
  * Mutable meta representing object state
  */
 @Serializable
-class Config : AbstractMutableMeta<Config>(), ObservableMeta {
+public class Config : AbstractMutableMeta<Config>(), ObservableMeta {
 
     private val listeners = HashSet<MetaListener>()
 
@@ -78,10 +75,11 @@ class Config : AbstractMutableMeta<Config>(), ObservableMeta {
 
     override fun empty(): Config = Config()
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Serializer(Config::class)
-    companion object ConfigSerializer : KSerializer<Config> {
+    public companion object ConfigSerializer : KSerializer<Config> {
 
-        fun empty(): Config = Config()
+        public fun empty(): Config = Config()
         override val descriptor: SerialDescriptor get() = MetaSerializer.descriptor
 
         override fun deserialize(decoder: Decoder): Config {
@@ -94,9 +92,9 @@ class Config : AbstractMutableMeta<Config>(), ObservableMeta {
     }
 }
 
-operator fun Config.get(token: NameToken): MetaItem<Config>? = items[token]
+public operator fun Config.get(token: NameToken): MetaItem<Config>? = items[token]
 
-fun Meta.asConfig(): Config = this as? Config ?: Config().also { builder ->
+public fun Meta.asConfig(): Config = this as? Config ?: Config().also { builder ->
     this.items.mapValues { entry ->
         val item = entry.value
         builder[entry.key.asName()] = when (item) {

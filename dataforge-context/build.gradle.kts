@@ -4,8 +4,12 @@ plugins {
 
 description = "Context and provider definitions"
 
-kscience{
+kscience {
     useCoroutines()
+}
+
+repositories {
+    maven("https://maven.pkg.github.com/altavir/kotlin-logging")
 }
 
 kotlin {
@@ -13,7 +17,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":dataforge-meta"))
-                api("io.github.microutils:kotlin-logging:1.9.0")
+                api("io.github.microutils:kotlin-logging:1.9.0-dev-npm")
             }
         }
         val jvmMain by getting {

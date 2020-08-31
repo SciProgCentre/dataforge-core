@@ -13,15 +13,18 @@ import kotlin.script.experimental.jvm.dependenciesFromCurrentContext
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
 
-object Builders {
+public object Builders {
 
-    fun buildWorkspace(source: SourceCode, context: Context = Global): Workspace {
+    private fun buildWorkspace(source: SourceCode, context: Context = Global): Workspace {
         val builder = SimpleWorkspaceBuilder(context)
 
         val workspaceScriptConfiguration = ScriptCompilationConfiguration {
-            baseClass(Any::class)
+//            baseClass(Any::class)
             implicitReceivers(WorkspaceBuilder::class)
-            defaultImports("hep.dataforge.workspace.*")
+            defaultImports(
+                "hep.dataforge.meta.*",
+                "hep.dataforge.workspace.*"
+            )
             jvm {
                 dependenciesFromCurrentContext(wholeClasspath = true)
             }
@@ -49,7 +52,7 @@ object Builders {
         return builder.build()
     }
 
-    fun buildWorkspace(file: File): Workspace = buildWorkspace(file.toScriptSource())
+    public fun buildWorkspace(file: File): Workspace = buildWorkspace(file.toScriptSource())
 
-    fun buildWorkspace(string: String): Workspace = buildWorkspace(string.toScriptSource())
+    public fun buildWorkspace(string: String): Workspace = buildWorkspace(string.toScriptSource())
 }

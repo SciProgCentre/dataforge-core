@@ -7,9 +7,9 @@ import hep.dataforge.names.NameToken
  * A meta laminate consisting of multiple immutable meta layers. For mutable front layer, use [Scheme].
  * If [layers] list contains a [Laminate] it is flat-mapped.
  */
-class Laminate(layers: List<Meta>) : MetaBase() {
+public class Laminate(layers: List<Meta>) : MetaBase() {
 
-    val layers: List<Meta> = layers.flatMap {
+    public val layers: List<Meta> = layers.flatMap {
         if (it is Laminate) {
             it.layers
         } else {
@@ -17,7 +17,7 @@ class Laminate(layers: List<Meta>) : MetaBase() {
         }
     }
 
-    constructor(vararg layers: Meta?) : this(layers.filterNotNull())
+    public constructor(vararg layers: Meta?) : this(layers.filterNotNull())
 
     override val items: Map<NameToken, MetaItem<Meta>> by lazy {
         layers.map { it.items.keys }.flatten().associateWith { key ->
@@ -28,21 +28,21 @@ class Laminate(layers: List<Meta>) : MetaBase() {
     /**
      * Generate sealed meta using [mergeRule]
      */
-    fun merge(): SealedMeta {
+    public fun merge(): SealedMeta {
         val items = layers.map { it.items.keys }.flatten().associateWith { key ->
             layers.asSequence().map { it.items[key] }.filterNotNull().merge()
         }
         return SealedMeta(items)
     }
 
-    companion object {
+    public companion object {
 
         /**
          * The default rule which always uses the first found item in sequence alongside with its children.
          *
          * TODO add picture
          */
-        val replaceRule: (Sequence<MetaItem<*>>) -> MetaItem<SealedMeta> = { it.first().seal() }
+        public val replaceRule: (Sequence<MetaItem<*>>) -> MetaItem<SealedMeta> = { it.first().seal() }
 
         private fun Sequence<MetaItem<*>>.merge(): MetaItem<SealedMeta> {
             return when {
@@ -76,14 +76,14 @@ class Laminate(layers: List<Meta>) : MetaBase() {
          * The values a replaced but meta children are joined
          * TODO add picture
          */
-        val mergeRule: (Sequence<MetaItem<*>>) -> MetaItem<SealedMeta> = { it.merge() }
+        public val mergeRule: (Sequence<MetaItem<*>>) -> MetaItem<SealedMeta> = { it.merge() }
     }
 }
 
 /**
  * Performance optimized version of get method
  */
-fun Laminate.getFirst(name: Name): MetaItem<*>? {
+public fun Laminate.getFirst(name: Name): MetaItem<*>? {
     layers.forEach { layer ->
         layer[name]?.let { return it }
     }
@@ -93,11 +93,11 @@ fun Laminate.getFirst(name: Name): MetaItem<*>? {
 /**
  * Create a new [Laminate] adding given layer to the top
  */
-fun Laminate.withTop(meta: Meta): Laminate = Laminate(listOf(meta) + layers)
+public fun Laminate.withTop(meta: Meta): Laminate = Laminate(listOf(meta) + layers)
 
 /**
  * Create a new [Laminate] adding given layer to the bottom
  */
-fun Laminate.withBottom(meta: Meta): Laminate = Laminate(layers + meta)
+public fun Laminate.withBottom(meta: Meta): Laminate = Laminate(layers + meta)
 
 //TODO add custom rules for Laminate merge

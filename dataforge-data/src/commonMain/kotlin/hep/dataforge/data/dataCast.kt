@@ -20,12 +20,12 @@ inline fun <reified R : Any, T : R> Data<T>.upcast(): Data<R> = upcast(R::class)
 /**
  * Check if node could be safely cast to given class
  */
-expect fun <R : Any> DataNode<*>.canCast(type: KClass<out R>): Boolean
+internal expect fun <R : Any> DataNode<*>.canCast(type: KClass<out R>): Boolean
 
 /**
  * Check if data could be safely cast to given class
  */
-expect fun <R : Any> Data<*>.canCast(type: KClass<out R>): Boolean
+internal expect fun <R : Any> Data<*>.canCast(type: KClass<out R>): Boolean
 
 fun <R : Any> DataItem<*>.canCast(type: KClass<out R>): Boolean = when (this) {
     is DataItem.Node -> node.canCast(type)

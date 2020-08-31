@@ -5,12 +5,20 @@ pluginManagement {
         gradlePluginPortal()
         maven("https://dl.bintray.com/kotlin/kotlin-eap")
         maven("https://dl.bintray.com/kotlin/kotlinx")
-        maven("https://dl.bintray.com/mipt-npm/scientifik")
         maven("https://dl.bintray.com/mipt-npm/kscience")
         maven("https://dl.bintray.com/mipt-npm/dev")
     }
 
     val toolsVersion = "0.6.0"
+    val kotlinVersion = "1.4.0"
+
+    plugins {
+        kotlin("jvm") version kotlinVersion
+        id("scientifik.mpp") version toolsVersion
+        id("scientifik.jvm") version toolsVersion
+        id("scientifik.js") version toolsVersion
+        id("scientifik.publish") version toolsVersion
+    }
 
     resolutionStrategy {
         eachPlugin {

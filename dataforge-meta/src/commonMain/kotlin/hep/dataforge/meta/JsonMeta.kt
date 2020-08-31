@@ -15,7 +15,7 @@ import kotlinx.serialization.json.*
 /**
  * @param descriptor reserved for custom serialization in future
  */
-fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
+public fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
     return if (isList()) {
         JsonArray(list.map { it.toJson() })
     } else {
@@ -82,11 +82,11 @@ private fun Meta.toJsonWithIndex(descriptor: NodeDescriptor?, indexValue: String
     return JsonObject(elementMap)
 }
 
-fun Meta.toJson(descriptor: NodeDescriptor? = null): JsonObject = toJsonWithIndex(descriptor, null)
+public fun Meta.toJson(descriptor: NodeDescriptor? = null): JsonObject = toJsonWithIndex(descriptor, null)
 
-fun JsonObject.toMeta(descriptor: NodeDescriptor? = null): JsonMeta = JsonMeta(this, descriptor)
+public fun JsonObject.toMeta(descriptor: NodeDescriptor? = null): JsonMeta = JsonMeta(this, descriptor)
 
-fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
+public fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
     return when (this) {
         JsonNull -> Null
         else -> {
@@ -99,7 +99,7 @@ fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
     }
 }
 
-fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<JsonMeta> = when (this) {
+public fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<JsonMeta> = when (this) {
     is JsonPrimitive -> {
         val value = this.toValue(descriptor as? ValueDescriptor)
         MetaItem.ValueItem(value)
@@ -129,7 +129,7 @@ fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<JsonMet
 /**
  * A meta wrapping json object
  */
-class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : MetaBase() {
+public class JsonMeta(private val json: JsonObject, private val descriptor: NodeDescriptor? = null) : MetaBase() {
 
     private fun buildItems(): Map<NameToken, MetaItem<JsonMeta>> {
         val map = LinkedHashMap<NameToken, MetaItem<JsonMeta>>()
@@ -173,10 +173,10 @@ class JsonMeta(val json: JsonObject, val descriptor: NodeDescriptor? = null) : M
 
     override val items: Map<NameToken, MetaItem<JsonMeta>> by lazy(::buildItems)
 
-    companion object {
+    public companion object {
         /**
          * A key representing top-level json array of nodes, which could not be directly represented by a meta node
          */
-        const val JSON_ARRAY_KEY = "@jsonArray"
+        public const val JSON_ARRAY_KEY: String = "@jsonArray"
     }
 }

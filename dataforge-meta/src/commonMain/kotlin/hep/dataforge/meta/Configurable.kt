@@ -14,21 +14,21 @@ import kotlin.reflect.KProperty
  * It is not possible to know if some property is declared by provider just by looking on [Configurable],
  * this information should be provided externally.
  */
-interface Configurable : Described, MutableItemProvider {
+public interface Configurable : Described, MutableItemProvider {
     /**
      * Backing config
      */
-    val config: Config
+    public val config: Config
 
     /**
      * Default meta item provider
      */
-    fun getDefaultItem(name: Name): MetaItem<*>? = null
+    public fun getDefaultItem(name: Name): MetaItem<*>? = null
 
     /**
      * Check if property with given [name] could be assigned to [item]
      */
-    fun validateItem(name: Name, item: MetaItem<*>?): Boolean {
+    public fun validateItem(name: Name, item: MetaItem<*>?): Boolean {
         val descriptor = descriptor?.get(name)
         return descriptor?.validateItem(item) ?: true
     }
@@ -53,40 +53,32 @@ interface Configurable : Described, MutableItemProvider {
     }
 }
 
-/**
- * Reset the property to its default value
- */
-@Deprecated("To be removed since unused", ReplaceWith("setItem(name, null)"))
-fun Configurable.resetProperty(name: Name) {
-    setItem(name, null)
-}
+public fun Configurable.getItem(key: String): MetaItem<*>? = getItem(key.toName())
 
-fun Configurable.getItem(key: String) = getItem(key.toName())
+public fun Configurable.setItem(name: Name, value: Value?): Unit = setItem(name, value?.let { MetaItem.ValueItem(value) })
+public fun Configurable.setItem(name: Name, meta: Meta?): Unit = setItem(name, meta?.let { MetaItem.NodeItem(meta) })
 
-fun Configurable.setItem(name: Name, value: Value?) = setItem(name, value?.let { MetaItem.ValueItem(value) })
-fun Configurable.setItem(name: Name, meta: Meta?) = setItem(name, meta?.let { MetaItem.NodeItem(meta) })
+public fun Configurable.setItem(key: String, item: MetaItem<*>?): Unit = setItem(key.toName(), item)
 
-fun Configurable.setItem(key: String, item: MetaItem<*>?) = setItem(key.toName(), item)
+public fun Configurable.setItem(key: String, value: Value?): Unit = setItem(key, value?.let { MetaItem.ValueItem(value) })
+public fun Configurable.setItem(key: String, meta: Meta?): Unit = setItem(key, meta?.let { MetaItem.NodeItem(meta) })
 
-fun Configurable.setItem(key: String, value: Value?) = setItem(key, value?.let { MetaItem.ValueItem(value) })
-fun Configurable.setItem(key: String, meta: Meta?) = setItem(key, meta?.let { MetaItem.NodeItem(meta) })
-
-fun <T : Configurable> T.configure(meta: Meta): T = this.apply { config.update(meta) }
+public fun <T : Configurable> T.configure(meta: Meta): T = this.apply { config.update(meta) }
 
 @DFBuilder
-inline fun <T : Configurable> T.configure(action: Config.() -> Unit): T = apply { config.apply(action) }
+public inline fun <T : Configurable> T.configure(action: Config.() -> Unit): T = apply { config.apply(action) }
 
 /* Node delegates */
 
-fun Configurable.config(key: Name? = null): ReadWriteProperty<Any?, Config?> =
+public fun Configurable.config(key: Name? = null): ReadWriteProperty<Any?, Config?> =
     config.node(key)
 
-fun MutableItemProvider.node(key: Name? = null): ReadWriteProperty<Any?, Meta?> = item(key).convert(
+public fun MutableItemProvider.node(key: Name? = null): ReadWriteProperty<Any?, Meta?> = item(key).convert(
     reader = { it.node },
     writer = { it?.let { MetaItem.NodeItem(it) } }
 )
 
-fun <T : Configurable> Configurable.spec(
+public fun <T : Configurable> Configurable.spec(
     spec: Specification<T>, key: Name? = null
 ): ReadWriteProperty<Any?, T?> = object : ReadWriteProperty<Any?, T?> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
@@ -100,7 +92,7 @@ fun <T : Configurable> Configurable.spec(
     }
 }
 
-fun <T : Configurable> Configurable.spec(
+public fun <T : Configurable> Configurable.spec(
     spec: Specification<T>, default: T, key: Name? = null
 ): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
