@@ -1,6 +1,7 @@
 package hep.dataforge.output.html
 
 import hep.dataforge.context.Context
+import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import hep.dataforge.output.Output
 import hep.dataforge.output.Renderer
@@ -10,12 +11,14 @@ import hep.dataforge.provider.Type
 import hep.dataforge.provider.top
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.html.FlowContent
 import kotlinx.html.TagConsumer
 import kotlinx.html.p
 import kotlin.reflect.KClass
 
 
-class HtmlRenderer<T : Any>(override val context: Context, private val consumer: TagConsumer<*>) : Renderer<T> {
+@DFExperimental
+public class HtmlRenderer<T : Any>(override val context: Context, private val consumer: TagConsumer<*>) : Renderer<T> {
     private val cache = HashMap<KClass<*>, HtmlBuilder<*>>()
 
     /**
@@ -42,7 +45,7 @@ class HtmlRenderer<T : Any>(override val context: Context, private val consumer:
         }
         context.launch(Dispatchers.Output) {
             @Suppress("UNCHECKED_CAST")
-            (builder as HtmlBuilder<T>).run { consumer.render(obj) }
+            (builder as HtmlBuilder<T>).run { render(obj) }
         }
     }
 }
@@ -51,29 +54,29 @@ class HtmlRenderer<T : Any>(override val context: Context, private val consumer:
  * A text or binary renderer based on [Renderer]
  */
 @Type(HTML_CONVERTER_TYPE)
-interface HtmlBuilder<T : Any> {
+public interface HtmlBuilder<T : Any> {
     /**
      * The priority of this renderer compared to other renderers
      */
-    val priority: Int
+    public val priority: Int
 
     /**
      * The type of the content served by this renderer
      */
-    val type: KClass<T>
+    public val type: KClass<T>
 
-    suspend fun TagConsumer<*>.render(obj: T)
+    public suspend fun FlowContent.render(obj: T)
 
-    companion object {
-        const val HTML_CONVERTER_TYPE = "dataforge.htmlBuilder"
+    public companion object {
+        public const val HTML_CONVERTER_TYPE: String = "dataforge.htmlBuilder"
     }
 }
 
-object DefaultHtmlBuilder : HtmlBuilder<Any> {
+public object DefaultHtmlBuilder : HtmlBuilder<Any> {
     override val priority: Int = Int.MAX_VALUE
     override val type: KClass<Any> = Any::class
 
-    override suspend fun TagConsumer<*>.render(obj: Any) {
+    override suspend fun FlowContent.render(obj: Any) {
         p { +obj.toString() }
     }
 }
