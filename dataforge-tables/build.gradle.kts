@@ -1,5 +1,5 @@
 plugins {
-    id("kscience.mpp")
+    id("ru.mipt.npm.mpp")
 }
 
 kotlin {

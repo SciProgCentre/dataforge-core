@@ -1,6 +1,5 @@
-
 plugins {
-    id("kscience.jvm")
+    id("ru.mipt.npm.jvm")
 }
 
 description = "YAML meta IO"

@@ -3,6 +3,7 @@ package hep.dataforge.io
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.cbor.Cbor
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,6 +25,7 @@ class MetaSerializerTest {
         assertEquals(meta, restored)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testCborSerialization() {
         val bytes = Cbor.encodeToByteArray(MetaSerializer, meta)

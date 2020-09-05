@@ -14,7 +14,7 @@ public fun <T : Any> Data<T>.get(): T = runBlocking { await() }
  * Check that node is compatible with given type meaning that each element could be cast to the type
  */
 internal actual fun <R : Any> DataNode<*>.canCast(type: KClass<out R>): Boolean =
-    type.isSuperclassOf(type)
+    this.type.isSubclassOf(type)
 
 internal actual fun <R : Any> Data<*>.canCast(type: KClass<out R>): Boolean =
     this.type.isSubclassOf(type)
