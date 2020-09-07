@@ -11,12 +11,12 @@ import java.nio.file.StandardOpenOption
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.streams.asSequence
 
-fun <R> Path.read(block: Input.() -> R): R = asBinary().read(block = block)
+public fun <R> Path.read(block: Input.() -> R): R = asBinary().read(block = block)
 
 /**
  * Write a live output to a newly created file. If file does not exist, throws error
  */
-fun Path.write(block: Output.() -> Unit): Unit {
+public fun Path.write(block: Output.() -> Unit): Unit {
     val stream = Files.newOutputStream(this, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW)
     stream.asOutput().use(block)
 }
@@ -24,7 +24,7 @@ fun Path.write(block: Output.() -> Unit): Unit {
 /**
  * Create a new file or append to exiting one with given output [block]
  */
-fun Path.append(block: Output.() -> Unit): Unit {
+public fun Path.append(block: Output.() -> Unit): Unit {
     val stream = Files.newOutputStream(
         this,
         StandardOpenOption.WRITE, StandardOpenOption.APPEND, StandardOpenOption.CREATE
@@ -35,7 +35,7 @@ fun Path.append(block: Output.() -> Unit): Unit {
 /**
  * Create a new file or replace existing one using given output [block]
  */
-fun Path.rewrite(block: Output.() -> Unit): Unit {
+public fun Path.rewrite(block: Output.() -> Unit): Unit {
     val stream = Files.newOutputStream(
         this,
         StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE
@@ -43,9 +43,9 @@ fun Path.rewrite(block: Output.() -> Unit): Unit {
     stream.asOutput().use(block)
 }
 
-fun Path.readEnvelope(format: EnvelopeFormat): Envelope {
+public fun Path.readEnvelope(format: EnvelopeFormat): Envelope {
     val partialEnvelope: PartialEnvelope = asBinary().read {
-        format.run { readPartial() }
+        format.run { readPartial(this@read) }
     }
     val offset: Int = partialEnvelope.dataOffset.toInt()
     val size: Int = partialEnvelope.dataSize?.toInt() ?: (Files.size(this).toInt() - offset)
@@ -58,7 +58,7 @@ fun Path.readEnvelope(format: EnvelopeFormat): Envelope {
  */
 @Suppress("UNCHECKED_CAST")
 @DFExperimental
-inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
+public inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
     return ioFormatFactories.find { it.type.isSuperclassOf(T::class) } as IOFormat<T>?
 }
 
@@ -66,7 +66,7 @@ inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
  * Read file containing meta using given [formatOverride] or file extension to infer meta type.
  * If [path] is a directory search for file starting with `meta` in it
  */
-fun IOPlugin.readMetaFile(path: Path, formatOverride: MetaFormat? = null, descriptor: NodeDescriptor? = null): Meta {
+public fun IOPlugin.readMetaFile(path: Path, formatOverride: MetaFormat? = null, descriptor: NodeDescriptor? = null): Meta {
     if (!Files.exists(path)) error("Meta file $path does not exist")
 
     val actualPath: Path = if (Files.isDirectory(path)) {
@@ -80,7 +80,7 @@ fun IOPlugin.readMetaFile(path: Path, formatOverride: MetaFormat? = null, descri
     val metaFormat = formatOverride ?: resolveMetaFormat(extension) ?: error("Can't resolve meta format $extension")
     return metaFormat.run {
         actualPath.read {
-            readMeta(descriptor)
+            readMeta(this, descriptor)
         }
     }
 }
@@ -89,7 +89,7 @@ fun IOPlugin.readMetaFile(path: Path, formatOverride: MetaFormat? = null, descri
  * Write meta to file using [metaFormat]. If [path] is a directory, write a file with name equals name of [metaFormat].
  * Like "meta.json"
  */
-fun IOPlugin.writeMetaFile(
+public fun IOPlugin.writeMetaFile(
     path: Path,
     meta: Meta,
     metaFormat: MetaFormatFactory = JsonMetaFormat,
@@ -102,7 +102,7 @@ fun IOPlugin.writeMetaFile(
     }
     metaFormat.run {
         actualPath.write {
-            writeMeta(meta, descriptor)
+            writeMeta(this, meta, descriptor)
         }
     }
 }
@@ -111,7 +111,7 @@ fun IOPlugin.writeMetaFile(
  * Return inferred [EnvelopeFormat] if only one format could read given file. If no format accepts file, return null. If
  * multiple formats accepts file, throw an error.
  */
-fun IOPlugin.peekBinaryFormat(path: Path): EnvelopeFormat? {
+public fun IOPlugin.peekBinaryFormat(path: Path): EnvelopeFormat? {
     val binary = path.asBinary()
     val formats = envelopeFormatFactories.mapNotNull { factory ->
         binary.read {
@@ -126,8 +126,8 @@ fun IOPlugin.peekBinaryFormat(path: Path): EnvelopeFormat? {
     }
 }
 
-val IOPlugin.Companion.META_FILE_NAME: String get() = "@meta"
-val IOPlugin.Companion.DATA_FILE_NAME: String get() = "@data"
+public val IOPlugin.Companion.META_FILE_NAME: String get() = "@meta"
+public val IOPlugin.Companion.DATA_FILE_NAME: String get() = "@data"
 
 /**
  * Read and envelope from file if the file exists, return null if file does not exist.
@@ -143,7 +143,7 @@ val IOPlugin.Companion.DATA_FILE_NAME: String get() = "@data"
  * Return null otherwise.
  */
 @DFExperimental
-fun IOPlugin.readEnvelopeFile(
+public fun IOPlugin.readEnvelopeFile(
     path: Path,
     readNonEnvelopes: Boolean = false,
     formatPeeker: IOPlugin.(Path) -> EnvelopeFormat? = IOPlugin::peekBinaryFormat
@@ -182,9 +182,9 @@ fun IOPlugin.readEnvelopeFile(
 /**
  * Write a binary into file. Throws an error if file already exists
  */
-fun <T : Any> IOFormat<T>.writeToFile(path: Path, obj: T) {
+public fun <T : Any> IOFormat<T>.writeToFile(path: Path, obj: T) {
     path.write {
-        writeObject(obj)
+        writeObject(this, obj)
     }
 }
 
@@ -192,7 +192,7 @@ fun <T : Any> IOFormat<T>.writeToFile(path: Path, obj: T) {
  * Write envelope file to given [path] using [envelopeFormat] and optional [metaFormat]
  */
 @DFExperimental
-fun IOPlugin.writeEnvelopeFile(
+public fun IOPlugin.writeEnvelopeFile(
     path: Path,
     envelope: Envelope,
     envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat,

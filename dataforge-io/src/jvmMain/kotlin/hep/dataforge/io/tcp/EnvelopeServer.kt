@@ -74,12 +74,12 @@ public class EnvelopeServer(
             val outputStream = socket.getOutputStream()
             format.run {
                 while (socket.isConnected) {
-                    val request = inputStream.readBlocking { readObject() }
+                    val request = inputStream.readBlocking { readObject(this) }
                     logger.debug { "Accepted request with type ${request.type} from ${socket.remoteSocketAddress}" }
                     if (request.type == SHUTDOWN_ENVELOPE_TYPE) {
                         //Echo shutdown command
                         outputStream.write {
-                            writeObject(request)
+                            writeObject(this, request)
                         }
                         logger.info { "Accepted graceful shutdown signal from ${socket.inetAddress}" }
                         socket.close()
@@ -89,7 +89,7 @@ public class EnvelopeServer(
                     runBlocking {
                         val response = responder.respond(request)
                         outputStream.write {
-                            writeObject(response)
+                            writeObject(this, response)
                         }
                         logger.debug { "Sent response with type ${response.type} to ${socket.remoteSocketAddress}" }
                     }

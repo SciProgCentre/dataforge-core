@@ -9,31 +9,34 @@ import hep.dataforge.names.toName
  * A convenience builder for context
  */
 @DFBuilder
-class ContextBuilder(var name: String = "@anonymous", val parent: Context = Global) {
+public class ContextBuilder(private val parent: Context = Global, public var name: String = "@anonymous") {
     private val plugins = ArrayList<Plugin>()
     private var meta = MetaBuilder()
 
-    fun properties(action: MetaBuilder.() -> Unit) {
+    public fun properties(action: MetaBuilder.() -> Unit) {
         meta.action()
     }
 
-    fun plugin(plugin: Plugin) {
+    public fun plugin(plugin: Plugin) {
         plugins.add(plugin)
     }
 
-    fun plugin(tag: PluginTag, action: MetaBuilder.() -> Unit = {}) {
-        plugins.add(PluginRepository.fetch(tag, Meta(action)))
+    public fun plugin(tag: PluginTag, action: MetaBuilder.() -> Unit = {}) {
+        val factory = parent.resolve<PluginFactory<*>>(PluginFactory.TYPE).values
+            .find { it.tag.matches(tag) } ?: error("Can't resolve plugin factory for $tag")
+        val plugin = factory.invoke(Meta(action), parent)
+        plugins.add(plugin)
     }
 
-    fun plugin(builder: PluginFactory<*>, action: MetaBuilder.() -> Unit = {}) {
+    public fun plugin(builder: PluginFactory<*>, action: MetaBuilder.() -> Unit = {}) {
         plugins.add(builder.invoke(Meta(action)))
     }
 
-    fun plugin(name: String, group: String = "", version: String = "", action: MetaBuilder.() -> Unit = {}) {
+    public fun plugin(name: String, group: String = "", version: String = "", action: MetaBuilder.() -> Unit = {}) {
         plugin(PluginTag(name, group, version), action)
     }
 
-    fun build(): Context {
+    public fun build(): Context {
         return Context(name.toName(), parent).apply {
             this@ContextBuilder.plugins.forEach {
                 plugins.load(it)

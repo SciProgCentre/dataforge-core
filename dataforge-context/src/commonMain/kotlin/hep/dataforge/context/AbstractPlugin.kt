@@ -6,7 +6,7 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
-abstract class AbstractPlugin(override val meta: Meta = Meta.EMPTY) : Plugin {
+public abstract class AbstractPlugin(override val meta: Meta = Meta.EMPTY) : Plugin {
     private var _context: Context? = null
     private val dependencies = ArrayList<PluginFactory<*>>()
 
@@ -32,7 +32,7 @@ abstract class AbstractPlugin(override val meta: Meta = Meta.EMPTY) : Plugin {
     }
 }
 
-fun <T : Named> Collection<T>.toMap(): Map<Name, T> = associate { it.name to it }
+public fun <T : Named> Collection<T>.toMap(): Map<Name, T> = associate { it.name to it }
 
 private class PluginDependencyDelegate<P : Plugin>(val type: KClass<out P>) : ReadOnlyProperty<AbstractPlugin, P> {
     override fun getValue(thisRef: AbstractPlugin, property: KProperty<*>): P {

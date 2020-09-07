@@ -1,7 +1,7 @@
 package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
-import hep.dataforge.context.content
+import hep.dataforge.context.resolve
 import hep.dataforge.context.toMap
 import hep.dataforge.data.DataNode
 import hep.dataforge.meta.Meta
@@ -19,7 +19,7 @@ class SimpleWorkspace(
 ) : Workspace {
 
     override val tasks: Map<Name, Task<*>> by lazy {
-        context.content<Task<*>>(Task.TYPE) + tasks.toMap()
+        context.resolve<Task<*>>(Task.TYPE) + tasks.toMap()
     }
 
     companion object {

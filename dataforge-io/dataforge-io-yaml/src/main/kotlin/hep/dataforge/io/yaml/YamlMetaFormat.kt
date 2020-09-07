@@ -16,17 +16,20 @@ import kotlinx.io.asInputStream
 import kotlinx.io.text.writeUtf8String
 import org.yaml.snakeyaml.Yaml
 
+/**
+ * Represent meta as Yaml
+ */
 @DFExperimental
-class YamlMetaFormat(val meta: Meta) : MetaFormat {
+public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
     private val yaml = Yaml()
 
-    override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {
+    override fun writeMeta(output: Output, meta: Meta, descriptor: NodeDescriptor?) {
         val string = yaml.dump(meta.toMap(descriptor))
-        writeUtf8String(string)
+        output.writeUtf8String(string)
     }
 
-    override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
-        val map: Map<String, Any?> = yaml.load(asInputStream())
+    override fun readMeta(input: Input, descriptor: NodeDescriptor?): Meta {
+        val map: Map<String, Any?> = yaml.load(input.asInputStream())
         return map.toMeta(descriptor)
     }
 
@@ -35,19 +38,19 @@ class YamlMetaFormat(val meta: Meta) : MetaFormat {
         META_KEY put meta
     }
 
-    companion object : MetaFormatFactory {
+    public companion object : MetaFormatFactory {
         override fun invoke(meta: Meta, context: Context): MetaFormat = YamlMetaFormat(meta)
 
-        override val shortName = "yaml"
+        override val shortName: String = "yaml"
 
         override val key: Short = 0x594d //YM
 
         private val default = YamlMetaFormat()
 
-        override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) =
-            default.run { writeMeta(meta, descriptor) }
+        override fun writeMeta(output: Output, meta: Meta, descriptor: NodeDescriptor?): Unit =
+            default.writeMeta(output, meta, descriptor)
 
-        override fun Input.readMeta(descriptor: NodeDescriptor?): Meta =
-            default.run { readMeta(descriptor) }
+        override fun readMeta(input: kotlinx.io.Input, descriptor: NodeDescriptor?): Meta =
+            default.readMeta(input, descriptor)
     }
 }

@@ -20,41 +20,42 @@ import kotlin.reflect.KClass
 /**
  * And interface for reading and writing objects into with IO streams
  */
-interface IOFormat<T : Any> : MetaRepr {
-    fun Output.writeObject(obj: T)
-    fun Input.readObject(): T
+public interface IOFormat<T : Any> : MetaRepr {
+    public fun writeObject(output: Output, obj: T)
+    public fun readObject(input: Input): T
 
-    companion object{
-        val NAME_KEY = "name".asName()
-        val META_KEY = "meta".asName()
+    public companion object {
+        public val NAME_KEY: Name = "name".asName()
+        public val META_KEY: Name = "meta".asName()
     }
 }
 
-fun <T : Any> Input.readWith(format: IOFormat<T>): T = format.run { readObject() }
+public fun <T : Any> Input.readWith(format: IOFormat<T>): T = format.run { readObject(this@readWith) }
 
 /**
  * Read given binary as object using given format
  */
-fun <T : Any> Binary.readWith(format: IOFormat<T>): T = read {
+public fun <T : Any> Binary.readWith(format: IOFormat<T>): T = read {
     readWith(format)
 }
 
-fun <T : Any> Output.writeWith(format: IOFormat<T>, obj: T) = format.run { writeObject(obj) }
+public fun <T : Any> Output.writeWith(format: IOFormat<T>, obj: T): Unit =
+    format.run { writeObject(this@writeWith, obj) }
 
-class ListIOFormat<T : Any>(val format: IOFormat<T>) : IOFormat<List<T>> {
-    override fun Output.writeObject(obj: List<T>) {
-        writeInt(obj.size)
-        format.run {
+public class ListIOFormat<T : Any>(public val format: IOFormat<T>) : IOFormat<List<T>> {
+    override fun writeObject(output: Output, obj: List<T>) {
+        output.writeInt(obj.size)
+        this.format.run {
             obj.forEach {
-                writeObject(it)
+                writeObject(output, it)
             }
         }
     }
 
-    override fun Input.readObject(): List<T> {
-        val size = readInt()
+    override fun readObject(input: Input): List<T> {
+        val size = input.readInt()
         return format.run {
-            List(size) { readObject() }
+            List(size) { readObject(input) }
         }
     }
 
@@ -64,9 +65,9 @@ class ListIOFormat<T : Any>(val format: IOFormat<T>) : IOFormat<List<T>> {
     }
 }
 
-val <T : Any> IOFormat<T>.list get() = ListIOFormat(this)
+//public val <T : Any> IOFormat<T>.list: ListIOFormat<T> get() = ListIOFormat(this)
 
-fun ObjectPool<Buffer>.fill(block: Buffer.() -> Unit): Buffer {
+public fun ObjectPool<Buffer>.fill(block: Buffer.() -> Unit): Buffer {
     val buffer = borrow()
     return try {
         buffer.apply(block)
@@ -77,50 +78,50 @@ fun ObjectPool<Buffer>.fill(block: Buffer.() -> Unit): Buffer {
 }
 
 @Type(IO_FORMAT_TYPE)
-interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named, MetaRepr {
+public interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named, MetaRepr {
     /**
      * Explicit type for dynamic type checks
      */
-    val type: KClass<out T>
+    public val type: KClass<out T>
 
     override fun toMeta(): Meta = Meta {
         NAME_KEY put name.toString()
     }
 
-    companion object {
-        const val IO_FORMAT_TYPE = "io.format"
+    public companion object {
+        public const val IO_FORMAT_TYPE: String = "io.format"
     }
 }
 
-fun <T : Any> IOFormat<T>.toBinary(obj: T): Binary = Binary { writeObject(obj) }
+public fun <T : Any> IOFormat<T>.toBinary(obj: T): Binary = Binary { writeObject(this, obj) }
 
-object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
+public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
     override fun invoke(meta: Meta, context: Context): IOFormat<Double> = this
 
     override val name: Name = "double".asName()
 
     override val type: KClass<out Double> get() = Double::class
 
-    override fun Output.writeObject(obj: Double) {
-        writeDouble(obj)
+    override fun writeObject(output: Output, obj: kotlin.Double) {
+        output.writeDouble(obj)
     }
 
-    override fun Input.readObject(): Double = readDouble()
+    override fun readObject(input: Input): Double = input.readDouble()
 }
 
-object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
+public object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
     override fun invoke(meta: Meta, context: Context): IOFormat<Value> = this
 
     override val name: Name = "value".asName()
 
     override val type: KClass<out Value> get() = Value::class
 
-    override fun Output.writeObject(obj: Value) {
-        BinaryMetaFormat.run { writeValue(obj) }
+    override fun writeObject(output: Output, obj: Value) {
+        BinaryMetaFormat.run { output.writeValue(obj) }
     }
 
-    override fun Input.readObject(): Value {
-        return (BinaryMetaFormat.run { readMetaItem() } as? MetaItem.ValueItem)?.value
+    override fun readObject(input: Input): Value {
+        return (BinaryMetaFormat.run { input.readMetaItem() } as? MetaItem.ValueItem)?.value
             ?: error("The item is not a value")
     }
 }

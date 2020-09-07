@@ -1,7 +1,7 @@
 plugins {
     id("ru.mipt.npm.mpp")
     id("ru.mipt.npm.node")
-//    id("ru.mipt.npm.native")
+    id("ru.mipt.npm.native")
 }
 
 description = "Context and provider definitions"

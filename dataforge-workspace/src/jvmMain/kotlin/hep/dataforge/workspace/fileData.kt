@@ -168,7 +168,7 @@ private suspend fun <T : Any> ZipOutputStream.writeNode(
                 val entry = ZipEntry(name)
                 putNextEntry(entry)
                 envelopeFormat.run {
-                    asOutput().writeObject(envelope)
+                    writeObject(asOutput(), envelope)
                 }
             }
             is DataItem.Node -> {

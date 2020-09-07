@@ -3,7 +3,9 @@ plugins {
     id("org.jetbrains.changelog") version "0.4.0"
 }
 
-val dataforgeVersion by extra("0.1.9-dev-5")
+apply(plugin = "org.jetbrains.dokka")
+
+val dataforgeVersion by extra("0.2.0-dev-1")
 
 val bintrayRepo by extra("dataforge")
 val githubProject by extra("dataforge-core")

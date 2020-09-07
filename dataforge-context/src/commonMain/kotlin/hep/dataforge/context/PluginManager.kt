@@ -4,6 +4,17 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import kotlin.reflect.KClass
 
+
+interface PluginFactory<T : Plugin> : Factory<T> {
+    val tag: PluginTag
+    val type: KClass<out T>
+
+    companion object{
+        const val TYPE = "pluginFactory"
+    }
+}
+
+
 /**
  * The manager for plugin system. Should monitor plugin dependencies and locks.
  *

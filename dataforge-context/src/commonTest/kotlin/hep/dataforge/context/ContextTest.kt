@@ -22,7 +22,7 @@ class ContextTest {
     @Test
     fun testPluginManager() {
         Global.plugins.load(DummyPlugin())
-        val members = Global.content<Name>("test")
+        val members = Global.resolve<Name>("test")
         assertEquals(3, members.count())
         members.forEach {
             assertEquals(it.key, it.value.appendLeft("test"))

@@ -13,31 +13,28 @@ import kotlin.reflect.KClass
 /**
  * A partially read envelope with meta, but without data
  */
-@ExperimentalUnsignedTypes
-data class PartialEnvelope(val meta: Meta, val dataOffset: UInt, val dataSize: ULong?)
+public data class PartialEnvelope(val meta: Meta, val dataOffset: UInt, val dataSize: ULong?)
 
-interface EnvelopeFormat : IOFormat<Envelope> {
-    val defaultMetaFormat: MetaFormatFactory get() = JsonMetaFormat
+public interface EnvelopeFormat : IOFormat<Envelope> {
+    public val defaultMetaFormat: MetaFormatFactory get() = JsonMetaFormat
 
-    fun Input.readPartial(): PartialEnvelope
+    public fun readPartial(input: Input): PartialEnvelope
 
-    fun Output.writeEnvelope(
+    public fun Output.writeEnvelope(
         envelope: Envelope,
         metaFormatFactory: MetaFormatFactory = defaultMetaFormat,
         formatMeta: Meta = Meta.EMPTY
     )
 
-    override fun Input.readObject(): Envelope
+    override fun readObject(input: Input): Envelope
 
-    override fun Output.writeObject(obj: Envelope): Unit = writeEnvelope(obj)
+    override fun writeObject(output: Output, obj: Envelope): Unit = output.writeEnvelope(obj)
 }
 
-fun EnvelopeFormat.readPartial(input: Input) = input.readPartial()
-
-fun EnvelopeFormat.read(input: Input) = input.readObject()
+public fun EnvelopeFormat.read(input: Input): Envelope = readObject(input)
 
 @Type(ENVELOPE_FORMAT_TYPE)
-interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeFormat {
+public interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeFormat {
     override val name: Name get() = "envelope".asName()
     override val type: KClass<out Envelope> get() = Envelope::class
 
@@ -47,9 +44,9 @@ interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeFormat {
      * Try to infer specific format from input and return null if the attempt is failed.
      * This method does **not** return Input into initial state.
      */
-    fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat?
+    public fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat?
 
-    companion object {
-        const val ENVELOPE_FORMAT_TYPE = "io.format.envelope"
+    public companion object {
+        public const val ENVELOPE_FORMAT_TYPE: String = "io.format.envelope"
     }
 }

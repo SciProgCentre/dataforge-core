@@ -2,13 +2,11 @@ package hep.dataforge.context
 
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
-import hep.dataforge.names.asName
 import hep.dataforge.names.plus
 import hep.dataforge.provider.Provider
 import hep.dataforge.provider.top
 import hep.dataforge.values.Value
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import mu.KLogger
@@ -28,9 +26,9 @@ import kotlin.jvm.JvmName
  * Since plugins could contain mutable state, context has two states: active and inactive. No changes are allowed to active context.
  * @author Alexander Nozik
  */
-open class Context(
+public open class Context(
     final override val name: Name,
-    val parent: Context? = Global
+    public val parent: Context? = Global,
 ) : Named, MetaRepr, Provider, CoroutineScope {
 
     private val config = Config()
@@ -38,7 +36,7 @@ open class Context(
     /**
      * Context properties. Working as substitute for environment variables
      */
-    val properties: Meta = if (parent == null) {
+    private val properties: Meta = if (parent == null) {
         config
     } else {
         Laminate(config, parent.properties)
@@ -47,19 +45,19 @@ open class Context(
     /**
      * Context logger
      */
-    val logger: KLogger = KotlinLogging.logger(name.toString())
+    public val logger: KLogger = KotlinLogging.logger(name.toString())
 
     /**
      * A [PluginManager] for current context
      */
-    val plugins: PluginManager by lazy { PluginManager(this) }
+    public val plugins: PluginManager by lazy { PluginManager(this) }
 
     private val activators = HashSet<Any>()
 
     /**
      * Defines if context is used in any kind of active computations. Active context properties and plugins could not be changed
      */
-    val isActive: Boolean = activators.isNotEmpty()
+    public val isActive: Boolean = activators.isNotEmpty()
 
     override val defaultTarget: String get() = Plugin.PLUGIN_TARGET
 
@@ -74,21 +72,21 @@ open class Context(
     /**
      * Mark context as active and used by [activator]
      */
-    fun activate(activator: Any) {
+    public fun activate(activator: Any) {
         activators.add(activator)
     }
 
     /**
      * Mark context unused by [activator]
      */
-    fun deactivate(activator: Any) {
+    public fun deactivate(activator: Any) {
         activators.remove(activator)
     }
 
     /**
      * Change the properties of the context. If active, throw an exception
      */
-    fun configure(action: Config.() -> Unit) {
+    public fun configure(action: Config.() -> Unit) {
         if (isActive) error("Can't configure active context")
         config.action()
     }
@@ -102,7 +100,7 @@ open class Context(
     /**
      * Detach all plugins and terminate context
      */
-    open fun close() {
+    public open fun close() {
         if (isActive) error("Can't close active context")
         //detach all plugins
         plugins.forEach { it.detach() }
@@ -115,71 +113,30 @@ open class Context(
     }
 }
 
-fun Context.content(target: String): Map<Name, Any> = content<Any>(target)
-
 /**
  * A map of all objects provided by plugins with given target and type
  */
 @JvmName("typedContent")
-inline fun <reified T : Any> Context.content(target: String): Map<Name, T> =
-    plugins.flatMap { plugin ->
-        plugin.top<T>(target).entries.map { (plugin.name + it.key) to it.value }
-    }.associate { it }
+public inline fun <reified T : Any> Context.resolve(target: String): Map<Name, T> = plugins.flatMap { plugin ->
+    plugin.top<T>(target).entries.map { (plugin.name + it.key) to it.value }
+}.associate { it }
 
 
-/**
- * A global root context. Closing [Global] terminates the framework.
- */
-object Global : Context("GLOBAL".asName(), null) {
-
-    override val coroutineContext: CoroutineContext = GlobalScope.coroutineContext + SupervisorJob()
-
-    /**
-     * Closing all contexts
-     *
-     * @throws Exception
-     */
-    override fun close() {
-        logger.info { "Shutting down GLOBAL" }
-        for (ctx in contextRegistry.values) {
-            ctx.close()
-        }
-        super.close()
-    }
-
-    private val contextRegistry = HashMap<String, Context>()
-
-    /**
-     * Get previously built context
-     *
-     * @param name
-     * @return
-     */
-    fun getContext(name: String): Context? {
-        return contextRegistry[name]
-    }
-
-    fun context(name: String, parent: Context = this, block: ContextBuilder.() -> Unit = {}): Context =
-        ContextBuilder(name, parent).apply(block).build()
-
-}
-
+public fun Context.resolve(target: String): Map<Name, Any> = resolve<Any>(target)
 
 /**
  * The interface for something that encapsulated in context
  *
- * @author Alexander Nozik
- * @version $Id: $Id
  */
-interface ContextAware {
+public interface ContextAware {
     /**
      * Get context for this object
      *
      * @return
      */
-    val context: Context
+    public val context: Context
 
-    val logger: KLogger
+    public val logger: KLogger
         get() = if (this is Named) {
             KotlinLogging.logger((context.name + this.name).toString())
         } else {

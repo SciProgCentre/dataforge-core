@@ -56,10 +56,10 @@ public class EnvelopeClient(
         val outputStream = socket.getOutputStream()
         format.run {
             outputStream.write {
-                writeObject(request)
+                writeObject(this, request)
             }
             logger.debug { "Sent request with type ${request.type} to ${socket.remoteSocketAddress}" }
-            val res = inputStream.readBlocking { readObject() }
+            val res = inputStream.readBlocking { readObject(this) }
             logger.debug { "Received response with type ${res.type} from ${socket.remoteSocketAddress}" }
             return@withContext res
         }

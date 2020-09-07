@@ -31,11 +31,11 @@ private class PartDescriptor : Scheme() {
     }
 }
 
-data class EnvelopePart(val binary: Binary, val description: Meta?)
+public data class EnvelopePart(val binary: Binary, val description: Meta?)
 
-typealias EnvelopeParts = List<EnvelopePart>
+public typealias EnvelopeParts = List<EnvelopePart>
 
-fun EnvelopeBuilder.multipart(
+public fun EnvelopeBuilder.multipart(
     parts: EnvelopeParts,
     separator: String = DEFAULT_MULTIPART_DATA_SEPARATOR
 ) {
@@ -69,7 +69,7 @@ fun EnvelopeBuilder.multipart(
     }
 }
 
-fun EnvelopeBuilder.envelopes(
+public fun EnvelopeBuilder.envelopes(
     envelopes: List<Envelope>,
     format: EnvelopeFormat = TaggedEnvelopeFormat,
     separator: String = DEFAULT_MULTIPART_DATA_SEPARATOR
@@ -84,7 +84,7 @@ fun EnvelopeBuilder.envelopes(
     multipart(parts, separator)
 }
 
-fun Envelope.parts(): EnvelopeParts {
+public fun Envelope.parts(): EnvelopeParts {
     if (data == null) return emptyList()
     //TODO add zip folder reader
     val parts = meta.getIndexed(PARTS_KEY).values.mapNotNull { it.node }.map {
@@ -101,14 +101,14 @@ fun Envelope.parts(): EnvelopeParts {
     }
 }
 
-fun EnvelopePart.envelope(format: EnvelopeFormat): Envelope = binary.readWith(format)
+public fun EnvelopePart.envelope(format: EnvelopeFormat): Envelope = binary.readWith(format)
 
-val EnvelopePart.name: String? get() = description?.get("name").string
+public val EnvelopePart.name: String? get() = description?.get("name").string
 
 /**
  * Represent envelope part by an envelope
  */
-fun EnvelopePart.envelope(plugin: IOPlugin): Envelope {
+public fun EnvelopePart.envelope(plugin: IOPlugin): Envelope {
     val formatItem = description?.get(PART_FORMAT_KEY)
     return if (formatItem != null) {
         val format: EnvelopeFormat = plugin.resolveEnvelopeFormat(formatItem)

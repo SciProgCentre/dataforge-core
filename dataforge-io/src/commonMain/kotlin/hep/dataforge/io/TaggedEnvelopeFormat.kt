@@ -12,9 +12,13 @@ import hep.dataforge.names.plus
 import hep.dataforge.names.toName
 import kotlinx.io.*
 
-class TaggedEnvelopeFormat(
-    val io: IOPlugin,
-    val version: VERSION = VERSION.DF02
+/**
+ * A streaming-friendly envelope format with a short binary tag.
+ * TODO add description
+ */
+public class TaggedEnvelopeFormat(
+    public val io: IOPlugin,
+    public val version: VERSION = VERSION.DF02
 ) : EnvelopeFormat {
 
 //    private val metaFormat = io.metaFormat(metaFormatKey)
@@ -57,32 +61,32 @@ class TaggedEnvelopeFormat(
      * @param input an input to read from
      * @param formats a collection of meta formats to resolve
      */
-    override fun Input.readObject(): Envelope {
-        val tag = readTag(version)
+    override fun readObject(input: Input): Envelope {
+        val tag = input.readTag(this.version)
 
         val metaFormat = io.resolveMetaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
-        val meta: Meta = limit(tag.metaSize.toInt()).run {
+        val meta: Meta = input.limit(tag.metaSize.toInt()).run {
             metaFormat.run {
-                readObject()
+                readObject(input)
             }
         }
 
-        val data = readBinary(tag.dataSize.toInt())
+        val data = input.readBinary(tag.dataSize.toInt())
 
         return SimpleEnvelope(meta, data)
     }
 
-    override fun Input.readPartial(): PartialEnvelope {
-        val tag = readTag(version)
+    override fun readPartial(input: Input): PartialEnvelope {
+        val tag = input.readTag(this.version)
 
         val metaFormat = io.resolveMetaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
-        val meta: Meta = limit(tag.metaSize.toInt()).run {
+        val meta: Meta = input.limit(tag.metaSize.toInt()).run {
             metaFormat.run {
-                readObject()
+                readObject(input)
             }
         }
 
@@ -95,7 +99,7 @@ class TaggedEnvelopeFormat(
         val dataSize: ULong
     )
 
-    enum class VERSION(val tagSize: UInt) {
+    public enum class VERSION(public val tagSize: UInt) {
         DF02(20u),
         DF03(24u)
     }
@@ -107,7 +111,7 @@ class TaggedEnvelopeFormat(
         }
     }
 
-    companion object : EnvelopeFormatFactory {
+    public companion object : EnvelopeFormatFactory {
         private const val START_SEQUENCE = "#~"
         private const val END_SEQUENCE = "~#\r\n"
 
@@ -158,14 +162,14 @@ class TaggedEnvelopeFormat(
 
         private val default by lazy { invoke() }
 
-        override fun Input.readPartial(): PartialEnvelope =
-            default.run { readPartial() }
+        override fun readPartial(input: Input): PartialEnvelope =
+            default.run { readPartial(input) }
 
-        override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) =
+        override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta): Unit =
             default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
 
-        override fun Input.readObject(): Envelope =
-            default.run { readObject() }
+        override fun readObject(input: Input): Envelope =
+            default.run { readObject(input) }
 
 
     }

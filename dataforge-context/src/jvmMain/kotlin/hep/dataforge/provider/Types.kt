@@ -1,7 +1,7 @@
 package hep.dataforge.provider
 
 import hep.dataforge.context.Context
-import hep.dataforge.context.content
+import hep.dataforge.context.resolve
 import hep.dataforge.names.Name
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
@@ -40,5 +40,5 @@ inline fun <reified T : Any> Provider.top(): Map<Name, T> {
 /**
  * A sequences of all objects provided by plugins with given target and type
  */
-inline fun <reified T : Any> Context.content(): Map<Name, T> = content<T>(Types[T::class])
+inline fun <reified T : Any> Context.content(): Map<Name, T> = resolve<T>(Types[T::class])
 
