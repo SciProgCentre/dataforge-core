@@ -12,103 +12,148 @@ import kotlin.reflect.KProperty
 
 /* Read-write delegates */
 
-open class MutableItemDelegate(
-    override val owner: MutableItemProvider,
-    key: Name? = null,
-    default: MetaItem<*>? = null
-) : ItemDelegate(owner, key, default), ReadWriteProperty<Any?, MetaItem<*>?> {
+public typealias MutableItemDelegate = ReadWriteProperty<Any?, MetaItem<*>?>
+
+public fun MutableItemProvider.item(key: Name? = null): MutableItemDelegate = object :MutableItemDelegate {
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): MetaItem<*>? {
+        return getItem(key ?: property.name.asName())
+    }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: MetaItem<*>?) {
         val name = key ?: property.name.asName()
-        owner.setItem(name, value)
+        setItem(name, value)
+    }
+    //MutableItemDelegate(this, key)
+}
+
+/* Mutable converters */
+
+/**
+ * A type converter for a mutable [MetaItem] delegate
+ */
+public fun <R : Any> MutableItemDelegate.convert(
+    converter: MetaConverter<R>,
+): ReadWriteProperty<Any?, R?> = object : ReadWriteProperty<Any?, R?> {
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): R? =
+        this@convert.getValue(thisRef, property)?.let(converter::itemToObject)
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: R?) {
+        val item = value?.let(converter::objectToMetaItem)
+        this@convert.setValue(thisRef, property, item)
     }
 }
 
-fun MutableItemProvider.item(key: Name? = null): MutableItemDelegate =
-    MutableItemDelegate(this, key)
+public fun <R : Any> MutableItemDelegate.convert(
+    converter: MetaConverter<R>,
+    default: () -> R,
+): ReadWriteProperty<Any?, R> = object : ReadWriteProperty<Any?, R> {
 
-//Read-write delegates
+    override fun getValue(thisRef: Any?, property: KProperty<*>): R =
+        this@convert.getValue(thisRef, property)?.let(converter::itemToObject) ?: default()
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: R) {
+        val item = value.let(converter::objectToMetaItem)
+        this@convert.setValue(thisRef, property, item)
+    }
+}
+
+public fun <R> MutableItemDelegate.convert(
+    reader: (MetaItem<*>?) -> R,
+    writer: (R) -> MetaItem<*>?,
+): ReadWriteProperty<Any?, R> = object : ReadWriteProperty<Any?, R> {
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): R =
+        this@convert.getValue(thisRef, property).let(reader)
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: R) {
+        val item = value?.let(writer)
+        this@convert.setValue(thisRef, property, item)
+    }
+}
+
+/* Read-write delegates */
 
 /**
  * A property delegate that uses custom key
  */
-fun MutableItemProvider.value(key: Name? = null): ReadWriteProperty<Any?, Value?> =
+public fun MutableItemProvider.value(key: Name? = null): ReadWriteProperty<Any?, Value?> =
     item(key).convert(MetaConverter.value)
 
-fun MutableItemProvider.string(key: Name? = null): ReadWriteProperty<Any?, String?> =
+public fun MutableItemProvider.string(key: Name? = null): ReadWriteProperty<Any?, String?> =
     item(key).convert(MetaConverter.string)
 
-fun MutableItemProvider.boolean(key: Name? = null): ReadWriteProperty<Any?, Boolean?> =
+public fun MutableItemProvider.boolean(key: Name? = null): ReadWriteProperty<Any?, Boolean?> =
     item(key).convert(MetaConverter.boolean)
 
-fun MutableItemProvider.number(key: Name? = null): ReadWriteProperty<Any?, Number?> =
+public fun MutableItemProvider.number(key: Name? = null): ReadWriteProperty<Any?, Number?> =
     item(key).convert(MetaConverter.number)
 
-fun MutableItemProvider.string(default: String, key: Name? = null): ReadWriteProperty<Any?, String> =
+public fun MutableItemProvider.string(default: String, key: Name? = null): ReadWriteProperty<Any?, String> =
     item(key).convert(MetaConverter.string) { default }
 
-fun MutableItemProvider.boolean(default: Boolean, key: Name? = null): ReadWriteProperty<Any?, Boolean> =
+public fun MutableItemProvider.boolean(default: Boolean, key: Name? = null): ReadWriteProperty<Any?, Boolean> =
     item(key).convert(MetaConverter.boolean) { default }
 
-fun MutableItemProvider.number(default: Number, key: Name? = null): ReadWriteProperty<Any?, Number> =
+public fun MutableItemProvider.number(default: Number, key: Name? = null): ReadWriteProperty<Any?, Number> =
     item(key).convert(MetaConverter.number) { default }
 
-fun MutableItemProvider.value(key: Name? = null, default: () -> Value): ReadWriteProperty<Any?, Value> =
+public fun MutableItemProvider.value(key: Name? = null, default: () -> Value): ReadWriteProperty<Any?, Value> =
     item(key).convert(MetaConverter.value, default)
 
-fun MutableItemProvider.string(key: Name? = null, default: () -> String): ReadWriteProperty<Any?, String> =
+public fun MutableItemProvider.string(key: Name? = null, default: () -> String): ReadWriteProperty<Any?, String> =
     item(key).convert(MetaConverter.string, default)
 
-fun MutableItemProvider.boolean(key: Name? = null, default: () -> Boolean): ReadWriteProperty<Any?, Boolean> =
+public fun MutableItemProvider.boolean(key: Name? = null, default: () -> Boolean): ReadWriteProperty<Any?, Boolean> =
     item(key).convert(MetaConverter.boolean, default)
 
-fun MutableItemProvider.number(key: Name? = null, default: () -> Number): ReadWriteProperty<Any?, Number> =
+public fun MutableItemProvider.number(key: Name? = null, default: () -> Number): ReadWriteProperty<Any?, Number> =
     item(key).convert(MetaConverter.number, default)
 
-inline fun <reified E : Enum<E>> MutableItemProvider.enum(default: E, key: Name? = null): ReadWriteProperty<Any?, E> =
+public inline fun <reified E : Enum<E>> MutableItemProvider.enum(default: E, key: Name? = null): ReadWriteProperty<Any?, E> =
     item(key).convert(MetaConverter.enum()) { default }
 
-inline fun <reified M : MutableMeta<M>> M.node(key: Name? = null): ReadWriteProperty<Any?, M?> =
+public inline fun <reified M : MutableMeta<M>> M.node(key: Name? = null): ReadWriteProperty<Any?, M?> =
     item(key).convert(reader = { it?.let { it.node as M } }, writer = { it?.let { MetaItem.NodeItem(it) } })
 
 
-fun Configurable.value(key: Name? = null): ReadWriteProperty<Any?, Value?> =
+public fun Configurable.value(key: Name? = null): ReadWriteProperty<Any?, Value?> =
     item(key).convert(MetaConverter.value)
 
-/* Number delegates*/
+/* Number delegates */
 
-fun MutableItemProvider.int(key: Name? = null): ReadWriteProperty<Any?, Int?> =
+public fun MutableItemProvider.int(key: Name? = null): ReadWriteProperty<Any?, Int?> =
     item(key).convert(MetaConverter.int)
 
-fun MutableItemProvider.double(key: Name? = null): ReadWriteProperty<Any?, Double?> =
+public fun MutableItemProvider.double(key: Name? = null): ReadWriteProperty<Any?, Double?> =
     item(key).convert(MetaConverter.double)
 
-fun MutableItemProvider.long(key: Name? = null): ReadWriteProperty<Any?, Long?> =
+public fun MutableItemProvider.long(key: Name? = null): ReadWriteProperty<Any?, Long?> =
     item(key).convert(MetaConverter.long)
 
-fun MutableItemProvider.float(key: Name? = null): ReadWriteProperty<Any?, Float?> =
+public fun MutableItemProvider.float(key: Name? = null): ReadWriteProperty<Any?, Float?> =
     item(key).convert(MetaConverter.float)
 
 
 /* Safe number delegates*/
 
-fun MutableItemProvider.int(default: Int, key: Name? = null): ReadWriteProperty<Any?, Int> =
+public fun MutableItemProvider.int(default: Int, key: Name? = null): ReadWriteProperty<Any?, Int> =
     item(key).convert(MetaConverter.int) { default }
 
-fun MutableItemProvider.double(default: Double, key: Name? = null): ReadWriteProperty<Any?, Double> =
+public fun MutableItemProvider.double(default: Double, key: Name? = null): ReadWriteProperty<Any?, Double> =
     item(key).convert(MetaConverter.double) { default }
 
-fun MutableItemProvider.long(default: Long, key: Name? = null): ReadWriteProperty<Any?, Long> =
+public fun MutableItemProvider.long(default: Long, key: Name? = null): ReadWriteProperty<Any?, Long> =
     item(key).convert(MetaConverter.long) { default }
 
-fun MutableItemProvider.float(default: Float, key: Name? = null): ReadWriteProperty<Any?, Float> =
+public fun MutableItemProvider.float(default: Float, key: Name? = null): ReadWriteProperty<Any?, Float> =
     item(key).convert(MetaConverter.float) { default }
 
 
-/*
- * Extra delegates for special cases
- */
-fun MutableItemProvider.stringList(
+/* Extra delegates for special cases */
+
+public fun MutableItemProvider.stringList(
     vararg default: String,
     key: Name? = null
 ): ReadWriteProperty<Any?, List<String>> = item(key).convert(
@@ -116,14 +161,14 @@ fun MutableItemProvider.stringList(
     writer = { it.map { str -> str.asValue() }.asValue().asMetaItem() }
 )
 
-fun MutableItemProvider.stringList(
+public fun MutableItemProvider.stringList(
     key: Name? = null
 ): ReadWriteProperty<Any?, List<String>?> = item(key).convert(
     reader = {  it?.stringList },
     writer = { it?.map { str -> str.asValue() }?.asValue()?.asMetaItem() }
 )
 
-fun MutableItemProvider.numberList(
+public fun MutableItemProvider.numberList(
     vararg default: Number,
     key: Name? = null
 ): ReadWriteProperty<Any?, List<Number>> = item(key).convert(
@@ -131,10 +176,10 @@ fun MutableItemProvider.numberList(
     writer = { it.map { num -> num.asValue() }.asValue().asMetaItem() }
 )
 
-/**
- * A special delegate for double arrays
- */
-fun MutableItemProvider.doubleArray(
+/* A special delegate for double arrays */
+
+
+public fun MutableItemProvider.doubleArray(
     vararg default: Double,
     key: Name? = null
 ): ReadWriteProperty<Any?, DoubleArray> =item(key).convert(
@@ -142,7 +187,7 @@ fun MutableItemProvider.doubleArray(
     writer = { DoubleArrayValue(it).asMetaItem() }
 )
 
-fun <T> MutableItemProvider.listValue(
+public fun <T> MutableItemProvider.listValue(
     key: Name? = null,
     writer: (T) -> Value = { Value.of(it) },
     reader: (Value) -> T

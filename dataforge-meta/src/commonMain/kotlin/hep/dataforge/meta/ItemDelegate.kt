@@ -5,26 +5,47 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.values.Value
 import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 
 /* Meta delegates */
-//TODO to be replaced in 1.4 by interfaces
-open class ItemDelegate(
-    open val owner: ItemProvider,
-    val key: Name? = null,
-    open val default: MetaItem<*>? = null
-) : ReadOnlyProperty<Any?, MetaItem<*>?> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): MetaItem<*>? {
-        return owner.getItem(key ?: property.name.asName()) ?: default
-    }
-}
 
-public fun ItemProvider.item(key: Name? = null): ItemDelegate = ItemDelegate(this, key)
+public typealias ItemDelegate = ReadOnlyProperty<Any?, MetaItem<*>?>
+
+public fun ItemProvider.item(key: Name? = null): ItemDelegate = ReadOnlyProperty { _, property ->
+    getItem(key ?: property.name.asName())
+}
 
 //TODO add caching for sealed nodes
 
 
-//Read-only delegates for Metas
+/**
+ * Apply a converter to this delegate creating a delegate with a custom type
+ */
+public fun <R : Any> ItemDelegate.convert(
+    converter: MetaConverter<R>,
+): ReadOnlyProperty<Any?, R?> = ReadOnlyProperty { thisRef, property ->
+    this@convert.getValue(thisRef, property)?.let(converter::itemToObject)
+}
+
+/*
+ *
+ */
+public fun <R : Any> ItemDelegate.convert(
+    converter: MetaConverter<R>,
+    default: () -> R,
+): ReadOnlyProperty<Any?, R> = ReadOnlyProperty<Any?, R> { thisRef, property ->
+    this@convert.getValue(thisRef, property)?.let(converter::itemToObject) ?: default()
+}
+
+/**
+ * A converter with a custom reader transformation
+ */
+public fun <R> ItemDelegate.convert(
+    reader: (MetaItem<*>?) -> R,
+): ReadOnlyProperty<Any?, R> = ReadOnlyProperty<Any?, R> { thisRef, property ->
+    this@convert.getValue(thisRef, property).let(reader)
+}
+
+/* Read-only delegates for Metas */
 
 /**
  * A property delegate that uses custom key

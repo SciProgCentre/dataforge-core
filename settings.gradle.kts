@@ -18,7 +18,6 @@ pluginManagement {
         id("ru.mipt.npm.publish") version toolsVersion
         kotlin("jvm") version kotlinVersion
         kotlin("js") version kotlinVersion
-
     }
 }
 
