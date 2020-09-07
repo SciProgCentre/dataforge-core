@@ -3,7 +3,6 @@ package hep.dataforge.data
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.isSuperclassOf
 
 /**
  * Block the thread and get data content
@@ -14,7 +13,7 @@ public fun <T : Any> Data<T>.get(): T = runBlocking { await() }
  * Check that node is compatible with given type meaning that each element could be cast to the type
  */
 internal actual fun <R : Any> DataNode<*>.canCast(type: KClass<out R>): Boolean =
-    this.type.isSubclassOf(type)
+    type.isSubclassOf(this.type)
 
 internal actual fun <R : Any> Data<*>.canCast(type: KClass<out R>): Boolean =
     this.type.isSubclassOf(type)

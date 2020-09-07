@@ -1,18 +1,17 @@
 package hep.dataforge.meta
 
-import hep.dataforge.names.Name
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class SpecificationTest {
-    class TestStyled(config: Config, defaultProvider: (Name) -> MetaItem<*>?) :
+    class TestStyled(config: Config, defaultProvider: ItemProvider) :
         Scheme(config, defaultProvider) {
         var list by numberList(1, 2, 3)
 
         companion object : Specification<TestStyled> {
             override fun wrap(
                 config: Config,
-                defaultProvider: (Name) -> MetaItem<*>?
+                defaultProvider: ItemProvider
             ): TestStyled = TestStyled(config, defaultProvider)
         }
     }

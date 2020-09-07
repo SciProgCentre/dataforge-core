@@ -1,25 +1,25 @@
 package hep.dataforge.values
 
-import hep.dataforge.meta.boolean
-import hep.dataforge.meta.enum
-import hep.dataforge.meta.string
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializer(Value::class)
-object ValueSerializer : KSerializer<Value> {
+public object ValueSerializer : KSerializer<Value> {
     private val listSerializer by lazy { ListSerializer(ValueSerializer) }
 
     override val descriptor: SerialDescriptor =
         buildClassSerialDescriptor("hep.dataforge.values.Value") {
-            boolean("isList")
-            enum<ValueType>("valueType")
-            string("value")
+            element<Boolean>("isList")
+            element<ValueType>("valueType")
+            element<String>("value")
         }
 
     private fun Decoder.decodeValue(): Value {

@@ -12,6 +12,7 @@ import kotlinx.serialization.Serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
 
 
 /**
@@ -86,7 +87,7 @@ public sealed class MetaItem<out M : Meta> {
 }
 
 public fun Value.asMetaItem(): ValueItem = ValueItem(this)
-public fun <M:Meta> M.asMetaItem(): NodeItem<M> = NodeItem(this)
+public fun <M : Meta> M.asMetaItem(): NodeItem<M> = NodeItem(this)
 
 /**
  * The object that could be represented as [Meta]. Meta provided by [toMeta] method should fully represent object state.
@@ -96,8 +97,12 @@ public interface MetaRepr {
     public fun toMeta(): Meta
 }
 
-public interface ItemProvider{
+public fun interface ItemProvider {
     public fun getItem(name: Name): MetaItem<*>?
+
+    public companion object {
+        public val EMPTY: ItemProvider = ItemProvider { null }
+    }
 }
 
 /**
@@ -107,6 +112,7 @@ public interface ItemProvider{
  *
  *   * Same name siblings are supported via elements with the same [Name] but different queries
  */
+@Serializable(MetaSerializer::class)
 public interface Meta : MetaRepr, ItemProvider {
     /**
      * Top level items of meta tree
@@ -140,7 +146,7 @@ public interface Meta : MetaRepr, ItemProvider {
          */
         public const val VALUE_KEY: String = "@value"
 
-        public val EMPTY: Meta = object: MetaBase() {
+        public val EMPTY: Meta = object : MetaBase() {
             override val items: Map<NameToken, MetaItem<*>> = emptyMap()
         }
     }
@@ -202,7 +208,7 @@ public interface MetaNode<out M : MetaNode<M>> : Meta {
 /**
  * The same as [Meta.get], but with specific node type
  */
-public operator fun <M : MetaNode<M>> M?.get(name: Name): MetaItem<M>? = if( this == null) {
+public operator fun <M : MetaNode<M>> M?.get(name: Name): MetaItem<M>? = if (this == null) {
     null
 } else {
     @Suppress("UNCHECKED_CAST", "ReplaceGetOrSet")
@@ -226,7 +232,10 @@ public abstract class MetaBase : Meta {
 
     override fun hashCode(): Int = items.hashCode()
 
-    override fun toString(): String = JSON_PRETTY.encodeToString(MetaSerializer, this)
+    override fun toString(): String = Json {
+        prettyPrint = true
+        useArrayPolymorphism = true
+    }.encodeToString(MetaSerializer, this)
 }
 
 /**
@@ -240,7 +249,7 @@ public abstract class AbstractMetaNode<M : MetaNode<M>> : MetaNode<M>, MetaBase(
  * If the argument is possibly mutable node, it is copied on creation
  */
 public class SealedMeta internal constructor(
-    override val items: Map<NameToken, MetaItem<SealedMeta>>
+    override val items: Map<NameToken, MetaItem<SealedMeta>>,
 ) : AbstractMetaNode<SealedMeta>()
 
 /**

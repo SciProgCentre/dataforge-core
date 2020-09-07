@@ -14,8 +14,7 @@ import kotlin.reflect.KProperty
 
 public typealias MutableItemDelegate = ReadWriteProperty<Any?, MetaItem<*>?>
 
-public fun MutableItemProvider.item(key: Name? = null): MutableItemDelegate = object :MutableItemDelegate {
-
+public fun MutableItemProvider.item(key: Name? = null): MutableItemDelegate = object : MutableItemDelegate {
     override fun getValue(thisRef: Any?, property: KProperty<*>): MetaItem<*>? {
         return getItem(key ?: property.name.asName())
     }
@@ -24,7 +23,6 @@ public fun MutableItemProvider.item(key: Name? = null): MutableItemDelegate = ob
         val name = key ?: property.name.asName()
         setItem(name, value)
     }
-    //MutableItemDelegate(this, key)
 }
 
 /* Mutable converters */
@@ -111,7 +109,10 @@ public fun MutableItemProvider.boolean(key: Name? = null, default: () -> Boolean
 public fun MutableItemProvider.number(key: Name? = null, default: () -> Number): ReadWriteProperty<Any?, Number> =
     item(key).convert(MetaConverter.number, default)
 
-public inline fun <reified E : Enum<E>> MutableItemProvider.enum(default: E, key: Name? = null): ReadWriteProperty<Any?, E> =
+public inline fun <reified E : Enum<E>> MutableItemProvider.enum(
+    default: E,
+    key: Name? = null,
+): ReadWriteProperty<Any?, E> =
     item(key).convert(MetaConverter.enum()) { default }
 
 public inline fun <reified M : MutableMeta<M>> M.node(key: Name? = null): ReadWriteProperty<Any?, M?> =
@@ -155,22 +156,22 @@ public fun MutableItemProvider.float(default: Float, key: Name? = null): ReadWri
 
 public fun MutableItemProvider.stringList(
     vararg default: String,
-    key: Name? = null
+    key: Name? = null,
 ): ReadWriteProperty<Any?, List<String>> = item(key).convert(
     reader = { it?.stringList ?: listOf(*default) },
     writer = { it.map { str -> str.asValue() }.asValue().asMetaItem() }
 )
 
 public fun MutableItemProvider.stringList(
-    key: Name? = null
+    key: Name? = null,
 ): ReadWriteProperty<Any?, List<String>?> = item(key).convert(
-    reader = {  it?.stringList },
+    reader = { it?.stringList },
     writer = { it?.map { str -> str.asValue() }?.asValue()?.asMetaItem() }
 )
 
 public fun MutableItemProvider.numberList(
     vararg default: Number,
-    key: Name? = null
+    key: Name? = null,
 ): ReadWriteProperty<Any?, List<Number>> = item(key).convert(
     reader = { it?.value?.list?.map { value -> value.number } ?: listOf(*default) },
     writer = { it.map { num -> num.asValue() }.asValue().asMetaItem() }
@@ -181,8 +182,8 @@ public fun MutableItemProvider.numberList(
 
 public fun MutableItemProvider.doubleArray(
     vararg default: Double,
-    key: Name? = null
-): ReadWriteProperty<Any?, DoubleArray> =item(key).convert(
+    key: Name? = null,
+): ReadWriteProperty<Any?, DoubleArray> = item(key).convert(
     reader = { it?.value?.doubleArray ?: doubleArrayOf(*default) },
     writer = { DoubleArrayValue(it).asMetaItem() }
 )
@@ -190,5 +191,5 @@ public fun MutableItemProvider.doubleArray(
 public fun <T> MutableItemProvider.listValue(
     key: Name? = null,
     writer: (T) -> Value = { Value.of(it) },
-    reader: (Value) -> T
+    reader: (Value) -> T,
 ): ReadWriteProperty<Any?, List<T>?> = item(key).convert(MetaConverter.valueList(writer, reader))

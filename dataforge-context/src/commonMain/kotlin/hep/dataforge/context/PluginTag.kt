@@ -2,7 +2,6 @@ package hep.dataforge.context
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
-import hep.dataforge.meta.buildMeta
 
 /**
  * The tag which contains information about name, group and version of some
@@ -10,7 +9,7 @@ import hep.dataforge.meta.buildMeta
  *
  * @author Alexander Nozik
  */
-data class PluginTag(
+public data class PluginTag(
     val name: String,
     val group: String = "",
     val version: String = ""
@@ -22,7 +21,7 @@ data class PluginTag(
      * @param otherTag
      * @return
      */
-    fun matches(otherTag: PluginTag): Boolean {
+    public fun matches(otherTag: PluginTag): Boolean {
         return matchesName(otherTag) && matchesGroup(otherTag)
     }
 
@@ -42,9 +41,9 @@ data class PluginTag(
         "version" put version
     }
 
-    companion object {
+    public companion object {
 
-        const val DATAFORGE_GROUP = "hep.dataforge"
+        public const val DATAFORGE_GROUP: String = "hep.dataforge"
 
         /**
          * Build new PluginTag from standard string representation
@@ -52,7 +51,7 @@ data class PluginTag(
          * @param tag
          * @return
          */
-        fun fromString(tag: String): PluginTag {
+        public fun fromString(tag: String): PluginTag {
             val sepIndex = tag.indexOf(":")
             return if (sepIndex >= 0) {
                 PluginTag(group = tag.substring(0, sepIndex), name = tag.substring(sepIndex + 1))

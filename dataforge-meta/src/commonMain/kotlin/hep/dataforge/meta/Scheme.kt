@@ -8,23 +8,21 @@ import hep.dataforge.names.plus
 /**
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
  */
-open class Scheme() : Configurable, Described, MetaRepr {
-    constructor(config: Config, defaultProvider: (Name) -> MetaItem<*>?) : this() {
-        this.config = config
-        this.defaultProvider = defaultProvider
-    }
+public open class Scheme(
+    config: Config,
+    defaultProvider: ItemProvider,
+) : Configurable, Described, MetaRepr {
 
-    //constructor(config: Config, default: Meta) : this(config, { default[it] })
-    constructor(config: Config) : this(config, { null })
-
-    final override var config: Config = Config()
+    override var config: Config = config
         internal set
 
-    var defaultProvider: (Name) -> MetaItem<*>? = { null }
+    public var defaultProvider: ItemProvider = defaultProvider
         internal set
+
+    public constructor() : this(Config(), ItemProvider { null })
 
     override fun getDefaultItem(name: Name): MetaItem<*>? {
-        return defaultProvider(name) ?: descriptor?.get(name)?.defaultItem()
+        return defaultProvider.getItem(name) ?: descriptor?.get(name)?.defaultItem()
     }
 
     /**
@@ -32,7 +30,7 @@ open class Scheme() : Configurable, Described, MetaRepr {
      * values if default value is unavailable.
      * Values from [defaultProvider] completely replace
      */
-    open val defaultLayer: Meta get() = DefaultLayer(Name.EMPTY)
+    public open val defaultLayer: Meta get() = DefaultLayer(Name.EMPTY)
 
     override fun toMeta(): Laminate = Laminate(config, defaultLayer)
 
@@ -50,38 +48,45 @@ open class Scheme() : Configurable, Described, MetaRepr {
     }
 }
 
-inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit) = apply(block)
+/**
+ * A shortcut to edit a [Scheme] object in-place
+ */
+public inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit): T = apply(block)
 
 /**
  * A specification for simplified generation of wrappers
  */
-open class SchemeSpec<T : Scheme>(val builder: () -> T) :
-    Specification<T> {
-    override fun empty(): T = builder()
+public open class SchemeSpec<T : Scheme>(
+    private val builder: (config: Config, defaultProvider: ItemProvider) -> T,
+) : Specification<T> {
 
-    override fun wrap(config: Config, defaultProvider: (Name) -> MetaItem<*>?): T {
-        return empty().apply {
+    public constructor(emptyBuilder: () -> T) : this({ config: Config, defaultProvider: ItemProvider ->
+        emptyBuilder().apply {
             this.config = config
             this.defaultProvider = defaultProvider
         }
-    }
+    })
+
+    override fun empty(): T = builder(Config(), ItemProvider.EMPTY)
+
+    override fun wrap(config: Config, defaultProvider: ItemProvider): T = builder(config, defaultProvider)
 
     @Suppress("OVERRIDE_BY_INLINE")
-    final override inline operator fun invoke(action: T.() -> Unit) = empty().apply(action)
+    final override inline operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
 }
 
 /**
  * A scheme that uses [Meta] as a default layer
  */
-open class MetaScheme(
-    val meta: Meta,
+public open class MetaScheme(
+    private val meta: Meta,
     override val descriptor: NodeDescriptor? = null,
-    config: Config = Config()
+    config: Config = Config(),
 ) : Scheme(config, meta::get) {
     override val defaultLayer: Meta get() = Laminate(meta, descriptor?.defaultItem().node)
 }
 
-fun Meta.asScheme() =
-    MetaScheme(this)
+public fun Meta.asScheme(): MetaScheme = MetaScheme(this)
 
-fun <T : Configurable> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit) = spec.wrap(this).apply(block)
+public fun <T : Configurable> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit): T =
+    spec.wrap(this).apply(block)

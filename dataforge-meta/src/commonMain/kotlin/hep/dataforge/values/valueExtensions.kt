@@ -1,32 +1,33 @@
 package hep.dataforge.values
 
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
 
 /**
  * Check if value is null
  */
-fun Value.isNull(): Boolean = this == Null
+public fun Value.isNull(): Boolean = this == Null
 
 /**
  * Check if value is list
  */
-fun Value.isList(): Boolean = this.list.size > 1
+public fun Value.isList(): Boolean = this.list.size > 1
 
-val Value.boolean
+public val Value.boolean
     get() = this == True
             || this.list.firstOrNull() == True
             || (type == ValueType.STRING && string.toBoolean())
 
 
-val Value.int get() = number.toInt()
-val Value.double get() = number.toDouble()
-val Value.float get() = number.toFloat()
-val Value.short get() = number.toShort()
-val Value.long get() = number.toLong()
+public val Value.int: Int get() = number.toInt()
+public val Value.double: Double get() = number.toDouble()
+public val Value.float: Float get() = number.toFloat()
+public val Value.short: Short get() = number.toShort()
+public val Value.long: Long get() = number.toLong()
 
-val Value.stringList: List<String> get() = list.map { it.string }
+public val Value.stringList: List<String> get() = list.map { it.string }
 
-val Value.doubleArray: DoubleArray
+public val Value.doubleArray: DoubleArray
     get() = if (this is DoubleArrayValue) {
         value
     } else {
@@ -34,4 +35,4 @@ val Value.doubleArray: DoubleArray
     }
 
 
-fun Value.toMeta() = Meta { Meta.VALUE_KEY put this }
+public fun Value.toMeta(): MetaBuilder = Meta { Meta.VALUE_KEY put this }
