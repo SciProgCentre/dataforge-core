@@ -1,12 +1,18 @@
 package hep.dataforge.io
 
-import hep.dataforge.meta.*
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaItem
+import hep.dataforge.meta.MetaSerializer
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.cbor.Cbor
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
+val JSON_PRETTY: Json = Json { prettyPrint = true; useArrayPolymorphism = true }
+val JSON_PLAIN: Json = Json { prettyPrint = false; useArrayPolymorphism = true }
 
 class MetaSerializerTest {
     val meta = Meta {

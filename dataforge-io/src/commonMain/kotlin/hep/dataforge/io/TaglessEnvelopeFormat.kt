@@ -20,7 +20,7 @@ import kotlin.collections.set
  */
 public class TaglessEnvelopeFormat(
     public val io: IOPlugin,
-    public val meta: Meta = Meta.EMPTY
+    public val meta: Meta = Meta.EMPTY,
 ) : EnvelopeFormat {
 
     private val metaStart = meta[META_START_PROPERTY].string ?: DEFAULT_META_START
@@ -85,13 +85,9 @@ public class TaglessEnvelopeFormat(
             val metaFormat = properties[META_TYPE_PROPERTY]?.let { io.resolveMetaFormat(it) } ?: JsonMetaFormat
             val metaSize = properties[META_LENGTH_PROPERTY]?.toInt()
             meta = if (metaSize != null) {
-                input.limit(metaSize).run {
-                    metaFormat.run { readObject(input) }
-                }
+                metaFormat.readObject(input.limit(metaSize))
             } else {
-                metaFormat.run {
-                    readObject(input)
-                }
+                metaFormat.readObject(input)
             }
         }
 
@@ -150,9 +146,7 @@ public class TaglessEnvelopeFormat(
             val metaSize = properties[META_LENGTH_PROPERTY]?.toInt()
             meta = if (metaSize != null) {
                 offset += metaSize.toUInt()
-                input.limit(metaSize).run {
-                    metaFormat.run { readObject(input) }
-                }
+                metaFormat.readObject(input.limit(metaSize))
             } else {
                 error("Can't partially read an envelope with undefined meta size")
             }
@@ -203,11 +197,13 @@ public class TaglessEnvelopeFormat(
         override fun readPartial(input: Input): PartialEnvelope =
             default.run { readPartial(input) }
 
-        override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta): Unit =
-            default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
+        override fun Output.writeEnvelope(
+            envelope: Envelope,
+            metaFormatFactory: MetaFormatFactory,
+            formatMeta: Meta,
+        ): Unit = default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
 
-        override fun readObject(input: Input): Envelope =
-            default.run { readObject(input) }
+        override fun readObject(input: Input): Envelope = default.readObject(input)
 
         override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
             return try {

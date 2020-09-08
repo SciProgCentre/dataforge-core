@@ -4,6 +4,7 @@ package hep.dataforge.meta
 
 import hep.dataforge.meta.JsonMeta.Companion.JSON_ARRAY_KEY
 import hep.dataforge.meta.descriptors.ItemDescriptor
+import hep.dataforge.meta.descriptors.ItemDescriptor.Companion.DEFAULT_INDEX_KEY
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.descriptors.ValueDescriptor
 import hep.dataforge.names.NameToken
@@ -75,7 +76,7 @@ private fun Meta.toJsonWithIndex(descriptor: NodeDescriptor?, indexValue: String
 
 
     if (indexValue != null) {
-        val indexKey = descriptor?.indexKey ?: NodeDescriptor.DEFAULT_INDEX_KEY
+        val indexKey = descriptor?.indexKey ?: DEFAULT_INDEX_KEY
         elementMap[indexKey] = JsonPrimitive(indexValue)
     }
 
@@ -158,7 +159,7 @@ public class JsonMeta(private val json: JsonObject, private val descriptor: Node
                     )
                     map[key] = MetaItem.ValueItem(listValue)
                 } else value.forEachIndexed { index, jsonElement ->
-                    val indexKey = (itemDescriptor as? NodeDescriptor)?.indexKey ?: NodeDescriptor.DEFAULT_INDEX_KEY
+                    val indexKey = (itemDescriptor as? NodeDescriptor)?.indexKey ?: DEFAULT_INDEX_KEY
                     val indexValue: String = (jsonElement as? JsonObject)
                         ?.get(indexKey)?.jsonPrimitive?.contentOrNull
                         ?: index.toString() //In case index is non-string, the backward transformation will be broken.

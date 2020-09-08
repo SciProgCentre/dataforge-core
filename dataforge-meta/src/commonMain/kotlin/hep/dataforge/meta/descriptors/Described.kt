@@ -3,11 +3,11 @@ package hep.dataforge.meta.descriptors
 /**
  * An object which provides its descriptor
  */
-interface Described {
-    val descriptor: ItemDescriptor?
+public interface Described {
+    public val descriptor: ItemDescriptor?
 
-    companion object {
-        const val DESCRIPTOR_NODE = "@descriptor"
+    public companion object {
+        //public const val DESCRIPTOR_NODE: String = "@descriptor"
     }
 }
 

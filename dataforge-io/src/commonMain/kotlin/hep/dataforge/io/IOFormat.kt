@@ -30,7 +30,7 @@ public interface IOFormat<T : Any> : MetaRepr {
     }
 }
 
-public fun <T : Any> Input.readWith(format: IOFormat<T>): T = format.run { readObject(this@readWith) }
+public fun <T : Any> Input.readWith(format: IOFormat<T>): T = format.readObject(this@readWith)
 
 /**
  * Read given binary as object using given format

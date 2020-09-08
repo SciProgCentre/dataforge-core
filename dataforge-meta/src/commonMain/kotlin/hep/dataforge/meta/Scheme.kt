@@ -1,9 +1,12 @@
 package hep.dataforge.meta
 
-import hep.dataforge.meta.descriptors.*
+import hep.dataforge.meta.descriptors.Described
+import hep.dataforge.meta.descriptors.NodeDescriptor
+import hep.dataforge.meta.descriptors.defaultItem
+import hep.dataforge.meta.descriptors.get
 import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
-import hep.dataforge.names.plus
+import hep.dataforge.names.asName
 
 /**
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
@@ -30,21 +33,21 @@ public open class Scheme(
      * values if default value is unavailable.
      * Values from [defaultProvider] completely replace
      */
-    public open val defaultLayer: Meta get() = DefaultLayer(Name.EMPTY)
+    public open val defaultLayer: Meta get() = DefaultLayer()
 
     override fun toMeta(): Laminate = Laminate(config, defaultLayer)
 
-    private inner class DefaultLayer(val path: Name) : MetaBase() {
-        override val items: Map<NameToken, MetaItem<*>> =
-            (descriptor?.get(path) as? NodeDescriptor)?.items?.entries?.associate { (key, descriptor) ->
+    private inner class DefaultLayer : MetaBase() {
+        override val items: Map<NameToken, MetaItem<*>> = buildMap {
+            descriptor?.items?.forEach { (key, itemDescriptor) ->
                 val token = NameToken(key)
-                val fullName = path + token
-                val item: MetaItem<*> = when (descriptor) {
-                    is ValueDescriptor -> getDefaultItem(fullName) ?: descriptor.defaultItem()
-                    is NodeDescriptor -> MetaItem.NodeItem(DefaultLayer(fullName))
+                val name = token.asName()
+                val item = defaultProvider.getItem(name) ?: itemDescriptor.defaultItem()
+                if (item != null) {
+                    put(token, item)
                 }
-                token to item
-            } ?: emptyMap()
+            }
+        }
     }
 }
 
@@ -82,7 +85,7 @@ public open class MetaScheme(
     private val meta: Meta,
     override val descriptor: NodeDescriptor? = null,
     config: Config = Config(),
-) : Scheme(config, meta::get) {
+) : Scheme(config, meta) {
     override val defaultLayer: Meta get() = Laminate(meta, descriptor?.defaultItem().node)
 }
 

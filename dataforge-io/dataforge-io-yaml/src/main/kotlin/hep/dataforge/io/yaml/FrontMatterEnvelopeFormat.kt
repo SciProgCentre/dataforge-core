@@ -105,11 +105,13 @@ class FrontMatterEnvelopeFormat(
         override fun readPartial(input: Input): PartialEnvelope =
             default.readPartial(input)
 
-        override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta): Unit =
-            default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
+        override fun Output.writeEnvelope(
+            envelope: Envelope,
+            metaFormatFactory: MetaFormatFactory,
+            formatMeta: Meta,
+        ): Unit = default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
 
-        override fun readObject(input: Input): Envelope =
-            default.readObject(input)
+        override fun readObject(input: Input): Envelope = default.readObject(input)
 
     }
 }

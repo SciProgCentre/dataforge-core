@@ -18,7 +18,7 @@ import kotlinx.io.*
  */
 public class TaggedEnvelopeFormat(
     public val io: IOPlugin,
-    public val version: VERSION = VERSION.DF02
+    public val version: VERSION = VERSION.DF02,
 ) : EnvelopeFormat {
 
 //    private val metaFormat = io.metaFormat(metaFormatKey)
@@ -67,11 +67,7 @@ public class TaggedEnvelopeFormat(
         val metaFormat = io.resolveMetaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
-        val meta: Meta = input.limit(tag.metaSize.toInt()).run {
-            metaFormat.run {
-                readObject(input)
-            }
-        }
+        val meta: Meta = metaFormat.readObject(input.limit(tag.metaSize.toInt()))
 
         val data = input.readBinary(tag.dataSize.toInt())
 
@@ -84,11 +80,8 @@ public class TaggedEnvelopeFormat(
         val metaFormat = io.resolveMetaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
-        val meta: Meta = input.limit(tag.metaSize.toInt()).run {
-            metaFormat.run {
-                readObject(input)
-            }
-        }
+        val meta: Meta = metaFormat.readObject(input.limit(tag.metaSize.toInt()))
+
 
         return PartialEnvelope(meta, version.tagSize + tag.metaSize, tag.dataSize)
     }
@@ -96,7 +89,7 @@ public class TaggedEnvelopeFormat(
     private data class Tag(
         val metaFormatKey: Short,
         val metaSize: UInt,
-        val dataSize: ULong
+        val dataSize: ULong,
     )
 
     public enum class VERSION(public val tagSize: UInt) {
@@ -165,13 +158,13 @@ public class TaggedEnvelopeFormat(
         override fun readPartial(input: Input): PartialEnvelope =
             default.run { readPartial(input) }
 
-        override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta): Unit =
-            default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
+        override fun Output.writeEnvelope(
+            envelope: Envelope,
+            metaFormatFactory: MetaFormatFactory,
+            formatMeta: Meta,
+        ): Unit = default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
 
-        override fun readObject(input: Input): Envelope =
-            default.run { readObject(input) }
-
-
+        override fun readObject(input: Input): Envelope = default.readObject(input)
     }
 
 }

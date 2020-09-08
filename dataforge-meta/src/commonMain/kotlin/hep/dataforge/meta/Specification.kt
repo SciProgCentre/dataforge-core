@@ -26,17 +26,10 @@ public fun <T : Configurable> Specification<T>.update(config: Config, action: T.
 /**
  * Wrap a configuration using static meta as default
  */
-public fun <T : Configurable> Specification<T>.wrap(config: Config = Config(), default: Meta = Meta.EMPTY): T =
-    wrap(config, default)
-
-/**
- * Wrap a configuration using static meta as default
- */
 public fun <T : Configurable> Specification<T>.wrap(source: Meta): T {
     val default = source.seal()
     return wrap(source.asConfig(), default)
 }
-
 
 /**
  * Apply specified configuration to configurable

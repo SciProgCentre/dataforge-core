@@ -66,7 +66,11 @@ public inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
  * Read file containing meta using given [formatOverride] or file extension to infer meta type.
  * If [path] is a directory search for file starting with `meta` in it
  */
-public fun IOPlugin.readMetaFile(path: Path, formatOverride: MetaFormat? = null, descriptor: NodeDescriptor? = null): Meta {
+public fun IOPlugin.readMetaFile(
+    path: Path,
+    formatOverride: MetaFormat? = null,
+    descriptor: NodeDescriptor? = null,
+): Meta {
     if (!Files.exists(path)) error("Meta file $path does not exist")
 
     val actualPath: Path = if (Files.isDirectory(path)) {
@@ -93,7 +97,7 @@ public fun IOPlugin.writeMetaFile(
     path: Path,
     meta: Meta,
     metaFormat: MetaFormatFactory = JsonMetaFormat,
-    descriptor: NodeDescriptor? = null
+    descriptor: NodeDescriptor? = null,
 ) {
     val actualPath = if (Files.isDirectory(path)) {
         path.resolve("@" + metaFormat.name.toString())
@@ -146,14 +150,15 @@ public val IOPlugin.Companion.DATA_FILE_NAME: String get() = "@data"
 public fun IOPlugin.readEnvelopeFile(
     path: Path,
     readNonEnvelopes: Boolean = false,
-    formatPeeker: IOPlugin.(Path) -> EnvelopeFormat? = IOPlugin::peekBinaryFormat
+    formatPeeker: IOPlugin.(Path) -> EnvelopeFormat? = IOPlugin::peekBinaryFormat,
 ): Envelope? {
     if (!Files.exists(path)) return null
 
     //read two-files directory
     if (Files.isDirectory(path)) {
-        val metaFile = Files.list(path).asSequence()
-            .singleOrNull { it.fileName.toString().startsWith(IOPlugin.META_FILE_NAME) }
+        val metaFile = Files.list(path).asSequence().singleOrNull {
+            it.fileName.toString().startsWith(IOPlugin.META_FILE_NAME)
+        }
 
         val meta = if (metaFile == null) {
             Meta.EMPTY
@@ -196,7 +201,7 @@ public fun IOPlugin.writeEnvelopeFile(
     path: Path,
     envelope: Envelope,
     envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat,
-    metaFormat: MetaFormatFactory? = null
+    metaFormat: MetaFormatFactory? = null,
 ) {
     path.rewrite {
         with(envelopeFormat) {
@@ -212,7 +217,7 @@ public fun IOPlugin.writeEnvelopeFile(
 fun IOPlugin.writeEnvelopeDirectory(
     path: Path,
     envelope: Envelope,
-    metaFormat: MetaFormatFactory = JsonMetaFormat
+    metaFormat: MetaFormatFactory = JsonMetaFormat,
 ) {
     if (!Files.exists(path)) {
         Files.createDirectories(path)
