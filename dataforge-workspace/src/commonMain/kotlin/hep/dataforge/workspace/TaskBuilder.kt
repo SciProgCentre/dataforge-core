@@ -14,11 +14,11 @@ import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
 @DFBuilder
-class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
+public class TaskBuilder<R : Any>(public val name: Name, public val type: KClass<out R>) {
     private var modelTransform: TaskModelBuilder.(Meta) -> Unit = { allData() }
 
     //    private val additionalDependencies = HashSet<Dependency>()
-    var descriptor: NodeDescriptor? = null
+    private var descriptor: NodeDescriptor? = null
     private val dataTransforms: MutableList<DataTransformation> = ArrayList()
 
     /**
@@ -43,7 +43,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
 //        additionalDependencies.add(dependency)
 //    }
 
-    fun model(modelTransform: TaskModelBuilder.(Meta) -> Unit) {
+    public fun model(modelTransform: TaskModelBuilder.(Meta) -> Unit) {
         this.modelTransform = modelTransform
     }
 
@@ -51,7 +51,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
      * Add a transformation on untyped data
      */
     @JvmName("rawTransform")
-    fun transform(
+    public fun transform(
         from: String = "",
         to: String = "",
         block: TaskEnv.(DataNode<*>) -> DataNode<R>
@@ -62,7 +62,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
         }
     }
 
-    fun <T : Any> transform(
+    public fun <T : Any> transform(
         inputType: KClass<out T>,
         from: String = "",
         to: String = "",
@@ -75,7 +75,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
         }
     }
 
-    inline fun <reified T : Any> transform(
+    public inline fun <reified T : Any> transform(
         from: String = "",
         to: String = "",
         noinline block: TaskEnv.(DataNode<T>) -> DataNode<R>
@@ -86,7 +86,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     /**
      * Perform given action on data elements in `from` node in input and put the result to `to` node
      */
-    inline fun <reified T : Any> action(
+    public inline fun <reified T : Any> action(
         from: String = "",
         to: String = "",
         crossinline block: TaskEnv.() -> Action<T, R>
@@ -96,8 +96,8 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
         }
     }
 
-    class TaskEnv(val name: Name, val meta: Meta, val context: Context, val data: DataNode<Any>) {
-        operator fun <T : Any> DirectTaskDependency<T>.invoke(): DataNode<T> = if (placement.isEmpty()) {
+    public class TaskEnv(public val name: Name, public val meta: Meta, public val context: Context, public val data: DataNode<Any>) {
+        public operator fun <T : Any> DirectTaskDependency<T>.invoke(): DataNode<T> = if (placement.isEmpty()) {
             data.cast(task.type)
         } else {
             data[placement].node?.cast(task.type)
@@ -108,7 +108,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     /**
      * A customized map action with ability to change meta and name
      */
-    inline fun <reified T : Any> mapAction(
+    public inline fun <reified T : Any> mapAction(
         from: String = "",
         to: String = "",
         crossinline block: MapActionBuilder<T, R>.(TaskEnv) -> Unit
@@ -127,7 +127,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     /**
      * A simple map action without changing meta or name
      */
-    inline fun <reified T : Any> map(
+    public inline fun <reified T : Any> map(
         from: String = "",
         to: String = "",
         crossinline block: suspend TaskEnv.(T) -> R
@@ -148,7 +148,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     /**
      * Join elements in gathered data by multiple groups
      */
-    inline fun <reified T : Any> reduceByGroup(
+    public inline fun <reified T : Any> reduceByGroup(
         from: String = "",
         to: String = "",
         crossinline block: ReduceGroupBuilder<T, R>.(TaskEnv) -> Unit        //TODO needs KEEP-176
@@ -165,7 +165,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     /**
      * Join all elemlents in gathered data matching input type
      */
-    inline fun <reified T : Any> reduce(
+    public inline fun <reified T : Any> reduce(
         from: String = "",
         to: String = "",
         crossinline block: suspend TaskEnv.(Map<Name, T>) -> R
@@ -188,7 +188,7 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     /**
      * Split each element in gathered data into fixed number of fragments
      */
-    inline fun <reified T : Any> split(
+    public inline fun <reified T : Any> split(
         from: String = "",
         to: String = "",
         crossinline block: SplitBuilder<T, R>.(TaskEnv) -> Unit  //TODO needs KEEP-176
@@ -205,16 +205,11 @@ class TaskBuilder<R : Any>(val name: Name, val type: KClass<out R>) {
     /**
      * Use DSL to create a descriptor for this task
      */
-    fun description(transform: NodeDescriptor.() -> Unit) {
+    public fun description(transform: NodeDescriptor.() -> Unit) {
         this.descriptor = NodeDescriptor().apply(transform)
     }
 
     internal fun build(): GenericTask<R> {
-//        val actualTransform: TaskModelBuilder.(Meta) -> Unit = {
-//            modelTransform
-//            dependencies.addAll(additionalDependencies)
-//        }
-
         return GenericTask(
             name,
             type,

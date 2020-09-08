@@ -4,7 +4,7 @@ import hep.dataforge.meta.Meta
 import kotlinx.coroutines.flow.toList
 import kotlin.reflect.KClass
 
-inline class MapRow<C : Any>(val values: Map<String, C?>) : Row<C> {
+public inline class MapRow<C : Any>(private val values: Map<String, C?>) : Row<C> {
     override fun getValue(column: String): C? = values[column]
 }
 
@@ -17,10 +17,10 @@ internal class RowTableColumn<C : Any, T : C>(val table: Table<C>, val header: C
     override fun get(index: Int): T? = table.rows[index].getValue(name, type)
 }
 
-open class RowTable<C : Any>(override val rows: List<Row<C>>, override val header: List<ColumnHeader<C>>) : Table<C> {
+public open class RowTable<C : Any>(override val rows: List<Row<C>>, override val header: List<ColumnHeader<C>>) : Table<C> {
     override fun getValue(row: Int, column: String): C? = rows[row].getValue(column)
 
     override val columns: List<Column<C>> get() = header.map { RowTableColumn(this, it) }
 }
 
-suspend fun <C : Any> Rows<C>.collect(): Table<C> = this as? Table<C> ?: RowTable(rowFlow().toList(), header)
+public suspend fun <C : Any> Rows<C>.collect(): Table<C> = this as? Table<C> ?: RowTable(rowFlow().toList(), header)

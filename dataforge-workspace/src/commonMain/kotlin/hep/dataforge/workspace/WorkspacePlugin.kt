@@ -9,9 +9,9 @@ import kotlin.reflect.KClass
 /**
  * An abstract plugin with some additional boilerplate to effectively work with workspace context
  */
-abstract class WorkspacePlugin : AbstractPlugin() {
+public abstract class WorkspacePlugin : AbstractPlugin() {
     private val _tasks = HashSet<Task<*>>()
-    val tasks: Collection<Task<*>> get() = _tasks
+    public val tasks: Collection<Task<*>> get() = _tasks
 
     override fun provideTop(target: String): Map<Name, Any> {
         return when (target) {
@@ -20,11 +20,11 @@ abstract class WorkspacePlugin : AbstractPlugin() {
         }
     }
 
-    fun task(task: Task<*>){
+    public fun task(task: Task<*>){
         _tasks.add(task)
     }
 
-    fun <T : Any> task(
+    public fun <T : Any> task(
         name: String,
         type: KClass<out T>,
         builder: TaskBuilder<T>.() -> Unit
@@ -32,7 +32,7 @@ abstract class WorkspacePlugin : AbstractPlugin() {
         _tasks.add(it)
     }
 
-    inline fun <reified T : Any> task(
+    public inline fun <reified T : Any> task(
         name: String,
         noinline builder: TaskBuilder<T>.() -> Unit
     ) = task(name, T::class, builder)

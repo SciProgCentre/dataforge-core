@@ -3,7 +3,7 @@ package hep.dataforge.tables
 /**
  * @param T bottom type for all columns in the table
  */
-class ColumnTable<T : Any>(override val columns: Collection<Column<T>>) : Table<T> {
+public class ColumnTable<T : Any>(override val columns: Collection<Column<T>>) : Table<T> {
     private val rowsNum = columns.first().size
 
     init {

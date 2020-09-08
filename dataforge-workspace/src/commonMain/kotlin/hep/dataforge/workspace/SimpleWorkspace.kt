@@ -11,7 +11,7 @@ import hep.dataforge.names.Name
 /**
  * A simple workspace without caching
  */
-class SimpleWorkspace(
+public class SimpleWorkspace(
     override val context: Context,
     override val data: DataNode<Any>,
     override val targets: Map<String, Meta>,
@@ -22,7 +22,7 @@ class SimpleWorkspace(
         context.resolve<Task<*>>(Task.TYPE) + tasks.toMap()
     }
 
-    companion object {
+    public companion object {
 
     }
 }

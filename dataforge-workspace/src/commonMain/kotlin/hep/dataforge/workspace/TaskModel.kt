@@ -21,7 +21,7 @@ import hep.dataforge.workspace.TaskModel.Companion.MODEL_TARGET_KEY
  * @param meta the meta for the task (not for the whole configuration)
  * @param dependencies a list of direct dependencies for this task
  */
-data class TaskModel(
+public data class TaskModel(
     val name: Name,
     val meta: Meta,
     val dependencies: Collection<Dependency>
@@ -45,15 +45,15 @@ data class TaskModel(
         }
     }
 
-    companion object {
-        val MODEL_TARGET_KEY = "@target".asName()
+    public companion object {
+        public val MODEL_TARGET_KEY = "@target".asName()
     }
 }
 
 /**
  * Build input for the task
  */
-fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> {
+public fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> {
     return DataTreeBuilder(Any::class).apply {
         dependencies.forEach { dep ->
             update(dep.apply(workspace))
@@ -61,43 +61,43 @@ fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> {
     }.build()
 }
 
-interface TaskDependencyContainer {
-    val defaultMeta: Meta
-    fun add(dependency: Dependency)
+public interface TaskDependencyContainer {
+    public val defaultMeta: Meta
+    public fun add(dependency: Dependency)
 }
 
 /**
  * Add dependency for a task defined in a workspace and resolved by
  */
-fun TaskDependencyContainer.dependsOn(
+public fun TaskDependencyContainer.dependsOn(
     name: Name,
     placement: Name = Name.EMPTY,
     meta: Meta = defaultMeta
 ): WorkspaceTaskDependency =
     WorkspaceTaskDependency(name, meta, placement).also { add(it) }
 
-fun TaskDependencyContainer.dependsOn(
+public fun TaskDependencyContainer.dependsOn(
     name: String,
     placement: Name = Name.EMPTY,
     meta: Meta = defaultMeta
 ): WorkspaceTaskDependency =
     dependsOn(name.toName(), placement, meta)
 
-fun <T : Any> TaskDependencyContainer.dependsOn(
+public fun <T : Any> TaskDependencyContainer.dependsOn(
     task: Task<T>,
     placement: Name = Name.EMPTY,
     meta: Meta = defaultMeta
 ): DirectTaskDependency<T> =
     DirectTaskDependency(task, meta, placement).also { add(it) }
 
-fun <T : Any> TaskDependencyContainer.dependsOn(
+public fun <T : Any> TaskDependencyContainer.dependsOn(
     task: Task<T>,
     placement: String,
     meta: Meta = defaultMeta
 ): DirectTaskDependency<T> =
     DirectTaskDependency(task, meta, placement.toName()).also { add(it) }
 
-fun <T : Any> TaskDependencyContainer.dependsOn(
+public fun <T : Any> TaskDependencyContainer.dependsOn(
     task: Task<T>,
     placement: Name = Name.EMPTY,
     metaBuilder: MetaBuilder.() -> Unit
@@ -107,13 +107,13 @@ fun <T : Any> TaskDependencyContainer.dependsOn(
 /**
  * Add custom data dependency
  */
-fun TaskDependencyContainer.data(action: DataFilter.() -> Unit): DataDependency =
+public fun TaskDependencyContainer.data(action: DataFilter.() -> Unit): DataDependency =
     DataDependency(DataFilter(action)).also { add(it) }
 
 /**
  * User-friendly way to add data dependency
  */
-fun TaskDependencyContainer.data(pattern: String? = null, from: String? = null, to: String? = null): DataDependency =
+public fun TaskDependencyContainer.data(pattern: String? = null, from: String? = null, to: String? = null): DataDependency =
     data {
         pattern?.let { this.pattern = it }
         from?.let { this.from = it }
@@ -123,17 +123,17 @@ fun TaskDependencyContainer.data(pattern: String? = null, from: String? = null, 
 /**
  * Add all data as root node
  */
-fun TaskDependencyContainer.allData(to: Name = Name.EMPTY) = AllDataDependency(to).also { add(it) }
+public fun TaskDependencyContainer.allData(to: Name = Name.EMPTY): AllDataDependency = AllDataDependency(to).also { add(it) }
 
 /**
  * A builder for [TaskModel]
  */
-class TaskModelBuilder(val name: Name, meta: Meta = Meta.EMPTY) : TaskDependencyContainer {
+public class TaskModelBuilder(public val name: Name, meta: Meta = Meta.EMPTY) : TaskDependencyContainer {
     /**
      * Meta for current task. By default uses the whole input meta
      */
-    var meta: MetaBuilder = meta.builder()
-    val dependencies = HashSet<Dependency>()
+    public var meta: MetaBuilder = meta.builder()
+    private val dependencies: HashSet<Dependency> = HashSet<Dependency>()
 
     override val defaultMeta: Meta get() = meta
 
@@ -141,11 +141,11 @@ class TaskModelBuilder(val name: Name, meta: Meta = Meta.EMPTY) : TaskDependency
         dependencies.add(dependency)
     }
 
-    var target: String by this.meta.string(key = MODEL_TARGET_KEY, default = "")
+    public var target: String by this.meta.string(key = MODEL_TARGET_KEY, default = "")
 
 
-    fun build(): TaskModel = TaskModel(name, meta.seal(), dependencies)
+    public fun build(): TaskModel = TaskModel(name, meta.seal(), dependencies)
 }
 
 
-val TaskModel.target get() = meta[MODEL_TARGET_KEY]?.string ?: ""
+public val TaskModel.target: String get() = meta[MODEL_TARGET_KEY]?.string ?: ""

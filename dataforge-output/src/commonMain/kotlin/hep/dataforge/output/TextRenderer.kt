@@ -11,7 +11,41 @@ import kotlinx.io.Output
 import kotlinx.io.text.writeUtf8String
 import kotlin.reflect.KClass
 
-class TextRenderer(override val context: Context, private val output: Output) : Renderer<Any> {
+
+/**
+ * A text or binary renderer based on [Output]
+ */
+@Type(TEXT_RENDERER_TYPE)
+public interface TextFormat {
+    /**
+     * The priority of this renderer compared to other renderers
+     */
+    public val priority: Int
+    /**
+     * The type of the content served by this renderer
+     */
+    public val type: KClass<*>
+
+    public suspend fun Output.render(obj: Any)
+
+    public companion object {
+        public const val TEXT_RENDERER_TYPE: String = "dataforge.textRenderer"
+    }
+}
+
+public object DefaultTextFormat : TextFormat {
+    override val priority: Int = Int.MAX_VALUE
+    override val type: KClass<*> = Any::class
+
+    override suspend fun Output.render(obj: Any) {
+        writeUtf8String(obj.toString() + "\n")
+    }
+}
+
+/**
+ * A text-based renderer
+ */
+public class TextRenderer(override val context: Context, private val output: Output) : Renderer<Any> {
     private val cache = HashMap<KClass<*>, TextFormat>()
 
     /**
@@ -38,35 +72,5 @@ class TextRenderer(override val context: Context, private val output: Output) : 
         context.launch(Dispatchers.Output) {
             format.run { output.render(obj) }
         }
-    }
-}
-
-/**
- * A text or binary renderer based on [Output]
- */
-@Type(TEXT_RENDERER_TYPE)
-interface TextFormat {
-    /**
-     * The priority of this renderer compared to other renderers
-     */
-    val priority: Int
-    /**
-     * The type of the content served by this renderer
-     */
-    val type: KClass<*>
-
-    suspend fun Output.render(obj: Any)
-
-    companion object {
-        const val TEXT_RENDERER_TYPE = "dataforge.textRenderer"
-    }
-}
-
-object DefaultTextFormat : TextFormat {
-    override val priority: Int = Int.MAX_VALUE
-    override val type: KClass<*> = Any::class
-
-    override suspend fun Output.render(obj: Any) {
-        writeUtf8String(obj.toString() + "\n")
     }
 }

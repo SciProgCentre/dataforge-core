@@ -10,12 +10,12 @@ import hep.dataforge.meta.Meta
  * based on its configuration and provided meta
  *
  */
-interface Renderer<in T : Any> : ContextAware {
+public interface Renderer<in T : Any> : ContextAware {
     /**
      * Render specific object with configuration.
      *
      * By convention actual render is called in asynchronous mode, so this method should never
      * block execution
      */
-    fun render(obj: T, meta: Meta = Meta.EMPTY)
+    public fun render(obj: T, meta: Meta = Meta.EMPTY)
 }

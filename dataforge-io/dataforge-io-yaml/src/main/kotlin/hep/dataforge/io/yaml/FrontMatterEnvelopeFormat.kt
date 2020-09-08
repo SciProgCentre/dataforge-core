@@ -11,9 +11,9 @@ import kotlinx.io.text.readUtf8Line
 import kotlinx.io.text.writeUtf8String
 
 @DFExperimental
-class FrontMatterEnvelopeFormat(
-    val io: IOPlugin,
-    val meta: Meta = Meta.EMPTY,
+public class FrontMatterEnvelopeFormat(
+    private val io: IOPlugin,
+    private val meta: Meta = Meta.EMPTY,
 ) : EnvelopeFormat {
 
     override fun readPartial(input: Input): PartialEnvelope {
@@ -80,8 +80,8 @@ class FrontMatterEnvelopeFormat(
         META_KEY put meta
     }
 
-    companion object : EnvelopeFormatFactory {
-        const val SEPARATOR = "---"
+    public companion object : EnvelopeFormatFactory {
+        public const val SEPARATOR = "---"
 
         private val metaTypeRegex = "---(\\w*)\\s*".toRegex()
 

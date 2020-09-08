@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 /**
  * A manager for outputs
  */
-interface OutputManager {
+public interface OutputManager {
 
     /**
      * Get an output specialized for given type, name and stage.
@@ -19,7 +19,7 @@ interface OutputManager {
      * @param name represents the name inside the node.
      * @param meta configuration for [Renderer] (not for rendered object)
      */
-    operator fun <T : Any> get(
+    public operator fun <T : Any> get(
         type: KClass<out T>,
         name: Name,
         stage: Name = Name.EMPTY,
@@ -30,12 +30,12 @@ interface OutputManager {
 /**
  * Get an output manager for a context
  */
-val Context.output: OutputManager get() = plugins.get() ?: ConsoleOutputManager()
+public val Context.output: OutputManager get() = plugins.get() ?: ConsoleOutputManager()
 
 /**
  * Get an output with given [name], [stage] and reified content type
  */
-inline operator fun <reified T : Any> OutputManager.get(
+public inline operator fun <reified T : Any> OutputManager.get(
     name: Name,
     stage: Name = Name.EMPTY,
     meta: Meta = Meta.EMPTY
@@ -46,14 +46,14 @@ inline operator fun <reified T : Any> OutputManager.get(
 /**
  * Directly render an object using the most suitable renderer
  */
-fun OutputManager.render(obj: Any, name: Name, stage: Name = Name.EMPTY, meta: Meta = Meta.EMPTY) =
+public fun OutputManager.render(obj: Any, name: Name, stage: Name = Name.EMPTY, meta: Meta = Meta.EMPTY): Unit =
     get(obj::class, name, stage).render(obj, meta)
 
 /**
  * System console output.
  * The [CONSOLE_RENDERER] is used when no other [OutputManager] is provided.
  */
-val CONSOLE_RENDERER: Renderer<Any> = object : Renderer<Any> {
+public val CONSOLE_RENDERER: Renderer<Any> = object : Renderer<Any> {
     override fun render(obj: Any, meta: Meta) {
         println(obj)
     }
@@ -62,21 +62,21 @@ val CONSOLE_RENDERER: Renderer<Any> = object : Renderer<Any> {
 
 }
 
-class ConsoleOutputManager : AbstractPlugin(), OutputManager {
+public class ConsoleOutputManager : AbstractPlugin(), OutputManager {
     override val tag: PluginTag get() = ConsoleOutputManager.tag
 
     override fun <T : Any> get(type: KClass<out T>, name: Name, stage: Name, meta: Meta): Renderer<T> = CONSOLE_RENDERER
 
-    companion object : PluginFactory<ConsoleOutputManager> {
-        override val tag = PluginTag("output.console", group = DATAFORGE_GROUP)
+    public companion object : PluginFactory<ConsoleOutputManager> {
+        override val tag: PluginTag = PluginTag("output.console", group = DATAFORGE_GROUP)
 
-        override val type = ConsoleOutputManager::class
+        override val type: KClass<ConsoleOutputManager> = ConsoleOutputManager::class
 
-        override fun invoke(meta: Meta, context: Context) = ConsoleOutputManager()
+        override fun invoke(meta: Meta, context: Context): ConsoleOutputManager = ConsoleOutputManager()
     }
 }
 
 /**
  * A dispatcher for output tasks.
  */
-expect val Dispatchers.Output: CoroutineDispatcher
+public expect val Dispatchers.Output: CoroutineDispatcher
