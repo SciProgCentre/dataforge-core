@@ -35,7 +35,7 @@ public abstract class WorkspacePlugin : AbstractPlugin() {
     public inline fun <reified T : Any> task(
         name: String,
         noinline builder: TaskBuilder<T>.() -> Unit
-    ) = task(name, T::class, builder)
+    ): GenericTask<T> = task(name, T::class, builder)
 
 //
 ////TODO add delegates to build gradle-like tasks

@@ -22,29 +22,25 @@ import hep.dataforge.names.Name
  *
  * @author Alexander Nozik
  */
-interface Provider {
+public interface Provider {
 
     /**
      * Default target for this provider
-     *
-     * @return
      */
-    val defaultTarget: String get() = ""
+    public val defaultTarget: String get() = ""
 
     /**
      * Default target for next chain segment
-     *
-     * @return
      */
-    val defaultChainTarget: String get() = ""
+    public val defaultChainTarget: String get() = ""
 
     /**
      * A map of direct children for specific target
      */
-    fun provideTop(target: String): Map<Name, Any> = emptyMap()
+    public fun provideTop(target: String): Map<Name, Any> = emptyMap()
 }
 
-fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
+public fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
     if (path.length == 0) throw IllegalArgumentException("Can't provide by empty path")
     val first = path.first()
     val target = targetOverride ?: first.target ?: defaultTarget
@@ -63,7 +59,7 @@ fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
 /**
  * Type checked provide
  */
-inline fun <reified T : Any> Provider.provide(path: String, targetOverride: String? = null): T? {
+public inline fun <reified T : Any> Provider.provide(path: String, targetOverride: String? = null): T? {
     return provide(Path.parse(path), targetOverride) as? T
 }
 //
@@ -77,7 +73,7 @@ inline fun <reified T : Any> Provider.provide(path: String, targetOverride: Stri
 /**
  *  Typed top level content
  */
-inline fun <reified T : Any> Provider.top(target: String): Map<Name, T> {
+public inline fun <reified T : Any> Provider.top(target: String): Map<Name, T> {
     return provideTop(target).mapValues {
         it.value as? T ?: error("The type of element $it is ${it::class} but ${T::class} is expected")
     }

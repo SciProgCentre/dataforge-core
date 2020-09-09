@@ -22,21 +22,17 @@ import hep.dataforge.provider.Provider
  *
  * @author Alexander Nozik
  */
-interface Plugin : Named, ContextAware, Provider, MetaRepr {
+public interface Plugin : Named, ContextAware, Provider, MetaRepr {
 
     /**
      * Get tag for this plugin
-     *
-     * @return
      */
-    val tag: PluginTag
+    public val tag: PluginTag
 
-    val meta: Meta
+    public val meta: Meta
 
     /**
      * The name of this plugin ignoring version and group
-     *
-     * @return
      */
     override val name: Name get() = tag.name.toName()
 
@@ -44,25 +40,21 @@ interface Plugin : Named, ContextAware, Provider, MetaRepr {
      * Plugin dependencies which are required to attach this plugin. Plugin
      * dependencies must be initialized and enabled in the Context before this
      * plugin is enabled.
-     *
-     * @return
      */
-    fun dependsOn(): Collection<PluginFactory<*>>
+    public fun dependsOn(): Collection<PluginFactory<*>>
 
     /**
      * Start this plugin and attach registration info to the context. This method
      * should be called only via PluginManager to avoid dependency issues.
-     *
-     * @param context
      */
-    fun attach(context: Context)
+    public fun attach(context: Context)
 
     /**
      * Stop this plugin and remove registration info from context and other
      * plugins. This method should be called only via PluginManager to avoid
      * dependency issues.
      */
-    fun detach()
+    public fun detach()
 
     override fun toMeta(): Meta = Meta {
         "context" put context.name.toString()
@@ -71,9 +63,9 @@ interface Plugin : Named, ContextAware, Provider, MetaRepr {
         "meta" put meta
     }
 
-    companion object {
+    public companion object {
 
-        const val PLUGIN_TARGET = "plugin"
+        public const val PLUGIN_TARGET = "plugin"
     }
 
 }

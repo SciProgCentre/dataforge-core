@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 /**
  * A data element characterized by its meta
  */
-interface Data<out T : Any> : Goal<T>, MetaRepr{
+public interface Data<out T : Any> : Goal<T>, MetaRepr{
     /**
      * Type marker for the data. The type is known before the calculation takes place so it could be checked.
      */

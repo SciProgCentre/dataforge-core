@@ -24,16 +24,14 @@ import hep.dataforge.names.isEmpty
  *
  * @author Alexander Nozik
  */
-interface Named {
+public interface Named {
 
     /**
      * The name of this object instance
-     *
-     * @return
      */
-    val name: Name
+    public val name: Name
 
-    companion object {
+    public companion object {
 
         /**
          * Get the name of given object. If object is Named its name is used,
@@ -42,7 +40,7 @@ interface Named {
          * @param obj
          * @return
          */
-        fun nameOf(obj: Any): Name {
+        public fun nameOf(obj: Any): Name {
             return if (obj is Named) {
                 obj.name
             } else {
@@ -56,5 +54,4 @@ interface Named {
  * Check if this object has an empty name and therefore is anonymous.
  * @return
  */
-val Named.isAnonymous: Boolean
-    get() = this.name.isEmpty()
+public val Named.isAnonymous: Boolean get() = this.name.isEmpty()

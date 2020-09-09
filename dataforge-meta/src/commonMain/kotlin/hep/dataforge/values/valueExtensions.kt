@@ -13,7 +13,7 @@ public fun Value.isNull(): Boolean = this == Null
  */
 public fun Value.isList(): Boolean = this.list.size > 1
 
-public val Value.boolean
+public val Value.boolean: Boolean
     get() = this == True
             || this.list.firstOrNull() == True
             || (type == ValueType.STRING && string.toBoolean())
