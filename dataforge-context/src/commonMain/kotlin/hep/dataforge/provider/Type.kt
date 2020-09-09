@@ -7,4 +7,4 @@ package hep.dataforge.provider
  */
 @MustBeDocumented
 @Target(AnnotationTarget.CLASS)
-annotation class Type(val id: String)
+public annotation class Type(val id: String)

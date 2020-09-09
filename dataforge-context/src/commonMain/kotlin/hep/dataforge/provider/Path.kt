@@ -26,25 +26,25 @@ import hep.dataforge.names.toName
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-inline class Path(val tokens: List<PathToken>) : Iterable<PathToken> {
+public inline class Path(public val tokens: List<PathToken>) : Iterable<PathToken> {
 
-    val head: PathToken? get() = tokens.firstOrNull()
+    public val head: PathToken? get() = tokens.firstOrNull()
 
-    val length: Int get() = tokens.size
+    public val length: Int get() = tokens.size
 
     /**
      * Returns non-empty optional containing the chain without first segment in case of chain path.
      *
      * @return
      */
-    val tail: Path? get() = if (tokens.isEmpty()) null else Path(tokens.drop(1))
+    public val tail: Path? get() = if (tokens.isEmpty()) null else Path(tokens.drop(1))
 
     override fun iterator(): Iterator<PathToken> = tokens.iterator()
 
-    companion object {
-        const val PATH_SEGMENT_SEPARATOR = "/"
+    public companion object {
+        public const val PATH_SEGMENT_SEPARATOR = "/"
 
-        fun parse(path: String): Path {
+        public fun parse(path: String): Path {
             val head = path.substringBefore(PATH_SEGMENT_SEPARATOR)
             val tail = path.substringAfter(PATH_SEGMENT_SEPARATOR)
             return PathToken.parse(head).toPath() + parse(tail)
@@ -52,18 +52,18 @@ inline class Path(val tokens: List<PathToken>) : Iterable<PathToken> {
     }
 }
 
-operator fun Path.plus(path: Path) = Path(this.tokens + path.tokens)
+public operator fun Path.plus(path: Path): Path = Path(this.tokens + path.tokens)
 
-data class PathToken(val name: Name, val target: String? = null) {
+public data class PathToken(val name: Name, val target: String? = null) {
     override fun toString(): String = if (target == null) {
         name.toString()
     } else {
         "$target$TARGET_SEPARATOR$name"
     }
 
-    companion object {
-        const val TARGET_SEPARATOR = "::"
-        fun parse(token: String): PathToken {
+    public companion object {
+        public const val TARGET_SEPARATOR: String = "::"
+        public fun parse(token: String): PathToken {
             val target = token.substringBefore(TARGET_SEPARATOR, "")
             val name = token.substringAfter(TARGET_SEPARATOR).toName()
             if (target.contains("[")) TODO("target separators in queries are not supported")
@@ -72,4 +72,4 @@ data class PathToken(val name: Name, val target: String? = null) {
     }
 }
 
-fun PathToken.toPath() = Path(listOf(this))
+public fun PathToken.toPath(): Path = Path(listOf(this))

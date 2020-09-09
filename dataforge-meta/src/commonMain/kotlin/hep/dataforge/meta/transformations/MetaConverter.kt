@@ -6,18 +6,18 @@ import hep.dataforge.values.*
 /**
  * A converter of generic object to and from [MetaItem]
  */
-interface MetaConverter<T : Any> {
-    fun itemToObject(item: MetaItem<*>): T
-    fun objectToMetaItem(obj: T): MetaItem<*>
+public interface MetaConverter<T : Any> {
+    public fun itemToObject(item: MetaItem<*>): T
+    public fun objectToMetaItem(obj: T): MetaItem<*>
 
-    companion object {
+    public companion object {
 
-        val item = object : MetaConverter<MetaItem<*>> {
+        public val item: MetaConverter<MetaItem<*>> = object : MetaConverter<MetaItem<*>> {
             override fun itemToObject(item: MetaItem<*>): MetaItem<*> = item
             override fun objectToMetaItem(obj: MetaItem<*>): MetaItem<*> = obj
         }
 
-        val meta = object : MetaConverter<Meta> {
+        public val meta: MetaConverter<Meta> = object : MetaConverter<Meta> {
             override fun itemToObject(item: MetaItem<*>): Meta = when (item) {
                 is MetaItem.NodeItem -> item.node
                 is MetaItem.ValueItem -> item.value.toMeta()
@@ -26,7 +26,7 @@ interface MetaConverter<T : Any> {
             override fun objectToMetaItem(obj: Meta): MetaItem<*> = MetaItem.NodeItem(obj)
         }
 
-        val value = object : MetaConverter<Value> {
+        public val value: MetaConverter<Value> = object : MetaConverter<Value> {
             override fun itemToObject(item: MetaItem<*>): Value = when (item) {
                 is MetaItem.NodeItem -> item.node[Meta.VALUE_KEY].value ?: error("Can't convert node to a value")
                 is MetaItem.ValueItem -> item.value
@@ -35,7 +35,7 @@ interface MetaConverter<T : Any> {
             override fun objectToMetaItem(obj: Value): MetaItem<*> = MetaItem.ValueItem(obj)
         }
 
-        val string = object : MetaConverter<String> {
+        public val string: MetaConverter<String> = object : MetaConverter<String> {
             override fun itemToObject(item: MetaItem<*>): String = when (item) {
                 is MetaItem.NodeItem -> item.node[Meta.VALUE_KEY].value ?: error("Can't convert node to a value")
                 is MetaItem.ValueItem -> item.value
@@ -44,7 +44,7 @@ interface MetaConverter<T : Any> {
             override fun objectToMetaItem(obj: String): MetaItem<*> = MetaItem.ValueItem(obj.asValue())
         }
 
-        val boolean = object : MetaConverter<Boolean> {
+        public val boolean: MetaConverter<Boolean> = object : MetaConverter<Boolean> {
             override fun itemToObject(item: MetaItem<*>): Boolean = when (item) {
                 is MetaItem.NodeItem -> item.node[Meta.VALUE_KEY].value ?: error("Can't convert node to a value")
                 is MetaItem.ValueItem -> item.value
@@ -53,7 +53,7 @@ interface MetaConverter<T : Any> {
             override fun objectToMetaItem(obj: Boolean): MetaItem<*> = MetaItem.ValueItem(obj.asValue())
         }
 
-        val number = object : MetaConverter<Number> {
+        public val number: MetaConverter<Number> = object : MetaConverter<Number> {
             override fun itemToObject(item: MetaItem<*>): Number = when (item) {
                 is MetaItem.NodeItem -> item.node[Meta.VALUE_KEY].value ?: error("Can't convert node to a value")
                 is MetaItem.ValueItem -> item.value
@@ -62,7 +62,7 @@ interface MetaConverter<T : Any> {
             override fun objectToMetaItem(obj: Number): MetaItem<*> = MetaItem.ValueItem(obj.asValue())
         }
 
-        val double = object : MetaConverter<Double> {
+        public val double: MetaConverter<Double> = object : MetaConverter<Double> {
             override fun itemToObject(item: MetaItem<*>): Double = when (item) {
                 is MetaItem.NodeItem -> item.node[Meta.VALUE_KEY].value ?: error("Can't convert node to a value")
                 is MetaItem.ValueItem -> item.value
@@ -71,7 +71,7 @@ interface MetaConverter<T : Any> {
             override fun objectToMetaItem(obj: Double): MetaItem<*> = MetaItem.ValueItem(obj.asValue())
         }
 
-        val float = object : MetaConverter<Float> {
+        public val float: MetaConverter<Float> = object : MetaConverter<Float> {
             override fun itemToObject(item: MetaItem<*>): Float = when (item) {
                 is MetaItem.NodeItem -> item.node[Meta.VALUE_KEY].value ?: error("Can't convert node to a value")
                 is MetaItem.ValueItem -> item.value
@@ -80,7 +80,7 @@ interface MetaConverter<T : Any> {
             override fun objectToMetaItem(obj: Float): MetaItem<*> = MetaItem.ValueItem(obj.asValue())
         }
 
-        val int = object : MetaConverter<Int> {
+        public val int: MetaConverter<Int> = object : MetaConverter<Int> {
             override fun itemToObject(item: MetaItem<*>): Int = when (item) {
                 is MetaItem.NodeItem -> item.node[Meta.VALUE_KEY].value ?: error("Can't convert node to a value")
                 is MetaItem.ValueItem -> item.value
@@ -89,7 +89,7 @@ interface MetaConverter<T : Any> {
             override fun objectToMetaItem(obj: Int): MetaItem<*> = MetaItem.ValueItem(obj.asValue())
         }
 
-        val long = object : MetaConverter<Long> {
+        public val long: MetaConverter<Long> = object : MetaConverter<Long> {
             override fun itemToObject(item: MetaItem<*>): Long = when (item) {
                 is MetaItem.NodeItem -> item.node[Meta.VALUE_KEY].value ?: error("Can't convert node to a value")
                 is MetaItem.ValueItem -> item.value
@@ -98,14 +98,14 @@ interface MetaConverter<T : Any> {
             override fun objectToMetaItem(obj: Long): MetaItem<*> = MetaItem.ValueItem(obj.asValue())
         }
 
-        inline fun <reified E : Enum<E>> enum(): MetaConverter<E> = object : MetaConverter<E> {
+        public inline fun <reified E : Enum<E>> enum(): MetaConverter<E> = object : MetaConverter<E> {
             @Suppress("USELESS_CAST")
             override fun itemToObject(item: MetaItem<*>): E = item.enum<E>() as? E ?: error("The Item is not a Enum")
 
             override fun objectToMetaItem(obj: E): MetaItem<*> = MetaItem.ValueItem(obj.asValue())
         }
 
-        fun <T> valueList(writer: (T) -> Value = {Value.of(it)}, reader: (Value) -> T): MetaConverter<List<T>> =
+        public fun <T> valueList(writer: (T) -> Value = {Value.of(it)}, reader: (Value) -> T): MetaConverter<List<T>> =
             object : MetaConverter<List<T>> {
                 override fun itemToObject(item: MetaItem<*>): List<T> =
                     item.value?.list?.map(reader) ?: error("The item is not a value list")
@@ -117,8 +117,8 @@ interface MetaConverter<T : Any> {
     }
 }
 
-fun <T : Any> MetaConverter<T>.nullableItemToObject(item: MetaItem<*>?): T? = item?.let { itemToObject(it) }
-fun <T : Any> MetaConverter<T>.nullableObjectToMetaItem(obj: T?): MetaItem<*>? = obj?.let { objectToMetaItem(it) }
+public fun <T : Any> MetaConverter<T>.nullableItemToObject(item: MetaItem<*>?): T? = item?.let { itemToObject(it) }
+public fun <T : Any> MetaConverter<T>.nullableObjectToMetaItem(obj: T?): MetaItem<*>? = obj?.let { objectToMetaItem(it) }
 
-fun <T : Any> MetaConverter<T>.metaToObject(meta: Meta): T = itemToObject(MetaItem.NodeItem(meta))
-fun <T : Any> MetaConverter<T>.valueToObject(value: Value): T = itemToObject(MetaItem.ValueItem(value))
+public fun <T : Any> MetaConverter<T>.metaToObject(meta: Meta): T = itemToObject(MetaItem.NodeItem(meta))
+public fun <T : Any> MetaConverter<T>.valueToObject(value: Value): T = itemToObject(MetaItem.ValueItem(value))
