@@ -3,13 +3,15 @@ pluginManagement {
         mavenLocal()
         jcenter()
         gradlePluginPortal()
+        maven("https://dl.bintray.com/kotlin/kotlin-eap")
+        maven("https://dl.bintray.com/kotlin/kotlin-dev")
         maven("https://dl.bintray.com/mipt-npm/dataforge")
         maven("https://dl.bintray.com/mipt-npm/kscience")
         maven("https://dl.bintray.com/mipt-npm/dev")
     }
 
-    val toolsVersion = "0.6.0-dev-4"
-    val kotlinVersion = "1.4.0"
+    val toolsVersion = "0.6.0-dev-5"
+    val kotlinVersion = "1.4.20-dev-3898-14"
 
     plugins {
         id("ru.mipt.npm.mpp") version toolsVersion
