@@ -132,11 +132,12 @@ public interface Meta : MetaRepr, ItemProvider {
 
     override fun toMeta(): Meta = seal()
 
-    override fun equals(other: Any?): Boolean
-
-    override fun hashCode(): Int
-
-    override fun toString(): String
+    //TODO to be restored on 1.4.30 after https://youtrack.jetbrains.com/issue/KT-41765 si fixed
+//    override fun equals(other: Any?): Boolean
+//
+//    override fun hashCode(): Int
+//
+//    override fun toString(): String
 
     public companion object {
         public const val TYPE: String = "meta"
