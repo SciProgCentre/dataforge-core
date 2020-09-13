@@ -6,7 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlin.reflect.KClass
 
-fun <R : Any, T : R> Data<T>.upcast(type: KClass<out R>): Data<R> {
+public fun <R : Any, T : R> Data<T>.upcast(type: KClass<out R>): Data<R> {
     return object : Data<R> by this {
         override val type: KClass<out R> = type
     }
@@ -15,7 +15,7 @@ fun <R : Any, T : R> Data<T>.upcast(type: KClass<out R>): Data<R> {
 /**
  * Safe upcast a [Data] to a supertype
  */
-inline fun <reified R : Any, T : R> Data<T>.upcast(): Data<R> = upcast(R::class)
+public inline fun <reified R : Any, T : R> Data<T>.upcast(): Data<R> = upcast(R::class)
 
 /**
  * Check if node could be safely cast to given class
@@ -27,7 +27,7 @@ internal expect fun <R : Any> DataNode<*>.canCast(type: KClass<out R>): Boolean
  */
 internal expect fun <R : Any> Data<*>.canCast(type: KClass<out R>): Boolean
 
-fun <R : Any> DataItem<*>.canCast(type: KClass<out R>): Boolean = when (this) {
+public fun <R : Any> DataItem<*>.canCast(type: KClass<out R>): Boolean = when (this) {
     is DataItem.Node -> node.canCast(type)
     is DataItem.Leaf -> data.canCast(type)
 }
@@ -36,7 +36,7 @@ fun <R : Any> DataItem<*>.canCast(type: KClass<out R>): Boolean = when (this) {
  * Unsafe cast of data node
  */
 @Suppress("UNCHECKED_CAST")
-fun <R : Any> Data<*>.cast(type: KClass<out R>): Data<R> {
+public fun <R : Any> Data<*>.cast(type: KClass<out R>): Data<R> {
     return object : Data<R> {
         override val meta: Meta get() = this@cast.meta
         override val dependencies: Collection<Goal<*>> get() = this@cast.dependencies
@@ -47,10 +47,10 @@ fun <R : Any> Data<*>.cast(type: KClass<out R>): Data<R> {
     }
 }
 
-inline fun <reified R : Any> Data<*>.cast(): Data<R> = cast(R::class)
+public inline fun <reified R : Any> Data<*>.cast(): Data<R> = cast(R::class)
 
 @Suppress("UNCHECKED_CAST")
-fun <R : Any> DataNode<*>.cast(type: KClass<out R>): DataNode<R> {
+public fun <R : Any> DataNode<*>.cast(type: KClass<out R>): DataNode<R> {
     return object : DataNode<R> {
         override val meta: Meta get() = this@cast.meta
         override val type: KClass<out R> = type
@@ -58,12 +58,12 @@ fun <R : Any> DataNode<*>.cast(type: KClass<out R>): DataNode<R> {
     }
 }
 
-inline fun <reified R : Any> DataNode<*>.cast(): DataNode<R> = cast(R::class)
+public inline fun <reified R : Any> DataNode<*>.cast(): DataNode<R> = cast(R::class)
 
 /**
  * Check that node is compatible with given type meaning that each element could be cast to the type
  */
-fun <T : Any> DataNode<*>.ensureType(type: KClass<out T>) {
+public fun <T : Any> DataNode<*>.ensureType(type: KClass<out T>) {
     if (!canCast(type)) {
         error("$type expected, but $type received")
     }

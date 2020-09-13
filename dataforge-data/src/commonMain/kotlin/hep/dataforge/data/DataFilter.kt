@@ -4,25 +4,25 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.toName
 
 
-class DataFilter : Scheme() {
+public class DataFilter : Scheme() {
     /**
      * A source node for the filter
      */
-    var from by string()
+    public var from: String? by string()
     /**
      * A target placement for the filtered node
      */
-    var to by string()
+    public var to: String? by string()
     /**
      * A regular expression pattern for the filter
      */
-    var pattern by string(".*")
+    public var pattern: String by string(".*")
 //    val prefix by string()
 //    val suffix by string()
 
-    fun isEmpty(): Boolean = config.isEmpty()
+    public fun isEmpty(): Boolean = config.isEmpty()
 
-    companion object : SchemeSpec<DataFilter>(::DataFilter)
+    public companion object : SchemeSpec<DataFilter>(::DataFilter)
 }
 
 /**

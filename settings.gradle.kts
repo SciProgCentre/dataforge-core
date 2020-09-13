@@ -8,8 +8,8 @@ pluginManagement {
         maven("https://dl.bintray.com/mipt-npm/dev")
     }
 
-    val toolsVersion = "0.6.0-dev-4"
-    val kotlinVersion = "1.4.0"
+    val toolsVersion = "0.6.0"
+    val kotlinVersion = "1.4.10"
 
     plugins {
         id("ru.mipt.npm.mpp") version toolsVersion

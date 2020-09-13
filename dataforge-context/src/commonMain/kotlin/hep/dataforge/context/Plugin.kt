@@ -1,27 +1,23 @@
 package hep.dataforge.context
 
+import hep.dataforge.context.Plugin.Companion.TARGET
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
+import hep.dataforge.provider.Type
 
 /**
  * The interface to define a Context plugin. A plugin stores all runtime features of a context.
  * The plugin is by default configurable and a Provider (both features could be ignored).
  * The plugin must in most cases have an empty constructor in order to be able to load it from library.
  *
- *
  * The plugin lifecycle is the following:
  *
- *
  * create - configure - attach - detach - destroy
- *
- *
- * Configuration of attached plugin is possible for a context which is not in a runtime mode, but it is not recommended.
- *
- * @author Alexander Nozik
  */
+@Type(TARGET)
 public interface Plugin : Named, ContextAware, Provider, MetaRepr {
 
     /**
@@ -64,8 +60,7 @@ public interface Plugin : Named, ContextAware, Provider, MetaRepr {
     }
 
     public companion object {
-
-        public const val PLUGIN_TARGET = "plugin"
+        public const val TARGET: String = "plugin"
     }
 
 }

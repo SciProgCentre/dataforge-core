@@ -1,5 +1,6 @@
 package hep.dataforge.context
 
+import hep.dataforge.meta.Meta
 import hep.dataforge.names.asName
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
@@ -8,7 +9,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * A global root context. Closing [Global] terminates the framework.
  */
-public object Global : Context("GLOBAL".asName(), null) {
+public object Global : Context("GLOBAL".asName(), null, Meta.EMPTY) {
 
     override val coroutineContext: CoroutineContext = GlobalScope.coroutineContext + SupervisorJob()
 

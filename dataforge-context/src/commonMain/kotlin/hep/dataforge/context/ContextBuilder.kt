@@ -1,8 +1,6 @@
 package hep.dataforge.context
 
-import hep.dataforge.meta.DFBuilder
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.*
 import hep.dataforge.names.toName
 
 /**
@@ -21,10 +19,11 @@ public class ContextBuilder(private val parent: Context = Global, public var nam
         plugins.add(plugin)
     }
 
-    public fun plugin(tag: PluginTag, action: MetaBuilder.() -> Unit = {}) {
-        val factory = parent.resolve<PluginFactory<*>>(PluginFactory.TYPE).values
+    @OptIn(DFExperimental::class)
+    public fun plugin(tag: PluginTag, metaBuilder: MetaBuilder.() -> Unit = {}) {
+        val factory = parent.gatherInSequence<PluginFactory<*>>(PluginFactory.TYPE).values
             .find { it.tag.matches(tag) } ?: error("Can't resolve plugin factory for $tag")
-        val plugin = factory.invoke(Meta(action), parent)
+        val plugin = factory.invoke(Meta(metaBuilder), parent)
         plugins.add(plugin)
     }
 
@@ -37,7 +36,7 @@ public class ContextBuilder(private val parent: Context = Global, public var nam
     }
 
     public fun build(): Context {
-        return Context(name.toName(), parent).apply {
+        return Context(name.toName(), parent, meta.seal()).apply {
             this@ContextBuilder.plugins.forEach {
                 plugins.load(it)
             }

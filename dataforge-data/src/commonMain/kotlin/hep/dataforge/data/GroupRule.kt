@@ -19,10 +19,10 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
 
-interface GroupRule {
-    operator fun <T : Any> invoke(node: DataNode<T>): Map<String, DataNode<T>>
+public interface GroupRule {
+    public operator fun <T : Any> invoke(node: DataNode<T>): Map<String, DataNode<T>>
 
-    companion object{
+    public companion object{
         /**
          * Create grouping rule that creates groups for different values of value
          * field with name [key]
@@ -31,7 +31,7 @@ interface GroupRule {
          * @param defaultTagValue
          * @return
          */
-        fun byValue(key: String, defaultTagValue: String): GroupRule = object :
+        public fun byValue(key: String, defaultTagValue: String): GroupRule = object :
             GroupRule {
             override fun <T : Any> invoke(node: DataNode<T>): Map<String, DataNode<T>> {
                 val map = HashMap<String, DataTreeBuilder<T>>()
@@ -52,7 +52,7 @@ interface GroupRule {
 //        def = "default",
 //        info = "Default value which should be used for content in which the grouping value is not presented"
 //    )
-        fun byMeta(config: Meta): GroupRule {
+        public fun byMeta(config: Meta): GroupRule {
             //TODO expand grouping options
             return config["byValue"]?.string?.let {
                 byValue(

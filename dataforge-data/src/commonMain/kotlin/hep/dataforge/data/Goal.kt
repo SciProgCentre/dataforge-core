@@ -1,37 +1,36 @@
 package hep.dataforge.data
 
+import hep.dataforge.meta.DFExperimental
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-interface Goal<out T> {
-    val dependencies: Collection<Goal<*>>
+public interface Goal<out T> {
+    public val dependencies: Collection<Goal<*>>
     /**
      * Returns current running coroutine if the goal is started
      */
-    val result: Deferred<T>?
+    public val result: Deferred<T>?
 
     /**
      * Get ongoing computation or start a new one.
      * Does not guarantee thread safety. In case of multi-thread access, could create orphan computations.
      */
-    fun CoroutineScope.startAsync(): Deferred<T>
+    public fun CoroutineScope.startAsync(): Deferred<T>
 
     /**
      * Reset the computation
      */
-    fun reset()
+    public fun reset()
 
-    companion object {
-
-    }
+    public companion object
 }
 
-suspend fun <T> Goal<T>.await(): T = coroutineScope { startAsync().await() }
+public suspend fun <T> Goal<T>.await(): T = coroutineScope { startAsync().await() }
 
-val Goal<*>.isComplete get() = result?.isCompleted ?: false
+public val Goal<*>.isComplete: Boolean get() = result?.isCompleted ?: false
 
-open class StaticGoal<T>(val value: T) : Goal<T> {
+public open class StaticGoal<T>(public val value: T) : Goal<T> {
     override val dependencies: Collection<Goal<*>> get() = emptyList()
     override val result: Deferred<T> = CompletableDeferred(value)
 
@@ -42,10 +41,10 @@ open class StaticGoal<T>(val value: T) : Goal<T> {
     }
 }
 
-open class DynamicGoal<T>(
-    val coroutineContext: CoroutineContext = EmptyCoroutineContext,
+public open class DynamicGoal<T>(
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext,
     override val dependencies: Collection<Goal<*>> = emptyList(),
-    val block: suspend CoroutineScope.() -> T
+    public val block: suspend CoroutineScope.() -> T
 ) : Goal<T> {
 
     final override var result: Deferred<T>? = null
@@ -55,6 +54,7 @@ open class DynamicGoal<T>(
      * Get ongoing computation or start a new one.
      * Does not guarantee thread safety. In case of multi-thread access, could create orphan computations.
      */
+    @DFExperimental
     override fun CoroutineScope.startAsync(): Deferred<T> {
         val startedDependencies = this@DynamicGoal.dependencies.map { goal ->
             goal.run { startAsync() }
@@ -82,7 +82,7 @@ open class DynamicGoal<T>(
 /**
  * Create a one-to-one goal based on existing goal
  */
-fun <T, R> Goal<T>.map(
+public fun <T, R> Goal<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(T) -> R
 ): Goal<R> = DynamicGoal(coroutineContext, listOf(this)) {
@@ -92,7 +92,7 @@ fun <T, R> Goal<T>.map(
 /**
  * Create a joining goal.
  */
-fun <T, R> Collection<Goal<T>>.reduce(
+public fun <T, R> Collection<Goal<T>>.reduce(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Collection<T>) -> R
 ): Goal<R> = DynamicGoal(coroutineContext, this) {
@@ -105,7 +105,7 @@ fun <T, R> Collection<Goal<T>>.reduce(
  * @param T type of the input goal
  * @param R type of the result goal
  */
-fun <K, T, R> Map<K, Goal<T>>.reduce(
+public fun <K, T, R> Map<K, Goal<T>>.reduce(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Map<K, T>) -> R
 ): Goal<R> = DynamicGoal(coroutineContext, this.values) {

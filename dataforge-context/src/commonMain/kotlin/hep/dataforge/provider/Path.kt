@@ -42,7 +42,7 @@ public inline class Path(public val tokens: List<PathToken>) : Iterable<PathToke
     override fun iterator(): Iterator<PathToken> = tokens.iterator()
 
     public companion object {
-        public const val PATH_SEGMENT_SEPARATOR = "/"
+        public const val PATH_SEGMENT_SEPARATOR: String = "/"
 
         public fun parse(path: String): Path {
             val head = path.substringBefore(PATH_SEGMENT_SEPARATOR)

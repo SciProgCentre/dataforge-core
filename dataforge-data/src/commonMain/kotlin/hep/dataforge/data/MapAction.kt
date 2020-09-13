@@ -7,32 +7,31 @@ import kotlin.reflect.KClass
 /**
  * Action environment includes data name, data meta and action configuration meta
  */
-data class ActionEnv(
+public data class ActionEnv(
     val name: Name,
     val meta: Meta,
     val actionMeta: Meta
 )
 
-
 /**
  * Action environment
  */
 @DFBuilder
-class MapActionBuilder<T, R>(var name: Name, var meta: MetaBuilder, val actionMeta: Meta) {
-    lateinit var result: suspend ActionEnv.(T) -> R
+public class MapActionBuilder<T, R>(public var name: Name, public var meta: MetaBuilder, public val actionMeta: Meta) {
+    public lateinit var result: suspend ActionEnv.(T) -> R
 
     /**
      * Calculate the result of goal
      */
-    fun result(f: suspend ActionEnv.(T) -> R) {
+    public fun result(f: suspend ActionEnv.(T) -> R) {
         result = f;
     }
 }
 
 
-class MapAction<T : Any, out R : Any>(
-    val inputType: KClass<T>,
-    val outputType: KClass<out R>,
+public class MapAction<T : Any, out R : Any>(
+    public val inputType: KClass<T>,
+    public val outputType: KClass<out R>,
     private val block: MapActionBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
@@ -67,7 +66,7 @@ class MapAction<T : Any, out R : Any>(
     }
 }
 
-inline fun <reified T : Any, reified R : Any> DataNode<T>.map(
+public inline fun <reified T : Any, reified R : Any> DataNode<T>.map(
     meta: Meta,
     noinline action: MapActionBuilder<in T, out R>.() -> Unit
 ): DataNode<R> = MapAction(T::class, R::class, action).invoke(this, meta)

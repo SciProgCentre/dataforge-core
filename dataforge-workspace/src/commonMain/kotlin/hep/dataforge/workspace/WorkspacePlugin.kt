@@ -13,7 +13,7 @@ public abstract class WorkspacePlugin : AbstractPlugin() {
     private val _tasks = HashSet<Task<*>>()
     public val tasks: Collection<Task<*>> get() = _tasks
 
-    override fun provideTop(target: String): Map<Name, Any> {
+    override fun content(target: String): Map<Name, Any> {
         return when (target) {
             Task.TYPE -> tasks.toMap()
             else -> emptyMap()
