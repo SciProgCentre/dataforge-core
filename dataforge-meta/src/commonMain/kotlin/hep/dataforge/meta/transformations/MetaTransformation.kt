@@ -138,8 +138,8 @@ public inline class MetaTransformation(public val transformations: Collection<Tr
         }
     }
 
-    companion object {
-        fun make(block: MetaTransformationBuilder.() -> Unit): MetaTransformation =
+    public companion object {
+        public fun make(block: MetaTransformationBuilder.() -> Unit): MetaTransformation =
             MetaTransformationBuilder().apply(block).build()
     }
 }

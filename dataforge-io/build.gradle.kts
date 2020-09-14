@@ -1,7 +1,7 @@
 plugins {
     id("ru.mipt.npm.mpp")
     id("ru.mipt.npm.node")
-//    id("ru.mipt.npm.native")
+    id("ru.mipt.npm.native")
 }
 
 description = "IO module"
@@ -12,7 +12,7 @@ kscience {
     }
 }
 
-val ioVersion by rootProject.extra("0.2.0-npm-dev-10")
+val ioVersion by rootProject.extra("0.2.0-npm-dev-11")
 
 kotlin {
     sourceSets {

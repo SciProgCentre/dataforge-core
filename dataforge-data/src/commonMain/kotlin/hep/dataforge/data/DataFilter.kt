@@ -28,7 +28,7 @@ public class DataFilter : Scheme() {
 /**
  * Apply meta-based filter to given data node
  */
-fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
+public fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
     val sourceNode = filter.from?.let { get(it.toName()).node } ?: this@filter
     val regex = filter.pattern.toRegex()
     val targetNode = DataTreeBuilder(type).apply {
@@ -46,10 +46,10 @@ fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
 /**
  * Filter data using [DataFilter] specification
  */
-fun <T : Any> DataNode<T>.filter(filter: Meta): DataNode<T> = filter(DataFilter.wrap(filter))
+public fun <T : Any> DataNode<T>.filter(filter: Meta): DataNode<T> = filter(DataFilter.wrap(filter))
 
 /**
  * Filter data using [DataFilter] builder
  */
-fun <T : Any> DataNode<T>.filter(filterBuilder: DataFilter.() -> Unit): DataNode<T> =
+public fun <T : Any> DataNode<T>.filter(filterBuilder: DataFilter.() -> Unit): DataNode<T> =
     filter(DataFilter(filterBuilder))

@@ -47,7 +47,7 @@ public open class Context(
     /**
      * A [PluginManager] for current context
      */
-    public val plugins: PluginManager by lazy { PluginManager(this) }
+    public val plugins: PluginManager = PluginManager(this)
 
     @Deprecated("To be removed in favor of immutable plugins")
     private val activators = HashSet<Any>()
@@ -92,7 +92,7 @@ public open class Context(
         }
     }
 
-    override fun content(target: String): Map<Name, Any>  = content(target,true)
+    override fun content(target: String): Map<Name, Any> = content(target, true)
 
     override val coroutineContext: CoroutineContext by lazy {
         (parent ?: Global).coroutineContext.let { parenContext ->

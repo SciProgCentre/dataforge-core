@@ -21,8 +21,11 @@ class ContextTest {
 
     @Test
     fun testPluginManager() {
-        Global.plugins.load(DummyPlugin())
-        val members = Global.gather<Name>("test")
+        val context = Global.context("test"){
+            plugin(DummyPlugin())
+        }
+        //Global.plugins.load(DummyPlugin())
+        val members = context.gather<Name>("test")
         assertEquals(3, members.count())
         members.forEach {
             assertEquals(it.key, it.value.appendLeft("test"))

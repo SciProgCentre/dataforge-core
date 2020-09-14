@@ -46,7 +46,7 @@ public data class TaskModel(
     }
 
     public companion object {
-        public val MODEL_TARGET_KEY = "@target".asName()
+        public val MODEL_TARGET_KEY: Name = "@target".asName()
     }
 }
 
