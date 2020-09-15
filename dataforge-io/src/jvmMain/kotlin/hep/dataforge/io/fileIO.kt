@@ -214,7 +214,7 @@ public fun IOPlugin.writeEnvelopeFile(
  * Write separate meta and data files to given directory [path]
  */
 @DFExperimental
-fun IOPlugin.writeEnvelopeDirectory(
+public fun IOPlugin.writeEnvelopeDirectory(
     path: Path,
     envelope: Envelope,
     metaFormat: MetaFormatFactory = JsonMetaFormat,
