@@ -39,10 +39,10 @@ public fun <R : Any> DataNode<*>.filterIsInstance(type: KClass<out R>): DataNode
 /**
  * Filter all elements of given data item that could be cast to given type. If no elements are available, return null.
  */
-fun <R : Any> DataItem<*>?.filterIsInstance(type: KClass<out R>): DataItem<R>? = when (this) {
+public fun <R : Any> DataItem<*>?.filterIsInstance(type: KClass<out R>): DataItem<R>? = when (this) {
     null -> null
     is DataItem.Node -> DataItem.Node(this.node.filterIsInstance(type))
     is DataItem.Leaf -> this.data.filterIsInstance(type)?.let { DataItem.Leaf(it) }
 }
 
-inline fun <reified R : Any> DataItem<*>?.filterIsInstance(): DataItem<R>? = this@filterIsInstance.filterIsInstance(R::class)
+public inline fun <reified R : Any> DataItem<*>?.filterIsInstance(): DataItem<R>? = this@filterIsInstance.filterIsInstance(R::class)

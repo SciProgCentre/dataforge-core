@@ -2,14 +2,16 @@ package hep.dataforge.context
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.provider.Type
 import kotlin.reflect.KClass
 
 
+@Type(PluginFactory.TYPE)
 public interface PluginFactory<T : Plugin> : Factory<T> {
     public val tag: PluginTag
     public val type: KClass<out T>
 
-    public companion object{
+    public companion object {
         public const val TYPE: String = "pluginFactory"
     }
 }
@@ -23,6 +25,8 @@ public interface PluginFactory<T : Plugin> : Factory<T> {
  */
 public class PluginManager(override val context: Context) : ContextAware, Iterable<Plugin> {
 
+    //TODO refactor to read-only container
+
     /**
      * A set of loaded plugins
      */
@@ -33,21 +37,24 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
      */
     private val parent: PluginManager? = context.parent?.plugins
 
-
-    public fun sequence(recursive: Boolean): Sequence<Plugin> {
-        return if (recursive && parent != null) {
-            plugins.asSequence() + parent.sequence(true)
+    /**
+     * List plugins stored in this [PluginManager]. If [inherit] is true, include parent plugins as well
+     */
+    public fun list(inherit: Boolean): Collection<Plugin> {
+        return if (inherit && parent != null) {
+            plugins + parent.list(true)
         } else {
-            plugins.asSequence()
+            plugins
         }
     }
 
     /**
      * Get existing plugin or return null if not present. Only first matching plugin is returned.
-     * @param recursive search for parent [PluginManager] plugins
+     * @param inherit search for parent [PluginManager] plugins
      * @param predicate condition for the plugin
      */
-    public fun find(recursive: Boolean = true, predicate: (Plugin) -> Boolean): Plugin? = sequence(recursive).find(predicate)
+    public fun find(inherit: Boolean = true, predicate: (Plugin) -> Boolean): Plugin? =
+        list(inherit).find(predicate)
 
 
     /**
@@ -56,7 +63,8 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
      * @param tag
      * @return
      */
-    public operator fun get(tag: PluginTag, recursive: Boolean = true): Plugin? = find(recursive) { tag.matches(it.tag) }
+    public operator fun get(tag: PluginTag, inherit: Boolean = true): Plugin? =
+        find(inherit) { tag.matches(it.tag) }
 
 
     /**
@@ -142,7 +150,7 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
     public fun <T : Plugin> fetch(
         factory: PluginFactory<T>,
         recursive: Boolean = true,
-        metaBuilder: MetaBuilder.() -> Unit
+        metaBuilder: MetaBuilder.() -> Unit,
     ): T = fetch(factory, recursive, Meta(metaBuilder))
 
     override fun iterator(): Iterator<Plugin> = plugins.iterator()

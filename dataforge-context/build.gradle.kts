@@ -10,16 +10,12 @@ kscience {
     useCoroutines()
 }
 
-repositories {
-    maven("https://maven.pkg.github.com/altavir/kotlin-logging")
-}
-
 kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
                 api(project(":dataforge-meta"))
-                api("io.github.microutils:kotlin-logging:1.9.0-dev-npm")
+                api("io.github.microutils:kotlin-logging:1.9.0-dev-npm-2")
             }
         }
         val jvmMain by getting {

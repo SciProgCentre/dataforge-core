@@ -10,16 +10,16 @@ import kotlin.collections.set
 import kotlin.reflect.KClass
 
 
-class FragmentRule<T : Any, R : Any>(val name: Name, var meta: MetaBuilder) {
-    lateinit var result: suspend (T) -> R
+public class FragmentRule<T : Any, R : Any>(public val name: Name, public var meta: MetaBuilder) {
+    public lateinit var result: suspend (T) -> R
 
-    fun result(f: suspend (T) -> R) {
+    public fun result(f: suspend (T) -> R) {
         result = f;
     }
 }
 
 
-class SplitBuilder<T : Any, R : Any>(val name: Name, val meta: Meta) {
+public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val meta: Meta) {
     internal val fragments: MutableMap<Name, FragmentRule<T, R>.() -> Unit> = HashMap()
 
     /**
@@ -27,14 +27,14 @@ class SplitBuilder<T : Any, R : Any>(val name: Name, val meta: Meta) {
      * @param name the name of a fragment
      * @param rule the rule to transform fragment name and meta using
      */
-    fun fragment(name: String, rule: FragmentRule<T, R>.() -> Unit) {
+    public fun fragment(name: String, rule: FragmentRule<T, R>.() -> Unit) {
         fragments[name.toName()] = rule
     }
 }
 
-class SplitAction<T : Any, R : Any>(
-    val inputType: KClass<T>,
-    val outputType: KClass<out R>,
+public class SplitAction<T : Any, R : Any>(
+    public val inputType: KClass<T>,
+    public val outputType: KClass<out R>,
     private val action: SplitBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 

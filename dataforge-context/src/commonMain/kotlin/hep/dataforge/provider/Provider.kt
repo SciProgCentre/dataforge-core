@@ -16,6 +16,8 @@
 package hep.dataforge.provider
 
 import hep.dataforge.names.Name
+import kotlin.reflect.KClass
+import kotlin.reflect.safeCast
 
 /**
  * A marker utility interface for providers.
@@ -37,14 +39,14 @@ public interface Provider {
     /**
      * A map of direct children for specific target
      */
-    public fun provideTop(target: String): Map<Name, Any> = emptyMap()
+    public fun content(target: String): Map<Name, Any> = emptyMap()
 }
 
 public fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
     if (path.length == 0) throw IllegalArgumentException("Can't provide by empty path")
     val first = path.first()
     val target = targetOverride ?: first.target ?: defaultTarget
-    val res = provideTop(target)[first.name] ?: return null
+    val res = content(target)[first.name] ?: return null
     return when (path.length) {
         1 -> res
         else -> {
@@ -66,17 +68,22 @@ public inline fun <reified T : Any> Provider.provide(path: String, targetOverrid
 //inline fun <reified T : Any> Provider.provide(target: String, name: Name): T? {
 //    return provide(PathToken(name, target).toPath()) as? T
 //}
-//
+
 //inline fun <reified T : Any> Provider.provide(target: String, name: String): T? =
 //    provide(target, name.toName())
 
 /**
  *  Typed top level content
  */
-public inline fun <reified T : Any> Provider.top(target: String): Map<Name, T> {
-    return provideTop(target).mapValues {
-        it.value as? T ?: error("The type of element $it is ${it::class} but ${T::class} is expected")
+public fun <T : Any> Provider.top(target: String, type: KClass<out T>): Map<Name, T> {
+    return content(target).mapValues {
+        type.safeCast(it.value) ?: error("The type of element $it is ${it::class} but $type is expected")
     }
 }
+
+/**
+ *  Typed top level content
+ */
+public inline fun <reified T : Any> Provider.top(target: String): Map<Name, T> = top(target, T::class)
 
 

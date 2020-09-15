@@ -15,7 +15,7 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     override val tag: PluginTag get() = Companion.tag
 
     public val ioFormatFactories: Collection<IOFormatFactory<*>> by lazy {
-        context.resolve<IOFormatFactory<*>>(IO_FORMAT_TYPE).values
+        context.gather<IOFormatFactory<*>>(IO_FORMAT_TYPE).values
     }
 
     public fun <T : Any> resolveIOFormat(item: MetaItem<*>, type: KClass<out T>): IOFormat<T>? {
@@ -30,7 +30,7 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
 
 
     public val metaFormatFactories: Collection<MetaFormatFactory> by lazy {
-        context.resolve<MetaFormatFactory>(META_FORMAT_TYPE).values
+        context.gather<MetaFormatFactory>(META_FORMAT_TYPE).values
     }
 
     public fun resolveMetaFormat(key: Short, meta: Meta = Meta.EMPTY): MetaFormat? =
@@ -40,7 +40,7 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         metaFormatFactories.find { it.shortName == name }?.invoke(meta)
 
     public val envelopeFormatFactories: Collection<EnvelopeFormatFactory> by lazy {
-        context.resolve<EnvelopeFormatFactory>(ENVELOPE_FORMAT_TYPE).values
+        context.gather<EnvelopeFormatFactory>(ENVELOPE_FORMAT_TYPE).values
     }
 
     private fun resolveEnvelopeFormat(name: Name, meta: Meta = Meta.EMPTY): EnvelopeFormat? =
@@ -52,11 +52,11 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         return resolveEnvelopeFormat(name.toName(), meta)
     }
 
-    override fun provideTop(target: String): Map<Name, Any> {
+    override fun content(target: String): Map<Name, Any> {
         return when (target) {
             META_FORMAT_TYPE -> defaultMetaFormats.toMap()
             ENVELOPE_FORMAT_TYPE -> defaultEnvelopeFormats.toMap()
-            else -> super.provideTop(target)
+            else -> super.content(target)
         }
     }
 

@@ -1,14 +1,17 @@
 package hep.dataforge.context
 
+import hep.dataforge.meta.Meta
 import hep.dataforge.names.asName
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlin.coroutines.CoroutineContext
+import kotlin.native.concurrent.ThreadLocal
 
 /**
  * A global root context. Closing [Global] terminates the framework.
  */
-public object Global : Context("GLOBAL".asName(), null) {
+@ThreadLocal
+public object Global : Context("GLOBAL".asName(), null, Meta.EMPTY) {
 
     override val coroutineContext: CoroutineContext = GlobalScope.coroutineContext + SupervisorJob()
 
@@ -38,6 +41,8 @@ public object Global : Context("GLOBAL".asName(), null) {
     }
 
     public fun context(name: String, parent: Context = this, block: ContextBuilder.() -> Unit = {}): Context =
-        ContextBuilder(parent, name).apply(block).build()
+        ContextBuilder(parent, name).apply(block).build().also {
+            contextRegistry[name] = it
+        }
 
 }

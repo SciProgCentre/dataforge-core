@@ -51,7 +51,7 @@ public interface Value {
     override fun hashCode(): Int
 
     public companion object {
-        public const val TYPE: String = "value"
+        public const val TARGET: String = "value"
 
         /**
          * Convert object to value

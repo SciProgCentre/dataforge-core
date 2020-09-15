@@ -31,7 +31,7 @@ public interface Workspace : ContextAware, Provider {
      */
     public val tasks: Map<Name, Task<*>>
 
-    override fun provideTop(target: String): Map<Name, Any> {
+    override fun content(target: String): Map<Name, Any> {
         return when (target) {
             "target", Meta.TYPE -> targets.mapKeys { it.key.toName() }
             Task.TYPE -> tasks

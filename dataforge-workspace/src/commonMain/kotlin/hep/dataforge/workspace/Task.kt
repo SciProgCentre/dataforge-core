@@ -49,6 +49,6 @@ public interface Task<out R : Any> : Named, Described {
     public fun run(workspace: Workspace, model: TaskModel): DataNode<R>
 
     public companion object {
-        public const val TYPE = "task"
+        public const val TYPE: String = "task"
     }
 }

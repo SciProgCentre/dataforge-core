@@ -17,8 +17,6 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
         }
     }
 
-    public constructor(vararg layers: Meta?) : this(layers.filterNotNull())
-
     override val items: Map<NameToken, MetaItem<Meta>> by lazy {
         layers.map { it.items.keys }.flatten().associateWith { key ->
             layers.asSequence().map { it.items[key] }.filterNotNull().let(replaceRule)
@@ -79,6 +77,9 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
         public val mergeRule: (Sequence<MetaItem<*>>) -> MetaItem<SealedMeta> = { it.merge() }
     }
 }
+
+@Suppress("FunctionName")
+public fun Laminate(vararg layers: Meta?): Laminate = Laminate(layers.filterNotNull())
 
 /**
  * Performance optimized version of get method

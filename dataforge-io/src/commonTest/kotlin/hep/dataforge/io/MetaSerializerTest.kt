@@ -48,8 +48,10 @@ class MetaSerializerTest {
         assertEquals(name, restored)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testMetaItemDescriptor() {
         val descriptor = MetaItem.serializer(MetaSerializer).descriptor.getElementDescriptor(0)
+        println(descriptor)
     }
 }
