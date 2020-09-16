@@ -28,8 +28,8 @@ public interface ObservableMeta : Meta {
 /**
  * Mutable meta representing object state
  */
-@Serializable
-public class Config : AbstractMutableMeta<Config>(), ObservableMeta {
+@Serializable(Config.Companion::class)
+public class Config() : AbstractMutableMeta<Config>(), ObservableMeta {
 
     private val listeners = HashSet<MetaListener>()
 

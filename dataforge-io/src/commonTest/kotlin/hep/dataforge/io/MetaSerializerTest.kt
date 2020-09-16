@@ -27,6 +27,7 @@ class MetaSerializerTest {
     @Test
     fun testMetaSerialization() {
         val string = JSON_PRETTY.encodeToString(MetaSerializer, meta)
+        println(string)
         val restored = JSON_PLAIN.decodeFromString(MetaSerializer, string)
         assertEquals(meta, restored)
     }
@@ -35,7 +36,7 @@ class MetaSerializerTest {
     @Test
     fun testCborSerialization() {
         val bytes = Cbor.encodeToByteArray(MetaSerializer, meta)
-        println(bytes.contentToString())
+        println(bytes.decodeToString())
         val restored = Cbor.decodeFromByteArray(MetaSerializer, bytes)
         assertEquals(meta, restored)
     }

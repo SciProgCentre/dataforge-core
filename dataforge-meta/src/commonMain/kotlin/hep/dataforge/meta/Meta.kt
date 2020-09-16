@@ -4,14 +4,11 @@ import hep.dataforge.meta.Meta.Companion.VALUE_KEY
 import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.names.*
-import hep.dataforge.values.*
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.KSerializer
+import hep.dataforge.values.EnumValue
+import hep.dataforge.values.Null
+import hep.dataforge.values.Value
+import hep.dataforge.values.boolean
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 
 
@@ -20,28 +17,16 @@ import kotlinx.serialization.json.Json
  * * a [ValueItem] (leaf)
  * * a [NodeItem] (node)
  */
-@Serializable
-public sealed class MetaItem<out M : Meta> {
+@Serializable(MetaItemSerializer::class)
+public sealed class MetaItem<out M : Meta>() {
 
     abstract override fun equals(other: Any?): Boolean
 
     abstract override fun hashCode(): Int
 
-    @Serializable
+    @Serializable(MetaItemSerializer::class)
     public class ValueItem(public val value: Value) : MetaItem<Nothing>() {
         override fun toString(): String = value.toString()
-
-        @OptIn(ExperimentalSerializationApi::class)
-        @Serializer(ValueItem::class)
-        public companion object : KSerializer<ValueItem> {
-            override val descriptor: SerialDescriptor get() = ValueSerializer.descriptor
-
-            override fun deserialize(decoder: Decoder): ValueItem = ValueItem(ValueSerializer.deserialize(decoder))
-
-            override fun serialize(encoder: Encoder, value: ValueItem) {
-                ValueSerializer.serialize(encoder, value.value)
-            }
-        }
 
         override fun equals(other: Any?): Boolean {
             return this.value == (other as? ValueItem)?.value
@@ -52,22 +37,10 @@ public sealed class MetaItem<out M : Meta> {
         }
     }
 
-    @Serializable
-    public class NodeItem<M : Meta>(@Serializable(MetaSerializer::class) public val node: M) : MetaItem<M>() {
+    @Serializable(MetaItemSerializer::class)
+    public class NodeItem<M : Meta>(public val node: M) : MetaItem<M>() {
         //Fixing serializer for node could cause class cast problems, but it should not since Meta descendants are not serializeable
         override fun toString(): String = node.toString()
-
-        @OptIn(ExperimentalSerializationApi::class)
-        @Serializer(NodeItem::class)
-        public companion object : KSerializer<NodeItem<out Meta>> {
-            override val descriptor: SerialDescriptor get() = MetaSerializer.descriptor
-
-            override fun deserialize(decoder: Decoder): NodeItem<*> = NodeItem(MetaSerializer.deserialize(decoder))
-
-            override fun serialize(encoder: Encoder, value: NodeItem<*>) {
-                MetaSerializer.serialize(encoder, value.node)
-            }
-        }
 
         override fun equals(other: Any?): Boolean = node == (other as? NodeItem<*>)?.node
 
@@ -112,7 +85,6 @@ public fun interface ItemProvider {
  *
  *   * Same name siblings are supported via elements with the same [Name] but different queries
  */
-@Serializable(MetaSerializer::class)
 public interface Meta : MetaRepr, ItemProvider {
     /**
      * Top level items of meta tree

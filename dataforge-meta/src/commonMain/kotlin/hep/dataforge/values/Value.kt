@@ -19,7 +19,6 @@ public enum class ValueType {
  *
  * Value can represent a list of value objects.
  */
-@Serializable(ValueSerializer::class)
 public interface Value {
     /**
      * Get raw value of this value
