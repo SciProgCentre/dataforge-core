@@ -204,9 +204,7 @@ public fun IOPlugin.writeEnvelopeFile(
     metaFormat: MetaFormatFactory? = null,
 ) {
     path.rewrite {
-        with(envelopeFormat) {
-            writeEnvelope(envelope, metaFormat ?: envelopeFormat.defaultMetaFormat)
-        }
+        envelopeFormat.writeEnvelope(this, envelope, metaFormat ?: envelopeFormat.defaultMetaFormat)
     }
 }
 

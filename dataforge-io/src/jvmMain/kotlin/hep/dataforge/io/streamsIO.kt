@@ -1,4 +1,4 @@
-package hep.dataforge.io.tcp
+package hep.dataforge.io
 
 import kotlinx.io.*
 import kotlinx.io.buffer.Buffer
@@ -30,16 +30,16 @@ private class BlockingStreamInput(val source: InputStream) : Input() {
     }
 }
 
-fun <R> InputStream.read(size: Int, block: Input.() -> R): R {
+public fun <R> InputStream.read(size: Int, block: Input.() -> R): R {
     val buffer = ByteArray(size)
     read(buffer)
     return buffer.asBinary().read(block = block)
 }
 
-fun <R> InputStream.read(block: Input.() -> R): R = asInput().block()
+public fun <R> InputStream.read(block: Input.() -> R): R = asInput().block()
 
-fun <R> InputStream.readBlocking(block: Input.() -> R): R = BlockingStreamInput(this).block()
+public fun <R> InputStream.readBlocking(block: Input.() -> R): R = BlockingStreamInput(this).block()
 
-inline fun OutputStream.write(block: Output.() -> Unit) {
+public inline fun OutputStream.write(block: Output.() -> Unit) {
     asOutput().block()
 }

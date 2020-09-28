@@ -1,11 +1,8 @@
 plugins {
-    id("ru.mipt.npm.publish") apply false
-    id("org.jetbrains.changelog") version "0.4.0"
+    id("ru.mipt.npm.project")
 }
 
-apply(plugin = "org.jetbrains.dokka")
-
-val dataforgeVersion by extra("0.2.0-dev-2")
+val dataforgeVersion by extra("0.2.0-dev-3")
 
 val bintrayRepo by extra("dataforge")
 val githubProject by extra("dataforge-core")
@@ -15,6 +12,8 @@ allprojects {
     group = "hep.dataforge"
     version = dataforgeVersion
 
+    apply(plugin = "org.jetbrains.dokka")
+
     repositories {
         mavenLocal()
     }
@@ -22,5 +21,4 @@ allprojects {
 
 subprojects {
     apply(plugin = "ru.mipt.npm.publish")
-    apply(plugin = "org.jetbrains.dokka")
 }

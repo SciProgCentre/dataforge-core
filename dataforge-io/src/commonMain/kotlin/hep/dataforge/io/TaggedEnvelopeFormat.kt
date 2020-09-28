@@ -41,18 +41,23 @@ public class TaggedEnvelopeFormat(
         writeRawString(END_SEQUENCE)
     }
 
-    override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) {
-        val metaFormat = metaFormatFactory.invoke(formatMeta, io.context)
+    override fun writeEnvelope(
+        output: Output,
+        envelope: Envelope,
+        metaFormatFactory: MetaFormatFactory,
+        formatMeta: Meta,
+    ) {
+        val metaFormat = metaFormatFactory.invoke(formatMeta, this@TaggedEnvelopeFormat.io.context)
         val metaBytes = metaFormat.toBinary(envelope.meta)
         val actualSize: ULong = (envelope.data?.size ?: 0).toULong()
         val tag = Tag(metaFormatFactory.key, metaBytes.size.toUInt() + 2u, actualSize)
-        writeBinary(tag.toBinary())
-        writeBinary(metaBytes)
-        writeRawString("\r\n")
+        output.writeBinary(tag.toBinary())
+        output.writeBinary(metaBytes)
+        output.writeRawString("\r\n")
         envelope.data?.let {
-            writeBinary(it)
+            output.writeBinary(it)
         }
-        flush()
+        output.flush()
     }
 
     /**
@@ -158,11 +163,19 @@ public class TaggedEnvelopeFormat(
         override fun readPartial(input: Input): PartialEnvelope =
             default.run { readPartial(input) }
 
-        override fun Output.writeEnvelope(
+        override fun writeEnvelope(
+            output: Output,
             envelope: Envelope,
             metaFormatFactory: MetaFormatFactory,
             formatMeta: Meta,
-        ): Unit = default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
+        ): Unit = default.run {
+            writeEnvelope(
+                output,
+                envelope,
+                metaFormatFactory,
+                formatMeta
+            )
+        }
 
         override fun readObject(input: Input): Envelope = default.readObject(input)
     }

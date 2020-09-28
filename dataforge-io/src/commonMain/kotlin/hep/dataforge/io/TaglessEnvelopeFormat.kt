@@ -30,32 +30,39 @@ public class TaglessEnvelopeFormat(
         writeUtf8String("#? $key: $value;\r\n")
     }
 
-    override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) {
-        val metaFormat = metaFormatFactory(formatMeta, io.context)
+    override fun writeEnvelope(
+        output: Output,
+        envelope: Envelope,
+        metaFormatFactory: MetaFormatFactory,
+        formatMeta: Meta
+    ) {
+        val metaFormat = metaFormatFactory(formatMeta, this.io.context)
 
         //printing header
-        writeRawString(TAGLESS_ENVELOPE_HEADER + "\r\n")
+        output.writeRawString(TAGLESS_ENVELOPE_HEADER + "\r\n")
 
         //printing all properties
-        writeProperty(META_TYPE_PROPERTY, metaFormatFactory.shortName)
+        output.writeProperty(META_TYPE_PROPERTY,
+            metaFormatFactory.shortName)
         //TODO add optional metaFormat properties
         val actualSize: Int = envelope.data?.size ?: 0
 
-        writeProperty(DATA_LENGTH_PROPERTY, actualSize)
+        output.writeProperty(DATA_LENGTH_PROPERTY, actualSize)
 
         //Printing meta
         if (!envelope.meta.isEmpty()) {
             val metaBytes = metaFormat.toBinary(envelope.meta)
-            writeProperty(META_LENGTH_PROPERTY, metaBytes.size + 2)
-            writeUtf8String(metaStart + "\r\n")
-            writeBinary(metaBytes)
-            writeRawString("\r\n")
+            output.writeProperty(META_LENGTH_PROPERTY,
+                metaBytes.size + 2)
+            output.writeUtf8String(this.metaStart + "\r\n")
+            output.writeBinary(metaBytes)
+            output.writeRawString("\r\n")
         }
 
         //Printing data
         envelope.data?.let { data ->
-            writeUtf8String(dataStart + "\r\n")
-            writeBinary(data)
+            output.writeUtf8String(this.dataStart + "\r\n")
+            output.writeBinary(data)
         }
     }
 
@@ -169,7 +176,7 @@ public class TaglessEnvelopeFormat(
 
     public companion object : EnvelopeFormatFactory {
 
-        private val propertyPattern = "#\\?\\s*(?<key>[\\w.]*)\\s*:\\s*(?<value>[^;]*);?".toRegex()
+        private val propertyPattern = "#\\?\\s*([\\w.]*)\\s*:\\s*([^;]*);?".toRegex()
 
         public const val META_TYPE_PROPERTY: String = "metaType"
         public const val META_LENGTH_PROPERTY: String = "metaLength"
@@ -197,11 +204,19 @@ public class TaglessEnvelopeFormat(
         override fun readPartial(input: Input): PartialEnvelope =
             default.run { readPartial(input) }
 
-        override fun Output.writeEnvelope(
+        override fun writeEnvelope(
+            output: Output,
             envelope: Envelope,
             metaFormatFactory: MetaFormatFactory,
             formatMeta: Meta,
-        ): Unit = default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
+        ): Unit = default.run {
+            writeEnvelope(
+                output,
+                envelope,
+                metaFormatFactory,
+                formatMeta
+            )
+        }
 
         override fun readObject(input: Input): Envelope = default.readObject(input)
 

@@ -64,14 +64,19 @@ public class FrontMatterEnvelopeFormat(
         return SimpleEnvelope(meta, data)
     }
 
-    override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) {
-        val metaFormat = metaFormatFactory(formatMeta, io.context)
-        writeRawString("$SEPARATOR\r\n")
-        metaFormat.run { writeObject(this@writeEnvelope, envelope.meta) }
-        writeRawString("$SEPARATOR\r\n")
+    override fun writeEnvelope(
+        output: Output,
+        envelope: Envelope,
+        metaFormatFactory: MetaFormatFactory,
+        formatMeta: Meta,
+    ) {
+        val metaFormat = metaFormatFactory(formatMeta, this@FrontMatterEnvelopeFormat.io.context)
+        output.writeRawString("${hep.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.SEPARATOR}\r\n")
+        metaFormat.run { this.writeObject(output, envelope.meta) }
+        output.writeRawString("${hep.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.SEPARATOR}\r\n")
         //Printing data
         envelope.data?.let { data ->
-            writeBinary(data)
+            output.writeBinary(data)
         }
     }
 
@@ -105,11 +110,13 @@ public class FrontMatterEnvelopeFormat(
         override fun readPartial(input: Input): PartialEnvelope =
             default.readPartial(input)
 
-        override fun Output.writeEnvelope(
+        override fun writeEnvelope(
+            output: Output,
             envelope: Envelope,
             metaFormatFactory: MetaFormatFactory,
             formatMeta: Meta,
-        ): Unit = default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
+        ): Unit = default.writeEnvelope(output, envelope, metaFormatFactory, formatMeta)
+
 
         override fun readObject(input: Input): Envelope = default.readObject(input)
 

@@ -20,15 +20,16 @@ public interface EnvelopeFormat : IOFormat<Envelope> {
 
     public fun readPartial(input: Input): PartialEnvelope
 
-    public fun Output.writeEnvelope(
+    public fun writeEnvelope(
+        output: Output,
         envelope: Envelope,
         metaFormatFactory: MetaFormatFactory = defaultMetaFormat,
-        formatMeta: Meta = Meta.EMPTY
+        formatMeta: Meta = Meta.EMPTY,
     )
 
     override fun readObject(input: Input): Envelope
 
-    override fun writeObject(output: Output, obj: Envelope): Unit = output.writeEnvelope(obj)
+    override fun writeObject(output: Output, obj: Envelope): Unit = writeEnvelope(output, obj)
 }
 
 public fun EnvelopeFormat.read(input: Input): Envelope = readObject(input)
