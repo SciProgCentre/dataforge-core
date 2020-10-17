@@ -91,5 +91,5 @@ public open class MetaScheme(
 
 public fun Meta.asScheme(): MetaScheme = MetaScheme(this)
 
-public fun <T : Configurable> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit): T =
+public fun <T : Configurable> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit = {}): T =
     spec.wrap(this).apply(block)
