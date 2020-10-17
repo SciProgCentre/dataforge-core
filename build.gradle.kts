@@ -12,7 +12,7 @@ allprojects {
     group = "hep.dataforge"
     version = dataforgeVersion
 
-    apply(plugin = "org.jetbrains.dokka")
+    apply<org.jetbrains.dokka.gradle.DokkaPlugin>()
 
     repositories {
         mavenLocal()

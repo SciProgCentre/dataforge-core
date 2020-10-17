@@ -7,8 +7,6 @@ import hep.dataforge.provider.Type
 import hep.dataforge.provider.top
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.io.Output
-import kotlinx.io.text.writeUtf8String
 import kotlin.reflect.KClass
 
 
@@ -26,7 +24,7 @@ public interface TextFormat {
      */
     public val type: KClass<*>
 
-    public suspend fun Output.render(obj: Any)
+    public suspend fun Appendable.render(obj: Any)
 
     public companion object {
         public const val TEXT_RENDERER_TYPE: String = "dataforge.textRenderer"
@@ -37,15 +35,15 @@ public object DefaultTextFormat : TextFormat {
     override val priority: Int = Int.MAX_VALUE
     override val type: KClass<*> = Any::class
 
-    override suspend fun Output.render(obj: Any) {
-        writeUtf8String(obj.toString() + "\n")
+    override suspend fun Appendable.render(obj: Any) {
+        append(obj.toString() + "\n")
     }
 }
 
 /**
  * A text-based renderer
  */
-public class TextRenderer(override val context: Context, private val output: Output) : Renderer<Any> {
+public class TextRenderer(override val context: Context, private val output: Appendable) : Renderer<Any> {
     private val cache = HashMap<KClass<*>, TextFormat>()
 
     /**

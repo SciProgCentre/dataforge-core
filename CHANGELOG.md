@@ -9,6 +9,7 @@
 - Empty query in Name is null instead of ""
 - Provider provides an empty map instead of error by default
 - Hidden delegates hierarchy in favor of stdlib properties
+- Removed io depdendency from `dataforge-output`. Replaced Output by Appendable.
 
 ### Deprecated
 - Context activation API
