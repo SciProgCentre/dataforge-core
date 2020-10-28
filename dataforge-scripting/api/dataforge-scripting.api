@@ -1,0 +1,6 @@
+public final class hep/dataforge/scripting/Builders {
+	public static final field INSTANCE Lhep/dataforge/scripting/Builders;
+	public final fun buildWorkspace (Ljava/io/File;)Lhep/dataforge/workspace/Workspace;
+	public final fun buildWorkspace (Ljava/lang/String;)Lhep/dataforge/workspace/Workspace;
+}
+

@@ -1,0 +1,401 @@
+public abstract interface class hep/dataforge/data/Action {
+	public abstract fun invoke (Lhep/dataforge/data/DataNode;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
+	public abstract fun isTerminal ()Z
+}
+
+public final class hep/dataforge/data/Action$DefaultImpls {
+	public static fun isTerminal (Lhep/dataforge/data/Action;)Z
+}
+
+public final class hep/dataforge/data/ActionEnv {
+	public fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/Meta;)V
+	public final fun component1 ()Lhep/dataforge/names/Name;
+	public final fun component2 ()Lhep/dataforge/meta/Meta;
+	public final fun component3 ()Lhep/dataforge/meta/Meta;
+	public final fun copy (Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/ActionEnv;
+	public static synthetic fun copy$default (Lhep/dataforge/data/ActionEnv;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/data/ActionEnv;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getActionMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getName ()Lhep/dataforge/names/Name;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class hep/dataforge/data/ActionKt {
+	public static final fun then (Lhep/dataforge/data/Action;Lhep/dataforge/data/Action;)Lhep/dataforge/data/Action;
+}
+
+public final class hep/dataforge/data/CoroutineMonitor : kotlin/coroutines/CoroutineContext$Element {
+	public static final field Companion Lhep/dataforge/data/CoroutineMonitor$Companion;
+	public fun <init> ()V
+	public final fun finish ()V
+	public fun fold (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
+	public fun get (Lkotlin/coroutines/CoroutineContext$Key;)Lkotlin/coroutines/CoroutineContext$Element;
+	public fun getKey ()Lkotlin/coroutines/CoroutineContext$Key;
+	public final fun getStatus ()Ljava/lang/String;
+	public final fun getTotalWork ()D
+	public final fun getWorkDone ()D
+	public fun minusKey (Lkotlin/coroutines/CoroutineContext$Key;)Lkotlin/coroutines/CoroutineContext;
+	public fun plus (Lkotlin/coroutines/CoroutineContext;)Lkotlin/coroutines/CoroutineContext;
+	public final fun setStatus (Ljava/lang/String;)V
+	public final fun setTotalWork (D)V
+	public final fun setWorkDone (D)V
+	public final fun start ()V
+}
+
+public final class hep/dataforge/data/CoroutineMonitor$Companion : kotlin/coroutines/CoroutineContext$Key {
+}
+
+public final class hep/dataforge/data/CoroutineMonitorKt {
+	public static final fun getDependencies (Lkotlinx/coroutines/Job;)Ljava/util/Collection;
+	public static final fun getMonitor (Lkotlin/coroutines/CoroutineContext;)Lhep/dataforge/data/CoroutineMonitor;
+	public static final fun getMonitor (Lkotlinx/coroutines/CoroutineScope;)Lhep/dataforge/data/CoroutineMonitor;
+	public static final fun getProgress (Lkotlinx/coroutines/Job;)D
+	public static final fun getStatus (Lkotlinx/coroutines/Job;)Ljava/lang/String;
+	public static final fun getTotalWork (Lkotlinx/coroutines/Job;)D
+	public static final fun getWorkDone (Lkotlinx/coroutines/Job;)D
+}
+
+public abstract interface class hep/dataforge/data/Data : hep/dataforge/data/Goal, hep/dataforge/meta/MetaRepr {
+	public static final field Companion Lhep/dataforge/data/Data$Companion;
+	public static final field TYPE Ljava/lang/String;
+	public abstract fun getMeta ()Lhep/dataforge/meta/Meta;
+	public abstract fun getType ()Lkotlin/reflect/KClass;
+	public abstract fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/data/Data$Companion {
+	public static final field TYPE Ljava/lang/String;
+	public final fun invoke (Ljava/lang/String;Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;Lkotlin/coroutines/CoroutineContext;Ljava/util/Collection;Lkotlin/jvm/functions/Function2;)Lhep/dataforge/data/Data;
+	public final fun invoke (Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;Lkotlin/coroutines/CoroutineContext;Ljava/util/Collection;Lkotlin/jvm/functions/Function2;)Lhep/dataforge/data/Data;
+	public static synthetic fun invoke$default (Lhep/dataforge/data/Data$Companion;Ljava/lang/String;Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;Lkotlin/coroutines/CoroutineContext;Ljava/util/Collection;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lhep/dataforge/data/Data;
+	public static synthetic fun invoke$default (Lhep/dataforge/data/Data$Companion;Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;Lkotlin/coroutines/CoroutineContext;Ljava/util/Collection;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lhep/dataforge/data/Data;
+	public final fun static (Ljava/lang/Object;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/Data;
+	public static synthetic fun static$default (Lhep/dataforge/data/Data$Companion;Ljava/lang/Object;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/data/Data;
+}
+
+public final class hep/dataforge/data/Data$DefaultImpls {
+	public static fun toMeta (Lhep/dataforge/data/Data;)Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/data/DataCastKt {
+	public static final fun canCast (Lhep/dataforge/data/DataItem;Lkotlin/reflect/KClass;)Z
+	public static final fun cast (Lhep/dataforge/data/Data;Lkotlin/reflect/KClass;)Lhep/dataforge/data/Data;
+	public static final fun cast (Lhep/dataforge/data/DataNode;Lkotlin/reflect/KClass;)Lhep/dataforge/data/DataNode;
+	public static final fun ensureType (Lhep/dataforge/data/DataNode;Lkotlin/reflect/KClass;)V
+	public static final fun upcast (Lhep/dataforge/data/Data;Lkotlin/reflect/KClass;)Lhep/dataforge/data/Data;
+}
+
+public final class hep/dataforge/data/DataFilter : hep/dataforge/meta/Scheme {
+	public static final field Companion Lhep/dataforge/data/DataFilter$Companion;
+	public fun <init> ()V
+	public final fun getFrom ()Ljava/lang/String;
+	public final fun getPattern ()Ljava/lang/String;
+	public final fun getTo ()Ljava/lang/String;
+	public final fun isEmpty ()Z
+	public final fun setFrom (Ljava/lang/String;)V
+	public final fun setPattern (Ljava/lang/String;)V
+	public final fun setTo (Ljava/lang/String;)V
+}
+
+public final class hep/dataforge/data/DataFilter$Companion : hep/dataforge/meta/SchemeSpec {
+}
+
+public final class hep/dataforge/data/DataFilterKt {
+	public static final fun filter (Lhep/dataforge/data/DataNode;Lhep/dataforge/data/DataFilter;)Lhep/dataforge/data/DataNode;
+	public static final fun filter (Lhep/dataforge/data/DataNode;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
+	public static final fun filter (Lhep/dataforge/data/DataNode;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/data/DataNode;
+}
+
+public abstract class hep/dataforge/data/DataItem : hep/dataforge/meta/MetaRepr {
+	public abstract fun getMeta ()Lhep/dataforge/meta/Meta;
+	public abstract fun getType ()Lkotlin/reflect/KClass;
+}
+
+public final class hep/dataforge/data/DataItem$Leaf : hep/dataforge/data/DataItem {
+	public fun <init> (Lhep/dataforge/data/Data;)V
+	public final fun getData ()Lhep/dataforge/data/Data;
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/data/DataItem$Node : hep/dataforge/data/DataItem {
+	public fun <init> (Lhep/dataforge/data/DataNode;)V
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getNode ()Lhep/dataforge/data/DataNode;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/data/DataJVMKt {
+	public static final fun filterIsInstance (Lhep/dataforge/data/Data;Lkotlin/reflect/KClass;)Lhep/dataforge/data/Data;
+	public static final fun filterIsInstance (Lhep/dataforge/data/DataItem;Lkotlin/reflect/KClass;)Lhep/dataforge/data/DataItem;
+	public static final fun filterIsInstance (Lhep/dataforge/data/DataNode;Lkotlin/reflect/KClass;)Lhep/dataforge/data/DataNode;
+	public static final fun get (Lhep/dataforge/data/Data;)Ljava/lang/Object;
+}
+
+public final class hep/dataforge/data/DataKt {
+	public static final fun map (Lhep/dataforge/data/Data;Lkotlin/reflect/KClass;Lkotlin/coroutines/CoroutineContext;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function3;)Lhep/dataforge/data/Data;
+	public static synthetic fun map$default (Lhep/dataforge/data/Data;Lkotlin/reflect/KClass;Lkotlin/coroutines/CoroutineContext;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lhep/dataforge/data/Data;
+	public static final fun reduce (Ljava/util/Map;Lkotlin/reflect/KClass;Lkotlin/coroutines/CoroutineContext;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function3;)Lhep/dataforge/data/DynamicData;
+	public static synthetic fun reduce$default (Ljava/util/Map;Lkotlin/reflect/KClass;Lkotlin/coroutines/CoroutineContext;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lhep/dataforge/data/DynamicData;
+}
+
+public abstract interface class hep/dataforge/data/DataNode : hep/dataforge/meta/MetaRepr {
+	public static final field Companion Lhep/dataforge/data/DataNode$Companion;
+	public static final field TYPE Ljava/lang/String;
+	public abstract fun getItems ()Ljava/util/Map;
+	public abstract fun getMeta ()Lhep/dataforge/meta/Meta;
+	public abstract fun getType ()Lkotlin/reflect/KClass;
+	public abstract fun startAll (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
+	public abstract fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/data/DataNode$Companion {
+	public static final field TYPE Ljava/lang/String;
+	public final fun builder (Lkotlin/reflect/KClass;)Lhep/dataforge/data/DataTreeBuilder;
+	public final fun invoke (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/data/DataTree;
+}
+
+public final class hep/dataforge/data/DataNode$DefaultImpls {
+	public static fun startAll (Lhep/dataforge/data/DataNode;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
+	public static fun toMeta (Lhep/dataforge/data/DataNode;)Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/data/DataNodeKt {
+	public static final fun asSequence (Lhep/dataforge/data/DataNode;)Lkotlin/sequences/Sequence;
+	public static final fun builder (Lhep/dataforge/data/DataNode;)Lhep/dataforge/data/DataTreeBuilder;
+	public static final fun dataSequence (Lhep/dataforge/data/DataNode;)Lkotlin/sequences/Sequence;
+	public static final fun datum (Lhep/dataforge/data/DataTreeBuilder;Lhep/dataforge/names/Name;Lhep/dataforge/data/Data;)V
+	public static final fun datum (Lhep/dataforge/data/DataTreeBuilder;Ljava/lang/String;Lhep/dataforge/data/Data;)V
+	public static final fun filter (Lhep/dataforge/data/DataNode;Lkotlin/jvm/functions/Function2;)Lhep/dataforge/data/DataNode;
+	public static final fun first (Lhep/dataforge/data/DataNode;)Lhep/dataforge/data/Data;
+	public static final fun get (Lhep/dataforge/data/DataNode;Lhep/dataforge/names/Name;)Lhep/dataforge/data/DataItem;
+	public static final fun get (Lhep/dataforge/data/DataNode;Ljava/lang/String;)Lhep/dataforge/data/DataItem;
+	public static final fun getData (Lhep/dataforge/data/DataItem;)Lhep/dataforge/data/Data;
+	public static final fun getNode (Lhep/dataforge/data/DataItem;)Lhep/dataforge/data/DataNode;
+	public static final fun iterator (Lhep/dataforge/data/DataNode;)Ljava/util/Iterator;
+	public static final fun join (Lhep/dataforge/data/DataNode;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun node (Lhep/dataforge/data/DataTreeBuilder;Lhep/dataforge/names/Name;Lhep/dataforge/data/DataNode;)V
+	public static final fun node (Lhep/dataforge/data/DataTreeBuilder;Ljava/lang/String;Lhep/dataforge/data/DataNode;)V
+	public static final fun static (Lhep/dataforge/data/DataTreeBuilder;Lhep/dataforge/names/Name;Ljava/lang/Object;Lhep/dataforge/meta/Meta;)V
+	public static final fun static (Lhep/dataforge/data/DataTreeBuilder;Lhep/dataforge/names/Name;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+	public static final fun static (Lhep/dataforge/data/DataTreeBuilder;Ljava/lang/String;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun static$default (Lhep/dataforge/data/DataTreeBuilder;Lhep/dataforge/names/Name;Ljava/lang/Object;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)V
+	public static synthetic fun static$default (Lhep/dataforge/data/DataTreeBuilder;Lhep/dataforge/names/Name;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun static$default (Lhep/dataforge/data/DataTreeBuilder;Ljava/lang/String;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public final class hep/dataforge/data/DataTree : hep/dataforge/data/DataNode {
+	public fun getItems ()Ljava/util/Map;
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun startAll (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/data/DataTreeBuilder {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public final fun build ()Lhep/dataforge/data/DataTree;
+	public final fun getType ()Lkotlin/reflect/KClass;
+	public final fun meta (Lhep/dataforge/meta/Meta;)V
+	public final fun meta (Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MetaBuilder;
+	public final fun put (Ljava/lang/String;Lhep/dataforge/data/Data;)V
+	public final fun put (Ljava/lang/String;Lhep/dataforge/data/DataItem;)V
+	public final fun put (Ljava/lang/String;Lhep/dataforge/data/DataNode;)V
+	public final fun put (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun set (Lhep/dataforge/names/Name;Lhep/dataforge/data/Data;)V
+	public final fun set (Lhep/dataforge/names/Name;Lhep/dataforge/data/DataItem;)V
+	public final fun set (Lhep/dataforge/names/Name;Lhep/dataforge/data/DataNode;)V
+	public final fun set (Lhep/dataforge/names/Name;Lhep/dataforge/data/DataTreeBuilder;)V
+	public final fun set (Lhep/dataforge/names/NameToken;Lhep/dataforge/data/Data;)V
+	public final fun set (Lhep/dataforge/names/NameToken;Lhep/dataforge/data/DataTreeBuilder;)V
+	public final fun update (Lhep/dataforge/data/DataNode;)V
+}
+
+public final class hep/dataforge/data/Dependencies : kotlin/coroutines/CoroutineContext$Element {
+	public static final field Companion Lhep/dataforge/data/Dependencies$Companion;
+	public fun <init> (Ljava/util/Collection;)V
+	public fun fold (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
+	public fun get (Lkotlin/coroutines/CoroutineContext$Key;)Lkotlin/coroutines/CoroutineContext$Element;
+	public fun getKey ()Lkotlin/coroutines/CoroutineContext$Key;
+	public final fun getValues ()Ljava/util/Collection;
+	public fun minusKey (Lkotlin/coroutines/CoroutineContext$Key;)Lkotlin/coroutines/CoroutineContext;
+	public fun plus (Lkotlin/coroutines/CoroutineContext;)Lkotlin/coroutines/CoroutineContext;
+}
+
+public final class hep/dataforge/data/Dependencies$Companion : kotlin/coroutines/CoroutineContext$Key {
+}
+
+public final class hep/dataforge/data/DynamicData : hep/dataforge/data/DynamicGoal, hep/dataforge/data/Data {
+	public fun <init> (Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;Lkotlin/coroutines/CoroutineContext;Ljava/util/Collection;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;Lkotlin/coroutines/CoroutineContext;Ljava/util/Collection;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public class hep/dataforge/data/DynamicGoal : hep/dataforge/data/Goal {
+	public fun <init> (Lkotlin/coroutines/CoroutineContext;Ljava/util/Collection;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Lkotlin/coroutines/CoroutineContext;Ljava/util/Collection;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getBlock ()Lkotlin/jvm/functions/Function2;
+	public fun getDependencies ()Ljava/util/Collection;
+	public final fun getResult ()Lkotlinx/coroutines/Deferred;
+	public fun reset ()V
+	public fun startAsync (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Deferred;
+}
+
+public final class hep/dataforge/data/FragmentRule {
+	public field result Lkotlin/jvm/functions/Function2;
+	public fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/meta/MetaBuilder;)V
+	public final fun getMeta ()Lhep/dataforge/meta/MetaBuilder;
+	public final fun getName ()Lhep/dataforge/names/Name;
+	public final fun getResult ()Lkotlin/jvm/functions/Function2;
+	public final fun result (Lkotlin/jvm/functions/Function2;)V
+	public final fun setMeta (Lhep/dataforge/meta/MetaBuilder;)V
+	public final fun setResult (Lkotlin/jvm/functions/Function2;)V
+}
+
+public abstract interface class hep/dataforge/data/Goal {
+	public static final field Companion Lhep/dataforge/data/Goal$Companion;
+	public abstract fun getDependencies ()Ljava/util/Collection;
+	public abstract fun getResult ()Lkotlinx/coroutines/Deferred;
+	public abstract fun reset ()V
+	public abstract fun startAsync (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Deferred;
+}
+
+public final class hep/dataforge/data/Goal$Companion {
+}
+
+public final class hep/dataforge/data/GoalKt {
+	public static final fun await (Lhep/dataforge/data/Goal;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun isComplete (Lhep/dataforge/data/Goal;)Z
+	public static final fun map (Lhep/dataforge/data/Goal;Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function3;)Lhep/dataforge/data/Goal;
+	public static synthetic fun map$default (Lhep/dataforge/data/Goal;Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lhep/dataforge/data/Goal;
+	public static final fun reduce (Ljava/util/Collection;Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function3;)Lhep/dataforge/data/Goal;
+	public static final fun reduce (Ljava/util/Map;Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function3;)Lhep/dataforge/data/Goal;
+	public static synthetic fun reduce$default (Ljava/util/Collection;Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lhep/dataforge/data/Goal;
+	public static synthetic fun reduce$default (Ljava/util/Map;Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lhep/dataforge/data/Goal;
+}
+
+public abstract interface class hep/dataforge/data/GroupRule {
+	public static final field Companion Lhep/dataforge/data/GroupRule$Companion;
+	public abstract fun invoke (Lhep/dataforge/data/DataNode;)Ljava/util/Map;
+}
+
+public final class hep/dataforge/data/GroupRule$Companion {
+	public final fun byMeta (Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/GroupRule;
+	public final fun byValue (Ljava/lang/String;Ljava/lang/String;)Lhep/dataforge/data/GroupRule;
+}
+
+public final class hep/dataforge/data/JoinGroup {
+	public field result Lkotlin/jvm/functions/Function3;
+	public fun <init> (Ljava/lang/String;Lhep/dataforge/data/DataNode;)V
+	public final fun getMeta ()Lhep/dataforge/meta/MetaBuilder;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getResult ()Lkotlin/jvm/functions/Function3;
+	public final fun result (Lkotlin/jvm/functions/Function3;)V
+	public final fun setMeta (Lhep/dataforge/meta/MetaBuilder;)V
+	public final fun setName (Ljava/lang/String;)V
+	public final fun setResult (Lkotlin/jvm/functions/Function3;)V
+}
+
+public final class hep/dataforge/data/MapAction : hep/dataforge/data/Action {
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
+	public final fun getInputType ()Lkotlin/reflect/KClass;
+	public final fun getOutputType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/data/DataNode;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
+	public fun isTerminal ()Z
+}
+
+public final class hep/dataforge/data/MapActionBuilder {
+	public field result Lkotlin/jvm/functions/Function3;
+	public fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/meta/MetaBuilder;Lhep/dataforge/meta/Meta;)V
+	public final fun getActionMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getMeta ()Lhep/dataforge/meta/MetaBuilder;
+	public final fun getName ()Lhep/dataforge/names/Name;
+	public final fun getResult ()Lkotlin/jvm/functions/Function3;
+	public final fun result (Lkotlin/jvm/functions/Function3;)V
+	public final fun setMeta (Lhep/dataforge/meta/MetaBuilder;)V
+	public final fun setName (Lhep/dataforge/names/Name;)V
+	public final fun setResult (Lkotlin/jvm/functions/Function3;)V
+}
+
+public final class hep/dataforge/data/NamedData : hep/dataforge/data/Data {
+	public fun <init> (Ljava/lang/String;Lhep/dataforge/data/Data;)V
+	public fun getDependencies ()Ljava/util/Collection;
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getName ()Ljava/lang/String;
+	public fun getResult ()Lkotlinx/coroutines/Deferred;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun reset ()V
+	public fun startAsync (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Deferred;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/data/ReduceAction : hep/dataforge/data/Action {
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
+	public final fun getInputType ()Lkotlin/reflect/KClass;
+	public final fun getOutputType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/data/DataNode;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
+	public fun isTerminal ()Z
+}
+
+public final class hep/dataforge/data/ReduceActionKt {
+	public static final fun get (Ljava/util/Map;Ljava/lang/String;)Ljava/lang/Object;
+}
+
+public final class hep/dataforge/data/ReduceGroupBuilder {
+	public fun <init> (Lhep/dataforge/meta/Meta;)V
+	public final fun byValue (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun byValue$default (Lhep/dataforge/data/ReduceGroupBuilder;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun getActionMeta ()Lhep/dataforge/meta/Meta;
+	public final fun group (Ljava/lang/String;Lhep/dataforge/data/DataFilter;Lkotlin/jvm/functions/Function1;)V
+	public final fun group (Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
+	public final fun result (Ljava/lang/String;Lkotlin/jvm/functions/Function3;)V
+}
+
+public final class hep/dataforge/data/SplitAction : hep/dataforge/data/Action {
+	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
+	public final fun getInputType ()Lkotlin/reflect/KClass;
+	public final fun getOutputType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/data/DataNode;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
+	public fun isTerminal ()Z
+}
+
+public final class hep/dataforge/data/SplitBuilder {
+	public fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;)V
+	public final fun fragment (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun getMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getName ()Lhep/dataforge/names/Name;
+}
+
+public final class hep/dataforge/data/StaticData : hep/dataforge/data/StaticGoal, hep/dataforge/data/Data {
+	public fun <init> (Ljava/lang/Object;Lhep/dataforge/meta/Meta;)V
+	public synthetic fun <init> (Ljava/lang/Object;Lhep/dataforge/meta/Meta;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public class hep/dataforge/data/StaticGoal : hep/dataforge/data/Goal {
+	public fun <init> (Ljava/lang/Object;)V
+	public fun getDependencies ()Ljava/util/Collection;
+	public fun getResult ()Lkotlinx/coroutines/Deferred;
+	public final fun getValue ()Ljava/lang/Object;
+	public fun reset ()V
+	public fun startAsync (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Deferred;
+}
+
+public final class hep/dataforge/data/TypeFilteredDataNode : hep/dataforge/data/DataNode {
+	public fun <init> (Lhep/dataforge/data/DataNode;Lkotlin/reflect/KClass;)V
+	public fun getItems ()Ljava/util/Map;
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getOrigin ()Lhep/dataforge/data/DataNode;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun startAll (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+

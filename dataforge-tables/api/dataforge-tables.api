@@ -1,0 +1,302 @@
+public final class hep/dataforge/tables/CachedTransformationColumn : hep/dataforge/tables/Column {
+	public fun <init> (Lhep/dataforge/tables/Table;Lkotlin/reflect/KClass;Ljava/lang/String;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;)V
+	public fun get (I)Ljava/lang/Object;
+	public final fun getMapper ()Lkotlin/jvm/functions/Function1;
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getName ()Ljava/lang/String;
+	public fun getSize ()I
+	public final fun getTable ()Lhep/dataforge/tables/Table;
+	public fun getType ()Lkotlin/reflect/KClass;
+}
+
+public final class hep/dataforge/tables/CastColumn : hep/dataforge/tables/Column {
+	public fun <init> (Lhep/dataforge/tables/Column;Lkotlin/reflect/KClass;)V
+	public fun get (I)Ljava/lang/Object;
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getName ()Ljava/lang/String;
+	public final fun getOrigin ()Lhep/dataforge/tables/Column;
+	public fun getSize ()I
+	public fun getType ()Lkotlin/reflect/KClass;
+}
+
+public final class hep/dataforge/tables/CastColumnKt {
+	public static final fun cast (Lhep/dataforge/tables/Column;Lkotlin/reflect/KClass;)Lhep/dataforge/tables/Column;
+	public static final fun get (Ljava/util/Collection;Lhep/dataforge/tables/ColumnHeader;)Lhep/dataforge/tables/Column;
+}
+
+public abstract interface class hep/dataforge/tables/Column : hep/dataforge/tables/ColumnHeader {
+	public abstract fun get (I)Ljava/lang/Object;
+	public abstract fun getSize ()I
+}
+
+public final class hep/dataforge/tables/ColumnDef : hep/dataforge/tables/ColumnHeader {
+	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlin/reflect/KClass;
+	public final fun component3 ()Lhep/dataforge/meta/Meta;
+	public final fun copy (Ljava/lang/String;Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;)Lhep/dataforge/tables/ColumnDef;
+	public static synthetic fun copy$default (Lhep/dataforge/tables/ColumnDef;Ljava/lang/String;Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/tables/ColumnDef;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getName ()Ljava/lang/String;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class hep/dataforge/tables/ColumnHeader {
+	public abstract fun getMeta ()Lhep/dataforge/meta/Meta;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getType ()Lkotlin/reflect/KClass;
+}
+
+public final class hep/dataforge/tables/ColumnHeaderKt {
+	public static final fun getTextWidth (Lhep/dataforge/tables/ColumnHeader;)I
+	public static final fun getValueType (Lhep/dataforge/tables/ColumnHeader;)Lhep/dataforge/values/ValueType;
+}
+
+public final class hep/dataforge/tables/ColumnProperty : kotlin/properties/ReadOnlyProperty {
+	public fun <init> (Lhep/dataforge/tables/Table;Lkotlin/reflect/KClass;)V
+	public final fun getTable ()Lhep/dataforge/tables/Table;
+	public final fun getType ()Lkotlin/reflect/KClass;
+	public fun getValue (Ljava/lang/Object;Lkotlin/reflect/KProperty;)Lhep/dataforge/tables/Column;
+	public synthetic fun getValue (Ljava/lang/Object;Lkotlin/reflect/KProperty;)Ljava/lang/Object;
+}
+
+public class hep/dataforge/tables/ColumnScheme : hep/dataforge/meta/Scheme {
+	public static final field Companion Lhep/dataforge/tables/ColumnScheme$Companion;
+	public fun <init> ()V
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun setTitle (Ljava/lang/String;)V
+}
+
+public final class hep/dataforge/tables/ColumnScheme$Companion : hep/dataforge/meta/SchemeSpec {
+}
+
+public final class hep/dataforge/tables/ColumnTable : hep/dataforge/tables/Table {
+	public fun <init> (Ljava/util/Collection;)V
+	public fun getColumns ()Ljava/util/Collection;
+	public fun getHeader ()Ljava/util/List;
+	public fun getRows ()Ljava/util/List;
+	public fun getValue (ILjava/lang/String;)Ljava/lang/Object;
+	public fun rowFlow ()Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class hep/dataforge/tables/IntColumn : hep/dataforge/tables/Column {
+	public static final field Companion Lhep/dataforge/tables/IntColumn$Companion;
+	public fun <init> (Ljava/lang/String;[ILhep/dataforge/meta/Meta;)V
+	public synthetic fun <init> (Ljava/lang/String;[ILhep/dataforge/meta/Meta;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun get (I)Ljava/lang/Integer;
+	public synthetic fun get (I)Ljava/lang/Object;
+	public final fun getData ()[I
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getName ()Ljava/lang/String;
+	public fun getSize ()I
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun hashCode ()I
+}
+
+public final class hep/dataforge/tables/IntColumn$Companion {
+}
+
+public final class hep/dataforge/tables/ListColumn : hep/dataforge/tables/Column {
+	public static final field Companion Lhep/dataforge/tables/ListColumn$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;)V
+	public fun get (I)Ljava/lang/Object;
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getName ()Ljava/lang/String;
+	public fun getSize ()I
+	public fun getType ()Lkotlin/reflect/KClass;
+}
+
+public final class hep/dataforge/tables/ListColumn$Companion {
+}
+
+public final class hep/dataforge/tables/MapRow : hep/dataforge/tables/Row {
+	public static final synthetic fun box-impl (Ljava/util/Map;)Lhep/dataforge/tables/MapRow;
+	public static fun constructor-impl (Ljava/util/Map;)Ljava/util/Map;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/util/Map;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/util/Map;Ljava/util/Map;)Z
+	public fun getValue (Ljava/lang/String;)Ljava/lang/Object;
+	public static fun getValue-impl (Ljava/util/Map;Ljava/lang/String;)Ljava/lang/Object;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/util/Map;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/util/Map;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/util/Map;
+}
+
+public final class hep/dataforge/tables/MutableColumnTable : hep/dataforge/tables/Table {
+	public fun <init> (I)V
+	public final fun add (Lhep/dataforge/tables/Column;)V
+	public synthetic fun getColumns ()Ljava/util/Collection;
+	public fun getColumns ()Ljava/util/List;
+	public fun getHeader ()Ljava/util/List;
+	public fun getRows ()Ljava/util/List;
+	public final fun getSize ()I
+	public fun getValue (ILjava/lang/String;)Ljava/lang/Object;
+	public final fun insert (ILhep/dataforge/tables/Column;)V
+	public fun rowFlow ()Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class hep/dataforge/tables/MutableTable : hep/dataforge/tables/RowTable {
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public final fun column (Ljava/lang/String;Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;)Lhep/dataforge/tables/ColumnHeader;
+	public fun getHeader ()Ljava/util/List;
+	public fun getRows ()Ljava/util/List;
+	public final fun row (Ljava/util/Map;)Lhep/dataforge/tables/Row;
+	public final fun row ([Lkotlin/Pair;)Lhep/dataforge/tables/Row;
+}
+
+public final class hep/dataforge/tables/MutableTableKt {
+	public static final fun edit (Lhep/dataforge/tables/Table;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/tables/Table;
+	public static final fun row (Lhep/dataforge/tables/MutableTable;[Lkotlin/Pair;)Lhep/dataforge/tables/Row;
+}
+
+public final class hep/dataforge/tables/RealColumn : hep/dataforge/tables/Column {
+	public static final field Companion Lhep/dataforge/tables/RealColumn$Companion;
+	public fun <init> (Ljava/lang/String;[DLhep/dataforge/meta/Meta;)V
+	public synthetic fun <init> (Ljava/lang/String;[DLhep/dataforge/meta/Meta;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun get (I)Ljava/lang/Double;
+	public synthetic fun get (I)Ljava/lang/Object;
+	public final fun getData ()[D
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getName ()Ljava/lang/String;
+	public fun getSize ()I
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun hashCode ()I
+}
+
+public final class hep/dataforge/tables/RealColumn$Companion {
+}
+
+public abstract interface class hep/dataforge/tables/Row {
+	public abstract fun getValue (Ljava/lang/String;)Ljava/lang/Object;
+}
+
+public class hep/dataforge/tables/RowTable : hep/dataforge/tables/Table {
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun getColumns ()Ljava/util/Collection;
+	public fun getColumns ()Ljava/util/List;
+	public fun getHeader ()Ljava/util/List;
+	public fun getRows ()Ljava/util/List;
+	public fun getValue (ILjava/lang/String;)Ljava/lang/Object;
+	public fun rowFlow ()Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class hep/dataforge/tables/RowTableKt {
+	public static final fun collect (Lhep/dataforge/tables/Rows;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class hep/dataforge/tables/Rows {
+	public abstract fun getHeader ()Ljava/util/List;
+	public abstract fun rowFlow ()Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class hep/dataforge/tables/SimpleColumnHeader : hep/dataforge/tables/ColumnHeader {
+	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlin/reflect/KClass;
+	public final fun component3 ()Lhep/dataforge/meta/Meta;
+	public final fun copy (Ljava/lang/String;Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;)Lhep/dataforge/tables/SimpleColumnHeader;
+	public static synthetic fun copy$default (Lhep/dataforge/tables/SimpleColumnHeader;Ljava/lang/String;Lkotlin/reflect/KClass;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/tables/SimpleColumnHeader;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getName ()Ljava/lang/String;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class hep/dataforge/tables/Table : hep/dataforge/tables/Rows {
+	public static final field Companion Lhep/dataforge/tables/Table$Companion;
+	public abstract fun getColumns ()Ljava/util/Collection;
+	public abstract fun getHeader ()Ljava/util/List;
+	public abstract fun getRows ()Ljava/util/List;
+	public abstract fun getValue (ILjava/lang/String;)Ljava/lang/Object;
+	public abstract fun rowFlow ()Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class hep/dataforge/tables/Table$Companion {
+	public final fun invoke (Lkotlin/jvm/functions/Function1;)Lhep/dataforge/tables/Table;
+}
+
+public final class hep/dataforge/tables/Table$DefaultImpls {
+	public static fun getHeader (Lhep/dataforge/tables/Table;)Ljava/util/List;
+	public static fun rowFlow (Lhep/dataforge/tables/Table;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class hep/dataforge/tables/TableKt {
+	public static final fun get (Lhep/dataforge/tables/Row;Lhep/dataforge/tables/ColumnHeader;)Ljava/lang/Object;
+	public static final fun get (Lhep/dataforge/tables/Table;ILhep/dataforge/tables/ColumnHeader;)Ljava/lang/Object;
+	public static final fun get (Ljava/util/Collection;Ljava/lang/String;)Lhep/dataforge/tables/Column;
+	public static final fun getIndices (Lhep/dataforge/tables/Column;)Lkotlin/ranges/IntRange;
+	public static final fun getValue (Lhep/dataforge/tables/Row;Ljava/lang/String;Lkotlin/reflect/KClass;)Ljava/lang/Object;
+	public static final fun getValue (Lhep/dataforge/tables/Table;ILjava/lang/String;Lkotlin/reflect/KClass;)Ljava/lang/Object;
+	public static final fun iterator (Lhep/dataforge/tables/Column;)Ljava/util/Iterator;
+}
+
+public final class hep/dataforge/tables/TransformationColumn : hep/dataforge/tables/Column {
+	public fun <init> (Lhep/dataforge/tables/Table;Lkotlin/reflect/KClass;Ljava/lang/String;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;)V
+	public fun get (I)Ljava/lang/Object;
+	public final fun getMapper ()Lkotlin/jvm/functions/Function1;
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun getName ()Ljava/lang/String;
+	public fun getSize ()I
+	public final fun getTable ()Lhep/dataforge/tables/Table;
+	public fun getType ()Lkotlin/reflect/KClass;
+}
+
+public final class hep/dataforge/tables/TransformationColumnKt {
+	public static final fun mapRowsToDouble (Lhep/dataforge/tables/Table;Ljava/lang/String;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/tables/RealColumn;
+	public static synthetic fun mapRowsToDouble$default (Lhep/dataforge/tables/Table;Ljava/lang/String;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/tables/RealColumn;
+	public static final fun mapRowsToInt (Lhep/dataforge/tables/Table;Ljava/lang/String;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/tables/IntColumn;
+	public static synthetic fun mapRowsToInt$default (Lhep/dataforge/tables/Table;Ljava/lang/String;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/tables/IntColumn;
+}
+
+public final class hep/dataforge/tables/ValueColumnScheme : hep/dataforge/tables/ColumnScheme {
+	public fun <init> ()V
+	public final fun getValueType ()Lhep/dataforge/values/ValueType;
+	public final fun setValueType (Lhep/dataforge/values/ValueType;)V
+}
+
+public final class hep/dataforge/tables/io/TextRows : hep/dataforge/tables/Rows {
+	public static final field Companion Lhep/dataforge/tables/io/TextRows$Companion;
+	public fun <init> (Ljava/util/List;Lkotlinx/io/Binary;)V
+	public fun getHeader ()Ljava/util/List;
+	public final fun indexFlow ()Lkotlinx/coroutines/flow/Flow;
+	public fun rowFlow ()Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class hep/dataforge/tables/io/TextRows$Companion {
+}
+
+public final class hep/dataforge/tables/io/TextRowsKt {
+	public static final fun buildRowIndex (Lhep/dataforge/tables/io/TextRows;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun writeRows (Lkotlinx/io/Output;Lhep/dataforge/tables/Rows;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class hep/dataforge/tables/io/TextTable : hep/dataforge/tables/Table {
+	public static final field Companion Lhep/dataforge/tables/io/TextTable$Companion;
+	public fun <init> (Ljava/util/List;Lkotlinx/io/Binary;Ljava/util/List;)V
+	public fun getColumns ()Ljava/util/Collection;
+	public fun getHeader ()Ljava/util/List;
+	public final fun getIndex ()Ljava/util/List;
+	public fun getRows ()Ljava/util/List;
+	public fun getValue (ILjava/lang/String;)Lhep/dataforge/values/Value;
+	public synthetic fun getValue (ILjava/lang/String;)Ljava/lang/Object;
+	public fun rowFlow ()Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class hep/dataforge/tables/io/TextTable$Companion {
+	public final fun invoke (Ljava/util/List;Lkotlinx/io/Binary;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class hep/dataforge/tables/io/TextTableEnvelopeKt {
+	public static final fun readEnvelope (Lhep/dataforge/tables/io/TextRows$Companion;Lhep/dataforge/io/Envelope;)Lhep/dataforge/tables/io/TextRows;
+	public static final fun wrap (Lhep/dataforge/tables/Table;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
