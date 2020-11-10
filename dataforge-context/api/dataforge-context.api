@@ -229,6 +229,35 @@ public abstract interface annotation class hep/dataforge/descriptors/ValueDef : 
 	public abstract fun type ()[Lhep/dataforge/values/ValueType;
 }
 
+public final class hep/dataforge/properties/ConfigProperty : hep/dataforge/properties/Property {
+	public fun <init> (Lhep/dataforge/meta/Config;Lhep/dataforge/names/Name;Lhep/dataforge/meta/transformations/MetaConverter;)V
+	public final fun getConfig ()Lhep/dataforge/meta/Config;
+	public final fun getConverter ()Lhep/dataforge/meta/transformations/MetaConverter;
+	public final fun getName ()Lhep/dataforge/names/Name;
+	public fun getValue ()Ljava/lang/Object;
+	public fun onChange (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+	public fun removeChangeListener (Ljava/lang/Object;)V
+	public fun setValue (Ljava/lang/Object;)V
+}
+
+public abstract interface class hep/dataforge/properties/Property {
+	public abstract fun getValue ()Ljava/lang/Object;
+	public abstract fun onChange (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun removeChangeListener (Ljava/lang/Object;)V
+	public abstract fun setValue (Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/properties/Property$DefaultImpls {
+	public static synthetic fun onChange$default (Lhep/dataforge/properties/Property;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun removeChangeListener$default (Lhep/dataforge/properties/Property;Ljava/lang/Object;ILjava/lang/Object;)V
+}
+
+public final class hep/dataforge/properties/PropertyKt {
+	public static final fun bind (Lhep/dataforge/properties/Property;Lhep/dataforge/properties/Property;)V
+	public static final fun mirror (Lhep/dataforge/properties/Property;Lhep/dataforge/properties/Property;Lkotlinx/coroutines/CoroutineScope;)V
+	public static final fun toFlow (Lhep/dataforge/properties/Property;)Lkotlinx/coroutines/flow/StateFlow;
+}
+
 public final class hep/dataforge/provider/DfTypeKt {
 	public static final fun getDfType (Lkotlin/reflect/KClass;)Ljava/lang/String;
 }

@@ -5,7 +5,6 @@ import hep.dataforge.values.ValueSerializer
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
@@ -52,8 +51,6 @@ public object MetaItemSerializer : KSerializer<MetaItem<*>> {
 /**
  * Serialized for meta
  */
-@OptIn(ExperimentalSerializationApi::class)
-@Serializer(Meta::class)
 public object MetaSerializer : KSerializer<Meta> {
 
     private val mapSerializer: KSerializer<Map<NameToken, MetaItem<Meta>>> = MapSerializer(

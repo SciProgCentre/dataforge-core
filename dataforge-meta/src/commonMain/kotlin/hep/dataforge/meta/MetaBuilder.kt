@@ -68,7 +68,7 @@ public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
 
     @JvmName("putMetas")
     public infix fun String.put(value: Iterable<Meta>) {
-        this@MetaBuilder[this] = value.toList()
+        set(this,value.toList())
     }
 
     public infix fun String.put(metaBuilder: MetaBuilder.() -> Unit) {
@@ -110,7 +110,7 @@ public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
 
     @JvmName("putMetas")
     public infix fun Name.put(value: Iterable<Meta>) {
-        this@MetaBuilder[this] = value.toList()
+        set(this, value.toList())
     }
 
     public infix fun Name.put(metaBuilder: MetaBuilder.() -> Unit) {

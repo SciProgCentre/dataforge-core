@@ -4,10 +4,8 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
@@ -53,12 +51,12 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableMeta {
 
     override fun replaceItem(key: NameToken, oldItem: MetaItem<Config>?, newItem: MetaItem<Config>?) {
         if (newItem == null) {
-            _items.remove(key)
+            children.remove(key)
             if (oldItem != null && oldItem is MetaItem.NodeItem<Config>) {
                 oldItem.node.removeListener(this)
             }
         } else {
-            _items[key] = newItem
+            children[key] = newItem
             if (newItem is MetaItem.NodeItem) {
                 newItem.node.onChange(this) { name, oldChild, newChild ->
                     itemChanged(key + name, oldChild, newChild)
@@ -75,8 +73,6 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableMeta {
 
     override fun empty(): Config = Config()
 
-    @OptIn(ExperimentalSerializationApi::class)
-    @Serializer(Config::class)
     public companion object ConfigSerializer : KSerializer<Config> {
 
         public fun empty(): Config = Config()

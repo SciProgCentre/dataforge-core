@@ -9,10 +9,8 @@ class SpecificationTest {
         var list by numberList(1, 2, 3)
 
         companion object : Specification<TestStyled> {
-            override fun wrap(
-                config: Config,
-                defaultProvider: ItemProvider
-            ): TestStyled = TestStyled(config, defaultProvider)
+            override fun wrap(meta: Meta, defaultProvider: ItemProvider): TestStyled =
+                TestStyled(meta.asConfig(), defaultProvider)
         }
     }
 

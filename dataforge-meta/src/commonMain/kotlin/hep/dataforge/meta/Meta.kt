@@ -66,6 +66,7 @@ public fun <M : Meta> M.asMetaItem(): NodeItem<M> = NodeItem(this)
  * The object that could be represented as [Meta]. Meta provided by [toMeta] method should fully represent object state.
  * Meaning that two states with the same meta are equal.
  */
+@Serializable(MetaSerializer::class)
 public interface MetaRepr {
     public fun toMeta(): Meta
 }
@@ -104,12 +105,11 @@ public interface Meta : MetaRepr, ItemProvider {
 
     override fun toMeta(): Meta = seal()
 
-    //TODO to be restored on 1.4.30 after https://youtrack.jetbrains.com/issue/KT-41765 si fixed
-//    override fun equals(other: Any?): Boolean
-//
-//    override fun hashCode(): Int
-//
-//    override fun toString(): String
+    override fun equals(other: Any?): Boolean
+
+    override fun hashCode(): Int
+
+    override fun toString(): String
 
     public companion object {
         public const val TYPE: String = "meta"

@@ -93,7 +93,6 @@ public final class hep/dataforge/data/DataFilter : hep/dataforge/meta/Scheme {
 	public final fun getFrom ()Ljava/lang/String;
 	public final fun getPattern ()Ljava/lang/String;
 	public final fun getTo ()Ljava/lang/String;
-	public final fun isEmpty ()Z
 	public final fun setFrom (Ljava/lang/String;)V
 	public final fun setPattern (Ljava/lang/String;)V
 	public final fun setTo (Ljava/lang/String;)V

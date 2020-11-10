@@ -20,8 +20,6 @@ public class DataFilter : Scheme() {
 //    val prefix by string()
 //    val suffix by string()
 
-    public fun isEmpty(): Boolean = config.isEmpty()
-
     public companion object : SchemeSpec<DataFilter>(::DataFilter)
 }
 

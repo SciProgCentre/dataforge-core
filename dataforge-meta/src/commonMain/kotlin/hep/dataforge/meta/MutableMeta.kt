@@ -1,11 +1,6 @@
 package hep.dataforge.meta
 
 import hep.dataforge.names.*
-import hep.dataforge.values.Value
-
-public interface MutableItemProvider : ItemProvider {
-    public fun setItem(name: Name, item: MetaItem<*>?)
-}
 
 public interface MutableMeta<out M : MutableMeta<M>> : MetaNode<M>, MutableItemProvider {
     override val items: Map<NameToken, MetaItem<M>>
@@ -19,18 +14,18 @@ public interface MutableMeta<out M : MutableMeta<M>> : MetaNode<M>, MutableItemP
  * Changes in Meta are not thread safe.
  */
 public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), MutableMeta<M> {
-    protected val _items: MutableMap<NameToken, MetaItem<M>> = LinkedHashMap()
+    protected val children: MutableMap<NameToken, MetaItem<M>> = LinkedHashMap()
 
     override val items: Map<NameToken, MetaItem<M>>
-        get() = _items
+        get() = children
 
     //protected abstract fun itemChanged(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?)
 
     protected open fun replaceItem(key: NameToken, oldItem: MetaItem<M>?, newItem: MetaItem<M>?) {
         if (newItem == null) {
-            _items.remove(key)
+            children.remove(key)
         } else {
-            _items[key] = newItem
+            children[key] = newItem
         }
         //itemChanged(key.asName(), oldItem, newItem)
     }
@@ -72,48 +67,6 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode
     }
 }
 
-
-@Suppress("NOTHING_TO_INLINE")
-public inline fun MutableMeta<*>.remove(name: Name): Unit = setItem(name, null)
-
-@Suppress("NOTHING_TO_INLINE")
-public inline fun MutableMeta<*>.remove(name: String): Unit = remove(name.toName())
-
-public operator fun MutableMeta<*>.set(name: Name, item: MetaItem<*>?): Unit = setItem(name, item)
-
-public fun MutableMeta<*>.setValue(name: Name, value: Value): Unit = setItem(name, MetaItem.ValueItem(value))
-
-public fun MutableMeta<*>.setValue(name: String, value: Value): Unit = set(name.toName(), value)
-
-public fun MutableMeta<*>.setItem(name: String, item: MetaItem<*>?): Unit = setItem(name.toName(), item)
-
-public fun MutableMeta<*>.setNode(name: Name, node: Meta): Unit =
-    setItem(name, MetaItem.NodeItem(node))
-
-public fun MutableMeta<*>.setNode(name: String, node: Meta): Unit = setNode(name.toName(), node)
-
-/**
- * Universal unsafe set method
- */
-public operator fun MutableMeta<*>.set(name: Name, value: Any?) {
-    when (value) {
-        null -> remove(name)
-        is MetaItem<*> -> setItem(name, value)
-        is Meta -> setNode(name, value)
-        is Configurable -> setNode(name, value.config)
-        else -> setValue(name, Value.of(value))
-    }
-}
-
-public operator fun MutableMeta<*>.set(name: NameToken, value: Any?): Unit =
-    set(name.asName(), value)
-
-public operator fun MutableMeta<*>.set(key: String, value: Any?): Unit =
-    set(key.toName(), value)
-
-public operator fun MutableMeta<*>.set(key: String, index: String, value: Any?): Unit =
-    set(key.toName().withIndex(index), value)
-
 /**
  * Update existing mutable node with another node. The rules are following:
  *  * value replaces anything
@@ -129,33 +82,6 @@ public fun <M : MutableMeta<M>> M.update(meta: Meta) {
         }
     }
 }
-
-/* Same name siblings generation */
-
-public fun MutableMeta<*>.setIndexedItems(
-    name: Name,
-    items: Iterable<MetaItem<*>>,
-    indexFactory: (MetaItem<*>, index: Int) -> String = { _, index -> index.toString() }
-) {
-    val tokens = name.tokens.toMutableList()
-    val last = tokens.last()
-    items.forEachIndexed { index, meta ->
-        val indexedToken = NameToken(last.body, last.index + indexFactory(meta, index))
-        tokens[tokens.lastIndex] = indexedToken
-        setItem(Name(tokens), meta)
-    }
-}
-
-public fun MutableMeta<*>.setIndexed(
-    name: Name,
-    metas: Iterable<Meta>,
-    indexFactory: (Meta, index: Int) -> String = { _, index -> index.toString() }
-) {
-    setIndexedItems(name, metas.map { MetaItem.NodeItem(it) }) { item, index -> indexFactory(item.node!!, index) }
-}
-
-public operator fun MutableMeta<*>.set(name: Name, metas: Iterable<Meta>): Unit = setIndexed(name, metas)
-public operator fun MutableMeta<*>.set(name: String, metas: Iterable<Meta>): Unit = setIndexed(name.toName(), metas)
 
 /**
  * Append the node with a same-name-sibling, automatically generating numerical index

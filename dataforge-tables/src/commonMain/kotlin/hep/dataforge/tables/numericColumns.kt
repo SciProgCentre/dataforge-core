@@ -1,6 +1,7 @@
 package hep.dataforge.tables
 
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.invoke
 import kotlin.reflect.KClass
 
 

@@ -29,7 +29,7 @@ public class DataDependency(private val filter: DataFilter, private val placemen
     }
 
     override fun toMeta(): Meta = Meta {
-        "data" put filter.config
+        "data" put filter.toMeta()
         "to" put placement.toString()
     }
 }
