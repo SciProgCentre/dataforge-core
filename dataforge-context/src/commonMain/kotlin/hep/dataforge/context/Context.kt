@@ -28,6 +28,7 @@ public open class Context(
     final override val name: Name,
     public val parent: Context?,
     meta: Meta,
+    plugins: Set<Plugin> = emptySet(),
 ) : Named, MetaRepr, Provider, CoroutineScope {
 
     /**
@@ -47,32 +48,7 @@ public open class Context(
     /**
      * A [PluginManager] for current context
      */
-    public val plugins: PluginManager = PluginManager(this)
-
-    @Deprecated("To be removed in favor of immutable plugins")
-    private val activators = HashSet<Any>()
-
-    /**
-     * Defines if context is used in any kind of active computations. Active context properties and plugins could not be changed
-     */
-    @Deprecated("To be removed in favor of immutable plugins")
-    public val isActive: Boolean = activators.isNotEmpty()
-
-    /**
-     * Mark context as active and used by [activator]
-     */
-    @Deprecated("To be removed in favor of immutable plugins")
-    public fun activate(activator: Any) {
-        activators.add(activator)
-    }
-
-    /**
-     * Mark context unused by [activator]
-     */
-    @Deprecated("To be removed in favor of immutable plugins")
-    public fun deactivate(activator: Any) {
-        activators.remove(activator)
-    }
+    public val plugins: PluginManager by lazy { PluginManager(this, plugins)}
 
     override val defaultTarget: String get() = Plugin.TARGET
 
@@ -104,8 +80,6 @@ public open class Context(
      * Detach all plugins and terminate context
      */
     public open fun close() {
-        @Suppress("DEPRECATION")
-        if (isActive) error("Can't close active context")
         //detach all plugins
         plugins.forEach { it.detach() }
     }

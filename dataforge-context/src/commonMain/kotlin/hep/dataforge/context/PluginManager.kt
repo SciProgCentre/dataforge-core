@@ -16,21 +16,24 @@ public interface PluginFactory<T : Plugin> : Factory<T> {
     }
 }
 
-
 /**
  * The manager for plugin system. Should monitor plugin dependencies and locks.
  *
  * @property context A context for this plugin manager
  * @author Alexander Nozik
  */
-public class PluginManager(override val context: Context) : ContextAware, Iterable<Plugin> {
+public class PluginManager(override val context: Context, plugins: Set<Plugin>) : ContextAware, Iterable<Plugin> {
 
     //TODO refactor to read-only container
 
     /**
      * A set of loaded plugins
      */
-    private val plugins = HashSet<Plugin>()
+    private val plugins: HashSet<Plugin> = HashSet(plugins)
+
+    init {
+        plugins.forEach { it.attach(context) }
+    }
 
     /**
      * A [PluginManager] of parent context if it is present
@@ -56,7 +59,6 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
     public fun find(inherit: Boolean = true, predicate: (Plugin) -> Boolean): Plugin? =
         list(inherit).find(predicate)
 
-
     /**
      * Find a loaded plugin via its tag
      *
@@ -65,7 +67,6 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
      */
     public operator fun get(tag: PluginTag, inherit: Boolean = true): Plugin? =
         find(inherit) { tag.matches(it.tag) }
-
 
     /**
      * Find a loaded plugin via its class. This method does not check if the result is unique and just returns first
@@ -96,10 +97,8 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
      * @return
      */
     public fun <T : Plugin> load(plugin: T): T {
-        if (context.isActive) error("Can't load plugin into active context")
-
         if (get(plugin::class, plugin.tag, recursive = false) != null) {
-            error("Plugin of type ${plugin::class} already exists in ${context.name}")
+            error("Plugin with tag ${plugin.tag} already exists in ${context.name}")
         } else {
             for (tag in plugin.dependsOn()) {
                 fetch(tag, true)
@@ -125,8 +124,6 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
      * Remove a plugin from [PluginManager]
      */
     public fun remove(plugin: Plugin) {
-        if (context.isActive) error("Can't remove plugin from active context")
-
         if (plugins.contains(plugin)) {
             logger.info { "Removing plugin ${plugin.name} from ${context.name}" }
             plugin.detach()
@@ -136,7 +133,6 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
 
     /**
      * Get an existing plugin with given meta or load new one using provided factory
-     *
      */
     public fun <T : Plugin> fetch(factory: PluginFactory<T>, recursive: Boolean = true, meta: Meta = Meta.EMPTY): T {
         val loaded = get(factory.type, factory.tag, recursive)

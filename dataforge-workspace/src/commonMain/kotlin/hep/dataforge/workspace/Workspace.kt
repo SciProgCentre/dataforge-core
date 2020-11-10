@@ -45,25 +45,23 @@ public interface Workspace : ContextAware, Provider {
      * Invoke a task in the workspace utilizing caching if possible
      */
     public fun <R : Any> run(task: Task<R>, config: Meta): DataNode<R> {
-        context.activate(this)
-        try {
-            val model = task.build(this, config)
-            task.validate(model)
-            return task.run(this, model)
-        } finally {
-            context.deactivate(this)
-        }
+        val model = task.build(this, config)
+        task.validate(model)
+        return task.run(this, model)
     }
 
     public companion object {
         public const val TYPE: String = "workspace"
-        public operator fun invoke(parent: Context = Global, block: SimpleWorkspaceBuilder.() -> Unit): SimpleWorkspace =
+        public operator fun invoke(
+            parent: Context = Global,
+            block: SimpleWorkspaceBuilder.() -> Unit,
+        ): SimpleWorkspace =
             SimpleWorkspaceBuilder(parent).apply(block).build()
     }
 }
 
 public fun Workspace.run(task: Task<*>, target: String): DataNode<Any> {
-    val meta = targets[target] ?: error("A target with name $target not found in ${this}")
+    val meta = targets[target] ?: error("A target with name $target not found in $this")
     return run(task, meta)
 }
 
@@ -77,5 +75,5 @@ public fun Workspace.run(task: String, meta: Meta): DataNode<Any> =
 public fun Workspace.run(task: String, block: MetaBuilder.() -> Unit = {}): DataNode<Any> =
     run(task, Meta(block))
 
-public fun <T: Any> Workspace.run(task: Task<T>, metaBuilder: MetaBuilder.() -> Unit = {}): DataNode<T> =
+public fun <T : Any> Workspace.run(task: Task<T>, metaBuilder: MetaBuilder.() -> Unit = {}): DataNode<T> =
     run(task, Meta(metaBuilder))

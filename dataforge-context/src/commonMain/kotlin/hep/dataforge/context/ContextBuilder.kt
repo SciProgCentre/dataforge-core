@@ -8,7 +8,7 @@ import hep.dataforge.names.toName
  */
 @DFBuilder
 public class ContextBuilder(private val parent: Context = Global, public var name: String = "@anonymous") {
-    private val plugins = ArrayList<Plugin>()
+    private val plugins = HashSet<Plugin>()
     private var meta = MetaBuilder()
 
     public fun properties(action: MetaBuilder.() -> Unit) {
@@ -20,9 +20,12 @@ public class ContextBuilder(private val parent: Context = Global, public var nam
     }
 
     @OptIn(DFExperimental::class)
-    public fun plugin(tag: PluginTag, metaBuilder: MetaBuilder.() -> Unit = {}) {
-        val factory = parent.gatherInSequence<PluginFactory<*>>(PluginFactory.TYPE).values
+    private fun findPluginFactory(tag: PluginTag): PluginFactory<*> =
+        parent.gatherInSequence<PluginFactory<*>>(PluginFactory.TYPE).values
             .find { it.tag.matches(tag) } ?: error("Can't resolve plugin factory for $tag")
+
+    public fun plugin(tag: PluginTag, metaBuilder: MetaBuilder.() -> Unit = {}) {
+        val factory = findPluginFactory(tag)
         val plugin = factory.invoke(Meta(metaBuilder), parent)
         plugins.add(plugin)
     }
@@ -36,10 +39,6 @@ public class ContextBuilder(private val parent: Context = Global, public var nam
     }
 
     public fun build(): Context {
-        return Context(name.toName(), parent, meta.seal()).apply {
-            this@ContextBuilder.plugins.forEach {
-                plugins.load(it)
-            }
-        }
+        return Context(name.toName(), parent, meta.seal(), plugins)
     }
 }
