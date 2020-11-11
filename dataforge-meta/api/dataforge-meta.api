@@ -479,11 +479,11 @@ public class hep/dataforge/meta/Scheme : hep/dataforge/meta/Configurable, hep/da
 	public fun <init> ()V
 	public fun <init> (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
 	public synthetic fun <init> (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getConfig ()Lhep/dataforge/meta/Config;
+	public final fun getConfig ()Lhep/dataforge/meta/Config;
 	public final fun getDefaultItem (Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
 	public fun getDefaultLayer ()Lhep/dataforge/meta/Meta;
 	public synthetic fun getDescriptor ()Lhep/dataforge/meta/descriptors/ItemDescriptor;
-	public fun getDescriptor ()Lhep/dataforge/meta/descriptors/NodeDescriptor;
+	public final fun getDescriptor ()Lhep/dataforge/meta/descriptors/NodeDescriptor;
 	public fun getItem (Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
 	public final fun isEmpty ()Z
 	public fun setItem (Lhep/dataforge/names/Name;Lhep/dataforge/meta/MetaItem;)V
@@ -499,9 +499,11 @@ public final class hep/dataforge/meta/SchemeKt {
 	public static synthetic fun toScheme$default (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/Specification;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/meta/Configurable;
 }
 
-public class hep/dataforge/meta/SchemeSpec : hep/dataforge/meta/Specification {
+public class hep/dataforge/meta/SchemeSpec : hep/dataforge/meta/Specification, hep/dataforge/meta/descriptors/Described {
 	public fun <init> (Lkotlin/jvm/functions/Function0;)V
-	public fun <init> (Lkotlin/jvm/functions/Function2;)V
+	public fun <init> (Lkotlin/jvm/functions/Function3;)V
+	public synthetic fun getDescriptor ()Lhep/dataforge/meta/descriptors/ItemDescriptor;
+	public fun getDescriptor ()Lhep/dataforge/meta/descriptors/NodeDescriptor;
 	public synthetic fun wrap (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
 	public fun wrap (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/Scheme;
 }

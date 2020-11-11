@@ -2,7 +2,7 @@ plugins {
     id("ru.mipt.npm.project")
 }
 
-val dataforgeVersion by extra("0.2.0-dev-6")
+val dataforgeVersion by extra("0.2.0-dev-7")
 
 val bintrayRepo by extra("dataforge")
 val githubProject by extra("dataforge-core")

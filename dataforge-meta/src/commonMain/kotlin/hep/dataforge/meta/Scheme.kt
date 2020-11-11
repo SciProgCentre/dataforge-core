@@ -12,11 +12,15 @@ import hep.dataforge.names.asName
 public open class Scheme(
     config: Config = Config(),
     internal var default: ItemProvider? = null,
-    override val descriptor: NodeDescriptor? = null,
+    descriptor: NodeDescriptor? = null,
 ) : Configurable, Described, MetaRepr {
 
     override var config: Config = config
         internal set
+
+    override var descriptor: NodeDescriptor? = descriptor
+        internal set
+
 
     public fun getDefaultItem(name: Name): MetaItem<*>? {
         return default?.getItem(name) ?: descriptor?.get(name)?.defaultItem()
@@ -79,13 +83,14 @@ public inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit): T = apply
  * A specification for simplified generation of wrappers
  */
 public open class SchemeSpec<T : Scheme>(
-    private val builder: (config: Config, defaultProvider: ItemProvider) -> T,
-) : Specification<T> {
+    private val builder: (config: Config, defaultProvider: ItemProvider, descriptor: NodeDescriptor?) -> T,
+) : Specification<T>, Described {
 
-    public constructor(emptyBuilder: () -> T) : this({ config: Config, defaultProvider: ItemProvider ->
+    public constructor(emptyBuilder: () -> T) : this({ config: Config, defaultProvider: ItemProvider, descriptor: NodeDescriptor? ->
         emptyBuilder().apply {
             this.config = config
             this.default = defaultProvider
+            this.descriptor = descriptor
         }
     })
 
@@ -93,10 +98,13 @@ public open class SchemeSpec<T : Scheme>(
      * If the provided [Meta] is a [Config] use it as a scheme base, otherwise use it as default.
      */
     override fun wrap(meta: Meta, defaultProvider: ItemProvider): T = if (meta is Config) {
-        builder(meta, defaultProvider)
+        builder(meta, defaultProvider, descriptor)
     } else {
-        builder(Config(), meta.withDefault(defaultProvider))
+        builder(Config(), meta.withDefault(defaultProvider), descriptor)
     }
+
+    //TODO Generate descriptor from Scheme class
+    override val descriptor: NodeDescriptor? get() = null
 }
 
 ///**
