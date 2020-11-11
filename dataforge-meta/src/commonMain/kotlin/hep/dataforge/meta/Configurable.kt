@@ -6,23 +6,11 @@ import kotlin.properties.ReadWriteProperty
 /**
  * A container that holds a [Config].
  */
-public interface Configurable : MutableItemProvider {
+public interface Configurable {
     /**
      * Backing config
      */
     public val config: Config
-
-    /**
-     * Get a property with default
-     */
-    override fun getItem(name: Name): MetaItem<*>? = config[name]
-
-    /**
-     * Set a configurable property
-     */
-    override fun setItem(name: Name, item: MetaItem<*>?) {
-        config.setItem(name, item)
-    }
 }
 
 

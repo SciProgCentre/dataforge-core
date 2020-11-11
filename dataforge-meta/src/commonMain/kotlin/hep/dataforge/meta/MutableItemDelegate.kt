@@ -118,10 +118,6 @@ public inline fun <reified E : Enum<E>> MutableItemProvider.enum(
 public inline fun <reified M : MutableMeta<M>> M.node(key: Name? = null): ReadWriteProperty<Any?, M?> =
     item(key).convert(reader = { it?.let { it.node as M } }, writer = { it?.let { MetaItem.NodeItem(it) } })
 
-
-public fun Configurable.value(key: Name? = null): ReadWriteProperty<Any?, Value?> =
-    item(key).convert(MetaConverter.value)
-
 /* Number delegates */
 
 public fun MutableItemProvider.int(key: Name? = null): ReadWriteProperty<Any?, Int?> =

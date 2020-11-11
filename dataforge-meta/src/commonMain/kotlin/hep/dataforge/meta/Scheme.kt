@@ -13,7 +13,7 @@ public open class Scheme(
     config: Config = Config(),
     internal var default: ItemProvider? = null,
     descriptor: NodeDescriptor? = null,
-) : Configurable, Described, MetaRepr {
+) : Configurable, MutableItemProvider, Described, MetaRepr {
 
     override var config: Config = config
         internal set
@@ -44,7 +44,7 @@ public open class Scheme(
      */
     override fun setItem(name: Name, item: MetaItem<*>?) {
         if (validateItem(name, item)) {
-            super.setItem(name, item)
+            config.setItem(name, item)
         } else {
             error("Validation failed for property $name with value $item")
         }
@@ -120,5 +120,5 @@ public open class SchemeSpec<T : Scheme>(
 
 public fun Meta.asScheme(): Scheme = Scheme(this.asConfig(), null, null)
 
-public fun <T : Configurable> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit = {}): T =
+public fun <T : MutableItemProvider> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit = {}): T =
     spec.wrap(this).apply(block)
