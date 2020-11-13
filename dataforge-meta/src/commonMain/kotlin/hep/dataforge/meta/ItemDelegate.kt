@@ -45,7 +45,7 @@ public fun <R> ItemDelegate.convert(
     this@convert.getValue(thisRef, property).let(reader)
 }
 
-/* Read-only delegates for Metas */
+/* Read-only delegates for [ItemProvider] */
 
 /**
  * A property delegate that uses custom key

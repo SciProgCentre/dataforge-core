@@ -10,6 +10,7 @@
 - Provider provides an empty map instead of error by default
 - Hidden delegates hierarchy in favor of stdlib properties
 - Removed io depdendency from `dataforge-output`. Replaced Output by Appendable.
+- Configurable is no longer MutableItemProvider. All functionality moved to Scheme.
 
 ### Deprecated
 - Context activation API

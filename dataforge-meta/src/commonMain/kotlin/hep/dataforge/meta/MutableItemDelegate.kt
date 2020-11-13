@@ -71,7 +71,9 @@ public fun <R> MutableItemDelegate.convert(
     }
 }
 
-/* Read-write delegates */
+
+
+/* Read-write delegates for [MutableItemProvider] */
 
 /**
  * A property delegate that uses custom key
