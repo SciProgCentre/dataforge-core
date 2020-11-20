@@ -4,13 +4,15 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class SpecificationTest {
-    class TestStyled(config: Config, defaultProvider: ItemProvider) :
-        Scheme(config, defaultProvider) {
+    class TestStyled : Scheme() {
         var list by numberList(1, 2, 3)
 
         companion object : Specification<TestStyled> {
-            override fun wrap(meta: Meta, defaultProvider: ItemProvider): TestStyled =
-                TestStyled(meta.asConfig(), defaultProvider)
+            override fun read(meta: Meta, defaultProvider: ItemProvider): TestStyled =
+                TestStyled().apply {
+                    this.config = meta.asConfig()
+
+                }
         }
     }
 

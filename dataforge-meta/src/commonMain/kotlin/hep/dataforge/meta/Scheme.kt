@@ -16,7 +16,10 @@ public open class Scheme(
 ) : Configurable, MutableItemProvider, Described, MetaRepr {
 
     override var config: Config = config
-        internal set
+        internal set(value) {
+            //Fix problem with `init` blocks in specifications
+            field = value.apply { update(field) }
+        }
 
     override var descriptor: NodeDescriptor? = descriptor
         internal set
@@ -94,17 +97,18 @@ public open class SchemeSpec<T : Scheme>(
         }
     })
 
-    /**
-     * If the provided [Meta] is a [Config] use it as a scheme base, otherwise use it as default.
-     */
-    override fun wrap(meta: Meta, defaultProvider: ItemProvider): T = if (meta is Config) {
-        builder(meta, defaultProvider, descriptor)
-    } else {
+    override fun read(meta: Meta, defaultProvider: ItemProvider): T =
         builder(Config(), meta.withDefault(defaultProvider), descriptor)
+
+    override fun wrap(config: Config, defaultProvider: ItemProvider): T {
+        return builder(config, defaultProvider, descriptor)
     }
 
     //TODO Generate descriptor from Scheme class
     override val descriptor: NodeDescriptor? get() = null
+
+    @Suppress("OVERRIDE_BY_INLINE")
+    final override inline operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
 }
 
 ///**
@@ -118,7 +122,9 @@ public open class SchemeSpec<T : Scheme>(
 //    override val defaultLayer: Meta get() = Laminate(meta, descriptor?.defaultItem().node)
 //}
 
-public fun Meta.asScheme(): Scheme = Scheme(this.asConfig(), null, null)
+public fun Meta.asScheme(): Scheme = Scheme().apply {
+    config = this@asScheme.asConfig()
+}
 
 public fun <T : MutableItemProvider> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit = {}): T =
-    spec.wrap(this).apply(block)
+    spec.read(this).apply(block)

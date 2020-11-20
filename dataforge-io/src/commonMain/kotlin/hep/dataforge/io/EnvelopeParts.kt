@@ -88,7 +88,7 @@ public fun Envelope.parts(): EnvelopeParts {
     if (data == null) return emptyList()
     //TODO add zip folder reader
     val parts = meta.getIndexed(PARTS_KEY).values.mapNotNull { it.node }.map {
-        PartDescriptor.wrap(it)
+        PartDescriptor.read(it)
     }
     return if (parts.isEmpty()) {
         listOf(EnvelopePart(data!!, meta[MULTIPART_KEY].node))

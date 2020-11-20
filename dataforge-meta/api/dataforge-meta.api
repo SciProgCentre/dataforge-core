@@ -493,10 +493,16 @@ public final class hep/dataforge/meta/SchemeKt {
 public class hep/dataforge/meta/SchemeSpec : hep/dataforge/meta/Specification, hep/dataforge/meta/descriptors/Described {
 	public fun <init> (Lkotlin/jvm/functions/Function0;)V
 	public fun <init> (Lkotlin/jvm/functions/Function3;)V
+	public synthetic fun empty ()Lhep/dataforge/meta/MutableItemProvider;
+	public fun empty ()Lhep/dataforge/meta/Scheme;
 	public synthetic fun getDescriptor ()Lhep/dataforge/meta/descriptors/ItemDescriptor;
 	public fun getDescriptor ()Lhep/dataforge/meta/descriptors/NodeDescriptor;
-	public synthetic fun wrap (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
-	public fun wrap (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/Scheme;
+	public synthetic fun invoke (Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
+	public final fun invoke (Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/Scheme;
+	public synthetic fun read (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
+	public fun read (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/Scheme;
+	public synthetic fun wrap (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
+	public fun wrap (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/Scheme;
 }
 
 public final class hep/dataforge/meta/SealedMeta : hep/dataforge/meta/AbstractMetaNode {
@@ -504,19 +510,24 @@ public final class hep/dataforge/meta/SealedMeta : hep/dataforge/meta/AbstractMe
 }
 
 public abstract interface class hep/dataforge/meta/Specification {
-	public abstract fun wrap (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
+	public abstract fun empty ()Lhep/dataforge/meta/MutableItemProvider;
+	public abstract fun invoke (Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
+	public abstract fun read (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
+	public abstract fun wrap (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
 }
 
 public final class hep/dataforge/meta/Specification$DefaultImpls {
-	public static synthetic fun wrap$default (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;ILjava/lang/Object;)Lhep/dataforge/meta/MutableItemProvider;
+	public static fun empty (Lhep/dataforge/meta/Specification;)Lhep/dataforge/meta/MutableItemProvider;
+	public static fun invoke (Lhep/dataforge/meta/Specification;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
+	public static synthetic fun read$default (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;ILjava/lang/Object;)Lhep/dataforge/meta/MutableItemProvider;
+	public static fun wrap (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
+	public static synthetic fun wrap$default (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;ILjava/lang/Object;)Lhep/dataforge/meta/MutableItemProvider;
 }
 
 public final class hep/dataforge/meta/SpecificationKt {
 	public static final fun configSpec (Lhep/dataforge/meta/MetaItem;Lhep/dataforge/meta/Specification;)Lhep/dataforge/meta/MutableItemProvider;
 	public static final fun configure (Lhep/dataforge/meta/MetaRepr;Lhep/dataforge/meta/Specification;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MetaRepr;
 	public static final fun createStyle (Lhep/dataforge/meta/Specification;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/Meta;
-	public static final fun empty (Lhep/dataforge/meta/Specification;)Lhep/dataforge/meta/MutableItemProvider;
-	public static final fun invoke (Lhep/dataforge/meta/Specification;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
 	public static final fun spec (Lhep/dataforge/meta/MetaItem;Lhep/dataforge/meta/Specification;)Lhep/dataforge/meta/MutableItemProvider;
 	public static final fun spec (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Scheme;Lhep/dataforge/names/Name;)Lkotlin/properties/ReadWriteProperty;
 	public static final fun spec (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/Specification;Lhep/dataforge/names/Name;)Lkotlin/properties/ReadWriteProperty;
@@ -524,7 +535,6 @@ public final class hep/dataforge/meta/SpecificationKt {
 	public static synthetic fun spec$default (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/Specification;Lhep/dataforge/names/Name;ILjava/lang/Object;)Lkotlin/properties/ReadWriteProperty;
 	public static final fun update (Lhep/dataforge/meta/Configurable;Lhep/dataforge/meta/Specification;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/Configurable;
 	public static final fun update (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
-	public static final fun wrap (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/MutableItemProvider;
 }
 
 public abstract interface class hep/dataforge/meta/descriptors/Described {

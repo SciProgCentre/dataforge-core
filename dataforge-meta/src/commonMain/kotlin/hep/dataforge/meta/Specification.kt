@@ -13,27 +13,33 @@ import kotlin.reflect.KProperty
  */
 public interface Specification<T : MutableItemProvider> {
     /**
-     * Wrap generic configuration producing instance of desired type
+     * Read generic read-only meta with this [Specification] producing instance of desired type.
      */
-    public fun wrap(meta: Meta, defaultProvider: ItemProvider = ItemProvider.EMPTY): T
+    public fun read(meta: Meta, defaultProvider: ItemProvider = ItemProvider.EMPTY): T
+
+    /**
+     * Wrap mutable [Config], using it as inner storage (changes to [Specification] are reflected on [Config]
+     */
+    public fun wrap(config: Config, defaultProvider: ItemProvider = ItemProvider.EMPTY): T =
+        read(config as Meta, defaultProvider)
+
+    /**
+     * Generate an empty object
+     */
+    public fun empty(): T = read(Meta.EMPTY)
+
+    /**
+     * A convenience method to use specifications in builders
+     */
+    public operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
 }
-
-public fun <T : MutableItemProvider> Specification<T>.empty(): T = wrap(Config())
-
-public inline operator fun <T : MutableItemProvider> Specification<T>.invoke(action: T.() -> Unit): T = empty().apply(action)
 
 /**
  * Update given configuration using given type as a builder
  */
-public fun <T : MutableItemProvider> Specification<T>.update(meta: Meta, action: T.() -> Unit): T = wrap(meta).apply(action)
+public fun <T : MutableItemProvider> Specification<T>.update(meta: Meta, action: T.() -> Unit): T =
+    read(meta).apply(action)
 
-/**
- * Create a read-only version of
- */
-public fun <T : MutableItemProvider> Specification<T>.wrap(source: Meta): T {
-    val default = source.seal()
-    return wrap(source.asConfig(), default)
-}
 
 /**
  * Apply specified configuration to configurable
@@ -44,7 +50,10 @@ public fun <T : MetaRepr, C : MutableItemProvider, S : Specification<C>> T.confi
 /**
  * Update configuration using given specification
  */
-public fun <C : MutableItemProvider, S : Specification<C>> Configurable.update(spec: S, action: C.() -> Unit): Configurable =
+public fun <C : MutableItemProvider, S : Specification<C>> Configurable.update(
+    spec: S,
+    action: C.() -> Unit,
+): Configurable =
     apply { spec.update(config, action) }
 
 /**
@@ -63,11 +72,11 @@ public fun <T : MutableItemProvider> MetaItem<*>.spec(spec: Specification<T>): T
 public fun <T : MutableItemProvider> MetaItem<Config>.spec(spec: Specification<T>): T? = node?.let { spec.wrap(it) }
 
 public fun <T : Scheme> MutableItemProvider.spec(
-    spec: Specification<T>, key: Name? = null
+    spec: Specification<T>, key: Name? = null,
 ): ReadWriteProperty<Any?, T?> = object : ReadWriteProperty<Any?, T?> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
         val name = key ?: property.name.asName()
-        return getItem(name).node?.let { spec.wrap(it) }
+        return getItem(name).node?.let { spec.read(it) }
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
@@ -79,11 +88,11 @@ public fun <T : Scheme> MutableItemProvider.spec(
 public fun <T : Scheme> MutableItemProvider.spec(
     spec: Specification<T>,
     default: T,
-    key: Name? = null
+    key: Name? = null,
 ): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
         val name = key ?: property.name.asName()
-        return getItem(name).node?.let { spec.wrap(it) } ?: default
+        return getItem(name).node?.let { spec.read(it) } ?: default
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {

@@ -44,7 +44,7 @@ public fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
 /**
  * Filter data using [DataFilter] specification
  */
-public fun <T : Any> DataNode<T>.filter(filter: Meta): DataNode<T> = filter(DataFilter.wrap(filter))
+public fun <T : Any> DataNode<T>.filter(filter: Meta): DataNode<T> = filter(DataFilter.read(filter))
 
 /**
  * Filter data using [DataFilter] builder
