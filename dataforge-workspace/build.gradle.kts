@@ -9,7 +9,6 @@ kotlin {
             dependencies {
                 api(project(":dataforge-context"))
                 api(project(":dataforge-data"))
-                api(project(":dataforge-output"))
                 api(project(":dataforge-io"))
             }
         }

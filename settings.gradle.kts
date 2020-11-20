@@ -30,8 +30,7 @@ include(
     ":dataforge-io:dataforge-io-yaml",
     ":dataforge-context",
     ":dataforge-data",
-    ":dataforge-output",
-    ":dataforge-output:dataforge-output-html",
+//    ":dataforge-output",
     ":dataforge-tables",
     ":dataforge-workspace",
     ":dataforge-scripting"

@@ -14,9 +14,11 @@
 
 ### Deprecated
 - Context activation API
+- TextRenderer
 
 ### Removed
 - Functional server prototype
+- `dataforge-output` module
 
 ### Fixed
 - Global context CoroutineScope resolution

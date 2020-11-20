@@ -19,7 +19,7 @@ public interface OutputManager {
      * @param name represents the name inside the node.
      * @param meta configuration for [Renderer] (not for rendered object)
      */
-    public operator fun <T : Any> get(
+    public fun <T : Any> getOutputContainer(
         type: KClass<out T>,
         name: Name,
         stage: Name = Name.EMPTY,
@@ -35,37 +35,30 @@ public val Context.output: OutputManager get() = plugins.get() ?: ConsoleOutputM
 /**
  * Get an output with given [name], [stage] and reified content type
  */
-public inline operator fun <reified T : Any> OutputManager.get(
+public inline fun <reified T : Any> OutputManager.getOutputContainer(
     name: Name,
     stage: Name = Name.EMPTY,
     meta: Meta = Meta.EMPTY
 ): Renderer<T> {
-    return get(T::class, name, stage, meta)
+    return getOutputContainer(T::class, name, stage, meta)
 }
 
 /**
  * Directly render an object using the most suitable renderer
  */
 public fun OutputManager.render(obj: Any, name: Name, stage: Name = Name.EMPTY, meta: Meta = Meta.EMPTY): Unit =
-    get(obj::class, name, stage).render(obj, meta)
+    getOutputContainer(obj::class, name, stage).render(obj, meta)
 
 /**
  * System console output.
  * The [CONSOLE_RENDERER] is used when no other [OutputManager] is provided.
  */
-public val CONSOLE_RENDERER: Renderer<Any> = object : Renderer<Any> {
-    override fun render(obj: Any, meta: Meta) {
-        println(obj)
-    }
-
-    override val context: Context get() = Global
-
-}
+public val CONSOLE_RENDERER: Renderer<Any> = Renderer { obj, meta -> println(obj) }
 
 public class ConsoleOutputManager : AbstractPlugin(), OutputManager {
     override val tag: PluginTag get() = ConsoleOutputManager.tag
 
-    override fun <T : Any> get(type: KClass<out T>, name: Name, stage: Name, meta: Meta): Renderer<T> = CONSOLE_RENDERER
+    override fun <T : Any> getOutputContainer(type: KClass<out T>, name: Name, stage: Name, meta: Meta): Renderer<T> = CONSOLE_RENDERER
 
     public companion object : PluginFactory<ConsoleOutputManager> {
         override val tag: PluginTag = PluginTag("output.console", group = DATAFORGE_GROUP)

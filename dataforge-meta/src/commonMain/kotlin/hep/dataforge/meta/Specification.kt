@@ -18,9 +18,9 @@ public interface Specification<T : MutableItemProvider> {
     public fun wrap(meta: Meta, defaultProvider: ItemProvider = ItemProvider.EMPTY): T
 }
 
-public operator fun <T : MutableItemProvider> Specification<T>.invoke(action: T.() -> Unit): T = empty().apply(action)
-
 public fun <T : MutableItemProvider> Specification<T>.empty(): T = wrap(Config())
+
+public inline operator fun <T : MutableItemProvider> Specification<T>.invoke(action: T.() -> Unit): T = empty().apply(action)
 
 /**
  * Update given configuration using given type as a builder

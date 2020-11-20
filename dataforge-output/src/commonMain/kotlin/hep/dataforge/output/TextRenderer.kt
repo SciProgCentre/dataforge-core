@@ -8,12 +8,14 @@ import hep.dataforge.provider.top
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 
 /**
  * A text or binary renderer based on [Output]
  */
 @Type(TEXT_RENDERER_TYPE)
+@Deprecated("Bad design")
 public interface TextFormat {
     /**
      * The priority of this renderer compared to other renderers
@@ -31,6 +33,7 @@ public interface TextFormat {
     }
 }
 
+@Deprecated("Bad design")
 public object DefaultTextFormat : TextFormat {
     override val priority: Int = Int.MAX_VALUE
     override val type: KClass<*> = Any::class
@@ -43,6 +46,7 @@ public object DefaultTextFormat : TextFormat {
 /**
  * A text-based renderer
  */
+@Deprecated("Bad design")
 public class TextRenderer(override val context: Context, private val output: Appendable) : Renderer<Any> {
     private val cache = HashMap<KClass<*>, TextFormat>()
 
