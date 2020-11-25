@@ -10,8 +10,8 @@ pluginManagement {
         maven("https://dl.bintray.com/mipt-npm/dev")
     }
 
-    val toolsVersion = "0.6.4-dev-1.4.20-M2"
-    val kotlinVersion = "1.4.20-M2"
+    val toolsVersion = "0.7.0"
+    val kotlinVersion = "1.4.20"
 
     plugins {
         id("ru.mipt.npm.project") version toolsVersion
@@ -27,7 +27,7 @@ pluginManagement {
 include(
     ":dataforge-meta",
     ":dataforge-io",
-    ":dataforge-io:dataforge-io-yaml",
+//    ":dataforge-io:dataforge-io-yaml",
     ":dataforge-context",
     ":dataforge-data",
 //    ":dataforge-output",
