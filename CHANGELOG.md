@@ -4,6 +4,18 @@
 ### Added
 
 ### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+## [0.2.0]
+### Added
+
+### Changed
 - Context content resolution refactor
 - Kotlin 1.4.10 (build tools 0.6.0)
 - Empty query in Name is null instead of ""
