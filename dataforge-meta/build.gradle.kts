@@ -1,9 +1,12 @@
-import scientifik.useSerialization
-
 plugins {
-    id("scientifik.mpp")
+    id("ru.mipt.npm.mpp")
+    id("ru.mipt.npm.native")
 }
 
-useSerialization()
+kscience {
+    useSerialization{
+        json()
+    }
+}
 
 description = "Meta definition and basic operations on meta"

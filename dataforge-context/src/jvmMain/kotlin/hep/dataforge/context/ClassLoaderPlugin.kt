@@ -19,24 +19,24 @@ import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.cast
 
-class ClassLoaderPlugin(val classLoader: ClassLoader) : AbstractPlugin() {
+public class ClassLoaderPlugin(private val classLoader: ClassLoader) : AbstractPlugin() {
     override val tag: PluginTag = PluginTag("classLoader", PluginTag.DATAFORGE_GROUP)
 
     private val serviceCache: MutableMap<Class<*>, ServiceLoader<*>> = HashMap()
 
-    fun <T : Any> services(type: KClass<T>): Sequence<T> {
+    public fun <T : Any> services(type: KClass<T>): Sequence<T> {
         return serviceCache.getOrPut(type.java) { ServiceLoader.load(type.java, classLoader) }.asSequence()
             .map { type.cast(it) }
     }
 
-    companion object {
-        val DEFAULT = ClassLoaderPlugin(Global::class.java.classLoader)
+    public companion object {
+        public val DEFAULT: ClassLoaderPlugin = ClassLoaderPlugin(Global::class.java.classLoader)
     }
 }
 
-val Context.classLoaderPlugin get() = this.plugins.get() ?: ClassLoaderPlugin.DEFAULT
+public val Context.classLoaderPlugin: ClassLoaderPlugin get() = this.plugins.get() ?: ClassLoaderPlugin.DEFAULT
 
-inline fun <reified T : Any> Context.services() = classLoaderPlugin.services(T::class)
+public inline fun <reified T : Any> Context.services(): Sequence<T> = classLoaderPlugin.services(T::class)
 
 
 //open class JVMContext(

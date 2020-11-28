@@ -1,0 +1,273 @@
+public final class hep/dataforge/workspace/AllDataDependency : hep/dataforge/workspace/Dependency {
+	public fun <init> ()V
+	public fun <init> (Lhep/dataforge/names/Name;)V
+	public synthetic fun <init> (Lhep/dataforge/names/Name;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun apply (Lhep/dataforge/workspace/Workspace;)Lhep/dataforge/data/DataNode;
+	public synthetic fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun toMeta ()Lhep/dataforge/meta/MetaBuilder;
+}
+
+public final class hep/dataforge/workspace/DataDependency : hep/dataforge/workspace/Dependency {
+	public fun <init> (Lhep/dataforge/data/DataFilter;Lhep/dataforge/names/Name;)V
+	public synthetic fun <init> (Lhep/dataforge/data/DataFilter;Lhep/dataforge/names/Name;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun apply (Lhep/dataforge/workspace/Workspace;)Lhep/dataforge/data/DataNode;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public abstract class hep/dataforge/workspace/Dependency : hep/dataforge/meta/MetaRepr {
+	public abstract fun apply (Lhep/dataforge/workspace/Workspace;)Lhep/dataforge/data/DataNode;
+}
+
+public final class hep/dataforge/workspace/DirectTaskDependency : hep/dataforge/workspace/TaskDependency {
+	public static final field Companion Lhep/dataforge/workspace/DirectTaskDependency$Companion;
+	public fun <init> (Lhep/dataforge/workspace/Task;Lhep/dataforge/meta/Meta;Lhep/dataforge/names/Name;)V
+	public fun getName ()Lhep/dataforge/names/Name;
+	public final fun getTask ()Lhep/dataforge/workspace/Task;
+	public fun resolveTask (Lhep/dataforge/workspace/Workspace;)Lhep/dataforge/workspace/Task;
+}
+
+public final class hep/dataforge/workspace/DirectTaskDependency$Companion {
+	public final fun getDIRECT_TASK_NAME ()Lhep/dataforge/names/Name;
+}
+
+public final class hep/dataforge/workspace/EnvelopeDataKt {
+	public static final fun toData (Lhep/dataforge/io/Envelope;Lkotlin/reflect/KClass;Lhep/dataforge/io/IOFormat;)Lhep/dataforge/data/Data;
+	public static final fun toEnvelope (Lhep/dataforge/data/Data;Lhep/dataforge/io/IOFormat;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class hep/dataforge/workspace/FileDataKt {
+	public static final fun file (Lhep/dataforge/data/DataTreeBuilder;Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lkotlin/jvm/functions/Function2;)V
+	public static final fun readDataDirectory (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function2;)Lhep/dataforge/data/DataNode;
+	public static final fun readDataFile (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function2;)Lhep/dataforge/data/Data;
+	public static final fun writeDataDirectory (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/data/DataNode;Lhep/dataforge/io/IOFormat;Lhep/dataforge/io/EnvelopeFormat;Lhep/dataforge/io/MetaFormatFactory;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun writeDataDirectory$default (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/data/DataNode;Lhep/dataforge/io/IOFormat;Lhep/dataforge/io/EnvelopeFormat;Lhep/dataforge/io/MetaFormatFactory;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun writeZip (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/data/DataNode;Lhep/dataforge/io/IOFormat;Lhep/dataforge/io/EnvelopeFormat;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun writeZip$default (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/data/DataNode;Lhep/dataforge/io/IOFormat;Lhep/dataforge/io/EnvelopeFormat;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class hep/dataforge/workspace/GenericTask : hep/dataforge/workspace/Task {
+	public fun <init> (Lhep/dataforge/names/Name;Lkotlin/reflect/KClass;Lhep/dataforge/meta/descriptors/NodeDescriptor;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
+	public fun build (Lhep/dataforge/workspace/Workspace;Lhep/dataforge/meta/Meta;)Lhep/dataforge/workspace/TaskModel;
+	public synthetic fun getDescriptor ()Lhep/dataforge/meta/descriptors/ItemDescriptor;
+	public fun getDescriptor ()Lhep/dataforge/meta/descriptors/NodeDescriptor;
+	public fun getName ()Lhep/dataforge/names/Name;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun isTerminal ()Z
+	public fun run (Lhep/dataforge/workspace/Workspace;Lhep/dataforge/workspace/TaskModel;)Lhep/dataforge/data/DataNode;
+	public fun validate (Lhep/dataforge/workspace/TaskModel;)V
+}
+
+public final class hep/dataforge/workspace/SimpleWorkspace : hep/dataforge/workspace/Workspace {
+	public static final field Companion Lhep/dataforge/workspace/SimpleWorkspace$Companion;
+	public fun <init> (Lhep/dataforge/context/Context;Lhep/dataforge/data/DataNode;Ljava/util/Map;Ljava/util/Collection;)V
+	public fun content (Ljava/lang/String;)Ljava/util/Map;
+	public fun getContext ()Lhep/dataforge/context/Context;
+	public fun getData ()Lhep/dataforge/data/DataNode;
+	public fun getDefaultChainTarget ()Ljava/lang/String;
+	public fun getDefaultTarget ()Ljava/lang/String;
+	public fun getLogger ()Lmu/KLogger;
+	public fun getTargets ()Ljava/util/Map;
+	public fun getTasks ()Ljava/util/Map;
+	public fun run (Lhep/dataforge/workspace/Task;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
+}
+
+public final class hep/dataforge/workspace/SimpleWorkspace$Companion {
+}
+
+public final class hep/dataforge/workspace/SimpleWorkspaceBuilder : hep/dataforge/workspace/WorkspaceBuilder {
+	public fun <init> (Lhep/dataforge/context/Context;)V
+	public fun build ()Lhep/dataforge/workspace/SimpleWorkspace;
+	public synthetic fun build ()Lhep/dataforge/workspace/Workspace;
+	public fun getContext ()Lhep/dataforge/context/Context;
+	public fun getData ()Lhep/dataforge/data/DataTreeBuilder;
+	public fun getParentContext ()Lhep/dataforge/context/Context;
+	public fun getTargets ()Ljava/util/Map;
+	public fun getTasks ()Ljava/util/Set;
+	public fun setContext (Lhep/dataforge/context/Context;)V
+	public fun setData (Lhep/dataforge/data/DataTreeBuilder;)V
+	public fun setTargets (Ljava/util/Map;)V
+	public fun setTasks (Ljava/util/Set;)V
+}
+
+public abstract interface class hep/dataforge/workspace/Task : hep/dataforge/context/Named, hep/dataforge/meta/descriptors/Described {
+	public static final field Companion Lhep/dataforge/workspace/Task$Companion;
+	public static final field TYPE Ljava/lang/String;
+	public abstract fun build (Lhep/dataforge/workspace/Workspace;Lhep/dataforge/meta/Meta;)Lhep/dataforge/workspace/TaskModel;
+	public abstract fun getType ()Lkotlin/reflect/KClass;
+	public abstract fun isTerminal ()Z
+	public abstract fun run (Lhep/dataforge/workspace/Workspace;Lhep/dataforge/workspace/TaskModel;)Lhep/dataforge/data/DataNode;
+	public abstract fun validate (Lhep/dataforge/workspace/TaskModel;)V
+}
+
+public final class hep/dataforge/workspace/Task$Companion {
+	public static final field TYPE Ljava/lang/String;
+}
+
+public final class hep/dataforge/workspace/Task$DefaultImpls {
+	public static fun isTerminal (Lhep/dataforge/workspace/Task;)Z
+	public static fun validate (Lhep/dataforge/workspace/Task;Lhep/dataforge/workspace/TaskModel;)V
+}
+
+public final class hep/dataforge/workspace/TaskBuilder {
+	public fun <init> (Lhep/dataforge/names/Name;Lkotlin/reflect/KClass;)V
+	public final fun description (Lkotlin/jvm/functions/Function1;)V
+	public final fun getName ()Lhep/dataforge/names/Name;
+	public final fun getType ()Lkotlin/reflect/KClass;
+	public final fun model (Lkotlin/jvm/functions/Function2;)V
+	public final fun rawTransform (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun rawTransform$default (Lhep/dataforge/workspace/TaskBuilder;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public final fun transform (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun transform$default (Lhep/dataforge/workspace/TaskBuilder;Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+}
+
+public final class hep/dataforge/workspace/TaskBuilder$TaskEnv {
+	public fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;Lhep/dataforge/data/DataNode;)V
+	public final fun getContext ()Lhep/dataforge/context/Context;
+	public final fun getData ()Lhep/dataforge/data/DataNode;
+	public final fun getMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getName ()Lhep/dataforge/names/Name;
+	public final fun invoke (Lhep/dataforge/workspace/DirectTaskDependency;)Lhep/dataforge/data/DataNode;
+}
+
+public abstract class hep/dataforge/workspace/TaskDependency : hep/dataforge/workspace/Dependency {
+	public fun <init> (Lhep/dataforge/meta/Meta;Lhep/dataforge/names/Name;)V
+	public synthetic fun <init> (Lhep/dataforge/meta/Meta;Lhep/dataforge/names/Name;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun apply (Lhep/dataforge/workspace/Workspace;)Lhep/dataforge/data/DataNode;
+	public final fun getMeta ()Lhep/dataforge/meta/Meta;
+	public abstract fun getName ()Lhep/dataforge/names/Name;
+	public final fun getPlacement ()Lhep/dataforge/names/Name;
+	public abstract fun resolveTask (Lhep/dataforge/workspace/Workspace;)Lhep/dataforge/workspace/Task;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public abstract interface class hep/dataforge/workspace/TaskDependencyContainer {
+	public abstract fun add (Lhep/dataforge/workspace/Dependency;)V
+	public abstract fun getDefaultMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/workspace/TaskModel : hep/dataforge/meta/MetaRepr {
+	public static final field Companion Lhep/dataforge/workspace/TaskModel$Companion;
+	public fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;Ljava/util/Collection;)V
+	public final fun component1 ()Lhep/dataforge/names/Name;
+	public final fun component2 ()Lhep/dataforge/meta/Meta;
+	public final fun component3 ()Ljava/util/Collection;
+	public final fun copy (Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;Ljava/util/Collection;)Lhep/dataforge/workspace/TaskModel;
+	public static synthetic fun copy$default (Lhep/dataforge/workspace/TaskModel;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;Ljava/util/Collection;ILjava/lang/Object;)Lhep/dataforge/workspace/TaskModel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDependencies ()Ljava/util/Collection;
+	public final fun getMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getName ()Lhep/dataforge/names/Name;
+	public fun hashCode ()I
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class hep/dataforge/workspace/TaskModel$Companion {
+	public final fun getMODEL_TARGET_KEY ()Lhep/dataforge/names/Name;
+}
+
+public final class hep/dataforge/workspace/TaskModelBuilder : hep/dataforge/workspace/TaskDependencyContainer {
+	public fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;)V
+	public synthetic fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun add (Lhep/dataforge/workspace/Dependency;)V
+	public final fun build ()Lhep/dataforge/workspace/TaskModel;
+	public fun getDefaultMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getMeta ()Lhep/dataforge/meta/MetaBuilder;
+	public final fun getName ()Lhep/dataforge/names/Name;
+	public final fun getTarget ()Ljava/lang/String;
+	public final fun setMeta (Lhep/dataforge/meta/MetaBuilder;)V
+	public final fun setTarget (Ljava/lang/String;)V
+}
+
+public final class hep/dataforge/workspace/TaskModelKt {
+	public static final fun allData (Lhep/dataforge/workspace/TaskDependencyContainer;Lhep/dataforge/names/Name;)Lhep/dataforge/workspace/AllDataDependency;
+	public static synthetic fun allData$default (Lhep/dataforge/workspace/TaskDependencyContainer;Lhep/dataforge/names/Name;ILjava/lang/Object;)Lhep/dataforge/workspace/AllDataDependency;
+	public static final fun buildInput (Lhep/dataforge/workspace/TaskModel;Lhep/dataforge/workspace/Workspace;)Lhep/dataforge/data/DataTree;
+	public static final fun data (Lhep/dataforge/workspace/TaskDependencyContainer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lhep/dataforge/workspace/DataDependency;
+	public static final fun data (Lhep/dataforge/workspace/TaskDependencyContainer;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/workspace/DataDependency;
+	public static synthetic fun data$default (Lhep/dataforge/workspace/TaskDependencyContainer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lhep/dataforge/workspace/DataDependency;
+	public static final fun dependsOn (Lhep/dataforge/workspace/TaskDependencyContainer;Lhep/dataforge/names/Name;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;)Lhep/dataforge/workspace/WorkspaceTaskDependency;
+	public static final fun dependsOn (Lhep/dataforge/workspace/TaskDependencyContainer;Lhep/dataforge/workspace/Task;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;)Lhep/dataforge/workspace/DirectTaskDependency;
+	public static final fun dependsOn (Lhep/dataforge/workspace/TaskDependencyContainer;Lhep/dataforge/workspace/Task;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/workspace/DirectTaskDependency;
+	public static final fun dependsOn (Lhep/dataforge/workspace/TaskDependencyContainer;Lhep/dataforge/workspace/Task;Ljava/lang/String;Lhep/dataforge/meta/Meta;)Lhep/dataforge/workspace/DirectTaskDependency;
+	public static final fun dependsOn (Lhep/dataforge/workspace/TaskDependencyContainer;Ljava/lang/String;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;)Lhep/dataforge/workspace/WorkspaceTaskDependency;
+	public static synthetic fun dependsOn$default (Lhep/dataforge/workspace/TaskDependencyContainer;Lhep/dataforge/names/Name;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/workspace/WorkspaceTaskDependency;
+	public static synthetic fun dependsOn$default (Lhep/dataforge/workspace/TaskDependencyContainer;Lhep/dataforge/workspace/Task;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/workspace/DirectTaskDependency;
+	public static synthetic fun dependsOn$default (Lhep/dataforge/workspace/TaskDependencyContainer;Lhep/dataforge/workspace/Task;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/workspace/DirectTaskDependency;
+	public static synthetic fun dependsOn$default (Lhep/dataforge/workspace/TaskDependencyContainer;Lhep/dataforge/workspace/Task;Ljava/lang/String;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/workspace/DirectTaskDependency;
+	public static synthetic fun dependsOn$default (Lhep/dataforge/workspace/TaskDependencyContainer;Ljava/lang/String;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/workspace/WorkspaceTaskDependency;
+	public static final fun getTarget (Lhep/dataforge/workspace/TaskModel;)Ljava/lang/String;
+}
+
+public abstract interface class hep/dataforge/workspace/Workspace : hep/dataforge/context/ContextAware, hep/dataforge/provider/Provider {
+	public static final field Companion Lhep/dataforge/workspace/Workspace$Companion;
+	public static final field TYPE Ljava/lang/String;
+	public abstract fun content (Ljava/lang/String;)Ljava/util/Map;
+	public abstract fun getData ()Lhep/dataforge/data/DataNode;
+	public abstract fun getTargets ()Ljava/util/Map;
+	public abstract fun getTasks ()Ljava/util/Map;
+	public abstract fun run (Lhep/dataforge/workspace/Task;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
+}
+
+public final class hep/dataforge/workspace/Workspace$Companion {
+	public static final field TYPE Ljava/lang/String;
+	public final fun invoke (Lhep/dataforge/context/Context;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/workspace/SimpleWorkspace;
+	public static synthetic fun invoke$default (Lhep/dataforge/workspace/Workspace$Companion;Lhep/dataforge/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/workspace/SimpleWorkspace;
+}
+
+public final class hep/dataforge/workspace/Workspace$DefaultImpls {
+	public static fun content (Lhep/dataforge/workspace/Workspace;Ljava/lang/String;)Ljava/util/Map;
+	public static fun getDefaultChainTarget (Lhep/dataforge/workspace/Workspace;)Ljava/lang/String;
+	public static fun getDefaultTarget (Lhep/dataforge/workspace/Workspace;)Ljava/lang/String;
+	public static fun getLogger (Lhep/dataforge/workspace/Workspace;)Lmu/KLogger;
+	public static fun run (Lhep/dataforge/workspace/Workspace;Lhep/dataforge/workspace/Task;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
+}
+
+public abstract interface class hep/dataforge/workspace/WorkspaceBuilder {
+	public abstract fun build ()Lhep/dataforge/workspace/Workspace;
+	public abstract fun getContext ()Lhep/dataforge/context/Context;
+	public abstract fun getData ()Lhep/dataforge/data/DataTreeBuilder;
+	public abstract fun getParentContext ()Lhep/dataforge/context/Context;
+	public abstract fun getTargets ()Ljava/util/Map;
+	public abstract fun getTasks ()Ljava/util/Set;
+	public abstract fun setContext (Lhep/dataforge/context/Context;)V
+	public abstract fun setData (Lhep/dataforge/data/DataTreeBuilder;)V
+	public abstract fun setTargets (Ljava/util/Map;)V
+	public abstract fun setTasks (Ljava/util/Set;)V
+}
+
+public final class hep/dataforge/workspace/WorkspaceBuilderKt {
+	public static final fun context (Lhep/dataforge/workspace/WorkspaceBuilder;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun context$default (Lhep/dataforge/workspace/WorkspaceBuilder;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun rawData (Lhep/dataforge/workspace/WorkspaceBuilder;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/data/DataNode;
+	public static synthetic fun rawData$default (Lhep/dataforge/workspace/WorkspaceBuilder;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/data/DataNode;
+	public static final fun rawTask (Lhep/dataforge/workspace/WorkspaceBuilder;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/workspace/Task;
+	public static final fun target (Lhep/dataforge/workspace/WorkspaceBuilder;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static final fun target (Lhep/dataforge/workspace/WorkspaceBuilder;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static final fun task (Lhep/dataforge/workspace/WorkspaceBuilder;Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/workspace/Task;
+}
+
+public final class hep/dataforge/workspace/WorkspaceKt {
+	public static final fun run (Lhep/dataforge/workspace/Workspace;Lhep/dataforge/workspace/Task;Ljava/lang/String;)Lhep/dataforge/data/DataNode;
+	public static final fun run (Lhep/dataforge/workspace/Workspace;Lhep/dataforge/workspace/Task;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/data/DataNode;
+	public static final fun run (Lhep/dataforge/workspace/Workspace;Ljava/lang/String;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
+	public static final fun run (Lhep/dataforge/workspace/Workspace;Ljava/lang/String;Ljava/lang/String;)Lhep/dataforge/data/DataNode;
+	public static final fun run (Lhep/dataforge/workspace/Workspace;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/data/DataNode;
+	public static synthetic fun run$default (Lhep/dataforge/workspace/Workspace;Lhep/dataforge/workspace/Task;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/data/DataNode;
+	public static synthetic fun run$default (Lhep/dataforge/workspace/Workspace;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/data/DataNode;
+}
+
+public abstract class hep/dataforge/workspace/WorkspacePlugin : hep/dataforge/context/AbstractPlugin {
+	public fun <init> ()V
+	public fun content (Ljava/lang/String;)Ljava/util/Map;
+	public final fun getTasks ()Ljava/util/Collection;
+	public final fun task (Lhep/dataforge/workspace/Task;)V
+	public final fun task (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/workspace/GenericTask;
+}
+
+public final class hep/dataforge/workspace/WorkspaceTaskDependency : hep/dataforge/workspace/TaskDependency {
+	public fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;Lhep/dataforge/names/Name;)V
+	public fun getName ()Lhep/dataforge/names/Name;
+	public fun resolveTask (Lhep/dataforge/workspace/Workspace;)Lhep/dataforge/workspace/Task;
+}
+

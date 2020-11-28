@@ -11,14 +11,18 @@ import kotlinx.io.*
 import kotlinx.io.text.readUtf8String
 import kotlinx.io.text.writeUtf8String
 
-object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
+/**
+ * A DataForge-specific simplified binary format for meta
+ * TODO add description
+ */
+public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
     override val shortName: String = "bin"
     override val key: Short = 0x4249//BI
 
     override fun invoke(meta: Meta, context: Context): MetaFormat = this
 
-    override fun Input.readMeta(descriptor: NodeDescriptor?): Meta {
-        return (readMetaItem() as MetaItem.NodeItem).node
+    override fun readMeta(input: Input, descriptor: NodeDescriptor?): Meta {
+        return (input.readMetaItem() as MetaItem.NodeItem).node
     }
 
     private fun Output.writeChar(char: Char) = writeByte(char.toByte())
@@ -28,7 +32,7 @@ object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
         writeUtf8String(str)
     }
 
-    fun Output.writeValue(value: Value) {
+    public fun Output.writeValue(value: Value) {
         if (value.isList()) {
             writeChar('L')
             writeInt(value.list.size)
@@ -75,17 +79,21 @@ object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
         }
     }
 
-    override fun Output.writeMeta(meta: Meta, descriptor: NodeDescriptor?) {
-        writeChar('M')
-        writeInt(meta.items.size)
+    override fun writeMeta(
+        output: kotlinx.io.Output,
+        meta: hep.dataforge.meta.Meta,
+        descriptor: hep.dataforge.meta.descriptors.NodeDescriptor?
+    ) {
+        output.writeChar('M')
+        output.writeInt(meta.items.size)
         meta.items.forEach { (key, item) ->
-            writeString(key.toString())
+            output.writeString(key.toString())
             when (item) {
                 is MetaItem.ValueItem -> {
-                    writeValue(item.value)
+                    output.writeValue(item.value)
                 }
                 is MetaItem.NodeItem -> {
-                    writeObject(item.node)
+                    writeObject(output, item.node)
                 }
             }
         }
@@ -97,7 +105,7 @@ object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun Input.readMetaItem(): MetaItem<MetaBuilder> {
+    public fun Input.readMetaItem(): MetaItem<MetaBuilder> {
         return when (val keyChar = readByte().toChar()) {
             'S' -> MetaItem.ValueItem(StringValue(readString()))
             'N' -> MetaItem.ValueItem(Null)

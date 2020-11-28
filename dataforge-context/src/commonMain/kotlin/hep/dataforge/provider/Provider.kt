@@ -16,41 +16,37 @@
 package hep.dataforge.provider
 
 import hep.dataforge.names.Name
-import hep.dataforge.names.toName
+import kotlin.reflect.KClass
+import kotlin.reflect.safeCast
 
 /**
  * A marker utility interface for providers.
  *
  * @author Alexander Nozik
  */
-interface Provider {
+public interface Provider {
 
     /**
      * Default target for this provider
-     *
-     * @return
      */
-    val defaultTarget: String get() = ""
+    public val defaultTarget: String get() = ""
 
     /**
      * Default target for next chain segment
-     *
-     * @return
      */
-    val defaultChainTarget: String get() = ""
-
+    public val defaultChainTarget: String get() = ""
 
     /**
      * A map of direct children for specific target
      */
-    fun provideTop(target: String): Map<Name, Any>
+    public fun content(target: String): Map<Name, Any> = emptyMap()
 }
 
-fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
+public fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
     if (path.length == 0) throw IllegalArgumentException("Can't provide by empty path")
     val first = path.first()
     val target = targetOverride ?: first.target ?: defaultTarget
-    val res = provideTop(target)[first.name] ?: return null
+    val res = content(target)[first.name] ?: return null
     return when (path.length) {
         1 -> res
         else -> {
@@ -65,24 +61,29 @@ fun Provider.provide(path: Path, targetOverride: String? = null): Any? {
 /**
  * Type checked provide
  */
-inline fun <reified T : Any> Provider.provide(path: String): T? {
-    return provide(Path.parse(path)) as? T
+public inline fun <reified T : Any> Provider.provide(path: String, targetOverride: String? = null): T? {
+    return provide(Path.parse(path), targetOverride) as? T
 }
+//
+//inline fun <reified T : Any> Provider.provide(target: String, name: Name): T? {
+//    return provide(PathToken(name, target).toPath()) as? T
+//}
 
-inline fun <reified T : Any> Provider.provide(target: String, name: Name): T? {
-    return provide(PathToken(name, target).toPath()) as? T
-}
-
-inline fun <reified T : Any> Provider.provide(target: String, name: String): T? =
-    provide(target, name.toName())
+//inline fun <reified T : Any> Provider.provide(target: String, name: String): T? =
+//    provide(target, name.toName())
 
 /**
  *  Typed top level content
  */
-inline fun <reified T : Any> Provider.top(target: String): Map<Name, T> {
-    return provideTop(target).mapValues {
-        it.value as? T ?: error("The type of element $it is ${it::class} but ${T::class} is expected")
+public fun <T : Any> Provider.top(target: String, type: KClass<out T>): Map<Name, T> {
+    return content(target).mapValues {
+        type.safeCast(it.value) ?: error("The type of element $it is ${it::class} but $type is expected")
     }
 }
+
+/**
+ *  Typed top level content
+ */
+public inline fun <reified T : Any> Provider.top(target: String): Map<Name, T> = top(target, T::class)
 
 

@@ -11,113 +11,109 @@ import kotlin.jvm.JvmName
  * DSL builder for meta. Is not intended to store mutable state
  */
 @DFBuilder
-class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
+public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
     override fun wrapNode(meta: Meta): MetaBuilder = if (meta is MetaBuilder) meta else meta.builder()
     override fun empty(): MetaBuilder = MetaBuilder()
 
-    infix fun String.put(item: MetaItem<*>?) {
+    public infix fun String.put(item: MetaItem<*>?) {
         set(this, item)
     }
 
-    infix fun String.put(value: Value?) {
+    public infix fun String.put(value: Value?) {
         set(this, value)
     }
 
-    infix fun String.put(string: String?) {
+    public infix fun String.put(string: String?) {
         set(this, string?.asValue())
     }
 
-    infix fun String.put(number: Number?) {
+    public infix fun String.put(number: Number?) {
         set(this, number?.asValue())
     }
 
-    infix fun String.put(boolean: Boolean?) {
+    public infix fun String.put(boolean: Boolean?) {
         set(this, boolean?.asValue())
     }
 
-    infix fun String.put(enum: Enum<*>) {
+    public infix fun String.put(enum: Enum<*>) {
         set(this, EnumValue(enum))
     }
 
     @JvmName("putValues")
-    infix fun String.put(iterable: Iterable<Value>) {
+    public infix fun String.put(iterable: Iterable<Value>) {
         set(this, iterable.asValue())
     }
 
     @JvmName("putNumbers")
-    infix fun String.put(iterable: Iterable<Number>) {
+    public infix fun String.put(iterable: Iterable<Number>) {
         set(this, iterable.map { it.asValue() }.asValue())
     }
 
     @JvmName("putStrings")
-    infix fun String.put(iterable: Iterable<String>) {
+    public infix fun String.put(iterable: Iterable<String>) {
         set(this, iterable.map { it.asValue() }.asValue())
     }
 
-    infix fun String.put(array: DoubleArray) {
+    public infix fun String.put(array: DoubleArray) {
         set(this, array.asValue())
     }
 
-    infix fun String.putValue(any: Any?) {
-        set(this, Value.of(any))
-    }
-
-    infix fun String.put(meta: Meta?) {
+    public infix fun String.put(meta: Meta?) {
         this@MetaBuilder[this] = meta
     }
 
-    infix fun String.put(repr: MetaRepr?) {
+    public infix fun String.put(repr: MetaRepr?) {
         set(this, repr?.toMeta())
     }
 
     @JvmName("putMetas")
-    infix fun String.put(value: Iterable<Meta>) {
-        this@MetaBuilder[this] = value.toList()
+    public infix fun String.put(value: Iterable<Meta>) {
+        set(this,value.toList())
     }
 
-    infix fun String.put(metaBuilder: MetaBuilder.() -> Unit) {
+    public infix fun String.put(metaBuilder: MetaBuilder.() -> Unit) {
         this@MetaBuilder[this] = MetaBuilder().apply(metaBuilder)
     }
 
-    infix fun Name.put(value: Value?) {
+    public infix fun Name.put(value: Value?) {
         set(this, value)
     }
 
-    infix fun Name.put(string: String?) {
+    public infix fun Name.put(string: String?) {
         set(this, string?.asValue())
     }
 
-    infix fun Name.put(number: Number?) {
+    public infix fun Name.put(number: Number?) {
         set(this, number?.asValue())
     }
 
-    infix fun Name.put(boolean: Boolean?) {
+    public infix fun Name.put(boolean: Boolean?) {
         set(this, boolean?.asValue())
     }
 
-    infix fun Name.put(enum: Enum<*>) {
+    public infix fun Name.put(enum: Enum<*>) {
         set(this, EnumValue(enum))
     }
 
     @JvmName("putValues")
-    infix fun Name.put(iterable: Iterable<Value>) {
+    public infix fun Name.put(iterable: Iterable<Value>) {
         set(this, iterable.asValue())
     }
 
-    infix fun Name.put(meta: Meta?) {
+    public infix fun Name.put(meta: Meta?) {
         this@MetaBuilder[this] = meta
     }
 
-    infix fun Name.put(repr: MetaRepr?) {
+    public infix fun Name.put(repr: MetaRepr?) {
         set(this, repr?.toMeta())
     }
 
     @JvmName("putMetas")
-    infix fun Name.put(value: Iterable<Meta>) {
-        this@MetaBuilder[this] = value.toList()
+    public infix fun Name.put(value: Iterable<Meta>) {
+        set(this, value.toList())
     }
 
-    infix fun Name.put(metaBuilder: MetaBuilder.() -> Unit) {
+    public infix fun Name.put(metaBuilder: MetaBuilder.() -> Unit) {
         this@MetaBuilder[this] = MetaBuilder().apply(metaBuilder)
     }
 }
@@ -125,7 +121,7 @@ class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
 /**
  * For safety, builder always copies the initial meta even if it is builder itself
  */
-fun Meta.builder(): MetaBuilder {
+public fun Meta.builder(): MetaBuilder {
     return MetaBuilder().also { builder ->
         items.mapValues { entry ->
             val item = entry.value
@@ -140,16 +136,10 @@ fun Meta.builder(): MetaBuilder {
 /**
  * Create a deep copy of this meta and apply builder to it
  */
-fun Meta.edit(builder: MetaBuilder.() -> Unit): MetaBuilder = builder().apply(builder)
-
-/**
- * Build a [MetaBuilder] using given transformation
- */
-@Deprecated("To be replaced with fake constructor", ReplaceWith("Meta"))
-fun buildMeta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)
+public fun Meta.edit(builder: MetaBuilder.() -> Unit): MetaBuilder = builder().apply(builder)
 
 /**
  * Build a [MetaBuilder] using given transformation
  */
 @Suppress("FunctionName")
-fun Meta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)
+public fun Meta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)

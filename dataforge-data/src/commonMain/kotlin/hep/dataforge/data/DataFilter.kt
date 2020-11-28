@@ -4,31 +4,29 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.toName
 
 
-class DataFilter : Scheme() {
+public class DataFilter : Scheme() {
     /**
      * A source node for the filter
      */
-    var from by string()
+    public var from: String? by string()
     /**
      * A target placement for the filtered node
      */
-    var to by string()
+    public var to: String? by string()
     /**
      * A regular expression pattern for the filter
      */
-    var pattern by string(".*")
+    public var pattern: String by string(".*")
 //    val prefix by string()
 //    val suffix by string()
 
-    fun isEmpty(): Boolean = config.isEmpty()
-
-    companion object : SchemeSpec<DataFilter>(::DataFilter)
+    public companion object : SchemeSpec<DataFilter>(::DataFilter)
 }
 
 /**
  * Apply meta-based filter to given data node
  */
-fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
+public fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
     val sourceNode = filter.from?.let { get(it.toName()).node } ?: this@filter
     val regex = filter.pattern.toRegex()
     val targetNode = DataTreeBuilder(type).apply {
@@ -46,10 +44,10 @@ fun <T : Any> DataNode<T>.filter(filter: DataFilter): DataNode<T> {
 /**
  * Filter data using [DataFilter] specification
  */
-fun <T : Any> DataNode<T>.filter(filter: Meta): DataNode<T> = filter(DataFilter.wrap(filter))
+public fun <T : Any> DataNode<T>.filter(filter: Meta): DataNode<T> = filter(DataFilter.read(filter))
 
 /**
  * Filter data using [DataFilter] builder
  */
-fun <T : Any> DataNode<T>.filter(filterBuilder: DataFilter.() -> Unit): DataNode<T> =
+public fun <T : Any> DataNode<T>.filter(filterBuilder: DataFilter.() -> Unit): DataNode<T> =
     filter(DataFilter(filterBuilder))

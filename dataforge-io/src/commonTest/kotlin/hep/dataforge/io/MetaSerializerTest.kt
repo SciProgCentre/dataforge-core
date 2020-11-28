@@ -1,11 +1,18 @@
 package hep.dataforge.io
 
-import hep.dataforge.meta.*
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaItem
+import hep.dataforge.meta.MetaSerializer
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.cbor.Cbor
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
+val JSON_PRETTY: Json = Json { prettyPrint = true; useArrayPolymorphism = true }
+val JSON_PLAIN: Json = Json { prettyPrint = false; useArrayPolymorphism = true }
 
 class MetaSerializerTest {
     val meta = Meta {
@@ -19,29 +26,33 @@ class MetaSerializerTest {
 
     @Test
     fun testMetaSerialization() {
-        val string = JSON_PRETTY.stringify(MetaSerializer, meta)
-        val restored = JSON_PLAIN.parse(MetaSerializer, string)
-        assertEquals(restored, meta)
+        val string = JSON_PRETTY.encodeToString(MetaSerializer, meta)
+        println(string)
+        val restored = JSON_PLAIN.decodeFromString(MetaSerializer, string)
+        assertEquals(meta, restored)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testCborSerialization() {
-        val bytes = Cbor.dump(MetaSerializer, meta)
-        println(bytes.contentToString())
-        val restored = Cbor.load(MetaSerializer, bytes)
-        assertEquals(restored, meta)
+        val bytes = Cbor.encodeToByteArray(MetaSerializer, meta)
+        println(bytes.decodeToString())
+        val restored = Cbor.decodeFromByteArray(MetaSerializer, bytes)
+        assertEquals(meta, restored)
     }
 
     @Test
     fun testNameSerialization() {
         val name = "a.b.c".toName()
-        val string = JSON_PRETTY.stringify(Name.serializer(), name)
-        val restored = JSON_PLAIN.parse(Name.serializer(), string)
-        assertEquals(restored, name)
+        val string = JSON_PRETTY.encodeToString(Name.serializer(), name)
+        val restored = JSON_PLAIN.decodeFromString(Name.serializer(), string)
+        assertEquals(name, restored)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testMetaItemDescriptor() {
         val descriptor = MetaItem.serializer(MetaSerializer).descriptor.getElementDescriptor(0)
+        println(descriptor)
     }
 }

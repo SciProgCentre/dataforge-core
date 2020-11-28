@@ -30,12 +30,12 @@ class FileDataTest {
     }
 
     object StringIOFormat : IOFormat<String> {
-        override fun Output.writeObject(obj: String) {
-            writeUtf8String(obj)
+        override fun writeObject(output: Output, obj: String) {
+            output.writeUtf8String(obj)
         }
 
-        override fun Input.readObject(): String {
-            return readUtf8String()
+        override fun readObject(input: Input): String {
+            return input.readUtf8String()
         }
 
         override fun toMeta(): Meta = Meta {

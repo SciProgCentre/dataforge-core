@@ -1,8 +1,12 @@
 package hep.dataforge.io
 
-interface Responder {
+/**
+ * An object that could respond to external messages asynchronously
+ */
+public interface Responder {
     /**
      * Send a request and wait for response for this specific request
      */
-    suspend fun respond(request: Envelope): Envelope
+    public suspend fun respond(request: Envelope): Envelope
 }
+

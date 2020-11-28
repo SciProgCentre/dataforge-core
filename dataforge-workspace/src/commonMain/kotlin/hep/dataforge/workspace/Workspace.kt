@@ -15,23 +15,23 @@ import hep.dataforge.provider.Type
 
 
 @Type(Workspace.TYPE)
-interface Workspace : ContextAware, Provider {
+public interface Workspace : ContextAware, Provider {
     /**
      * The whole data node for current workspace
      */
-    val data: DataNode<Any>
+    public val data: DataNode<Any>
 
     /**
      * All targets associated with the workspace
      */
-    val targets: Map<String, Meta>
+    public val targets: Map<String, Meta>
 
     /**
      * All tasks associated with the workspace
      */
-    val tasks: Map<Name, Task<*>>
+    public val tasks: Map<Name, Task<*>>
 
-    override fun provideTop(target: String): Map<Name, Any> {
+    override fun content(target: String): Map<Name, Any> {
         return when (target) {
             "target", Meta.TYPE -> targets.mapKeys { it.key.toName() }
             Task.TYPE -> tasks
@@ -44,38 +44,36 @@ interface Workspace : ContextAware, Provider {
     /**
      * Invoke a task in the workspace utilizing caching if possible
      */
-    fun <R : Any> run(task: Task<R>, config: Meta): DataNode<R> {
-        context.activate(this)
-        try {
-            val model = task.build(this, config)
-            task.validate(model)
-            return task.run(this, model)
-        } finally {
-            context.deactivate(this)
-        }
+    public fun <R : Any> run(task: Task<R>, config: Meta): DataNode<R> {
+        val model = task.build(this, config)
+        task.validate(model)
+        return task.run(this, model)
     }
 
-    companion object {
-        const val TYPE = "workspace"
-        operator fun invoke(parent: Context = Global, block: SimpleWorkspaceBuilder.() -> Unit): SimpleWorkspace =
+    public companion object {
+        public const val TYPE: String = "workspace"
+        public operator fun invoke(
+            parent: Context = Global,
+            block: SimpleWorkspaceBuilder.() -> Unit,
+        ): SimpleWorkspace =
             SimpleWorkspaceBuilder(parent).apply(block).build()
     }
 }
 
-fun Workspace.run(task: Task<*>, target: String): DataNode<Any> {
-    val meta = targets[target] ?: error("A target with name $target not found in ${this}")
+public fun Workspace.run(task: Task<*>, target: String): DataNode<Any> {
+    val meta = targets[target] ?: error("A target with name $target not found in $this")
     return run(task, meta)
 }
 
 
-fun Workspace.run(task: String, target: String) =
+public fun Workspace.run(task: String, target: String): DataNode<Any> =
     tasks[task.toName()]?.let { run(it, target) } ?: error("Task with name $task not found")
 
-fun Workspace.run(task: String, meta: Meta) =
+public fun Workspace.run(task: String, meta: Meta): DataNode<Any> =
     tasks[task.toName()]?.let { run(it, meta) } ?: error("Task with name $task not found")
 
-fun Workspace.run(task: String, block: MetaBuilder.() -> Unit = {}) =
+public fun Workspace.run(task: String, block: MetaBuilder.() -> Unit = {}): DataNode<Any> =
     run(task, Meta(block))
 
-fun <T: Any> Workspace.run(task: Task<T>, metaBuilder: MetaBuilder.() -> Unit = {}): DataNode<T> =
+public fun <T : Any> Workspace.run(task: Task<T>, metaBuilder: MetaBuilder.() -> Unit = {}): DataNode<T> =
     run(task, Meta(metaBuilder))

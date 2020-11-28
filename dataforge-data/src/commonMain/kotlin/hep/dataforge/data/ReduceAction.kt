@@ -7,25 +7,25 @@ import hep.dataforge.names.toName
 import kotlin.reflect.KClass
 
 
-class JoinGroup<T : Any, R : Any>(var name: String, internal val node: DataNode<T>) {
+public class JoinGroup<T : Any, R : Any>(public var name: String, internal val node: DataNode<T>) {
 
-    var meta: MetaBuilder = MetaBuilder()
+    public var meta: MetaBuilder = MetaBuilder()
 
-    lateinit var result: suspend ActionEnv.(Map<Name, T>) -> R
+    public lateinit var result: suspend ActionEnv.(Map<Name, T>) -> R
 
-    fun result(f: suspend ActionEnv.(Map<Name, T>) -> R) {
+    public fun result(f: suspend ActionEnv.(Map<Name, T>) -> R) {
         this.result = f;
     }
 
 }
 
-class ReduceGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
+public class ReduceGroupBuilder<T : Any, R : Any>(public val actionMeta: Meta) {
     private val groupRules: MutableList<(DataNode<T>) -> List<JoinGroup<T, R>>> = ArrayList();
 
     /**
      * introduce grouping by value name
      */
-    fun byValue(tag: String, defaultTag: String = "@default", action: JoinGroup<T, R>.() -> Unit) {
+    public fun byValue(tag: String, defaultTag: String = "@default", action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { node ->
             GroupRule.byValue(tag, defaultTag).invoke(node).map {
                 JoinGroup<T, R>(it.key, it.value).apply(action)
@@ -36,7 +36,7 @@ class ReduceGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
     /**
      * Add a single fixed group to grouping rules
      */
-    fun group(groupName: String, filter: DataFilter, action: JoinGroup<T, R>.() -> Unit) {
+    public fun group(groupName: String, filter: DataFilter, action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { node ->
             listOf(
                 JoinGroup<T, R>(groupName, node.filter(filter)).apply(action)
@@ -44,7 +44,7 @@ class ReduceGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
         }
     }
 
-    fun group(groupName: String, filter: (Name, Data<T>) -> Boolean, action: JoinGroup<T, R>.() -> Unit) {
+    public fun group(groupName: String, filter: (Name, Data<T>) -> Boolean, action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { node ->
             listOf(
                 JoinGroup<T, R>(groupName, node.filter(filter)).apply(action)
@@ -55,7 +55,7 @@ class ReduceGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
     /**
      * Apply transformation to the whole node
      */
-    fun result(resultName: String, f: suspend ActionEnv.(Map<Name, T>) -> R) {
+    public fun result(resultName: String, f: suspend ActionEnv.(Map<Name, T>) -> R) {
         groupRules += { node ->
             listOf(JoinGroup<T, R>(resultName, node).apply { result(f) })
         }
@@ -71,9 +71,9 @@ class ReduceGroupBuilder<T : Any, R : Any>(val actionMeta: Meta) {
 /**
  * The same rules as for KPipe
  */
-class ReduceAction<T : Any, R : Any>(
-    val inputType: KClass<T>,
-    val outputType: KClass<out R>,
+public class ReduceAction<T : Any, R : Any>(
+    public val inputType: KClass<T>,
+    public val outputType: KClass<out R>,
     private val action: ReduceGroupBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
@@ -104,4 +104,4 @@ class ReduceAction<T : Any, R : Any>(
     }
 }
 
-operator fun <T> Map<Name, T>.get(name: String) = get(name.toName())
+public operator fun <T> Map<Name, T>.get(name: String): T? = get(name.toName())

@@ -3,18 +3,16 @@ package hep.dataforge.io
 import hep.dataforge.meta.*
 import hep.dataforge.meta.JsonMeta.Companion.JSON_ARRAY_KEY
 import kotlinx.io.asBinary
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.json
-import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 fun Meta.toByteArray(format: MetaFormat = JsonMetaFormat) = buildByteArray {
-    format.run { writeObject(this@toByteArray) }
+    format.writeObject(this@buildByteArray, this@toByteArray)
 }
 
 fun MetaFormat.fromByteArray(packet: ByteArray): Meta {
-    return packet.asBinary().read { readObject() }
+    return packet.asBinary().read { readObject(this) }
 }
 
 class MetaFormatTest {
@@ -57,21 +55,21 @@ class MetaFormatTest {
 
     @Test
     fun testJsonToMeta() {
-        val json = jsonArray {
+        val json = buildJsonArray {
             //top level array
-            +jsonArray {
-                +JsonPrimitive(88)
-                +json {
-                    "c" to "aasdad"
-                    "d" to true
-                }
-            }
-            +"value"
-            +jsonArray {
-                +JsonPrimitive(1.0)
-                +JsonPrimitive(2.0)
-                +JsonPrimitive(3.0)
-            }
+            add(buildJsonArray {
+                add(JsonPrimitive(88))
+                add(buildJsonObject {
+                    put("c", "aasdad")
+                    put("d", true)
+                })
+            })
+            add("value")
+            add(buildJsonArray {
+                add(JsonPrimitive(1.0))
+                add(JsonPrimitive(2.0))
+                add(JsonPrimitive(3.0))
+            })
         }
         val meta = json.toMetaItem().node!!
 

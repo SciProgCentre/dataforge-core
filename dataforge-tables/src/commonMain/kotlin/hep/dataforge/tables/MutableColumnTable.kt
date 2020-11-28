@@ -3,7 +3,7 @@ package hep.dataforge.tables
 /**
  * Mutable table with a fixed size, but dynamic columns
  */
-class MutableColumnTable<C: Any>(val size: Int) : Table<C> {
+public class MutableColumnTable<C: Any>(public val size: Int) : Table<C> {
     private val _columns = ArrayList<Column<C>>()
 
     override val columns: List<Column<C>> get() = _columns
@@ -16,7 +16,7 @@ class MutableColumnTable<C: Any>(val size: Int) : Table<C> {
     /**
      * Add a fixed column to the end of the table
      */
-    fun add(column: Column<C>) {
+    public fun add(column: Column<C>) {
         require(column.size == this.size) { "Required column size $size, but found ${column.size}" }
         _columns.add(column)
     }
@@ -24,7 +24,7 @@ class MutableColumnTable<C: Any>(val size: Int) : Table<C> {
     /**
      * Insert a column at [index]
      */
-    fun insert(index: Int, column: Column<C>) {
+    public fun insert(index: Int, column: Column<C>) {
         require(column.size == this.size) { "Required column size $size, but found ${column.size}" }
         _columns.add(index, column)
     }

@@ -8,7 +8,7 @@ import hep.dataforge.values.Value
 /**
  * Convert meta to map of maps
  */
-fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
+public fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
     return items.entries.associate { (token, item) ->
         token.toString() to when (item) {
             is MetaItem.NodeItem -> item.node.toMap()
@@ -22,7 +22,7 @@ fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
  * All other values will be converted to values.
  */
 @DFExperimental
-fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = Meta {
+public fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = Meta {
     @Suppress("UNCHECKED_CAST")
     fun toItem(value: Any?): MetaItem<*> = when (value) {
         is MetaItem<*> -> value

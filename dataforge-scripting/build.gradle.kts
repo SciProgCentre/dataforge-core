@@ -1,23 +1,22 @@
 plugins {
-    id("scientifik.mpp")
+    id("ru.mipt.npm.mpp")
 }
 
 kotlin {
-    jvm()
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 api(project(":dataforge-workspace"))
                 implementation(kotlin("scripting-common"))
             }
         }
-        val jvmMain by getting {
+        jvmMain{
             dependencies {
-                implementation(kotlin("scripting-jvm-host-embeddable"))
+                implementation(kotlin("scripting-jvm-host"))
                 implementation(kotlin("scripting-jvm"))
             }
         }
-        val jvmTest by getting {
+        jvmTest {
             dependencies {
                 implementation("ch.qos.logback:logback-classic:1.2.3")
             }

@@ -1,12 +1,13 @@
 package hep.dataforge.tables
 
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.invoke
 import kotlin.reflect.KClass
 
 
-class RealColumn(
+public class RealColumn(
     override val name: String,
-    val data: DoubleArray,
+    public val data: DoubleArray,
     override val meta: Meta = Meta.EMPTY
 ) : Column<Double> {
     override val type: KClass<out Double> get() = Double::class
@@ -34,8 +35,8 @@ class RealColumn(
         return result
     }
 
-    companion object {
-        inline operator fun <reified T : Any> invoke(
+    public companion object {
+        public inline operator fun <reified T : Any> invoke(
             name: String,
             data: DoubleArray,
             noinline metaBuilder: ColumnScheme.() -> Unit
@@ -43,9 +44,9 @@ class RealColumn(
     }
 }
 
-class IntColumn(
+public class IntColumn(
     override val name: String,
-    val data: IntArray,
+    public val data: IntArray,
     override val meta: Meta = Meta.EMPTY
 ) : Column<Int> {
     override val type: KClass<out Int> get() = Int::class
@@ -73,8 +74,8 @@ class IntColumn(
         return result
     }
 
-    companion object {
-        inline operator fun <reified T : Any> invoke(
+    public companion object {
+        public inline operator fun <reified T : Any> invoke(
             name: String,
             data: IntArray,
             noinline metaBuilder: ColumnScheme.() -> Unit

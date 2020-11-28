@@ -4,8 +4,12 @@ import hep.dataforge.meta.Meta.Companion.VALUE_KEY
 import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.names.*
-import hep.dataforge.values.*
-import kotlinx.serialization.*
+import hep.dataforge.values.EnumValue
+import hep.dataforge.values.Null
+import hep.dataforge.values.Value
+import hep.dataforge.values.boolean
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 
 /**
@@ -13,27 +17,16 @@ import kotlinx.serialization.*
  * * a [ValueItem] (leaf)
  * * a [NodeItem] (node)
  */
-@Serializable
-sealed class MetaItem<out M : Meta> {
+@Serializable(MetaItemSerializer::class)
+public sealed class MetaItem<out M : Meta>() {
 
     abstract override fun equals(other: Any?): Boolean
 
     abstract override fun hashCode(): Int
 
-    @Serializable
-    class ValueItem(val value: Value) : MetaItem<Nothing>() {
+    @Serializable(MetaItemSerializer::class)
+    public class ValueItem(public val value: Value) : MetaItem<Nothing>() {
         override fun toString(): String = value.toString()
-
-        @Serializer(ValueItem::class)
-        companion object : KSerializer<ValueItem> {
-            override val descriptor: SerialDescriptor get() = ValueSerializer.descriptor
-
-            override fun deserialize(decoder: Decoder): ValueItem = ValueItem(ValueSerializer.deserialize(decoder))
-
-            override fun serialize(encoder: Encoder, value: ValueItem) {
-                ValueSerializer.serialize(encoder, value.value)
-            }
-        }
 
         override fun equals(other: Any?): Boolean {
             return this.value == (other as? ValueItem)?.value
@@ -44,29 +37,18 @@ sealed class MetaItem<out M : Meta> {
         }
     }
 
-    @Serializable
-    class NodeItem<M : Meta>(@Serializable(MetaSerializer::class) val node: M) : MetaItem<M>() {
+    @Serializable(MetaItemSerializer::class)
+    public class NodeItem<M : Meta>(public val node: M) : MetaItem<M>() {
         //Fixing serializer for node could cause class cast problems, but it should not since Meta descendants are not serializeable
         override fun toString(): String = node.toString()
-
-        @Serializer(NodeItem::class)
-        companion object : KSerializer<NodeItem<out Meta>> {
-            override val descriptor: SerialDescriptor get() = MetaSerializer.descriptor
-
-            override fun deserialize(decoder: Decoder): NodeItem<*> = NodeItem(MetaSerializer.deserialize(decoder))
-
-            override fun serialize(encoder: Encoder, value: NodeItem<*>) {
-                MetaSerializer.serialize(encoder, value.node)
-            }
-        }
 
         override fun equals(other: Any?): Boolean = node == (other as? NodeItem<*>)?.node
 
         override fun hashCode(): Int = node.hashCode()
     }
 
-    companion object {
-        fun of(arg: Any?): MetaItem<*> {
+    public companion object {
+        public fun of(arg: Any?): MetaItem<*> {
             return when (arg) {
                 null -> ValueItem(Null)
                 is MetaItem<*> -> arg
@@ -77,16 +59,24 @@ sealed class MetaItem<out M : Meta> {
     }
 }
 
+public fun Value.asMetaItem(): ValueItem = ValueItem(this)
+public fun <M : Meta> M.asMetaItem(): NodeItem<M> = NodeItem(this)
+
 /**
  * The object that could be represented as [Meta]. Meta provided by [toMeta] method should fully represent object state.
  * Meaning that two states with the same meta are equal.
  */
-interface MetaRepr {
-    fun toMeta(): Meta
+@Serializable(MetaSerializer::class)
+public interface MetaRepr {
+    public fun toMeta(): Meta
 }
 
-interface ItemProvider{
-    fun getItem(name: Name): MetaItem<*>?
+public fun interface ItemProvider {
+    public fun getItem(name: Name): MetaItem<*>?
+
+    public companion object {
+        public val EMPTY: ItemProvider = ItemProvider { null }
+    }
 }
 
 /**
@@ -96,15 +86,15 @@ interface ItemProvider{
  *
  *   * Same name siblings are supported via elements with the same [Name] but different queries
  */
-interface Meta : MetaRepr, ItemProvider {
+public interface Meta : MetaRepr, ItemProvider {
     /**
      * Top level items of meta tree
      */
-    val items: Map<NameToken, MetaItem<*>>
+    public val items: Map<NameToken, MetaItem<*>>
 
     override fun getItem(name: Name): MetaItem<*>? {
         if (name.isEmpty()) return NodeItem(this)
-        return name.first()?.let { token ->
+        return name.firstOrNull()?.let { token ->
             val tail = name.cutFirst()
             when (tail.length) {
                 0 -> items[token]
@@ -121,15 +111,15 @@ interface Meta : MetaRepr, ItemProvider {
 
     override fun toString(): String
 
-    companion object {
-        const val TYPE = "meta"
+    public companion object {
+        public const val TYPE: String = "meta"
 
         /**
          * A key for single value node
          */
-        const val VALUE_KEY = "@value"
+        public const val VALUE_KEY: String = "@value"
 
-        val EMPTY: Meta = object: MetaBase() {
+        public val EMPTY: Meta = object : MetaBase() {
             override val items: Map<NameToken, MetaItem<*>> = emptyMap()
         }
     }
@@ -142,19 +132,19 @@ interface Meta : MetaRepr, ItemProvider {
  *
  * If [name] is empty return current [Meta] as a [NodeItem]
  */
-operator fun Meta?.get(name: Name): MetaItem<*>? = this?.getItem(name)
+public operator fun Meta?.get(name: Name): MetaItem<*>? = this?.getItem(name)
 
-operator fun Meta?.get(token: NameToken): MetaItem<*>? = this?.items?.get(token)
+public operator fun Meta?.get(token: NameToken): MetaItem<*>? = this?.items?.get(token)
 
 /**
  * Parse [Name] from [key] using full name notation and pass it to [Meta.get]
  */
-operator fun Meta?.get(key: String): MetaItem<*>? = get(key.toName())
+public operator fun Meta?.get(key: String): MetaItem<*>? = get(key.toName())
 
 /**
  * Get a sequence of [Name]-[Value] pairs
  */
-fun Meta.values(): Sequence<Pair<Name, Value>> {
+public fun Meta.values(): Sequence<Pair<Name, Value>> {
     return items.asSequence().flatMap { (key, item) ->
         when (item) {
             is ValueItem -> sequenceOf(key.asName() to item.value)
@@ -166,7 +156,7 @@ fun Meta.values(): Sequence<Pair<Name, Value>> {
 /**
  * Get a sequence of all [Name]-[MetaItem] pairs for all items including nodes
  */
-fun Meta.sequence(): Sequence<Pair<Name, MetaItem<*>>> {
+public fun Meta.sequence(): Sequence<Pair<Name, MetaItem<*>>> {
     return sequence {
         items.forEach { (key, item) ->
             yield(key.asName() to item)
@@ -179,33 +169,33 @@ fun Meta.sequence(): Sequence<Pair<Name, MetaItem<*>>> {
     }
 }
 
-operator fun Meta.iterator(): Iterator<Pair<Name, MetaItem<*>>> = sequence().iterator()
+public operator fun Meta.iterator(): Iterator<Pair<Name, MetaItem<*>>> = sequence().iterator()
 
 /**
  * A meta node that ensures that all of its descendants has at least the same type
  */
-interface MetaNode<out M : MetaNode<M>> : Meta {
+public interface MetaNode<out M : MetaNode<M>> : Meta {
     override val items: Map<NameToken, MetaItem<M>>
 }
 
 /**
  * The same as [Meta.get], but with specific node type
  */
-operator fun <M : MetaNode<M>> M?.get(name: Name): MetaItem<M>? = if( this == null) {
+public operator fun <M : MetaNode<M>> M?.get(name: Name): MetaItem<M>? = if (this == null) {
     null
 } else {
     @Suppress("UNCHECKED_CAST", "ReplaceGetOrSet")
     (this as Meta).get(name) as MetaItem<M>? // Do not change
 }
 
-operator fun <M : MetaNode<M>> M?.get(key: String): MetaItem<M>? = this[key.toName()]
+public operator fun <M : MetaNode<M>> M?.get(key: String): MetaItem<M>? = this[key.toName()]
 
-operator fun <M : MetaNode<M>> M?.get(key: NameToken): MetaItem<M>? = this[key.asName()]
+public operator fun <M : MetaNode<M>> M?.get(key: NameToken): MetaItem<M>? = this[key.asName()]
 
 /**
  * Equals, hashcode and to string for any meta
  */
-abstract class MetaBase : Meta {
+public abstract class MetaBase : Meta {
 
     override fun equals(other: Any?): Boolean = if (other is Meta) {
         this.items == other.items
@@ -215,30 +205,33 @@ abstract class MetaBase : Meta {
 
     override fun hashCode(): Int = items.hashCode()
 
-    override fun toString(): String = JSON_PRETTY.stringify(MetaSerializer, this)
+    override fun toString(): String = Json {
+        prettyPrint = true
+        useArrayPolymorphism = true
+    }.encodeToString(MetaSerializer, this)
 }
 
 /**
  * Equals and hash code implementation for meta node
  */
-abstract class AbstractMetaNode<M : MetaNode<M>> : MetaNode<M>, MetaBase()
+public abstract class AbstractMetaNode<M : MetaNode<M>> : MetaNode<M>, MetaBase()
 
 /**
  * The meta implementation which is guaranteed to be immutable.
  *
  * If the argument is possibly mutable node, it is copied on creation
  */
-class SealedMeta internal constructor(
-    override val items: Map<NameToken, MetaItem<SealedMeta>>
+public class SealedMeta internal constructor(
+    override val items: Map<NameToken, MetaItem<SealedMeta>>,
 ) : AbstractMetaNode<SealedMeta>()
 
 /**
  * Generate sealed node from [this]. If it is already sealed return it as is
  */
-fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(items.mapValues { entry -> entry.value.seal() })
+public fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(items.mapValues { entry -> entry.value.seal() })
 
 @Suppress("UNCHECKED_CAST")
-fun MetaItem<*>.seal(): MetaItem<SealedMeta> = when (this) {
+public fun MetaItem<*>.seal(): MetaItem<SealedMeta> = when (this) {
     is ValueItem -> this
     is NodeItem -> NodeItem(node.seal())
 }
@@ -246,32 +239,32 @@ fun MetaItem<*>.seal(): MetaItem<SealedMeta> = when (this) {
 /**
  * Unsafe methods to access values and nodes directly from [MetaItem]
  */
-val MetaItem<*>?.value: Value?
+public val MetaItem<*>?.value: Value?
     get() = (this as? ValueItem)?.value
         ?: (this?.node?.get(VALUE_KEY) as? ValueItem)?.value
 
-val MetaItem<*>?.string get() = value?.string
-val MetaItem<*>?.boolean get() = value?.boolean
-val MetaItem<*>?.number get() = value?.number
-val MetaItem<*>?.double get() = number?.toDouble()
-val MetaItem<*>?.float get() = number?.toFloat()
-val MetaItem<*>?.int get() = number?.toInt()
-val MetaItem<*>?.long get() = number?.toLong()
-val MetaItem<*>?.short get() = number?.toShort()
+public val MetaItem<*>?.string: String? get() = value?.string
+public val MetaItem<*>?.boolean: Boolean? get() = value?.boolean
+public val MetaItem<*>?.number: Number? get() = value?.number
+public val MetaItem<*>?.double: Double? get() = number?.toDouble()
+public val MetaItem<*>?.float: Float? get() = number?.toFloat()
+public val MetaItem<*>?.int: Int? get() = number?.toInt()
+public val MetaItem<*>?.long: Long? get() = number?.toLong()
+public val MetaItem<*>?.short: Short? get() = number?.toShort()
 
-inline fun <reified E : Enum<E>> MetaItem<*>?.enum(): E? = if (this is ValueItem && this.value is EnumValue<*>) {
+public inline fun <reified E : Enum<E>> MetaItem<*>?.enum(): E? = if (this is ValueItem && this.value is EnumValue<*>) {
     this.value.value as E
 } else {
     string?.let { enumValueOf<E>(it) }
 }
 
-val MetaItem<*>?.stringList get() = value?.list?.map { it.string } ?: emptyList()
+public val MetaItem<*>.stringList: List<String>? get() = value?.list?.map { it.string }
 
-val <M : Meta> MetaItem<M>?.node: M?
+public val <M : Meta> MetaItem<M>?.node: M?
     get() = when (this) {
         null -> null
         is ValueItem -> null//error("Trying to interpret value meta item as node item")
         is NodeItem -> node
     }
 
-fun Meta.isEmpty() = this === Meta.EMPTY || this.items.isEmpty()
+public fun Meta.isEmpty(): Boolean = this === Meta.EMPTY || this.items.isEmpty()

@@ -11,7 +11,7 @@ class ContextTest {
     class DummyPlugin : AbstractPlugin() {
         override val tag get() = PluginTag("test")
 
-        override fun provideTop(target: String): Map<Name, Any> {
+        override fun content(target: String): Map<Name, Any> {
             return when(target){
                 "test" -> listOf("a", "b", "c.d").associate { it.toName() to it.toName() }
                 else -> emptyMap()
@@ -21,8 +21,11 @@ class ContextTest {
 
     @Test
     fun testPluginManager() {
-        Global.plugins.load(DummyPlugin())
-        val members = Global.content<Name>("test")
+        val context = Global.context("test"){
+            plugin(DummyPlugin())
+        }
+        //Global.plugins.load(DummyPlugin())
+        val members = context.gather<Name>("test")
         assertEquals(3, members.count())
         members.forEach {
             assertEquals(it.key, it.value.appendLeft("test"))

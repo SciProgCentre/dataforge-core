@@ -1,17 +1,17 @@
-import scientifik.DependencySourceSet.TEST
-import scientifik.useSerialization
-
 plugins {
-    id("scientifik.mpp")
+    id("ru.mipt.npm.mpp")
+    id("ru.mipt.npm.native")
 }
 
 description = "IO module"
 
-useSerialization(sourceSet = TEST){
-    cbor()
+kscience {
+    useSerialization(sourceSet = ru.mipt.npm.gradle.DependencySourceSet.TEST) {
+        cbor()
+    }
 }
 
-val ioVersion by rootProject.extra("0.2.0-npm-dev-7")
+val ioVersion by rootProject.extra("0.2.0-npm-dev-11")
 
 kotlin {
     sourceSets {

@@ -4,25 +4,30 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.NameToken
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
-import kotlinx.serialization.*
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlin.collections.set
 
 //TODO add validator to configuration
 
-data class MetaListener(
+public data class MetaListener(
     val owner: Any? = null,
     val action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit
 )
 
-interface ObservableMeta : Meta {
-    fun onChange(owner: Any?, action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit)
-    fun removeListener(owner: Any?)
+public interface ObservableMeta : Meta {
+    public fun onChange(owner: Any?, action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit)
+    public fun removeListener(owner: Any?)
 }
 
 /**
  * Mutable meta representing object state
  */
-@Serializable
-class Config : AbstractMutableMeta<Config>(), ObservableMeta {
+@Serializable(Config.Companion::class)
+public class Config() : AbstractMutableMeta<Config>(), ObservableMeta {
 
     private val listeners = HashSet<MetaListener>()
 
@@ -46,12 +51,12 @@ class Config : AbstractMutableMeta<Config>(), ObservableMeta {
 
     override fun replaceItem(key: NameToken, oldItem: MetaItem<Config>?, newItem: MetaItem<Config>?) {
         if (newItem == null) {
-            _items.remove(key)
+            children.remove(key)
             if (oldItem != null && oldItem is MetaItem.NodeItem<Config>) {
                 oldItem.node.removeListener(this)
             }
         } else {
-            _items[key] = newItem
+            children[key] = newItem
             if (newItem is MetaItem.NodeItem) {
                 newItem.node.onChange(this) { name, oldChild, newChild ->
                     itemChanged(key + name, oldChild, newChild)
@@ -68,10 +73,9 @@ class Config : AbstractMutableMeta<Config>(), ObservableMeta {
 
     override fun empty(): Config = Config()
 
-    @Serializer(Config::class)
-    companion object ConfigSerializer : KSerializer<Config> {
+    public companion object ConfigSerializer : KSerializer<Config> {
 
-        fun empty(): Config = Config()
+        public fun empty(): Config = Config()
         override val descriptor: SerialDescriptor get() = MetaSerializer.descriptor
 
         override fun deserialize(decoder: Decoder): Config {
@@ -84,9 +88,9 @@ class Config : AbstractMutableMeta<Config>(), ObservableMeta {
     }
 }
 
-operator fun Config.get(token: NameToken): MetaItem<Config>? = items[token]
+public operator fun Config.get(token: NameToken): MetaItem<Config>? = items[token]
 
-fun Meta.asConfig(): Config = this as? Config ?: Config().also { builder ->
+public fun Meta.asConfig(): Config = this as? Config ?: Config().also { builder ->
     this.items.mapValues { entry ->
         val item = entry.value
         builder[entry.key.asName()] = when (item) {

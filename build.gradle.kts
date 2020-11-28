@@ -1,20 +1,18 @@
-
 plugins {
-    val toolsVersion = "0.5.0"
-    id("scientifik.mpp") version toolsVersion apply false
-    id("scientifik.jvm") version toolsVersion apply false
-    id("scientifik.publish") version toolsVersion apply false
-    id("org.jetbrains.dokka") version "0.10.1"
+    id("ru.mipt.npm.project")
 }
 
-val dataforgeVersion by extra("0.1.8")
+val dataforgeVersion by extra("0.2.0")
 
 val bintrayRepo by extra("dataforge")
 val githubProject by extra("dataforge-core")
+val spaceRepo by extra("https://maven.jetbrains.space/mipt-npm/p/df/maven")
 
 allprojects {
     group = "hep.dataforge"
     version = dataforgeVersion
+
+    apply<org.jetbrains.dokka.gradle.DokkaPlugin>()
 
     repositories {
         mavenLocal()
@@ -22,6 +20,5 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = "scientifik.publish")
-    apply(plugin = "org.jetbrains.dokka")
+    apply(plugin = "ru.mipt.npm.publish")
 }

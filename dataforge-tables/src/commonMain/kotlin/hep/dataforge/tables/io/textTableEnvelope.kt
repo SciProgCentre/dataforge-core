@@ -12,7 +12,7 @@ import kotlinx.io.asBinary
 
 
 @ExperimentalIoApi
-suspend fun Table<Value>.wrap(): Envelope = Envelope {
+public suspend fun Table<Value>.wrap(): Envelope = Envelope {
     meta {
         header.forEachIndexed { index, columnHeader ->
             set("column", index.toString(), Meta {
@@ -32,9 +32,9 @@ suspend fun Table<Value>.wrap(): Envelope = Envelope {
 
 @DFExperimental
 @ExperimentalIoApi
-fun TextRows.Companion.readEnvelope(envelope: Envelope): TextRows {
+public fun TextRows.Companion.readEnvelope(envelope: Envelope): TextRows {
     val header = envelope.meta.getIndexed("column")
-        .entries.sortedBy { it.key.toInt() }
+        .entries.sortedBy { it.key?.toInt() }
         .map { (_, item) ->
             SimpleColumnHeader(item.node["name"].string!!, Value::class, item.node["meta"].node ?: Meta.EMPTY)
         }

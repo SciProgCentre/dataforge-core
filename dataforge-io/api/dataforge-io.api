@@ -1,0 +1,469 @@
+public final class hep/dataforge/io/BinaryMetaFormat : hep/dataforge/io/MetaFormat, hep/dataforge/io/MetaFormatFactory {
+	public static final field INSTANCE Lhep/dataforge/io/BinaryMetaFormat;
+	public fun getKey ()S
+	public fun getName ()Lhep/dataforge/names/Name;
+	public fun getShortName ()Ljava/lang/String;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/MetaFormat;
+	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
+	public fun readMeta (Lkotlinx/io/Input;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Meta;
+	public final fun readMetaItem (Lkotlinx/io/Input;)Lhep/dataforge/meta/MetaItem;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/meta/Meta;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeMeta (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+	public final fun writeValue (Lkotlinx/io/Output;Lhep/dataforge/values/Value;)V
+}
+
+public final class hep/dataforge/io/BinaryView : kotlinx/io/Binary {
+	public fun <init> (Lkotlinx/io/Binary;II)V
+	public fun getSize ()I
+	public fun read (IILkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public abstract interface class hep/dataforge/io/Consumer {
+	public abstract fun consume (Lhep/dataforge/io/Envelope;)V
+}
+
+public final class hep/dataforge/io/DoubleIOFormat : hep/dataforge/io/IOFormat, hep/dataforge/io/IOFormatFactory {
+	public static final field INSTANCE Lhep/dataforge/io/DoubleIOFormat;
+	public fun getName ()Lhep/dataforge/names/Name;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/IOFormat;
+	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
+	public fun readObject (Lkotlinx/io/Input;)Ljava/lang/Double;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeObject (Lkotlinx/io/Output;D)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+
+public abstract interface class hep/dataforge/io/Envelope {
+	public static final field Companion Lhep/dataforge/io/Envelope$Companion;
+	public abstract fun getData ()Lkotlinx/io/Binary;
+	public abstract fun getMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/io/Envelope$Companion {
+	public final fun getENVELOPE_DATA_ID_KEY ()Lhep/dataforge/names/Name;
+	public final fun getENVELOPE_DATA_TYPE_KEY ()Lhep/dataforge/names/Name;
+	public final fun getENVELOPE_DESCRIPTION_KEY ()Lhep/dataforge/names/Name;
+	public final fun getENVELOPE_NAME_KEY ()Lhep/dataforge/names/Name;
+	public final fun getENVELOPE_NODE_KEY ()Lhep/dataforge/names/Name;
+	public final fun getENVELOPE_TYPE_KEY ()Lhep/dataforge/names/Name;
+	public final fun invoke (Lkotlin/jvm/functions/Function1;)Lhep/dataforge/io/Envelope;
+}
+
+public final class hep/dataforge/io/EnvelopeBuilder : hep/dataforge/io/Envelope {
+	public fun <init> ()V
+	public final fun data (Lkotlin/jvm/functions/Function1;)V
+	public fun getData ()Lkotlinx/io/Binary;
+	public final fun getDataID ()Ljava/lang/String;
+	public final fun getDataType ()Ljava/lang/String;
+	public final fun getDescription ()Ljava/lang/String;
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public final fun meta (Lkotlin/jvm/functions/Function1;)V
+	public final fun seal ()Lhep/dataforge/io/Envelope;
+	public fun setData (Lkotlinx/io/Binary;)V
+	public final fun setDataID (Ljava/lang/String;)V
+	public final fun setDataType (Ljava/lang/String;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public fun setMeta (Lhep/dataforge/meta/Meta;)V
+	public final fun setName (Ljava/lang/String;)V
+	public final fun setType (Ljava/lang/String;)V
+}
+
+public abstract interface class hep/dataforge/io/EnvelopeFormat : hep/dataforge/io/IOFormat {
+	public abstract fun getDefaultMetaFormat ()Lhep/dataforge/io/MetaFormatFactory;
+	public abstract fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/io/Envelope;
+	public abstract fun readPartial (Lkotlinx/io/Input;)Lhep/dataforge/io/PartialEnvelope;
+	public abstract fun writeEnvelope (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/Meta;)V
+	public abstract fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;)V
+}
+
+public final class hep/dataforge/io/EnvelopeFormat$DefaultImpls {
+	public static fun getDefaultMetaFormat (Lhep/dataforge/io/EnvelopeFormat;)Lhep/dataforge/io/MetaFormatFactory;
+	public static synthetic fun writeEnvelope$default (Lhep/dataforge/io/EnvelopeFormat;Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)V
+	public static fun writeObject (Lhep/dataforge/io/EnvelopeFormat;Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;)V
+}
+
+public abstract interface class hep/dataforge/io/EnvelopeFormatFactory : hep/dataforge/io/EnvelopeFormat, hep/dataforge/io/IOFormatFactory {
+	public static final field Companion Lhep/dataforge/io/EnvelopeFormatFactory$Companion;
+	public static final field ENVELOPE_FORMAT_TYPE Ljava/lang/String;
+	public abstract fun getName ()Lhep/dataforge/names/Name;
+	public abstract fun getType ()Lkotlin/reflect/KClass;
+	public abstract fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/EnvelopeFormat;
+	public abstract fun peekFormat (Lhep/dataforge/io/IOPlugin;Lkotlinx/io/Input;)Lhep/dataforge/io/EnvelopeFormat;
+}
+
+public final class hep/dataforge/io/EnvelopeFormatFactory$Companion {
+	public static final field ENVELOPE_FORMAT_TYPE Ljava/lang/String;
+}
+
+public final class hep/dataforge/io/EnvelopeFormatFactory$DefaultImpls {
+	public static fun getDefaultMetaFormat (Lhep/dataforge/io/EnvelopeFormatFactory;)Lhep/dataforge/io/MetaFormatFactory;
+	public static fun getName (Lhep/dataforge/io/EnvelopeFormatFactory;)Lhep/dataforge/names/Name;
+	public static fun getType (Lhep/dataforge/io/EnvelopeFormatFactory;)Lkotlin/reflect/KClass;
+	public static fun toMeta (Lhep/dataforge/io/EnvelopeFormatFactory;)Lhep/dataforge/meta/Meta;
+	public static fun writeObject (Lhep/dataforge/io/EnvelopeFormatFactory;Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;)V
+}
+
+public final class hep/dataforge/io/EnvelopeFormatKt {
+	public static final fun read (Lhep/dataforge/io/EnvelopeFormat;Lkotlinx/io/Input;)Lhep/dataforge/io/Envelope;
+}
+
+public final class hep/dataforge/io/EnvelopeKt {
+	public static final fun contentEquals (Lhep/dataforge/io/Envelope;Lhep/dataforge/io/Envelope;)Z
+	public static final fun dataEquals (Lhep/dataforge/io/Envelope;Lhep/dataforge/io/Envelope;)Z
+	public static final fun getDataID (Lhep/dataforge/io/Envelope;)Ljava/lang/String;
+	public static final fun getDataType (Lhep/dataforge/io/Envelope;)Ljava/lang/String;
+	public static final fun getDescription (Lhep/dataforge/io/Envelope;)Ljava/lang/String;
+	public static final fun getType (Lhep/dataforge/io/Envelope;)Ljava/lang/String;
+	public static final fun metaEquals (Lhep/dataforge/io/Envelope;Lhep/dataforge/io/Envelope;)Z
+	public static final fun withMetaLayers (Lhep/dataforge/io/Envelope;[Lhep/dataforge/meta/Meta;)Lhep/dataforge/io/Envelope;
+}
+
+public final class hep/dataforge/io/EnvelopePart {
+	public fun <init> (Lkotlinx/io/Binary;Lhep/dataforge/meta/Meta;)V
+	public final fun component1 ()Lkotlinx/io/Binary;
+	public final fun component2 ()Lhep/dataforge/meta/Meta;
+	public final fun copy (Lkotlinx/io/Binary;Lhep/dataforge/meta/Meta;)Lhep/dataforge/io/EnvelopePart;
+	public static synthetic fun copy$default (Lhep/dataforge/io/EnvelopePart;Lkotlinx/io/Binary;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/io/EnvelopePart;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBinary ()Lkotlinx/io/Binary;
+	public final fun getDescription ()Lhep/dataforge/meta/Meta;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class hep/dataforge/io/EnvelopePartsKt {
+	public static final fun envelope (Lhep/dataforge/io/EnvelopePart;Lhep/dataforge/io/EnvelopeFormat;)Lhep/dataforge/io/Envelope;
+	public static final fun envelope (Lhep/dataforge/io/EnvelopePart;Lhep/dataforge/io/IOPlugin;)Lhep/dataforge/io/Envelope;
+	public static final fun envelopes (Lhep/dataforge/io/EnvelopeBuilder;Ljava/util/List;Lhep/dataforge/io/EnvelopeFormat;Ljava/lang/String;)V
+	public static synthetic fun envelopes$default (Lhep/dataforge/io/EnvelopeBuilder;Ljava/util/List;Lhep/dataforge/io/EnvelopeFormat;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun getName (Lhep/dataforge/io/EnvelopePart;)Ljava/lang/String;
+	public static final fun multipart (Lhep/dataforge/io/EnvelopeBuilder;Ljava/util/List;Ljava/lang/String;)V
+	public static synthetic fun multipart$default (Lhep/dataforge/io/EnvelopeBuilder;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun parts (Lhep/dataforge/io/Envelope;)Ljava/util/List;
+}
+
+public final class hep/dataforge/io/FileIOKt {
+	public static final fun append (Ljava/nio/file/Path;Lkotlin/jvm/functions/Function1;)V
+	public static final fun getDATA_FILE_NAME (Lhep/dataforge/io/IOPlugin$Companion;)Ljava/lang/String;
+	public static final fun getMETA_FILE_NAME (Lhep/dataforge/io/IOPlugin$Companion;)Ljava/lang/String;
+	public static final fun peekBinaryFormat (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;)Lhep/dataforge/io/EnvelopeFormat;
+	public static final fun read (Ljava/nio/file/Path;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun readEnvelope (Ljava/nio/file/Path;Lhep/dataforge/io/EnvelopeFormat;)Lhep/dataforge/io/Envelope;
+	public static final fun readEnvelopeFile (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;ZLkotlin/jvm/functions/Function2;)Lhep/dataforge/io/Envelope;
+	public static synthetic fun readEnvelopeFile$default (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;ZLkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lhep/dataforge/io/Envelope;
+	public static final fun readMetaFile (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/io/MetaFormat;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Meta;
+	public static synthetic fun readMetaFile$default (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/io/MetaFormat;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILjava/lang/Object;)Lhep/dataforge/meta/Meta;
+	public static final fun rewrite (Ljava/nio/file/Path;Lkotlin/jvm/functions/Function1;)V
+	public static final fun write (Ljava/nio/file/Path;Lkotlin/jvm/functions/Function1;)V
+	public static final fun writeEnvelopeDirectory (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;)V
+	public static synthetic fun writeEnvelopeDirectory$default (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;ILjava/lang/Object;)V
+	public static final fun writeEnvelopeFile (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/EnvelopeFormat;Lhep/dataforge/io/MetaFormatFactory;)V
+	public static synthetic fun writeEnvelopeFile$default (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/EnvelopeFormat;Lhep/dataforge/io/MetaFormatFactory;ILjava/lang/Object;)V
+	public static final fun writeMetaFile (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/meta/Meta;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
+	public static synthetic fun writeMetaFile$default (Lhep/dataforge/io/IOPlugin;Ljava/nio/file/Path;Lhep/dataforge/meta/Meta;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILjava/lang/Object;)V
+	public static final fun writeToFile (Lhep/dataforge/io/IOFormat;Ljava/nio/file/Path;Ljava/lang/Object;)V
+}
+
+public abstract interface class hep/dataforge/io/IOFormat : hep/dataforge/meta/MetaRepr {
+	public static final field Companion Lhep/dataforge/io/IOFormat$Companion;
+	public abstract fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public abstract fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/io/IOFormat$Companion {
+	public final fun getMETA_KEY ()Lhep/dataforge/names/Name;
+	public final fun getNAME_KEY ()Lhep/dataforge/names/Name;
+}
+
+public abstract interface class hep/dataforge/io/IOFormatFactory : hep/dataforge/context/Factory, hep/dataforge/context/Named, hep/dataforge/meta/MetaRepr {
+	public static final field Companion Lhep/dataforge/io/IOFormatFactory$Companion;
+	public static final field IO_FORMAT_TYPE Ljava/lang/String;
+	public abstract fun getType ()Lkotlin/reflect/KClass;
+	public abstract fun toMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/io/IOFormatFactory$Companion {
+	public static final field IO_FORMAT_TYPE Ljava/lang/String;
+}
+
+public final class hep/dataforge/io/IOFormatFactory$DefaultImpls {
+	public static fun toMeta (Lhep/dataforge/io/IOFormatFactory;)Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/io/IOFormatKt {
+	public static final fun fill (Lkotlinx/io/pool/ObjectPool;Lkotlin/jvm/functions/Function1;)Ljava/nio/ByteBuffer;
+	public static final fun readWith (Lkotlinx/io/Binary;Lhep/dataforge/io/IOFormat;)Ljava/lang/Object;
+	public static final fun readWith (Lkotlinx/io/Input;Lhep/dataforge/io/IOFormat;)Ljava/lang/Object;
+	public static final fun toBinary (Lhep/dataforge/io/IOFormat;Ljava/lang/Object;)Lkotlinx/io/Binary;
+	public static final fun writeWith (Lkotlinx/io/Output;Lhep/dataforge/io/IOFormat;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/io/IOPlugin : hep/dataforge/context/AbstractPlugin {
+	public static final field Companion Lhep/dataforge/io/IOPlugin$Companion;
+	public fun <init> (Lhep/dataforge/meta/Meta;)V
+	public fun content (Ljava/lang/String;)Ljava/util/Map;
+	public final fun getEnvelopeFormatFactories ()Ljava/util/Collection;
+	public final fun getIoFormatFactories ()Ljava/util/Collection;
+	public final fun getMetaFormatFactories ()Ljava/util/Collection;
+	public fun getTag ()Lhep/dataforge/context/PluginTag;
+	public final fun resolveEnvelopeFormat (Lhep/dataforge/meta/MetaItem;)Lhep/dataforge/io/EnvelopeFormat;
+	public final fun resolveIOFormat (Lhep/dataforge/meta/MetaItem;Lkotlin/reflect/KClass;)Lhep/dataforge/io/IOFormat;
+	public final fun resolveMetaFormat (Ljava/lang/String;Lhep/dataforge/meta/Meta;)Lhep/dataforge/io/MetaFormat;
+	public final fun resolveMetaFormat (SLhep/dataforge/meta/Meta;)Lhep/dataforge/io/MetaFormat;
+	public static synthetic fun resolveMetaFormat$default (Lhep/dataforge/io/IOPlugin;Ljava/lang/String;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/io/MetaFormat;
+	public static synthetic fun resolveMetaFormat$default (Lhep/dataforge/io/IOPlugin;SLhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/io/MetaFormat;
+}
+
+public final class hep/dataforge/io/IOPlugin$Companion : hep/dataforge/context/PluginFactory {
+	public final fun getDefaultEnvelopeFormats ()Ljava/util/List;
+	public final fun getDefaultMetaFormats ()Ljava/util/List;
+	public fun getTag ()Lhep/dataforge/context/PluginTag;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/IOPlugin;
+	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
+}
+
+public final class hep/dataforge/io/IOPluginKt {
+	public static final fun getIo (Lhep/dataforge/context/Context;)Lhep/dataforge/io/IOPlugin;
+}
+
+public final class hep/dataforge/io/IoMiscKt {
+	public static final fun Binary (ILkotlin/jvm/functions/Function1;)Lkotlinx/io/Binary;
+	public static synthetic fun Binary$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lkotlinx/io/Binary;
+	public static final fun buildByteArray (ILkotlin/jvm/functions/Function1;)[B
+	public static synthetic fun buildByteArray$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)[B
+	public static final fun get (Lkotlinx/io/Binary;Lkotlin/ranges/IntRange;)Lhep/dataforge/io/BinaryView;
+	public static final fun readRawString (Lkotlinx/io/Input;I)Ljava/lang/String;
+	public static final fun view (Lkotlinx/io/Binary;II)Lhep/dataforge/io/BinaryView;
+	public static final fun writeRawString (Lkotlinx/io/Output;Ljava/lang/String;)V
+}
+
+public final class hep/dataforge/io/JsonMetaFormat : hep/dataforge/io/MetaFormat {
+	public static final field Companion Lhep/dataforge/io/JsonMetaFormat$Companion;
+	public fun <init> ()V
+	public fun <init> (Lkotlinx/serialization/json/Json;)V
+	public synthetic fun <init> (Lkotlinx/serialization/json/Json;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun readMeta (Lkotlinx/io/Input;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Meta;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/meta/Meta;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeMeta (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/io/JsonMetaFormat$Companion : hep/dataforge/io/MetaFormatFactory {
+	public final fun getDEFAULT_JSON ()Lkotlinx/serialization/json/Json;
+	public fun getKey ()S
+	public fun getName ()Lhep/dataforge/names/Name;
+	public fun getShortName ()Ljava/lang/String;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/MetaFormat;
+	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
+	public fun readMeta (Lkotlinx/io/Input;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Meta;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/meta/Meta;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeMeta (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/io/ListIOFormat : hep/dataforge/io/IOFormat {
+	public fun <init> (Lhep/dataforge/io/IOFormat;)V
+	public final fun getFormat ()Lhep/dataforge/io/IOFormat;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun readObject (Lkotlinx/io/Input;)Ljava/util/List;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+	public fun writeObject (Lkotlinx/io/Output;Ljava/util/List;)V
+}
+
+public abstract interface class hep/dataforge/io/MetaFormat : hep/dataforge/io/IOFormat {
+	public abstract fun readMeta (Lkotlinx/io/Input;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Meta;
+	public abstract fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/meta/Meta;
+	public abstract fun writeMeta (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
+	public abstract fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;)V
+}
+
+public final class hep/dataforge/io/MetaFormat$DefaultImpls {
+	public static synthetic fun readMeta$default (Lhep/dataforge/io/MetaFormat;Lkotlinx/io/Input;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILjava/lang/Object;)Lhep/dataforge/meta/Meta;
+	public static fun readObject (Lhep/dataforge/io/MetaFormat;Lkotlinx/io/Input;)Lhep/dataforge/meta/Meta;
+	public static synthetic fun writeMeta$default (Lhep/dataforge/io/MetaFormat;Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILjava/lang/Object;)V
+	public static fun writeObject (Lhep/dataforge/io/MetaFormat;Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;)V
+}
+
+public abstract interface class hep/dataforge/io/MetaFormatFactory : hep/dataforge/io/IOFormatFactory, hep/dataforge/io/MetaFormat {
+	public static final field Companion Lhep/dataforge/io/MetaFormatFactory$Companion;
+	public static final field META_FORMAT_TYPE Ljava/lang/String;
+	public abstract fun getKey ()S
+	public abstract fun getName ()Lhep/dataforge/names/Name;
+	public abstract fun getShortName ()Ljava/lang/String;
+	public abstract fun getType ()Lkotlin/reflect/KClass;
+	public abstract fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/MetaFormat;
+}
+
+public final class hep/dataforge/io/MetaFormatFactory$Companion {
+	public static final field META_FORMAT_TYPE Ljava/lang/String;
+}
+
+public final class hep/dataforge/io/MetaFormatFactory$DefaultImpls {
+	public static fun getKey (Lhep/dataforge/io/MetaFormatFactory;)S
+	public static fun getName (Lhep/dataforge/io/MetaFormatFactory;)Lhep/dataforge/names/Name;
+	public static fun getType (Lhep/dataforge/io/MetaFormatFactory;)Lkotlin/reflect/KClass;
+	public static fun readObject (Lhep/dataforge/io/MetaFormatFactory;Lkotlinx/io/Input;)Lhep/dataforge/meta/Meta;
+	public static fun toMeta (Lhep/dataforge/io/MetaFormatFactory;)Lhep/dataforge/meta/Meta;
+	public static fun writeObject (Lhep/dataforge/io/MetaFormatFactory;Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;)V
+}
+
+public final class hep/dataforge/io/MetaFormatKt {
+	public static final fun parse (Lhep/dataforge/io/MetaFormat;Ljava/lang/String;)Lhep/dataforge/meta/Meta;
+	public static final fun parse (Lhep/dataforge/io/MetaFormatFactory;Ljava/lang/String;Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/Meta;
+	public static final fun toString (Lhep/dataforge/meta/Meta;Lhep/dataforge/io/MetaFormat;)Ljava/lang/String;
+	public static final fun toString (Lhep/dataforge/meta/Meta;Lhep/dataforge/io/MetaFormatFactory;)Ljava/lang/String;
+}
+
+public final class hep/dataforge/io/PartialEnvelope {
+	public synthetic fun <init> (Lhep/dataforge/meta/Meta;ILkotlin/ULong;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lhep/dataforge/meta/Meta;
+	public final fun component2-pVg5ArA ()I
+	public final fun component3-6VbMDqA ()Lkotlin/ULong;
+	public final fun copy-BMK4sig (Lhep/dataforge/meta/Meta;ILkotlin/ULong;)Lhep/dataforge/io/PartialEnvelope;
+	public static synthetic fun copy-BMK4sig$default (Lhep/dataforge/io/PartialEnvelope;Lhep/dataforge/meta/Meta;ILkotlin/ULong;ILjava/lang/Object;)Lhep/dataforge/io/PartialEnvelope;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDataOffset-pVg5ArA ()I
+	public final fun getDataSize-6VbMDqA ()Lkotlin/ULong;
+	public final fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class hep/dataforge/io/ProxyEnvelope : hep/dataforge/io/Envelope {
+	public fun <init> (Lhep/dataforge/io/Envelope;[Lhep/dataforge/meta/Meta;)V
+	public fun getData ()Lkotlinx/io/Binary;
+	public fun getMeta ()Lhep/dataforge/meta/Laminate;
+	public synthetic fun getMeta ()Lhep/dataforge/meta/Meta;
+	public final fun getSource ()Lhep/dataforge/io/Envelope;
+}
+
+public abstract interface class hep/dataforge/io/Responder {
+	public abstract fun respond (Lhep/dataforge/io/Envelope;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class hep/dataforge/io/SimpleEnvelope : hep/dataforge/io/Envelope {
+	public fun <init> (Lhep/dataforge/meta/Meta;Lkotlinx/io/Binary;)V
+	public fun getData ()Lkotlinx/io/Binary;
+	public fun getMeta ()Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/io/StreamsIOKt {
+	public static final fun read (Ljava/io/InputStream;ILkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun read (Ljava/io/InputStream;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun readBlocking (Ljava/io/InputStream;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun write (Ljava/io/OutputStream;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class hep/dataforge/io/TaggedEnvelopeFormat : hep/dataforge/io/EnvelopeFormat {
+	public static final field Companion Lhep/dataforge/io/TaggedEnvelopeFormat$Companion;
+	public fun <init> (Lhep/dataforge/io/IOPlugin;Lhep/dataforge/io/TaggedEnvelopeFormat$VERSION;)V
+	public synthetic fun <init> (Lhep/dataforge/io/IOPlugin;Lhep/dataforge/io/TaggedEnvelopeFormat$VERSION;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getDefaultMetaFormat ()Lhep/dataforge/io/MetaFormatFactory;
+	public final fun getIo ()Lhep/dataforge/io/IOPlugin;
+	public final fun getVersion ()Lhep/dataforge/io/TaggedEnvelopeFormat$VERSION;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/io/Envelope;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun readPartial (Lkotlinx/io/Input;)Lhep/dataforge/io/PartialEnvelope;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeEnvelope (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/Meta;)V
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/io/TaggedEnvelopeFormat$Companion : hep/dataforge/io/EnvelopeFormatFactory {
+	public fun getDefaultMetaFormat ()Lhep/dataforge/io/MetaFormatFactory;
+	public fun getName ()Lhep/dataforge/names/Name;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/EnvelopeFormat;
+	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
+	public fun peekFormat (Lhep/dataforge/io/IOPlugin;Lkotlinx/io/Input;)Lhep/dataforge/io/EnvelopeFormat;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/io/Envelope;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun readPartial (Lkotlinx/io/Input;)Lhep/dataforge/io/PartialEnvelope;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeEnvelope (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/Meta;)V
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/io/TaggedEnvelopeFormat$VERSION : java/lang/Enum {
+	public static final field DF02 Lhep/dataforge/io/TaggedEnvelopeFormat$VERSION;
+	public static final field DF03 Lhep/dataforge/io/TaggedEnvelopeFormat$VERSION;
+	public final fun getTagSize-pVg5ArA ()I
+	public static fun valueOf (Ljava/lang/String;)Lhep/dataforge/io/TaggedEnvelopeFormat$VERSION;
+	public static fun values ()[Lhep/dataforge/io/TaggedEnvelopeFormat$VERSION;
+}
+
+public final class hep/dataforge/io/TaglessEnvelopeFormat : hep/dataforge/io/EnvelopeFormat {
+	public static final field Companion Lhep/dataforge/io/TaglessEnvelopeFormat$Companion;
+	public static final field DATA_LENGTH_PROPERTY Ljava/lang/String;
+	public static final field DATA_START_PROPERTY Ljava/lang/String;
+	public static final field DEFAULT_DATA_START Ljava/lang/String;
+	public static final field DEFAULT_META_START Ljava/lang/String;
+	public static final field META_LENGTH_PROPERTY Ljava/lang/String;
+	public static final field META_START_PROPERTY Ljava/lang/String;
+	public static final field META_TYPE_PROPERTY Ljava/lang/String;
+	public static final field TAGLESS_ENVELOPE_HEADER Ljava/lang/String;
+	public static final field TAGLESS_ENVELOPE_TYPE Ljava/lang/String;
+	public static final field code I
+	public fun <init> (Lhep/dataforge/io/IOPlugin;Lhep/dataforge/meta/Meta;)V
+	public synthetic fun <init> (Lhep/dataforge/io/IOPlugin;Lhep/dataforge/meta/Meta;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getDefaultMetaFormat ()Lhep/dataforge/io/MetaFormatFactory;
+	public final fun getIo ()Lhep/dataforge/io/IOPlugin;
+	public final fun getMeta ()Lhep/dataforge/meta/Meta;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/io/Envelope;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun readPartial (Lkotlinx/io/Input;)Lhep/dataforge/io/PartialEnvelope;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeEnvelope (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/Meta;)V
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/io/TaglessEnvelopeFormat$Companion : hep/dataforge/io/EnvelopeFormatFactory {
+	public fun getDefaultMetaFormat ()Lhep/dataforge/io/MetaFormatFactory;
+	public fun getName ()Lhep/dataforge/names/Name;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/EnvelopeFormat;
+	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
+	public fun peekFormat (Lhep/dataforge/io/IOPlugin;Lkotlinx/io/Input;)Lhep/dataforge/io/EnvelopeFormat;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/io/Envelope;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun readPartial (Lkotlinx/io/Input;)Lhep/dataforge/io/PartialEnvelope;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeEnvelope (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/Meta;)V
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/io/ValueIOFormat : hep/dataforge/io/IOFormat, hep/dataforge/io/IOFormatFactory {
+	public static final field INSTANCE Lhep/dataforge/io/ValueIOFormat;
+	public fun getName ()Lhep/dataforge/names/Name;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/IOFormat;
+	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/values/Value;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/values/Value;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+

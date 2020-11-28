@@ -8,7 +8,7 @@ import hep.dataforge.values.isList
 
 //TODO add Meta wrapper for dynamic
 
-fun Value.toDynamic(): dynamic {
+public fun Value.toDynamic(): dynamic {
     return if (isList()) {
         list.map { it.toDynamic() }.toTypedArray().asDynamic()
     } else {
@@ -19,7 +19,7 @@ fun Value.toDynamic(): dynamic {
 /**
  * Represent or copy this [Meta] to dynamic object to be passed to JS libraries
  */
-fun Meta.toDynamic(): dynamic {
+public fun Meta.toDynamic(): dynamic {
     if (this is DynamicMeta) return this.obj
 
     fun MetaItem<*>.toDynamic(): dynamic = when (this) {
@@ -38,8 +38,8 @@ fun Meta.toDynamic(): dynamic {
     return res
 }
 
-class DynamicMeta(val obj: dynamic) : MetaBase() {
-    private fun keys() = js("Object.keys(this.obj)") as Array<String>
+public class DynamicMeta(internal val obj: dynamic) : MetaBase() {
+    private fun keys(): Array<String> = js("Object").keys(obj)
 
     private fun isArray(@Suppress("UNUSED_PARAMETER") obj: dynamic): Boolean =
         js("Array.isArray(obj)") as Boolean
@@ -47,7 +47,7 @@ class DynamicMeta(val obj: dynamic) : MetaBase() {
     private fun isPrimitive(obj: dynamic): Boolean =
         (jsTypeOf(obj) != "object")
 
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     private fun asItem(obj: dynamic): MetaItem<DynamicMeta>? {
         return when {
             obj == null -> MetaItem.ValueItem(Null)

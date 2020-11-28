@@ -1,16 +1,15 @@
 plugins {
-    id("scientifik.mpp")
+    id("ru.mipt.npm.mpp")
+    id("ru.mipt.npm.native")
 }
 
 kotlin {
-    jvm()
-    js()
     sourceSets {
-        val commonMain by getting{
+        commonMain{
             dependencies {
                 api(project(":dataforge-context"))
                 api(project(":dataforge-data"))
-                api(project(":dataforge-output"))
+                api(project(":dataforge-io"))
             }
         }
     }

@@ -36,7 +36,7 @@ class DescriptorTest {
 
     @Test
     fun testDefaultMetaNode(){
-        val meta = descriptor.buildDefaultMeta()
+        val meta = descriptor.defaultMeta()
         assertEquals(false, meta["aNode.otherNode.otherValue"].boolean)
     }
 }

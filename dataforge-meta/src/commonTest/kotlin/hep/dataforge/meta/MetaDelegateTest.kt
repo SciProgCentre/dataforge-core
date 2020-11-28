@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.values.asValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -29,7 +30,7 @@ class MetaDelegateTest {
     fun delegateTest() {
 
         val testObject = TestScheme.empty()
-        testObject.config["myValue"] = "theString"
+        testObject.setValue("myValue","theString".asValue())
         testObject.enumValue = TestEnum.NO
 
         testObject.inner = InnerSpec { innerValue = "ddd" }

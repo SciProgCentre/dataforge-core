@@ -12,25 +12,25 @@ import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
 @DFBuilder
-interface WorkspaceBuilder {
-    val parentContext: Context
-    var context: Context
-    var data: DataTreeBuilder<Any>
-    var tasks: MutableSet<Task<Any>>
-    var targets: MutableMap<String, Meta>
+public interface WorkspaceBuilder {
+    public val parentContext: Context
+    public var context: Context
+    public var data: DataTreeBuilder<Any>
+    public var tasks: MutableSet<Task<Any>>
+    public var targets: MutableMap<String, Meta>
 
-    fun build(): Workspace
+    public fun build(): Workspace
 }
 
 
 /**
  * Set the context for future workspcace
  */
-fun WorkspaceBuilder.context(name: String = "WORKSPACE", block: ContextBuilder.() -> Unit = {}) {
-    context = ContextBuilder(name, parentContext).apply(block).build()
+public fun WorkspaceBuilder.context(name: String = "WORKSPACE", block: ContextBuilder.() -> Unit = {}) {
+    context = ContextBuilder(parentContext, name).apply(block).build()
 }
 
-inline fun <reified T : Any> WorkspaceBuilder.data(
+public inline fun <reified T : Any> WorkspaceBuilder.data(
     name: Name = Name.EMPTY,
     noinline block: DataTreeBuilder<T>.() -> Unit
 ): DataNode<T> {
@@ -45,20 +45,20 @@ inline fun <reified T : Any> WorkspaceBuilder.data(
 }
 
 @JvmName("rawData")
-fun WorkspaceBuilder.data(
+public fun WorkspaceBuilder.data(
     name: Name = Name.EMPTY,
     block: DataTreeBuilder<Any>.() -> Unit
 ): DataNode<Any> = data<Any>(name, block)
 
 
-fun WorkspaceBuilder.target(name: String, block: MetaBuilder.() -> Unit) {
+public fun WorkspaceBuilder.target(name: String, block: MetaBuilder.() -> Unit) {
     targets[name] = Meta(block).seal()
 }
 
 /**
  * Use existing target as a base updating it with the block
  */
-fun WorkspaceBuilder.target(name: String, base: String, block: MetaBuilder.() -> Unit) {
+public fun WorkspaceBuilder.target(name: String, base: String, block: MetaBuilder.() -> Unit) {
     val parentTarget = targets[base] ?: error("Base target with name $base not found")
     targets[name] = parentTarget.builder()
         .apply { "@baseTarget" put base }
@@ -66,19 +66,19 @@ fun WorkspaceBuilder.target(name: String, base: String, block: MetaBuilder.() ->
         .seal()
 }
 
-fun <T : Any> WorkspaceBuilder.task(
+public fun <T : Any> WorkspaceBuilder.task(
     name: String,
     type: KClass<out T>,
     builder: TaskBuilder<T>.() -> Unit
 ): Task<T> = TaskBuilder(name.toName(), type).apply(builder).build().also { tasks.add(it) }
 
-inline fun <reified T : Any> WorkspaceBuilder.task(
+public inline fun <reified T : Any> WorkspaceBuilder.task(
     name: String,
     noinline builder: TaskBuilder<T>.() -> Unit
 ): Task<T> = task(name, T::class, builder)
 
 @JvmName("rawTask")
-fun WorkspaceBuilder.task(
+public fun WorkspaceBuilder.task(
     name: String,
     builder: TaskBuilder<Any>.() -> Unit
 ): Task<Any> = task(name, Any::class, builder)
@@ -86,7 +86,7 @@ fun WorkspaceBuilder.task(
 /**
  * A builder for a simple workspace
  */
-class SimpleWorkspaceBuilder(override val parentContext: Context) : WorkspaceBuilder {
+public class SimpleWorkspaceBuilder(override val parentContext: Context) : WorkspaceBuilder {
     override var context: Context = parentContext
     override var data: DataTreeBuilder<Any> = DataTreeBuilder(Any::class)
     override var tasks: MutableSet<Task<Any>> = HashSet()

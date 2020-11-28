@@ -36,7 +36,7 @@ private fun newZFS(path: Path): FileSystem {
  * @param metaFileFormat the meta format for override
  */
 @DFExperimental
-fun <T : Any> IOPlugin.readDataFile(
+public fun <T : Any> IOPlugin.readDataFile(
     path: Path,
     type: KClass<out T>,
     formatResolver: FileFormatResolver<T>
@@ -47,7 +47,7 @@ fun <T : Any> IOPlugin.readDataFile(
 }
 
 @DFExperimental
-inline fun <reified T : Any> IOPlugin.readDataFile(path: Path): Data<T> =
+public inline fun <reified T : Any> IOPlugin.readDataFile(path: Path): Data<T> =
     readDataFile(path, T::class) { _, _ ->
         resolveIOFormat<T>() ?: error("Can't resolve IO format for ${T::class}")
     }
@@ -56,7 +56,7 @@ inline fun <reified T : Any> IOPlugin.readDataFile(path: Path): Data<T> =
  * Add file/directory-based data tree item
  */
 @DFExperimental
-fun <T : Any> DataTreeBuilder<T>.file(
+public fun <T : Any> DataTreeBuilder<T>.file(
     plugin: IOPlugin,
     path: Path,
     formatResolver: FileFormatResolver<T>
@@ -109,7 +109,7 @@ fun <T : Any> IOPlugin.readDataDirectory(
 }
 
 @DFExperimental
-inline fun <reified T : Any> IOPlugin.readDataDirectory(path: Path): DataNode<T> =
+public inline fun <reified T : Any> IOPlugin.readDataDirectory(path: Path): DataNode<T> =
     readDataDirectory(path, T::class) { _, _ ->
         resolveIOFormat<T>() ?: error("Can't resolve IO format for ${T::class}")
     }
@@ -118,7 +118,7 @@ inline fun <reified T : Any> IOPlugin.readDataDirectory(path: Path): DataNode<T>
  * Write data tree to existing directory or create a new one using default [java.nio.file.FileSystem] provider
  */
 @DFExperimental
-suspend fun <T : Any> IOPlugin.writeDataDirectory(
+public suspend fun <T : Any> IOPlugin.writeDataDirectory(
     path: Path,
     node: DataNode<T>,
     format: IOFormat<T>,
@@ -168,7 +168,7 @@ private suspend fun <T : Any> ZipOutputStream.writeNode(
                 val entry = ZipEntry(name)
                 putNextEntry(entry)
                 envelopeFormat.run {
-                    asOutput().writeObject(envelope)
+                    writeObject(asOutput(), envelope)
                 }
             }
             is DataItem.Node -> {

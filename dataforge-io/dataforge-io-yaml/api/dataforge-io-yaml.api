@@ -1,0 +1,59 @@
+public final class hep/dataforge/io/yaml/FrontMatterEnvelopeFormat : hep/dataforge/io/EnvelopeFormat {
+	public static final field Companion Lhep/dataforge/io/yaml/FrontMatterEnvelopeFormat$Companion;
+	public static final field SEPARATOR Ljava/lang/String;
+	public fun <init> (Lhep/dataforge/io/IOPlugin;Lhep/dataforge/meta/Meta;)V
+	public synthetic fun <init> (Lhep/dataforge/io/IOPlugin;Lhep/dataforge/meta/Meta;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getDefaultMetaFormat ()Lhep/dataforge/io/MetaFormatFactory;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/io/Envelope;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun readPartial (Lkotlinx/io/Input;)Lhep/dataforge/io/PartialEnvelope;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeEnvelope (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/Meta;)V
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/io/yaml/FrontMatterEnvelopeFormat$Companion : hep/dataforge/io/EnvelopeFormatFactory {
+	public fun getDefaultMetaFormat ()Lhep/dataforge/io/MetaFormatFactory;
+	public fun getName ()Lhep/dataforge/names/Name;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/EnvelopeFormat;
+	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
+	public fun peekFormat (Lhep/dataforge/io/IOPlugin;Lkotlinx/io/Input;)Lhep/dataforge/io/EnvelopeFormat;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/io/Envelope;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun readPartial (Lkotlinx/io/Input;)Lhep/dataforge/io/PartialEnvelope;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeEnvelope (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/Meta;)V
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/io/yaml/YamlMetaFormat : hep/dataforge/io/MetaFormat {
+	public static final field Companion Lhep/dataforge/io/yaml/YamlMetaFormat$Companion;
+	public fun <init> (Lhep/dataforge/meta/Meta;)V
+	public fun readMeta (Lkotlinx/io/Input;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Meta;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/meta/Meta;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeMeta (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/io/yaml/YamlMetaFormat$Companion : hep/dataforge/io/MetaFormatFactory {
+	public fun getKey ()S
+	public fun getName ()Lhep/dataforge/names/Name;
+	public fun getShortName ()Ljava/lang/String;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/MetaFormat;
+	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
+	public fun readMeta (Lkotlinx/io/Input;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Meta;
+	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/meta/Meta;
+	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
+	public fun writeMeta (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
+	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;)V
+	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+}
+

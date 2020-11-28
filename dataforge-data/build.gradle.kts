@@ -1,28 +1,22 @@
 plugins {
-    id("scientifik.mpp")
+    id("ru.mipt.npm.mpp")
+    id("ru.mipt.npm.native")
 }
 
-val coroutinesVersion: String = Scientifik.coroutinesVersion
+kscience{
+    useCoroutines()
+}
 
 kotlin {
     sourceSets {
-        val commonMain by getting{
+        commonMain{
             dependencies {
                 api(project(":dataforge-meta"))
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutinesVersion")
             }
         }
-
-        val jvmMain by getting{
-            dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+        jvmMain{
+            dependencies{
                 api(kotlin("reflect"))
-            }
-        }
-
-        val jsMain by getting{
-            dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$coroutinesVersion")
             }
         }
     }

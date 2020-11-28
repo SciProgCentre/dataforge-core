@@ -9,20 +9,19 @@ import hep.dataforge.meta.Meta
 import kotlinx.io.*
 import kotlinx.io.text.readUtf8Line
 import kotlinx.io.text.writeUtf8String
-import kotlinx.serialization.toUtf8Bytes
 
 @DFExperimental
-class FrontMatterEnvelopeFormat(
-    val io: IOPlugin,
-    val meta: Meta = Meta.EMPTY
+public class FrontMatterEnvelopeFormat(
+    private val io: IOPlugin,
+    private val meta: Meta = Meta.EMPTY,
 ) : EnvelopeFormat {
 
-    override fun Input.readPartial(): PartialEnvelope {
-        var line: String = ""
+    override fun readPartial(input: Input): PartialEnvelope {
+        var line = ""
         var offset = 0u
         do {
-            line = readUtf8Line() //?: error("Input does not contain front matter separator")
-            offset += line.toUtf8Bytes().size.toUInt()
+            line = input.readUtf8Line() //?: error("Input does not contain front matter separator")
+            offset += line.toByteArray().size.toUInt()
         } while (!line.startsWith(SEPARATOR))
 
         val readMetaFormat =
@@ -32,22 +31,21 @@ class FrontMatterEnvelopeFormat(
         //TODO replace by preview
         val meta = Binary {
             do {
-                line = readUtf8Line()
+                line = input.readUtf8Line()
                 writeUtf8String(line + "\r\n")
-                offset += line.toUtf8Bytes().size.toUInt()
+                offset += line.toByteArray().size.toUInt()
             } while (!line.startsWith(SEPARATOR))
         }.read {
-            readMetaFormat.run {
-                readMeta()
-            }
+            readMetaFormat.readMeta(input)
+
         }
         return PartialEnvelope(meta, offset, null)
     }
 
-    override fun Input.readObject(): Envelope {
-        var line: String = ""
+    override fun readObject(input: Input): Envelope {
+        var line = ""
         do {
-            line = readUtf8Line() //?: error("Input does not contain front matter separator")
+            line = input.readUtf8Line() //?: error("Input does not contain front matter separator")
         } while (!line.startsWith(SEPARATOR))
 
         val readMetaFormat =
@@ -56,26 +54,29 @@ class FrontMatterEnvelopeFormat(
 
         val meta = Binary {
             do {
-                writeUtf8String(readUtf8Line() + "\r\n")
+                writeUtf8String(input.readUtf8Line() + "\r\n")
             } while (!line.startsWith(SEPARATOR))
         }.read {
-            readMetaFormat.run {
-                readMeta()
-            }
+            readMetaFormat.readMeta(input)
         }
-        val bytes = readByteArray()
+        val bytes = input.readByteArray()
         val data = bytes.asBinary()
         return SimpleEnvelope(meta, data)
     }
 
-    override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) {
-        val metaFormat = metaFormatFactory(formatMeta, io.context)
-        writeRawString("$SEPARATOR\r\n")
-        metaFormat.run { writeObject(envelope.meta) }
-        writeRawString("$SEPARATOR\r\n")
+    override fun writeEnvelope(
+        output: Output,
+        envelope: Envelope,
+        metaFormatFactory: MetaFormatFactory,
+        formatMeta: Meta,
+    ) {
+        val metaFormat = metaFormatFactory(formatMeta, this@FrontMatterEnvelopeFormat.io.context)
+        output.writeRawString("${hep.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.SEPARATOR}\r\n")
+        metaFormat.run { this.writeObject(output, envelope.meta) }
+        output.writeRawString("${hep.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.SEPARATOR}\r\n")
         //Printing data
         envelope.data?.let { data ->
-            writeBinary(data)
+            output.writeBinary(data)
         }
     }
 
@@ -84,8 +85,8 @@ class FrontMatterEnvelopeFormat(
         META_KEY put meta
     }
 
-    companion object : EnvelopeFormatFactory {
-        const val SEPARATOR = "---"
+    public companion object : EnvelopeFormatFactory {
+        public const val SEPARATOR = "---"
 
         private val metaTypeRegex = "---(\\w*)\\s*".toRegex()
 
@@ -106,14 +107,18 @@ class FrontMatterEnvelopeFormat(
 
         private val default by lazy { invoke() }
 
-        override fun Input.readPartial(): PartialEnvelope =
-            default.run { readPartial() }
+        override fun readPartial(input: Input): PartialEnvelope =
+            default.readPartial(input)
 
-        override fun Output.writeEnvelope(envelope: Envelope, metaFormatFactory: MetaFormatFactory, formatMeta: Meta) =
-            default.run { writeEnvelope(envelope, metaFormatFactory, formatMeta) }
+        override fun writeEnvelope(
+            output: Output,
+            envelope: Envelope,
+            metaFormatFactory: MetaFormatFactory,
+            formatMeta: Meta,
+        ): Unit = default.writeEnvelope(output, envelope, metaFormatFactory, formatMeta)
 
-        override fun Input.readObject(): Envelope =
-            default.run { readObject() }
+
+        override fun readObject(input: Input): Envelope = default.readObject(input)
 
     }
 }

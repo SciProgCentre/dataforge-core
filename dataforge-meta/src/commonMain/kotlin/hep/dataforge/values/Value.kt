@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  *
  */
 @Serializable
-enum class ValueType {
+public enum class ValueType {
     NUMBER, STRING, BOOLEAN, NULL
 }
 
@@ -19,44 +19,44 @@ enum class ValueType {
  *
  * Value can represent a list of value objects.
  */
-interface Value {
+@Serializable(ValueSerializer::class)
+public interface Value {
     /**
      * Get raw value of this value
      */
-    val value: Any?
+    public val value: Any?
 
     /**
      * The type of the value
      */
-    val type: ValueType
+    public val type: ValueType
 
     /**
      * get this value represented as Number
      */
-    val number: Number
+    public val number: Number
 
     /**
      * get this value represented as String
      */
-    val string: String
+    public val string: String
 
     /**
      * get this value represented as List
      */
-    val list: List<Value>
-        get() = if (this == Null) emptyList() else listOf(this)
+    public val list: List<Value> get() = if (this == Null) emptyList() else listOf(this)
 
     override fun equals(other: Any?): Boolean
 
     override fun hashCode(): Int
 
-    companion object {
-        const val TYPE = "value"
+    public companion object {
+        public const val TARGET: String = "value"
 
         /**
          * Convert object to value
          */
-        fun of(value: Any?): Value {
+        public fun of(value: Any?): Value {
             return when (value) {
                 null -> Null
                 is Value -> value
@@ -89,7 +89,7 @@ interface Value {
 /**
  * A singleton null value
  */
-object Null : Value {
+public object Null : Value {
     override val value: Any? get() = null
     override val type: ValueType get() = ValueType.NULL
     override val number: Number get() = Double.NaN
@@ -104,7 +104,7 @@ object Null : Value {
 /**
  * Singleton true value
  */
-object True : Value {
+public object True : Value {
     override val value: Any? get() = true
     override val type: ValueType get() = ValueType.BOOLEAN
     override val number: Number get() = 1.0
@@ -119,7 +119,7 @@ object True : Value {
 /**
  * Singleton false value
  */
-object False : Value {
+public object False : Value {
     override val value: Any? get() = false
     override val type: ValueType get() = ValueType.BOOLEAN
     override val number: Number get() = -1.0
@@ -131,7 +131,7 @@ object False : Value {
     override fun hashCode(): Int = -1
 }
 
-class NumberValue(override val number: Number) : Value {
+public class NumberValue(override val number: Number) : Value {
     override val value: Any? get() = number
     override val type: ValueType get() = ValueType.NUMBER
     override val string: String get() = number.toString()
@@ -154,7 +154,7 @@ class NumberValue(override val number: Number) : Value {
     override fun toString(): String = value.toString()
 }
 
-class StringValue(override val string: String) : Value {
+public class StringValue(override val string: String) : Value {
     override val value: Any? get() = string
     override val type: ValueType get() = ValueType.STRING
     override val number: Number get() = string.toDouble()
@@ -168,7 +168,7 @@ class StringValue(override val string: String) : Value {
     override fun toString(): String = "\"${value.toString()}\""
 }
 
-class EnumValue<E : Enum<*>>(override val value: E) : Value {
+public class EnumValue<E : Enum<*>>(override val value: E) : Value {
     override val type: ValueType get() = ValueType.STRING
     override val number: Number get() = value.ordinal
     override val string: String get() = value.name
@@ -182,7 +182,7 @@ class EnumValue<E : Enum<*>>(override val value: E) : Value {
     override fun toString(): String = value.toString()
 }
 
-class ListValue(override val list: List<Value>) : Value {
+public class ListValue(override val list: List<Value>) : Value {
     init {
         require(list.isNotEmpty()) { "Can't create list value from empty list" }
     }
@@ -210,34 +210,34 @@ class ListValue(override val list: List<Value>) : Value {
 
 }
 
-fun Number.asValue(): Value = NumberValue(this)
+public fun Number.asValue(): Value = NumberValue(this)
 
-fun Boolean.asValue(): Value = if (this) True else False
+public fun Boolean.asValue(): Value = if (this) True else False
 
-fun String.asValue(): Value = StringValue(this)
+public fun String.asValue(): Value = StringValue(this)
 
-fun Iterable<Value>.asValue(): Value {
+public fun Iterable<Value>.asValue(): Value {
     val list = toList()
     return if (list.isEmpty()) Null else ListValue(this.toList())
 }
 
-fun IntArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
+public fun IntArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun LongArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
+public fun LongArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun ShortArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
+public fun ShortArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun FloatArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
+public fun FloatArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun ByteArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
+public fun ByteArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-fun <E : Enum<E>> E.asValue(): Value = EnumValue(this)
+public fun <E : Enum<E>> E.asValue(): Value = EnumValue(this)
 
 
 /**
  * Create Value from String using closest match conversion
  */
-fun String.parseValue(): Value {
+public fun String.parseValue(): Value {
 
     //Trying to get integer
     if (isEmpty() || this == Null.string) {

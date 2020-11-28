@@ -32,12 +32,12 @@ private fun readLine(header: ValueTableHeader, line: String): Row<Value> {
  * Finite or infinite [Rows] created from a fixed width text binary
  */
 @ExperimentalIoApi
-class TextRows(override val header: ValueTableHeader, val binary: Binary) : Rows<Value> {
+public class TextRows(override val header: ValueTableHeader, private val binary: Binary) : Rows<Value> {
 
     /**
      * A flow of indexes of string start offsets ignoring empty strings
      */
-    fun indexFlow(): Flow<Int> = binary.read {
+    public fun indexFlow(): Flow<Int> = binary.read {
         var counter: Int = 0
         flow {
             val string = readUtf8StringUntilDelimiter('\n')
@@ -59,23 +59,23 @@ class TextRows(override val header: ValueTableHeader, val binary: Binary) : Rows
         }
     }
 
-    companion object
+    public companion object
 }
 
 /**
  * Create a row offset index for [TextRows]
  */
 @ExperimentalIoApi
-suspend fun TextRows.buildRowIndex(): List<Int> = indexFlow().toList()
+public suspend fun TextRows.buildRowIndex(): List<Int> = indexFlow().toList()
 
 /**
  * Finite table created from [RandomAccessBinary] with fixed width text table
  */
 @ExperimentalIoApi
-class TextTable(
+public class TextTable(
     override val header: ValueTableHeader,
-    val binary: Binary,
-    val index: List<Int>
+    private val binary: Binary,
+    public val index: List<Int>
 ) : Table<Value> {
 
     override val columns: Collection<Column<Value>> get() = header.map { RowTableColumn(this, it) }
@@ -96,8 +96,8 @@ class TextTable(
         return readAt(offset)[column]
     }
 
-    companion object {
-        suspend operator fun invoke(header: ValueTableHeader, binary: Binary): TextTable {
+    public companion object {
+        public suspend operator fun invoke(header: ValueTableHeader, binary: Binary): TextTable {
             val index = TextRows(header, binary).buildRowIndex()
             return TextTable(header, binary, index)
         }
@@ -131,7 +131,7 @@ private fun Output.writeValue(value: Value, width: Int, left: Boolean = true) {
 /**
  * Write rows without header to the output
  */
-suspend fun Output.writeRows(rows: Rows<Value>) {
+public suspend fun Output.writeRows(rows: Rows<Value>) {
     val widths: List<Int> = rows.header.map {
         it.textWidth
     }

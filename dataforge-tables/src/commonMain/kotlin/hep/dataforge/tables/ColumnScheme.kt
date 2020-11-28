@@ -6,12 +6,12 @@ import hep.dataforge.meta.enum
 import hep.dataforge.meta.string
 import hep.dataforge.values.ValueType
 
-open class ColumnScheme : Scheme() {
-    var title by string()
+public open class ColumnScheme : Scheme() {
+    public var title: String? by string()
 
-    companion object : SchemeSpec<ColumnScheme>(::ColumnScheme)
+    public companion object : SchemeSpec<ColumnScheme>(::ColumnScheme)
 }
 
-class ValueColumnScheme : ColumnScheme() {
-    var valueType by enum(ValueType.STRING)
+public class ValueColumnScheme : ColumnScheme() {
+    public var valueType: ValueType by enum(ValueType.STRING)
 }
