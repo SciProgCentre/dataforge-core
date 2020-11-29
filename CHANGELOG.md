@@ -4,6 +4,8 @@
 ### Added
 
 ### Changed
+- `ListValue` and `DoubleArrayValue` implement `Iterable`.
+- Changed the logic of `Value::isList` to check for type instead of size
 
 ### Deprecated
 
@@ -12,6 +14,7 @@
 ### Fixed
 
 ### Security
+
 ## [0.2.0]
 ### Added
 

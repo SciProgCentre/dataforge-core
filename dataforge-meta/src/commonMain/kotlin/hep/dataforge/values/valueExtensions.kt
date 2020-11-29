@@ -9,9 +9,10 @@ import hep.dataforge.meta.MetaBuilder
 public fun Value.isNull(): Boolean = this == Null
 
 /**
- * Check if value is list
+ * Check if value is list. This method checks the type of the value, not the number of the elements.
+ * So it will return `true` for empty lists and lists of one elements.
  */
-public fun Value.isList(): Boolean = this.list.size > 1
+public fun Value.isList(): Boolean = this is Iterable<*>
 
 public val Value.boolean: Boolean
     get() = this == True

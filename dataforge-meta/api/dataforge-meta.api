@@ -813,7 +813,7 @@ public final class hep/dataforge/names/NameTokenKt {
 	public static final fun withIndex (Lhep/dataforge/names/NameToken;Ljava/lang/String;)Lhep/dataforge/names/NameToken;
 }
 
-public final class hep/dataforge/values/DoubleArrayValue : hep/dataforge/values/Value {
+public final class hep/dataforge/values/DoubleArrayValue : hep/dataforge/values/Value, java/lang/Iterable, kotlin/jvm/internal/markers/KMappedMarker {
 	public fun <init> ([D)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getList ()Ljava/util/List;
@@ -824,6 +824,7 @@ public final class hep/dataforge/values/DoubleArrayValue : hep/dataforge/values/
 	public synthetic fun getValue ()Ljava/lang/Object;
 	public fun getValue ()[D
 	public fun hashCode ()I
+	public fun iterator ()Ljava/util/Iterator;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -869,7 +870,7 @@ public final class hep/dataforge/values/LazyParsedValue : hep/dataforge/values/V
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class hep/dataforge/values/ListValue : hep/dataforge/values/Value {
+public final class hep/dataforge/values/ListValue : hep/dataforge/values/Value, java/lang/Iterable, kotlin/jvm/internal/markers/KMappedMarker {
 	public fun <init> (Ljava/util/List;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getList ()Ljava/util/List;
@@ -879,6 +880,7 @@ public final class hep/dataforge/values/ListValue : hep/dataforge/values/Value {
 	public synthetic fun getValue ()Ljava/lang/Object;
 	public fun getValue ()Ljava/util/List;
 	public fun hashCode ()I
+	public fun iterator ()Ljava/util/Iterator;
 	public fun toString ()Ljava/lang/String;
 }
 

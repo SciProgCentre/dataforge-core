@@ -105,7 +105,7 @@ public object Null : Value {
  * Singleton true value
  */
 public object True : Value {
-    override val value: Any? get() = true
+    override val value: Any get() = true
     override val type: ValueType get() = ValueType.BOOLEAN
     override val number: Number get() = 1.0
     override val string: String get() = "true"
@@ -120,7 +120,7 @@ public object True : Value {
  * Singleton false value
  */
 public object False : Value {
-    override val value: Any? get() = false
+    override val value: Any get() = false
     override val type: ValueType get() = ValueType.BOOLEAN
     override val number: Number get() = -1.0
     override val string: String get() = "false"
@@ -132,7 +132,7 @@ public object False : Value {
 }
 
 public class NumberValue(override val number: Number) : Value {
-    override val value: Any? get() = number
+    override val value: Any get() = number
     override val type: ValueType get() = ValueType.NUMBER
     override val string: String get() = number.toString()
 
@@ -155,7 +155,7 @@ public class NumberValue(override val number: Number) : Value {
 }
 
 public class StringValue(override val string: String) : Value {
-    override val value: Any? get() = string
+    override val value: Any get() = string
     override val type: ValueType get() = ValueType.STRING
     override val number: Number get() = string.toDouble()
 
@@ -182,7 +182,7 @@ public class EnumValue<E : Enum<*>>(override val value: E) : Value {
     override fun toString(): String = value.toString()
 }
 
-public class ListValue(override val list: List<Value>) : Value {
+public class ListValue(override val list: List<Value>) : Value, Iterable<Value> {
     init {
         require(list.isNotEmpty()) { "Can't create list value from empty list" }
     }
@@ -193,6 +193,8 @@ public class ListValue(override val list: List<Value>) : Value {
     override val string: String get() = list.first().string
 
     override fun toString(): String = list.joinToString(prefix = "[", postfix = "]")
+
+    override fun iterator(): Iterator<Value> = list.iterator()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
