@@ -27,7 +27,6 @@ public object ValueSerializer : KSerializer<Value> {
         }
     }
 
-
     override fun deserialize(decoder: Decoder): Value {
         val isList = decoder.decodeBoolean()
         return if (isList) {

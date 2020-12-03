@@ -58,7 +58,7 @@ public object MetaSerializer : KSerializer<Meta> {
         MetaItemSerializer//MetaItem.serializer(MetaSerializer)
     )
 
-    override val descriptor: SerialDescriptor get() = mapSerializer.descriptor
+    override val descriptor: SerialDescriptor  = buildClassSerialDescriptor("Meta")
 
     override fun deserialize(decoder: Decoder): Meta {
         return if (decoder is JsonDecoder) {
