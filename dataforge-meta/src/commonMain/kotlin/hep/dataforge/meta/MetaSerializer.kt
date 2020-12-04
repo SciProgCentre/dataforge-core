@@ -18,7 +18,7 @@ public object MetaItemSerializer : KSerializer<MetaItem<*>> {
     @OptIn(InternalSerializationApi::class)
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("hep.dataforge.meta.MetaItem") {
         element<Boolean>("isNode")
-        element("content", buildSerialDescriptor("MetaItem.content", PolymorphicKind.SEALED))
+        element("content", buildSerialDescriptor("MetaItem.content", SerialKind.CONTEXTUAL))
     }
 
     override fun deserialize(decoder: Decoder): MetaItem<*> {

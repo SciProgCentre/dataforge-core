@@ -86,7 +86,7 @@ public class FrontMatterEnvelopeFormat(
     }
 
     public companion object : EnvelopeFormatFactory {
-        public const val SEPARATOR = "---"
+        public const val SEPARATOR: String = "---"
 
         private val metaTypeRegex = "---(\\w*)\\s*".toRegex()
 
