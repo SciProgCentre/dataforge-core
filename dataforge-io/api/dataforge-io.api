@@ -77,6 +77,10 @@ public final class hep/dataforge/io/EnvelopeBuilder : hep/dataforge/io/Envelope 
 	public final fun setType (Ljava/lang/String;)V
 }
 
+public final class hep/dataforge/io/EnvelopeBuilderKt {
+	public static final fun Envelope (Lkotlin/jvm/functions/Function1;)Lhep/dataforge/io/Envelope;
+}
+
 public abstract interface class hep/dataforge/io/EnvelopeFormat : hep/dataforge/io/IOFormat {
 	public abstract fun getDefaultMetaFormat ()Lhep/dataforge/io/MetaFormatFactory;
 	public abstract fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/io/Envelope;
