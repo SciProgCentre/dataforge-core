@@ -12,13 +12,12 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonObject
 
-@OptIn(ExperimentalSerializationApi::class)
 public object MetaItemSerializer : KSerializer<MetaItem<*>> {
 
-    @OptIn(InternalSerializationApi::class)
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("hep.dataforge.meta.MetaItem") {
+    @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
+    override val descriptor: SerialDescriptor = buildSerialDescriptor("MetaItem", PolymorphicKind.SEALED) {
         element<Boolean>("isNode")
-        element("content", buildSerialDescriptor("MetaItem.content", SerialKind.CONTEXTUAL))
+        element("value", buildSerialDescriptor("MetaItem.value", SerialKind.CONTEXTUAL))
     }
 
     override fun deserialize(decoder: Decoder): MetaItem<*> {

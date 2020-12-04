@@ -8,7 +8,7 @@ import kotlin.reflect.full.cast
 import kotlin.reflect.full.isSubclassOf
 
 @Suppress("UNCHECKED_CAST")
-fun <T : Any> Column<*>.cast(type: KClass<out T>): Column<T> {
+public fun <T : Any> Column<*>.cast(type: KClass<out T>): Column<T> {
     return if (type.isSubclassOf(this.type)) {
         this as Column<T>
     } else {
@@ -16,7 +16,7 @@ fun <T : Any> Column<*>.cast(type: KClass<out T>): Column<T> {
     }
 }
 
-class CastColumn<T : Any>(val origin: Column<*>, override val type: KClass<out T>) : Column<T> {
+public class CastColumn<T : Any>(private val origin: Column<*>, override val type: KClass<out T>) : Column<T> {
     override val name: String get() = origin.name
     override val meta: Meta get() = origin.meta
     override val size: Int get() = origin.size
@@ -25,12 +25,12 @@ class CastColumn<T : Any>(val origin: Column<*>, override val type: KClass<out T
     override fun get(index: Int): T? = type.cast(origin[index])
 }
 
-class ColumnProperty<C: Any, T : C>(val table: Table<C>, val type: KClass<T>) : ReadOnlyProperty<Any?, Column<T>> {
+public class ColumnProperty<C: Any, T : C>(public val table: Table<C>, public val type: KClass<T>) : ReadOnlyProperty<Any?, Column<T>> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): Column<T> {
         val name = property.name
         return (table.columns[name] ?: error("Column with name $name not found in the table")).cast(type)
     }
 }
 
-operator fun <C: Any, T : C> Collection<Column<C>>.get(header: ColumnHeader<T>): Column<T>? =
+public operator fun <C: Any, T : C> Collection<Column<C>>.get(header: ColumnHeader<T>): Column<T>? =
     find { it.name == header.name }?.cast(header.type)
