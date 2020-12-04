@@ -142,4 +142,4 @@ public fun Meta.edit(builder: MetaBuilder.() -> Unit): MetaBuilder = builder().a
  * Build a [MetaBuilder] using given transformation
  */
 @Suppress("FunctionName")
-public fun Meta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)
+public inline fun Meta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)
