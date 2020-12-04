@@ -29,6 +29,9 @@ public interface Envelope {
         /**
          * Build a static envelope using provided builder
          */
+        @Deprecated("Use top level function instead",
+            replaceWith = ReplaceWith("Envelope(block)", "hep.dataforge.io.Envelope")
+        )
         public inline operator fun invoke(block: EnvelopeBuilder.() -> Unit): Envelope =
             EnvelopeBuilder().apply(block).seal()
     }

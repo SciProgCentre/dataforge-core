@@ -8,6 +8,7 @@
 - `ListValue` and `DoubleArrayValue` implement `Iterable`.
 - Changed the logic of `Value::isList` to check for type instead of size
 - `Meta{}` builder made inline
+- Moved `Envelope` builder to a top level function. Companion invoke is deprecated.
 
 ### Deprecated
 
