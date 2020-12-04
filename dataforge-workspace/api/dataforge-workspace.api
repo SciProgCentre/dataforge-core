@@ -65,7 +65,6 @@ public final class hep/dataforge/workspace/SimpleWorkspace : hep/dataforge/works
 	public fun getData ()Lhep/dataforge/data/DataNode;
 	public fun getDefaultChainTarget ()Ljava/lang/String;
 	public fun getDefaultTarget ()Ljava/lang/String;
-	public fun getLogger ()Lmu/KLogger;
 	public fun getTargets ()Ljava/util/Map;
 	public fun getTasks ()Ljava/util/Map;
 	public fun run (Lhep/dataforge/workspace/Task;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
@@ -219,7 +218,6 @@ public final class hep/dataforge/workspace/Workspace$DefaultImpls {
 	public static fun content (Lhep/dataforge/workspace/Workspace;Ljava/lang/String;)Ljava/util/Map;
 	public static fun getDefaultChainTarget (Lhep/dataforge/workspace/Workspace;)Ljava/lang/String;
 	public static fun getDefaultTarget (Lhep/dataforge/workspace/Workspace;)Ljava/lang/String;
-	public static fun getLogger (Lhep/dataforge/workspace/Workspace;)Lmu/KLogger;
 	public static fun run (Lhep/dataforge/workspace/Workspace;Lhep/dataforge/workspace/Task;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
 }
 

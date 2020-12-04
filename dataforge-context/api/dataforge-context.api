@@ -10,7 +10,6 @@ public abstract class hep/dataforge/context/AbstractPlugin : hep/dataforge/conte
 	public fun getContext ()Lhep/dataforge/context/Context;
 	public fun getDefaultChainTarget ()Ljava/lang/String;
 	public fun getDefaultTarget ()Ljava/lang/String;
-	public fun getLogger ()Lmu/KLogger;
 	public fun getMeta ()Lhep/dataforge/meta/Meta;
 	public fun getName ()Lhep/dataforge/names/Name;
 	protected final fun require (Lhep/dataforge/context/PluginFactory;)Lkotlin/properties/ReadOnlyProperty;
@@ -47,7 +46,6 @@ public class hep/dataforge/context/Context : hep/dataforge/context/Named, hep/da
 	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
 	public fun getDefaultChainTarget ()Ljava/lang/String;
 	public fun getDefaultTarget ()Ljava/lang/String;
-	public final fun getLogger ()Lmu/KLogger;
 	public final fun getName ()Lhep/dataforge/names/Name;
 	public final fun getParent ()Lhep/dataforge/context/Context;
 	public final fun getPlugins ()Lhep/dataforge/context/PluginManager;
@@ -59,11 +57,6 @@ public final class hep/dataforge/context/Context$Companion {
 
 public abstract interface class hep/dataforge/context/ContextAware {
 	public abstract fun getContext ()Lhep/dataforge/context/Context;
-	public abstract fun getLogger ()Lmu/KLogger;
-}
-
-public final class hep/dataforge/context/ContextAware$DefaultImpls {
-	public static fun getLogger (Lhep/dataforge/context/ContextAware;)Lmu/KLogger;
 }
 
 public final class hep/dataforge/context/ContextBuilder {
@@ -100,6 +93,11 @@ public final class hep/dataforge/context/Global : hep/dataforge/context/Context 
 	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
 }
 
+public final class hep/dataforge/context/LoggingKt {
+	public static final fun getLogger (Lhep/dataforge/context/Context;)Lmu/KLogger;
+	public static final fun getLogger (Lhep/dataforge/context/ContextAware;)Lmu/KLogger;
+}
+
 public abstract interface class hep/dataforge/context/Named {
 	public static final field Companion Lhep/dataforge/context/Named$Companion;
 	public abstract fun getName ()Lhep/dataforge/names/Name;
@@ -133,7 +131,6 @@ public final class hep/dataforge/context/Plugin$DefaultImpls {
 	public static fun content (Lhep/dataforge/context/Plugin;Ljava/lang/String;)Ljava/util/Map;
 	public static fun getDefaultChainTarget (Lhep/dataforge/context/Plugin;)Ljava/lang/String;
 	public static fun getDefaultTarget (Lhep/dataforge/context/Plugin;)Ljava/lang/String;
-	public static fun getLogger (Lhep/dataforge/context/Plugin;)Lmu/KLogger;
 	public static fun getName (Lhep/dataforge/context/Plugin;)Lhep/dataforge/names/Name;
 	public static fun toMeta (Lhep/dataforge/context/Plugin;)Lhep/dataforge/meta/Meta;
 }
@@ -162,7 +159,6 @@ public final class hep/dataforge/context/PluginManager : hep/dataforge/context/C
 	public static synthetic fun get$default (Lhep/dataforge/context/PluginManager;Lhep/dataforge/context/PluginTag;ZILjava/lang/Object;)Lhep/dataforge/context/Plugin;
 	public static synthetic fun get$default (Lhep/dataforge/context/PluginManager;Lkotlin/reflect/KClass;Lhep/dataforge/context/PluginTag;ZILjava/lang/Object;)Ljava/lang/Object;
 	public fun getContext ()Lhep/dataforge/context/Context;
-	public fun getLogger ()Lmu/KLogger;
 	public fun iterator ()Ljava/util/Iterator;
 	public final fun list (Z)Ljava/util/Collection;
 	public final fun load (Lhep/dataforge/context/Plugin;)Lhep/dataforge/context/Plugin;
@@ -286,8 +282,12 @@ public final class hep/dataforge/provider/Path$Companion {
 }
 
 public final class hep/dataforge/provider/PathKt {
+	public static final fun Path ([Lhep/dataforge/names/Name;)Ljava/util/List;
+	public static final fun Path ([Lkotlin/Pair;)Ljava/util/List;
+	public static final fun asPath (Lhep/dataforge/names/Name;Ljava/lang/String;)Ljava/util/List;
+	public static final fun asPath (Lhep/dataforge/provider/PathToken;)Ljava/util/List;
+	public static synthetic fun asPath$default (Lhep/dataforge/names/Name;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
 	public static final fun plus-MQiGgVU (Ljava/util/List;Ljava/util/List;)Ljava/util/List;
-	public static final fun toPath (Lhep/dataforge/provider/PathToken;)Ljava/util/List;
 }
 
 public final class hep/dataforge/provider/PathToken {

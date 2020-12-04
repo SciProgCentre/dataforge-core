@@ -1,6 +1,7 @@
 package hep.dataforge.workspace
 
 import hep.dataforge.context.PluginTag
+import hep.dataforge.context.logger
 import hep.dataforge.data.*
 import hep.dataforge.meta.boolean
 import hep.dataforge.meta.builder

@@ -1,5 +1,6 @@
 package hep.dataforge.workspace
 
+import hep.dataforge.context.logger
 import hep.dataforge.data.DataNode
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.NodeDescriptor
@@ -27,7 +28,7 @@ public class GenericTask<R : Any>(
         val input = model.buildInput(workspace)// gather(workspace, model)
 
         //execute
-        workspace.context.logger.info{"Starting task '$name' on ${model.target} with meta: \n${model.meta}"}
+        workspace.logger.info{"Starting task '$name' on ${model.target} with meta: \n${model.meta}"}
         val output = dataTransform(workspace).invoke(model, input)
 
         //handle result

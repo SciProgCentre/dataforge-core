@@ -1,6 +1,7 @@
 package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
+import hep.dataforge.context.logger
 import hep.dataforge.data.*
 import hep.dataforge.meta.DFBuilder
 import hep.dataforge.meta.Meta
