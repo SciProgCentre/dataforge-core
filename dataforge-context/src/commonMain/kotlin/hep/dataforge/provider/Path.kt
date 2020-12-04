@@ -47,7 +47,7 @@ public inline class Path(public val tokens: List<PathToken>) : Iterable<PathToke
         public fun parse(path: String): Path {
             val head = path.substringBefore(PATH_SEGMENT_SEPARATOR)
             val tail = path.substringAfter(PATH_SEGMENT_SEPARATOR)
-            return PathToken.parse(head).toPath() + parse(tail)
+            return PathToken.parse(head).asPath() + parse(tail)
         }
     }
 }
@@ -72,4 +72,22 @@ public data class PathToken(val name: Name, val target: String? = null) {
     }
 }
 
-public fun PathToken.toPath(): Path = Path(listOf(this))
+/**
+ * Represent this path token as full path
+ */
+public fun PathToken.asPath(): Path = Path(listOf(this))
+
+/**
+ * Represent a name with optional [target] as a [Path]
+ */
+public fun Name.asPath(target: String? = null): Path = PathToken(this, target).asPath()
+
+/**
+ * Build a path from given names using default targets
+ */
+public fun Path(vararg names: Name): Path = Path(names.map { PathToken(it) })
+
+/**
+ * Use an array of [Name]-target pairs to construct segmented [Path]
+ */
+public fun Path(vararg tokens: Pair<Name, String?>): Path = Path(tokens.map { PathToken(it.first, it.second) })

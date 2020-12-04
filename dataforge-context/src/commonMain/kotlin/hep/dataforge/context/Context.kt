@@ -5,13 +5,10 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
 import hep.dataforge.meta.sequence
 import hep.dataforge.names.Name
-import hep.dataforge.names.plus
 import hep.dataforge.provider.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import mu.KLogger
-import mu.KotlinLogging
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -39,11 +36,6 @@ public open class Context(
     } else {
         Laminate(meta, parent.properties)
     }
-
-    /**
-     * Context logger
-     */
-    public val logger: KLogger = KotlinLogging.logger(name.toString())
 
     /**
      * A [PluginManager] for current context
@@ -106,12 +98,4 @@ public interface ContextAware {
      * @return
      */
     public val context: Context
-
-    public val logger: KLogger
-        get() = if (this is Named) {
-            KotlinLogging.logger((context.name + this.name).toString())
-        } else {
-            context.logger
-        }
-
 }

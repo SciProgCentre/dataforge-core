@@ -3,12 +3,14 @@
 ## [Unreleased]
 ### Added
 - Yaml meta format based on yaml.kt
+- `Path` builders
 
 ### Changed
 - `ListValue` and `DoubleArrayValue` implement `Iterable`.
 - Changed the logic of `Value::isList` to check for type instead of size
 - `Meta{}` builder made inline
 - Moved `Envelope` builder to a top level function. Companion invoke is deprecated.
+- Context logging moved to the extension
 
 ### Deprecated
 
