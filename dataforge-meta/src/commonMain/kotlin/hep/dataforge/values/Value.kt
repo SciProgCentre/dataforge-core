@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 public enum class ValueType {
-    NUMBER, STRING, BOOLEAN, NULL
+    NUMBER, STRING, BOOLEAN, LIST, NULL
 }
 
 /**
@@ -32,16 +32,6 @@ public interface Value {
     public val type: ValueType
 
     /**
-     * get this value represented as Number
-     */
-    public val number: Number
-
-    /**
-     * get this value represented as String
-     */
-    public val string: String
-
-    /**
      * get this value represented as List
      */
     public val list: List<Value> get() = if (this == Null) emptyList() else listOf(this)
@@ -51,7 +41,7 @@ public interface Value {
     override fun hashCode(): Int
 
     public companion object {
-        public const val TARGET: String = "value"
+        public const val TYPE: String = "value"
 
         /**
          * Convert object to value
@@ -86,16 +76,27 @@ public interface Value {
     }
 }
 
+public val Value.string: String get() = toString()
+
+/**
+ * get this value represented as Number
+ */
+public val Value.numberOrNull: Number?
+    get() = if (this is NumberValue) number else string.toDoubleOrNull()
+
+/**
+ * Return [Value] number content or throw error if value is not a number
+ */
+public val Value.number: Number
+    get() = (if (this is NumberValue) number else numberOrNull ?: error("The value is not a number"))
+
 /**
  * A singleton null value
  */
 public object Null : Value {
     override val value: Any? get() = null
     override val type: ValueType get() = ValueType.NULL
-    override val number: Number get() = Double.NaN
-    override val string: String get() = "@null"
-
-    override fun toString(): String = value.toString()
+    override fun toString(): String = "@null"
 
     override fun equals(other: Any?): Boolean = other === Null
     override fun hashCode(): Int = 0
@@ -107,9 +108,6 @@ public object Null : Value {
 public object True : Value {
     override val value: Any get() = true
     override val type: ValueType get() = ValueType.BOOLEAN
-    override val number: Number get() = 1.0
-    override val string: String get() = "true"
-
     override fun toString(): String = value.toString()
 
     override fun equals(other: Any?): Boolean = other === True
@@ -122,42 +120,40 @@ public object True : Value {
 public object False : Value {
     override val value: Any get() = false
     override val type: ValueType get() = ValueType.BOOLEAN
-    override val number: Number get() = -1.0
-    override val string: String get() = "false"
-
     override fun toString(): String = value.toString()
 
     override fun equals(other: Any?): Boolean = other === False
     override fun hashCode(): Int = -1
 }
 
-public class NumberValue(override val number: Number) : Value {
+public class NumberValue(public val number: Number) : Value {
     override val value: Any get() = number
     override val type: ValueType get() = ValueType.NUMBER
-    override val string: String get() = number.toString()
+
+    override fun toString(): String = number.toString()
 
     override fun equals(other: Any?): Boolean {
         if (other !is Value) return false
-        return when (number) {
-            is Short -> number.toShort() == other.number.toShort()
-            is Long -> number.toLong() == other.number.toLong()
-            is Byte -> number.toByte() == other.number.toByte()
-            is Int -> number.toInt() == other.number.toInt()
-            is Float -> number.toFloat() == other.number.toFloat()
-            is Double -> number.toDouble() == other.number.toDouble()
-            else -> number.toString() == other.number.toString()
+
+        val otherNumber = other.numberOrNull ?: return false
+
+        return when (numberOrNull) {
+            is Short -> number.toShort() == otherNumber.toShort()
+            is Long -> number.toLong() == otherNumber.toLong()
+            is Byte -> number.toByte() == otherNumber.toByte()
+            is Int -> number.toInt() == otherNumber.toInt()
+            is Float -> number.toFloat() == otherNumber.toFloat()
+            is Double -> number.toDouble() == otherNumber.toDouble()
+            else -> number.toString() == otherNumber.toString()
         }
     }
 
-    override fun hashCode(): Int = number.hashCode()
-
-    override fun toString(): String = value.toString()
+    override fun hashCode(): Int = numberOrNull.hashCode()
 }
 
-public class StringValue(override val string: String) : Value {
+public class StringValue(public val string: String) : Value {
     override val value: Any get() = string
     override val type: ValueType get() = ValueType.STRING
-    override val number: Number get() = string.toDouble()
 
     override fun equals(other: Any?): Boolean {
         return this.string == (other as? Value)?.string
@@ -165,21 +161,19 @@ public class StringValue(override val string: String) : Value {
 
     override fun hashCode(): Int = string.hashCode()
 
-    override fun toString(): String = "\"${value.toString()}\""
+    override fun toString(): String = string
 }
 
 public class EnumValue<E : Enum<*>>(override val value: E) : Value {
     override val type: ValueType get() = ValueType.STRING
-    override val number: Number get() = value.ordinal
-    override val string: String get() = value.name
+
+    override fun toString(): String = value.toString()
 
     override fun equals(other: Any?): Boolean {
         return string == (other as? Value)?.string
     }
 
     override fun hashCode(): Int = value.hashCode()
-
-    override fun toString(): String = value.toString()
 }
 
 public class ListValue(override val list: List<Value>) : Value, Iterable<Value> {
@@ -188,9 +182,7 @@ public class ListValue(override val list: List<Value>) : Value, Iterable<Value> 
     }
 
     override val value: List<Value> get() = list
-    override val type: ValueType get() = list.first().type
-    override val number: Number get() = list.first().number
-    override val string: String get() = list.first().string
+    override val type: ValueType get() = ValueType.LIST
 
     override fun toString(): String = list.joinToString(prefix = "[", postfix = "]")
 
@@ -200,7 +192,7 @@ public class ListValue(override val list: List<Value>) : Value, Iterable<Value> 
         if (this === other) return true
         if (other !is Value) return false
         if (other is DoubleArrayValue) {
-            return DoubleArray(list.size) { list[it].number.toDouble() }.contentEquals(other.value)
+            return DoubleArray(list.size) { list[it].numberOrNull?.toDouble() ?: Double.NaN }.contentEquals(other.value)
         }
         return list == other.list
     }
@@ -208,8 +200,6 @@ public class ListValue(override val list: List<Value>) : Value, Iterable<Value> 
     override fun hashCode(): Int {
         return list.hashCode()
     }
-
-
 }
 
 public fun Number.asValue(): Value = NumberValue(this)

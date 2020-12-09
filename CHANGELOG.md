@@ -4,6 +4,7 @@
 ### Added
 - Yaml meta format based on yaml.kt
 - `Path` builders
+- Special ValueType for lists
 
 ### Changed
 - `ListValue` and `DoubleArrayValue` implement `Iterable`.
@@ -11,6 +12,7 @@
 - `Meta{}` builder made inline
 - Moved `Envelope` builder to a top level function. Companion invoke is deprecated.
 - Context logging moved to the extension
+- `number` and `string` methods on `Value` moved to extensions (breaking change)
 
 ### Deprecated
 

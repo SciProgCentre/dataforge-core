@@ -32,49 +32,48 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
         writeUtf8String(str)
     }
 
-    public fun Output.writeValue(value: Value) {
-        if (value.isList()) {
+    public fun Output.writeValue(value: Value): Unit = when (value.type) {
+        ValueType.NUMBER -> when (value.value) {
+            is Short -> {
+                writeChar('s')
+                writeShort(value.short)
+            }
+            is Int -> {
+                writeChar('i')
+                writeInt(value.int)
+            }
+            is Long -> {
+                writeChar('l')
+                writeLong(value.long)
+            }
+            is Float -> {
+                writeChar('f')
+                writeFloat(value.float)
+            }
+            else -> {
+                writeChar('d')
+                writeDouble(value.double)
+            }
+        }
+        ValueType.STRING -> {
+            writeChar('S')
+            writeString(value.string)
+        }
+        ValueType.BOOLEAN -> {
+            if (value.boolean) {
+                writeChar('+')
+            } else {
+                writeChar('-')
+            }
+        }
+        ValueType.NULL -> {
+            writeChar('N')
+        }
+        ValueType.LIST -> {
             writeChar('L')
             writeInt(value.list.size)
             value.list.forEach {
                 writeValue(it)
-            }
-        } else when (value.type) {
-            ValueType.NUMBER -> when (value.value) {
-                is Short -> {
-                    writeChar('s')
-                    writeShort(value.number.toShort())
-                }
-                is Int -> {
-                    writeChar('i')
-                    writeInt(value.number.toInt())
-                }
-                is Long -> {
-                    writeChar('l')
-                    writeLong(value.number.toLong())
-                }
-                is Float -> {
-                    writeChar('f')
-                    writeFloat(value.number.toFloat())
-                }
-                else -> {
-                    writeChar('d')
-                    writeDouble(value.number.toDouble())
-                }
-            }
-            ValueType.STRING -> {
-                writeChar('S')
-                writeString(value.string)
-            }
-            ValueType.BOOLEAN -> {
-                if (value.boolean) {
-                    writeChar('+')
-                } else {
-                    writeChar('-')
-                }
-            }
-            ValueType.NULL -> {
-                writeChar('N')
             }
         }
     }
@@ -82,7 +81,7 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
     override fun writeMeta(
         output: kotlinx.io.Output,
         meta: hep.dataforge.meta.Meta,
-        descriptor: hep.dataforge.meta.descriptors.NodeDescriptor?
+        descriptor: hep.dataforge.meta.descriptors.NodeDescriptor?,
     ) {
         output.writeChar('M')
         output.writeInt(meta.items.size)

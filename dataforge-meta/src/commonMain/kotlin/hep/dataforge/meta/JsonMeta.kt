@@ -16,20 +16,16 @@ import kotlinx.serialization.json.*
 /**
  * @param descriptor reserved for custom serialization in future
  */
-public fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
-    return if (isList()) {
-        JsonArray(list.map { it.toJson() })
-    } else {
-        when (type) {
-            ValueType.NUMBER -> JsonPrimitive(number)
-            ValueType.STRING -> JsonPrimitive(string)
-            ValueType.BOOLEAN -> JsonPrimitive(boolean)
-            ValueType.NULL -> JsonNull
-        }
-    }
+public fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement = when (type) {
+    ValueType.NUMBER -> JsonPrimitive(numberOrNull)
+    ValueType.STRING -> JsonPrimitive(string)
+    ValueType.BOOLEAN -> JsonPrimitive(boolean)
+    ValueType.LIST -> JsonArray(list.map { it.toJson() })
+    ValueType.NULL -> JsonNull
 }
 
 //Use these methods to customize JSON key mapping
+@Suppress("NULLABLE_EXTENSION_OPERATOR_WITH_SAFE_CALL_RECEIVER")
 private fun String.toJsonKey(descriptor: ItemDescriptor?) = descriptor?.attributes["jsonName"].string ?: toString()
 
 //private fun NodeDescriptor?.getDescriptor(key: String) = this?.items?.get(key)

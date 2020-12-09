@@ -19,6 +19,7 @@ class DynamicMetaTest {
         d.ob.booleanNode = true
 
         val meta = DynamicMeta(d)
+        println(meta)
         assertEquals(true, meta["ob.booleanNode"].boolean)
         assertEquals(2, meta["array"].value?.list?.get(1)?.int)
         assertEquals(4, meta.items.size)

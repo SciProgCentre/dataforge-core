@@ -32,5 +32,6 @@ public val ColumnHeader<Value>.textWidth: Int
         ValueType.STRING -> 16
         ValueType.BOOLEAN -> 5
         ValueType.NULL -> 5
+        ValueType.LIST -> 32
         null -> 16
     }

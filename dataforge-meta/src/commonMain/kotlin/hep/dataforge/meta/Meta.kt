@@ -4,10 +4,7 @@ import hep.dataforge.meta.Meta.Companion.VALUE_KEY
 import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.names.*
-import hep.dataforge.values.EnumValue
-import hep.dataforge.values.Null
-import hep.dataforge.values.Value
-import hep.dataforge.values.boolean
+import hep.dataforge.values.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -245,7 +242,7 @@ public val MetaItem<*>?.value: Value?
 
 public val MetaItem<*>?.string: String? get() = value?.string
 public val MetaItem<*>?.boolean: Boolean? get() = value?.boolean
-public val MetaItem<*>?.number: Number? get() = value?.number
+public val MetaItem<*>?.number: Number? get() = value?.numberOrNull
 public val MetaItem<*>?.double: Double? get() = number?.toDouble()
 public val MetaItem<*>?.float: Float? get() = number?.toFloat()
 public val MetaItem<*>?.int: Int? get() = number?.toInt()

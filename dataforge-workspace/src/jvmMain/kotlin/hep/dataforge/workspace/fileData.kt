@@ -16,9 +16,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.reflect.KClass
 
-typealias FileFormatResolver<T> = (Path, Meta) -> IOFormat<T>
-
-
+public typealias FileFormatResolver<T> = (Path, Meta) -> IOFormat<T>
 
 private fun newZFS(path: Path): FileSystem {
     val fsProvider = FileSystemProvider.installedProviders().find { it.scheme == "jar" }
@@ -84,7 +82,7 @@ public fun <T : Any> DataTreeBuilder<T>.file(
  * Read the directory as a data node. If [path] is a zip archive, read it as directory
  */
 @DFExperimental
-fun <T : Any> IOPlugin.readDataDirectory(
+public fun <T : Any> IOPlugin.readDataDirectory(
     path: Path,
     type: KClass<out T>,
     formatResolver: FileFormatResolver<T>

@@ -6,6 +6,7 @@ import hep.dataforge.tables.get
 import hep.dataforge.tables.row
 import hep.dataforge.values.Value
 import hep.dataforge.values.int
+import hep.dataforge.values.string
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.ExperimentalIoApi

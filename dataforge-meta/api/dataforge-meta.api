@@ -817,9 +817,6 @@ public final class hep/dataforge/values/DoubleArrayValue : hep/dataforge/values/
 	public fun <init> ([D)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getList ()Ljava/util/List;
-	public fun getNumber ()Ljava/lang/Double;
-	public synthetic fun getNumber ()Ljava/lang/Number;
-	public fun getString ()Ljava/lang/String;
 	public fun getType ()Lhep/dataforge/values/ValueType;
 	public synthetic fun getValue ()Ljava/lang/Object;
 	public fun getValue ()[D
@@ -832,8 +829,6 @@ public final class hep/dataforge/values/EnumValue : hep/dataforge/values/Value {
 	public fun <init> (Ljava/lang/Enum;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getList ()Ljava/util/List;
-	public fun getNumber ()Ljava/lang/Number;
-	public fun getString ()Ljava/lang/String;
 	public fun getType ()Lhep/dataforge/values/ValueType;
 	public fun getValue ()Ljava/lang/Enum;
 	public synthetic fun getValue ()Ljava/lang/Object;
@@ -850,8 +845,6 @@ public final class hep/dataforge/values/False : hep/dataforge/values/Value {
 	public static final field INSTANCE Lhep/dataforge/values/False;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getList ()Ljava/util/List;
-	public fun getNumber ()Ljava/lang/Number;
-	public fun getString ()Ljava/lang/String;
 	public fun getType ()Lhep/dataforge/values/ValueType;
 	public fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
@@ -862,8 +855,7 @@ public final class hep/dataforge/values/LazyParsedValue : hep/dataforge/values/V
 	public fun <init> (Ljava/lang/String;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getList ()Ljava/util/List;
-	public fun getNumber ()Ljava/lang/Number;
-	public fun getString ()Ljava/lang/String;
+	public final fun getString ()Ljava/lang/String;
 	public fun getType ()Lhep/dataforge/values/ValueType;
 	public fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
@@ -874,8 +866,6 @@ public final class hep/dataforge/values/ListValue : hep/dataforge/values/Value, 
 	public fun <init> (Ljava/util/List;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getList ()Ljava/util/List;
-	public fun getNumber ()Ljava/lang/Number;
-	public fun getString ()Ljava/lang/String;
 	public fun getType ()Lhep/dataforge/values/ValueType;
 	public synthetic fun getValue ()Ljava/lang/Object;
 	public fun getValue ()Ljava/util/List;
@@ -888,8 +878,6 @@ public final class hep/dataforge/values/Null : hep/dataforge/values/Value {
 	public static final field INSTANCE Lhep/dataforge/values/Null;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getList ()Ljava/util/List;
-	public fun getNumber ()Ljava/lang/Number;
-	public fun getString ()Ljava/lang/String;
 	public fun getType ()Lhep/dataforge/values/ValueType;
 	public fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
@@ -900,8 +888,7 @@ public final class hep/dataforge/values/NumberValue : hep/dataforge/values/Value
 	public fun <init> (Ljava/lang/Number;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getList ()Ljava/util/List;
-	public fun getNumber ()Ljava/lang/Number;
-	public fun getString ()Ljava/lang/String;
+	public final fun getNumber ()Ljava/lang/Number;
 	public fun getType ()Lhep/dataforge/values/ValueType;
 	public fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
@@ -912,8 +899,7 @@ public final class hep/dataforge/values/StringValue : hep/dataforge/values/Value
 	public fun <init> (Ljava/lang/String;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getList ()Ljava/util/List;
-	public fun getNumber ()Ljava/lang/Number;
-	public fun getString ()Ljava/lang/String;
+	public final fun getString ()Ljava/lang/String;
 	public fun getType ()Lhep/dataforge/values/ValueType;
 	public fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
@@ -924,8 +910,6 @@ public final class hep/dataforge/values/True : hep/dataforge/values/Value {
 	public static final field INSTANCE Lhep/dataforge/values/True;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getList ()Ljava/util/List;
-	public fun getNumber ()Ljava/lang/Number;
-	public fun getString ()Ljava/lang/String;
 	public fun getType ()Lhep/dataforge/values/ValueType;
 	public fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
@@ -934,18 +918,16 @@ public final class hep/dataforge/values/True : hep/dataforge/values/Value {
 
 public abstract interface class hep/dataforge/values/Value {
 	public static final field Companion Lhep/dataforge/values/Value$Companion;
-	public static final field TARGET Ljava/lang/String;
+	public static final field TYPE Ljava/lang/String;
 	public abstract fun equals (Ljava/lang/Object;)Z
 	public abstract fun getList ()Ljava/util/List;
-	public abstract fun getNumber ()Ljava/lang/Number;
-	public abstract fun getString ()Ljava/lang/String;
 	public abstract fun getType ()Lhep/dataforge/values/ValueType;
 	public abstract fun getValue ()Ljava/lang/Object;
 	public abstract fun hashCode ()I
 }
 
 public final class hep/dataforge/values/Value$Companion {
-	public static final field TARGET Ljava/lang/String;
+	public static final field TYPE Ljava/lang/String;
 	public final fun of (Ljava/lang/Object;)Lhep/dataforge/values/Value;
 }
 
@@ -978,6 +960,9 @@ public final class hep/dataforge/values/ValueKt {
 	public static final fun asValue ([I)Lhep/dataforge/values/Value;
 	public static final fun asValue ([J)Lhep/dataforge/values/Value;
 	public static final fun asValue ([S)Lhep/dataforge/values/Value;
+	public static final fun getNumber (Lhep/dataforge/values/Value;)Ljava/lang/Number;
+	public static final fun getNumberOrNull (Lhep/dataforge/values/Value;)Ljava/lang/Number;
+	public static final fun getString (Lhep/dataforge/values/Value;)Ljava/lang/String;
 	public static final fun parseValue (Ljava/lang/String;)Lhep/dataforge/values/Value;
 }
 
@@ -993,6 +978,7 @@ public final class hep/dataforge/values/ValueSerializer : kotlinx/serialization/
 public final class hep/dataforge/values/ValueType : java/lang/Enum {
 	public static final field BOOLEAN Lhep/dataforge/values/ValueType;
 	public static final field Companion Lhep/dataforge/values/ValueType$Companion;
+	public static final field LIST Lhep/dataforge/values/ValueType;
 	public static final field NULL Lhep/dataforge/values/ValueType;
 	public static final field NUMBER Lhep/dataforge/values/ValueType;
 	public static final field STRING Lhep/dataforge/values/ValueType;

@@ -3,10 +3,7 @@ package hep.dataforge.meta
 import hep.dataforge.meta.transformations.MetaConverter
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
-import hep.dataforge.values.DoubleArrayValue
-import hep.dataforge.values.Value
-import hep.dataforge.values.asValue
-import hep.dataforge.values.doubleArray
+import hep.dataforge.values.*
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -70,7 +67,6 @@ public fun <R> MutableItemDelegate.convert(
         this@convert.setValue(thisRef, property, item)
     }
 }
-
 
 
 /* Read-write delegates for [MutableItemProvider] */
@@ -171,7 +167,7 @@ public fun MutableItemProvider.numberList(
     vararg default: Number,
     key: Name? = null,
 ): ReadWriteProperty<Any?, List<Number>> = item(key).convert(
-    reader = { it?.value?.list?.map { value -> value.number } ?: listOf(*default) },
+    reader = { it?.value?.list?.map { value -> value.numberOrNull ?: Double.NaN } ?: listOf(*default) },
     writer = { it.map { num -> num.asValue() }.asValue().asMetaItem() }
 )
 

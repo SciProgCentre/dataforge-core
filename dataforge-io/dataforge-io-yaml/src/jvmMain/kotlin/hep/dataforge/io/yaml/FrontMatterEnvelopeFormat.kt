@@ -17,6 +17,7 @@ public class FrontMatterEnvelopeFormat(
 ) : EnvelopeFormat {
 
     override fun readPartial(input: Input): PartialEnvelope {
+        @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
         var line = ""
         var offset = 0u
         do {

@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 
 
 class EnvelopeFormatTest {
-    val envelope = Envelope.invoke {
+    val envelope = Envelope {
         type = "test.format"
         meta{
             "d" put 22.2
