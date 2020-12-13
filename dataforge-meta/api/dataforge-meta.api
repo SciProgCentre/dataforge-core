@@ -924,6 +924,7 @@ public abstract interface class hep/dataforge/values/Value {
 	public abstract fun getType ()Lhep/dataforge/values/ValueType;
 	public abstract fun getValue ()Ljava/lang/Object;
 	public abstract fun hashCode ()I
+	public abstract fun toString ()Ljava/lang/String;
 }
 
 public final class hep/dataforge/values/Value$Companion {
