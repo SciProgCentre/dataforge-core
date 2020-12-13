@@ -4,8 +4,6 @@ import hep.dataforge.names.*
 
 public interface MutableMeta<out M : MutableMeta<M>> : MetaNode<M>, MutableItemProvider {
     override val items: Map<NameToken, MetaItem<M>>
-//    fun onChange(owner: Any? = null, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit)
-//    fun removeListener(owner: Any? = null)
 }
 
 /**
