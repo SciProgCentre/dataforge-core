@@ -40,6 +40,8 @@ public interface Value {
 
     override fun hashCode(): Int
 
+    override fun toString(): String
+
     public companion object {
         public const val TYPE: String = "value"
 
