@@ -10,6 +10,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlin.collections.set
+import kotlin.jvm.Synchronized
 
 //TODO add validator to configuration
 
@@ -31,6 +32,7 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableMeta {
 
     private val listeners = HashSet<MetaListener>()
 
+    @Synchronized
     private fun itemChanged(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) {
         listeners.forEach { it.action(name, oldItem, newItem) }
     }
@@ -38,6 +40,7 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableMeta {
     /**
      * Add change listener to this meta. Owner is declared to be able to remove listeners later. Listener without owner could not be removed
      */
+    @Synchronized
     override fun onChange(owner: Any?, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit) {
         listeners.add(MetaListener(owner, action))
     }
@@ -45,6 +48,7 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableMeta {
     /**
      * Remove all listeners belonging to given owner
      */
+    @Synchronized
     override fun removeListener(owner: Any?) {
         listeners.removeAll { it.owner === owner }
     }
