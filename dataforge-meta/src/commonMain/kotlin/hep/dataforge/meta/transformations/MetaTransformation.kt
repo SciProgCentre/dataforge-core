@@ -102,7 +102,7 @@ public inline class MetaTransformation(public val transformations: Collection<Tr
      * Generate an observable configuration that contains only elements defined by transformation rules and changes with the source
      */
     @DFExperimental
-    public fun generate(source: Config): ObservableMeta = Config().apply {
+    public fun generate(source: Config): ObservableItemProvider = Config().apply {
         transformations.forEach { rule ->
             rule.selectItems(source).forEach { name ->
                 rule.transformItem(name, source[name], this)

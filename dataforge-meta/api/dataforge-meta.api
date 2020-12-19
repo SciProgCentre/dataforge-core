@@ -14,7 +14,7 @@ public abstract class hep/dataforge/meta/AbstractMutableMeta : hep/dataforge/met
 	protected abstract fun wrapNode (Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/MutableMeta;
 }
 
-public final class hep/dataforge/meta/Config : hep/dataforge/meta/AbstractMutableMeta, hep/dataforge/meta/ObservableMeta {
+public final class hep/dataforge/meta/Config : hep/dataforge/meta/AbstractMutableMeta, hep/dataforge/meta/ObservableItemProvider {
 	public static final field ConfigSerializer Lhep/dataforge/meta/Config$ConfigSerializer;
 	public fun <init> ()V
 	public synthetic fun empty$dataforge_meta ()Lhep/dataforge/meta/MutableMeta;
@@ -106,6 +106,20 @@ public final class hep/dataforge/meta/ItemDelegateKt {
 	public static synthetic fun string$default (Lhep/dataforge/meta/ItemProvider;Ljava/lang/String;Lhep/dataforge/names/Name;ILjava/lang/Object;)Lkotlin/properties/ReadOnlyProperty;
 	public static final fun value (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/names/Name;)Lkotlin/properties/ReadOnlyProperty;
 	public static synthetic fun value$default (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/names/Name;ILjava/lang/Object;)Lkotlin/properties/ReadOnlyProperty;
+}
+
+public final class hep/dataforge/meta/ItemListener {
+	public fun <init> (Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)V
+	public synthetic fun <init> (Ljava/lang/Object;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Lkotlin/jvm/functions/Function3;
+	public final fun copy (Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Lhep/dataforge/meta/ItemListener;
+	public static synthetic fun copy$default (Lhep/dataforge/meta/ItemListener;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lhep/dataforge/meta/ItemListener;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAction ()Lkotlin/jvm/functions/Function3;
+	public final fun getOwner ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class hep/dataforge/meta/ItemProvider {
@@ -309,20 +323,6 @@ public final class hep/dataforge/meta/MetaKt {
 	public static final fun values (Lhep/dataforge/meta/Meta;)Lkotlin/sequences/Sequence;
 }
 
-public final class hep/dataforge/meta/MetaListener {
-	public fun <init> (Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)V
-	public synthetic fun <init> (Ljava/lang/Object;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/Object;
-	public final fun component2 ()Lkotlin/jvm/functions/Function3;
-	public final fun copy (Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Lhep/dataforge/meta/MetaListener;
-	public static synthetic fun copy$default (Lhep/dataforge/meta/MetaListener;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lhep/dataforge/meta/MetaListener;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAction ()Lkotlin/jvm/functions/Function3;
-	public final fun getOwner ()Ljava/lang/Object;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public abstract interface class hep/dataforge/meta/MetaNode : hep/dataforge/meta/Meta {
 	public abstract fun getItems ()Ljava/util/Map;
 }
@@ -456,14 +456,9 @@ public final class hep/dataforge/meta/MutableMetaKt {
 	public static final fun update (Lhep/dataforge/meta/MutableMeta;Lhep/dataforge/meta/Meta;)V
 }
 
-public abstract interface class hep/dataforge/meta/ObservableMeta : hep/dataforge/meta/Meta {
+public abstract interface class hep/dataforge/meta/ObservableItemProvider : hep/dataforge/meta/ItemProvider {
 	public abstract fun onChange (Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)V
 	public abstract fun removeListener (Ljava/lang/Object;)V
-}
-
-public final class hep/dataforge/meta/ObservableMeta$DefaultImpls {
-	public static fun getItem (Lhep/dataforge/meta/ObservableMeta;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
-	public static fun toMeta (Lhep/dataforge/meta/ObservableMeta;)Lhep/dataforge/meta/Meta;
 }
 
 public class hep/dataforge/meta/Scheme : hep/dataforge/meta/Configurable, hep/dataforge/meta/MetaRepr, hep/dataforge/meta/MutableItemProvider, hep/dataforge/meta/descriptors/Described {
@@ -671,7 +666,7 @@ public final class hep/dataforge/meta/transformations/MetaTransformation {
 	public fun equals (Ljava/lang/Object;)Z
 	public static fun equals-impl (Ljava/util/Collection;Ljava/lang/Object;)Z
 	public static final fun equals-impl0 (Ljava/util/Collection;Ljava/util/Collection;)Z
-	public static final fun generate-impl (Ljava/util/Collection;Lhep/dataforge/meta/Config;)Lhep/dataforge/meta/ObservableMeta;
+	public static final fun generate-impl (Ljava/util/Collection;Lhep/dataforge/meta/Config;)Lhep/dataforge/meta/ObservableItemProvider;
 	public static final fun generate-impl (Ljava/util/Collection;Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/Meta;
 	public final fun getTransformations ()Ljava/util/Collection;
 	public fun hashCode ()I

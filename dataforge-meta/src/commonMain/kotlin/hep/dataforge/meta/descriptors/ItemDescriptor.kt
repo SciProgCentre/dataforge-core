@@ -46,7 +46,7 @@ public sealed class ItemDescriptor(public val config: Config) {
 /**
  * Configure attributes of the descriptor, creating an attributes node if needed.
  */
-public fun ItemDescriptor.attributes(block: Config.() -> Unit) {
+public inline fun ItemDescriptor.attributes(block: Config.() -> Unit) {
     (attributes ?: Config().also { this.attributes = it }).apply(block)
 }
 
