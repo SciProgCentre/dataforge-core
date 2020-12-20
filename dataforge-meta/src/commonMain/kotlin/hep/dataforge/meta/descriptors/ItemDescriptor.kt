@@ -38,6 +38,8 @@ public sealed class ItemDescriptor(public val config: Config) {
      */
     public var indexKey: String by config.string(DEFAULT_INDEX_KEY)
 
+    public abstract fun copy(): ItemDescriptor
+
     public companion object{
         public const val DEFAULT_INDEX_KEY: String = "@index"
     }
@@ -180,6 +182,8 @@ public class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) 
         value(name.toName(), block)
     }
 
+    override fun copy(): NodeDescriptor = NodeDescriptor(config.toConfig())
+
     public companion object {
 
         internal val ITEM_KEY: Name = "item".asName()
@@ -281,6 +285,8 @@ public class ValueDescriptor(config: Config = Config()) : ItemDescriptor(config)
     public fun allow(vararg v: Any) {
         this.allowedValues = v.map { Value.of(it) }
     }
+
+    override fun copy(): ValueDescriptor = ValueDescriptor(config.toConfig())
 }
 
 /**

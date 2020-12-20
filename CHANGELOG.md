@@ -5,6 +5,7 @@
 - Yaml meta format based on yaml.kt
 - `Path` builders
 - Special ValueType for lists
+- `copy` method to descriptors
 
 ### Changed
 - `ListValue` and `DoubleArrayValue` implement `Iterable`.

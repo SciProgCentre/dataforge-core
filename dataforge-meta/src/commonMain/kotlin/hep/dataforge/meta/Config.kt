@@ -94,7 +94,11 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableItemProvider {
 
 public operator fun Config.get(token: NameToken): MetaItem<Config>? = items[token]
 
-public fun Meta.asConfig(): Config = this as? Config ?: Config().also { builder ->
+/**
+ * Create a mutable copy of this [Meta]. The copy is created event if initial [Meta] is a [Config].
+ * Listeners are not preserved
+ */
+public fun Meta.toConfig(): Config = Config().also { builder ->
     this.items.mapValues { entry ->
         val item = entry.value
         builder[entry.key.asName()] = when (item) {
@@ -103,3 +107,8 @@ public fun Meta.asConfig(): Config = this as? Config ?: Config().also { builder 
         }
     }
 }
+
+/**
+ * Return this [Meta] as [Config] if it is [Config] and create a new copy otherwise
+ */
+public fun Meta.asConfig(): Config = this as? Config ?: toConfig()
