@@ -28,7 +28,6 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMet
         //itemChanged(key.asName(), oldItem, newItem)
     }
 
-    @Suppress("UNCHECKED_CAST")
     protected fun wrapItem(item: MetaItem<*>?): MetaItem<M>? = when (item) {
         null -> null
         is MetaItem.ValueItem -> item
@@ -50,7 +49,7 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMet
             0 -> error("Can't setValue meta item for empty name")
             1 -> {
                 val token = name.firstOrNull()!!
-                @Suppress("UNCHECKED_CAST") val oldItem: MetaItem<M>? = getItem(name) as? MetaItem<M>
+                val oldItem: MetaItem<M>? = getItem(name)
                 replaceItem(token, oldItem, wrapItem(item))
             }
             else -> {

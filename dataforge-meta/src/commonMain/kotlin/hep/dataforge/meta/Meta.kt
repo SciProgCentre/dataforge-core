@@ -4,7 +4,6 @@ import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.names.*
 import hep.dataforge.values.Value
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 
@@ -63,7 +62,7 @@ public interface Meta : MetaRepr, ItemProvider {
     }
 }
 
-public operator fun Meta?.get(token: NameToken): MetaItem<*>? = this?.items?.get(token)
+public operator fun Meta.get(token: NameToken): MetaItem<*>? = items.get(token)
 
 /**
  * Get a sequence of [Name]-[Value] pairs
@@ -98,17 +97,17 @@ public operator fun Meta.iterator(): Iterator<Pair<Name, MetaItem<*>>> = itemSeq
  */
 public interface TypedMeta<out M : TypedMeta<M>> : Meta {
     override val items: Map<NameToken, MetaItem<M>>
+
+    @Suppress("UNCHECKED_CAST")
+    override fun getItem(name: Name): MetaItem<M>? = super.getItem(name)?.let { it as MetaItem<M> }
+    //Typed meta guarantees that all children have M type
 }
 
 /**
  * The same as [Meta.get], but with specific node type
  */
-public operator fun <M : TypedMeta<M>> M?.get(name: Name): MetaItem<M>? = if (this == null) {
-    null
-} else {
-    @Suppress("UNCHECKED_CAST", "ReplaceGetOrSet")
-    (this as Meta).get(name) as MetaItem<M>? // Do not change
-}
+public operator fun <M : TypedMeta<M>> M?.get(name: Name): MetaItem<M>? = this?.getItem(name)
+
 
 public operator fun <M : TypedMeta<M>> M?.get(key: String): MetaItem<M>? = this[key.toName()]
 public operator fun <M : TypedMeta<M>> M?.get(key: NameToken): MetaItem<M>? = this[key.asName()]

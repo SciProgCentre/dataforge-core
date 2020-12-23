@@ -3,7 +3,6 @@ package hep.dataforge.meta
 import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.values.*
-import kotlinx.serialization.Serializable
 
 /**
  * A member of the meta tree. Could be represented as one of following:
@@ -72,7 +71,7 @@ public val MetaItem<*>?.int: Int? get() = number?.toInt()
 public val MetaItem<*>?.long: Long? get() = number?.toLong()
 public val MetaItem<*>?.short: Short? get() = number?.toShort()
 
-public inline fun <reified E : Enum<E>> MetaItem<*>?.enum(): E? = if (this is MetaItem.ValueItem && this.value is EnumValue<*>) {
+public inline fun <reified E : Enum<E>> MetaItem<*>?.enum(): E? = if (this is ValueItem && this.value is EnumValue<*>) {
     this.value.value as E
 } else {
     string?.let { enumValueOf<E>(it) }

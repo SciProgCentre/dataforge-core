@@ -19,7 +19,7 @@ public interface Specification<T : MutableItemProvider> {
     /**
      * Wrap [MutableItemProvider], using it as inner storage (changes to [Specification] are reflected on [MutableItemProvider]
      */
-    public fun write(config: Config, defaultProvider: ItemProvider = ItemProvider.EMPTY): T
+    public fun write(target: MutableItemProvider, defaultProvider: ItemProvider = ItemProvider.EMPTY): T
 
     /**
      * Generate an empty object

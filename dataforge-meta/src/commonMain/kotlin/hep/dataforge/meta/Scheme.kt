@@ -86,12 +86,12 @@ public inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit): T = apply
  * A specification for simplified generation of wrappers
  */
 public open class SchemeSpec<T : Scheme>(
-    private val builder: (config: Config, defaultProvider: ItemProvider, descriptor: NodeDescriptor?) -> T,
+    private val builder: (target: MutableItemProvider, defaultProvider: ItemProvider, descriptor: NodeDescriptor?) -> T,
 ) : Specification<T>, Described {
 
-    public constructor(emptyBuilder: () -> T) : this({ config: Config, defaultProvider: ItemProvider, descriptor: NodeDescriptor? ->
+    public constructor(emptyBuilder: () -> T) : this({ target: MutableItemProvider, defaultProvider: ItemProvider, descriptor: NodeDescriptor? ->
         emptyBuilder().apply {
-            this.items = config
+            this.items = target
             this.default = defaultProvider
             this.descriptor = descriptor
         }
@@ -100,8 +100,8 @@ public open class SchemeSpec<T : Scheme>(
     override fun read(items: ItemProvider): T =
         builder(Config(), items, descriptor)
 
-    override fun write(config: Config, defaultProvider: ItemProvider): T =
-        builder(config, defaultProvider, descriptor)
+    override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): T =
+        builder(target, defaultProvider, descriptor)
 
     //TODO Generate descriptor from Scheme class
     override val descriptor: NodeDescriptor? get() = null

@@ -2,7 +2,6 @@
 
 package hep.dataforge.meta
 
-import hep.dataforge.meta.JsonMeta.Companion.JSON_ARRAY_KEY
 import hep.dataforge.meta.descriptors.ItemDescriptor
 import hep.dataforge.meta.descriptors.ItemDescriptor.Companion.DEFAULT_INDEX_KEY
 import hep.dataforge.meta.descriptors.NodeDescriptor
@@ -26,7 +25,7 @@ public fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement = when
 
 //Use these methods to customize JSON key mapping
 @Suppress("NULLABLE_EXTENSION_OPERATOR_WITH_SAFE_CALL_RECEIVER")
-private fun String.toJsonKey(descriptor: ItemDescriptor?) = descriptor?.attributes["jsonName"].string ?: toString()
+private fun String.toJsonKey(descriptor: ItemDescriptor?) = descriptor?.attributes?.get("jsonName").string ?: toString()
 
 //private fun NodeDescriptor?.getDescriptor(key: String) = this?.items?.get(key)
 
