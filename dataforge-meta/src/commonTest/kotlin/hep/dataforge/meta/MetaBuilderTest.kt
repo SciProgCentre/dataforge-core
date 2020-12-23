@@ -30,7 +30,7 @@ class MetaBuilderTest {
                 "b.a[$it]" put it
             }
         }.seal()
-        assertEquals(10, meta.values().count())
+        assertEquals(10, meta.valueSequence().count())
 
         val nodes = meta.getIndexed("b.a")
 

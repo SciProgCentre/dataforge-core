@@ -30,7 +30,7 @@ class MetaDelegateTest {
     fun delegateTest() {
 
         val testObject = TestScheme.empty()
-        testObject.setValue("myValue","theString".asValue())
+        testObject.set("myValue","theString".asValue())
         testObject.enumValue = TestEnum.NO
 
         testObject.inner = InnerSpec { innerValue = "ddd" }

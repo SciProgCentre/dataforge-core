@@ -3,7 +3,7 @@ package hep.dataforge.context
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
-import hep.dataforge.meta.sequence
+import hep.dataforge.meta.itemSequence
 import hep.dataforge.names.Name
 import hep.dataforge.provider.Provider
 import kotlinx.coroutines.CoroutineScope
@@ -47,13 +47,13 @@ public open class Context(
     public fun content(target: String, inherit: Boolean): Map<Name, Any> {
         return if (inherit) {
             when (target) {
-                PROPERTY_TARGET -> properties.sequence().toMap()
+                PROPERTY_TARGET -> properties.itemSequence().toMap()
                 Plugin.TARGET -> plugins.list(true).associateBy { it.name }
                 else -> emptyMap()
             }
         } else {
             when (target) {
-                PROPERTY_TARGET -> properties.layers.firstOrNull()?.sequence()?.toMap() ?: emptyMap()
+                PROPERTY_TARGET -> properties.layers.firstOrNull()?.itemSequence()?.toMap() ?: emptyMap()
                 Plugin.TARGET -> plugins.list(false).associateBy { it.name }
                 else -> emptyMap()
             }

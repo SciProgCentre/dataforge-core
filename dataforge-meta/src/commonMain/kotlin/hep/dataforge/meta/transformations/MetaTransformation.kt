@@ -19,7 +19,7 @@ public interface TransformationRule {
      * @return a sequence of item paths to be transformed
      */
     public fun selectItems(meta: Meta): Sequence<Name> =
-        meta.sequence().filter { matches(it.first, it.second) }.map { it.first }
+        meta.itemSequence().filter { matches(it.first, it.second) }.map { it.first }
 
     /**
      * Apply transformation for a single item (Node or Value) to the target
@@ -37,10 +37,10 @@ public data class KeepTransformationRule(val selector: (Name) -> Boolean) :
     }
 
     override fun selectItems(meta: Meta): Sequence<Name> =
-        meta.sequence().map { it.first }.filter(selector)
+        meta.itemSequence().map { it.first }.filter(selector)
 
     override fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem<*>?, target: M) {
-        if (selector(name)) target.setItem(name, item)
+        if (selector(name)) target.set(name, item)
     }
 }
 
@@ -170,7 +170,7 @@ public class MetaTransformationBuilder {
     public fun keep(regex: String) {
         transformations.add(
             RegexItemTransformationRule(regex.toRegex()) { name, _, metaItem ->
-                setItem(name, metaItem)
+                set(name, metaItem)
             })
     }
 

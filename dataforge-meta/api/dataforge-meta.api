@@ -1,10 +1,4 @@
-public abstract class hep/dataforge/meta/AbstractMetaNode : hep/dataforge/meta/MetaBase, hep/dataforge/meta/MetaNode {
-	public fun <init> ()V
-	public fun getItem (Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
-	public fun toMeta ()Lhep/dataforge/meta/Meta;
-}
-
-public abstract class hep/dataforge/meta/AbstractMutableMeta : hep/dataforge/meta/AbstractMetaNode, hep/dataforge/meta/MutableMeta {
+public abstract class hep/dataforge/meta/AbstractMutableMeta : hep/dataforge/meta/AbstractTypedMeta, hep/dataforge/meta/MutableMeta {
 	public fun <init> ()V
 	protected final fun getChildren ()Ljava/util/Map;
 	public fun getItems ()Ljava/util/Map;
@@ -12,6 +6,12 @@ public abstract class hep/dataforge/meta/AbstractMutableMeta : hep/dataforge/met
 	public fun setItem (Lhep/dataforge/names/Name;Lhep/dataforge/meta/MetaItem;)V
 	protected final fun wrapItem (Lhep/dataforge/meta/MetaItem;)Lhep/dataforge/meta/MetaItem;
 	protected abstract fun wrapNode (Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/MutableMeta;
+}
+
+public abstract class hep/dataforge/meta/AbstractTypedMeta : hep/dataforge/meta/MetaBase, hep/dataforge/meta/TypedMeta {
+	public fun <init> ()V
+	public fun getItem (Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
+	public fun toMeta ()Lhep/dataforge/meta/Meta;
 }
 
 public final class hep/dataforge/meta/Config : hep/dataforge/meta/AbstractMutableMeta, hep/dataforge/meta/ObservableItemProvider {
@@ -36,6 +36,7 @@ public final class hep/dataforge/meta/Config$ConfigSerializer : kotlinx/serializ
 public final class hep/dataforge/meta/ConfigKt {
 	public static final fun asConfig (Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/Config;
 	public static final fun get (Lhep/dataforge/meta/Config;Lhep/dataforge/names/NameToken;)Lhep/dataforge/meta/MetaItem;
+	public static final fun toConfig (Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/Config;
 }
 
 public abstract interface class hep/dataforge/meta/Configurable {
@@ -58,8 +59,8 @@ public abstract interface annotation class hep/dataforge/meta/DFExperimental : j
 public final class hep/dataforge/meta/GetIndexedKt {
 	public static final fun getIndexed (Lhep/dataforge/meta/Meta;Lhep/dataforge/names/Name;)Ljava/util/Map;
 	public static final fun getIndexed (Lhep/dataforge/meta/Meta;Ljava/lang/String;)Ljava/util/Map;
-	public static final fun getIndexed (Lhep/dataforge/meta/MetaNode;Lhep/dataforge/names/Name;)Ljava/util/Map;
-	public static final fun getIndexed (Lhep/dataforge/meta/MetaNode;Ljava/lang/String;)Ljava/util/Map;
+	public static final fun getIndexed (Lhep/dataforge/meta/TypedMeta;Lhep/dataforge/names/Name;)Ljava/util/Map;
+	public static final fun getIndexed (Lhep/dataforge/meta/TypedMeta;Ljava/lang/String;)Ljava/util/Map;
 }
 
 public final class hep/dataforge/meta/ItemDelegateKt {
@@ -129,6 +130,12 @@ public abstract interface class hep/dataforge/meta/ItemProvider {
 
 public final class hep/dataforge/meta/ItemProvider$Companion {
 	public final fun getEMPTY ()Lhep/dataforge/meta/ItemProvider;
+}
+
+public final class hep/dataforge/meta/ItemProviderKt {
+	public static final fun get (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
+	public static final fun get (Lhep/dataforge/meta/ItemProvider;Ljava/lang/String;)Lhep/dataforge/meta/MetaItem;
+	public static final fun withDefault (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/ItemProvider;
 }
 
 public final class hep/dataforge/meta/JsonMeta : hep/dataforge/meta/MetaBase {
@@ -286,24 +293,9 @@ public final class hep/dataforge/meta/MetaItem$ValueItem$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class hep/dataforge/meta/MetaItemSerializer : kotlinx/serialization/KSerializer {
-	public static final field INSTANCE Lhep/dataforge/meta/MetaItemSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lhep/dataforge/meta/MetaItem;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lhep/dataforge/meta/MetaItem;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-}
-
-public final class hep/dataforge/meta/MetaKt {
+public final class hep/dataforge/meta/MetaItemKt {
 	public static final fun asMetaItem (Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/MetaItem$NodeItem;
 	public static final fun asMetaItem (Lhep/dataforge/values/Value;)Lhep/dataforge/meta/MetaItem$ValueItem;
-	public static final fun get (Lhep/dataforge/meta/Meta;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
-	public static final fun get (Lhep/dataforge/meta/Meta;Lhep/dataforge/names/NameToken;)Lhep/dataforge/meta/MetaItem;
-	public static final fun get (Lhep/dataforge/meta/Meta;Ljava/lang/String;)Lhep/dataforge/meta/MetaItem;
-	public static final fun get (Lhep/dataforge/meta/MetaNode;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
-	public static final fun get (Lhep/dataforge/meta/MetaNode;Lhep/dataforge/names/NameToken;)Lhep/dataforge/meta/MetaItem;
-	public static final fun get (Lhep/dataforge/meta/MetaNode;Ljava/lang/String;)Lhep/dataforge/meta/MetaItem;
 	public static final fun getBoolean (Lhep/dataforge/meta/MetaItem;)Ljava/lang/Boolean;
 	public static final fun getDouble (Lhep/dataforge/meta/MetaItem;)Ljava/lang/Double;
 	public static final fun getFloat (Lhep/dataforge/meta/MetaItem;)Ljava/lang/Float;
@@ -315,21 +307,26 @@ public final class hep/dataforge/meta/MetaKt {
 	public static final fun getString (Lhep/dataforge/meta/MetaItem;)Ljava/lang/String;
 	public static final fun getStringList (Lhep/dataforge/meta/MetaItem;)Ljava/util/List;
 	public static final fun getValue (Lhep/dataforge/meta/MetaItem;)Lhep/dataforge/values/Value;
+}
+
+public final class hep/dataforge/meta/MetaItemSerializer : kotlinx/serialization/KSerializer {
+	public static final field INSTANCE Lhep/dataforge/meta/MetaItemSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lhep/dataforge/meta/MetaItem;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lhep/dataforge/meta/MetaItem;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public final class hep/dataforge/meta/MetaKt {
+	public static final fun get (Lhep/dataforge/meta/Meta;Lhep/dataforge/names/NameToken;)Lhep/dataforge/meta/MetaItem;
+	public static final fun get (Lhep/dataforge/meta/TypedMeta;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
+	public static final fun get (Lhep/dataforge/meta/TypedMeta;Lhep/dataforge/names/NameToken;)Lhep/dataforge/meta/MetaItem;
+	public static final fun get (Lhep/dataforge/meta/TypedMeta;Ljava/lang/String;)Lhep/dataforge/meta/MetaItem;
 	public static final fun isEmpty (Lhep/dataforge/meta/Meta;)Z
+	public static final fun itemSequence (Lhep/dataforge/meta/Meta;)Lkotlin/sequences/Sequence;
 	public static final fun iterator (Lhep/dataforge/meta/Meta;)Ljava/util/Iterator;
-	public static final fun seal (Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/SealedMeta;
-	public static final fun seal (Lhep/dataforge/meta/MetaItem;)Lhep/dataforge/meta/MetaItem;
-	public static final fun sequence (Lhep/dataforge/meta/Meta;)Lkotlin/sequences/Sequence;
-	public static final fun values (Lhep/dataforge/meta/Meta;)Lkotlin/sequences/Sequence;
-}
-
-public abstract interface class hep/dataforge/meta/MetaNode : hep/dataforge/meta/Meta {
-	public abstract fun getItems ()Ljava/util/Map;
-}
-
-public final class hep/dataforge/meta/MetaNode$DefaultImpls {
-	public static fun getItem (Lhep/dataforge/meta/MetaNode;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
-	public static fun toMeta (Lhep/dataforge/meta/MetaNode;)Lhep/dataforge/meta/Meta;
+	public static final fun valueSequence (Lhep/dataforge/meta/Meta;)Lkotlin/sequences/Sequence;
 }
 
 public abstract interface class hep/dataforge/meta/MetaRepr {
@@ -389,6 +386,8 @@ public final class hep/dataforge/meta/MutableItemDelegateKt {
 	public static final fun long (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;)Lkotlin/properties/ReadWriteProperty;
 	public static synthetic fun long$default (Lhep/dataforge/meta/MutableItemProvider;JLhep/dataforge/names/Name;ILjava/lang/Object;)Lkotlin/properties/ReadWriteProperty;
 	public static synthetic fun long$default (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;ILjava/lang/Object;)Lkotlin/properties/ReadWriteProperty;
+	public static final fun node (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;)Lkotlin/properties/ReadWriteProperty;
+	public static synthetic fun node$default (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;ILjava/lang/Object;)Lkotlin/properties/ReadWriteProperty;
 	public static final fun number (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;)Lkotlin/properties/ReadWriteProperty;
 	public static final fun number (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)Lkotlin/properties/ReadWriteProperty;
 	public static final fun number (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/Number;Lhep/dataforge/names/Name;)Lkotlin/properties/ReadWriteProperty;
@@ -418,14 +417,16 @@ public abstract interface class hep/dataforge/meta/MutableItemProvider : hep/dat
 }
 
 public final class hep/dataforge/meta/MutableItemProviderKt {
-	public static final fun getItem (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;)Lhep/dataforge/meta/MetaItem;
-	public static final fun node (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;)Lkotlin/properties/ReadWriteProperty;
-	public static synthetic fun node$default (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;ILjava/lang/Object;)Lkotlin/properties/ReadWriteProperty;
 	public static final fun remove (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;)V
 	public static final fun remove (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;)V
+	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;)V
+	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Lhep/dataforge/meta/MetaItem;)V
+	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Lhep/dataforge/values/Value;)V
 	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Ljava/lang/Iterable;)V
 	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Ljava/lang/Object;)V
 	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/NameToken;Ljava/lang/Object;)V
+	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;Lhep/dataforge/meta/Meta;)V
+	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;Lhep/dataforge/meta/MetaItem;)V
 	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;Ljava/lang/Iterable;)V
 	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;Ljava/lang/Object;)V
 	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)V
@@ -433,14 +434,11 @@ public final class hep/dataforge/meta/MutableItemProviderKt {
 	public static synthetic fun setIndexed$default (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Ljava/lang/Iterable;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public static final fun setIndexedItems (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Ljava/lang/Iterable;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun setIndexedItems$default (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Ljava/lang/Iterable;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public static final fun setItem (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;Lhep/dataforge/meta/MetaItem;)V
-	public static final fun setNode (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;)V
-	public static final fun setNode (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;Lhep/dataforge/meta/Meta;)V
-	public static final fun setValue (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Lhep/dataforge/values/Value;)V
-	public static final fun setValue (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;Lhep/dataforge/values/Value;)V
+	public static final fun update (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/Meta;)V
+	public static final fun withDefault (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
 }
 
-public abstract interface class hep/dataforge/meta/MutableMeta : hep/dataforge/meta/MetaNode, hep/dataforge/meta/MutableItemProvider {
+public abstract interface class hep/dataforge/meta/MutableMeta : hep/dataforge/meta/MutableItemProvider, hep/dataforge/meta/TypedMeta {
 	public abstract fun getItems ()Ljava/util/Map;
 }
 
@@ -453,7 +451,6 @@ public final class hep/dataforge/meta/MutableMetaKt {
 	public static final fun append (Lhep/dataforge/meta/MutableMeta;Lhep/dataforge/names/Name;Ljava/lang/Object;)V
 	public static final fun append (Lhep/dataforge/meta/MutableMeta;Ljava/lang/String;Ljava/lang/Object;)V
 	public static final fun edit (Lhep/dataforge/meta/AbstractMutableMeta;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function1;)V
-	public static final fun update (Lhep/dataforge/meta/MutableMeta;Lhep/dataforge/meta/Meta;)V
 }
 
 public abstract interface class hep/dataforge/meta/ObservableItemProvider : hep/dataforge/meta/ItemProvider {
@@ -461,21 +458,20 @@ public abstract interface class hep/dataforge/meta/ObservableItemProvider : hep/
 	public abstract fun removeListener (Ljava/lang/Object;)V
 }
 
-public class hep/dataforge/meta/Scheme : hep/dataforge/meta/Configurable, hep/dataforge/meta/MetaRepr, hep/dataforge/meta/MutableItemProvider, hep/dataforge/meta/descriptors/Described {
+public class hep/dataforge/meta/Scheme : hep/dataforge/meta/MetaRepr, hep/dataforge/meta/MutableItemProvider, hep/dataforge/meta/descriptors/Described {
 	public fun <init> ()V
-	public fun <init> (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
-	public synthetic fun <init> (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getConfig ()Lhep/dataforge/meta/Config;
-	public final fun getDefaultItem (Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
+	public fun <init> (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
+	public synthetic fun <init> (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun getDefaultLayer ()Lhep/dataforge/meta/Meta;
 	public synthetic fun getDescriptor ()Lhep/dataforge/meta/descriptors/ItemDescriptor;
 	public fun getDescriptor ()Lhep/dataforge/meta/descriptors/NodeDescriptor;
 	public fun getItem (Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
+	public final fun getItems ()Lhep/dataforge/meta/MutableItemProvider;
 	public final fun isEmpty ()Z
 	public fun setItem (Lhep/dataforge/names/Name;Lhep/dataforge/meta/MetaItem;)V
 	public fun toMeta ()Lhep/dataforge/meta/Laminate;
 	public synthetic fun toMeta ()Lhep/dataforge/meta/Meta;
-	public final fun validateItem (Lhep/dataforge/names/Name;Lhep/dataforge/meta/MetaItem;)Z
+	public fun validateItem (Lhep/dataforge/names/Name;Lhep/dataforge/meta/MetaItem;)Z
 }
 
 public final class hep/dataforge/meta/SchemeKt {
@@ -494,42 +490,51 @@ public class hep/dataforge/meta/SchemeSpec : hep/dataforge/meta/Specification, h
 	public fun getDescriptor ()Lhep/dataforge/meta/descriptors/NodeDescriptor;
 	public synthetic fun invoke (Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
 	public final fun invoke (Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/Scheme;
-	public synthetic fun read (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
-	public fun read (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/Scheme;
-	public synthetic fun wrap (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
-	public fun wrap (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/Scheme;
+	public synthetic fun read (Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
+	public fun read (Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/Scheme;
+	public synthetic fun write (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
+	public fun write (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/Scheme;
 }
 
-public final class hep/dataforge/meta/SealedMeta : hep/dataforge/meta/AbstractMetaNode {
+public final class hep/dataforge/meta/SealedMeta : hep/dataforge/meta/AbstractTypedMeta {
 	public fun getItems ()Ljava/util/Map;
+}
+
+public final class hep/dataforge/meta/SealedMetaKt {
+	public static final fun seal (Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/SealedMeta;
+	public static final fun seal (Lhep/dataforge/meta/MetaItem;)Lhep/dataforge/meta/MetaItem;
 }
 
 public abstract interface class hep/dataforge/meta/Specification {
 	public abstract fun empty ()Lhep/dataforge/meta/MutableItemProvider;
 	public abstract fun invoke (Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
-	public abstract fun read (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
-	public abstract fun wrap (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
+	public abstract fun read (Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
+	public abstract fun write (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
 }
 
 public final class hep/dataforge/meta/Specification$DefaultImpls {
 	public static fun empty (Lhep/dataforge/meta/Specification;)Lhep/dataforge/meta/MutableItemProvider;
 	public static fun invoke (Lhep/dataforge/meta/Specification;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
-	public static synthetic fun read$default (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;ILjava/lang/Object;)Lhep/dataforge/meta/MutableItemProvider;
-	public static fun wrap (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MutableItemProvider;
-	public static synthetic fun wrap$default (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;ILjava/lang/Object;)Lhep/dataforge/meta/MutableItemProvider;
+	public static synthetic fun write$default (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Config;Lhep/dataforge/meta/ItemProvider;ILjava/lang/Object;)Lhep/dataforge/meta/MutableItemProvider;
 }
 
 public final class hep/dataforge/meta/SpecificationKt {
-	public static final fun configSpec (Lhep/dataforge/meta/MetaItem;Lhep/dataforge/meta/Specification;)Lhep/dataforge/meta/MutableItemProvider;
-	public static final fun configure (Lhep/dataforge/meta/MetaRepr;Lhep/dataforge/meta/Specification;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MetaRepr;
-	public static final fun createStyle (Lhep/dataforge/meta/Specification;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/Meta;
-	public static final fun spec (Lhep/dataforge/meta/MetaItem;Lhep/dataforge/meta/Specification;)Lhep/dataforge/meta/MutableItemProvider;
 	public static final fun spec (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Scheme;Lhep/dataforge/names/Name;)Lkotlin/properties/ReadWriteProperty;
 	public static final fun spec (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/Specification;Lhep/dataforge/names/Name;)Lkotlin/properties/ReadWriteProperty;
 	public static synthetic fun spec$default (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Scheme;Lhep/dataforge/names/Name;ILjava/lang/Object;)Lkotlin/properties/ReadWriteProperty;
 	public static synthetic fun spec$default (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/Specification;Lhep/dataforge/names/Name;ILjava/lang/Object;)Lkotlin/properties/ReadWriteProperty;
+	public static final fun update (Lhep/dataforge/meta/Config;Lhep/dataforge/meta/Specification;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
 	public static final fun update (Lhep/dataforge/meta/Configurable;Lhep/dataforge/meta/Specification;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/Configurable;
-	public static final fun update (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
+	public static final fun withSpec (Lhep/dataforge/meta/MetaItem;Lhep/dataforge/meta/Specification;)Lhep/dataforge/meta/MutableItemProvider;
+}
+
+public abstract interface class hep/dataforge/meta/TypedMeta : hep/dataforge/meta/Meta {
+	public abstract fun getItems ()Ljava/util/Map;
+}
+
+public final class hep/dataforge/meta/TypedMeta$DefaultImpls {
+	public static fun getItem (Lhep/dataforge/meta/TypedMeta;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
+	public static fun toMeta (Lhep/dataforge/meta/TypedMeta;)Lhep/dataforge/meta/Meta;
 }
 
 public abstract interface class hep/dataforge/meta/descriptors/Described {
@@ -545,10 +550,11 @@ public final class hep/dataforge/meta/descriptors/DescriptorMetaKt {
 	public static final fun defaultMeta (Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Laminate;
 }
 
-public abstract class hep/dataforge/meta/descriptors/ItemDescriptor {
+public abstract class hep/dataforge/meta/descriptors/ItemDescriptor : hep/dataforge/meta/Configurable {
 	public static final field Companion Lhep/dataforge/meta/descriptors/ItemDescriptor$Companion;
 	public static final field DEFAULT_INDEX_KEY Ljava/lang/String;
 	public synthetic fun <init> (Lhep/dataforge/meta/Config;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public abstract fun copy ()Lhep/dataforge/meta/descriptors/ItemDescriptor;
 	public final fun getAttributes ()Lhep/dataforge/meta/Config;
 	public final fun getConfig ()Lhep/dataforge/meta/Config;
 	public final fun getIndexKey ()Ljava/lang/String;
@@ -578,6 +584,8 @@ public final class hep/dataforge/meta/descriptors/NodeDescriptor : hep/dataforge
 	public fun <init> ()V
 	public fun <init> (Lhep/dataforge/meta/Config;)V
 	public synthetic fun <init> (Lhep/dataforge/meta/Config;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun copy ()Lhep/dataforge/meta/descriptors/ItemDescriptor;
+	public fun copy ()Lhep/dataforge/meta/descriptors/NodeDescriptor;
 	public final fun getDefault ()Lhep/dataforge/meta/Config;
 	public final fun getItems ()Ljava/util/Map;
 	public final fun getNodes ()Ljava/util/Map;
@@ -602,6 +610,8 @@ public final class hep/dataforge/meta/descriptors/ValueDescriptor : hep/dataforg
 	public fun <init> (Lhep/dataforge/meta/Config;)V
 	public synthetic fun <init> (Lhep/dataforge/meta/Config;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun allow ([Ljava/lang/Object;)V
+	public synthetic fun copy ()Lhep/dataforge/meta/descriptors/ItemDescriptor;
+	public fun copy ()Lhep/dataforge/meta/descriptors/ValueDescriptor;
 	public final fun default (Ljava/lang/Object;)V
 	public final fun getAllowedValues ()Ljava/util/List;
 	public final fun getDefault ()Lhep/dataforge/values/Value;

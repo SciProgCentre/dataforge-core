@@ -8,7 +8,7 @@ import hep.dataforge.values.*
  * A common parent for [ValueDescriptor] and [NodeDescriptor]. Describes a single [MetaItem] or a group of same-name-siblings.
  */
 @DFBuilder
-public sealed class ItemDescriptor(public val config: Config) {
+public sealed class ItemDescriptor(final override val config: Config): Configurable {
 
     /**
      * True if same name siblings with this name are allowed

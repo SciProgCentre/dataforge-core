@@ -11,7 +11,7 @@ import kotlin.properties.ReadOnlyProperty
 public typealias ItemDelegate = ReadOnlyProperty<Any?, MetaItem<*>?>
 
 public fun ItemProvider.item(key: Name? = null): ItemDelegate = ReadOnlyProperty { _, property ->
-    getItem(key ?: property.name.asName())
+    get(key ?: property.name.asName())
 }
 
 //TODO add caching for sealed nodes

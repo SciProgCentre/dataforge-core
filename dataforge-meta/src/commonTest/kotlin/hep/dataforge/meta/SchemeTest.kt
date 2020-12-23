@@ -17,9 +17,9 @@ class SchemeTest{
 
         val meta = styled.toMeta()
 
-        assertEquals(10, meta.values().count())
+        assertEquals(10, meta.valueSequence().count())
 
-        val bNode = styled.getItem("b").node
+        val bNode = styled.get("b").node
 
         val aNodes = bNode?.getIndexed("a")
 

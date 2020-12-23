@@ -2,7 +2,7 @@ package hep.dataforge.meta
 
 import hep.dataforge.names.*
 
-public interface MutableMeta<out M : MutableMeta<M>> : MetaNode<M>, MutableItemProvider {
+public interface MutableMeta<out M : MutableMeta<M>> : TypedMeta<M>, MutableItemProvider {
     override val items: Map<NameToken, MetaItem<M>>
 }
 
@@ -11,7 +11,7 @@ public interface MutableMeta<out M : MutableMeta<M>> : MetaNode<M>, MutableItemP
  *
  * Changes in Meta are not thread safe.
  */
-public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode<M>(), MutableMeta<M> {
+public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMeta<M>(), MutableMeta<M> {
     protected val children: MutableMap<NameToken, MetaItem<M>> = LinkedHashMap()
 
     override val items: Map<NameToken, MetaItem<M>>
@@ -50,7 +50,7 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode
             0 -> error("Can't setValue meta item for empty name")
             1 -> {
                 val token = name.firstOrNull()!!
-                @Suppress("UNCHECKED_CAST") val oldItem: MetaItem<M>? = get(name) as? MetaItem<M>
+                @Suppress("UNCHECKED_CAST") val oldItem: MetaItem<M>? = getItem(name) as? MetaItem<M>
                 replaceItem(token, oldItem, wrapItem(item))
             }
             else -> {
@@ -59,24 +59,8 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractMetaNode
                 if (items[token] == null) {
                     replaceItem(token, null, MetaItem.NodeItem(empty()))
                 }
-                items[token]?.node!!.setItem(name.cutFirst(), item)
+                items[token]?.node!!.set(name.cutFirst(), item)
             }
-        }
-    }
-}
-
-/**
- * Update existing mutable node with another node. The rules are following:
- *  * value replaces anything
- *  * node updates node and replaces anything but node
- *  * node list updates node list if number of nodes in the list is the same and replaces anything otherwise
- */
-public fun <M : MutableMeta<M>> M.update(meta: Meta) {
-    meta.items.forEach { entry ->
-        when (val value = entry.value) {
-            is MetaItem.ValueItem -> setValue(entry.key.asName(), value.value)
-            is MetaItem.NodeItem -> (this[entry.key.asName()] as? MetaItem.NodeItem)?.node?.update(value.node)
-                ?: run { setNode(entry.key.asName(), value.node) }
         }
     }
 }

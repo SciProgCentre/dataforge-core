@@ -35,12 +35,12 @@ public fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = 
         if (value is List<*>) {
             val items = value.map { toItem(it) }
             if (items.all { it is MetaItem.ValueItem }) {
-                setValue(key, ListValue(items.map { it.value!! }))
+                set(key, ListValue(items.map { it.value!! }))
             } else {
                 setIndexedItems(key.toName(), value.map { toItem(it) })
             }
         } else {
-            setItem(key, toItem(value))
+            set(key, toItem(value))
         }
     }
 }

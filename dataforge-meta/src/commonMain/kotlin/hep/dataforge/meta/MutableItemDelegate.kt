@@ -13,12 +13,12 @@ public typealias MutableItemDelegate = ReadWriteProperty<Any?, MetaItem<*>?>
 
 public fun MutableItemProvider.item(key: Name? = null): MutableItemDelegate = object : MutableItemDelegate {
     override fun getValue(thisRef: Any?, property: KProperty<*>): MetaItem<*>? {
-        return getItem(key ?: property.name.asName())
+        return get(key ?: property.name.asName())
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: MetaItem<*>?) {
         val name = key ?: property.name.asName()
-        setItem(name, value)
+        set(name, value)
     }
 }
 
@@ -112,6 +112,11 @@ public inline fun <reified E : Enum<E>> MutableItemProvider.enum(
     key: Name? = null,
 ): ReadWriteProperty<Any?, E> =
     item(key).convert(MetaConverter.enum()) { default }
+
+public fun MutableItemProvider.node(key: Name? = null): ReadWriteProperty<Any?, Meta?> = item(key).convert(
+    reader = { it.node },
+    writer = { it?.asMetaItem() }
+)
 
 public inline fun <reified M : MutableMeta<M>> M.node(key: Name? = null): ReadWriteProperty<Any?, M?> =
     item(key).convert(reader = { it?.let { it.node as M } }, writer = { it?.let { MetaItem.NodeItem(it) } })

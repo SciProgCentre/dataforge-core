@@ -29,8 +29,8 @@ public fun Meta.getIndexed(name: String): Map<String?, MetaItem<*>> = this@getIn
  * Get all items matching given name.
  */
 @Suppress("UNCHECKED_CAST")
-public fun <M : MetaNode<M>> M.getIndexed(name: Name): Map<String, MetaItem<M>> =
+public fun <M : TypedMeta<M>> M.getIndexed(name: Name): Map<String, MetaItem<M>> =
     (this as Meta).getIndexed(name) as Map<String, MetaItem<M>>
 
-public fun <M : MetaNode<M>> M.getIndexed(name: String): Map<String, MetaItem<M>> =
+public fun <M : TypedMeta<M>> M.getIndexed(name: String): Map<String, MetaItem<M>> =
     getIndexed(name.toName())

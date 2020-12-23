@@ -11,7 +11,7 @@ public class MetaWithDefault(public val meta: Meta, public val default: ItemProv
         get() = meta.items
 
     override fun getItem(name: Name): MetaItem<*>? {
-        return meta[name] ?: default.getItem(name)
+        return meta[name] ?: default[name]
     }
 }
 
