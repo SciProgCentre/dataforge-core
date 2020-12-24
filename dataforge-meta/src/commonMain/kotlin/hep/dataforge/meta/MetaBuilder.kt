@@ -134,11 +134,6 @@ public fun Meta.builder(): MetaBuilder {
 }
 
 /**
- * Create a deep copy of this meta and apply builder to it
- */
-public inline fun Meta.edit(builder: MetaBuilder.() -> Unit): MetaBuilder = builder().apply(builder)
-
-/**
  * Build a [MetaBuilder] using given transformation
  */
 @Suppress("FunctionName")

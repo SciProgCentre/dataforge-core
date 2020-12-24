@@ -110,17 +110,6 @@ public open class SchemeSpec<T : Scheme>(
     final override inline operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
 }
 
-///**
-// * A scheme that uses [Meta] as a default layer
-// */
-//public open class MetaScheme(
-//    private val meta: Meta,
-//    override val descriptor: NodeDescriptor? = null,
-//    config: Config = Config(),
-//) : Scheme(config, meta) {
-//    override val defaultLayer: Meta get() = Laminate(meta, descriptor?.defaultItem().node)
-//}
-
 public fun Meta.asScheme(): Scheme = Scheme().apply {
     items = this@asScheme.asConfig()
 }

@@ -3,6 +3,7 @@ package hep.dataforge.meta
 import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.values.*
+import kotlinx.serialization.Serializable
 
 /**
  * A member of the meta tree. Could be represented as one of following:

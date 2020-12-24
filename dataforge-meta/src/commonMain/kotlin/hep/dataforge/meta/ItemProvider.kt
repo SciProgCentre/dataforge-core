@@ -63,6 +63,13 @@ public fun ItemProvider.getIndexed(name: Name): Map<String?, MetaItem<*>> {
 public fun ItemProvider.getIndexed(name: String): Map<String?, MetaItem<*>> = this@getIndexed.getIndexed(name.toName())
 
 /**
+ * Return a provider referencing a child node
+ */
+public fun ItemProvider.getChild(childName: Name): ItemProvider = get(childName).node ?: ItemProvider.EMPTY
+
+public fun ItemProvider.getChild(childName: String): ItemProvider  = getChild(childName.toName())
+
+/**
  * Get all items matching given name.
  */
 @Suppress("UNCHECKED_CAST")

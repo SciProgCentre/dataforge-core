@@ -2,6 +2,7 @@
 
 package hep.dataforge.meta
 
+import hep.dataforge.meta.JsonMeta.Companion.JSON_ARRAY_KEY
 import hep.dataforge.meta.descriptors.ItemDescriptor
 import hep.dataforge.meta.descriptors.ItemDescriptor.Companion.DEFAULT_INDEX_KEY
 import hep.dataforge.meta.descriptors.NodeDescriptor

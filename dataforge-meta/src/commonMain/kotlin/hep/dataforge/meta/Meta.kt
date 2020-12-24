@@ -4,6 +4,7 @@ import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.names.*
 import hep.dataforge.values.Value
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 

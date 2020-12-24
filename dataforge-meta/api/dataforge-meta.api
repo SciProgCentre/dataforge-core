@@ -128,6 +128,7 @@ public final class hep/dataforge/meta/ItemProvider$Companion {
 public final class hep/dataforge/meta/ItemProviderKt {
 	public static final fun get (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
 	public static final fun get (Lhep/dataforge/meta/ItemProvider;Ljava/lang/String;)Lhep/dataforge/meta/MetaItem;
+	public static final fun getChild (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/ItemProvider;
 	public static final fun getIndexed (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/names/Name;)Ljava/util/Map;
 	public static final fun getIndexed (Lhep/dataforge/meta/ItemProvider;Ljava/lang/String;)Ljava/util/Map;
 	public static final fun getIndexed (Lhep/dataforge/meta/TypedMeta;Lhep/dataforge/names/Name;)Ljava/util/Map;
@@ -251,7 +252,6 @@ public final class hep/dataforge/meta/MetaBuilder : hep/dataforge/meta/AbstractM
 public final class hep/dataforge/meta/MetaBuilderKt {
 	public static final fun Meta (Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MetaBuilder;
 	public static final fun builder (Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/MetaBuilder;
-	public static final fun edit (Lhep/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MetaBuilder;
 }
 
 public abstract class hep/dataforge/meta/MetaItem {
@@ -415,6 +415,8 @@ public abstract interface class hep/dataforge/meta/MutableItemProvider : hep/dat
 }
 
 public final class hep/dataforge/meta/MutableItemProviderKt {
+	public static final fun editChild (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
+	public static final fun getChild (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MutableItemProvider;
 	public static final fun remove (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;)V
 	public static final fun remove (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;)V
 	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;)V

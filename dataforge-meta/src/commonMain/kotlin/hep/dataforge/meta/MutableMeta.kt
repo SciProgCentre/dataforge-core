@@ -46,7 +46,7 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMet
 
     override fun setItem(name: Name, item: MetaItem<*>?) {
         when (name.length) {
-            0 -> error("Can't setValue meta item for empty name")
+            0 -> error("Can't set a meta item for empty name")
             1 -> {
                 val token = name.firstOrNull()!!
                 val oldItem: MetaItem<M>? = getItem(name)

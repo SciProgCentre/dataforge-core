@@ -49,7 +49,7 @@ public data class KeepTransformationRule(val selector: (Name) -> Boolean) :
  */
 public data class SingleItemTransformationRule(
     val from: Name,
-    val transform: MutableMeta<*>.(Name, MetaItem<*>?) -> Unit
+    val transform: MutableMeta<*>.(Name, MetaItem<*>?) -> Unit,
 ) : TransformationRule {
     override fun matches(name: Name, item: MetaItem<*>?): Boolean {
         return name == from
@@ -66,7 +66,7 @@ public data class SingleItemTransformationRule(
 
 public data class RegexItemTransformationRule(
     val from: Regex,
-    val transform: MutableMeta<*>.(name: Name, MatchResult, MetaItem<*>?) -> Unit
+    val transform: MutableMeta<*>.(name: Name, MatchResult, MetaItem<*>?) -> Unit,
 ) : TransformationRule {
     override fun matches(name: Name, item: MetaItem<*>?): Boolean {
         return from.matches(name.toString())
@@ -116,7 +116,7 @@ public inline class MetaTransformation(public val transformations: Collection<Tr
      * Transform a meta, replacing all elements found in rules with transformed entries
      */
     public fun apply(source: Meta): Meta =
-        source.edit {
+        source.builder().apply {
             transformations.forEach { rule ->
                 rule.selectItems(source).forEach { name ->
                     remove(name)

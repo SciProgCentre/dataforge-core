@@ -75,6 +75,31 @@ public operator fun MutableItemProvider.set(name: String, metas: Iterable<Meta>)
     setIndexed(name.toName(), metas)
 
 /**
+ * Get a [MutableItemProvider] referencing a child node
+ */
+public fun MutableItemProvider.getChild(childName: Name): MutableItemProvider {
+    fun createProvider() = object : MutableItemProvider {
+        override fun setItem(name: Name, item: MetaItem<*>?) {
+            this@getChild.setItem(childName + name, item)
+        }
+
+        override fun getItem(name: Name): MetaItem<*>? = this@getChild.getItem(childName + name)
+    }
+
+    return when {
+        childName.isEmpty() -> this
+        this is MutableMeta<*> -> {
+            get(childName).node ?: createProvider()
+        }
+        else -> {
+            createProvider()
+        }
+    }
+}
+
+public fun MutableItemProvider.getChild(childName: String): MutableItemProvider  = getChild(childName.toName())
+
+/**
  * Update existing mutable node with another node. The rules are following:
  *  * value replaces anything
  *  * node updates node and replaces anything but node
@@ -83,6 +108,12 @@ public operator fun MutableItemProvider.set(name: String, metas: Iterable<Meta>)
 public fun MutableItemProvider.update(meta: Meta) {
     meta.valueSequence().forEach { (name, value) -> set(name, value) }
 }
+
+/**
+ * Edit a provider child at given name location
+ */
+public fun MutableItemProvider.editChild(name: Name, builder: MutableItemProvider.() -> Unit): MutableItemProvider =
+    getChild(name).apply(builder)
 
 /**
  * Create a mutable item provider that uses given provider for default values if those are not found in this provider.
