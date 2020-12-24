@@ -8,7 +8,7 @@ import hep.dataforge.values.*
  * A common parent for [ValueDescriptor] and [NodeDescriptor]. Describes a single [MetaItem] or a group of same-name-siblings.
  */
 @DFBuilder
-public sealed class ItemDescriptor(final override val config: Config): Configurable {
+public sealed class ItemDescriptor(final override val config: Config) : Configurable {
 
     /**
      * True if same name siblings with this name are allowed
@@ -40,7 +40,7 @@ public sealed class ItemDescriptor(final override val config: Config): Configura
 
     public abstract fun copy(): ItemDescriptor
 
-    public companion object{
+    public companion object {
         public const val DEFAULT_INDEX_KEY: String = "@index"
     }
 }
@@ -95,12 +95,13 @@ public class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) 
      * The map of children item descriptors (both nodes and values)
      */
     public val items: Map<String, ItemDescriptor>
-        get() = config.getIndexed(ITEM_KEY).mapValues { (_, item) ->
+        get() = config.getIndexed(ITEM_KEY).entries.associate { (name, item) ->
+            if (name == null) error("Child item index should not be null")
             val node = item.node ?: error("Node descriptor must be a node")
             if (node[IS_NODE_KEY].boolean == true) {
-                NodeDescriptor(node)
+                name to NodeDescriptor(node as Config)
             } else {
-                ValueDescriptor(node)
+                name to ValueDescriptor(node as Config)
             }
         }
 
@@ -112,8 +113,9 @@ public class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) 
         get() = config.getIndexed(ITEM_KEY).entries.filter {
             it.value.node[IS_NODE_KEY].boolean == true
         }.associate { (name, item) ->
+            if (name == null) error("Child node index should not be null")
             val node = item.node ?: error("Node descriptor must be a node")
-            name to NodeDescriptor(node)
+            name to NodeDescriptor(node as Config)
         }
 
     /**
@@ -123,8 +125,9 @@ public class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) 
         get() = config.getIndexed(ITEM_KEY).entries.filter {
             it.value.node[IS_NODE_KEY].boolean != true
         }.associate { (name, item) ->
+            if (name == null) error("Child value index should not be null")
             val node = item.node ?: error("Node descriptor must be a node")
-            name to ValueDescriptor(node)
+            name to ValueDescriptor(node as Config)
         }
 
     private fun buildNode(name: Name): NodeDescriptor {
@@ -189,7 +192,8 @@ public class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) 
         internal val ITEM_KEY: Name = "item".asName()
         internal val IS_NODE_KEY: Name = "@isNode".asName()
 
-        public inline operator fun invoke(block: NodeDescriptor.() -> Unit): NodeDescriptor = NodeDescriptor().apply(block)
+        public inline operator fun invoke(block: NodeDescriptor.() -> Unit): NodeDescriptor =
+            NodeDescriptor().apply(block)
 
         //TODO infer descriptor from spec
     }
@@ -270,7 +274,7 @@ public class ValueDescriptor(config: Config = Config()) : ItemDescriptor(config)
             val value = it.value
             when {
                 value?.list != null -> value.list
-                type?.let { type -> type.size == 1 && type[0] === ValueType.BOOLEAN} ?: false -> listOf(True, False)
+                type?.let { type -> type.size == 1 && type[0] === ValueType.BOOLEAN } ?: false -> listOf(True, False)
                 else -> emptyList()
             }
         },

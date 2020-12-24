@@ -83,7 +83,7 @@ public fun Meta.valueSequence(): Sequence<Pair<Name, Value>> {
 public fun Meta.itemSequence(): Sequence<Pair<Name, MetaItem<*>>> = sequence {
     items.forEach { (key, item) ->
         yield(key.asName() to item)
-        if (item is NodeItem<*>) {
+        if (item is NodeItem) {
             yieldAll(item.node.itemSequence().map { (innerKey, innerItem) ->
                 (key + innerKey) to innerItem
             })

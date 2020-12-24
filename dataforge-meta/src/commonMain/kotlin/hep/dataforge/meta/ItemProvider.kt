@@ -69,12 +69,12 @@ public fun ItemProvider.getChild(childName: Name): ItemProvider = get(childName)
 
 public fun ItemProvider.getChild(childName: String): ItemProvider  = getChild(childName.toName())
 
-/**
- * Get all items matching given name.
- */
-@Suppress("UNCHECKED_CAST")
-public fun <M : TypedMeta<M>> M.getIndexed(name: Name): Map<String, MetaItem<M>> =
-    (this as Meta).getIndexed(name) as Map<String, MetaItem<M>>
-
-public fun <M : TypedMeta<M>> M.getIndexed(name: String): Map<String, MetaItem<M>> =
-    getIndexed(name.toName())
+///**
+// * Get all items matching given name.
+// */
+//@Suppress("UNCHECKED_CAST")
+//public fun <M : TypedMeta<M>> M.getIndexed(name: Name): Map<String?, MetaItem<M>> =
+//    (this as Meta).getIndexed(name) as Map<String?, MetaItem<M>>
+//
+//public fun <M : TypedMeta<M>> M.getIndexed(name: String): Map<String?, MetaItem<M>> =
+//    getIndexed(name.toName())

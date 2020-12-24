@@ -28,7 +28,7 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMet
         //itemChanged(key.asName(), oldItem, newItem)
     }
 
-    protected fun wrapItem(item: MetaItem<*>?): MetaItem<M>? = when (item) {
+    private fun wrapItem(item: MetaItem<*>?): MetaItem<M>? = when (item) {
         null -> null
         is MetaItem.ValueItem -> item
         is MetaItem.NodeItem -> MetaItem.NodeItem(wrapNode(item.node))
@@ -67,18 +67,18 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMet
 /**
  * Append the node with a same-name-sibling, automatically generating numerical index
  */
-public fun <M : MutableMeta<M>> M.append(name: Name, value: Any?) {
+public fun MutableItemProvider.append(name: Name, value: Any?) {
     require(!name.isEmpty()) { "Name could not be empty for append operation" }
     val newIndex = name.lastOrNull()!!.index
     if (newIndex != null) {
         set(name, value)
     } else {
-        val index = (getIndexed(name).keys.mapNotNull { it.toIntOrNull() }.maxOrNull() ?: -1) + 1
+        val index = (getIndexed(name).keys.mapNotNull { it?.toIntOrNull() }.maxOrNull() ?: -1) + 1
         set(name.withIndex(index.toString()), value)
     }
 }
 
-public fun <M : MutableMeta<M>> M.append(name: String, value: Any?): Unit = append(name.toName(), value)
+public fun MutableItemProvider.append(name: String, value: Any?): Unit = append(name.toName(), value)
 
 /**
  * Apply existing node with given [builder] or create a new element with it.

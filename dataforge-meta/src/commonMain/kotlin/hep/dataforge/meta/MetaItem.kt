@@ -52,16 +52,16 @@ public sealed class MetaItem<out M : Meta>() {
     }
 }
 
-public fun Value.asMetaItem(): MetaItem.ValueItem = MetaItem.ValueItem(this)
-public fun <M : Meta> M.asMetaItem(): MetaItem.NodeItem<M> = MetaItem.NodeItem(this)
+public fun Value.asMetaItem(): ValueItem = ValueItem(this)
+public fun <M : Meta> M.asMetaItem(): NodeItem<M> = NodeItem(this)
 
 
 /**
  * Unsafe methods to access values and nodes directly from [MetaItem]
  */
 public val MetaItem<*>?.value: Value?
-    get() = (this as? MetaItem.ValueItem)?.value
-        ?: (this?.node?.get(Meta.VALUE_KEY) as? MetaItem.ValueItem)?.value
+    get() = (this as? ValueItem)?.value
+        ?: (this?.node?.get(Meta.VALUE_KEY) as? ValueItem)?.value
 
 public val MetaItem<*>?.string: String? get() = value?.string
 public val MetaItem<*>?.boolean: Boolean? get() = value?.boolean
@@ -83,6 +83,6 @@ public val MetaItem<*>.stringList: List<String>? get() = value?.list?.map { it.s
 public val <M : Meta> MetaItem<M>?.node: M?
     get() = when (this) {
         null -> null
-        is MetaItem.ValueItem -> null//error("Trying to interpret value meta item as node item")
-        is MetaItem.NodeItem -> node
+        is ValueItem -> null//error("Trying to interpret value meta item as node item")
+        is NodeItem -> node
     }

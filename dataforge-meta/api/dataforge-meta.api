@@ -129,10 +129,9 @@ public final class hep/dataforge/meta/ItemProviderKt {
 	public static final fun get (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MetaItem;
 	public static final fun get (Lhep/dataforge/meta/ItemProvider;Ljava/lang/String;)Lhep/dataforge/meta/MetaItem;
 	public static final fun getChild (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/ItemProvider;
+	public static final fun getChild (Lhep/dataforge/meta/ItemProvider;Ljava/lang/String;)Lhep/dataforge/meta/ItemProvider;
 	public static final fun getIndexed (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/names/Name;)Ljava/util/Map;
 	public static final fun getIndexed (Lhep/dataforge/meta/ItemProvider;Ljava/lang/String;)Ljava/util/Map;
-	public static final fun getIndexed (Lhep/dataforge/meta/TypedMeta;Lhep/dataforge/names/Name;)Ljava/util/Map;
-	public static final fun getIndexed (Lhep/dataforge/meta/TypedMeta;Ljava/lang/String;)Ljava/util/Map;
 	public static final fun getRootNode (Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/Meta;
 	public static final fun withDefault (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/ItemProvider;
 }
@@ -417,6 +416,7 @@ public abstract interface class hep/dataforge/meta/MutableItemProvider : hep/dat
 public final class hep/dataforge/meta/MutableItemProviderKt {
 	public static final fun editChild (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/MutableItemProvider;
 	public static final fun getChild (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/MutableItemProvider;
+	public static final fun getChild (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;)Lhep/dataforge/meta/MutableItemProvider;
 	public static final fun remove (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;)V
 	public static final fun remove (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;)V
 	public static final fun set (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Lhep/dataforge/meta/Meta;)V
@@ -448,8 +448,8 @@ public final class hep/dataforge/meta/MutableMeta$DefaultImpls {
 }
 
 public final class hep/dataforge/meta/MutableMetaKt {
-	public static final fun append (Lhep/dataforge/meta/MutableMeta;Lhep/dataforge/names/Name;Ljava/lang/Object;)V
-	public static final fun append (Lhep/dataforge/meta/MutableMeta;Ljava/lang/String;Ljava/lang/Object;)V
+	public static final fun append (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Ljava/lang/Object;)V
+	public static final fun append (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;Ljava/lang/Object;)V
 	public static final fun edit (Lhep/dataforge/meta/AbstractMutableMeta;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function1;)V
 }
 

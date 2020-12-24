@@ -14,6 +14,7 @@
 - Moved `Envelope` builder to a top level function. Companion invoke is deprecated.
 - Context logging moved to the extension
 - `number` and `string` methods on `Value` moved to extensions (breaking change)
+- \[Major breaking change\] Schemes and configurables us `MutableItemProvider` instead of `Config`
 
 ### Deprecated
 

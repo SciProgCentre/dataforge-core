@@ -2,6 +2,7 @@ package hep.dataforge.meta
 
 import hep.dataforge.names.*
 import hep.dataforge.values.Value
+import hep.dataforge.values.asValue
 
 public interface MutableItemProvider : ItemProvider {
     public fun setItem(name: Name, item: MetaItem<*>?)
@@ -29,8 +30,13 @@ public inline fun MutableItemProvider.remove(name: String): Unit = remove(name.t
 public operator fun MutableItemProvider.set(name: Name, value: Any?) {
     when (value) {
         null -> remove(name)
+        is Value -> set(name, value)
+        is Number -> set(name, value.asValue())
+        is String -> set(name, value.asValue())
+        is Boolean -> set(name, value.asValue())
         is MetaItem<*> -> set(name, value)
         is Meta -> set(name, value)
+        is MetaRepr -> set(name, value.toMeta())
         is Configurable -> set(name, value.config)
         else -> set(name, Value.of(value))
     }
@@ -97,7 +103,7 @@ public fun MutableItemProvider.getChild(childName: Name): MutableItemProvider {
     }
 }
 
-public fun MutableItemProvider.getChild(childName: String): MutableItemProvider  = getChild(childName.toName())
+public fun MutableItemProvider.getChild(childName: String): MutableItemProvider = getChild(childName.toName())
 
 /**
  * Update existing mutable node with another node. The rules are following:
