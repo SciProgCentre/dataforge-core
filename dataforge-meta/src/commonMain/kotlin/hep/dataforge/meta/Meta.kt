@@ -1,7 +1,5 @@
 package hep.dataforge.meta
 
-import hep.dataforge.meta.MetaItem.NodeItem
-import hep.dataforge.meta.MetaItem.ValueItem
 import hep.dataforge.names.*
 import hep.dataforge.values.Value
 import kotlinx.serialization.Serializable
@@ -18,9 +16,9 @@ public interface MetaRepr {
 }
 
 /**
- * Generic meta tree representation. Elements are [MetaItem] objects that could be represented by three different entities:
- *  * [MetaItem.ValueItem] (leaf)
- *  * [MetaItem.NodeItem] single node
+ * Generic meta tree representation. Elements are [TypedMetaItem] objects that could be represented by three different entities:
+ *  * [ValueItem] (leaf)
+ *  * [NodeItem] single node
  *
  *   * Same name siblings are supported via elements with the same [Name] but different queries
  */
@@ -28,9 +26,9 @@ public interface Meta : MetaRepr, ItemProvider {
     /**
      * Top level items of meta tree
      */
-    public val items: Map<NameToken, MetaItem<*>>
+    public val items: Map<NameToken, MetaItem>
 
-    override fun getItem(name: Name): MetaItem<*>? {
+    override fun getItem(name: Name): MetaItem? {
         if (name.isEmpty()) return NodeItem(this)
         return name.firstOrNull()?.let { token ->
             val tail = name.cutFirst()
@@ -58,12 +56,12 @@ public interface Meta : MetaRepr, ItemProvider {
         public const val VALUE_KEY: String = "@value"
 
         public val EMPTY: Meta = object : MetaBase() {
-            override val items: Map<NameToken, MetaItem<*>> = emptyMap()
+            override val items: Map<NameToken, MetaItem> = emptyMap()
         }
     }
 }
 
-public operator fun Meta.get(token: NameToken): MetaItem<*>? = items.get(token)
+public operator fun Meta.get(token: NameToken): MetaItem? = items.get(token)
 
 /**
  * Get a sequence of [Name]-[Value] pairs
@@ -78,9 +76,9 @@ public fun Meta.valueSequence(): Sequence<Pair<Name, Value>> {
 }
 
 /**
- * Get a sequence of all [Name]-[MetaItem] pairs for all items including nodes
+ * Get a sequence of all [Name]-[TypedMetaItem] pairs for all items including nodes
  */
-public fun Meta.itemSequence(): Sequence<Pair<Name, MetaItem<*>>> = sequence {
+public fun Meta.itemSequence(): Sequence<Pair<Name, MetaItem>> = sequence {
     items.forEach { (key, item) ->
         yield(key.asName() to item)
         if (item is NodeItem) {
@@ -91,27 +89,27 @@ public fun Meta.itemSequence(): Sequence<Pair<Name, MetaItem<*>>> = sequence {
     }
 }
 
-public operator fun Meta.iterator(): Iterator<Pair<Name, MetaItem<*>>> = itemSequence().iterator()
+public operator fun Meta.iterator(): Iterator<Pair<Name, MetaItem>> = itemSequence().iterator()
 
 /**
  * A meta node that ensures that all of its descendants has at least the same type
  */
 public interface TypedMeta<out M : TypedMeta<M>> : Meta {
-    override val items: Map<NameToken, MetaItem<M>>
+    override val items: Map<NameToken, TypedMetaItem<M>>
 
     @Suppress("UNCHECKED_CAST")
-    override fun getItem(name: Name): MetaItem<M>? = super.getItem(name)?.let { it as MetaItem<M> }
+    override fun getItem(name: Name): TypedMetaItem<M>? = super.getItem(name)?.let { it as TypedMetaItem<M> }
     //Typed meta guarantees that all children have M type
 }
 
 /**
  * The same as [Meta.get], but with specific node type
  */
-public operator fun <M : TypedMeta<M>> M?.get(name: Name): MetaItem<M>? = this?.getItem(name)
+public operator fun <M : TypedMeta<M>> M?.get(name: Name): TypedMetaItem<M>? = this?.getItem(name)
 
 
-public operator fun <M : TypedMeta<M>> M?.get(key: String): MetaItem<M>? = this[key.toName()]
-public operator fun <M : TypedMeta<M>> M?.get(key: NameToken): MetaItem<M>? = this[key.asName()]
+public operator fun <M : TypedMeta<M>> M?.get(key: String): TypedMetaItem<M>? = this[key.toName()]
+public operator fun <M : TypedMeta<M>> M?.get(key: NameToken): TypedMetaItem<M>? = this[key.asName()]
 
 /**
  * Equals, hashcode and to string for any meta

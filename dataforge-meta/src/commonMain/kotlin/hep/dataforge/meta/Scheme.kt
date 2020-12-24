@@ -25,19 +25,19 @@ public open class Scheme(
         internal set
 
 
-    private fun getDefaultItem(name: Name): MetaItem<*>? {
+    private fun getDefaultItem(name: Name): MetaItem? {
         return default?.get(name) ?: descriptor?.get(name)?.defaultItem()
     }
 
     /**
      * Get a property with default
      */
-    override fun getItem(name: Name): MetaItem<*>? = items[name] ?: getDefaultItem(name)
+    override fun getItem(name: Name): MetaItem? = items[name] ?: getDefaultItem(name)
 
     /**
      * Check if property with given [name] could be assigned to [item]
      */
-    public open fun validateItem(name: Name, item: MetaItem<*>?): Boolean {
+    public open fun validateItem(name: Name, item: MetaItem?): Boolean {
         val descriptor = descriptor?.get(name)
         return descriptor?.validateItem(item) ?: true
     }
@@ -45,7 +45,7 @@ public open class Scheme(
     /**
      * Set a configurable property
      */
-    override fun setItem(name: Name, item: MetaItem<*>?) {
+    override fun setItem(name: Name, item: MetaItem?) {
         if (validateItem(name, item)) {
             items[name] = item
         } else {
@@ -60,7 +60,7 @@ public open class Scheme(
      */
     public open val defaultLayer: Meta
         get() = object : MetaBase() {
-            override val items: Map<NameToken, MetaItem<*>> = buildMap {
+            override val items: Map<NameToken, MetaItem> = buildMap {
                 descriptor?.items?.forEach { (key, itemDescriptor) ->
                     val token = NameToken(key)
                     val name = token.asName()

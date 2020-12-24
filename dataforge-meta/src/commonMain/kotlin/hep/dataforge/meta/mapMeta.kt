@@ -11,30 +11,30 @@ import hep.dataforge.values.Value
 public fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
     return items.entries.associate { (token, item) ->
         token.toString() to when (item) {
-            is MetaItem.NodeItem -> item.node.toMap()
-            is MetaItem.ValueItem -> item.value.value
+            is NodeItem -> item.node.toMap()
+            is ValueItem -> item.value.value
         }
     }
 }
 
 /**
- * Convert map of maps to meta. This method will recognize [MetaItem], [Map]<String,Any?> and [List] of all mentioned above as value.
+ * Convert map of maps to meta. This method will recognize [TypedMetaItem], [Map]<String,Any?> and [List] of all mentioned above as value.
  * All other values will be converted to values.
  */
 @DFExperimental
 public fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = Meta {
     @Suppress("UNCHECKED_CAST")
-    fun toItem(value: Any?): MetaItem<*> = when (value) {
-        is MetaItem<*> -> value
-        is Meta -> MetaItem.NodeItem(value)
-        is Map<*, *> -> MetaItem.NodeItem((value as Map<String, Any?>).toMeta())
-        else -> MetaItem.ValueItem(Value.of(value))
+    fun toItem(value: Any?): MetaItem = when (value) {
+        is MetaItem -> value
+        is Meta -> NodeItem(value)
+        is Map<*, *> -> NodeItem((value as Map<String, Any?>).toMeta())
+        else -> ValueItem(Value.of(value))
     }
 
     entries.forEach { (key, value) ->
         if (value is List<*>) {
             val items = value.map { toItem(it) }
-            if (items.all { it is MetaItem.ValueItem }) {
+            if (items.all { it is ValueItem }) {
                 set(key, ListValue(items.map { it.value!! }))
             } else {
                 setIndexedItems(key.toName(), value.map { toItem(it) })

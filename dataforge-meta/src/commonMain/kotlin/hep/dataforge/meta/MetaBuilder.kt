@@ -15,7 +15,7 @@ public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
     override fun wrapNode(meta: Meta): MetaBuilder = if (meta is MetaBuilder) meta else meta.builder()
     override fun empty(): MetaBuilder = MetaBuilder()
 
-    public infix fun String.put(item: MetaItem<*>?) {
+    public infix fun String.put(item: MetaItem?) {
         set(this, item)
     }
 
@@ -126,8 +126,8 @@ public fun Meta.builder(): MetaBuilder {
         items.mapValues { entry ->
             val item = entry.value
             builder[entry.key.asName()] = when (item) {
-                is MetaItem.ValueItem -> item.value
-                is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.builder())
+                is ValueItem -> item.value
+                is NodeItem -> NodeItem(item.node.builder())
             }
         }
     }

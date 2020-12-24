@@ -8,7 +8,7 @@ import hep.dataforge.names.NameToken
  * If the argument is possibly mutable node, it is copied on creation
  */
 public class SealedMeta internal constructor(
-    override val items: Map<NameToken, MetaItem<SealedMeta>>,
+    override val items: Map<NameToken, TypedMetaItem<SealedMeta>>,
 ) : AbstractTypedMeta<SealedMeta>()
 
 /**
@@ -17,7 +17,7 @@ public class SealedMeta internal constructor(
 public fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(items.mapValues { entry -> entry.value.seal() })
 
 @Suppress("UNCHECKED_CAST")
-public fun MetaItem<*>.seal(): MetaItem<SealedMeta> = when (this) {
-    is MetaItem.ValueItem -> this
-    is MetaItem.NodeItem -> MetaItem.NodeItem(node.seal())
+public fun MetaItem.seal(): TypedMetaItem<SealedMeta> = when (this) {
+    is ValueItem -> this
+    is NodeItem -> NodeItem(node.seal())
 }

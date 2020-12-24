@@ -1,8 +1,8 @@
 package hep.dataforge.io
 
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaItem
 import hep.dataforge.meta.MetaSerializer
+import hep.dataforge.meta.TypedMetaItem
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -52,7 +52,7 @@ class MetaSerializerTest {
     @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testMetaItemDescriptor() {
-        val descriptor = MetaItem.serializer(MetaSerializer).descriptor.getElementDescriptor(0)
+        val descriptor = TypedMetaItem.serializer(MetaSerializer).descriptor.getElementDescriptor(0)
         println(descriptor)
     }
 }

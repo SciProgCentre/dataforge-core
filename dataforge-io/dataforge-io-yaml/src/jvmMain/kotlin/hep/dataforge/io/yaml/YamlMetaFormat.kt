@@ -22,10 +22,10 @@ import net.mamoe.yamlkt.*
 public fun Meta.toYaml(): YamlMap {
     val map: Map<String, Any?> = items.entries.associate { (key, item) ->
         key.toString() to when (item) {
-            is MetaItem.ValueItem -> {
+            is ValueItem -> {
                 item.value.value
             }
-            is MetaItem.NodeItem -> {
+            is NodeItem -> {
                 item.node.toYaml()
             }
         }
@@ -35,8 +35,8 @@ public fun Meta.toYaml(): YamlMap {
 
 private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: NodeDescriptor? = null) : MetaBase() {
 
-    private fun buildItems(): Map<NameToken, MetaItem<*>> {
-        val map = LinkedHashMap<NameToken, MetaItem<*>>()
+    private fun buildItems(): Map<NameToken, MetaItem> {
+        val map = LinkedHashMap<NameToken, MetaItem>()
 
         yamlMap.content.entries.forEach { (key, value) ->
             val stringKey = key.toString()
@@ -53,7 +53,7 @@ private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: Nod
                             (it as YamlLiteral).content.parseValue()
                         }
                     )
-                    map[token] = MetaItem.ValueItem(listValue)
+                    map[token] = ValueItem(listValue)
                 } else value.forEachIndexed { index, yamlElement ->
                     val indexKey = (itemDescriptor as? NodeDescriptor)?.indexKey ?: ItemDescriptor.DEFAULT_INDEX_KEY
                     val indexValue: String = (yamlElement as? YamlMap)?.getStringOrNull(indexKey)
@@ -67,10 +67,10 @@ private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: Nod
         return map
     }
 
-    override val items: Map<NameToken, MetaItem<*>> get() = buildItems()
+    override val items: Map<NameToken, MetaItem> get() = buildItems()
 }
 
-public fun YamlElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<*> = when (this) {
+public fun YamlElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem = when (this) {
     YamlNull -> Null.asMetaItem()
     is YamlLiteral -> content.parseValue().asMetaItem()
     is YamlMap -> toMeta().asMetaItem()

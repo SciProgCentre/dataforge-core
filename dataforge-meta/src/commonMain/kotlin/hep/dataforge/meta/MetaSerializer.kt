@@ -12,7 +12,7 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonObject
 
-public object MetaItemSerializer : KSerializer<MetaItem<*>> {
+public object MetaItemSerializer : KSerializer<MetaItem> {
 
     @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
     override val descriptor: SerialDescriptor = buildSerialDescriptor("MetaItem", PolymorphicKind.SEALED) {
@@ -20,7 +20,7 @@ public object MetaItemSerializer : KSerializer<MetaItem<*>> {
         element("value", buildSerialDescriptor("MetaItem.value", SerialKind.CONTEXTUAL))
     }
 
-    override fun deserialize(decoder: Decoder): MetaItem<*> {
+    override fun deserialize(decoder: Decoder): MetaItem {
         decoder.decodeStructure(descriptor) {
             //Force strict serialization order
             require(decodeElementIndex(descriptor) == 0) { "Node flag must be first item serialized" }
@@ -36,12 +36,12 @@ public object MetaItemSerializer : KSerializer<MetaItem<*>> {
         }
     }
 
-    override fun serialize(encoder: Encoder, value: MetaItem<*>) {
+    override fun serialize(encoder: Encoder, value: MetaItem) {
         encoder.encodeStructure(descriptor) {
-            encodeBooleanElement(descriptor, 0, value is MetaItem.NodeItem)
+            encodeBooleanElement(descriptor, 0, value is NodeItem)
             when (value) {
-                is MetaItem.ValueItem -> encodeSerializableElement(descriptor, 1, ValueSerializer, value.value)
-                is MetaItem.NodeItem -> encodeSerializableElement(descriptor, 1, MetaSerializer, value.node)
+                is ValueItem -> encodeSerializableElement(descriptor, 1, ValueSerializer, value.value)
+                is NodeItem -> encodeSerializableElement(descriptor, 1, MetaSerializer, value.node)
             }
         }
     }
@@ -52,7 +52,7 @@ public object MetaItemSerializer : KSerializer<MetaItem<*>> {
  */
 public object MetaSerializer : KSerializer<Meta> {
 
-    private val mapSerializer: KSerializer<Map<NameToken, MetaItem<Meta>>> = MapSerializer(
+    private val mapSerializer: KSerializer<Map<NameToken, TypedMetaItem<Meta>>> = MapSerializer(
         NameToken,
         MetaItemSerializer//MetaItem.serializer(MetaSerializer)
     )
@@ -64,7 +64,7 @@ public object MetaSerializer : KSerializer<Meta> {
             JsonObject.serializer().deserialize(decoder).toMeta()
         } else {
             object : MetaBase() {
-                override val items: Map<NameToken, MetaItem<*>> = mapSerializer.deserialize(decoder)
+                override val items: Map<NameToken, MetaItem> = mapSerializer.deserialize(decoder)
             }
         }
     }

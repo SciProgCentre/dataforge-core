@@ -46,7 +46,7 @@ public fun <C : MutableItemProvider, S : Specification<C>> Configurable.update(
     action: C.() -> Unit,
 ): Configurable = apply { config.update(spec, action) }
 
-public fun <T : MutableItemProvider> MetaItem<Config>.withSpec(spec: Specification<T>): T? =
+public fun <T : MutableItemProvider> TypedMetaItem<Config>.withSpec(spec: Specification<T>): T? =
     node?.let { spec.write(it) }
 
 public fun <T : Scheme> MutableItemProvider.spec(

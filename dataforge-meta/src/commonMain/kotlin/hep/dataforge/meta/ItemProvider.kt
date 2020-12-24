@@ -1,11 +1,10 @@
 package hep.dataforge.meta
 
-import hep.dataforge.meta.MetaItem.NodeItem
 import hep.dataforge.names.*
 
 public fun interface ItemProvider {
     //getItem used instead of get in order to provide extension freedom
-    public fun getItem(name: Name): MetaItem<*>?
+    public fun getItem(name: Name): MetaItem?
 
     public companion object {
         public val EMPTY: ItemProvider = ItemProvider { null }
@@ -20,7 +19,7 @@ public fun interface ItemProvider {
  *
  * If [name] is empty return current [Meta] as a [NodeItem]
  */
-public operator fun ItemProvider?.get(name: Name): MetaItem<*>? = this?.getItem(name)
+public operator fun ItemProvider?.get(name: Name): MetaItem? = this?.getItem(name)
 
 /**
  * The root node of this item provider if it is present
@@ -30,7 +29,7 @@ public val ItemProvider.rootNode: Meta? get() = get(Name.EMPTY).node
 /**
  * Parse [Name] from [key] using full name notation and pass it to [Meta.get]
  */
-public operator fun ItemProvider?.get(key: String): MetaItem<*>? = this?.get(key.toName())
+public operator fun ItemProvider?.get(key: String): MetaItem? = this?.get(key.toName())
 
 /**
  * Create a provider that uses given provider for default values if those are not found in this provider
@@ -43,7 +42,7 @@ public fun ItemProvider.withDefault(default: ItemProvider): ItemProvider = ItemP
  * Get all items matching given name. The index of the last element, if present is used as a [Regex],
  * against which indexes of elements are matched.
  */
-public fun ItemProvider.getIndexed(name: Name): Map<String?, MetaItem<*>> {
+public fun ItemProvider.getIndexed(name: Name): Map<String?, MetaItem> {
     val root: Meta = when (name.length) {
         0 -> error("Can't use empty name for 'getIndexed'")
         1 -> this.rootNode ?: return emptyMap()
@@ -60,7 +59,7 @@ public fun ItemProvider.getIndexed(name: Name): Map<String?, MetaItem<*>> {
     }
 }
 
-public fun ItemProvider.getIndexed(name: String): Map<String?, MetaItem<*>> = this@getIndexed.getIndexed(name.toName())
+public fun ItemProvider.getIndexed(name: String): Map<String?, MetaItem> = this@getIndexed.getIndexed(name.toName())
 
 /**
  * Return a provider referencing a child node

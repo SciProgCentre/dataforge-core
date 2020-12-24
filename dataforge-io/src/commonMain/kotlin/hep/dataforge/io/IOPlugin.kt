@@ -18,7 +18,7 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         context.gather<IOFormatFactory<*>>(IO_FORMAT_TYPE).values
     }
 
-    public fun <T : Any> resolveIOFormat(item: MetaItem<*>, type: KClass<out T>): IOFormat<T>? {
+    public fun <T : Any> resolveIOFormat(item: MetaItem, type: KClass<out T>): IOFormat<T>? {
         val key = item.string ?: item.node[NAME_KEY]?.string ?: error("Format name not defined")
         val name = key.toName()
         return ioFormatFactories.find { it.name == name }?.let {
@@ -46,7 +46,7 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     private fun resolveEnvelopeFormat(name: Name, meta: Meta = Meta.EMPTY): EnvelopeFormat? =
         envelopeFormatFactories.find { it.name == name }?.invoke(meta, context)
 
-    public fun resolveEnvelopeFormat(item: MetaItem<*>): EnvelopeFormat? {
+    public fun resolveEnvelopeFormat(item: MetaItem): EnvelopeFormat? {
         val name = item.string ?: item.node[NAME_KEY]?.string ?: error("Envelope format name not defined")
         val meta = item.node[META_KEY].node ?: Meta.EMPTY
         return resolveEnvelopeFormat(name.toName(), meta)

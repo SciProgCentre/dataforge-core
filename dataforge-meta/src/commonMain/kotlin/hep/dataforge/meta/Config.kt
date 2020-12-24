@@ -16,11 +16,11 @@ import kotlin.jvm.Synchronized
 
 public data class ItemListener(
     val owner: Any? = null,
-    val action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit
+    val action: (name: Name, oldItem: MetaItem?, newItem: MetaItem?) -> Unit
 )
 
 public interface ObservableItemProvider : ItemProvider {
-    public fun onChange(owner: Any?, action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit)
+    public fun onChange(owner: Any?, action: (name: Name, oldItem: MetaItem?, newItem: MetaItem?) -> Unit)
     public fun removeListener(owner: Any?)
 }
 
@@ -33,7 +33,7 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableItemProvider {
     private val listeners = HashSet<ItemListener>()
 
     @Synchronized
-    private fun itemChanged(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) {
+    private fun itemChanged(name: Name, oldItem: MetaItem?, newItem: MetaItem?) {
         listeners.forEach { it.action(name, oldItem, newItem) }
     }
 
@@ -41,7 +41,7 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableItemProvider {
      * Add change listener to this meta. Owner is declared to be able to remove listeners later. Listener without owner could not be removed
      */
     @Synchronized
-    override fun onChange(owner: Any?, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit) {
+    override fun onChange(owner: Any?, action: (Name, MetaItem?, MetaItem?) -> Unit) {
         listeners.add(ItemListener(owner, action))
     }
 
@@ -53,15 +53,15 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableItemProvider {
         listeners.removeAll { it.owner === owner }
     }
 
-    override fun replaceItem(key: NameToken, oldItem: MetaItem<Config>?, newItem: MetaItem<Config>?) {
+    override fun replaceItem(key: NameToken, oldItem: TypedMetaItem<Config>?, newItem: TypedMetaItem<Config>?) {
         if (newItem == null) {
             children.remove(key)
-            if (oldItem != null && oldItem is MetaItem.NodeItem<Config>) {
+            if (oldItem != null && oldItem is NodeItem<Config>) {
                 oldItem.node.removeListener(this)
             }
         } else {
             children[key] = newItem
-            if (newItem is MetaItem.NodeItem) {
+            if (newItem is NodeItem) {
                 newItem.node.onChange(this) { name, oldChild, newChild ->
                     itemChanged(key + name, oldChild, newChild)
                 }
@@ -92,7 +92,7 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableItemProvider {
     }
 }
 
-public operator fun Config.get(token: NameToken): MetaItem<Config>? = items[token]
+public operator fun Config.get(token: NameToken): TypedMetaItem<Config>? = items[token]
 
 /**
  * Create a mutable copy of this [Meta]. The copy is created event if initial [Meta] is a [Config].
@@ -102,8 +102,8 @@ public fun Meta.toConfig(): Config = Config().also { builder ->
     this.items.mapValues { entry ->
         val item = entry.value
         builder[entry.key.asName()] = when (item) {
-            is MetaItem.ValueItem -> item.value
-            is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.asConfig())
+            is ValueItem -> item.value
+            is NodeItem -> NodeItem(item.node.asConfig())
         }
     }
 }

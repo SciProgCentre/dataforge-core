@@ -9,14 +9,14 @@ import kotlin.reflect.KProperty
 
 /* Read-write delegates */
 
-public typealias MutableItemDelegate = ReadWriteProperty<Any?, MetaItem<*>?>
+public typealias MutableItemDelegate = ReadWriteProperty<Any?, MetaItem?>
 
 public fun MutableItemProvider.item(key: Name? = null): MutableItemDelegate = object : MutableItemDelegate {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): MetaItem<*>? {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): MetaItem? {
         return get(key ?: property.name.asName())
     }
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: MetaItem<*>?) {
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: MetaItem?) {
         val name = key ?: property.name.asName()
         set(name, value)
     }
@@ -25,7 +25,7 @@ public fun MutableItemProvider.item(key: Name? = null): MutableItemDelegate = ob
 /* Mutable converters */
 
 /**
- * A type converter for a mutable [MetaItem] delegate
+ * A type converter for a mutable [TypedMetaItem] delegate
  */
 public fun <R : Any> MutableItemDelegate.convert(
     converter: MetaConverter<R>,
@@ -55,8 +55,8 @@ public fun <R : Any> MutableItemDelegate.convert(
 }
 
 public fun <R> MutableItemDelegate.convert(
-    reader: (MetaItem<*>?) -> R,
-    writer: (R) -> MetaItem<*>?,
+    reader: (MetaItem?) -> R,
+    writer: (R) -> MetaItem?,
 ): ReadWriteProperty<Any?, R> = object : ReadWriteProperty<Any?, R> {
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): R =
@@ -119,7 +119,7 @@ public fun MutableItemProvider.node(key: Name? = null): ReadWriteProperty<Any?, 
 )
 
 public inline fun <reified M : MutableMeta<M>> M.node(key: Name? = null): ReadWriteProperty<Any?, M?> =
-    item(key).convert(reader = { it?.let { it.node as M } }, writer = { it?.let { MetaItem.NodeItem(it) } })
+    item(key).convert(reader = { it?.let { it.node as M } }, writer = { it?.let { NodeItem(it) } })
 
 /* Number delegates */
 

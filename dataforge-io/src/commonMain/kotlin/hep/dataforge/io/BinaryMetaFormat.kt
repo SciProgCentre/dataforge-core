@@ -1,11 +1,8 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Context
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.MetaItem
+import hep.dataforge.meta.*
 import hep.dataforge.meta.descriptors.NodeDescriptor
-import hep.dataforge.meta.set
 import hep.dataforge.values.*
 import kotlinx.io.*
 import kotlinx.io.text.readUtf8String
@@ -22,7 +19,7 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
     override fun invoke(meta: Meta, context: Context): MetaFormat = this
 
     override fun readMeta(input: Input, descriptor: NodeDescriptor?): Meta {
-        return (input.readMetaItem() as MetaItem.NodeItem).node
+        return (input.readMetaItem() as NodeItem).node
     }
 
     private fun Output.writeChar(char: Char) = writeByte(char.toByte())
@@ -88,10 +85,10 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
         meta.items.forEach { (key, item) ->
             output.writeString(key.toString())
             when (item) {
-                is MetaItem.ValueItem -> {
+                is ValueItem -> {
                     output.writeValue(item.value)
                 }
-                is MetaItem.NodeItem -> {
+                is NodeItem -> {
                     writeObject(output, item.node)
                 }
             }
@@ -104,21 +101,21 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
     }
 
     @Suppress("UNCHECKED_CAST")
-    public fun Input.readMetaItem(): MetaItem<MetaBuilder> {
+    public fun Input.readMetaItem(): TypedMetaItem<MetaBuilder> {
         return when (val keyChar = readByte().toChar()) {
-            'S' -> MetaItem.ValueItem(StringValue(readString()))
-            'N' -> MetaItem.ValueItem(Null)
-            '+' -> MetaItem.ValueItem(True)
-            '-' -> MetaItem.ValueItem(True)
-            's' -> MetaItem.ValueItem(NumberValue(readShort()))
-            'i' -> MetaItem.ValueItem(NumberValue(readInt()))
-            'l' -> MetaItem.ValueItem(NumberValue(readInt()))
-            'f' -> MetaItem.ValueItem(NumberValue(readFloat()))
-            'd' -> MetaItem.ValueItem(NumberValue(readDouble()))
+            'S' -> ValueItem(StringValue(readString()))
+            'N' -> ValueItem(Null)
+            '+' -> ValueItem(True)
+            '-' -> ValueItem(True)
+            's' -> ValueItem(NumberValue(readShort()))
+            'i' -> ValueItem(NumberValue(readInt()))
+            'l' -> ValueItem(NumberValue(readInt()))
+            'f' -> ValueItem(NumberValue(readFloat()))
+            'd' -> ValueItem(NumberValue(readDouble()))
             'L' -> {
                 val length = readInt()
-                val list = (1..length).map { (readMetaItem() as MetaItem.ValueItem).value }
-                MetaItem.ValueItem(Value.of(list))
+                val list = (1..length).map { (readMetaItem() as ValueItem).value }
+                ValueItem(Value.of(list))
             }
             'M' -> {
                 val length = readInt()
@@ -129,7 +126,7 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
                         set(name, item)
                     }
                 }
-                MetaItem.NodeItem(meta)
+                NodeItem(meta)
             }
             else -> error("Unknown serialization key character: $keyChar")
         }

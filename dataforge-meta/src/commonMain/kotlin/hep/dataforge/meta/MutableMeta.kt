@@ -3,7 +3,7 @@ package hep.dataforge.meta
 import hep.dataforge.names.*
 
 public interface MutableMeta<out M : MutableMeta<M>> : TypedMeta<M>, MutableItemProvider {
-    override val items: Map<NameToken, MetaItem<M>>
+    override val items: Map<NameToken, TypedMetaItem<M>>
 }
 
 /**
@@ -12,14 +12,14 @@ public interface MutableMeta<out M : MutableMeta<M>> : TypedMeta<M>, MutableItem
  * Changes in Meta are not thread safe.
  */
 public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMeta<M>(), MutableMeta<M> {
-    protected val children: MutableMap<NameToken, MetaItem<M>> = LinkedHashMap()
+    protected val children: MutableMap<NameToken, TypedMetaItem<M>> = LinkedHashMap()
 
-    override val items: Map<NameToken, MetaItem<M>>
+    override val items: Map<NameToken, TypedMetaItem<M>>
         get() = children
 
     //protected abstract fun itemChanged(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?)
 
-    protected open fun replaceItem(key: NameToken, oldItem: MetaItem<M>?, newItem: MetaItem<M>?) {
+    protected open fun replaceItem(key: NameToken, oldItem: TypedMetaItem<M>?, newItem: TypedMetaItem<M>?) {
         if (newItem == null) {
             children.remove(key)
         } else {
@@ -28,10 +28,10 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMet
         //itemChanged(key.asName(), oldItem, newItem)
     }
 
-    private fun wrapItem(item: MetaItem<*>?): MetaItem<M>? = when (item) {
+    private fun wrapItem(item: MetaItem?): TypedMetaItem<M>? = when (item) {
         null -> null
-        is MetaItem.ValueItem -> item
-        is MetaItem.NodeItem -> MetaItem.NodeItem(wrapNode(item.node))
+        is ValueItem -> item
+        is NodeItem -> NodeItem(wrapNode(item.node))
     }
 
     /**
@@ -44,19 +44,19 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMet
      */
     internal abstract fun empty(): M
 
-    override fun setItem(name: Name, item: MetaItem<*>?) {
+    override fun setItem(name: Name, item: MetaItem?) {
         when (name.length) {
             0 -> error("Can't set a meta item for empty name")
             1 -> {
                 val token = name.firstOrNull()!!
-                val oldItem: MetaItem<M>? = getItem(name)
+                val oldItem: TypedMetaItem<M>? = getItem(name)
                 replaceItem(token, oldItem, wrapItem(item))
             }
             else -> {
                 val token = name.firstOrNull()!!
                 //get existing or create new node. Query is ignored for new node
                 if (items[token] == null) {
-                    replaceItem(token, null, MetaItem.NodeItem(empty()))
+                    replaceItem(token, null, NodeItem(empty()))
                 }
                 items[token]?.node!!.set(name.cutFirst(), item)
             }
@@ -87,7 +87,7 @@ public fun MutableItemProvider.append(name: String, value: Any?): Unit = append(
 public fun <M : AbstractMutableMeta<M>> M.edit(name: Name, builder: M.() -> Unit) {
     val item = when (val existingItem = get(name)) {
         null -> empty().also { set(name, it) }
-        is MetaItem.NodeItem<M> -> existingItem.node
+        is NodeItem<M> -> existingItem.node
         else -> error("Can't edit value meta item")
     }
     item.apply(builder)

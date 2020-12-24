@@ -5,7 +5,7 @@ import hep.dataforge.names.*
 import hep.dataforge.values.*
 
 /**
- * A common parent for [ValueDescriptor] and [NodeDescriptor]. Describes a single [MetaItem] or a group of same-name-siblings.
+ * A common parent for [ValueDescriptor] and [NodeDescriptor]. Describes a single [TypedMetaItem] or a group of same-name-siblings.
  */
 @DFBuilder
 public sealed class ItemDescriptor(final override val config: Config) : Configurable {
@@ -55,7 +55,7 @@ public inline fun ItemDescriptor.attributes(block: Config.() -> Unit) {
 /**
  * Check if given item suits the descriptor
  */
-public fun ItemDescriptor.validateItem(item: MetaItem<*>?): Boolean {
+public fun ItemDescriptor.validateItem(item: MetaItem?): Boolean {
     if (item == null) return !required
     return when (this) {
         is ValueDescriptor -> isAllowedValue(item.value ?: return false)
@@ -279,7 +279,7 @@ public class ValueDescriptor(config: Config = Config()) : ItemDescriptor(config)
             }
         },
         writer = {
-            MetaItem.ValueItem(it.asValue())
+            ValueItem(it.asValue())
         }
     )
 

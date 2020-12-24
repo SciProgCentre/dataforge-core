@@ -6,8 +6,8 @@ import hep.dataforge.context.Named
 import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaItem
 import hep.dataforge.meta.MetaRepr
+import hep.dataforge.meta.ValueItem
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.provider.Type
@@ -121,7 +121,7 @@ public object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
     }
 
     override fun readObject(input: Input): Value {
-        return (BinaryMetaFormat.run { input.readMetaItem() } as? MetaItem.ValueItem)?.value
+        return (BinaryMetaFormat.run { input.readMetaItem() } as? ValueItem)?.value
             ?: error("The item is not a value")
     }
 }

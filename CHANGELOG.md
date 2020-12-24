@@ -15,6 +15,8 @@
 - Context logging moved to the extension
 - `number` and `string` methods on `Value` moved to extensions (breaking change)
 - \[Major breaking change\] Schemes and configurables us `MutableItemProvider` instead of `Config`
+- \[Major breaking change\] `MetaItem` renamed to `TypedMetaItem` and `MetaItem` is now an alias for `TypedMetaItem<*>`
+- \[Major breaking change\] Moved `NodeItem` and `ValueItem` to a top level
 
 ### Deprecated
 

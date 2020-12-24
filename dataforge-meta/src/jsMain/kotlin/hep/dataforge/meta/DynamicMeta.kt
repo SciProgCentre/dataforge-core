@@ -22,9 +22,9 @@ public fun Value.toDynamic(): dynamic {
 public fun Meta.toDynamic(): dynamic {
     if (this is DynamicMeta) return this.obj
 
-    fun MetaItem<*>.toDynamic(): dynamic = when (this) {
-        is MetaItem.ValueItem -> this.value.toDynamic()
-        is MetaItem.NodeItem -> this.node.toDynamic()
+    fun MetaItem.toDynamic(): dynamic = when (this) {
+        is ValueItem -> this.value.toDynamic()
+        is NodeItem -> this.node.toDynamic()
     }
 
     val res = js("{}")
@@ -48,27 +48,27 @@ public class DynamicMeta(internal val obj: dynamic) : MetaBase() {
         (jsTypeOf(obj) != "object")
 
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    private fun asItem(obj: dynamic): MetaItem<DynamicMeta>? {
+    private fun asItem(obj: dynamic): TypedMetaItem<DynamicMeta>? {
         return when {
-            obj == null -> MetaItem.ValueItem(Null)
-            isArray(obj) && (obj as Array<Any?>).all { isPrimitive(it) } -> MetaItem.ValueItem(Value.of(obj as Array<Any?>))
+            obj == null -> ValueItem(Null)
+            isArray(obj) && (obj as Array<Any?>).all { isPrimitive(it) } -> ValueItem(Value.of(obj as Array<Any?>))
             else -> when (jsTypeOf(obj)) {
-                "boolean" -> MetaItem.ValueItem(Value.of(obj as Boolean))
-                "number" -> MetaItem.ValueItem(Value.of(obj as Number))
-                "string" -> MetaItem.ValueItem(Value.of(obj as String))
-                "object" -> MetaItem.NodeItem(DynamicMeta(obj))
+                "boolean" -> ValueItem(Value.of(obj as Boolean))
+                "number" -> ValueItem(Value.of(obj as Number))
+                "string" -> ValueItem(Value.of(obj as String))
+                "object" -> NodeItem(DynamicMeta(obj))
                 else -> null
             }
         }
     }
 
-    override val items: Map<NameToken, MetaItem<DynamicMeta>>
-        get() = keys().flatMap<String, Pair<NameToken, MetaItem<DynamicMeta>>> { key ->
+    override val items: Map<NameToken, TypedMetaItem<DynamicMeta>>
+        get() = keys().flatMap<String, Pair<NameToken, TypedMetaItem<DynamicMeta>>> { key ->
             val value = obj[key] ?: return@flatMap emptyList()
             if (isArray(value)) {
                 val array = value as Array<Any?>
                 return@flatMap if (array.all { isPrimitive(it) }) {
-                    listOf(NameToken(key) to MetaItem.ValueItem(Value.of(array)))
+                    listOf(NameToken(key) to ValueItem(Value.of(array)))
                 } else {
                     array.mapIndexedNotNull { index, it ->
                         val item = asItem(it) ?: return@mapIndexedNotNull null

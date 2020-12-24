@@ -5,16 +5,16 @@ import hep.dataforge.values.Value
 import hep.dataforge.values.asValue
 
 public interface MutableItemProvider : ItemProvider {
-    public fun setItem(name: Name, item: MetaItem<*>?)
+    public fun setItem(name: Name, item: MetaItem?)
 }
 
-public operator fun MutableItemProvider.set(name: Name, item: MetaItem<*>?): Unit = setItem(name, item)
+public operator fun MutableItemProvider.set(name: Name, item: MetaItem?): Unit = setItem(name, item)
 
 public operator fun MutableItemProvider.set(name: Name, value: Value?): Unit = set(name, value?.asMetaItem())
 
 public operator fun MutableItemProvider.set(name: Name, meta: Meta?): Unit = set(name, meta?.asMetaItem())
 
-public operator fun MutableItemProvider.set(key: String, item: MetaItem<*>?): Unit = set(key.toName(), item)
+public operator fun MutableItemProvider.set(key: String, item: MetaItem?): Unit = set(key.toName(), item)
 
 public operator fun MutableItemProvider.set(key: String, meta: Meta?): Unit = set(key, meta?.asMetaItem())
 
@@ -34,7 +34,7 @@ public operator fun MutableItemProvider.set(name: Name, value: Any?) {
         is Number -> set(name, value.asValue())
         is String -> set(name, value.asValue())
         is Boolean -> set(name, value.asValue())
-        is MetaItem<*> -> set(name, value)
+        is MetaItem -> set(name, value)
         is Meta -> set(name, value)
         is MetaRepr -> set(name, value.toMeta())
         is Configurable -> set(name, value.config)
@@ -56,8 +56,8 @@ public operator fun MutableItemProvider.set(key: String, index: String, value: A
 
 public fun MutableItemProvider.setIndexedItems(
     name: Name,
-    items: Iterable<MetaItem<*>>,
-    indexFactory: (MetaItem<*>, index: Int) -> String = { _, index -> index.toString() },
+    items: Iterable<MetaItem>,
+    indexFactory: (MetaItem, index: Int) -> String = { _, index -> index.toString() },
 ) {
     val tokens = name.tokens.toMutableList()
     val last = tokens.last()
@@ -73,7 +73,7 @@ public fun MutableItemProvider.setIndexed(
     metas: Iterable<Meta>,
     indexFactory: (Meta, index: Int) -> String = { _, index -> index.toString() },
 ) {
-    setIndexedItems(name, metas.map { MetaItem.NodeItem(it) }) { item, index -> indexFactory(item.node!!, index) }
+    setIndexedItems(name, metas.map { NodeItem(it) }) { item, index -> indexFactory(item.node!!, index) }
 }
 
 public operator fun MutableItemProvider.set(name: Name, metas: Iterable<Meta>): Unit = setIndexed(name, metas)
@@ -85,11 +85,11 @@ public operator fun MutableItemProvider.set(name: String, metas: Iterable<Meta>)
  */
 public fun MutableItemProvider.getChild(childName: Name): MutableItemProvider {
     fun createProvider() = object : MutableItemProvider {
-        override fun setItem(name: Name, item: MetaItem<*>?) {
+        override fun setItem(name: Name, item: MetaItem?) {
             this@getChild.setItem(childName + name, item)
         }
 
-        override fun getItem(name: Name): MetaItem<*>? = this@getChild.getItem(childName + name)
+        override fun getItem(name: Name): MetaItem? = this@getChild.getItem(childName + name)
     }
 
     return when {
@@ -130,9 +130,9 @@ public fun MutableItemProvider.withDefault(default: ItemProvider): MutableItemPr
         //Optimize for use with empty default
         this
     } else object : MutableItemProvider {
-        override fun setItem(name: Name, item: MetaItem<*>?) {
+        override fun setItem(name: Name, item: MetaItem?) {
             this@withDefault.setItem(name, item)
         }
 
-        override fun getItem(name: Name): MetaItem<*>? = this@withDefault.getItem(name) ?: default.getItem(name)
+        override fun getItem(name: Name): MetaItem? = this@withDefault.getItem(name) ?: default.getItem(name)
     }

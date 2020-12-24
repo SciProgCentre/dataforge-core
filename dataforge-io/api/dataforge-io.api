@@ -7,7 +7,7 @@ public final class hep/dataforge/io/BinaryMetaFormat : hep/dataforge/io/MetaForm
 	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/MetaFormat;
 	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
 	public fun readMeta (Lkotlinx/io/Input;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Meta;
-	public final fun readMetaItem (Lkotlinx/io/Input;)Lhep/dataforge/meta/MetaItem;
+	public final fun readMetaItem (Lkotlinx/io/Input;)Lhep/dataforge/meta/TypedMetaItem;
 	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/meta/Meta;
 	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
 	public fun toMeta ()Lhep/dataforge/meta/Meta;
@@ -219,8 +219,8 @@ public final class hep/dataforge/io/IOPlugin : hep/dataforge/context/AbstractPlu
 	public final fun getIoFormatFactories ()Ljava/util/Collection;
 	public final fun getMetaFormatFactories ()Ljava/util/Collection;
 	public fun getTag ()Lhep/dataforge/context/PluginTag;
-	public final fun resolveEnvelopeFormat (Lhep/dataforge/meta/MetaItem;)Lhep/dataforge/io/EnvelopeFormat;
-	public final fun resolveIOFormat (Lhep/dataforge/meta/MetaItem;Lkotlin/reflect/KClass;)Lhep/dataforge/io/IOFormat;
+	public final fun resolveEnvelopeFormat (Lhep/dataforge/meta/TypedMetaItem;)Lhep/dataforge/io/EnvelopeFormat;
+	public final fun resolveIOFormat (Lhep/dataforge/meta/TypedMetaItem;Lkotlin/reflect/KClass;)Lhep/dataforge/io/IOFormat;
 	public final fun resolveMetaFormat (Ljava/lang/String;Lhep/dataforge/meta/Meta;)Lhep/dataforge/io/MetaFormat;
 	public final fun resolveMetaFormat (SLhep/dataforge/meta/Meta;)Lhep/dataforge/io/MetaFormat;
 	public static synthetic fun resolveMetaFormat$default (Lhep/dataforge/io/IOPlugin;Ljava/lang/String;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/io/MetaFormat;

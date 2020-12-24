@@ -8,7 +8,7 @@ import kotlin.properties.ReadOnlyProperty
 
 /* Meta delegates */
 
-public typealias ItemDelegate = ReadOnlyProperty<Any?, MetaItem<*>?>
+public typealias ItemDelegate = ReadOnlyProperty<Any?, MetaItem?>
 
 public fun ItemProvider.item(key: Name? = null): ItemDelegate = ReadOnlyProperty { _, property ->
     get(key ?: property.name.asName())
@@ -40,7 +40,7 @@ public fun <R : Any> ItemDelegate.convert(
  * A converter with a custom reader transformation
  */
 public fun <R> ItemDelegate.convert(
-    reader: (MetaItem<*>?) -> R,
+    reader: (MetaItem?) -> R,
 ): ReadOnlyProperty<Any?, R> = ReadOnlyProperty<Any?, R> { thisRef, property ->
     this@convert.getValue(thisRef, property).let(reader)
 }
