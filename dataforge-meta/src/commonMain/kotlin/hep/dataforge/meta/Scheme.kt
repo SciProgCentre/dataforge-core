@@ -18,7 +18,9 @@ public open class Scheme(
     public var items: MutableItemProvider = items
         internal set(value) {
             //Fix problem with `init` blocks in specifications
-            field = value.withDefault(field)
+            field = value.apply {
+                field.rootNode?.let { update(it) }
+            }
         }
 
     override var descriptor: NodeDescriptor? = descriptor
