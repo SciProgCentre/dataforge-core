@@ -9,13 +9,9 @@ import hep.dataforge.names.asName
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
  * Default item provider and [NodeDescriptor] are optional
  */
-public open class Scheme(
-    items: MutableItemProvider = Config(),
-    internal var default: ItemProvider? = null,
-    descriptor: NodeDescriptor? = null,
-) : MutableItemProvider, Described, MetaRepr {
+public open class Scheme() : MutableItemProvider, Described, MetaRepr {
 
-    public var items: MutableItemProvider = items
+    public var items: MutableItemProvider = MetaBuilder()
         internal set(value) {
             //Fix problem with `init` blocks in specifications
             field = value.apply {
@@ -23,8 +19,20 @@ public open class Scheme(
             }
         }
 
-    override var descriptor: NodeDescriptor? = descriptor
+    internal var default: ItemProvider? = null
+
+    final override var descriptor: NodeDescriptor? = null
         internal set
+
+    public constructor(
+        items: MutableItemProvider,
+        default: ItemProvider? = null,
+        descriptor: NodeDescriptor? = null,
+    ) : this(){
+        this.items = items
+        this.default = default
+        this.descriptor = descriptor
+    }
 
 
     private fun getDefaultItem(name: Name): MetaItem? {
@@ -115,6 +123,3 @@ public open class SchemeSpec<T : Scheme>(
 public fun Meta.asScheme(): Scheme = Scheme().apply {
     items = this@asScheme.asConfig()
 }
-
-public fun <T : MutableItemProvider> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit = {}): T =
-    spec.read(this).apply(block)

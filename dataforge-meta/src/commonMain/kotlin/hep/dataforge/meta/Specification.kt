@@ -35,8 +35,9 @@ public interface Specification<T : MutableItemProvider> {
 /**
  * Update a [MutableItemProvider] using given specification
  */
-public fun <T : MutableItemProvider> MutableItemProvider.update(spec: Specification<T>, action: T.() -> Unit): T =
+public fun <T : MutableItemProvider> MutableItemProvider.update(spec: Specification<T>, action: T.() -> Unit) {
     spec.write(this).apply(action)
+}
 
 /**
  * Update configuration using given specification
@@ -44,34 +45,20 @@ public fun <T : MutableItemProvider> MutableItemProvider.update(spec: Specificat
 public fun <C : MutableItemProvider, S : Specification<C>> Configurable.update(
     spec: S,
     action: C.() -> Unit,
-): Configurable = apply { config.update(spec, action) }
+) {
+    config.update(spec, action)
+}
 
-public fun <T : MutableItemProvider> TypedMetaItem<Config>.withSpec(spec: Specification<T>): T? =
+public fun <T : MutableItemProvider> TypedMetaItem<MutableMeta<*>>.withSpec(spec: Specification<T>): T? =
     node?.let { spec.write(it) }
 
 public fun <T : Scheme> MutableItemProvider.spec(
     spec: Specification<T>,
     key: Name? = null,
-): ReadWriteProperty<Any?, T?> = object : ReadWriteProperty<Any?, T?> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-        val name = key ?: property.name.asName()
-        return get(name).node?.let { spec.read(it) }
-    }
-
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
-        val name = key ?: property.name.asName()
-        set(name, value?.toMeta()?.asMetaItem())
-    }
-}
-
-public fun <T : Scheme> MutableItemProvider.spec(
-    spec: Specification<T>,
-    default: T,
-    key: Name? = null,
 ): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
         val name = key ?: property.name.asName()
-        return get(name).node?.let { spec.read(it) } ?: default
+        return getChild(name).let { spec.write(it) }
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
