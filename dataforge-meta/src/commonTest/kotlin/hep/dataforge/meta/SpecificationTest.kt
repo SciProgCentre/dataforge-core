@@ -4,22 +4,22 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class SpecificationTest {
-    class TestStyled(target: MutableItemProvider, default: ItemProvider?) : Scheme(target, default) {
+    class TestScheme : Scheme() {
         var list by numberList(1, 2, 3)
 
-        companion object : Specification<TestStyled> {
-            override fun read(items: ItemProvider): TestStyled = TestStyled(Config(), items)
-
-            override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): TestStyled =
-                TestStyled(target, defaultProvider)
-        }
-    }
-
-    class TestScheme : Scheme() {
         var a by int()
         var b by string()
 
-        companion object : SchemeSpec<TestScheme>(::TestScheme)
+        companion object : Specification<TestScheme> {
+            override fun empty(): TestScheme = TestScheme()
+
+            override fun read(items: ItemProvider): TestScheme =
+                inflate(Config(), items)
+
+            override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): TestScheme =
+                inflate(target, defaultProvider)
+
+        }
     }
 
 //    @Test
@@ -49,7 +49,7 @@ class SpecificationTest {
 
     @Test
     fun testSpecific() {
-        val testObject = TestStyled {
+        val testObject = TestScheme {
             list = emptyList()
         }
         assertEquals(emptyList(), testObject.list)
@@ -62,7 +62,19 @@ class SpecificationTest {
         val scheme = TestScheme.write(child)
         scheme.a = 22
         scheme.b = "test"
-        assertEquals(22,config["child.a"].int)
-        assertEquals("test",config["child.b"].string)
+        assertEquals(22, config["child.a"].int)
+        assertEquals("test", config["child.b"].string)
+    }
+
+    @Test
+    fun testChildUpdate() {
+        val config = Config()
+        val child = config.getChild("child")
+        val scheme = child.update(TestScheme) {
+            a = 22
+            b = "test"
+        }
+        assertEquals(22, config["child.a"].int)
+        assertEquals("test", config["child.b"].string)
     }
 }

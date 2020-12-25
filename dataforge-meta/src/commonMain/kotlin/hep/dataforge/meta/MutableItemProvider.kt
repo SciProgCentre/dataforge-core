@@ -116,8 +116,8 @@ public fun MutableItemProvider.editChild(name: Name, builder: MutableItemProvide
  * Create a mutable item provider that uses given provider for default values if those are not found in this provider.
  * Changes are propagated only to this provider.
  */
-public fun MutableItemProvider.withDefault(default: ItemProvider): MutableItemProvider =
-    if (default is Meta && default.isEmpty()) {
+public fun MutableItemProvider.withDefault(default: ItemProvider?): MutableItemProvider =
+    if (default == null || (default is Meta && default.isEmpty())) {
         //Optimize for use with empty default
         this
     } else object : MutableItemProvider {

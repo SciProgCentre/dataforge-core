@@ -5,31 +5,36 @@ import hep.dataforge.names.asName
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-/**
- * Allows to apply custom configuration in a type safe way to simple untyped configuration.
- * By convention [Scheme] companion should inherit this class
- *
- */
-public interface Specification<T : MutableItemProvider> {
+public interface ReadOnlySpecification<out T : ItemProvider> {
+
     /**
      * Read generic read-only meta with this [Specification] producing instance of desired type.
      */
     public fun read(items: ItemProvider): T
 
-    /**
-     * Wrap [MutableItemProvider], using it as inner storage (changes to [Specification] are reflected on [MutableItemProvider]
-     */
-    public fun write(target: MutableItemProvider, defaultProvider: ItemProvider = ItemProvider.EMPTY): T
 
     /**
      * Generate an empty object
      */
-    public fun empty(): T = read(Meta.EMPTY)
+    public fun empty(): T
 
     /**
      * A convenience method to use specifications in builders
      */
     public operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
+}
+
+
+/**
+ * Allows to apply custom configuration in a type safe way to simple untyped configuration.
+ * By convention [Scheme] companion should inherit this class
+ *
+ */
+public interface Specification<out T : MutableItemProvider>: ReadOnlySpecification<T> {
+    /**
+     * Wrap [MutableItemProvider], using it as inner storage (changes to [Specification] are reflected on [MutableItemProvider]
+     */
+    public fun write(target: MutableItemProvider, defaultProvider: ItemProvider = ItemProvider.EMPTY): T
 }
 
 /**

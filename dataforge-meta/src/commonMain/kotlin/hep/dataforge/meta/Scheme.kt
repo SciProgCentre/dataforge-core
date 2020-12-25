@@ -11,29 +11,23 @@ import hep.dataforge.names.asName
  */
 public open class Scheme() : MutableItemProvider, Described, MetaRepr {
 
-    public var items: MutableItemProvider = MetaBuilder()
-        internal set(value) {
-            //Fix problem with `init` blocks in specifications
-            field = value.apply {
-                field.rootNode?.let { update(it) }
-            }
-        }
+    private var items: MutableItemProvider = MetaBuilder()
 
-    internal var default: ItemProvider? = null
+    private var default: ItemProvider? = null
 
     final override var descriptor: NodeDescriptor? = null
-        internal set
 
-    public constructor(
+    internal fun inflate(
         items: MutableItemProvider,
         default: ItemProvider? = null,
         descriptor: NodeDescriptor? = null,
-    ) : this(){
+    ) {
+        //use properties in the init block as default
+        this.default = items.withDefault(default)
+        //reset values, defaults are already saved
         this.items = items
-        this.default = default
         this.descriptor = descriptor
     }
-
 
     private fun getDefaultItem(name: Name): MetaItem? {
         return default?.get(name) ?: descriptor?.get(name)?.defaultItem()
@@ -87,6 +81,16 @@ public open class Scheme() : MutableItemProvider, Described, MetaRepr {
     public fun isEmpty(): Boolean = toMeta().isEmpty()
 }
 
+
+public fun <T : Scheme, S : Specification<T>> S.inflate(
+    items: MutableItemProvider,
+    default: ItemProvider? = null,
+    descriptor: NodeDescriptor? = null,
+): T = empty().apply {
+    inflate(items, default, descriptor)
+}
+
+
 /**
  * A shortcut to edit a [Scheme] object in-place
  */
@@ -95,31 +99,20 @@ public inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit): T = apply
 /**
  * A specification for simplified generation of wrappers
  */
-public open class SchemeSpec<T : Scheme>(
-    private val builder: (target: MutableItemProvider, defaultProvider: ItemProvider, descriptor: NodeDescriptor?) -> T,
+public open class SchemeSpec<out T : Scheme>(
+    private val builder: () -> T,
 ) : Specification<T>, Described {
 
-    public constructor(emptyBuilder: () -> T) : this({ target: MutableItemProvider, defaultProvider: ItemProvider, descriptor: NodeDescriptor? ->
-        emptyBuilder().apply {
-            this.items = target
-            this.default = defaultProvider
-            this.descriptor = descriptor
-        }
-    })
+    override fun empty(): T = builder()
 
-    override fun read(items: ItemProvider): T =
-        builder(Config(), items, descriptor)
+    override fun read(items: ItemProvider): T = inflate(Config(), items, descriptor)
 
     override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): T =
-        builder(target, defaultProvider, descriptor)
+        inflate(target, defaultProvider, descriptor)
 
     //TODO Generate descriptor from Scheme class
     override val descriptor: NodeDescriptor? get() = null
 
     @Suppress("OVERRIDE_BY_INLINE")
     final override inline operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
-}
-
-public fun Meta.asScheme(): Scheme = Scheme().apply {
-    items = this@asScheme.asConfig()
 }
