@@ -131,6 +131,7 @@ public final class hep/dataforge/meta/ItemProviderKt {
 	public static final fun getChild (Lhep/dataforge/meta/ItemProvider;Ljava/lang/String;)Lhep/dataforge/meta/ItemProvider;
 	public static final fun getIndexed (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/names/Name;)Ljava/util/Map;
 	public static final fun getIndexed (Lhep/dataforge/meta/ItemProvider;Ljava/lang/String;)Ljava/util/Map;
+	public static final fun getRootItem (Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/TypedMetaItem;
 	public static final fun getRootNode (Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/Meta;
 	public static final fun withDefault (Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/ItemProvider;
 }
@@ -252,6 +253,22 @@ public final class hep/dataforge/meta/MetaBuilderKt {
 	public static final fun builder (Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/MetaBuilder;
 }
 
+public final class hep/dataforge/meta/MetaItemKt {
+	public static final fun asMetaItem (Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/NodeItem;
+	public static final fun asMetaItem (Lhep/dataforge/values/Value;)Lhep/dataforge/meta/ValueItem;
+	public static final fun getBoolean (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Boolean;
+	public static final fun getDouble (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Double;
+	public static final fun getFloat (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Float;
+	public static final fun getInt (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Integer;
+	public static final fun getLong (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Long;
+	public static final fun getNode (Lhep/dataforge/meta/TypedMetaItem;)Lhep/dataforge/meta/Meta;
+	public static final fun getNumber (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Number;
+	public static final fun getShort (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Short;
+	public static final fun getString (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/String;
+	public static final fun getStringList (Lhep/dataforge/meta/TypedMetaItem;)Ljava/util/List;
+	public static final fun getValue (Lhep/dataforge/meta/TypedMetaItem;)Lhep/dataforge/values/Value;
+}
+
 public final class hep/dataforge/meta/MetaItemSerializer : kotlinx/serialization/KSerializer {
 	public static final field INSTANCE Lhep/dataforge/meta/MetaItemSerializer;
 	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lhep/dataforge/meta/TypedMetaItem;
@@ -263,9 +280,6 @@ public final class hep/dataforge/meta/MetaItemSerializer : kotlinx/serialization
 
 public final class hep/dataforge/meta/MetaKt {
 	public static final fun get (Lhep/dataforge/meta/Meta;Lhep/dataforge/names/NameToken;)Lhep/dataforge/meta/TypedMetaItem;
-	public static final fun get (Lhep/dataforge/meta/TypedMeta;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/TypedMetaItem;
-	public static final fun get (Lhep/dataforge/meta/TypedMeta;Lhep/dataforge/names/NameToken;)Lhep/dataforge/meta/TypedMetaItem;
-	public static final fun get (Lhep/dataforge/meta/TypedMeta;Ljava/lang/String;)Lhep/dataforge/meta/TypedMetaItem;
 	public static final fun isEmpty (Lhep/dataforge/meta/Meta;)Z
 	public static final fun itemSequence (Lhep/dataforge/meta/Meta;)Lkotlin/sequences/Sequence;
 	public static final fun iterator (Lhep/dataforge/meta/Meta;)Ljava/util/Iterator;
@@ -508,20 +522,10 @@ public final class hep/dataforge/meta/TypedMetaItem$Companion {
 	public final fun serializer (Lkotlinx/serialization/KSerializer;)Lkotlinx/serialization/KSerializer;
 }
 
-public final class hep/dataforge/meta/TypedMetaItemKt {
-	public static final fun asMetaItem (Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/NodeItem;
-	public static final fun asMetaItem (Lhep/dataforge/values/Value;)Lhep/dataforge/meta/ValueItem;
-	public static final fun getBoolean (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Boolean;
-	public static final fun getDouble (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Double;
-	public static final fun getFloat (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Float;
-	public static final fun getInt (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Integer;
-	public static final fun getLong (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Long;
-	public static final fun getNode (Lhep/dataforge/meta/TypedMetaItem;)Lhep/dataforge/meta/Meta;
-	public static final fun getNumber (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Number;
-	public static final fun getShort (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/Short;
-	public static final fun getString (Lhep/dataforge/meta/TypedMetaItem;)Ljava/lang/String;
-	public static final fun getStringList (Lhep/dataforge/meta/TypedMetaItem;)Ljava/util/List;
-	public static final fun getValue (Lhep/dataforge/meta/TypedMetaItem;)Lhep/dataforge/values/Value;
+public final class hep/dataforge/meta/TypedMetaKt {
+	public static final fun get (Lhep/dataforge/meta/TypedMeta;Lhep/dataforge/names/Name;)Lhep/dataforge/meta/TypedMetaItem;
+	public static final fun get (Lhep/dataforge/meta/TypedMeta;Lhep/dataforge/names/NameToken;)Lhep/dataforge/meta/TypedMetaItem;
+	public static final fun get (Lhep/dataforge/meta/TypedMeta;Ljava/lang/String;)Lhep/dataforge/meta/TypedMetaItem;
 }
 
 public final class hep/dataforge/meta/ValueItem : hep/dataforge/meta/TypedMetaItem {

@@ -18,10 +18,11 @@ public sealed class TypedMetaItem<out M : Meta>() {
     public companion object {
         public fun of(arg: Any?): MetaItem {
             return when (arg) {
-                null -> ValueItem(Null)
+                null -> Null.asMetaItem()
                 is MetaItem -> arg
-                is Meta -> NodeItem(arg)
-                else -> ValueItem(Value.of(arg))
+                is Meta -> arg.asMetaItem()
+                is ItemProvider -> arg.rootItem ?: Null.asMetaItem()
+                else -> Value.of(arg).asMetaItem()
             }
         }
     }

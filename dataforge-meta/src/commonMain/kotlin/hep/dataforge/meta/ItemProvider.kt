@@ -22,9 +22,14 @@ public fun interface ItemProvider {
 public operator fun ItemProvider?.get(name: Name): MetaItem? = this?.getItem(name)
 
 /**
+ * Root item of this provider
+ */
+public val ItemProvider.rootItem: MetaItem?  get() = get(Name.EMPTY)
+
+/**
  * The root node of this item provider if it is present
  */
-public val ItemProvider.rootNode: Meta? get() = get(Name.EMPTY).node
+public val ItemProvider.rootNode: Meta? get() = rootItem.node
 
 /**
  * Parse [Name] from [key] using full name notation and pass it to [Meta.get]
