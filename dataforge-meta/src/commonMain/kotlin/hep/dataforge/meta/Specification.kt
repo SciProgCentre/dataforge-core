@@ -33,9 +33,9 @@ public interface Specification<T : MutableItemProvider> {
 }
 
 /**
- * Update a [Config] using given specification
+ * Update a [MutableItemProvider] using given specification
  */
-public fun <T : MutableItemProvider> Config.update(spec: Specification<T>, action: T.() -> Unit): T =
+public fun <T : MutableItemProvider> MutableItemProvider.update(spec: Specification<T>, action: T.() -> Unit): T =
     spec.write(this).apply(action)
 
 /**
