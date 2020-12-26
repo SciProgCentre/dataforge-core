@@ -77,10 +77,12 @@ public open class Scheme() : MutableItemProvider, Described, MetaRepr {
         }
 
     override fun toMeta(): Laminate = Laminate(items[Name.EMPTY].node, defaultLayer)
-
-    public fun isEmpty(): Boolean = toMeta().isEmpty()
 }
 
+/**
+ * The scheme is considered empty only if its root item does not exist.
+ */
+public fun Scheme.isEmpty(): Boolean = rootItem == null
 
 public fun <T : Scheme, S : Specification<T>> S.inflate(
     items: MutableItemProvider,

@@ -447,7 +447,6 @@ public class hep/dataforge/meta/Scheme : hep/dataforge/meta/MetaRepr, hep/datafo
 	public synthetic fun getDescriptor ()Lhep/dataforge/meta/descriptors/ItemDescriptor;
 	public final fun getDescriptor ()Lhep/dataforge/meta/descriptors/NodeDescriptor;
 	public fun getItem (Lhep/dataforge/names/Name;)Lhep/dataforge/meta/TypedMetaItem;
-	public final fun isEmpty ()Z
 	public final fun setDescriptor (Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
 	public fun setItem (Lhep/dataforge/names/Name;Lhep/dataforge/meta/TypedMetaItem;)V
 	public fun toMeta ()Lhep/dataforge/meta/Laminate;
@@ -459,6 +458,7 @@ public final class hep/dataforge/meta/SchemeKt {
 	public static final fun inflate (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Scheme;
 	public static synthetic fun inflate$default (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILjava/lang/Object;)Lhep/dataforge/meta/Scheme;
 	public static final fun invoke (Lhep/dataforge/meta/Scheme;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/Scheme;
+	public static final fun isEmpty (Lhep/dataforge/meta/Scheme;)Z
 }
 
 public class hep/dataforge/meta/SchemeSpec : hep/dataforge/meta/Specification, hep/dataforge/meta/descriptors/Described {
