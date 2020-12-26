@@ -455,10 +455,11 @@ public class hep/dataforge/meta/Scheme : hep/dataforge/meta/MetaRepr, hep/datafo
 }
 
 public final class hep/dataforge/meta/SchemeKt {
-	public static final fun inflate (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Scheme;
-	public static synthetic fun inflate$default (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILjava/lang/Object;)Lhep/dataforge/meta/Scheme;
 	public static final fun invoke (Lhep/dataforge/meta/Scheme;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/meta/Scheme;
 	public static final fun isEmpty (Lhep/dataforge/meta/Scheme;)Z
+	public static final fun retarget (Lhep/dataforge/meta/Scheme;Lhep/dataforge/meta/MutableItemProvider;)Lhep/dataforge/meta/Scheme;
+	public static final fun wrap (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Scheme;
+	public static synthetic fun wrap$default (Lhep/dataforge/meta/Specification;Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/meta/ItemProvider;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILjava/lang/Object;)Lhep/dataforge/meta/Scheme;
 }
 
 public class hep/dataforge/meta/SchemeSpec : hep/dataforge/meta/Specification, hep/dataforge/meta/descriptors/Described {

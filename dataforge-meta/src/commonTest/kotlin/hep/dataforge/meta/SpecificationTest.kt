@@ -14,10 +14,10 @@ class SpecificationTest {
             override fun empty(): TestScheme = TestScheme()
 
             override fun read(items: ItemProvider): TestScheme =
-                inflate(Config(), items)
+                wrap(Config(), items)
 
             override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): TestScheme =
-                inflate(target, defaultProvider)
+                wrap(target, defaultProvider)
 
         }
     }

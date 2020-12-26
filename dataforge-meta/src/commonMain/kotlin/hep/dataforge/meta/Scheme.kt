@@ -17,7 +17,7 @@ public open class Scheme() : MutableItemProvider, Described, MetaRepr {
 
     final override var descriptor: NodeDescriptor? = null
 
-    internal fun inflate(
+    internal fun wrap(
         items: MutableItemProvider,
         default: ItemProvider? = null,
         descriptor: NodeDescriptor? = null,
@@ -84,14 +84,23 @@ public open class Scheme() : MutableItemProvider, Described, MetaRepr {
  */
 public fun Scheme.isEmpty(): Boolean = rootItem == null
 
-public fun <T : Scheme, S : Specification<T>> S.inflate(
+/**
+ * Create a new empty [Scheme] object (including defaults) and inflate it around existing [MutableItemProvider].
+ * Items already present in the scheme are used as defaults.
+ */
+public fun <T : Scheme, S : Specification<T>> S.wrap(
     items: MutableItemProvider,
     default: ItemProvider? = null,
     descriptor: NodeDescriptor? = null,
 ): T = empty().apply {
-    inflate(items, default, descriptor)
+    wrap(items, default, descriptor)
 }
 
+/**
+ * Relocate scheme target onto given [MutableItemProvider]. Old provider does not get updates anymore.
+ * Current state of the scheme used as a default.
+ */
+public fun <T : Scheme> T.retarget(provider: MutableItemProvider) :T = apply { wrap(provider) }
 
 /**
  * A shortcut to edit a [Scheme] object in-place
@@ -107,10 +116,10 @@ public open class SchemeSpec<out T : Scheme>(
 
     override fun empty(): T = builder()
 
-    override fun read(items: ItemProvider): T = inflate(Config(), items, descriptor)
+    override fun read(items: ItemProvider): T = wrap(Config(), items, descriptor)
 
     override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): T =
-        inflate(target, defaultProvider, descriptor)
+        wrap(target, defaultProvider, descriptor)
 
     //TODO Generate descriptor from Scheme class
     override val descriptor: NodeDescriptor? get() = null
