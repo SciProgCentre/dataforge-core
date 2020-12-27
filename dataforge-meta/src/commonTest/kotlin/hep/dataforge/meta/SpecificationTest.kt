@@ -3,24 +3,25 @@ package hep.dataforge.meta
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SpecificationTest {
-    class TestScheme : Scheme() {
-        var list by numberList(1, 2, 3)
+internal class TestScheme : Scheme() {
+    var list by numberList(1, 2, 3)
 
-        var a by int()
-        var b by string()
+    var a by int()
+    var b by string()
 
-        companion object : Specification<TestScheme> {
-            override fun empty(): TestScheme = TestScheme()
+    companion object : Specification<TestScheme> {
+        override fun empty(): TestScheme = TestScheme()
 
-            override fun read(items: ItemProvider): TestScheme =
-                wrap(Config(), items)
+        override fun read(items: ItemProvider): TestScheme =
+            wrap(Config(), items)
 
-            override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): TestScheme =
-                wrap(target, defaultProvider)
+        override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): TestScheme =
+            wrap(target, defaultProvider)
 
-        }
     }
+}
+
+class SpecificationTest {
 
 //    @Test
 //    fun testMetaScheme(){
@@ -70,7 +71,7 @@ class SpecificationTest {
     fun testChildUpdate() {
         val config = Config()
         val child = config.getChild("child")
-        val scheme = child.update(TestScheme) {
+        child.update(TestScheme) {
             a = 22
             b = "test"
         }

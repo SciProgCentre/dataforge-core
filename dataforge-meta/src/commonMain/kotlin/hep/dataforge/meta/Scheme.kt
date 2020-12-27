@@ -11,7 +11,7 @@ import hep.dataforge.names.asName
  */
 public open class Scheme() : MutableItemProvider, Described, MetaRepr {
 
-    private var items: MutableItemProvider = MetaBuilder()
+    private var items: MutableItemProvider = Config()
 
     private var default: ItemProvider? = null
 
@@ -23,7 +23,7 @@ public open class Scheme() : MutableItemProvider, Described, MetaRepr {
         descriptor: NodeDescriptor? = null,
     ) {
         //use properties in the init block as default
-        this.default = items.withDefault(default)
+        this.default = this.items.withDefault(default)
         //reset values, defaults are already saved
         this.items = items
         this.descriptor = descriptor
