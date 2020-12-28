@@ -25,7 +25,6 @@ public open class Context(
     final override val name: Name,
     public val parent: Context?,
     meta: Meta,
-    plugins: Set<Plugin> = emptySet(),
 ) : Named, MetaRepr, Provider, CoroutineScope {
 
     /**
@@ -40,7 +39,7 @@ public open class Context(
     /**
      * A [PluginManager] for current context
      */
-    public val plugins: PluginManager by lazy { PluginManager(this, plugins)}
+    public val plugins: PluginManager by lazy { PluginManager(this)}
 
     override val defaultTarget: String get() = Plugin.TARGET
 

@@ -17,6 +17,7 @@
 - \[Major breaking change\] Schemes and configurables us `MutableItemProvider` instead of `Config`
 - \[Major breaking change\] `MetaItem` renamed to `TypedMetaItem` and `MetaItem` is now an alias for `TypedMetaItem<*>`
 - \[Major breaking change\] Moved `NodeItem` and `ValueItem` to a top level
+- Plugins are removed from Context constructor and added lazily in ContextBuilder
 
 ### Deprecated
 

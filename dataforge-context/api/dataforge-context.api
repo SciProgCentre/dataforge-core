@@ -38,8 +38,7 @@ public final class hep/dataforge/context/ClassLoaderPluginKt {
 public class hep/dataforge/context/Context : hep/dataforge/context/Named, hep/dataforge/meta/MetaRepr, hep/dataforge/provider/Provider, kotlinx/coroutines/CoroutineScope {
 	public static final field Companion Lhep/dataforge/context/Context$Companion;
 	public static final field PROPERTY_TARGET Ljava/lang/String;
-	public fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/context/Context;Lhep/dataforge/meta/Meta;Ljava/util/Set;)V
-	public synthetic fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/context/Context;Lhep/dataforge/meta/Meta;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/context/Context;Lhep/dataforge/meta/Meta;)V
 	public fun close ()V
 	public fun content (Ljava/lang/String;)Ljava/util/Map;
 	public final fun content (Ljava/lang/String;Z)Ljava/util/Map;
@@ -65,7 +64,6 @@ public final class hep/dataforge/context/ContextBuilder {
 	public synthetic fun <init> (Lhep/dataforge/context/Context;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun build ()Lhep/dataforge/context/Context;
 	public final fun getName ()Ljava/lang/String;
-	public final fun plugin (Lhep/dataforge/context/Plugin;)V
 	public final fun plugin (Lhep/dataforge/context/PluginFactory;Lkotlin/jvm/functions/Function1;)V
 	public final fun plugin (Lhep/dataforge/context/PluginTag;Lkotlin/jvm/functions/Function1;)V
 	public final fun plugin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
@@ -147,7 +145,7 @@ public final class hep/dataforge/context/PluginFactory$Companion {
 }
 
 public final class hep/dataforge/context/PluginManager : hep/dataforge/context/ContextAware, java/lang/Iterable, kotlin/jvm/internal/markers/KMappedMarker {
-	public fun <init> (Lhep/dataforge/context/Context;Ljava/util/Set;)V
+	public fun <init> (Lhep/dataforge/context/Context;)V
 	public final fun fetch (Lhep/dataforge/context/PluginFactory;ZLhep/dataforge/meta/Meta;)Lhep/dataforge/context/Plugin;
 	public final fun fetch (Lhep/dataforge/context/PluginFactory;ZLkotlin/jvm/functions/Function1;)Lhep/dataforge/context/Plugin;
 	public static synthetic fun fetch$default (Lhep/dataforge/context/PluginManager;Lhep/dataforge/context/PluginFactory;ZLhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/context/Plugin;

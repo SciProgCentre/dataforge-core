@@ -1,17 +1,23 @@
 package hep.dataforge.workspace
 
-import hep.dataforge.context.PluginTag
-import hep.dataforge.context.logger
+import hep.dataforge.context.*
 import hep.dataforge.data.*
-import hep.dataforge.meta.boolean
-import hep.dataforge.meta.builder
-import hep.dataforge.meta.get
-import hep.dataforge.meta.int
+import hep.dataforge.meta.*
 import hep.dataforge.names.plus
+import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+/**
+ * Make a fake-factory for a one single plugin. Useful for unique or test plugins
+ */
+public inline fun <reified P: Plugin> P.toFactory(): PluginFactory<P> = object : PluginFactory<P> {
+    override fun invoke(meta: Meta, context: Context): P = this@toFactory
+
+    override val tag: PluginTag = this@toFactory.tag
+    override val type: KClass<out P> = P::class
+}
 
 class SimpleWorkspaceTest {
     val testPlugin = object : WorkspacePlugin() {
@@ -23,11 +29,12 @@ class SimpleWorkspaceTest {
             }
         }
     }
+    val testPluginFactory = testPlugin.toFactory()
 
     val workspace = Workspace {
 
         context {
-            plugin(testPlugin)
+            plugin(testPluginFactory)
         }
 
         data {

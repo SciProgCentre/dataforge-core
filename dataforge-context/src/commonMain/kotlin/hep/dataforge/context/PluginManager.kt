@@ -2,19 +2,8 @@ package hep.dataforge.context
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.provider.Type
 import kotlin.reflect.KClass
 
-
-@Type(PluginFactory.TYPE)
-public interface PluginFactory<T : Plugin> : Factory<T> {
-    public val tag: PluginTag
-    public val type: KClass<out T>
-
-    public companion object {
-        public const val TYPE: String = "pluginFactory"
-    }
-}
 
 /**
  * The manager for plugin system. Should monitor plugin dependencies and locks.
@@ -22,14 +11,14 @@ public interface PluginFactory<T : Plugin> : Factory<T> {
  * @property context A context for this plugin manager
  * @author Alexander Nozik
  */
-public class PluginManager(override val context: Context, plugins: Set<Plugin>) : ContextAware, Iterable<Plugin> {
+public class PluginManager(override val context: Context) : ContextAware, Iterable<Plugin> {
 
     //TODO refactor to read-only container
 
     /**
      * A set of loaded plugins
      */
-    private val plugins: HashSet<Plugin> = HashSet(plugins)
+    private val plugins: HashSet<Plugin> = HashSet()
 
     init {
         plugins.forEach { it.attach(context) }

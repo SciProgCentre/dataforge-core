@@ -24,7 +24,7 @@ public operator fun ItemProvider?.get(name: Name): MetaItem? = this?.getItem(nam
 /**
  * Root item of this provider
  */
-public val ItemProvider.rootItem: MetaItem?  get() = get(Name.EMPTY)
+public val ItemProvider.rootItem: MetaItem? get() = get(Name.EMPTY)
 
 /**
  * The root node of this item provider if it is present
@@ -39,8 +39,12 @@ public operator fun ItemProvider?.get(key: String): MetaItem? = this?.get(key.to
 /**
  * Create a provider that uses given provider for default values if those are not found in this provider
  */
-public fun ItemProvider.withDefault(default: ItemProvider): ItemProvider = ItemProvider {
-    this[it] ?: default[it]
+public fun ItemProvider.withDefault(default: ItemProvider?): ItemProvider = if (default == null) {
+    this
+} else {
+    ItemProvider {
+        this[it] ?: default[it]
+    }
 }
 
 /**
@@ -71,7 +75,7 @@ public fun ItemProvider.getIndexed(name: String): Map<String?, MetaItem> = this@
  */
 public fun ItemProvider.getChild(childName: Name): ItemProvider = get(childName).node ?: ItemProvider.EMPTY
 
-public fun ItemProvider.getChild(childName: String): ItemProvider  = getChild(childName.toName())
+public fun ItemProvider.getChild(childName: String): ItemProvider = getChild(childName.toName())
 
 ///**
 // * Get all items matching given name.

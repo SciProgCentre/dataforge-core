@@ -56,8 +56,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
 
         override val type: KClass<out DataPropagationTestPlugin> = DataPropagationTestPlugin::class
 
-        override fun invoke(meta: Meta, context: Context): DataPropagationTestPlugin =
-            DataPropagationTestPlugin(meta)
+        override fun invoke(meta: Meta, context: Context): DataPropagationTestPlugin = DataPropagationTestPlugin()
 
         override val tag: PluginTag = PluginTag("Test")
     }
@@ -66,7 +65,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
 class DataPropagationTest {
     val testWorkspace = Workspace {
         context {
-            plugin(DataPropagationTestPlugin())
+            plugin(DataPropagationTestPlugin)
         }
         data {
             repeat(100) {

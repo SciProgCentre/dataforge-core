@@ -8,15 +8,11 @@ import hep.dataforge.names.toName
  */
 @DFBuilder
 public class ContextBuilder(private val parent: Context = Global, public var name: String = "@anonymous") {
-    private val plugins = HashSet<Plugin>()
+    private val factories = HashMap<PluginFactory<*>, Meta>()
     private var meta = MetaBuilder()
 
     public fun properties(action: MetaBuilder.() -> Unit) {
         meta.action()
-    }
-
-    public fun plugin(plugin: Plugin) {
-        plugins.add(plugin)
     }
 
     @OptIn(DFExperimental::class)
@@ -26,12 +22,11 @@ public class ContextBuilder(private val parent: Context = Global, public var nam
 
     public fun plugin(tag: PluginTag, metaBuilder: MetaBuilder.() -> Unit = {}) {
         val factory = findPluginFactory(tag)
-        val plugin = factory.invoke(Meta(metaBuilder), parent)
-        plugins.add(plugin)
+        factories[factory] = Meta(metaBuilder)
     }
 
-    public fun plugin(builder: PluginFactory<*>, action: MetaBuilder.() -> Unit = {}) {
-        plugins.add(builder.invoke(Meta(action)))
+    public fun plugin(factory: PluginFactory<*>, metaBuilder: MetaBuilder.() -> Unit = {}) {
+        factories[factory] = Meta(metaBuilder)
     }
 
     public fun plugin(name: String, group: String = "", version: String = "", action: MetaBuilder.() -> Unit = {}) {
@@ -39,6 +34,10 @@ public class ContextBuilder(private val parent: Context = Global, public var nam
     }
 
     public fun build(): Context {
-        return Context(name.toName(), parent, meta.seal(), plugins)
+        return Context(name.toName(), parent, meta.seal()).apply {
+            factories.forEach { (factory, meta) ->
+                plugins.load(factory, meta)
+            }
+        }
     }
 }

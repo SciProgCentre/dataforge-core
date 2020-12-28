@@ -299,18 +299,6 @@ public final class hep/dataforge/meta/MetaSerializer : kotlinx/serialization/KSe
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 }
 
-public final class hep/dataforge/meta/MetaWithDefault : hep/dataforge/meta/MetaBase {
-	public fun <init> (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)V
-	public final fun getDefault ()Lhep/dataforge/meta/ItemProvider;
-	public fun getItem (Lhep/dataforge/names/Name;)Lhep/dataforge/meta/TypedMetaItem;
-	public fun getItems ()Ljava/util/Map;
-	public final fun getMeta ()Lhep/dataforge/meta/Meta;
-}
-
-public final class hep/dataforge/meta/MetaWithDefaultKt {
-	public static final fun withDefault (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/ItemProvider;)Lhep/dataforge/meta/MetaWithDefault;
-}
-
 public final class hep/dataforge/meta/MutableItemDelegateKt {
 	public static final fun boolean (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;)Lkotlin/properties/ReadWriteProperty;
 	public static final fun boolean (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)Lkotlin/properties/ReadWriteProperty;
