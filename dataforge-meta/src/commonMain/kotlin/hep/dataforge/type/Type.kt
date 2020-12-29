@@ -1,4 +1,4 @@
-package hep.dataforge.provider
+package hep.dataforge.type
 
 /**
  * A text label for internal DataForge type classification. Alternative for mime container type.

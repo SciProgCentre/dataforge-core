@@ -10,7 +10,7 @@ import hep.dataforge.meta.MetaRepr
 import hep.dataforge.meta.ValueItem
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
-import hep.dataforge.provider.Type
+import hep.dataforge.type.Type
 import hep.dataforge.values.Value
 import kotlinx.io.*
 import kotlinx.io.buffer.Buffer

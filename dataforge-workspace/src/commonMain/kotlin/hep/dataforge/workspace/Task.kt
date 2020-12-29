@@ -4,7 +4,7 @@ import hep.dataforge.context.Named
 import hep.dataforge.data.DataNode
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.Described
-import hep.dataforge.provider.Type
+import hep.dataforge.type.Type
 import hep.dataforge.workspace.Task.Companion.TYPE
 import kotlin.reflect.KClass
 

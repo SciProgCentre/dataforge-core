@@ -5,7 +5,7 @@ import hep.dataforge.io.EnvelopeFormatFactory.Companion.ENVELOPE_FORMAT_TYPE
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
-import hep.dataforge.provider.Type
+import hep.dataforge.type.Type
 import kotlinx.io.Input
 import kotlinx.io.Output
 import kotlin.reflect.KClass

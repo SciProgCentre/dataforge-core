@@ -2,13 +2,13 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextBuilder
+import hep.dataforge.context.Global
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataTreeBuilder
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.isEmpty
 import hep.dataforge.names.toName
-import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
 @DFBuilder
@@ -96,3 +96,8 @@ public class SimpleWorkspaceBuilder(override val parentContext: Context) : Works
         return SimpleWorkspace(context, data.build(), targets, tasks)
     }
 }
+
+public fun Workspace(
+    parent: Context = Global,
+    block: SimpleWorkspaceBuilder.() -> Unit,
+): Workspace = SimpleWorkspaceBuilder(parent).apply(block).build()

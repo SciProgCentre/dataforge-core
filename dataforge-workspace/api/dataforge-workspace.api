@@ -210,8 +210,6 @@ public abstract interface class hep/dataforge/workspace/Workspace : hep/dataforg
 
 public final class hep/dataforge/workspace/Workspace$Companion {
 	public static final field TYPE Ljava/lang/String;
-	public final fun invoke (Lhep/dataforge/context/Context;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/workspace/SimpleWorkspace;
-	public static synthetic fun invoke$default (Lhep/dataforge/workspace/Workspace$Companion;Lhep/dataforge/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/workspace/SimpleWorkspace;
 }
 
 public final class hep/dataforge/workspace/Workspace$DefaultImpls {
@@ -235,6 +233,8 @@ public abstract interface class hep/dataforge/workspace/WorkspaceBuilder {
 }
 
 public final class hep/dataforge/workspace/WorkspaceBuilderKt {
+	public static final fun Workspace (Lhep/dataforge/context/Context;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/workspace/Workspace;
+	public static synthetic fun Workspace$default (Lhep/dataforge/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/workspace/Workspace;
 	public static final fun context (Lhep/dataforge/workspace/WorkspaceBuilder;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun context$default (Lhep/dataforge/workspace/WorkspaceBuilder;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static final fun rawData (Lhep/dataforge/workspace/WorkspaceBuilder;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/data/DataNode;

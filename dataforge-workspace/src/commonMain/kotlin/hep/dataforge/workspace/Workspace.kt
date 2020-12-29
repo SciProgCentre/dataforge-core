@@ -1,8 +1,6 @@
 package hep.dataforge.workspace
 
-import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
-import hep.dataforge.context.Global
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.dataSequence
@@ -11,7 +9,7 @@ import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
-import hep.dataforge.provider.Type
+import hep.dataforge.type.Type
 
 
 @Type(Workspace.TYPE)
@@ -52,11 +50,6 @@ public interface Workspace : ContextAware, Provider {
 
     public companion object {
         public const val TYPE: String = "workspace"
-        public operator fun invoke(
-            parent: Context = Global,
-            block: SimpleWorkspaceBuilder.() -> Unit,
-        ): SimpleWorkspace =
-            SimpleWorkspaceBuilder(parent).apply(block).build()
     }
 }
 

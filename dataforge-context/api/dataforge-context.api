@@ -326,7 +326,3 @@ public final class hep/dataforge/provider/ProviderKt {
 	public static final fun top (Lhep/dataforge/provider/Provider;Ljava/lang/String;Lkotlin/reflect/KClass;)Ljava/util/Map;
 }
 
-public abstract interface annotation class hep/dataforge/provider/Type : java/lang/annotation/Annotation {
-	public abstract fun id ()Ljava/lang/String;
-}
-

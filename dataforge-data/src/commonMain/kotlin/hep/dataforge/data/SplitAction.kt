@@ -33,31 +33,26 @@ public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val me
 }
 
 public class SplitAction<T : Any, R : Any>(
-    public val inputType: KClass<T>,
     public val outputType: KClass<out R>,
     private val action: SplitBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
-    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
-        node.ensureType(inputType)
+    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataNode(outputType) {
+        node.dataSequence().forEach { (name, data) ->
 
-        return DataNode.invoke(outputType) {
-            node.dataSequence().forEach { (name, data) ->
+            val laminate = Laminate(data.meta, meta)
 
-                val laminate = Laminate(data.meta, meta)
-
-                val split = SplitBuilder<T, R>(name, data.meta).apply(action)
+            val split = SplitBuilder<T, R>(name, data.meta).apply(action)
 
 
-                // apply individual fragment rules to result
-                split.fragments.forEach { (fragmentName, rule) ->
-                    val env = FragmentRule<T, R>(fragmentName, laminate.builder())
+            // apply individual fragment rules to result
+            split.fragments.forEach { (fragmentName, rule) ->
+                val env = FragmentRule<T, R>(fragmentName, laminate.builder())
 
-                    rule(env)
+                rule(env)
 
-                    val res = data.map(outputType, meta = env.meta) { env.result(it) }
-                    set(env.name, res)
-                }
+                val res = data.map(outputType, meta = env.meta) { env.result(it) }
+                set(env.name, res)
             }
         }
     }

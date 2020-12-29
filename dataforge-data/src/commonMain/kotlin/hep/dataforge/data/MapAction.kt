@@ -30,46 +30,41 @@ public class MapActionBuilder<T, R>(public var name: Name, public var meta: Meta
 
 
 public class MapAction<T : Any, out R : Any>(
-    public val inputType: KClass<T>,
     public val outputType: KClass<out R>,
     private val block: MapActionBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
-    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
-        node.ensureType(inputType)
+    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataNode(outputType) {
+        node.dataSequence().forEach { (name, data) ->
+            /*
+             * Creating a new environment for action using **old** name, old meta and task meta
+             */
+            val env = ActionEnv(name, data.meta, meta)
 
-        return DataNode.invoke(outputType) {
-            node.dataSequence().forEach { (name, data) ->
-                /*
-                 * Creating a new environment for action using **old** name, old meta and task meta
-                 */
-                val env = ActionEnv(name, data.meta, meta)
+            //applying transformation from builder
+            val builder = MapActionBuilder<T, R>(
+                name,
+                data.meta.builder(), // using data meta
+                meta
+            ).apply(block)
 
-                //applying transformation from builder
-                val builder = MapActionBuilder<T, R>(
-                    name,
-                    data.meta.builder(), // using data meta
-                    meta
-                ).apply(block)
+            //getting new name
+            val newName = builder.name
 
-                //getting new name
-                val newName = builder.name
+            //getting new meta
+            val newMeta = builder.meta.seal()
 
-                //getting new meta
-                val newMeta = builder.meta.seal()
-
-                val newData = data.map(outputType, meta = newMeta) { builder.result(env, it) }
-                //setting the data node
-                this[newName] = newData
-            }
+            val newData = data.map(outputType, meta = newMeta) { builder.result(env, it) }
+            //setting the data node
+            this[newName] = newData
         }
     }
 }
 
-public inline fun <reified T : Any, reified R : Any> DataNode<T>.map(
+public inline fun <T : Any, reified R : Any> DataNode<T>.map(
     meta: Meta,
     noinline action: MapActionBuilder<in T, out R>.() -> Unit
-): DataNode<R> = MapAction(T::class, R::class, action).invoke(this, meta)
+): DataNode<R> = MapAction(R::class, action).invoke(this, meta)
 
 
 

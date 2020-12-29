@@ -72,35 +72,31 @@ public class ReduceGroupBuilder<T : Any, R : Any>(public val actionMeta: Meta) {
  * The same rules as for KPipe
  */
 public class ReduceAction<T : Any, R : Any>(
-    public val inputType: KClass<T>,
     public val outputType: KClass<out R>,
     private val action: ReduceGroupBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
-    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
-        node.ensureType(inputType)
-        return DataNode.invoke(outputType) {
-            ReduceGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
+    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataNode(outputType) {
+        ReduceGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
 
-                //val laminate = Laminate(group.meta, meta)
+            //val laminate = Laminate(group.meta, meta)
 
-                val dataMap = group.node.dataSequence().associate { it }
+            val dataMap = group.node.dataSequence().associate { it }
 
-                val groupName: String = group.name
+            val groupName: String = group.name
 
-                val groupMeta = group.meta
+            val groupMeta = group.meta
 
-                val env = ActionEnv(groupName.toName(), groupMeta, meta)
+            val env = ActionEnv(groupName.toName(), groupMeta, meta)
 
-                val res: DynamicData<R> = dataMap.reduce(
-                    outputType,
-                    meta = groupMeta
-                ) { group.result.invoke(env, it) }
+            val res: ComputationData<R> = dataMap.reduce(
+                outputType,
+                meta = groupMeta
+            ) { group.result.invoke(env, it) }
 
-                set(env.name, res)
-            }
-
+            set(env.name, res)
         }
+
     }
 }
 

@@ -7,7 +7,7 @@ import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
-import hep.dataforge.provider.Type
+import hep.dataforge.type.Type
 import kotlinx.io.ByteArrayInput
 import kotlinx.io.Input
 import kotlinx.io.Output

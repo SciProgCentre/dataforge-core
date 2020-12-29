@@ -6,7 +6,7 @@ import hep.dataforge.meta.MetaRepr
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
-import hep.dataforge.provider.Type
+import hep.dataforge.type.Type
 
 /**
  * The interface to define a Context plugin. A plugin stores all runtime features of a context.

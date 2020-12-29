@@ -11,7 +11,6 @@ import hep.dataforge.meta.string
 import hep.dataforge.names.Name
 import hep.dataforge.names.isEmpty
 import hep.dataforge.names.toName
-import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
 @DFBuilder
@@ -28,7 +27,7 @@ public class TaskBuilder<R : Any>(public val name: Name, public val type: KClass
     private inner class DataTransformation(
         val from: String = "",
         val to: String = "",
-        val transform: (Context, TaskModel, DataNode<Any>) -> DataNode<R>
+        val transform: (Context, TaskModel, DataNode<Any>) -> DataNode<R>,
     ) {
         operator fun invoke(workspace: Workspace, model: TaskModel, node: DataNode<Any>): DataNode<R>? {
             val localData = if (from.isEmpty()) {
@@ -55,7 +54,7 @@ public class TaskBuilder<R : Any>(public val name: Name, public val type: KClass
     public fun transform(
         from: String = "",
         to: String = "",
-        block: TaskEnv.(DataNode<*>) -> DataNode<R>
+        block: TaskEnv.(DataNode<*>) -> DataNode<R>,
     ) {
         dataTransforms += DataTransformation(from, to) { context, model, data ->
             val env = TaskEnv(Name.EMPTY, model.meta, context, data)
@@ -67,7 +66,7 @@ public class TaskBuilder<R : Any>(public val name: Name, public val type: KClass
         inputType: KClass<out T>,
         from: String = "",
         to: String = "",
-        block: TaskEnv.(DataNode<T>) -> DataNode<R>
+        block: TaskEnv.(DataNode<T>) -> DataNode<R>,
     ) {
         dataTransforms += DataTransformation(from, to) { context, model, data ->
             data.ensureType(inputType)
@@ -79,7 +78,7 @@ public class TaskBuilder<R : Any>(public val name: Name, public val type: KClass
     public inline fun <reified T : Any> transform(
         from: String = "",
         to: String = "",
-        noinline block: TaskEnv.(DataNode<T>) -> DataNode<R>
+        noinline block: TaskEnv.(DataNode<T>) -> DataNode<R>,
     ) {
         transform(T::class, from, to, block)
     }
@@ -90,14 +89,19 @@ public class TaskBuilder<R : Any>(public val name: Name, public val type: KClass
     public inline fun <reified T : Any> action(
         from: String = "",
         to: String = "",
-        crossinline block: TaskEnv.() -> Action<T, R>
+        crossinline block: TaskEnv.() -> Action<T, R>,
     ) {
         transform(from, to) { data: DataNode<T> ->
             block().invoke(data, meta)
         }
     }
 
-    public class TaskEnv(public val name: Name, public val meta: Meta, public val context: Context, public val data: DataNode<Any>) {
+    public class TaskEnv(
+        public val name: Name,
+        public val meta: Meta,
+        public val context: Context,
+        public val data: DataNode<Any>,
+    ) {
         public operator fun <T : Any> DirectTaskDependency<T>.invoke(): DataNode<T> = if (placement.isEmpty()) {
             data.cast(task.type)
         } else {
@@ -112,14 +116,11 @@ public class TaskBuilder<R : Any>(public val name: Name, public val type: KClass
     public inline fun <reified T : Any> mapAction(
         from: String = "",
         to: String = "",
-        crossinline block: MapActionBuilder<T, R>.(TaskEnv) -> Unit
+        crossinline block: MapActionBuilder<T, R>.(TaskEnv) -> Unit,
     ) {
         action(from, to) {
             val env = this
-            MapAction(
-                inputType = T::class,
-                outputType = type
-            ) {
+            MapAction<T, R>(type) {
                 block(env)
             }
         }
@@ -131,13 +132,10 @@ public class TaskBuilder<R : Any>(public val name: Name, public val type: KClass
     public inline fun <reified T : Any> map(
         from: String = "",
         to: String = "",
-        crossinline block: suspend TaskEnv.(T) -> R
+        crossinline block: suspend TaskEnv.(T) -> R,
     ) {
         action(from, to) {
-            MapAction(
-                inputType = T::class,
-                outputType = type
-            ) {
+            MapAction<T,R>(type) {
                 //TODO automatically append task meta
                 result = { data ->
                     block(data)
@@ -152,14 +150,11 @@ public class TaskBuilder<R : Any>(public val name: Name, public val type: KClass
     public inline fun <reified T : Any> reduceByGroup(
         from: String = "",
         to: String = "",
-        crossinline block: ReduceGroupBuilder<T, R>.(TaskEnv) -> Unit        //TODO needs KEEP-176
+        crossinline block: ReduceGroupBuilder<T, R>.(TaskEnv) -> Unit,        //TODO needs KEEP-176
     ) {
         action(from, to) {
             val env = this
-            ReduceAction(
-                inputType = T::class,
-                outputType = type
-            ) { block(env) }
+            ReduceAction<T, R>(type) { block(env) }
         }
     }
 
@@ -169,20 +164,16 @@ public class TaskBuilder<R : Any>(public val name: Name, public val type: KClass
     public inline fun <reified T : Any> reduce(
         from: String = "",
         to: String = "",
-        crossinline block: suspend TaskEnv.(Map<Name, T>) -> R
+        crossinline block: suspend TaskEnv.(Map<Name, T>) -> R,
     ) {
         action(from, to) {
-            ReduceAction(
-                inputType = T::class,
-                outputType = type,
-                action = {
-                    result(
-                        actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonymous"
-                    ) { data ->
-                        block(data)
-                    }
+            ReduceAction<T, R>(type) {
+                result(
+                    actionMeta[TaskModel.MODEL_TARGET_KEY]?.string ?: "@anonymous"
+                ) { data ->
+                    block(data)
                 }
-            )
+            }
         }
     }
 
@@ -192,14 +183,11 @@ public class TaskBuilder<R : Any>(public val name: Name, public val type: KClass
     public inline fun <reified T : Any> split(
         from: String = "",
         to: String = "",
-        crossinline block: SplitBuilder<T, R>.(TaskEnv) -> Unit  //TODO needs KEEP-176
+        crossinline block: SplitBuilder<T, R>.(TaskEnv) -> Unit,  //TODO needs KEEP-176
     ) {
         action(from, to) {
             val env = this
-            SplitAction(
-                inputType = T::class,
-                outputType = type
-            ) { block(env) }
+            SplitAction<T, R>(type) { block(this, env) }
         }
     }
 

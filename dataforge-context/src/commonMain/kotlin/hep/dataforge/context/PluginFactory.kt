@@ -1,6 +1,6 @@
 package hep.dataforge.context
 
-import hep.dataforge.provider.Type
+import hep.dataforge.type.Type
 import kotlin.reflect.KClass
 
 @Type(PluginFactory.TYPE)
