@@ -119,6 +119,14 @@ public class DataTreeBuilder<T : Any>(public val type: KClass<out T>) {
     }
 }
 
+@Suppress("FunctionName")
+public fun <T : Any> DataTree(type: KClass<out T>, block: DataTreeBuilder<T>.() -> Unit): DataTree<T> =
+    DataTreeBuilder(type).apply(block).build()
+
+@Suppress("FunctionName")
+public inline fun <reified T : Any> DataTree(noinline block: DataTreeBuilder<T>.() -> Unit): DataTree<T> =
+    DataTreeBuilder(T::class).apply(block).build()
+
 
 public fun <T : Any> DataTreeBuilder<T>.datum(name: Name, data: Data<T>) {
     this[name] = data
@@ -149,11 +157,11 @@ public fun <T : Any> DataTreeBuilder<T>.node(name: String, node: DataNode<T>) {
 }
 
 public inline fun <reified T : Any> DataTreeBuilder<T>.node(name: Name, noinline block: DataTreeBuilder<T>.() -> Unit) {
-    this[name] = DataNode(T::class, block)
+    this[name] = DataTree(T::class, block)
 }
 
 public inline fun <reified T : Any> DataTreeBuilder<T>.node(name: String, noinline block: DataTreeBuilder<T>.() -> Unit) {
-    this[name.toName()] = DataNode(T::class, block)
+    this[name.toName()] = DataTree(T::class, block)
 }
 
 /**

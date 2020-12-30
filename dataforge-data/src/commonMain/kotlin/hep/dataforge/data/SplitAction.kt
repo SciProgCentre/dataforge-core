@@ -33,11 +33,11 @@ public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val me
 }
 
 public class SplitAction<T : Any, R : Any>(
-    public val outputType: KClass<out R>,
+    private val outputType: KClass<out R>,
     private val action: SplitBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
-    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataNode(outputType) {
+    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataTree(outputType) {
         node.dataSequence().forEach { (name, data) ->
 
             val laminate = Laminate(data.meta, meta)

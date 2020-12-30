@@ -44,8 +44,14 @@ public interface DataNode<out T : Any> : MetaRepr {
      */
     public val type: KClass<out T>
 
+    /**
+     * Children items of this data node
+     */
     public val items: Map<NameToken, DataItem<T>>
 
+    /**
+     * Meta for this node
+     */
     public val meta: Meta
 
     override fun toMeta(): Meta = Meta {
@@ -58,39 +64,33 @@ public interface DataNode<out T : Any> : MetaRepr {
         }
     }
 
-    /**
-     * Start computation for all goals in data node and return a job for the whole node
-     */
-    @Suppress("DeferredResultUnused")
-    public fun CoroutineScope.startAll(): Job = launch {
-        items.values.forEach {
-            when (it) {
-                is DataItem.Node<*> -> it.node.run { startAll() }
-                is DataItem.Leaf<*> -> it.data.run { startAsync(this@launch) }
-            }
-        }
-    }
-
     public companion object {
         public const val TYPE: String = "dataNode"
-
-        public operator fun <T : Any> invoke(type: KClass<out T>, block: DataTreeBuilder<T>.() -> Unit): DataTree<T> =
-            DataTreeBuilder(type).apply(block).build()
-
-        public inline operator fun <reified T : Any> invoke(noinline block: DataTreeBuilder<T>.() -> Unit): DataTree<T> =
-            DataTreeBuilder(T::class).apply(block).build()
 
         public fun <T : Any> builder(type: KClass<out T>): DataTreeBuilder<T> = DataTreeBuilder(type)
     }
 }
 
-public suspend fun <T: Any> DataNode<T>.join(): Unit = coroutineScope { startAll().join() }
+/**
+ * Start computation for all goals in data node and return a job for the whole node
+ */
+@Suppress("DeferredResultUnused")
+public fun <T : Any> DataNode<T>.startAll(coroutineScope: CoroutineScope): Job = coroutineScope.launch {
+   items.values.forEach {
+        when (it) {
+            is DataItem.Node<*> -> it.node.run { startAll(this@launch) }
+            is DataItem.Leaf<*> -> it.data.run { this.startAsync(this@launch) }
+        }
+    }
+}
+
+public suspend fun <T: Any> DataNode<T>.join(): Unit = coroutineScope { startAll(this).join() }
 
 public val <T : Any> DataItem<T>?.node: DataNode<T>? get() = (this as? DataItem.Node<T>)?.node
 public val <T : Any> DataItem<T>?.data: Data<T>? get() = (this as? DataItem.Leaf<T>)?.data
 
 public operator fun <T : Any> DataNode<T>.get(name: Name): DataItem<T>? = when (name.length) {
-    0 -> error("Empty name")
+    0 -> DataItem.Node(this)
     1 -> items[name.firstOrNull()]
     else -> get(name.firstOrNull()!!.asName()).node?.get(name.cutFirst())
 }
@@ -127,7 +127,8 @@ public fun <T : Any> DataNode<T>.dataSequence(): Sequence<Pair<Name, Data<T>>> =
     }
 }
 
-public fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNode<T> = DataNode.invoke(type) {
+@DFExperimental
+public fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): DataNode<T> = DataTree(type) {
     dataSequence().forEach { (name, data) ->
         if (predicate(name, data)) {
             this[name] = data
@@ -136,7 +137,6 @@ public fun <T : Any> DataNode<T>.filter(predicate: (Name, Data<T>) -> Boolean): 
 }
 
 public fun <T : Any> DataNode<T>.first(): Data<T>? = dataSequence().firstOrNull()?.second
-
 
 public operator fun <T : Any> DataNode<T>.iterator(): Iterator<Pair<Name, DataItem<T>>> = itemSequence().iterator()
 

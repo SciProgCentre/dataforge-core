@@ -22,7 +22,6 @@ public interface WorkspaceBuilder {
     public fun build(): Workspace
 }
 
-
 /**
  * Set the context for future workspcace
  */

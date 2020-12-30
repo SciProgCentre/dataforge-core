@@ -30,11 +30,11 @@ public class MapActionBuilder<T, R>(public var name: Name, public var meta: Meta
 
 
 public class MapAction<T : Any, out R : Any>(
-    public val outputType: KClass<out R>,
+    private val outputType: KClass<out R>,
     private val block: MapActionBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
-    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataNode(outputType) {
+    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataTree(outputType) {
         node.dataSequence().forEach { (name, data) ->
             /*
              * Creating a new environment for action using **old** name, old meta and task meta

@@ -72,11 +72,11 @@ public class ReduceGroupBuilder<T : Any, R : Any>(public val actionMeta: Meta) {
  * The same rules as for KPipe
  */
 public class ReduceAction<T : Any, R : Any>(
-    public val outputType: KClass<out R>,
+    private val outputType: KClass<out R>,
     private val action: ReduceGroupBuilder<T, R>.() -> Unit
 ) : Action<T, R> {
 
-    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataNode(outputType) {
+    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataTree(outputType) {
         ReduceGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
 
             //val laminate = Laminate(group.meta, meta)

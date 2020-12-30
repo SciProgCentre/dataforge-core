@@ -2,6 +2,7 @@ package hep.dataforge.workspace
 
 import hep.dataforge.data.DataFilter
 import hep.dataforge.data.DataNode
+import hep.dataforge.data.DataTree
 import hep.dataforge.data.filter
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -24,7 +25,7 @@ public class DataDependency(private val filter: DataFilter, private val placemen
         return if (placement.isEmpty()) {
             result
         } else {
-            DataNode.invoke(Any::class) { this[placement] = result }
+            DataTree(Any::class) { this[placement] = result }
         }
     }
 
@@ -38,7 +39,7 @@ public class AllDataDependency(private val placement: Name = Name.EMPTY) : Depen
     override fun apply(workspace: Workspace): DataNode<Any> = if (placement.isEmpty()) {
         workspace.data
     } else {
-        DataNode.invoke(Any::class) { this[placement] = workspace.data }
+        DataTree(Any::class) { this[placement] = workspace.data }
     }
 
     override fun toMeta(): MetaBuilder = Meta {
@@ -65,7 +66,7 @@ public abstract class TaskDependency<out T : Any>(
         return if (placement.isEmpty()) {
             result
         } else {
-            DataNode(task.type) { this[placement] = result }
+            DataTree(task.type) { this[placement] = result }
         }
     }
 

@@ -19,7 +19,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
             allData()
         }
         transform<Int> { data ->
-            return@transform DataNode {
+            DataTree {
                 val result = data.dataSequence().map { it.second.get() }.reduce { acc, pair -> acc + pair }
                 set("result".asName(), Data { result })
             }
@@ -32,7 +32,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
             data("myData\\[12\\]")
         }
         transform<Int> { data ->
-            return@transform DataNode {
+            DataTree {
                 val result = data.dataSequence().map { it.second.get() }.reduce { acc, pair -> acc + pair }
                 set("result".asName(), Data { result })
             }
@@ -44,7 +44,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
             data(pattern = "myData.*")
         }
         transform<Int> { data ->
-            return@transform DataNode {
+            DataTree{
                 val result = data.dataSequence().map { it.second.get() }.reduce { acc, pair -> acc + pair }
                 set("result".asName(), Data { result })
             }

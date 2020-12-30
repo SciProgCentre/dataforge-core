@@ -163,18 +163,15 @@ public abstract interface class hep/dataforge/data/DataNode : hep/dataforge/meta
 	public abstract fun getItems ()Ljava/util/Map;
 	public abstract fun getMeta ()Lhep/dataforge/meta/Meta;
 	public abstract fun getType ()Lkotlin/reflect/KClass;
-	public abstract fun startAll (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
 	public abstract fun toMeta ()Lhep/dataforge/meta/Meta;
 }
 
 public final class hep/dataforge/data/DataNode$Companion {
 	public static final field TYPE Ljava/lang/String;
 	public final fun builder (Lkotlin/reflect/KClass;)Lhep/dataforge/data/DataTreeBuilder;
-	public final fun invoke (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/data/DataTree;
 }
 
 public final class hep/dataforge/data/DataNode$DefaultImpls {
-	public static fun startAll (Lhep/dataforge/data/DataNode;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
 	public static fun toMeta (Lhep/dataforge/data/DataNode;)Lhep/dataforge/meta/Meta;
 }
 
@@ -189,13 +186,13 @@ public final class hep/dataforge/data/DataNodeKt {
 	public static final fun itemSequence (Lhep/dataforge/data/DataNode;)Lkotlin/sequences/Sequence;
 	public static final fun iterator (Lhep/dataforge/data/DataNode;)Ljava/util/Iterator;
 	public static final fun join (Lhep/dataforge/data/DataNode;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun startAll (Lhep/dataforge/data/DataNode;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
 }
 
 public final class hep/dataforge/data/DataTree : hep/dataforge/data/DataNode {
 	public fun getItems ()Ljava/util/Map;
 	public fun getMeta ()Lhep/dataforge/meta/Meta;
 	public fun getType ()Lkotlin/reflect/KClass;
-	public fun startAll (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
 	public fun toMeta ()Lhep/dataforge/meta/Meta;
 }
 
@@ -219,6 +216,7 @@ public final class hep/dataforge/data/DataTreeBuilder {
 }
 
 public final class hep/dataforge/data/DataTreeBuilderKt {
+	public static final fun DataTree (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/data/DataTree;
 	public static final fun builder (Lhep/dataforge/data/DataNode;)Lhep/dataforge/data/DataTreeBuilder;
 	public static final fun datum (Lhep/dataforge/data/DataTreeBuilder;Lhep/dataforge/names/Name;Lhep/dataforge/data/Data;)V
 	public static final fun datum (Lhep/dataforge/data/DataTreeBuilder;Ljava/lang/String;Lhep/dataforge/data/Data;)V
@@ -303,7 +301,6 @@ public final class hep/dataforge/data/JoinGroup {
 
 public final class hep/dataforge/data/MapAction : hep/dataforge/data/Action {
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
-	public final fun getOutputType ()Lkotlin/reflect/KClass;
 	public fun invoke (Lhep/dataforge/data/DataNode;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
 	public fun isTerminal ()Z
 }
@@ -335,7 +332,6 @@ public final class hep/dataforge/data/NamedData : hep/dataforge/data/Data {
 
 public final class hep/dataforge/data/ReduceAction : hep/dataforge/data/Action {
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
-	public final fun getOutputType ()Lkotlin/reflect/KClass;
 	public fun invoke (Lhep/dataforge/data/DataNode;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
 	public fun isTerminal ()Z
 }
@@ -356,7 +352,6 @@ public final class hep/dataforge/data/ReduceGroupBuilder {
 
 public final class hep/dataforge/data/SplitAction : hep/dataforge/data/Action {
 	public fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)V
-	public final fun getOutputType ()Lkotlin/reflect/KClass;
 	public fun invoke (Lhep/dataforge/data/DataNode;Lhep/dataforge/meta/Meta;)Lhep/dataforge/data/DataNode;
 	public fun isTerminal ()Z
 }
@@ -391,7 +386,6 @@ public final class hep/dataforge/data/TypeFilteredDataNode : hep/dataforge/data/
 	public fun getMeta ()Lhep/dataforge/meta/Meta;
 	public final fun getOrigin ()Lhep/dataforge/data/DataNode;
 	public fun getType ()Lkotlin/reflect/KClass;
-	public fun startAll (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
 	public fun toMeta ()Lhep/dataforge/meta/Meta;
 }
 

@@ -37,7 +37,7 @@ private fun newZFS(path: Path): FileSystem {
 public fun <T : Any> IOPlugin.readDataFile(
     path: Path,
     type: KClass<out T>,
-    formatResolver: FileFormatResolver<T>
+    formatResolver: FileFormatResolver<T>,
 ): Data<T> {
     val envelope = readEnvelopeFile(path, true) ?: error("Can't read data from $path")
     val format = formatResolver(path, envelope.meta)
@@ -57,7 +57,7 @@ public inline fun <reified T : Any> IOPlugin.readDataFile(path: Path): Data<T> =
 public fun <T : Any> DataTreeBuilder<T>.file(
     plugin: IOPlugin,
     path: Path,
-    formatResolver: FileFormatResolver<T>
+    formatResolver: FileFormatResolver<T>,
 ) {
     //If path is a single file or a special directory, read it as single datum
     if (!Files.isDirectory(path) || Files.list(path).allMatch { it.fileName.toString().startsWith("@") }) {
@@ -85,7 +85,7 @@ public fun <T : Any> DataTreeBuilder<T>.file(
 public fun <T : Any> IOPlugin.readDataDirectory(
     path: Path,
     type: KClass<out T>,
-    formatResolver: FileFormatResolver<T>
+    formatResolver: FileFormatResolver<T>,
 ): DataNode<T> {
     //read zipped data node
     if (path.fileName != null && path.fileName.toString().endsWith(".zip")) {
@@ -94,7 +94,7 @@ public fun <T : Any> IOPlugin.readDataDirectory(
         return readDataDirectory(fs.rootDirectories.first(), type, formatResolver)
     }
     if (!Files.isDirectory(path)) error("Provided path $path is not a directory")
-    return DataNode(type) {
+    return DataTree(type) {
         Files.list(path).forEach { path ->
             val fileName = path.fileName.toString()
             if (fileName.startsWith(IOPlugin.META_FILE_NAME)) {
@@ -121,7 +121,7 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
     node: DataNode<T>,
     format: IOFormat<T>,
     envelopeFormat: EnvelopeFormat? = null,
-    metaFormat: MetaFormatFactory? = null
+    metaFormat: MetaFormatFactory? = null,
 ) {
     withContext(Dispatchers.IO) {
         if (!Files.exists(path)) {
@@ -156,7 +156,7 @@ private suspend fun <T : Any> ZipOutputStream.writeNode(
     name: String,
     item: DataItem<T>,
     dataFormat: IOFormat<T>,
-    envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat
+    envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat,
 ) {
     withContext(Dispatchers.IO) {
         when (item) {
@@ -187,7 +187,7 @@ suspend fun <T : Any> IOPlugin.writeZip(
     path: Path,
     node: DataNode<T>,
     format: IOFormat<T>,
-    envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat
+    envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat,
 ) {
     withContext(Dispatchers.IO) {
         val actualFile = if (path.toString().endsWith(".zip")) {
@@ -195,7 +195,10 @@ suspend fun <T : Any> IOPlugin.writeZip(
         } else {
             path.resolveSibling(path.fileName.toString() + ".zip")
         }
-        val fos = Files.newOutputStream(actualFile, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+        val fos = Files.newOutputStream(actualFile,
+            StandardOpenOption.WRITE,
+            StandardOpenOption.CREATE,
+            StandardOpenOption.TRUNCATE_EXISTING)
         val zos = ZipOutputStream(fos)
         zos.use {
             it.writeNode("", DataItem.Node(node), format, envelopeFormat)

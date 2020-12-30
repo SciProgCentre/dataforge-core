@@ -74,10 +74,10 @@ class SimpleWorkspaceTest {
                 val squareDep = dependsOn(square, placement = "square")
                 val linearDep = dependsOn(linear, placement = "linear")
             }
-            transform { data ->
+            transform<Int> { data ->
                 val squareNode = data["square"].node!!.cast<Int>()//squareDep()
                 val linearNode = data["linear"].node!!.cast<Int>()//linearDep()
-                return@transform DataNode(Int::class) {
+                DataTree<Int> {
                     squareNode.dataSequence().forEach { (name, _) ->
                         val newData = Data {
                             val squareValue = squareNode[name].data!!.get()

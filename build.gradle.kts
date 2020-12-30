@@ -19,6 +19,10 @@ allprojects {
     }
 }
 
+apiValidation{
+    validationDisabled = true
+}
+
 subprojects {
     apply(plugin = "ru.mipt.npm.publish")
 }
