@@ -15,15 +15,29 @@ import java.nio.file.StandardOpenOption
 import java.nio.file.spi.FileSystemProvider
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import kotlin.reflect.KClass
 import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 import kotlin.streams.toList
 
 //public typealias FileFormatResolver<T> = (Path, Meta) -> IOFormat<T>
 
-public interface FileFormatResolver<T: Any>{
+public interface FileFormatResolver<T : Any> {
     public val type: KType
-    public operator fun invoke (path: Path, meta: Meta): IOFormat<T>
+    public operator fun invoke(path: Path, meta: Meta): IOFormat<T>
 }
+
+@PublishedApi
+internal inline fun <reified T : Any> IOPlugin.formatResolver(): FileFormatResolver<T> =
+    object : FileFormatResolver<T> {
+        override val type: KType = typeOf<T>()
+
+        override fun invoke(path: Path, meta: Meta): IOFormat<T> =
+            resolveIOFormat<T>() ?: error("Can't resolve IO format for ${T::class}")
+    }
+
+private val <T : Any> FileFormatResolver<T>.kClass: KClass<T>
+    get() = type.classifier as? KClass<T> ?: error("Format resolver actual type does not correspond to type parameter")
 
 private fun newZFS(path: Path): FileSystem {
     val fsProvider = FileSystemProvider.installedProviders().find { it.scheme == "jar" }
@@ -51,9 +65,7 @@ public fun <T : Any> IOPlugin.readDataFile(
 }
 
 @DFExperimental
-public inline fun <reified T : Any> IOPlugin.readDataFile(path: Path): Data<T> = readDataFile(path) { _, _ ->
-    resolveIOFormat<T>() ?: error("Can't resolve IO format for ${T::class}")
-}
+public inline fun <reified T : Any> IOPlugin.readDataFile(path: Path): Data<T> = readDataFile(path, formatResolver())
 
 /**
  * Add file/directory-based data tree item
@@ -98,7 +110,7 @@ public fun <T : Any> IOPlugin.readDataDirectory(
         return readDataDirectory(fs.rootDirectories.first(), formatResolver)
     }
     if (!Files.isDirectory(path)) error("Provided path $path is not a directory")
-    return DataTree.static(formatResolver.type) {
+    return DataTree.static(formatResolver.kClass) {
         Files.list(path).toList().forEach { path ->
             val fileName = path.fileName.toString()
             if (fileName.startsWith(IOPlugin.META_FILE_NAME)) {
@@ -114,9 +126,7 @@ public fun <T : Any> IOPlugin.readDataDirectory(
 
 @DFExperimental
 public inline fun <reified T : Any> IOPlugin.readDataDirectory(path: Path): DataTree<T> =
-    readDataDirectory(path) { _, _ ->
-        resolveIOFormat<T>() ?: error("Can't resolve IO format for ${T::class}")
-    }
+    readDataDirectory(path, formatResolver())
 
 /**
  * Write data tree to existing directory or create a new one using default [java.nio.file.FileSystem] provider
@@ -138,7 +148,7 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
         tree.items().forEach { (token, item) ->
             val childPath = path.resolve(token.toString())
             when (item) {
-                is DataItem.Node -> {
+                is DataTreeItem.Node -> {
                     writeDataDirectory(childPath, item.tree, format, envelopeFormat)
                 }
                 is DataTreeItem.Leaf -> {

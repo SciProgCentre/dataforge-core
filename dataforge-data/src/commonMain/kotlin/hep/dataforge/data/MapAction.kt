@@ -50,7 +50,7 @@ public class MapAction<T : Any, out R : Any>(
             //applying transformation from builder
             val builder = MapActionBuilder<T, R>(
                 data.name,
-                data.meta.builder(), // using data meta
+                data.meta.toMutableMeta(), // using data meta
                 meta
             ).apply(block)
 

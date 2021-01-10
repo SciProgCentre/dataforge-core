@@ -3,7 +3,7 @@ package hep.dataforge.data
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.builder
+import hep.dataforge.meta.toMutableMeta
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import kotlinx.coroutines.CoroutineScope
@@ -58,7 +58,7 @@ public class SplitAction<T : Any, R : Any>(
 
             // apply individual fragment rules to result
             return split.fragments.entries.asFlow().map { (fragmentName, rule) ->
-                val env = SplitBuilder.FragmentRule<T, R>(fragmentName, laminate.builder()).apply(rule)
+                val env = SplitBuilder.FragmentRule<T, R>(fragmentName, laminate.toMutableMeta()).apply(rule)
                 data.map(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
             }
         }

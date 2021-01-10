@@ -1,6 +1,7 @@
 package hep.dataforge.data
 
-import hep.dataforge.meta.DFExperimental
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.set
 import hep.dataforge.names.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -47,66 +48,10 @@ public interface DataSet<out T : Any> {
 }
 
 /**
- * A stateless filtered [DataSet]
- */
-@DFExperimental
-public fun <T : Any> DataSet<T>.filter(
-    predicate: suspend (Name, Data<T>) -> Boolean,
-): DataSet<T> = object : DataSet<T> {
-    override val dataType: KClass<out T> get() = this@filter.dataType
-
-    override fun flow(): Flow<NamedData<T>> =
-        this@filter.flow().filter { predicate(it.name, it.data) }
-
-    override suspend fun getData(name: Name): Data<T>? = this@filter.getData(name)?.takeIf {
-        predicate(name, it)
-    }
-
-    override val updates: Flow<Name> = this@filter.updates.filter flowFilter@{ name ->
-        val theData = this@filter.getData(name) ?: return@flowFilter false
-        predicate(name, theData)
-    }
-}
-
-/**
  * Flow all data nodes with names starting with [branchName]
  */
 public fun <T : Any> DataSet<T>.flowChildren(branchName: Name): Flow<NamedData<T>> = this@flowChildren.flow().filter {
     it.name.startsWith(branchName)
-}
-
-/**
- * Get a subset of data starting with a given [branchName]
- */
-public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branchName.isEmpty()) this
-else object : DataSet<T> {
-    override val dataType: KClass<out T> get() = this@branch.dataType
-
-    override fun flow(): Flow<NamedData<T>> = this@branch.flow().mapNotNull {
-        it.name.removeHeadOrNull(branchName)?.let { name ->
-            it.data.named(name)
-        }
-    }
-
-    override suspend fun getData(name: Name): Data<T>? = this@branch.getData(branchName + name)
-
-    override val updates: Flow<Name> get() = this@branch.updates.mapNotNull { it.removeHeadOrNull(branchName) }
-}
-
-/**
- * Generate a wrapper data set with a given name prefix appended to all names
- */
-public fun <T : Any> DataSet<T>.withNamePrefix(prefix: Name): DataSet<T> = if (prefix.isEmpty()) this
-else object : DataSet<T> {
-    override val dataType: KClass<out T> get() = this@withNamePrefix.dataType
-
-    override fun flow(): Flow<NamedData<T>> = this@withNamePrefix.flow().map { it.data.named(prefix + it.name) }
-
-    override suspend fun getData(name: Name): Data<T>? =
-        name.removeHeadOrNull(name)?.let { this@withNamePrefix.getData(it) }
-
-    override val updates: Flow<Name> get() = this@withNamePrefix.updates.map { prefix + it }
-
 }
 
 /**
@@ -119,3 +64,16 @@ public fun <T : Any> DataSet<T>.startAll(coroutineScope: CoroutineScope): Job = 
 }
 
 public suspend fun <T : Any> DataSet<T>.join(): Unit = coroutineScope { startAll(this).join() }
+
+public suspend fun DataSet<*>.toMeta(): Meta = Meta {
+    flow().collect {
+        if (it.name.endsWith(DataSet.META_KEY)) {
+            set(it.name, it.meta)
+        } else {
+            it.name put {
+                "type" put it.type.simpleName
+                "meta" put it.meta
+            }
+        }
+    }
+}

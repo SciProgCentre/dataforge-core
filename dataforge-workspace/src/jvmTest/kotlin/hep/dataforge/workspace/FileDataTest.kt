@@ -12,6 +12,7 @@ import kotlinx.io.Output
 import kotlinx.io.text.readUtf8String
 import kotlinx.io.text.writeUtf8String
 import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 import kotlin.test.Test
@@ -49,6 +50,13 @@ class FileDataTest {
 
     }
 
+    object StringFormatResolver: FileFormatResolver<String>{
+        override val type: KType = typeOf<String>()
+
+        override fun invoke(path: Path, meta: Meta): IOFormat<String> =StringIOFormat
+
+    }
+
     @Test
     @DFExperimental
     fun testDataWriteRead() {
@@ -58,9 +66,9 @@ class FileDataTest {
                 writeDataDirectory(dir, dataNode, StringIOFormat)
             }
             println(dir.toUri().toString())
-            val reconstructed = readDataDirectory(dir, String::class) { _, _ -> StringIOFormat }
-            assertEquals(dataNode["dir.a"]?.meta, reconstructed["dir.a"]?.meta)
-            assertEquals(dataNode["b"]?.data?.get(), reconstructed["b"]?.data?.value())
+            val reconstructed = readDataDirectory(dir,StringFormatResolver)
+            assertEquals(dataNode["dir.a"].data?.meta, reconstructed["dir.a"].data?.meta)
+            assertEquals(dataNode["b"]?.data?.value(), reconstructed["b"]?.data?.value())
         }
     }
 
@@ -74,9 +82,9 @@ class FileDataTest {
                 writeZip(zip, dataNode, StringIOFormat)
             }
             println(zip.toUri().toString())
-            val reconstructed = readDataDirectory(zip, String::class) { _, _ -> StringIOFormat }
-            assertEquals(dataNode["dir.a"]?.meta, reconstructed["dir.a"]?.meta)
-            assertEquals(dataNode["b"]?.data?.get(), reconstructed["b"]?.data?.value())
+            val reconstructed = readDataDirectory(zip, StringFormatResolver)
+            assertEquals(dataNode["dir.a"].data?.meta, reconstructed["dir.a"].data?.meta)
+            assertEquals(dataNode["b"]?.data?.value(), reconstructed["b"]?.data?.value())
         }
     }
 }

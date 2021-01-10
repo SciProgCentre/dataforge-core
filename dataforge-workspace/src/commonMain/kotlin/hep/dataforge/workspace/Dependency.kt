@@ -3,7 +3,7 @@ package hep.dataforge.workspace
 import hep.dataforge.data.DataSet
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
-import hep.dataforge.meta.builder
+import hep.dataforge.meta.toMutableMeta
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
@@ -48,7 +48,7 @@ public class ExternalTaskDependency<T : Any>(
 
     override val name: Name get() = EXTERNAL_TASK_NAME + task.name
 
-    override fun toMeta(): Meta = placement.toMeta().builder().apply {
+    override fun toMeta(): Meta = placement.toMeta().toMutableMeta().apply {
         "name" put name.toString()
         "task" put task.toString()
         "meta" put meta

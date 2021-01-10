@@ -85,13 +85,13 @@ class SimpleWorkspaceTest {
 
         val fullSquare = task<Int>("fullsquare") {
             model {
-                val squareDep = dependsOn(square, placement = "square")
-                val linearDep = dependsOn(linear, placement = "linear")
+                val squareDep = dependsOn(square, placement = DataPlacement.into("square"))
+                val linearDep = dependsOn(linear, placement = DataPlacement.into("linear"))
             }
             transform<Int> { data ->
-                val squareNode = data["square"].tree!!.filterIsInstance<Int>() //squareDep()
-                val linearNode = data["linear"].tree!!.filterIsInstance<Int>() //linearDep()
-                DataTree.dynamic<Int> {
+                val squareNode = data["square"].filterIsInstance<Int>() //squareDep()
+                val linearNode = data["linear"].filterIsInstance<Int>() //linearDep()
+                DataTree.dynamic<Int>(context) {
                     squareNode.flow().collect {
                         val newData: Data<Int> = Data {
                             val squareValue = squareNode.getData(it.name)!!.value()
@@ -142,7 +142,7 @@ class SimpleWorkspaceTest {
 
         val customPipeTask = task<Int>("custom") {
             mapAction<Int> {
-                meta = meta.builder().apply {
+                meta = meta.toMutableMeta().apply {
                     "newValue" put 22
                 }
                 name += "new"
@@ -157,14 +157,14 @@ class SimpleWorkspaceTest {
 
     @Test
     fun testWorkspace() {
-        val node = workspace.run("sum")
+        val node = workspace.runBlocking("sum")
         val res = node.first()
         assertEquals(328350, res?.value())
     }
 
     @Test
     fun testMetaPropagation() {
-        val node = workspace.run("sum") { "testFlag" put true }
+        val node = workspace.runBlocking("sum") { "testFlag" put true }
         val res = node.first()?.value()
     }
 
@@ -177,13 +177,15 @@ class SimpleWorkspaceTest {
 
     @Test
     fun testFullSquare() {
-        val node = workspace.run("fullsquare")
-        println(node.toMeta())
+        runBlocking {
+            val node = workspace.run("fullsquare")
+            println(node.toMeta())
+        }
     }
 
     @Test
     fun testGather() {
-        val node = workspace.run("filterOne")
+        val node = workspace.runBlocking("filterOne")
         runBlocking {
             assertEquals(12, node.first()?.value())
         }

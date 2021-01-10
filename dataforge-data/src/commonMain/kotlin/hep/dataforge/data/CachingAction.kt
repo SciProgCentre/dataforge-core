@@ -6,7 +6,7 @@ import hep.dataforge.names.startsWith
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlin.reflect.KType
+import kotlin.reflect.KClass
 
 /**
  * Remove all values with keys starting with [name]
@@ -20,7 +20,7 @@ internal fun MutableMap<Name, *>.removeWhatStartsWith(name: Name) {
  * An action that caches results on-demand and recalculates them on source push
  */
 public abstract class CachingAction<in T : Any, out R : Any>(
-    public val outputType: KType,
+    public val outputType: KClass<out R>,
 ) : Action<T, R> {
 
     protected abstract fun CoroutineScope.transform(
@@ -33,7 +33,7 @@ public abstract class CachingAction<in T : Any, out R : Any>(
         set: DataSet<T>,
         meta: Meta,
         scope: CoroutineScope,
-    ): DataSet<R> = DataTree.dynamic(outputType, scope) {
+    ): DataSet<R> = DataTree.dynamic(outputType,scope) {
         collectFrom(scope.transform(set, meta))
         scope.let {
             set.updates.collect {

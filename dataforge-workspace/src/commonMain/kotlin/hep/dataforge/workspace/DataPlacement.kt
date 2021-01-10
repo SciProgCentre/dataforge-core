@@ -22,6 +22,14 @@ public interface DataPlacement: MetaRepr {
             override fun toMeta(): Meta = Meta{"from" put "*"}
         }
 
+        public fun into(target: Name): DataPlacement = DataPlacementScheme{
+            to = target.toString()
+        }
+
+        public fun into(target: String): DataPlacement = DataPlacementScheme{
+            to = target
+        }
+
     }
 }
 

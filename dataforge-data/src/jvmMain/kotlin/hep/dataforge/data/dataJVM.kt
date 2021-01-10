@@ -1,7 +1,5 @@
 package hep.dataforge.data
 
-import hep.dataforge.names.Name
-import hep.dataforge.names.toName
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
@@ -61,10 +59,3 @@ public fun <R : Any> DataSet<*>.cast(type: KClass<out R>): DataSet<R> =
  */
 internal fun <R : Any> DataSet<*>.canCast(type: KClass<out R>): Boolean =
     type.isSubclassOf(this.dataType)
-
-
-public operator fun <T : Any> DataTree<T>.get(name: Name): DataTreeItem<T>? = runBlocking {
-    getItem(name)
-}
-
-public operator fun <T : Any> DataTree<T>.get(name: String): DataTreeItem<T>? = get(name.toName())

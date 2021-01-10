@@ -12,7 +12,7 @@ import kotlin.jvm.JvmName
  */
 @DFBuilder
 public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
-    override fun wrapNode(meta: Meta): MetaBuilder = if (meta is MetaBuilder) meta else meta.builder()
+    override fun wrapNode(meta: Meta): MetaBuilder = if (meta is MetaBuilder) meta else meta.toMutableMeta()
     override fun empty(): MetaBuilder = MetaBuilder()
 
     public infix fun String.put(item: MetaItem?) {
@@ -121,13 +121,13 @@ public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
 /**
  * For safety, builder always copies the initial meta even if it is builder itself
  */
-public fun Meta.builder(): MetaBuilder {
+public fun Meta.toMutableMeta(): MetaBuilder {
     return MetaBuilder().also { builder ->
         items.mapValues { entry ->
             val item = entry.value
             builder[entry.key.asName()] = when (item) {
                 is MetaItemValue -> item.value
-                is MetaItemNode -> MetaItemNode(item.node.builder())
+                is MetaItemNode -> MetaItemNode(item.node.toMutableMeta())
             }
         }
     }

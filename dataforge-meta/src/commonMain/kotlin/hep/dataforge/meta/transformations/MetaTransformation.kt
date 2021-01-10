@@ -116,7 +116,7 @@ public inline class MetaTransformation(public val transformations: Collection<Tr
      * Transform a meta, replacing all elements found in rules with transformed entries
      */
     public fun apply(source: Meta): Meta =
-        source.builder().apply {
+        source.toMutableMeta().apply {
             transformations.forEach { rule ->
                 rule.selectItems(source).forEach { name ->
                     remove(name)

@@ -123,8 +123,8 @@ public class TaskModelBuilder(public val name: Name, meta: Meta = Meta.EMPTY) : 
     /**
      * Meta for current task. By default uses the whole input meta
      */
-    public var meta: MetaBuilder = meta.builder()
-    private val dependencies: HashSet<Dependency> = HashSet<Dependency>()
+    public var meta: MetaBuilder = meta.toMutableMeta()
+    private val dependencies: HashSet<Dependency> = HashSet()
 
     override val defaultMeta: Meta get() = meta
 

@@ -20,10 +20,10 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
 
     val testAllData = task("allData", Int::class) {
         model {
-            allData()
+            data()
         }
         transform<Int> { data ->
-            DataTree.dynamic {
+            DataTree.dynamic(context) {
                 val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
                 data("result", result)
             }
@@ -36,7 +36,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
             data("myData\\[12\\]")
         }
         transform<Int> { data ->
-            DataTree.dynamic {
+            DataTree.dynamic(context) {
                 val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
                 data("result", result)
             }
@@ -48,7 +48,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
             data(pattern = "myData.*")
         }
         transform<Int> { data ->
-            DataTree.dynamic {
+            DataTree.dynamic(context) {
                 val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
                 data("result", result)
             }
@@ -80,19 +80,25 @@ class DataPropagationTest {
 
     @Test
     fun testAllData() {
-        val node = testWorkspace.run("Test.allData")
-        assertEquals(4950, node.first()!!.value())
+        runBlocking {
+            val node = testWorkspace.run("Test.allData")
+            assertEquals(4950, node.first()!!.value())
+        }
     }
 
     @Test
     fun testAllRegexData() {
-        val node = testWorkspace.run("Test.allRegexData")
-        assertEquals(4950, node.first()!!.value())
+        runBlocking {
+            val node = testWorkspace.run("Test.allRegexData")
+            assertEquals(4950, node.first()!!.value())
+        }
     }
 
     @Test
     fun testSingleData() {
-        val node = testWorkspace.run("Test.singleData")
-        assertEquals(12, node.first()!!.value())
+        runBlocking {
+            val node = testWorkspace.run("Test.singleData")
+            assertEquals(12, node.first()!!.value())
+        }
     }
 }
