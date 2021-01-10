@@ -22,10 +22,10 @@ import net.mamoe.yamlkt.*
 public fun Meta.toYaml(): YamlMap {
     val map: Map<String, Any?> = items.entries.associate { (key, item) ->
         key.toString() to when (item) {
-            is ValueItem -> {
+            is MetaItemValue -> {
                 item.value.value
             }
-            is NodeItem -> {
+            is MetaItemNode -> {
                 item.node.toYaml()
             }
         }
@@ -53,7 +53,7 @@ private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: Nod
                             (it as YamlLiteral).content.parseValue()
                         }
                     )
-                    map[token] = ValueItem(listValue)
+                    map[token] = MetaItemValue(listValue)
                 } else value.forEachIndexed { index, yamlElement ->
                     val indexKey = (itemDescriptor as? NodeDescriptor)?.indexKey ?: ItemDescriptor.DEFAULT_INDEX_KEY
                     val indexValue: String = (yamlElement as? YamlMap)?.getStringOrNull(indexKey)

@@ -56,12 +56,12 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableItemProvider {
     override fun replaceItem(key: NameToken, oldItem: TypedMetaItem<Config>?, newItem: TypedMetaItem<Config>?) {
         if (newItem == null) {
             children.remove(key)
-            if (oldItem != null && oldItem is NodeItem<Config>) {
+            if (oldItem != null && oldItem is MetaItemNode<Config>) {
                 oldItem.node.removeListener(this)
             }
         } else {
             children[key] = newItem
-            if (newItem is NodeItem) {
+            if (newItem is MetaItemNode) {
                 newItem.node.onChange(this) { name, oldChild, newChild ->
                     itemChanged(key + name, oldChild, newChild)
                 }
@@ -102,8 +102,8 @@ public fun Meta.toConfig(): Config = Config().also { builder ->
     this.items.mapValues { entry ->
         val item = entry.value
         builder[entry.key.asName()] = when (item) {
-            is ValueItem -> item.value
-            is NodeItem -> NodeItem(item.node.asConfig())
+            is MetaItemValue -> item.value
+            is MetaItemNode -> MetaItemNode(item.node.asConfig())
         }
     }
 }

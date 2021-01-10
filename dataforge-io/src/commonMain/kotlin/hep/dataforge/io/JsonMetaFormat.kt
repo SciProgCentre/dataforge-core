@@ -16,11 +16,15 @@ import kotlinx.io.text.readUtf8String
 import kotlinx.io.text.writeUtf8String
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 /**
  * A Json format for Meta representation
  */
 public class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat {
+
+    override val type: KType get() = typeOf<Meta>()
 
     override fun writeMeta(output: Output, meta: Meta, descriptor: NodeDescriptor?) {
         val jsonObject = meta.toJson(descriptor)

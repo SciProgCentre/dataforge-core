@@ -1,5 +1,6 @@
 package hep.dataforge.context
 
+import hep.dataforge.misc.Named
 import hep.dataforge.provider.Path
 import mu.KLogger
 import mu.KotlinLogging

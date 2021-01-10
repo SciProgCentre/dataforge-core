@@ -1,7 +1,7 @@
 package hep.dataforge.workspace
 
 import hep.dataforge.context.logger
-import hep.dataforge.data.DataNode
+import hep.dataforge.data.DataSet
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.get
@@ -17,10 +17,10 @@ public class GenericTask<R : Any>(
     override val type: KClass<out R>,
     override val descriptor: NodeDescriptor,
     private val modelTransform: TaskModelBuilder.(Meta) -> Unit,
-    private val dataTransform: Workspace.() -> TaskModel.(DataNode<Any>) -> DataNode<R>
+    private val dataTransform: Workspace.() -> suspend TaskModel.(DataSet<Any>) -> DataSet<R>
 ) : Task<R> {
 
-    override fun run(workspace: Workspace, model: TaskModel): DataNode<R> {
+    override suspend fun run(workspace: Workspace, model: TaskModel): DataSet<R> {
         //validate model
         validate(model)
 
@@ -42,11 +42,11 @@ public class GenericTask<R : Any>(
      * task. By default model uses the meta node with the same node as the name of the task.
      *
      * @param workspace
-     * @param taskConfig
+     * @param taskMeta
      * @return
      */
-    override fun build(workspace: Workspace, taskConfig: Meta): TaskModel {
-        val taskMeta = taskConfig[name]?.node ?: taskConfig
+    override fun build(workspace: Workspace, taskMeta: Meta): TaskModel {
+        val taskMeta = taskMeta[name]?.node ?: taskMeta
         val builder = TaskModelBuilder(name, taskMeta)
         builder.modelTransform(taskMeta)
         return builder.build()

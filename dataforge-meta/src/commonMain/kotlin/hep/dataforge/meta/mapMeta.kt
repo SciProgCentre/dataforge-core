@@ -11,8 +11,8 @@ import hep.dataforge.values.Value
 public fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
     return items.entries.associate { (token, item) ->
         token.toString() to when (item) {
-            is NodeItem -> item.node.toMap()
-            is ValueItem -> item.value.value
+            is MetaItemNode -> item.node.toMap()
+            is MetaItemValue -> item.value.value
         }
     }
 }
@@ -26,15 +26,15 @@ public fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = 
     @Suppress("UNCHECKED_CAST")
     fun toItem(value: Any?): MetaItem = when (value) {
         is MetaItem -> value
-        is Meta -> NodeItem(value)
-        is Map<*, *> -> NodeItem((value as Map<String, Any?>).toMeta())
-        else -> ValueItem(Value.of(value))
+        is Meta -> MetaItemNode(value)
+        is Map<*, *> -> MetaItemNode((value as Map<String, Any?>).toMeta())
+        else -> MetaItemValue(Value.of(value))
     }
 
     entries.forEach { (key, value) ->
         if (value is List<*>) {
             val items = value.map { toItem(it) }
-            if (items.all { it is ValueItem }) {
+            if (items.all { it is MetaItemValue }) {
                 set(key, ListValue(items.map { it.value!! }))
             } else {
                 setIndexedItems(key.toName(), value.map { toItem(it) })

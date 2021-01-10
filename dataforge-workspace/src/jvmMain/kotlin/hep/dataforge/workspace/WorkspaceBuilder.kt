@@ -3,11 +3,10 @@ package hep.dataforge.workspace
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextBuilder
 import hep.dataforge.context.Global
-import hep.dataforge.data.DataNode
-import hep.dataforge.data.DataTreeBuilder
+import hep.dataforge.data.DataTree
+import hep.dataforge.data.MutableDataTree
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
-import hep.dataforge.names.isEmpty
 import hep.dataforge.names.toName
 import kotlin.reflect.KClass
 
@@ -15,7 +14,7 @@ import kotlin.reflect.KClass
 public interface WorkspaceBuilder {
     public val parentContext: Context
     public var context: Context
-    public var data: DataTreeBuilder<Any>
+    public var data: MutableDataTree<Any>
     public var tasks: MutableSet<Task<Any>>
     public var targets: MutableMap<String, Meta>
 
@@ -31,23 +30,17 @@ public fun WorkspaceBuilder.context(name: String = "WORKSPACE", block: ContextBu
 
 public inline fun <reified T : Any> WorkspaceBuilder.data(
     name: Name = Name.EMPTY,
-    noinline block: DataTreeBuilder<T>.() -> Unit
-): DataNode<T> {
-    val node = DataTreeBuilder(T::class).apply(block)
-    if (name.isEmpty()) {
-        @Suppress("UNCHECKED_CAST")
-        data = node as DataTreeBuilder<Any>
-    } else {
-        data[name] = node
-    }
-    return node.build()
+    noinline block: MutableDataTree<T>.() -> Unit,
+): DataTree<T> {
+    TODO()
+    //data.branch(name).apply(block)
 }
 
 @JvmName("rawData")
 public fun WorkspaceBuilder.data(
     name: Name = Name.EMPTY,
-    block: DataTreeBuilder<Any>.() -> Unit
-): DataNode<Any> = data<Any>(name, block)
+    block: MutableDataTree<Any>.() -> Unit,
+): DataTree<Any> = data<Any>(name, block)
 
 
 public fun WorkspaceBuilder.target(name: String, block: MetaBuilder.() -> Unit) {
@@ -68,18 +61,18 @@ public fun WorkspaceBuilder.target(name: String, base: String, block: MetaBuilde
 public fun <T : Any> WorkspaceBuilder.task(
     name: String,
     type: KClass<out T>,
-    builder: TaskBuilder<T>.() -> Unit
+    builder: TaskBuilder<T>.() -> Unit,
 ): Task<T> = TaskBuilder(name.toName(), type).apply(builder).build().also { tasks.add(it) }
 
 public inline fun <reified T : Any> WorkspaceBuilder.task(
     name: String,
-    noinline builder: TaskBuilder<T>.() -> Unit
+    noinline builder: TaskBuilder<T>.() -> Unit,
 ): Task<T> = task(name, T::class, builder)
 
 @JvmName("rawTask")
 public fun WorkspaceBuilder.task(
     name: String,
-    builder: TaskBuilder<Any>.() -> Unit
+    builder: TaskBuilder<Any>.() -> Unit,
 ): Task<Any> = task(name, Any::class, builder)
 
 /**
@@ -87,12 +80,12 @@ public fun WorkspaceBuilder.task(
  */
 public class SimpleWorkspaceBuilder(override val parentContext: Context) : WorkspaceBuilder {
     override var context: Context = parentContext
-    override var data: DataTreeBuilder<Any> = DataTreeBuilder(Any::class)
+    override var data: MutableDataTree<Any> = MutableDataTree(Any::class,context)
     override var tasks: MutableSet<Task<Any>> = HashSet()
     override var targets: MutableMap<String, Meta> = HashMap()
 
     override fun build(): SimpleWorkspace {
-        return SimpleWorkspace(context, data.build(), targets, tasks)
+        return SimpleWorkspace(context, data, targets, tasks)
     }
 }
 

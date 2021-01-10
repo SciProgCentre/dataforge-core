@@ -3,7 +3,7 @@ package hep.dataforge.workspace
 import hep.dataforge.context.Context
 import hep.dataforge.context.gather
 import hep.dataforge.context.toMap
-import hep.dataforge.data.DataNode
+import hep.dataforge.data.DataTree
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 
@@ -13,7 +13,7 @@ import hep.dataforge.names.Name
  */
 public class SimpleWorkspace(
     override val context: Context,
-    override val data: DataNode<Any>,
+    override val data: DataTree<Any>,
     override val targets: Map<String, Meta>,
     tasks: Collection<Task<Any>>
 ) : Workspace {

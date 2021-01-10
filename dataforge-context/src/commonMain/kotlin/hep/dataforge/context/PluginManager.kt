@@ -89,8 +89,8 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
         if (get(plugin::class, plugin.tag, recursive = false) != null) {
             error("Plugin with tag ${plugin.tag} already exists in ${context.name}")
         } else {
-            for (tag in plugin.dependsOn()) {
-                fetch(tag, true)
+            for ((factory, meta) in plugin.dependsOn()) {
+                fetch(factory, meta, true)
             }
 
             logger.info { "Loading plugin ${plugin.name} into ${context.name}" }
@@ -123,7 +123,7 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
     /**
      * Get an existing plugin with given meta or load new one using provided factory
      */
-    public fun <T : Plugin> fetch(factory: PluginFactory<T>, recursive: Boolean = true, meta: Meta = Meta.EMPTY): T {
+    public fun <T : Plugin> fetch(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY, recursive: Boolean = true): T {
         val loaded = get(factory.type, factory.tag, recursive)
         return when {
             loaded == null -> load(factory(meta, context))
@@ -136,7 +136,7 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
         factory: PluginFactory<T>,
         recursive: Boolean = true,
         metaBuilder: MetaBuilder.() -> Unit,
-    ): T = fetch(factory, recursive, Meta(metaBuilder))
+    ): T = fetch(factory, Meta(metaBuilder), recursive)
 
     override fun iterator(): Iterator<Plugin> = plugins.iterator()
 

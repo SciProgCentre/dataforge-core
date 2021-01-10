@@ -16,8 +16,8 @@ public interface MetaRepr {
 
 /**
  * Generic meta tree representation. Elements are [TypedMetaItem] objects that could be represented by three different entities:
- *  * [ValueItem] (leaf)
- *  * [NodeItem] single node
+ *  * [MetaItemValue] (leaf)
+ *  * [MetaItemNode] single node
  *
  *   * Same name siblings are supported via elements with the same [Name] but different queries
  */
@@ -28,7 +28,7 @@ public interface Meta : MetaRepr, ItemProvider {
     public val items: Map<NameToken, MetaItem>
 
     override fun getItem(name: Name): MetaItem? {
-        if (name.isEmpty()) return NodeItem(this)
+        if (name.isEmpty()) return MetaItemNode(this)
         return name.firstOrNull()?.let { token ->
             val tail = name.cutFirst()
             when (tail.length) {
@@ -68,8 +68,8 @@ public operator fun Meta.get(token: NameToken): MetaItem? = items.get(token)
 public fun Meta.valueSequence(): Sequence<Pair<Name, Value>> {
     return items.asSequence().flatMap { (key, item) ->
         when (item) {
-            is ValueItem -> sequenceOf(key.asName() to item.value)
-            is NodeItem -> item.node.valueSequence().map { pair -> (key.asName() + pair.first) to pair.second }
+            is MetaItemValue -> sequenceOf(key.asName() to item.value)
+            is MetaItemNode -> item.node.valueSequence().map { pair -> (key.asName() + pair.first) to pair.second }
         }
     }
 }
@@ -80,7 +80,7 @@ public fun Meta.valueSequence(): Sequence<Pair<Name, Value>> {
 public fun Meta.itemSequence(): Sequence<Pair<Name, MetaItem>> = sequence {
     items.forEach { (key, item) ->
         yield(key.asName() to item)
-        if (item is NodeItem) {
+        if (item is MetaItemNode) {
             yieldAll(item.node.itemSequence().map { (innerKey, innerItem) ->
                 (key + innerKey) to innerItem
             })

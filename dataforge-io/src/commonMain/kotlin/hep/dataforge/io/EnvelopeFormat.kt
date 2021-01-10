@@ -3,12 +3,13 @@ package hep.dataforge.io
 import hep.dataforge.context.Context
 import hep.dataforge.io.EnvelopeFormatFactory.Companion.ENVELOPE_FORMAT_TYPE
 import hep.dataforge.meta.Meta
+import hep.dataforge.misc.Type
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
-import hep.dataforge.type.Type
 import kotlinx.io.Input
 import kotlinx.io.Output
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 /**
  * A partially read envelope with meta, but without data
@@ -16,6 +17,8 @@ import kotlin.reflect.KClass
 public data class PartialEnvelope(val meta: Meta, val dataOffset: UInt, val dataSize: ULong?)
 
 public interface EnvelopeFormat : IOFormat<Envelope> {
+    override val type: KType get() = typeOf<Envelope>()
+
     public val defaultMetaFormat: MetaFormatFactory get() = JsonMetaFormat
 
     public fun readPartial(input: Input): PartialEnvelope
@@ -37,7 +40,7 @@ public fun EnvelopeFormat.read(input: Input): Envelope = readObject(input)
 @Type(ENVELOPE_FORMAT_TYPE)
 public interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeFormat {
     override val name: Name get() = "envelope".asName()
-    override val type: KClass<out Envelope> get() = Envelope::class
+    override val type: KType get() = typeOf<Envelope>()
 
     override fun invoke(meta: Meta, context: Context): EnvelopeFormat
 

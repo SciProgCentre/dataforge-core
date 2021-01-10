@@ -71,7 +71,7 @@ public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
         set(this,value.toList())
     }
 
-    public infix fun String.put(metaBuilder: MetaBuilder.() -> Unit) {
+    public inline infix fun String.put(metaBuilder: MetaBuilder.() -> Unit) {
         this@MetaBuilder[this] = MetaBuilder().apply(metaBuilder)
     }
 
@@ -126,8 +126,8 @@ public fun Meta.builder(): MetaBuilder {
         items.mapValues { entry ->
             val item = entry.value
             builder[entry.key.asName()] = when (item) {
-                is ValueItem -> item.value
-                is NodeItem -> NodeItem(item.node.builder())
+                is MetaItemValue -> item.value
+                is MetaItemNode -> MetaItemNode(item.node.builder())
             }
         }
     }

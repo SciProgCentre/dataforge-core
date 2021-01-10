@@ -5,11 +5,15 @@ import hep.dataforge.context.PluginFactory
 import hep.dataforge.context.PluginTag
 import hep.dataforge.data.*
 import hep.dataforge.meta.Meta
-import hep.dataforge.names.asName
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.reduce
+import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+public fun <T : Any> DataSet<T>.first(): NamedData<T>? = runBlocking { flow().firstOrNull() }
 
 class DataPropagationTestPlugin : WorkspacePlugin() {
     override val tag: PluginTag = Companion.tag
@@ -19,9 +23,9 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
             allData()
         }
         transform<Int> { data ->
-            DataTree {
-                val result = data.dataSequence().map { it.second.get() }.reduce { acc, pair -> acc + pair }
-                set("result".asName(), Data { result })
+            DataTree.dynamic {
+                val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
+                data("result", result)
             }
         }
     }
@@ -32,9 +36,9 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
             data("myData\\[12\\]")
         }
         transform<Int> { data ->
-            DataTree {
-                val result = data.dataSequence().map { it.second.get() }.reduce { acc, pair -> acc + pair }
-                set("result".asName(), Data { result })
+            DataTree.dynamic {
+                val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
+                data("result", result)
             }
         }
     }
@@ -44,9 +48,9 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
             data(pattern = "myData.*")
         }
         transform<Int> { data ->
-            DataTree{
-                val result = data.dataSequence().map { it.second.get() }.reduce { acc, pair -> acc + pair }
-                set("result".asName(), Data { result })
+            DataTree.dynamic {
+                val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
+                data("result", result)
             }
         }
     }
@@ -69,7 +73,7 @@ class DataPropagationTest {
         }
         data {
             repeat(100) {
-                static("myData[$it]", it)
+                data("myData[$it]", it)
             }
         }
     }
@@ -77,18 +81,18 @@ class DataPropagationTest {
     @Test
     fun testAllData() {
         val node = testWorkspace.run("Test.allData")
-        assertEquals(4950, node.first()!!.get())
+        assertEquals(4950, node.first()!!.value())
     }
 
     @Test
     fun testAllRegexData() {
         val node = testWorkspace.run("Test.allRegexData")
-        assertEquals(4950, node.first()!!.get())
+        assertEquals(4950, node.first()!!.value())
     }
 
     @Test
     fun testSingleData() {
         val node = testWorkspace.run("Test.singleData")
-        assertEquals(12, node.first()!!.get())
+        assertEquals(12, node.first()!!.value())
     }
 }

@@ -30,8 +30,8 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMet
 
     private fun wrapItem(item: MetaItem?): TypedMetaItem<M>? = when (item) {
         null -> null
-        is ValueItem -> item
-        is NodeItem -> NodeItem(wrapNode(item.node))
+        is MetaItemValue -> item
+        is MetaItemNode -> MetaItemNode(wrapNode(item.node))
     }
 
     /**
@@ -56,7 +56,7 @@ public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMet
                 val token = name.firstOrNull()!!
                 //get existing or create new node. Query is ignored for new node
                 if (items[token] == null) {
-                    replaceItem(token, null, NodeItem(empty()))
+                    replaceItem(token, null, MetaItemNode(empty()))
                 }
                 items[token]?.node!!.set(name.cutFirst(), item)
             }
@@ -87,7 +87,7 @@ public fun MutableItemProvider.append(name: String, value: Any?): Unit = append(
 public fun <M : AbstractMutableMeta<M>> M.edit(name: Name, builder: M.() -> Unit) {
     val item = when (val existingItem = get(name)) {
         null -> empty().also { set(name, it) }
-        is NodeItem<M> -> existingItem.node
+        is MetaItemNode<M> -> existingItem.node
         else -> error("Can't edit value meta item")
     }
     item.apply(builder)

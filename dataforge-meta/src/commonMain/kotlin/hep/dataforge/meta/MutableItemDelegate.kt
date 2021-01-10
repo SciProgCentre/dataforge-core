@@ -119,7 +119,7 @@ public fun MutableItemProvider.node(key: Name? = null): ReadWriteProperty<Any?, 
 )
 
 public inline fun <reified M : MutableMeta<M>> M.node(key: Name? = null): ReadWriteProperty<Any?, M?> =
-    item(key).convert(reader = { it?.let { it.node as M } }, writer = { it?.let { NodeItem(it) } })
+    item(key).convert(reader = { it?.let { it.node as M } }, writer = { it?.let { MetaItemNode(it) } })
 
 /* Number delegates */
 

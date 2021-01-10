@@ -17,7 +17,7 @@ public fun interface ItemProvider {
 /**
  * Perform recursive item search using given [name]. Each [NameToken] is treated as a name in [Meta.items] of a parent node.
  *
- * If [name] is empty return current [Meta] as a [NodeItem]
+ * If [name] is empty return current [Meta] as a [MetaItemNode]
  */
 public operator fun ItemProvider?.get(name: Name): MetaItem? = this?.getItem(name)
 

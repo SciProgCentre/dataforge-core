@@ -12,15 +12,17 @@ public interface Goal<out T> {
     public val dependencies: Collection<Goal<*>>
 
     /**
-     * Returns current running coroutine if the goal is started
+     * Returns current running coroutine if the goal is started. Null if the computation is not started.
      */
-    public val result: Deferred<T>?
+    public val deferred: Deferred<T>?
 
     /**
      * Get ongoing computation or start a new one.
      * Does not guarantee thread safety. In case of multi-thread access, could create orphan computations.
+     *
+     * If the computation is already running, the scope is not used.
      */
-    public fun startAsync(coroutineScope: CoroutineScope): Deferred<T>
+    public fun async(coroutineScope: CoroutineScope): Deferred<T>
 
     /**
      * Reset the computation
@@ -30,28 +32,30 @@ public interface Goal<out T> {
     public companion object
 }
 
-public suspend fun <T> Goal<T>.await(): T = coroutineScope { startAsync(this).await() }
+public fun Goal<*>.launch(coroutineScope: CoroutineScope): Job = async(coroutineScope)
 
-public val Goal<*>.isComplete: Boolean get() = result?.isCompleted ?: false
+public suspend fun <T> Goal<T>.await(): T = coroutineScope { async(this).await() }
+
+public val Goal<*>.isComplete: Boolean get() = deferred?.isCompleted ?: false
 
 public open class StaticGoal<T>(public val value: T) : Goal<T> {
     override val dependencies: Collection<Goal<*>> get() = emptyList()
-    override val result: Deferred<T> = CompletableDeferred(value)
+    override val deferred: Deferred<T> = CompletableDeferred(value)
 
-    override fun startAsync(coroutineScope: CoroutineScope): Deferred<T> = result
+    override fun async(coroutineScope: CoroutineScope): Deferred<T> = deferred
 
     override fun reset() {
         //doNothing
     }
 }
 
-public open class ComputationGoal<T>(
+public open class LazyGoal<T>(
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext,
     override val dependencies: Collection<Goal<*>> = emptyList(),
     public val block: suspend CoroutineScope.() -> T,
 ) : Goal<T> {
 
-    final override var result: Deferred<T>? = null
+    final override var deferred: Deferred<T>? = null
         private set
 
     /**
@@ -59,11 +63,11 @@ public open class ComputationGoal<T>(
      * Does not guarantee thread safety. In case of multi-thread access, could create orphan computations.
      */
     @DFExperimental
-    override fun startAsync(coroutineScope: CoroutineScope): Deferred<T> {
+    override fun async(coroutineScope: CoroutineScope): Deferred<T> {
         val startedDependencies = this.dependencies.map { goal ->
-            goal.run { startAsync(coroutineScope) }
+            goal.run { async(coroutineScope) }
         }
-        return result ?: coroutineScope.async(
+        return deferred ?: coroutineScope.async(
             this.coroutineContext + CoroutineMonitor() + Dependencies(startedDependencies)
         ) {
             startedDependencies.forEach { deferred ->
@@ -72,15 +76,15 @@ public open class ComputationGoal<T>(
                 }
             }
             block()
-        }.also { result = it }
+        }.also { deferred = it }
     }
 
     /**
      * Reset the computation
      */
     override fun reset() {
-        result?.cancel()
-        result = null
+        deferred?.cancel()
+        deferred = null
     }
 }
 
@@ -90,7 +94,7 @@ public open class ComputationGoal<T>(
 public fun <T, R> Goal<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(T) -> R,
-): Goal<R> = ComputationGoal(coroutineContext, listOf(this)) {
+): Goal<R> = LazyGoal(coroutineContext, listOf(this)) {
     block(await())
 }
 
@@ -100,7 +104,7 @@ public fun <T, R> Goal<T>.map(
 public fun <T, R> Collection<Goal<T>>.reduce(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Collection<T>) -> R,
-): Goal<R> = ComputationGoal(coroutineContext, this) {
+): Goal<R> = LazyGoal(coroutineContext, this) {
     block(map { run { it.await() } })
 }
 
@@ -113,7 +117,7 @@ public fun <T, R> Collection<Goal<T>>.reduce(
 public fun <K, T, R> Map<K, Goal<T>>.reduce(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.(Map<K, T>) -> R,
-): Goal<R> = ComputationGoal(coroutineContext, this.values) {
+): Goal<R> = LazyGoal(coroutineContext, this.values) {
     block(mapValues { it.value.await() })
 }
 

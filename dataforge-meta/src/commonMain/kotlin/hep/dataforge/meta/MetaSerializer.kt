@@ -38,10 +38,10 @@ public object MetaItemSerializer : KSerializer<MetaItem> {
 
     override fun serialize(encoder: Encoder, value: MetaItem) {
         encoder.encodeStructure(descriptor) {
-            encodeBooleanElement(descriptor, 0, value is NodeItem)
+            encodeBooleanElement(descriptor, 0, value is MetaItemNode)
             when (value) {
-                is ValueItem -> encodeSerializableElement(descriptor, 1, ValueSerializer, value.value)
-                is NodeItem -> encodeSerializableElement(descriptor, 1, MetaSerializer, value.node)
+                is MetaItemValue -> encodeSerializableElement(descriptor, 1, ValueSerializer, value.value)
+                is MetaItemNode -> encodeSerializableElement(descriptor, 1, MetaSerializer, value.node)
             }
         }
     }

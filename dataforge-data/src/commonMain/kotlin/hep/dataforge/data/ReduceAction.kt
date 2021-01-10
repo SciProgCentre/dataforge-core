@@ -1,13 +1,19 @@
 package hep.dataforge.data
 
+import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.fold
 import kotlin.reflect.KClass
 
 
-public class JoinGroup<T : Any, R : Any>(public var name: String, internal val node: DataNode<T>) {
+@DFExperimental
+public class JoinGroup<T : Any, R : Any>(public var name: String, internal val set: DataSet<T>) {
 
     public var meta: MetaBuilder = MetaBuilder()
 
@@ -19,35 +25,44 @@ public class JoinGroup<T : Any, R : Any>(public var name: String, internal val n
 
 }
 
-public class ReduceGroupBuilder<T : Any, R : Any>(public val actionMeta: Meta) {
-    private val groupRules: MutableList<(DataNode<T>) -> List<JoinGroup<T, R>>> = ArrayList();
+@DFExperimental
+public class ReduceGroupBuilder<T : Any, R : Any>(
+    private val inputType: KClass<out T>,
+    private val scope: CoroutineScope,
+    public val actionMeta: Meta,
+) {
+    private val groupRules: MutableList<suspend (DataSet<T>) -> List<JoinGroup<T, R>>> = ArrayList();
 
     /**
-     * introduce grouping by value name
+     * introduce grouping by meta value
      */
     public fun byValue(tag: String, defaultTag: String = "@default", action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { node ->
-            GroupRule.byValue(tag, defaultTag).invoke(node).map {
+            GroupRule.byValue(scope, tag, defaultTag).gather(inputType, node).map {
                 JoinGroup<T, R>(it.key, it.value).apply(action)
             }
         }
     }
 
-    /**
-     * Add a single fixed group to grouping rules
-     */
-    public fun group(groupName: String, filter: DataFilter, action: JoinGroup<T, R>.() -> Unit) {
-        groupRules += { node ->
-            listOf(
-                JoinGroup<T, R>(groupName, node.filter(filter)).apply(action)
-            )
-        }
-    }
+//    /**
+//     * Add a single fixed group to grouping rules
+//     */
+//    public fun group(groupName: String, filter: DataMapper, action: JoinGroup<T, R>.() -> Unit) {
+//        groupRules += { node ->
+//            listOf(
+//                JoinGroup<T, R>(groupName, node.filter(filter)).apply(action)
+//            )
+//        }
+//    }
 
-    public fun group(groupName: String, filter: (Name, Data<T>) -> Boolean, action: JoinGroup<T, R>.() -> Unit) {
-        groupRules += { node ->
+    public fun group(
+        groupName: String,
+        filter: suspend (Name, Data<T>) -> Boolean,
+        action: JoinGroup<T, R>.() -> Unit,
+    ) {
+        groupRules += { source ->
             listOf(
-                JoinGroup<T, R>(groupName, node.filter(filter)).apply(action)
+                JoinGroup<T, R>(groupName, source.filter(filter)).apply(action)
             )
         }
     }
@@ -61,27 +76,27 @@ public class ReduceGroupBuilder<T : Any, R : Any>(public val actionMeta: Meta) {
         }
     }
 
-    internal fun buildGroups(input: DataNode<T>): List<JoinGroup<T, R>> {
+    internal suspend fun buildGroups(input: DataSet<T>): List<JoinGroup<T, R>> {
         return groupRules.flatMap { it.invoke(input) }
     }
 
 }
 
-
-/**
- * The same rules as for KPipe
- */
+@DFExperimental
 public class ReduceAction<T : Any, R : Any>(
-    private val outputType: KClass<out R>,
-    private val action: ReduceGroupBuilder<T, R>.() -> Unit
-) : Action<T, R> {
+    private val inputType: KClass<out T>,
+    outputType: KClass<out R>,
+    private val action: ReduceGroupBuilder<T, R>.() -> Unit,
+) : CachingAction<T, R>(outputType) {
+    //TODO optimize reduction. Currently the whole action recalculates on push
 
-    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataTree(outputType) {
-        ReduceGroupBuilder<T, R>(meta).apply(action).buildGroups(node).forEach { group ->
-
-            //val laminate = Laminate(group.meta, meta)
-
-            val dataMap = group.node.dataSequence().associate { it }
+    override fun CoroutineScope.transform(set: DataSet<T>, meta: Meta, key: Name): Flow<NamedData<R>> = flow {
+        ReduceGroupBuilder<T, R>(inputType,this@transform, meta).apply(action).buildGroups(set).forEach { group ->
+            val dataFlow: Map<Name, Data<T>> = group.set.flow().fold(HashMap()) { acc, value ->
+                acc.apply {
+                    acc[value.name] = value.data
+                }
+            }
 
             val groupName: String = group.name
 
@@ -89,14 +104,13 @@ public class ReduceAction<T : Any, R : Any>(
 
             val env = ActionEnv(groupName.toName(), groupMeta, meta)
 
-            val res: ComputationData<R> = dataMap.reduce(
+            val res: LazyData<R> = dataFlow.reduce(
                 outputType,
                 meta = groupMeta
             ) { group.result.invoke(env, it) }
 
-            set(env.name, res)
+            emit(res.named(env.name))
         }
-
     }
 }
 

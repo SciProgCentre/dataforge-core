@@ -4,6 +4,8 @@ import hep.dataforge.context.*
 import hep.dataforge.data.*
 import hep.dataforge.meta.*
 import hep.dataforge.names.plus
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,12 +14,24 @@ import kotlin.test.assertTrue
 /**
  * Make a fake-factory for a one single plugin. Useful for unique or test plugins
  */
-public inline fun <reified P: Plugin> P.toFactory(): PluginFactory<P> = object : PluginFactory<P> {
+public inline fun <reified P : Plugin> P.toFactory(): PluginFactory<P> = object : PluginFactory<P> {
     override fun invoke(meta: Meta, context: Context): P = this@toFactory
 
     override val tag: PluginTag = this@toFactory.tag
     override val type: KClass<out P> = P::class
 }
+
+public fun DataTree<*>.toMeta(): Meta = Meta {
+    "type" put (dataType.simpleName ?: "undefined")
+    "items" put {
+        runBlocking {
+            flow().collect {
+                it.name.toString() put it.data.meta
+            }
+        }
+    }
+}
+
 
 class SimpleWorkspaceTest {
     val testPlugin = object : WorkspacePlugin() {
@@ -39,7 +53,7 @@ class SimpleWorkspaceTest {
 
         data {
             repeat(100) {
-                static("myData[$it]", it)
+                data("myData[$it]", it)
             }
         }
 
@@ -47,7 +61,7 @@ class SimpleWorkspaceTest {
             model {
                 data("myData\\[12\\]")
             }
-            map<Int>{
+            map<Int> {
                 it
             }
         }
@@ -75,13 +89,13 @@ class SimpleWorkspaceTest {
                 val linearDep = dependsOn(linear, placement = "linear")
             }
             transform<Int> { data ->
-                val squareNode = data["square"].node!!.cast<Int>()//squareDep()
-                val linearNode = data["linear"].node!!.cast<Int>()//linearDep()
-                DataTree<Int> {
-                    squareNode.dataSequence().forEach { (name, _) ->
-                        val newData = Data {
-                            val squareValue = squareNode[name].data!!.get()
-                            val linearValue = linearNode[name].data!!.get()
+                val squareNode = data["square"].tree!!.filterIsInstance<Int>() //squareDep()
+                val linearNode = data["linear"].tree!!.filterIsInstance<Int>() //linearDep()
+                DataTree.dynamic<Int> {
+                    squareNode.flow().collect {
+                        val newData: Data<Int> = Data {
+                            val squareValue = squareNode.getData(it.name)!!.value()
+                            val linearValue = linearNode.getData(it.name)!!.value()
                             squareValue + linearValue
                         }
                         set(name, newData)
@@ -145,13 +159,13 @@ class SimpleWorkspaceTest {
     fun testWorkspace() {
         val node = workspace.run("sum")
         val res = node.first()
-        assertEquals(328350, res?.get())
+        assertEquals(328350, res?.value())
     }
 
     @Test
     fun testMetaPropagation() {
         val node = workspace.run("sum") { "testFlag" put true }
-        val res = node.first()?.get()
+        val res = node.first()?.value()
     }
 
     @Test
@@ -170,6 +184,8 @@ class SimpleWorkspaceTest {
     @Test
     fun testGather() {
         val node = workspace.run("filterOne")
-        assertEquals(12, node.first()?.get())
+        runBlocking {
+            assertEquals(12, node.first()?.value())
+        }
     }
 }

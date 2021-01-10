@@ -1,19 +1,15 @@
 package hep.dataforge.workspace
 
-import hep.dataforge.context.Named
-import hep.dataforge.data.DataNode
+import hep.dataforge.data.DataSet
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.Described
-import hep.dataforge.type.Type
+import hep.dataforge.misc.Named
+import hep.dataforge.misc.Type
 import hep.dataforge.workspace.Task.Companion.TYPE
 import kotlin.reflect.KClass
 
 @Type(TYPE)
 public interface Task<out R : Any> : Named, Described {
-    /**
-     * Terminal task is the one that could not build model lazily
-     */
-    public val isTerminal: Boolean get() = false
 
     /**
      * The explicit type of the node returned by the task
@@ -21,13 +17,13 @@ public interface Task<out R : Any> : Named, Described {
     public val type: KClass<out R>
 
     /**
-     * Build a model for this task
+     * Build a model for this task. Does not run any computations unless task [isEager]
      *
      * @param workspace
-     * @param taskConfig
+     * @param taskMeta
      * @return
      */
-    public fun build(workspace: Workspace, taskConfig: Meta): TaskModel
+    public fun build(workspace: Workspace, taskMeta: Meta): TaskModel
 
     /**
      * Check if the model is valid and is acceptable by the task. Throw exception if not.
@@ -46,7 +42,7 @@ public interface Task<out R : Any> : Named, Described {
      * @param model - a model to be executed
      * @return
      */
-    public fun run(workspace: Workspace, model: TaskModel): DataNode<R>
+    public suspend fun run(workspace: Workspace, model: TaskModel): DataSet<R>
 
     public companion object {
         public const val TYPE: String = "task"

@@ -279,7 +279,7 @@ public class ValueDescriptor(config: Config = Config()) : ItemDescriptor(config)
             }
         },
         writer = {
-            ValueItem(it.asValue())
+            MetaItemValue(it.asValue())
         }
     )
 

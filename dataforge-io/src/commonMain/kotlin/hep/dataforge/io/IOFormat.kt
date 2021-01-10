@@ -2,25 +2,28 @@ package hep.dataforge.io
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Factory
-import hep.dataforge.context.Named
 import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaItemValue
 import hep.dataforge.meta.MetaRepr
-import hep.dataforge.meta.ValueItem
+import hep.dataforge.misc.Named
+import hep.dataforge.misc.Type
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
-import hep.dataforge.type.Type
 import hep.dataforge.values.Value
 import kotlinx.io.*
 import kotlinx.io.buffer.Buffer
 import kotlinx.io.pool.ObjectPool
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 /**
  * And interface for reading and writing objects into with IO streams
  */
 public interface IOFormat<T : Any> : MetaRepr {
+    public val type: KType
+
     public fun writeObject(output: Output, obj: T)
     public fun readObject(input: Input): T
 
@@ -42,10 +45,14 @@ public fun <T : Any> Binary.readWith(format: IOFormat<T>): T = read {
 public fun <T : Any> Output.writeWith(format: IOFormat<T>, obj: T): Unit =
     format.run { writeObject(this@writeWith, obj) }
 
-public class ListIOFormat<T : Any>(public val format: IOFormat<T>) : IOFormat<List<T>> {
+public inline fun <reified T : Any> IOFormat.Companion.listOf(
+    format: IOFormat<T>,
+): IOFormat<List<T>> = object : IOFormat<List<T>> {
+    override val type: KType = typeOf<List<T>>()
+
     override fun writeObject(output: Output, obj: List<T>) {
         output.writeInt(obj.size)
-        this.format.run {
+        format.run {
             obj.forEach {
                 writeObject(output, it)
             }
@@ -63,9 +70,8 @@ public class ListIOFormat<T : Any>(public val format: IOFormat<T>) : IOFormat<Li
         NAME_KEY put "list"
         "contentFormat" put format.toMeta()
     }
-}
 
-//public val <T : Any> IOFormat<T>.list: ListIOFormat<T> get() = ListIOFormat(this)
+}
 
 public fun ObjectPool<Buffer>.fill(block: Buffer.() -> Unit): Buffer {
     val buffer = borrow()
@@ -82,7 +88,7 @@ public interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named, MetaRep
     /**
      * Explicit type for dynamic type checks
      */
-    public val type: KClass<out T>
+    public val type: KType
 
     override fun toMeta(): Meta = Meta {
         NAME_KEY put name.toString()
@@ -100,7 +106,7 @@ public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
 
     override val name: Name = "double".asName()
 
-    override val type: KClass<out Double> get() = Double::class
+    override val type: KType get() = typeOf<Double>()
 
     override fun writeObject(output: Output, obj: kotlin.Double) {
         output.writeDouble(obj)
@@ -114,14 +120,14 @@ public object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
 
     override val name: Name = "value".asName()
 
-    override val type: KClass<out Value> get() = Value::class
+    override val type: KType get() = typeOf<Value>()
 
     override fun writeObject(output: Output, obj: Value) {
         BinaryMetaFormat.run { output.writeValue(obj) }
     }
 
     override fun readObject(input: Input): Value {
-        return (BinaryMetaFormat.run { input.readMetaItem() } as? ValueItem)?.value
+        return (BinaryMetaFormat.run { input.readMetaItem() } as? MetaItemValue)?.value
             ?: error("The item is not a value")
     }
 }

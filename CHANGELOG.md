@@ -18,6 +18,7 @@
 - \[Major breaking change\] `MetaItem` renamed to `TypedMetaItem` and `MetaItem` is now an alias for `TypedMetaItem<*>`
 - \[Major breaking change\] Moved `NodeItem` and `ValueItem` to a top level
 - Plugins are removed from Context constructor and added lazily in ContextBuilder
+- \[Major breaking change\] Full refactor of DataTree/DataSource
 
 ### Deprecated
 

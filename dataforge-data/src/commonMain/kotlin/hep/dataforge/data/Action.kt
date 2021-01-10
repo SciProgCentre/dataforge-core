@@ -1,21 +1,22 @@
 package hep.dataforge.data
 
 import hep.dataforge.meta.Meta
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.*
 
 /**
- * A simple data transformation on a data node
+ * A simple data transformation on a data node. Actions should avoid doing actual dependency evaluation in [run].
  */
 public interface Action<in T : Any, out R : Any> {
     /**
      * Transform the data in the node, producing a new node. By default it is assumed that all calculations are lazy
-     * so not actual computation is started at this moment
+     * so not actual computation is started at this moment.
+     *
+     * [scope] context used to compute the initial result, also it is used for updates propagation
      */
-    public operator fun invoke(node: DataNode<T>, meta: Meta): DataNode<R>
+    public suspend fun run(set: DataSet<T>, meta: Meta, scope: CoroutineScope): DataSet<R>
 
-    /**
-     * Terminal action is the one that could not be invoked lazily and requires some kind of blocking computation to invoke
-     */
-    public val isTerminal: Boolean get() = false
+    public companion object
 }
 
 /**
@@ -24,12 +25,9 @@ public interface Action<in T : Any, out R : Any> {
 public infix fun <T : Any, I : Any, R : Any> Action<T, I>.then(action: Action<I, R>): Action<T, R> {
     // TODO introduce composite action and add optimize by adding action to the list
     return object : Action<T, R> {
-        override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> {
-            return action(this@then.invoke(node, meta), meta)
+        override suspend fun run(set: DataSet<T>, meta: Meta, scope: CoroutineScope): DataSet<R> {
+            return action.run(this@then.run(set, meta, scope), meta, scope)
         }
-
-        override val isTerminal: Boolean
-            get() = this@then.isTerminal || action.isTerminal
     }
 }
 

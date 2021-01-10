@@ -5,15 +5,16 @@
  */
 package hep.dataforge.workspace
 
-import hep.dataforge.data.DataFilter
 import hep.dataforge.data.DataTree
-import hep.dataforge.data.DataTreeBuilder
+import hep.dataforge.data.dynamic
+import hep.dataforge.data.update
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.names.toName
 import hep.dataforge.workspace.TaskModel.Companion.MODEL_TARGET_KEY
 
+//FIXME TaskModel should store individual propagation of all data elements, not just nodes
 
 /**
  * A model for task execution
@@ -24,7 +25,7 @@ import hep.dataforge.workspace.TaskModel.Companion.MODEL_TARGET_KEY
 public data class TaskModel(
     val name: Name,
     val meta: Meta,
-    val dependencies: Collection<Dependency>
+    val dependencies: Collection<Dependency>,
 ) : MetaRepr {
     //TODO provide a way to get task descriptor
     //TODO add pre-run check of task result type?
@@ -35,12 +36,10 @@ public data class TaskModel(
         "dependsOn" put {
             val dataDependencies = dependencies.filterIsInstance<DataDependency>()
             val taskDependencies = dependencies.filterIsInstance<TaskDependency<*>>()
-            setIndexed("data".toName(), dataDependencies.map { it.toMeta() })
+            setIndexed("data".toName(), dataDependencies.map { it.toMeta() }) //Should list all data here
             setIndexed(
                 "task".toName(),
-                taskDependencies.map { it.toMeta() }) { _, index ->
-                taskDependencies[index].name.toString()
-            }
+                taskDependencies.map { it.toMeta() }) { _, index -> taskDependencies[index].name.toString() }
             //TODO ensure all dependencies are listed
         }
     }
@@ -53,12 +52,10 @@ public data class TaskModel(
 /**
  * Build input for the task
  */
-public fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> {
-    return DataTreeBuilder(Any::class).apply {
-        dependencies.forEach { dep ->
-            update(dep.apply(workspace))
-        }
-    }.build()
+public suspend fun TaskModel.buildInput(workspace: Workspace): DataTree<Any> = DataTree.dynamic(workspace.context) {
+    dependencies.forEach { dep ->
+        update(dep.apply(workspace))
+    }
 }
 
 public interface TaskDependencyContainer {
@@ -71,59 +68,53 @@ public interface TaskDependencyContainer {
  */
 public fun TaskDependencyContainer.dependsOn(
     name: Name,
-    placement: Name = Name.EMPTY,
-    meta: Meta = defaultMeta
-): WorkspaceTaskDependency =
-    WorkspaceTaskDependency(name, meta, placement).also { add(it) }
+    placement: DataPlacement = DataPlacement.ALL,
+    meta: Meta = defaultMeta,
+): WorkspaceTaskDependency = WorkspaceTaskDependency(name, meta, placement).also { add(it) }
 
 public fun TaskDependencyContainer.dependsOn(
     name: String,
-    placement: Name = Name.EMPTY,
-    meta: Meta = defaultMeta
-): WorkspaceTaskDependency =
-    dependsOn(name.toName(), placement, meta)
+    placement: DataPlacement = DataPlacement.ALL,
+    meta: Meta = defaultMeta,
+): WorkspaceTaskDependency = dependsOn(name.toName(), placement, meta)
 
 public fun <T : Any> TaskDependencyContainer.dependsOn(
     task: Task<T>,
-    placement: Name = Name.EMPTY,
-    meta: Meta = defaultMeta
-): DirectTaskDependency<T> =
-    DirectTaskDependency(task, meta, placement).also { add(it) }
+    placement: DataPlacement = DataPlacement.ALL,
+    meta: Meta = defaultMeta,
+): ExternalTaskDependency<T> = ExternalTaskDependency(task, meta, placement).also { add(it) }
+
 
 public fun <T : Any> TaskDependencyContainer.dependsOn(
     task: Task<T>,
-    placement: String,
-    meta: Meta = defaultMeta
-): DirectTaskDependency<T> =
-    DirectTaskDependency(task, meta, placement.toName()).also { add(it) }
-
-public fun <T : Any> TaskDependencyContainer.dependsOn(
-    task: Task<T>,
-    placement: Name = Name.EMPTY,
-    metaBuilder: MetaBuilder.() -> Unit
-): DirectTaskDependency<T> =
-    dependsOn(task, placement, Meta(metaBuilder))
+    placement: DataPlacement = DataPlacement.ALL,
+    metaBuilder: MetaBuilder.() -> Unit,
+): ExternalTaskDependency<T> = dependsOn(task, placement, Meta(metaBuilder))
 
 /**
  * Add custom data dependency
  */
-public fun TaskDependencyContainer.data(action: DataFilter.() -> Unit): DataDependency =
-    DataDependency(DataFilter(action)).also { add(it) }
+public fun TaskDependencyContainer.data(action: DataPlacementScheme.() -> Unit): DataDependency =
+    DataDependency(DataPlacementScheme(action)).also { add(it) }
 
 /**
  * User-friendly way to add data dependency
  */
-public fun TaskDependencyContainer.data(pattern: String? = null, from: String? = null, to: String? = null): DataDependency =
+public fun TaskDependencyContainer.data(
+    pattern: String? = null,
+    from: String? = null,
+    to: String? = null,
+): DataDependency =
     data {
         pattern?.let { this.pattern = it }
         from?.let { this.from = it }
         to?.let { this.to = it }
     }
 
-/**
- * Add all data as root node
- */
-public fun TaskDependencyContainer.allData(to: Name = Name.EMPTY): AllDataDependency = AllDataDependency(to).also { add(it) }
+///**
+// * Add all data as root node
+// */
+//public fun TaskDependencyContainer.allData(to: Name = Name.EMPTY): AllDataDependency = AllDataDependency(to).also { add(it) }
 
 /**
  * A builder for [TaskModel]

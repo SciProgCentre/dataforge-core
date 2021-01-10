@@ -44,11 +44,11 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
 
         private fun Sequence<MetaItem>.merge(): TypedMetaItem<SealedMeta> {
             return when {
-                all { it is ValueItem } -> //If all items are values, take first
+                all { it is MetaItemValue } -> //If all items are values, take first
                     first().seal()
-                all { it is NodeItem } -> {
+                all { it is MetaItemNode } -> {
                     //list nodes in item
-                    val nodes = map { (it as NodeItem).node }
+                    val nodes = map { (it as MetaItemNode).node }
                     //represent as key->value entries
                     val entries = nodes.flatMap { it.items.entries.asSequence() }
                     //group by keys
@@ -57,13 +57,13 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
                     val items = groups.mapValues { entry ->
                         entry.value.asSequence().map { it.value }.merge()
                     }
-                    NodeItem(SealedMeta(items))
+                    MetaItemNode(SealedMeta(items))
 
                 }
                 else -> map {
                     when (it) {
-                        is ValueItem -> NodeItem(Meta { Meta.VALUE_KEY put it.value })
-                        is NodeItem -> it
+                        is MetaItemValue -> MetaItemNode(Meta { Meta.VALUE_KEY put it.value })
+                        is MetaItemNode -> it
                     }
                 }.merge()
             }

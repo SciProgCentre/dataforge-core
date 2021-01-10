@@ -23,8 +23,8 @@ public fun Meta.toDynamic(): dynamic {
     if (this is DynamicMeta) return this.obj
 
     fun MetaItem.toDynamic(): dynamic = when (this) {
-        is ValueItem -> this.value.toDynamic()
-        is NodeItem -> this.node.toDynamic()
+        is MetaItemValue -> this.value.toDynamic()
+        is MetaItemNode -> this.node.toDynamic()
     }
 
     val res = js("{}")
@@ -50,13 +50,13 @@ public class DynamicMeta(internal val obj: dynamic) : MetaBase() {
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     private fun asItem(obj: dynamic): TypedMetaItem<DynamicMeta>? {
         return when {
-            obj == null -> ValueItem(Null)
-            isArray(obj) && (obj as Array<Any?>).all { isPrimitive(it) } -> ValueItem(Value.of(obj as Array<Any?>))
+            obj == null -> MetaItemValue(Null)
+            isArray(obj) && (obj as Array<Any?>).all { isPrimitive(it) } -> MetaItemValue(Value.of(obj as Array<Any?>))
             else -> when (jsTypeOf(obj)) {
-                "boolean" -> ValueItem(Value.of(obj as Boolean))
-                "number" -> ValueItem(Value.of(obj as Number))
-                "string" -> ValueItem(Value.of(obj as String))
-                "object" -> NodeItem(DynamicMeta(obj))
+                "boolean" -> MetaItemValue(Value.of(obj as Boolean))
+                "number" -> MetaItemValue(Value.of(obj as Number))
+                "string" -> MetaItemValue(Value.of(obj as String))
+                "object" -> MetaItemNode(DynamicMeta(obj))
                 else -> null
             }
         }
@@ -68,7 +68,7 @@ public class DynamicMeta(internal val obj: dynamic) : MetaBase() {
             if (isArray(value)) {
                 val array = value as Array<Any?>
                 return@flatMap if (array.all { isPrimitive(it) }) {
-                    listOf(NameToken(key) to ValueItem(Value.of(array)))
+                    listOf(NameToken(key) to MetaItemValue(Value.of(array)))
                 } else {
                     array.mapIndexedNotNull { index, it ->
                         val item = asItem(it) ?: return@mapIndexedNotNull null

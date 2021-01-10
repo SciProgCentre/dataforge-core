@@ -12,24 +12,29 @@ import kotlinx.io.Output
 import kotlinx.io.text.readUtf8String
 import kotlinx.io.text.writeUtf8String
 import java.nio.file.Files
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
 class FileDataTest {
-    val dataNode = DataTree<String> {
-        node("dir") {
-            static("a", "Some string") {
+    val dataNode = DataTree.static<String> {
+        set("dir") {
+            data("a", "Some string") {
                 "content" put "Some string"
             }
         }
-        static("b", "root data")
+        data("b", "root data")
         meta {
             "content" put "This is root meta node"
         }
     }
 
     object StringIOFormat : IOFormat<String> {
+
+        override val type: KType = typeOf<String>()
+
         override fun writeObject(output: Output, obj: String) {
             output.writeUtf8String(obj)
         }
@@ -55,7 +60,7 @@ class FileDataTest {
             println(dir.toUri().toString())
             val reconstructed = readDataDirectory(dir, String::class) { _, _ -> StringIOFormat }
             assertEquals(dataNode["dir.a"]?.meta, reconstructed["dir.a"]?.meta)
-            assertEquals(dataNode["b"]?.data?.get(), reconstructed["b"]?.data?.get())
+            assertEquals(dataNode["b"]?.data?.get(), reconstructed["b"]?.data?.value())
         }
     }
 
@@ -71,7 +76,7 @@ class FileDataTest {
             println(zip.toUri().toString())
             val reconstructed = readDataDirectory(zip, String::class) { _, _ -> StringIOFormat }
             assertEquals(dataNode["dir.a"]?.meta, reconstructed["dir.a"]?.meta)
-            assertEquals(dataNode["b"]?.data?.get(), reconstructed["b"]?.data?.get())
+            assertEquals(dataNode["b"]?.data?.get(), reconstructed["b"]?.data?.value())
         }
     }
 }

@@ -4,20 +4,22 @@ import hep.dataforge.context.Context
 import hep.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.NodeDescriptor
+import hep.dataforge.misc.Type
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
-import hep.dataforge.type.Type
 import kotlinx.io.ByteArrayInput
 import kotlinx.io.Input
 import kotlinx.io.Output
 import kotlinx.io.use
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 /**
  * A format for meta serialization
  */
 public interface MetaFormat : IOFormat<Meta> {
+    override val type: KType get() = typeOf<Meta>()
 
     override fun writeObject(output: Output, obj: Meta) {
         writeMeta(output, obj, null)
@@ -40,7 +42,7 @@ public interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
 
     override val name: Name get() = "meta".asName() + shortName
 
-    override val type: KClass<out Meta> get() = Meta::class
+    override val type: KType get() = typeOf<Meta>()
 
     public val key: Short get() = name.hashCode().toShort()
 

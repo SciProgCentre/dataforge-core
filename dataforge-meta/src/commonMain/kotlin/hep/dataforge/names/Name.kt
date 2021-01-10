@@ -114,7 +114,7 @@ public fun String.toName(): Name {
                 }
                 else -> when (it) {
                     '.' -> {
-                        val query = if(queryBuilder.isEmpty()) null else queryBuilder.toString()
+                        val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
                         yield(NameToken(bodyBuilder.toString(), query))
                         bodyBuilder = StringBuilder()
                         queryBuilder = StringBuilder()
@@ -128,7 +128,7 @@ public fun String.toName(): Name {
                 }
             }
         }
-        val query = if(queryBuilder.isEmpty()) null else queryBuilder.toString()
+        val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
         yield(NameToken(bodyBuilder.toString(), query))
     }
     return Name(tokens.toList())
@@ -184,7 +184,16 @@ public fun Name.startsWith(token: NameToken): Boolean = firstOrNull() == token
 public fun Name.endsWith(token: NameToken): Boolean = lastOrNull() == token
 
 public fun Name.startsWith(name: Name): Boolean =
-    this.length >= name.length && tokens.subList(0, name.length) == name.tokens
+    this.length >= name.length && (this == name || tokens.subList(0, name.length) == name.tokens)
 
 public fun Name.endsWith(name: Name): Boolean =
-    this.length >= name.length && tokens.subList(length - name.length, length) == name.tokens
+    this.length >= name.length && (this == name || tokens.subList(length - name.length, length) == name.tokens)
+
+/**
+ * if [this] starts with given [head] name, returns the reminder of the name (could be empty). Otherwise returns null
+ */
+public fun Name.removeHeadOrNull(head: Name): Name? = if (startsWith(head)) {
+    Name(tokens.subList(head.length, head.length))
+} else {
+    null
+}

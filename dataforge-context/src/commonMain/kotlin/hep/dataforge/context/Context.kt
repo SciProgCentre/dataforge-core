@@ -4,6 +4,7 @@ import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
 import hep.dataforge.meta.itemSequence
+import hep.dataforge.misc.Named
 import hep.dataforge.names.Name
 import hep.dataforge.provider.Provider
 import kotlinx.coroutines.CoroutineScope
@@ -21,7 +22,7 @@ import kotlin.coroutines.CoroutineContext
  * be overridden by plugin implementation.
  *
  */
-public open class Context(
+public open class Context internal constructor(
     final override val name: Name,
     public val parent: Context?,
     meta: Meta,
@@ -39,7 +40,7 @@ public open class Context(
     /**
      * A [PluginManager] for current context
      */
-    public val plugins: PluginManager by lazy { PluginManager(this)}
+    public val plugins: PluginManager by lazy { PluginManager(this) }
 
     override val defaultTarget: String get() = Plugin.TARGET
 
@@ -85,6 +86,9 @@ public open class Context(
         public const val PROPERTY_TARGET: String = "context.property"
     }
 }
+
+public fun Context(name: String, parent: Context = Global, block: ContextBuilder.() -> Unit = {}): Context =
+    Global.context(name, parent, block)
 
 /**
  * The interface for something that encapsulated in context

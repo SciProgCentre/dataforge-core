@@ -6,20 +6,24 @@ import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.builder
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlin.collections.set
 import kotlin.reflect.KClass
 
 
-public class FragmentRule<T : Any, R : Any>(public val name: Name, public var meta: MetaBuilder) {
-    public lateinit var result: suspend (T) -> R
-
-    public fun result(f: suspend (T) -> R) {
-        result = f;
-    }
-}
-
 
 public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val meta: Meta) {
+
+    public class FragmentRule<T : Any, R : Any>(public val name: Name, public var meta: MetaBuilder) {
+        public lateinit var result: suspend (T) -> R
+
+        public fun result(f: suspend (T) -> R) {
+            result = f;
+        }
+    }
+
     internal val fragments: MutableMap<Name, FragmentRule<T, R>.() -> Unit> = HashMap()
 
     /**
@@ -32,27 +36,40 @@ public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val me
     }
 }
 
+/**
+ * Action that splits each incoming element into a number of fragments defined in builder
+ */
 public class SplitAction<T : Any, R : Any>(
     private val outputType: KClass<out R>,
-    private val action: SplitBuilder<T, R>.() -> Unit
+    private val action: SplitBuilder<T, R>.() -> Unit,
 ) : Action<T, R> {
 
-    override fun invoke(node: DataNode<T>, meta: Meta): DataNode<R> = DataTree(outputType) {
-        node.dataSequence().forEach { (name, data) ->
+    override suspend fun run(
+        set: DataSet<T>,
+        meta: Meta,
+        scope: CoroutineScope,
+    ): DataSet<R> = DataTree.dynamic(outputType, scope) {
 
+        suspend fun splitOne(data: NamedData<T>): Flow<NamedData<R>> {
             val laminate = Laminate(data.meta, meta)
 
-            val split = SplitBuilder<T, R>(name, data.meta).apply(action)
+            val split = SplitBuilder<T, R>(data.name, data.meta).apply(action)
 
 
             // apply individual fragment rules to result
-            split.fragments.forEach { (fragmentName, rule) ->
-                val env = FragmentRule<T, R>(fragmentName, laminate.builder())
+            return split.fragments.entries.asFlow().map { (fragmentName, rule) ->
+                val env = SplitBuilder.FragmentRule<T, R>(fragmentName, laminate.builder()).apply(rule)
+                data.map(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
+            }
+        }
 
-                rule(env)
-
-                val res = data.map(outputType, meta = env.meta) { env.result(it) }
-                set(env.name, res)
+        collectFrom(set.flow().flatMapConcat(transform = ::splitOne))
+        scope.launch {
+            set.updates.collect { name ->
+                //clear old nodes
+                remove(name)
+                //collect new items
+                collectFrom(set.flowChildren(name).flatMapConcat(transform = ::splitOne))
             }
         }
     }

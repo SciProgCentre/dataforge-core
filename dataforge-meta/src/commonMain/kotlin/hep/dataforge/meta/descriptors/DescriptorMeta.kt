@@ -24,16 +24,16 @@ private class DescriptorMeta(val descriptor: NodeDescriptor) : Meta, MetaBase() 
 public fun NodeDescriptor.defaultMeta(): Laminate = Laminate(default, DescriptorMeta(this))
 
 /**
- * Build a default [NodeItem] from this node descriptor
+ * Build a default [MetaItemNode] from this node descriptor
  */
-internal fun NodeDescriptor.defaultItem(): NodeItem<*> =
-    NodeItem(defaultMeta())
+internal fun NodeDescriptor.defaultItem(): MetaItemNode<*> =
+    MetaItemNode(defaultMeta())
 
 /**
- * Build a default [ValueItem] from this descriptor
+ * Build a default [MetaItemValue] from this descriptor
  */
-internal fun ValueDescriptor.defaultItem(): ValueItem? {
-    return ValueItem(default ?: return null)
+internal fun ValueDescriptor.defaultItem(): MetaItemValue? {
+    return MetaItemValue(default ?: return null)
 }
 
 /**

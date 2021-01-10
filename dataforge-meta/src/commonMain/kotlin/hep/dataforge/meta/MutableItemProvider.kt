@@ -64,7 +64,7 @@ public fun MutableItemProvider.setIndexed(
     metas: Iterable<Meta>,
     indexFactory: (Meta, index: Int) -> String = { _, index -> index.toString() },
 ) {
-    setIndexedItems(name, metas.map { NodeItem(it) }) { item, index -> indexFactory(item.node!!, index) }
+    setIndexedItems(name, metas.map { MetaItemNode(it) }) { item, index -> indexFactory(item.node!!, index) }
 }
 
 public operator fun MutableItemProvider.set(name: Name, metas: Iterable<Meta>): Unit = setIndexed(name, metas)
