@@ -67,6 +67,8 @@ public interface DataTree<out T : Any> : DataSet<T> {
     }
 }
 
+public suspend fun <T: Any> DataSet<T>.getData(name: String): Data<T>? = getData(name.toName())
+
 /**
  * Get a [DataTreeItem] with given [name] or null if the item does not exist
  */
@@ -97,10 +99,10 @@ public fun <T : Any> DataTree<T>.itemFlow(): Flow<Pair<Name, DataTreeItem<T>>> =
  * Get a branch of this [DataTree] with a given [branchName].
  * The difference from similar method for [DataSet] is that internal logic is more simple and the return value is a [DataTree]
  */
-public operator fun <T : Any> DataTree<T>.get(branchName: Name): DataTree<T> = object : DataTree<T> {
-    override val dataType: KClass<out T> get() = this@get.dataType
+public fun <T : Any> DataTree<T>.branch(branchName: Name): DataTree<T> = object : DataTree<T> {
+    override val dataType: KClass<out T> get() = this@branch.dataType
 
-    override val updates: Flow<Name> = this@get.updates.mapNotNull { it.removeHeadOrNull(branchName) }
+    override val updates: Flow<Name> = this@branch.updates.mapNotNull { it.removeHeadOrNull(branchName) }
 
     override suspend fun items(): Map<NameToken, DataTreeItem<T>> = getItem(branchName).tree?.items() ?: emptyMap()
 }

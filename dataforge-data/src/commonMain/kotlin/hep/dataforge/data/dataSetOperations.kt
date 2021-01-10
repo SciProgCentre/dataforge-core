@@ -51,22 +51,22 @@ else object : DataSet<T> {
 /**
  * Get a subset of data starting with a given [branchName]
  */
-public operator fun <T : Any> DataSet<T>.get(branchName: Name): DataSet<T> = if (branchName.isEmpty()) this
+public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branchName.isEmpty()) this
 else object : DataSet<T> {
-    override val dataType: KClass<out T> get() = this@get.dataType
+    override val dataType: KClass<out T> get() = this@branch.dataType
 
-    override fun flow(): Flow<NamedData<T>> = this@get.flow().mapNotNull {
+    override fun flow(): Flow<NamedData<T>> = this@branch.flow().mapNotNull {
         it.name.removeHeadOrNull(branchName)?.let { name ->
             it.data.named(name)
         }
     }
 
-    override suspend fun getData(name: Name): Data<T>? = this@get.getData(branchName + name)
+    override suspend fun getData(name: Name): Data<T>? = this@branch.getData(branchName + name)
 
-    override val updates: Flow<Name> get() = this@get.updates.mapNotNull { it.removeHeadOrNull(branchName) }
+    override val updates: Flow<Name> get() = this@branch.updates.mapNotNull { it.removeHeadOrNull(branchName) }
 }
 
-public operator fun <T : Any> DataSet<T>.get(branchName: String): DataSet<T> = this@get.get(branchName.toName())
+public fun <T : Any> DataSet<T>.branch(branchName: String): DataSet<T> = this@branch.branch(branchName.toName())
 
 @DFExperimental
 public suspend fun <T : Any> DataSet<T>.rootData(): Data<T>? = getData(Name.EMPTY)

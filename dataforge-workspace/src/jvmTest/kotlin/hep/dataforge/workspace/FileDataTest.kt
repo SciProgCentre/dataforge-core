@@ -67,8 +67,10 @@ class FileDataTest {
             }
             println(dir.toUri().toString())
             val reconstructed = readDataDirectory(dir,StringFormatResolver)
-            assertEquals(dataNode["dir.a"].data?.meta, reconstructed["dir.a"].data?.meta)
-            assertEquals(dataNode["b"]?.data?.value(), reconstructed["b"]?.data?.value())
+            runBlocking {
+                assertEquals(dataNode.getData("dir.a")?.meta, reconstructed.getData("dir.a")?.meta)
+                assertEquals(dataNode.getData("b")?.value(), reconstructed.getData("b")?.value())
+            }
         }
     }
 
@@ -83,8 +85,10 @@ class FileDataTest {
             }
             println(zip.toUri().toString())
             val reconstructed = readDataDirectory(zip, StringFormatResolver)
-            assertEquals(dataNode["dir.a"].data?.meta, reconstructed["dir.a"].data?.meta)
-            assertEquals(dataNode["b"]?.data?.value(), reconstructed["b"]?.data?.value())
+            runBlocking {
+                assertEquals(dataNode.getData("dir.a")?.meta, reconstructed.getData("dir.a")?.meta)
+                assertEquals(dataNode.getData("b")?.value(), reconstructed.getData("b")?.value())
+            }
         }
     }
 }

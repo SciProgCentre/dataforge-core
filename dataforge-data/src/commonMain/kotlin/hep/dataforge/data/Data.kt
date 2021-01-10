@@ -44,7 +44,7 @@ public interface Data<out T : Any> : Goal<T>, MetaRepr {
         /**
          * An empty data containing only meta
          */
-        public fun empty(meta: Meta): Data<Nothing> = object : Data<Nothing> {
+        public fun <T> empty(meta: Meta): Data<Nothing> = object : Data<Nothing> {
             override val type: KClass<out Nothing> = Nothing::class
             override val meta: Meta = meta
             override val dependencies: Collection<Goal<*>> = emptyList()

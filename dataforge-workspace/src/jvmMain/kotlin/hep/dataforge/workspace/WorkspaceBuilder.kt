@@ -3,10 +3,8 @@ package hep.dataforge.workspace
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextBuilder
 import hep.dataforge.context.Global
-import hep.dataforge.data.DataTree
 import hep.dataforge.data.MutableDataTree
 import hep.dataforge.meta.*
-import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import kotlin.reflect.KClass
 
@@ -28,19 +26,11 @@ public fun WorkspaceBuilder.context(name: String = "WORKSPACE", block: ContextBu
     context = ContextBuilder(parentContext, name).apply(block).build()
 }
 
-public inline fun <reified T : Any> WorkspaceBuilder.data(
-    name: Name = Name.EMPTY,
-    noinline block: MutableDataTree<T>.() -> Unit,
-): DataTree<T> {
-    TODO()
-    //data.branch(name).apply(block)
-}
-
-@JvmName("rawData")
-public fun WorkspaceBuilder.data(
-    name: Name = Name.EMPTY,
+public inline fun WorkspaceBuilder.data(
     block: MutableDataTree<Any>.() -> Unit,
-): DataTree<Any> = data<Any>(name, block)
+): Unit{
+    data.apply(block)
+}
 
 
 public fun WorkspaceBuilder.target(name: String, block: MetaBuilder.() -> Unit) {
@@ -80,7 +70,7 @@ public fun WorkspaceBuilder.task(
  */
 public class SimpleWorkspaceBuilder(override val parentContext: Context) : WorkspaceBuilder {
     override var context: Context = parentContext
-    override var data: MutableDataTree<Any> = MutableDataTree(Any::class,context)
+    override var data: MutableDataTree<Any> = MutableDataTree(Any::class, context)
     override var tasks: MutableSet<Task<Any>> = HashSet()
     override var targets: MutableMap<String, Meta> = HashMap()
 

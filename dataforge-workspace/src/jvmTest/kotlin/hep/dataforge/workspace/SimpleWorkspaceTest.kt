@@ -6,6 +6,7 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.plus
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Timeout
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,15 +22,8 @@ public inline fun <reified P : Plugin> P.toFactory(): PluginFactory<P> = object 
     override val type: KClass<out P> = P::class
 }
 
-public fun DataTree<*>.toMeta(): Meta = Meta {
-    "type" put (dataType.simpleName ?: "undefined")
-    "items" put {
-        runBlocking {
-            flow().collect {
-                it.name.toString() put it.data.meta
-            }
-        }
-    }
+public fun Workspace.runBlocking(task: String, block: MetaBuilder.() -> Unit = {}): DataSet<Any> = runBlocking{
+    run(task, block)
 }
 
 
@@ -89,8 +83,8 @@ class SimpleWorkspaceTest {
                 val linearDep = dependsOn(linear, placement = DataPlacement.into("linear"))
             }
             transform<Int> { data ->
-                val squareNode = data["square"].filterIsInstance<Int>() //squareDep()
-                val linearNode = data["linear"].filterIsInstance<Int>() //linearDep()
+                val squareNode = data.branch("square").filterIsInstance<Int>() //squareDep()
+                val linearNode = data.branch("linear").filterIsInstance<Int>() //linearDep()
                 DataTree.dynamic<Int>(context) {
                     squareNode.flow().collect {
                         val newData: Data<Int> = Data {
@@ -163,6 +157,7 @@ class SimpleWorkspaceTest {
     }
 
     @Test
+    @Timeout(400)
     fun testMetaPropagation() {
         val node = workspace.runBlocking("sum") { "testFlag" put true }
         val res = node.first()?.value()

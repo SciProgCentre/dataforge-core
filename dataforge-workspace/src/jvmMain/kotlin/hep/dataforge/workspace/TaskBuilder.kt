@@ -57,7 +57,7 @@ public class TaskBuilder<R : Any>(private val name: Name, public val type: KClas
     ) {
         dataTransforms += { context, model, data ->
             val env = TaskEnv(Name.EMPTY, model.meta, context, data)
-            val startData = data.get(from)
+            val startData = data.branch(from)
             env.block(startData).withNamePrefix(to)
         }
     }

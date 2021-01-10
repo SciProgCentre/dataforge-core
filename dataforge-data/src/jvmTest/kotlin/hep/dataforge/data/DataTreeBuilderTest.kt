@@ -27,8 +27,8 @@ internal class DataTreeBuilderTest{
         }
 
 
-        assertTrue { node["update.a"] != null }
-        assertTrue { node["primary.a"] != null }
+        assertTrue { node.branch("update.a") != null }
+        assertTrue { node.branch("primary.a") != null }
 
     }
 }

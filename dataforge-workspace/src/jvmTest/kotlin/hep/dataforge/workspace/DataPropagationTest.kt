@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-public fun <T : Any> DataSet<T>.first(): NamedData<T>? = runBlocking { flow().firstOrNull() }
+fun <T : Any> DataSet<T>.first(): NamedData<T>? = runBlocking { flow().firstOrNull() }
 
 class DataPropagationTestPlugin : WorkspacePlugin() {
     override val tag: PluginTag = Companion.tag

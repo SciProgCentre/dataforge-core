@@ -154,6 +154,3 @@ public suspend fun <T : Any> DataSet<T>.toMutableTree(
         set(it, getData(it))
     }.launchIn(scope)
 }
-
-public fun <T : Any> MutableDataTree<T>.get(branchName: Name): MutableDataTree<T> =
-    (this as DataTree<T>).get(branchName) as MutableDataTree<T>
