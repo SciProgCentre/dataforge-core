@@ -19,27 +19,14 @@ import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 
 /**
- *
- *
  * Path interface.
  *
- * @author Alexander Nozik
- * @version $Id: $Id
  */
 public inline class Path(public val tokens: List<PathToken>) : Iterable<PathToken> {
 
-    public val head: PathToken? get() = tokens.firstOrNull()
-
-    public val length: Int get() = tokens.size
-
-    /**
-     * Returns non-empty optional containing the chain without first segment in case of chain path.
-     *
-     * @return
-     */
-    public val tail: Path? get() = if (tokens.isEmpty()) null else Path(tokens.drop(1))
-
     override fun iterator(): Iterator<PathToken> = tokens.iterator()
+
+    override fun toString(): String = tokens.joinToString(separator = PATH_SEGMENT_SEPARATOR)
 
     public companion object {
         public const val PATH_SEGMENT_SEPARATOR: String = "/"
@@ -51,6 +38,19 @@ public inline class Path(public val tokens: List<PathToken>) : Iterable<PathToke
         }
     }
 }
+
+public val Path.length: Int get() = tokens.size
+
+public val Path.head: PathToken? get() = tokens.firstOrNull()
+
+
+/**
+ * Returns non-empty optional containing the chain without first segment in case of chain path.
+ *
+ * @return
+ */
+public val Path.tail: Path? get() = if (tokens.isEmpty()) null else Path(tokens.drop(1))
+
 
 public operator fun Path.plus(path: Path): Path = Path(this.tokens + path.tokens)
 
