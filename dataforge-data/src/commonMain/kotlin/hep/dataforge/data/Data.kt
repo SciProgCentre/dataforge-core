@@ -44,13 +44,15 @@ public interface Data<out T : Any> : Goal<T>, MetaRepr {
         /**
          * An empty data containing only meta
          */
-        public fun <T> empty(meta: Meta): Data<Nothing> = object : Data<Nothing> {
+        public fun empty(meta: Meta): Data<Nothing> = object : Data<Nothing> {
             override val type: KClass<out Nothing> = Nothing::class
             override val meta: Meta = meta
             override val dependencies: Collection<Goal<*>> = emptyList()
-            override val deferred: Deferred<Nothing> get() = GlobalScope.async(start = CoroutineStart.LAZY) {
-                error("The Data is empty and could not be computed")
-            }
+            override val deferred: Deferred<Nothing>
+                get() = GlobalScope.async(start = CoroutineStart.LAZY) {
+                    error("The Data is empty and could not be computed")
+                }
+
             override fun async(coroutineScope: CoroutineScope): Deferred<Nothing> = deferred
             override fun reset() {}
         }
@@ -92,7 +94,18 @@ public inline fun <reified T : Any> Data(
 public class NamedData<out T : Any> internal constructor(
     override val name: Name,
     public val data: Data<T>,
-) : Data<T> by data, Named
+) : Data<T> by data, Named {
+    override fun toString(): String = buildString {
+        append("NamedData(name=\"$name\"")
+        if(data is StaticData){
+            append(", value=${data.value}")
+        }
+        if(!data.meta.isEmpty()){
+            append(", meta=${data.meta}")
+        }
+        append(")")
+    }
+}
 
 public fun <T : Any> Data<T>.named(name: Name): NamedData<T> = if (this is NamedData) {
     NamedData(name, this.data)

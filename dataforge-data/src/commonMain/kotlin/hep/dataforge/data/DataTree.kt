@@ -46,9 +46,11 @@ public interface DataTree<out T : Any> : DataSet<T> {
 
     override fun flow(): Flow<NamedData<T>> = flow {
         items().forEach { (token, childItem: DataTreeItem<T>) ->
-            when (childItem) {
-                is DataTreeItem.Leaf -> emit(childItem.data.named(token.asName()))
-                is DataTreeItem.Node -> emitAll(childItem.tree.flow().map { it.named(token + it.name) })
+            if(!token.body.startsWith("@")) {
+                when (childItem) {
+                    is DataTreeItem.Leaf -> emit(childItem.data.named(token.asName()))
+                    is DataTreeItem.Node -> emitAll(childItem.tree.flow().map { it.named(token + it.name) })
+                }
             }
         }
     }

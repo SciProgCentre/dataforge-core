@@ -35,14 +35,7 @@ public class TaskBuilder<R : Any>(private val name: Name, public val type: KClas
         public val meta: Meta,
         public val context: Context,
         public val data: DataSet<Any>,
-    ) {
-//        public operator fun <T : Any> DirectTaskDependency<T>.invoke(): DataSet<T> = if (placement.isEmpty()) {
-//            data.cast(task.type)
-//        } else {
-//            data[placement].tree?.cast(task.type)
-//                ?: error("Could not find results of direct task dependency $this at \"$placement\"")
-//        }
-    }
+    )
 
     /**
      * Add a transformation on untyped data
@@ -86,7 +79,7 @@ public class TaskBuilder<R : Any>(private val name: Name, public val type: KClas
         crossinline block: TaskEnv.() -> Action<T, R>,
     ) {
         transform { data: DataSet<T> ->
-            block().run(data, meta, context)
+            block().execute(data, meta, context)
         }
     }
 
@@ -194,15 +187,19 @@ public class TaskBuilder<R : Any>(private val name: Name, public val type: KClas
                     logger.warn { "No transformation present, returning input data" }
                     dataSet.castOrNull(type) ?: error("$type expected, but $type received")
                 } else {
-                    val builder = MutableDataTree(type, workspace.context)
-                    dataTransforms.forEach { transformation ->
-                        val res = transformation(workspace.context, model, dataSet)
-                        builder.update(res)
+                    DataTree.dynamic(type, workspace.context){
+                        dataTransforms.forEach { transformation ->
+                            val res = transformation(workspace.context, model, dataSet)
+                            update(res)
+                        }
                     }
-                    builder
                 }
             }
         }
     }
 }
 
+@DFExperimental
+public suspend inline fun <reified T : Any> TaskBuilder.TaskEnv.dataTree(
+    crossinline block: suspend MutableDataTree<T>.() -> Unit,
+): DataTree<T> = DataTree.dynamic(context, block)

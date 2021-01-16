@@ -33,7 +33,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
 
     val testSingleData = task("singleData", Int::class) {
         model {
-            data("myData\\[12\\]")
+            data(pattern = "myData\\[12\\]")
         }
         transform<Int> { data ->
             DataTree.dynamic(context) {

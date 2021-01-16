@@ -4,6 +4,7 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.names.startsWith
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlin.reflect.KClass
@@ -29,18 +30,20 @@ public abstract class CachingAction<in T : Any, out R : Any>(
         key: Name = Name.EMPTY,
     ): Flow<NamedData<R>>
 
-    override suspend fun run(
-        set: DataSet<T>,
+    override suspend fun execute(
+        dataSet: DataSet<T>,
         meta: Meta,
-        scope: CoroutineScope,
-    ): DataSet<R> = DataTree.dynamic(outputType,scope) {
-        collectFrom(scope.transform(set, meta))
-        scope.let {
-            set.updates.collect {
+        scope: CoroutineScope?,
+    ): DataSet<R> = DataTree.dynamic(outputType) {
+        coroutineScope {
+            collectFrom(transform(dataSet, meta))
+        }
+        scope?.let {
+            dataSet.updates.collect {
                 //clear old nodes
                 remove(it)
                 //collect new items
-                collectFrom(scope.transform(set, meta, it))
+                collectFrom(scope.transform(dataSet, meta, it))
                 //FIXME if the target is data, updates are fired twice
             }
         }

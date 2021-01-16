@@ -33,16 +33,16 @@ public class MapActionBuilder<T, R>(public var name: Name, public var meta: Meta
 }
 
 
-public class MapAction<T : Any, out R : Any>(
+public class MapAction<in T : Any, out R : Any>(
     public val outputType: KClass<out R>,
     private val block: MapActionBuilder<T, R>.() -> Unit,
 ) : Action<T, R> {
 
-    override suspend fun run(
-        set: DataSet<T>,
+    override suspend fun execute(
+        dataSet: DataSet<T>,
         meta: Meta,
-        scope: CoroutineScope,
-    ): DataSet<R> = DataTree.dynamic(outputType, scope) {
+        scope: CoroutineScope?,
+    ): DataSet<R> {
         suspend fun mapOne(data: NamedData<T>): NamedData<R> {
             // Creating a new environment for action using **old** name, old meta and task meta
             val env = ActionEnv(data.name, data.meta, meta)
@@ -65,23 +65,26 @@ public class MapAction<T : Any, out R : Any>(
             return newData.named(newName)
         }
 
-        collectFrom(set.flow().map(::mapOne))
-        scope.launch {
-            set.updates.collect { name ->
-                //clear old nodes
-                remove(name)
-                //collect new items
-                collectFrom(set.flowChildren(name).map(::mapOne))
+        val flow = dataSet.flow().map(::mapOne)
+
+        return DataTree.dynamic(outputType) {
+            collectFrom(flow)
+            scope?.launch {
+                dataSet.updates.collect { name ->
+                    //clear old nodes
+                    remove(name)
+                    //collect new items
+                    collectFrom(dataSet.flowChildren(name).map(::mapOne))
+                }
             }
         }
     }
 }
 
-public suspend inline fun <T : Any, reified R : Any> DataSet<T>.map(
-    meta: Meta,
-    updatesScope: CoroutineScope,
-    noinline action: MapActionBuilder<in T, out R>.() -> Unit,
-): DataSet<R> = MapAction(R::class, action).run(this, meta, updatesScope)
 
+@Suppress("FunctionName")
+public inline fun <T : Any, reified R : Any> MapAction(
+    noinline builder: MapActionBuilder<T, R>.() -> Unit,
+): MapAction<T, R> = MapAction(R::class, builder)
 
 

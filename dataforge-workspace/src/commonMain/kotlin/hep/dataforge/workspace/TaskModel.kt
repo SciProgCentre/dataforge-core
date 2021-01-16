@@ -104,12 +104,11 @@ public fun TaskDependencyContainer.data(
     pattern: String? = null,
     from: String? = null,
     to: String? = null,
-): DataDependency =
-    data {
-        pattern?.let { this.pattern = it }
-        from?.let { this.from = it }
-        to?.let { this.to = it }
-    }
+): DataDependency = data {
+    pattern?.let { this.pattern = it }
+    from?.let { this.from = it }
+    to?.let { this.to = it }
+}
 
 ///**
 // * Add all data as root node

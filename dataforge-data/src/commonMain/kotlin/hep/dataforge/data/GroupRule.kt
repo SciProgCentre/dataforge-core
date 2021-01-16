@@ -41,7 +41,7 @@ public interface GroupRule {
 
                     set.flow().collect { data ->
                         val tagValue = data.meta[key]?.string ?: defaultTagValue
-                        map.getOrPut(tagValue) { MutableDataTree(dataType, scope) }.set(data.name, data.data)
+                        map.getOrPut(tagValue) { MutableDataTree(dataType) }.set(data.name, data.data)
                     }
 
                     return map

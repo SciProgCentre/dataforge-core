@@ -37,6 +37,8 @@ public fun WorkspaceBuilder.target(name: String, block: MetaBuilder.() -> Unit) 
     targets[name] = Meta(block).seal()
 }
 
+class WorkspaceTask(val workspace: Workspace, val name: String)
+
 /**
  * Use existing target as a base updating it with the block
  */
@@ -52,7 +54,7 @@ public fun <T : Any> WorkspaceBuilder.task(
     name: String,
     type: KClass<out T>,
     builder: TaskBuilder<T>.() -> Unit,
-): Task<T> = TaskBuilder(name.toName(), type).apply(builder).build().also { tasks.add(it) }
+): WorkspaceTask = TaskBuilder(name.toName(), type).apply(builder).build().also { tasks.add(it) }
 
 public inline fun <reified T : Any> WorkspaceBuilder.task(
     name: String,

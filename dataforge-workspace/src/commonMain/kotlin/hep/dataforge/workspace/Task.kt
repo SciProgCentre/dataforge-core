@@ -3,13 +3,12 @@ package hep.dataforge.workspace
 import hep.dataforge.data.DataSet
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.Described
-import hep.dataforge.misc.Named
 import hep.dataforge.misc.Type
 import hep.dataforge.workspace.Task.Companion.TYPE
 import kotlin.reflect.KClass
 
 @Type(TYPE)
-public interface Task<out R : Any> : Named, Described {
+public interface Task<out R : Any> : Described {
 
     /**
      * The explicit type of the node returned by the task

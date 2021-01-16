@@ -5,7 +5,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlin.reflect.KClass
 
-private class StaticDataTree<T : Any>(
+@PublishedApi
+internal class StaticDataTree<T : Any>(
     override val dataType: KClass<out T>,
 ) : DataSetBuilder<T>, DataTree<T> {
 
@@ -13,9 +14,9 @@ private class StaticDataTree<T : Any>(
 
     override val updates: Flow<Name> = emptyFlow()
 
-    override suspend fun items(): Map<NameToken, DataTreeItem<T>> = items
+    override suspend fun items(): Map<NameToken, DataTreeItem<T>> = items.filter { !it.key.body.startsWith("@") }
 
-    override fun remove(name: Name) {
+    override suspend fun remove(name: Name) {
         when (name.length) {
             0 -> error("Can't remove root tree node")
             1 -> items.remove(name.firstOrNull()!!)
@@ -34,7 +35,7 @@ private class StaticDataTree<T : Any>(
         else -> getOrCreateNode(name.cutLast()).getOrCreateNode(name.lastOrNull()!!.asName())
     }
 
-    private operator fun set(name: Name, item: DataTreeItem<T>?) {
+    private suspend fun set(name: Name, item: DataTreeItem<T>?) {
         if (name.isEmpty()) error("Can't set top level tree node")
         if (item == null) {
             remove(name)
@@ -43,7 +44,7 @@ private class StaticDataTree<T : Any>(
         }
     }
 
-    override fun set(name: Name, data: Data<T>?) {
+    override suspend fun set(name: Name, data: Data<T>?) {
         set(name, data?.let { DataTreeItem.Leaf(it) })
     }
 
@@ -58,20 +59,15 @@ private class StaticDataTree<T : Any>(
             }
         }
     }
-
-    override fun set(name: Name, block: DataSetBuilder<T>.() -> Unit) {
-        val tree = StaticDataTree(dataType).apply(block)
-        set(name, DataTreeItem.Node(tree))
-    }
 }
 
-public fun <T : Any> DataTree.Companion.static(
+public suspend fun <T : Any> DataTree.Companion.static(
     dataType: KClass<out T>,
-    block: DataSetBuilder<T>.() -> Unit,
-): DataTree<T> = StaticDataTree(dataType).apply(block)
+    block: suspend DataSetBuilder<T>.() -> Unit,
+): DataTree<T> = StaticDataTree(dataType).apply { block() }
 
-public inline fun <reified T : Any> DataTree.Companion.static(
-    noinline block: DataSetBuilder<T>.() -> Unit,
+public suspend inline fun <reified T : Any> DataTree.Companion.static(
+    noinline block: suspend DataSetBuilder<T>.() -> Unit,
 ): DataTree<T> = static(T::class, block)
 
 public suspend fun <T : Any> DataSet<T>.toStaticTree(): DataTree<T> = StaticDataTree(dataType).apply {

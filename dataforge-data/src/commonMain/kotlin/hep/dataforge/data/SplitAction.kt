@@ -13,7 +13,6 @@ import kotlin.collections.set
 import kotlin.reflect.KClass
 
 
-
 public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val meta: Meta) {
 
     public class FragmentRule<T : Any, R : Any>(public val name: Name, public var meta: MetaBuilder) {
@@ -44,11 +43,11 @@ public class SplitAction<T : Any, R : Any>(
     private val action: SplitBuilder<T, R>.() -> Unit,
 ) : Action<T, R> {
 
-    override suspend fun run(
-        set: DataSet<T>,
+    override suspend fun execute(
+        dataSet: DataSet<T>,
         meta: Meta,
-        scope: CoroutineScope,
-    ): DataSet<R> = DataTree.dynamic(outputType, scope) {
+        scope: CoroutineScope?,
+    ): DataSet<R> {
 
         suspend fun splitOne(data: NamedData<T>): Flow<NamedData<R>> {
             val laminate = Laminate(data.meta, meta)
@@ -63,13 +62,15 @@ public class SplitAction<T : Any, R : Any>(
             }
         }
 
-        collectFrom(set.flow().flatMapConcat(transform = ::splitOne))
-        scope.launch {
-            set.updates.collect { name ->
-                //clear old nodes
-                remove(name)
-                //collect new items
-                collectFrom(set.flowChildren(name).flatMapConcat(transform = ::splitOne))
+        return DataTree.dynamic(outputType) {
+            collectFrom(dataSet.flow().flatMapConcat(transform = ::splitOne))
+            scope?.launch {
+                dataSet.updates.collect { name ->
+                    //clear old nodes
+                    remove(name)
+                    //collect new items
+                    collectFrom(dataSet.flowChildren(name).flatMapConcat(transform = ::splitOne))
+                }
             }
         }
     }

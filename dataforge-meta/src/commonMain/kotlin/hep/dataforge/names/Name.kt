@@ -193,7 +193,7 @@ public fun Name.endsWith(name: Name): Boolean =
  * if [this] starts with given [head] name, returns the reminder of the name (could be empty). Otherwise returns null
  */
 public fun Name.removeHeadOrNull(head: Name): Name? = if (startsWith(head)) {
-    Name(tokens.subList(head.length, head.length))
+    Name(tokens.subList(head.length, length))
 } else {
     null
 }

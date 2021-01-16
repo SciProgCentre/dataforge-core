@@ -85,7 +85,7 @@ class SimpleWorkspaceTest {
             transform<Int> { data ->
                 val squareNode = data.branch("square").filterIsInstance<Int>() //squareDep()
                 val linearNode = data.branch("linear").filterIsInstance<Int>() //linearDep()
-                DataTree.dynamic<Int>(context) {
+                dataTree {
                     squareNode.flow().collect {
                         val newData: Data<Int> = Data {
                             val squareValue = squareNode.getData(it.name)!!.value()
@@ -150,6 +150,7 @@ class SimpleWorkspaceTest {
     }
 
     @Test
+    @Timeout(1)
     fun testWorkspace() {
         val node = workspace.runBlocking("sum")
         val res = node.first()
@@ -157,7 +158,7 @@ class SimpleWorkspaceTest {
     }
 
     @Test
-    @Timeout(400)
+    @Timeout(1)
     fun testMetaPropagation() {
         val node = workspace.runBlocking("sum") { "testFlag" put true }
         val res = node.first()?.value()
@@ -179,7 +180,7 @@ class SimpleWorkspaceTest {
     }
 
     @Test
-    fun testGather() {
+    fun testFilter() {
         val node = workspace.runBlocking("filterOne")
         runBlocking {
             assertEquals(12, node.first()?.value())

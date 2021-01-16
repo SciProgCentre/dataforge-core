@@ -77,3 +77,5 @@ public suspend fun DataSet<*>.toMeta(): Meta = Meta {
         }
     }
 }
+
+public val <T : Any> DataSet<T>.updatesWithData: Flow<NamedData<T>> get() = updates.mapNotNull { getData(it)?.named(it) }
