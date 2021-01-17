@@ -2,8 +2,7 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.gather
-import hep.dataforge.context.toMap
-import hep.dataforge.data.DataTree
+import hep.dataforge.data.DataSet
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 
@@ -13,13 +12,13 @@ import hep.dataforge.names.Name
  */
 public class SimpleWorkspace(
     override val context: Context,
-    override val data: DataTree<Any>,
+    override val data: DataSet<Any>,
     override val targets: Map<String, Meta>,
-    tasks: Collection<Task<Any>>
+    stages: Map<Name, WorkStage<Any>>
 ) : Workspace {
 
-    override val tasks: Map<Name, Task<*>> by lazy {
-        context.gather<Task<*>>(Task.TYPE) + tasks.toMap()
+    override val stages: Map<Name, WorkStage<*>> by lazy {
+        context.gather<WorkStage<*>>(WorkStage.TYPE) + stages
     }
 
     public companion object {

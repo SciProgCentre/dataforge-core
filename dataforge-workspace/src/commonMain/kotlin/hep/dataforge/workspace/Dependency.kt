@@ -25,7 +25,7 @@ public abstract class TaskDependency<out T : Any>(
     public val meta: Meta,
     protected val placement: DataPlacement,
 ) : Dependency() {
-    public abstract fun resolveTask(workspace: Workspace): Task<T>
+    public abstract fun resolveTask(workspace: Workspace): WorkStage<T>
 
     /**
      * A name of the dependency for logging and serialization
@@ -40,11 +40,11 @@ public abstract class TaskDependency<out T : Any>(
 }
 
 public class ExternalTaskDependency<T : Any>(
-    public val task: Task<T>,
+    public val task: WorkStage<T>,
     meta: Meta,
     placement: DataPlacement,
 ) : TaskDependency<T>(meta, placement) {
-    override fun resolveTask(workspace: Workspace): Task<T> = task
+    override fun resolveTask(workspace: Workspace): WorkStage<T> = task
 
     override val name: Name get() = EXTERNAL_TASK_NAME + task.name
 
@@ -64,7 +64,7 @@ public class WorkspaceTaskDependency(
     meta: Meta,
     placement: DataPlacement,
 ) : TaskDependency<Any>(meta, placement) {
-    override fun resolveTask(workspace: Workspace): Task<*> = workspace.tasks[name]
+    override fun resolveTask(workspace: Workspace): WorkStage<*> = workspace.stages[name]
         ?: error("Task with name $name is not found in the workspace")
 
     override fun toMeta(): Meta {

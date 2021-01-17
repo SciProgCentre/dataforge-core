@@ -11,11 +11,11 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.reflect.KClass
 
 /**
- * A mutable [DataTree.Companion.dynamic]. It
+ * A mutable [DataTree.Companion.active]. It
  */
-public class MutableDataTree<T : Any>(
+public class ActiveDataTree<T : Any>(
     override val dataType: KClass<out T>,
-) : DataTree<T>, DataSetBuilder<T> {
+) : DataTree<T>, DataSetBuilder<T>, ActiveDataSet<T> {
     private val mutex = Mutex()
     private val treeItems = HashMap<NameToken, DataTreeItem<T>>()
 
@@ -38,21 +38,8 @@ public class MutableDataTree<T : Any>(
 
     override suspend fun remove(name: Name) {
         if (name.isEmpty()) error("Can't remove the root node")
-        (getItem(name.cutLast()).tree as? MutableDataTree)?.remove(name.lastOrNull()!!)
+        (getItem(name.cutLast()).tree as? ActiveDataTree)?.remove(name.lastOrNull()!!)
     }
-
-//    private suspend fun set(token: NameToken, node: DataSet<T>) {
-//        //if (_map.containsKey(token)) error("Tree entry with name $token is not empty")
-//        mutex.withLock {
-//            treeItems[token] = DataTreeItem.Node(node.toMutableTree())
-//            coroutineScope {
-//                node.updates.onEach {
-//                    _updates.emit(token + it)
-//                }.launchIn(this)
-//            }
-//            _updates.emit(token.asName())
-//        }
-//    }
 
     private suspend fun set(token: NameToken, data: Data<T>) {
         mutex.withLock {
@@ -60,15 +47,15 @@ public class MutableDataTree<T : Any>(
         }
     }
 
-    private suspend fun getOrCreateNode(token: NameToken): MutableDataTree<T> =
-        (treeItems[token] as? DataTreeItem.Node<T>)?.tree as? MutableDataTree<T>
-            ?: MutableDataTree(dataType).also {
+    private suspend fun getOrCreateNode(token: NameToken): ActiveDataTree<T> =
+        (treeItems[token] as? DataTreeItem.Node<T>)?.tree as? ActiveDataTree<T>
+            ?: ActiveDataTree(dataType).also {
                 mutex.withLock {
                     treeItems[token] = DataTreeItem.Node(it)
                 }
             }
 
-    private suspend fun getOrCreateNode(name: Name): MutableDataTree<T> {
+    private suspend fun getOrCreateNode(name: Name): ActiveDataTree<T> {
         return when (name.length) {
             0 -> this
             1 -> getOrCreateNode(name.firstOrNull()!!)
@@ -90,7 +77,7 @@ public class MutableDataTree<T : Any>(
     }
 
     /**
-     * Copy given data set and mirror its changes to this [MutableDataTree] in [this@setAndObserve]. Returns an update [Job]
+     * Copy given data set and mirror its changes to this [ActiveDataTree] in [this@setAndObserve]. Returns an update [Job]
      */
     public fun CoroutineScope.setAndObserve(name: Name, dataSet: DataSet<T>): Job = launch {
         set(name, dataSet)
@@ -103,26 +90,26 @@ public class MutableDataTree<T : Any>(
 /**
  * Create a dynamic tree. Initial data is placed synchronously. Updates are propagated via [updatesScope]
  */
-public suspend fun <T : Any> DataTree.Companion.dynamic(
+public suspend fun <T : Any> DataTree.Companion.active(
     type: KClass<out T>,
-    block: suspend MutableDataTree<T>.() -> Unit,
+    block: suspend ActiveDataTree<T>.() -> Unit,
 ): DataTree<T> {
-    val tree = MutableDataTree(type)
+    val tree = ActiveDataTree(type)
     tree.block()
     return tree
 }
 
-public suspend inline fun <reified T : Any> DataTree.Companion.dynamic(
-    crossinline block: suspend MutableDataTree<T>.() -> Unit,
-): DataTree<T> = MutableDataTree(T::class).apply { block() }
+public suspend inline fun <reified T : Any> DataTree.Companion.active(
+    crossinline block: suspend ActiveDataTree<T>.() -> Unit,
+): DataTree<T> = ActiveDataTree(T::class).apply { block() }
 
 
-public suspend inline fun <reified T : Any> MutableDataTree<T>.set(
+public suspend inline fun <reified T : Any> ActiveDataTree<T>.set(
     name: Name,
-    noinline block: suspend MutableDataTree<T>.() -> Unit,
-): Unit = set(name, DataTree.dynamic(T::class, block))
+    noinline block: suspend ActiveDataTree<T>.() -> Unit,
+): Unit = set(name, DataTree.active(T::class, block))
 
-public suspend inline fun <reified T : Any> MutableDataTree<T>.set(
+public suspend inline fun <reified T : Any> ActiveDataTree<T>.set(
     name: String,
-    noinline block: suspend MutableDataTree<T>.() -> Unit,
-): Unit = set(name.toName(), DataTree.dynamic(T::class, block))
+    noinline block: suspend ActiveDataTree<T>.() -> Unit,
+): Unit = set(name.toName(), DataTree.active(T::class, block))

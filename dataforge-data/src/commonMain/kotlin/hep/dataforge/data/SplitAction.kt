@@ -62,7 +62,7 @@ public class SplitAction<T : Any, R : Any>(
             }
         }
 
-        return DataTree.dynamic(outputType) {
+        return DataTree.active(outputType) {
             collectFrom(dataSet.flow().flatMapConcat(transform = ::splitOne))
             scope?.launch {
                 dataSet.updates.collect { name ->

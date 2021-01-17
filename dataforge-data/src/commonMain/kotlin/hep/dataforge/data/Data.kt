@@ -3,9 +3,7 @@ package hep.dataforge.data
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
 import hep.dataforge.meta.isEmpty
-import hep.dataforge.misc.Named
 import hep.dataforge.misc.Type
-import hep.dataforge.names.Name
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -91,27 +89,7 @@ public inline fun <reified T : Any> Data(
     noinline block: suspend CoroutineScope.() -> T,
 ): Data<T> = Data(T::class, meta, context, dependencies, block)
 
-public class NamedData<out T : Any> internal constructor(
-    override val name: Name,
-    public val data: Data<T>,
-) : Data<T> by data, Named {
-    override fun toString(): String = buildString {
-        append("NamedData(name=\"$name\"")
-        if(data is StaticData){
-            append(", value=${data.value}")
-        }
-        if(!data.meta.isEmpty()){
-            append(", meta=${data.meta}")
-        }
-        append(")")
-    }
-}
 
-public fun <T : Any> Data<T>.named(name: Name): NamedData<T> = if (this is NamedData) {
-    NamedData(name, this.data)
-} else {
-    NamedData(name, this)
-}
 
 public fun <T : Any, R : Any> Data<T>.map(
     outputType: KClass<out R>,

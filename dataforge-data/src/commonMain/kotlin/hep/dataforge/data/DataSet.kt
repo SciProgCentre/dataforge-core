@@ -34,6 +34,12 @@ public interface DataSet<out T : Any> {
     public suspend fun listChildren(prefix: Name = Name.EMPTY): List<Name> =
         flow().map { it.name }.filter { it.startsWith(prefix) && (it.length == prefix.length + 1) }.toList()
 
+    public companion object {
+        public val META_KEY: Name = "@meta".asName()
+    }
+}
+
+public interface ActiveDataSet<T: Any>: DataSet<T>{
     /**
      * A flow of updated item names. Updates are propagated in a form of [Flow] of names of updated nodes.
      * Those can include new data items and replacement of existing ones. The replaced items could update existing data content
@@ -41,11 +47,9 @@ public interface DataSet<out T : Any> {
      *
      */
     public val updates: Flow<Name>
-
-    public companion object {
-        public val META_KEY: Name = "@meta".asName()
-    }
 }
+
+public val <T: Any> DataSet<T>.updates: Flow<Name>  get() = if(this is ActiveDataSet) updates else emptyFlow()
 
 /**
  * Flow all data nodes with names starting with [branchName]

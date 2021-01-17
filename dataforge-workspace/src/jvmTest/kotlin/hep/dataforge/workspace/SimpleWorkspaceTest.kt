@@ -4,6 +4,8 @@ import hep.dataforge.context.*
 import hep.dataforge.data.*
 import hep.dataforge.meta.*
 import hep.dataforge.names.plus
+import hep.dataforge.workspace.old.data
+import hep.dataforge.workspace.old.dependsOn
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Timeout
@@ -23,7 +25,7 @@ public inline fun <reified P : Plugin> P.toFactory(): PluginFactory<P> = object 
 }
 
 public fun Workspace.runBlocking(task: String, block: MetaBuilder.() -> Unit = {}): DataSet<Any> = runBlocking{
-    run(task, block)
+    execute(task, block)
 }
 
 
@@ -166,7 +168,7 @@ class SimpleWorkspaceTest {
 
     @Test
     fun testPluginTask() {
-        val tasks = workspace.tasks
+        val tasks = workspace.stages
         assertTrue { tasks["test.test"] != null }
         //val node = workspace.run("test.test", "empty")
     }
@@ -174,7 +176,7 @@ class SimpleWorkspaceTest {
     @Test
     fun testFullSquare() {
         runBlocking {
-            val node = workspace.run("fullsquare")
+            val node = workspace.execute("fullsquare")
             println(node.toMeta())
         }
     }

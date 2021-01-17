@@ -1,9 +1,7 @@
 package hep.dataforge.workspace
 
 import hep.dataforge.context.ContextAware
-import hep.dataforge.data.DataSet
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.misc.Type
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
@@ -15,7 +13,7 @@ public interface Workspace : ContextAware, Provider {
     /**
      * The whole data node for current workspace
      */
-    public val data: DataSet<Any>
+    public val data: StageDataSet<*>
 
     /**
      * All targets associated with the workspace
@@ -23,26 +21,17 @@ public interface Workspace : ContextAware, Provider {
     public val targets: Map<String, Meta>
 
     /**
-     * All tasks associated with the workspace
+     * All stages associated with the workspace
      */
-    public val tasks: Map<Name, Task<*>>
+    public val stages: Map<Name, WorkStage<*>>
 
     override fun content(target: String): Map<Name, Any> {
         return when (target) {
             "target", Meta.TYPE -> targets.mapKeys { it.key.toName() }
-            Task.TYPE -> tasks
+            WorkStage.TYPE -> stages
             //Data.TYPE -> data.flow().toMap()
             else -> emptyMap()
         }
-    }
-
-    /**
-     * Invoke a task in the workspace utilizing caching if possible
-     */
-    public suspend fun <R : Any> run(task: Task<R>, config: Meta): DataSet<R> {
-        val model = task.build(this, config)
-        task.validate(model)
-        return task.run(this, model)
     }
 
     public companion object {
@@ -50,20 +39,28 @@ public interface Workspace : ContextAware, Provider {
     }
 }
 
-public suspend fun Workspace.run(task: Task<*>, target: String): DataSet<Any> {
-    val meta = targets[target] ?: error("A target with name $target not found in $this")
-    return run(task, meta)
+public suspend fun Workspace.stage(taskName: Name, taskMeta: Meta): StageDataSet<*> {
+    val task = stages[taskName] ?: error("Task with name $taskName not found in the workspace")
+    return task.execute(this, taskMeta)
 }
 
+public suspend fun Workspace.getData(taskName: Name, taskMeta: Meta, name: Name): StageData<*>? =
+    stage(taskName, taskMeta).getData(name)
 
-public suspend fun Workspace.run(task: String, target: String): DataSet<Any> =
-    tasks[task.toName()]?.let { run(it, target) } ?: error("Task with name $task not found")
-
-public suspend fun Workspace.run(task: String, meta: Meta): DataSet<Any> =
-    tasks[task.toName()]?.let { run(it, meta) } ?: error("Task with name $task not found")
-
-public suspend fun Workspace.run(task: String, block: MetaBuilder.() -> Unit = {}): DataSet<Any> =
-    run(task, Meta(block))
-
-public suspend fun <T : Any> Workspace.run(task: Task<T>, metaBuilder: MetaBuilder.() -> Unit = {}): DataSet<T> =
-    run(task, Meta(metaBuilder))
+//public suspend fun Workspace.execute(task: WorkStage<*>, target: String): DataSet<Any> {
+//    val meta = targets[target] ?: error("A target with name $target not found in $this")
+//    return run(task, meta)
+//}
+//
+//
+//public suspend fun Workspace.execute(task: String, target: String): DataSet<Any> =
+//    stages[task.toName()]?.let { execute(it, target) } ?: error("Task with name $task not found")
+//
+//public suspend fun Workspace.execute(task: String, meta: Meta): DataSet<Any> =
+//    stages[task.toName()]?.let { run(it, meta) } ?: error("Task with name $task not found")
+//
+//public suspend fun Workspace.execute(task: String, block: MetaBuilder.() -> Unit = {}): DataSet<Any> =
+//    execute(task, Meta(block))
+//
+//public suspend fun <T : Any> Workspace.execute(task: WorkStage<T>, metaBuilder: MetaBuilder.() -> Unit = {}): DataSet<T> =
+//    run(task, Meta(metaBuilder))

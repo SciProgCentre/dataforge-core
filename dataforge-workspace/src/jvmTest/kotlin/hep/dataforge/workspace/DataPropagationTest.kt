@@ -5,6 +5,7 @@ import hep.dataforge.context.PluginFactory
 import hep.dataforge.context.PluginTag
 import hep.dataforge.data.*
 import hep.dataforge.meta.Meta
+import hep.dataforge.workspace.old.data
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.reduce
@@ -23,7 +24,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
             data()
         }
         transform<Int> { data ->
-            DataTree.dynamic(context) {
+            DataTree.active(context) {
                 val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
                 data("result", result)
             }
@@ -36,7 +37,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
             data(pattern = "myData\\[12\\]")
         }
         transform<Int> { data ->
-            DataTree.dynamic(context) {
+            DataTree.active(context) {
                 val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
                 data("result", result)
             }
@@ -48,7 +49,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
             data(pattern = "myData.*")
         }
         transform<Int> { data ->
-            DataTree.dynamic(context) {
+            DataTree.active(context) {
                 val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
                 data("result", result)
             }
@@ -81,7 +82,7 @@ class DataPropagationTest {
     @Test
     fun testAllData() {
         runBlocking {
-            val node = testWorkspace.run("Test.allData")
+            val node = testWorkspace.execute("Test.allData")
             assertEquals(4950, node.first()!!.value())
         }
     }
@@ -89,7 +90,7 @@ class DataPropagationTest {
     @Test
     fun testAllRegexData() {
         runBlocking {
-            val node = testWorkspace.run("Test.allRegexData")
+            val node = testWorkspace.execute("Test.allRegexData")
             assertEquals(4950, node.first()!!.value())
         }
     }
@@ -97,7 +98,7 @@ class DataPropagationTest {
     @Test
     fun testSingleData() {
         runBlocking {
-            val node = testWorkspace.run("Test.singleData")
+            val node = testWorkspace.execute("Test.singleData")
             assertEquals(12, node.first()!!.value())
         }
     }

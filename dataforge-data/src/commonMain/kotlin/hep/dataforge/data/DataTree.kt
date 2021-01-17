@@ -31,19 +31,6 @@ public interface DataTree<out T : Any> : DataSet<T> {
      */
     public suspend fun items(): Map<NameToken, DataTreeItem<T>>
 
-//    override fun flow(): Flow<NamedData<T>> = flow flowBuilder@{
-//        val item = getItem(root) ?: return@flowBuilder
-//        when (item) {
-//            is DataTreeItem.Leaf -> emit(item.data.named(root))
-//            is DataTreeItem.Node -> item.tree.items().forEach { (token, childItem: DataTreeItem<T>) ->
-//                when (childItem) {
-//                    is DataTreeItem.Leaf -> emit(childItem.data.named(root + token))
-//                    is DataTreeItem.Node -> emitAll(childItem.tree.flow().map { it.named(root + token + it.name) })
-//                }
-//            }
-//        }
-//    }
-
     override fun flow(): Flow<NamedData<T>> = flow {
         items().forEach { (token, childItem: DataTreeItem<T>) ->
             if(!token.body.startsWith("@")) {
@@ -103,8 +90,6 @@ public fun <T : Any> DataTree<T>.itemFlow(): Flow<Pair<Name, DataTreeItem<T>>> =
  */
 public fun <T : Any> DataTree<T>.branch(branchName: Name): DataTree<T> = object : DataTree<T> {
     override val dataType: KClass<out T> get() = this@branch.dataType
-
-    override val updates: Flow<Name> = this@branch.updates.mapNotNull { it.removeHeadOrNull(branchName) }
 
     override suspend fun items(): Map<NameToken, DataTreeItem<T>> = getItem(branchName).tree?.items() ?: emptyMap()
 }

@@ -67,7 +67,7 @@ public class MapAction<in T : Any, out R : Any>(
 
         val flow = dataSet.flow().map(::mapOne)
 
-        return DataTree.dynamic(outputType) {
+        return DataTree.active(outputType) {
             collectFrom(flow)
             scope?.launch {
                 dataSet.updates.collect { name ->

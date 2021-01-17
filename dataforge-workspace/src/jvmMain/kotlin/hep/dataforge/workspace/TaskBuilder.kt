@@ -1,11 +1,14 @@
 package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
-import hep.dataforge.context.logger
 import hep.dataforge.data.*
 import hep.dataforge.meta.*
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.names.Name
+import hep.dataforge.workspace.old.GenericTask
+import hep.dataforge.workspace.old.TaskModel
+import hep.dataforge.workspace.old.TaskModelBuilder
+import hep.dataforge.workspace.old.data
 import kotlin.reflect.KClass
 
 private typealias DataTransformation<R> = suspend (context: Context, model: TaskModel, data: DataSet<Any>) -> DataSet<R>
@@ -187,7 +190,7 @@ public class TaskBuilder<R : Any>(private val name: Name, public val type: KClas
                     logger.warn { "No transformation present, returning input data" }
                     dataSet.castOrNull(type) ?: error("$type expected, but $type received")
                 } else {
-                    DataTree.dynamic(type, workspace.context){
+                    DataTree.active(type, workspace.context){
                         dataTransforms.forEach { transformation ->
                             val res = transformation(workspace.context, model, dataSet)
                             update(res)
@@ -201,5 +204,5 @@ public class TaskBuilder<R : Any>(private val name: Name, public val type: KClas
 
 @DFExperimental
 public suspend inline fun <reified T : Any> TaskBuilder.TaskEnv.dataTree(
-    crossinline block: suspend MutableDataTree<T>.() -> Unit,
-): DataTree<T> = DataTree.dynamic(context, block)
+    crossinline block: suspend ActiveDataTree<T>.() -> Unit,
+): DataTree<T> = DataTree.active(context, block)

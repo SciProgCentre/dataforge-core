@@ -37,11 +37,11 @@ public interface GroupRule {
             object : GroupRule {
 
                 override suspend fun <T : Any> gather(dataType: KClass<out T>, set: DataSet<T>): Map<String, DataSet<T>> {
-                    val map = HashMap<String, MutableDataTree<T>>()
+                    val map = HashMap<String, ActiveDataTree<T>>()
 
                     set.flow().collect { data ->
                         val tagValue = data.meta[key]?.string ?: defaultTagValue
-                        map.getOrPut(tagValue) { MutableDataTree(dataType) }.set(data.name, data.data)
+                        map.getOrPut(tagValue) { ActiveDataTree(dataType) }.set(data.name, data.data)
                     }
 
                     return map

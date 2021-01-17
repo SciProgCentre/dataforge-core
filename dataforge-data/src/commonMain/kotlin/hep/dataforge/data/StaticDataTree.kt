@@ -12,8 +12,6 @@ internal class StaticDataTree<T : Any>(
 
     private val items: MutableMap<NameToken, DataTreeItem<T>> = HashMap()
 
-    override val updates: Flow<Name> = emptyFlow()
-
     override suspend fun items(): Map<NameToken, DataTreeItem<T>> = items.filter { !it.key.body.startsWith("@") }
 
     override suspend fun remove(name: Name) {
@@ -61,15 +59,15 @@ internal class StaticDataTree<T : Any>(
     }
 }
 
-public suspend fun <T : Any> DataTree.Companion.static(
+public suspend fun <T : Any> DataTree(
     dataType: KClass<out T>,
     block: suspend DataSetBuilder<T>.() -> Unit,
 ): DataTree<T> = StaticDataTree(dataType).apply { block() }
 
-public suspend inline fun <reified T : Any> DataTree.Companion.static(
+public suspend inline fun <reified T : Any> DataTree(
     noinline block: suspend DataSetBuilder<T>.() -> Unit,
-): DataTree<T> = static(T::class, block)
+): DataTree<T> = DataTree(T::class, block)
 
-public suspend fun <T : Any> DataSet<T>.toStaticTree(): DataTree<T> = StaticDataTree(dataType).apply {
-    update(this@toStaticTree)
+public suspend fun <T : Any> DataSet<T>.seal(): DataTree<T> = DataTree(dataType){
+    update(this@seal)
 }

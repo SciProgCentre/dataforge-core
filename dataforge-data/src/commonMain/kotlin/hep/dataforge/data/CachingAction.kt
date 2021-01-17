@@ -34,7 +34,7 @@ public abstract class CachingAction<in T : Any, out R : Any>(
         dataSet: DataSet<T>,
         meta: Meta,
         scope: CoroutineScope?,
-    ): DataSet<R> = DataTree.dynamic(outputType) {
+    ): DataSet<R> = DataTree.active(outputType) {
         coroutineScope {
             collectFrom(transform(dataSet, meta))
         }

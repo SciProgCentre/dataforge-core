@@ -3,7 +3,7 @@ package hep.dataforge.workspace
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextBuilder
 import hep.dataforge.context.Global
-import hep.dataforge.data.MutableDataTree
+import hep.dataforge.data.ActiveDataTree
 import hep.dataforge.meta.*
 import hep.dataforge.names.toName
 import kotlin.reflect.KClass
@@ -12,8 +12,8 @@ import kotlin.reflect.KClass
 public interface WorkspaceBuilder {
     public val parentContext: Context
     public var context: Context
-    public var data: MutableDataTree<Any>
-    public var tasks: MutableSet<Task<Any>>
+    public var data: ActiveDataTree<Any>
+    public var tasks: MutableSet<WorkStage<Any>>
     public var targets: MutableMap<String, Meta>
 
     public fun build(): Workspace
@@ -27,7 +27,7 @@ public fun WorkspaceBuilder.context(name: String = "WORKSPACE", block: ContextBu
 }
 
 public inline fun WorkspaceBuilder.data(
-    block: MutableDataTree<Any>.() -> Unit,
+    block: ActiveDataTree<Any>.() -> Unit,
 ): Unit{
     data.apply(block)
 }
@@ -59,21 +59,21 @@ public fun <T : Any> WorkspaceBuilder.task(
 public inline fun <reified T : Any> WorkspaceBuilder.task(
     name: String,
     noinline builder: TaskBuilder<T>.() -> Unit,
-): Task<T> = task(name, T::class, builder)
+): WorkStage<T> = task(name, T::class, builder)
 
 @JvmName("rawTask")
 public fun WorkspaceBuilder.task(
     name: String,
     builder: TaskBuilder<Any>.() -> Unit,
-): Task<Any> = task(name, Any::class, builder)
+): WorkStage<Any> = task(name, Any::class, builder)
 
 /**
  * A builder for a simple workspace
  */
 public class SimpleWorkspaceBuilder(override val parentContext: Context) : WorkspaceBuilder {
     override var context: Context = parentContext
-    override var data: MutableDataTree<Any> = MutableDataTree(Any::class, context)
-    override var tasks: MutableSet<Task<Any>> = HashSet()
+    override var data: ActiveDataTree<Any> = ActiveDataTree(Any::class, context)
+    override var tasks: MutableSet<WorkStage<Any>> = HashSet()
     override var targets: MutableMap<String, Meta> = HashMap()
 
     override fun build(): SimpleWorkspace {

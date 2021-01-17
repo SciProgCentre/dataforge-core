@@ -35,7 +35,7 @@ internal class DataTreeBuilderTest {
     fun testDynamicUpdates() = runBlocking {
         try {
             supervisorScope {
-                val subNode = DataTree.dynamic<Int> {
+                val subNode = DataTree.active<Int> {
                     launch {
                         repeat(10) {
                             delay(10)
@@ -48,7 +48,7 @@ internal class DataTreeBuilderTest {
                         println(it)
                     }
                 }
-                val rootNode = DataTree.dynamic<Int> {
+                val rootNode = DataTree.active<Int> {
                     setAndObserve("sub".toName(), subNode)
                 }
 

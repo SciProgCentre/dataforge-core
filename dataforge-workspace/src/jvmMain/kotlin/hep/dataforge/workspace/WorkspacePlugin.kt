@@ -1,26 +1,26 @@
 package hep.dataforge.workspace
 
 import hep.dataforge.context.AbstractPlugin
-import hep.dataforge.context.toMap
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
+import hep.dataforge.workspace.old.GenericTask
 import kotlin.reflect.KClass
 
 /**
  * An abstract plugin with some additional boilerplate to effectively work with workspace context
  */
 public abstract class WorkspacePlugin : AbstractPlugin() {
-    private val _tasks = HashSet<Task<*>>()
-    public val tasks: Collection<Task<*>> get() = _tasks
+    private val _tasks = HashSet<WorkStage<*>>()
+    public val tasks: Collection<WorkStage<*>> get() = _tasks
 
     override fun content(target: String): Map<Name, Any> {
         return when (target) {
-            Task.TYPE -> tasks.toMap()
+            WorkStage.TYPE -> tasks.toMap()
             else -> emptyMap()
         }
     }
 
-    public fun task(task: Task<*>){
+    public fun task(task: WorkStage<*>){
         _tasks.add(task)
     }
 
