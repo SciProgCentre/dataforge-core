@@ -1,5 +1,6 @@
 package hep.dataforge.names
 
+import hep.dataforge.meta.DFExperimental
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -38,6 +39,18 @@ public class Name(public val tokens: List<NameToken>) {
 
     public companion object : KSerializer<Name> {
         public const val NAME_SEPARATOR: String = "."
+
+        /**
+         * Match any single token (both body and index)
+         */
+        @DFExperimental
+        public val MATCH_ANY_TOKEN: NameToken = NameToken("*")
+
+        /**
+         * Token that allows to match the whole tail or the whole head of the name. Must match at least one token.
+         */
+        @DFExperimental
+        public val MATCH_ALL_TOKEN: NameToken = NameToken("**")
 
         public val EMPTY: Name = Name(emptyList())
 
