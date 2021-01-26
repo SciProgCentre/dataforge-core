@@ -1,5 +1,7 @@
 package hep.dataforge.data
 
+import hep.dataforge.actions.NamedData
+import hep.dataforge.actions.named
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.seal
@@ -11,36 +13,41 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 
-
+/**
+ * Lazily transform this data to another data. By convention [block] should not use external data (be pure).
+ * @param coroutineContext additional [CoroutineContext] elements used for data computation.
+ * @param meta for the resulting data. By default equals input data.
+ * @param block the transformation itself
+ */
 public fun <T : Any, R : Any> Data<T>.map(
     outputType: KClass<out R>,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = this.meta,
     block: suspend (T) -> R,
-): Data<R> = LazyData(outputType, meta, coroutineContext, listOf(this)) {
+): LazyData<R> = LazyData(outputType, meta, coroutineContext, listOf(this)) {
     block(await())
 }
 
 /**
- * Create a data mapping
+ * See [map]
  */
 public inline fun <T : Any, reified R : Any> Data<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = this.meta,
     crossinline block: suspend (T) -> R,
-): Data<R> = LazyData(R::class, meta, coroutineContext, listOf(this)) {
+): LazyData<R> = LazyData(R::class, meta, coroutineContext, listOf(this)) {
     block(await())
 }
 
 /**
- * Combine this data with the other data using [block]
+ * Combine this data with the other data using [block]. See [map] for other details
  */
-public inline fun <T1 : Any, T2: Any,  reified R : Any> Data<T1>.combine(
+public inline fun <T1 : Any, T2 : Any, reified R : Any> Data<T1>.combine(
     other: Data<T2>,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = this.meta,
     crossinline block: suspend (left: T1, right: T2) -> R,
-): Data<R> = LazyData(R::class, meta, coroutineContext, listOf(this,other)) {
+): LazyData<R> = LazyData(R::class, meta, coroutineContext, listOf(this, other)) {
     block(await(), other.await())
 }
 
@@ -48,19 +55,19 @@ public inline fun <T1 : Any, T2: Any,  reified R : Any> Data<T1>.combine(
 //data collection operations
 
 /**
- * Create a joined data.
+ * Lazily reduce a collection of [Data] to a single data.
  */
 public inline fun <T : Any, reified R : Any> Collection<Data<T>>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    noinline block: suspend (Collection<T>) -> R,
-): Data<R> = LazyData(
+    crossinline block: suspend (Collection<T>) -> R,
+): LazyData<R> = LazyData(
     R::class,
     meta,
     coroutineContext,
     this
 ) {
-    block(map { run { it.await() } })
+    block(map { it.await() })
 }
 
 public fun <K, T : Any, R : Any> Map<K, Data<T>>.reduceToData(
@@ -79,7 +86,7 @@ public fun <K, T : Any, R : Any> Map<K, Data<T>>.reduceToData(
 
 
 /**
- * A joining of multiple data into a single one
+ * Lazily reduce a [Map] of [Data] with any static key.
  * @param K type of the map key
  * @param T type of the input goal
  * @param R type of the result goal
@@ -97,8 +104,10 @@ public inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.reduceToData(
     block(mapValues { it.value.await() })
 }
 
+//flow operations
+
 /**
- * Transform a [Flow] of [NamedData] to a single [Data]. Execution restrictions are removed for inner [Flow]
+ * Transform a [Flow] of [NamedData] to a single [Data].
  */
 public suspend fun <T : Any, R : Any> Flow<NamedData<T>>.reduceToData(
     outputType: KClass<out R>,
@@ -113,8 +122,6 @@ public suspend fun <T : Any, R : Any> Flow<NamedData<T>>.reduceToData(
 ) {
     transformation(this)
 }
-
-//flow operations
 
 public suspend inline fun <T : Any, reified R : Any> Flow<NamedData<T>>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
@@ -145,7 +152,7 @@ public suspend fun <T : Any, R : Any> DataSet<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     metaTransform: MetaBuilder.() -> Unit = {},
     block: suspend (T) -> R,
-): DataSet<R> = DataTree(outputType) {
+): DataTree<R> = DataTree(outputType) {
     populate(
         flow().map {
             val newMeta = it.meta.toMutableMeta().apply(metaTransform).seal()
@@ -158,7 +165,7 @@ public suspend inline fun <T : Any, reified R : Any> DataSet<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     noinline metaTransform: MetaBuilder.() -> Unit = {},
     noinline block: suspend (T) -> R,
-): DataSet<R> = map(R::class, coroutineContext, metaTransform, block)
+): DataTree<R> = map(R::class, coroutineContext, metaTransform, block)
 
 public suspend fun <T : Any> DataSet<T>.forEach(block: suspend (NamedData<T>) -> Unit) {
     contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }

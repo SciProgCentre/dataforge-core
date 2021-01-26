@@ -15,8 +15,6 @@ import kotlin.reflect.KClass
 @Type(TYPE)
 public interface Task<out T : Any> : Described {
 
-    public val type: KClass<out T>
-
     /**
      * Compute a [TaskResult] using given meta. In general, the result is lazy and represents both computation model
      * and a handler for actual result
@@ -36,8 +34,8 @@ public class TaskResultBuilder<T : Any>(
     public val workspace: Workspace,
     public val taskName: Name,
     public val taskMeta: Meta,
-    private val dataSync: DataSetBuilder<T>,
-) : DataSetBuilder<T> by dataSync
+    private val dataDrop: DataSetBuilder<T>,
+) : DataSetBuilder<T> by dataDrop
 
 /**
  * Create a [Task] that composes a result using [builder]. Only data from the workspace could be used.
@@ -50,8 +48,6 @@ public fun <T : Any> Task(
     builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): Task<T> = object : Task<T> {
 
-    override val type: KClass<out T> = resultType
-
     override val descriptor: ItemDescriptor? = descriptor
 
     override suspend fun execute(
@@ -60,7 +56,7 @@ public fun <T : Any> Task(
         taskMeta: Meta,
     ): TaskResult<T> = withContext(GoalExecutionRestriction() + workspace.goalLogger) {
         //TODO use safe builder and check for external data on add and detects cycles
-        val dataset = DataTree(type) {
+        val dataset = DataTree(resultType) {
             TaskResultBuilder(workspace,taskName, taskMeta, this).apply { builder() }
         }
         workspace.internalize(dataset, taskName, taskMeta)

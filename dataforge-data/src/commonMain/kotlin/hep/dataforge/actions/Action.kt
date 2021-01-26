@@ -1,5 +1,7 @@
-package hep.dataforge.data
+package hep.dataforge.actions
 
+import hep.dataforge.data.DataSet
+import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -30,4 +32,11 @@ public infix fun <T : Any, I : Any, R : Any> Action<T, I>.then(action: Action<I,
         }
     }
 }
+
+@DFExperimental
+public suspend fun <T : Any, R : Any> DataSet<T>.transformWith(
+    action: Action<T, R>,
+    meta: Meta = Meta.EMPTY,
+    scope: CoroutineScope? = null,
+): DataSet<R> = action.execute(this, meta, scope)
 

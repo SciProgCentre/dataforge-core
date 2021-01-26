@@ -1,5 +1,7 @@
 package hep.dataforge.data
 
+import hep.dataforge.actions.NamedData
+import hep.dataforge.actions.named
 import hep.dataforge.meta.*
 import hep.dataforge.misc.Type
 import hep.dataforge.names.*

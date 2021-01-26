@@ -1,5 +1,6 @@
-package hep.dataforge.data
+package hep.dataforge.actions
 
+import hep.dataforge.data.*
 import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -43,17 +44,6 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
             }
         }
     }
-
-//    /**
-//     * Add a single fixed group to grouping rules
-//     */
-//    public fun group(groupName: String, filter: DataMapper, action: JoinGroup<T, R>.() -> Unit) {
-//        groupRules += { node ->
-//            listOf(
-//                JoinGroup<T, R>(groupName, node.filter(filter)).apply(action)
-//            )
-//        }
-//    }
 
     public fun group(
         groupName: String,

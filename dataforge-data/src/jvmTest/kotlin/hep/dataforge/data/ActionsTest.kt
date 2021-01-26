@@ -1,5 +1,6 @@
 package hep.dataforge.data
 
+import hep.dataforge.actions.MapAction
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

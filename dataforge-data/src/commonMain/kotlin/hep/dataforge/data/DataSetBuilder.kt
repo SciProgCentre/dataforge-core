@@ -1,5 +1,6 @@
 package hep.dataforge.data
 
+import hep.dataforge.actions.NamedData
 import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
