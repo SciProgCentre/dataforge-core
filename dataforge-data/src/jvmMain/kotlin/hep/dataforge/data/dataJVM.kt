@@ -1,31 +1,12 @@
 package hep.dataforge.data
 
-import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
 /**
- * Block the thread and get data content
- */
-public fun <T : Any> Data<T>.value(): T = runBlocking { await() }
-
-/**
  * Check if data could be safely cast to given class
  */
-internal fun <R : Any> Data<*>.canCast(type: KClass<out R>): Boolean =
-    this.type.isSubclassOf(type)
-
-
-//public fun <R : Any, T : R> Data<T>.upcast(type: KClass<out R>): Data<R> {
-//    return object : Data<R> by this {
-//        override val type: KClass<out R> = type
-//    }
-//}
-//
-///**
-// * Safe upcast a [Data] to a supertype
-// */
-//public inline fun <reified R : Any, T : R> Data<T>.upcast(): Data<R> = upcast(R::class)
+internal fun <R : Any> Data<*>.canCast(type: KClass<out R>): Boolean = this.type.isSubclassOf(type)
 
 /**
  * Cast the node to given type if the cast is possible or return null

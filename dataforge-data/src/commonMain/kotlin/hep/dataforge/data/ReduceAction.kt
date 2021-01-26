@@ -104,7 +104,7 @@ public class ReduceAction<T : Any, R : Any>(
 
             val env = ActionEnv(groupName.toName(), groupMeta, meta)
 
-            val res: LazyData<R> = dataFlow.reduce(
+            val res: LazyData<R> = dataFlow.reduceToData(
                 outputType,
                 meta = groupMeta
             ) { group.result.invoke(env, it) }

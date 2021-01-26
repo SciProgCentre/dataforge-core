@@ -20,15 +20,17 @@ import kotlin.test.assertEquals
 
 
 class FileDataTest {
-    val dataNode = DataTree.static<String> {
-        set("dir") {
-            data("a", "Some string") {
-                "content" put "Some string"
+    val dataNode = runBlocking {
+        DataTree<String> {
+            emit("dir") {
+                data("a", "Some string") {
+                    "content" put "Some string"
+                }
             }
-        }
-        data("b", "root data")
-        meta {
-            "content" put "This is root meta node"
+            data("b", "root data")
+            meta {
+                "content" put "This is root meta node"
+            }
         }
     }
 
@@ -50,10 +52,10 @@ class FileDataTest {
 
     }
 
-    object StringFormatResolver: FileFormatResolver<String>{
+    object StringFormatResolver : FileFormatResolver<String> {
         override val type: KType = typeOf<String>()
 
-        override fun invoke(path: Path, meta: Meta): IOFormat<String> =StringIOFormat
+        override fun invoke(path: Path, meta: Meta): IOFormat<String> = StringIOFormat
 
     }
 
@@ -64,12 +66,10 @@ class FileDataTest {
             val dir = Files.createTempDirectory("df_data_node")
             runBlocking {
                 writeDataDirectory(dir, dataNode, StringIOFormat)
-            }
-            println(dir.toUri().toString())
-            val reconstructed = readDataDirectory(dir,StringFormatResolver)
-            runBlocking {
+                println(dir.toUri().toString())
+                val reconstructed = readDataDirectory(dir, StringFormatResolver)
                 assertEquals(dataNode.getData("dir.a")?.meta, reconstructed.getData("dir.a")?.meta)
-                assertEquals(dataNode.getData("b")?.value(), reconstructed.getData("b")?.value())
+                assertEquals(dataNode.getData("b")?.await(), reconstructed.getData("b")?.await())
             }
         }
     }
@@ -82,12 +82,10 @@ class FileDataTest {
             val zip = Files.createTempFile("df_data_node", ".zip")
             runBlocking {
                 writeZip(zip, dataNode, StringIOFormat)
-            }
-            println(zip.toUri().toString())
-            val reconstructed = readDataDirectory(zip, StringFormatResolver)
-            runBlocking {
+                println(zip.toUri().toString())
+                val reconstructed = readDataDirectory(zip, StringFormatResolver)
                 assertEquals(dataNode.getData("dir.a")?.meta, reconstructed.getData("dir.a")?.meta)
-                assertEquals(dataNode.getData("b")?.value(), reconstructed.getData("b")?.value())
+                assertEquals(dataNode.getData("b")?.await(), reconstructed.getData("b")?.await())
             }
         }
     }

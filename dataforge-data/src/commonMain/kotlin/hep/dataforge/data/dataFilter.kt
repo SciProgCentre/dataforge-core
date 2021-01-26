@@ -12,10 +12,9 @@ import kotlin.reflect.KClass
 /**
  * A stateless filtered [DataSet]
  */
-@DFExperimental
 public fun <T : Any> DataSet<T>.filter(
     predicate: suspend (Name, Data<T>) -> Boolean,
-): DataSet<T> = object : DataSet<T> {
+): ActiveDataSet<T> = object : ActiveDataSet<T> {
     override val dataType: KClass<out T> get() = this@filter.dataType
 
     override fun flow(): Flow<NamedData<T>> =
@@ -36,7 +35,7 @@ public fun <T : Any> DataSet<T>.filter(
  * Generate a wrapper data set with a given name prefix appended to all names
  */
 public fun <T : Any> DataSet<T>.withNamePrefix(prefix: Name): DataSet<T> = if (prefix.isEmpty()) this
-else object : DataSet<T> {
+else object : ActiveDataSet<T> {
     override val dataType: KClass<out T> get() = this@withNamePrefix.dataType
 
     override fun flow(): Flow<NamedData<T>> = this@withNamePrefix.flow().map { it.data.named(prefix + it.name) }
@@ -51,8 +50,9 @@ else object : DataSet<T> {
 /**
  * Get a subset of data starting with a given [branchName]
  */
-public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branchName.isEmpty()) this
-else object : DataSet<T> {
+public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branchName.isEmpty()) {
+    this
+} else object : ActiveDataSet<T> {
     override val dataType: KClass<out T> get() = this@branch.dataType
 
     override fun flow(): Flow<NamedData<T>> = this@branch.flow().mapNotNull {
@@ -70,3 +70,4 @@ public fun <T : Any> DataSet<T>.branch(branchName: String): DataSet<T> = this@br
 
 @DFExperimental
 public suspend fun <T : Any> DataSet<T>.rootData(): Data<T>? = getData(Name.EMPTY)
+

@@ -67,14 +67,14 @@ public class MapAction<in T : Any, out R : Any>(
 
         val flow = dataSet.flow().map(::mapOne)
 
-        return DataTree.active(outputType) {
-            collectFrom(flow)
+        return ActiveDataTree(outputType) {
+            populate(flow)
             scope?.launch {
                 dataSet.updates.collect { name ->
                     //clear old nodes
                     remove(name)
                     //collect new items
-                    collectFrom(dataSet.flowChildren(name).map(::mapOne))
+                    populate(dataSet.flowChildren(name).map(::mapOne))
                 }
             }
         }

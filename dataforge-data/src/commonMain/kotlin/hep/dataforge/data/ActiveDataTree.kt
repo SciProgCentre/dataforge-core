@@ -63,7 +63,7 @@ public class ActiveDataTree<T : Any>(
         }
     }
 
-    override suspend fun set(name: Name, data: Data<T>?) {
+    override suspend fun emit(name: Name, data: Data<T>?) {
         if (data == null) {
             remove(name)
         } else {
@@ -80,9 +80,9 @@ public class ActiveDataTree<T : Any>(
      * Copy given data set and mirror its changes to this [ActiveDataTree] in [this@setAndObserve]. Returns an update [Job]
      */
     public fun CoroutineScope.setAndObserve(name: Name, dataSet: DataSet<T>): Job = launch {
-        set(name, dataSet)
+        emit(name, dataSet)
         dataSet.updates.collect { nameInBranch ->
-            set(name + nameInBranch, dataSet.getData(nameInBranch))
+            emit(name + nameInBranch, dataSet.getData(nameInBranch))
         }
     }
 }
@@ -90,7 +90,8 @@ public class ActiveDataTree<T : Any>(
 /**
  * Create a dynamic tree. Initial data is placed synchronously. Updates are propagated via [updatesScope]
  */
-public suspend fun <T : Any> DataTree.Companion.active(
+@Suppress("FunctionName")
+public suspend fun <T : Any> ActiveDataTree(
     type: KClass<out T>,
     block: suspend ActiveDataTree<T>.() -> Unit,
 ): DataTree<T> {
@@ -99,17 +100,18 @@ public suspend fun <T : Any> DataTree.Companion.active(
     return tree
 }
 
-public suspend inline fun <reified T : Any> DataTree.Companion.active(
+@Suppress("FunctionName")
+public suspend inline fun <reified T : Any> ActiveDataTree(
     crossinline block: suspend ActiveDataTree<T>.() -> Unit,
 ): DataTree<T> = ActiveDataTree(T::class).apply { block() }
 
 
-public suspend inline fun <reified T : Any> ActiveDataTree<T>.set(
+public suspend inline fun <reified T : Any> ActiveDataTree<T>.emit(
     name: Name,
     noinline block: suspend ActiveDataTree<T>.() -> Unit,
-): Unit = set(name, DataTree.active(T::class, block))
+): Unit = emit(name, ActiveDataTree(T::class, block))
 
-public suspend inline fun <reified T : Any> ActiveDataTree<T>.set(
+public suspend inline fun <reified T : Any> ActiveDataTree<T>.emit(
     name: String,
     noinline block: suspend ActiveDataTree<T>.() -> Unit,
-): Unit = set(name.toName(), DataTree.active(T::class, block))
+): Unit = emit(name.toName(), ActiveDataTree(T::class, block))

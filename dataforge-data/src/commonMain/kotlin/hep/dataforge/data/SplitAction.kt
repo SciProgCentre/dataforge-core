@@ -62,14 +62,14 @@ public class SplitAction<T : Any, R : Any>(
             }
         }
 
-        return DataTree.active(outputType) {
-            collectFrom(dataSet.flow().flatMapConcat(transform = ::splitOne))
+        return ActiveDataTree(outputType) {
+            populate(dataSet.flow().flatMapConcat(transform = ::splitOne))
             scope?.launch {
                 dataSet.updates.collect { name ->
                     //clear old nodes
                     remove(name)
                     //collect new items
-                    collectFrom(dataSet.flowChildren(name).flatMapConcat(transform = ::splitOne))
+                    populate(dataSet.flowChildren(name).flatMapConcat(transform = ::splitOne))
                 }
             }
         }

@@ -34,16 +34,16 @@ public abstract class CachingAction<in T : Any, out R : Any>(
         dataSet: DataSet<T>,
         meta: Meta,
         scope: CoroutineScope?,
-    ): DataSet<R> = DataTree.active(outputType) {
+    ): DataSet<R> = ActiveDataTree(outputType) {
         coroutineScope {
-            collectFrom(transform(dataSet, meta))
+            populate(transform(dataSet, meta))
         }
         scope?.let {
             dataSet.updates.collect {
                 //clear old nodes
                 remove(it)
                 //collect new items
-                collectFrom(scope.transform(dataSet, meta, it))
+                populate(scope.transform(dataSet, meta, it))
                 //FIXME if the target is data, updates are fired twice
             }
         }

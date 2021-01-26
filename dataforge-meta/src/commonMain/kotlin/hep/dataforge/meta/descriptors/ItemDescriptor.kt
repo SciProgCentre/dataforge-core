@@ -192,12 +192,12 @@ public class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) 
         internal val ITEM_KEY: Name = "item".asName()
         internal val IS_NODE_KEY: Name = "@isNode".asName()
 
-        public inline operator fun invoke(block: NodeDescriptor.() -> Unit): NodeDescriptor =
-            NodeDescriptor().apply(block)
-
         //TODO infer descriptor from spec
     }
 }
+
+public inline fun NodeDescriptor(block: NodeDescriptor.() -> Unit): NodeDescriptor =
+    NodeDescriptor().apply(block)
 
 /**
  * Get a descriptor item associated with given name or null if item for given name not provided

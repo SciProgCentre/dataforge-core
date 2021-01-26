@@ -42,32 +42,34 @@ internal class StaticDataTree<T : Any>(
         }
     }
 
-    override suspend fun set(name: Name, data: Data<T>?) {
+    override suspend fun emit(name: Name, data: Data<T>?) {
         set(name, data?.let { DataTreeItem.Leaf(it) })
     }
 
-    override suspend fun set(name: Name, dataSet: DataSet<T>) {
+    override suspend fun emit(name: Name, dataSet: DataSet<T>) {
         if (dataSet is StaticDataTree) {
             set(name, DataTreeItem.Node(dataSet))
         } else {
             coroutineScope {
                 dataSet.flow().collect {
-                    set(name + it.name, it.data)
+                    emit(name + it.name, it.data)
                 }
             }
         }
     }
 }
 
+@Suppress("FunctionName")
 public suspend fun <T : Any> DataTree(
     dataType: KClass<out T>,
     block: suspend DataSetBuilder<T>.() -> Unit,
 ): DataTree<T> = StaticDataTree(dataType).apply { block() }
 
+@Suppress("FunctionName")
 public suspend inline fun <reified T : Any> DataTree(
     noinline block: suspend DataSetBuilder<T>.() -> Unit,
 ): DataTree<T> = DataTree(T::class, block)
 
 public suspend fun <T : Any> DataSet<T>.seal(): DataTree<T> = DataTree(dataType){
-    update(this@seal)
+    populate(this@seal)
 }

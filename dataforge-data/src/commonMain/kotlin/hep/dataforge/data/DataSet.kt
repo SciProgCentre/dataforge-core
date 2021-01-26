@@ -36,10 +36,21 @@ public interface DataSet<out T : Any> {
 
     public companion object {
         public val META_KEY: Name = "@meta".asName()
+
+        /**
+         * An empty [DataSet] that suits all types
+         */
+        public val EMPTY: DataSet<Nothing> = object : DataSet<Nothing> {
+            override val dataType: KClass<out Nothing> = Nothing::class
+
+            override fun flow(): Flow<NamedData<Nothing>> = emptyFlow()
+
+            override suspend fun getData(name: Name): Data<Nothing>? = null
+        }
     }
 }
 
-public interface ActiveDataSet<T: Any>: DataSet<T>{
+public interface ActiveDataSet<T : Any> : DataSet<T> {
     /**
      * A flow of updated item names. Updates are propagated in a form of [Flow] of names of updated nodes.
      * Those can include new data items and replacement of existing ones. The replaced items could update existing data content
@@ -49,7 +60,7 @@ public interface ActiveDataSet<T: Any>: DataSet<T>{
     public val updates: Flow<Name>
 }
 
-public val <T: Any> DataSet<T>.updates: Flow<Name>  get() = if(this is ActiveDataSet) updates else emptyFlow()
+public val <T : Any> DataSet<T>.updates: Flow<Name> get() = if (this is ActiveDataSet) updates else emptyFlow()
 
 /**
  * Flow all data nodes with names starting with [branchName]

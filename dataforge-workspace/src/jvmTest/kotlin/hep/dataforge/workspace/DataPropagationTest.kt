@@ -5,54 +5,28 @@ import hep.dataforge.context.PluginFactory
 import hep.dataforge.context.PluginTag
 import hep.dataforge.data.*
 import hep.dataforge.meta.Meta
-import hep.dataforge.workspace.old.data
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.reduce
+import hep.dataforge.names.toName
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-fun <T : Any> DataSet<T>.first(): NamedData<T>? = runBlocking { flow().firstOrNull() }
-
 class DataPropagationTestPlugin : WorkspacePlugin() {
     override val tag: PluginTag = Companion.tag
 
-    val testAllData = task("allData", Int::class) {
-        model {
-            data()
+    val allData by task<Int> {
+        val selectedData = workspace.data.select<Int>()
+        val result: Data<Int> = selectedData.flow().foldToData(0) { result, data ->
+            result + data.await()
         }
-        transform<Int> { data ->
-            DataTree.active(context) {
-                val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
-                data("result", result)
-            }
-        }
+        emit("result", result)
     }
 
 
-    val testSingleData = task("singleData", Int::class) {
-        model {
-            data(pattern = "myData\\[12\\]")
-        }
-        transform<Int> { data ->
-            DataTree.active(context) {
-                val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
-                data("result", result)
-            }
-        }
-    }
-
-    val testAllRegexData = task("allRegexData", Int::class) {
-        model {
-            data(pattern = "myData.*")
-        }
-        transform<Int> { data ->
-            DataTree.active(context) {
-                val result = data.flow().map { it.value() }.reduce { acc, pair -> acc + pair }
-                data("result", result)
-            }
+    val singleData by task<Int> {
+        workspace.data.select<Int>().getData("myData[12]".toName())?.let {
+            emit("result", it)
         }
     }
 
@@ -72,9 +46,11 @@ class DataPropagationTest {
         context {
             plugin(DataPropagationTestPlugin)
         }
-        data {
-            repeat(100) {
-                data("myData[$it]", it)
+        runBlocking {
+            data {
+                repeat(100) {
+                    data("myData[$it]", it)
+                }
             }
         }
     }
@@ -82,24 +58,16 @@ class DataPropagationTest {
     @Test
     fun testAllData() {
         runBlocking {
-            val node = testWorkspace.execute("Test.allData")
-            assertEquals(4950, node.first()!!.value())
-        }
-    }
-
-    @Test
-    fun testAllRegexData() {
-        runBlocking {
-            val node = testWorkspace.execute("Test.allRegexData")
-            assertEquals(4950, node.first()!!.value())
+            val node = testWorkspace.produce("Test.allData")
+            assertEquals(4950, node.flow().single().await())
         }
     }
 
     @Test
     fun testSingleData() {
         runBlocking {
-            val node = testWorkspace.execute("Test.singleData")
-            assertEquals(12, node.first()!!.value())
+            val node = testWorkspace.produce("Test.singleData")
+            assertEquals(12, node.flow().single().await())
         }
     }
 }

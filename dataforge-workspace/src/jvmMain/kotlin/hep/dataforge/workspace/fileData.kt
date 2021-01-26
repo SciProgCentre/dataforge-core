@@ -82,7 +82,7 @@ public suspend fun <T : Any> DataSetBuilder<T>.file(
             val data = readDataFile(path, formatResolver)
             val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string
                 ?: path.fileName.toString().replace(".df", "")
-            set(name, data)
+            emit(name, data)
         }
     } else {
         //otherwise, read as directory
@@ -90,7 +90,7 @@ public suspend fun <T : Any> DataSetBuilder<T>.file(
             val data = readDataDirectory(path, formatResolver)
             val name = data.getMeta()[Envelope.ENVELOPE_NAME_KEY].string
                 ?: path.fileName.toString().replace(".df", "")
-            set(name, data)
+            emit(name, data)
         }
     }
 }
@@ -99,7 +99,7 @@ public suspend fun <T : Any> DataSetBuilder<T>.file(
  * Read the directory as a data node. If [path] is a zip archive, read it as directory
  */
 @DFExperimental
-public fun <T : Any> IOPlugin.readDataDirectory(
+public suspend fun <T : Any> IOPlugin.readDataDirectory(
     path: Path,
     formatResolver: FileFormatResolver<T>,
 ): DataTree<T> {
@@ -110,7 +110,7 @@ public fun <T : Any> IOPlugin.readDataDirectory(
         return readDataDirectory(fs.rootDirectories.first(), formatResolver)
     }
     if (!Files.isDirectory(path)) error("Provided path $path is not a directory")
-    return DataTree.static(formatResolver.kClass) {
+    return DataTree(formatResolver.kClass) {
         Files.list(path).toList().forEach { path ->
             val fileName = path.fileName.toString()
             if (fileName.startsWith(IOPlugin.META_FILE_NAME)) {
@@ -125,7 +125,7 @@ public fun <T : Any> IOPlugin.readDataDirectory(
 }
 
 @DFExperimental
-public inline fun <reified T : Any> IOPlugin.readDataDirectory(path: Path): DataTree<T> =
+public suspend inline fun <reified T : Any> IOPlugin.readDataDirectory(path: Path): DataTree<T> =
     readDataDirectory(path, formatResolver())
 
 /**

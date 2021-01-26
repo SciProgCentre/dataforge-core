@@ -10,20 +10,20 @@ import kotlin.test.assertEquals
 internal class DataTreeBuilderTest {
     @Test
     fun testDataUpdate() = runBlocking {
-        val updateData: DataTree<Any> = DataTree.static {
+        val updateData: DataTree<Any> = DataTree {
             "update" put {
                 "a" put Data.static("a")
                 "b" put Data.static("b")
             }
         }
 
-        val node = DataTree.static<Any> {
-            set("primary") {
+        val node = DataTree<Any> {
+            emit("primary") {
                 data("a", "a")
                 data("b", "b")
             }
             data("root", "root")
-            update(updateData)
+            populate(updateData)
         }
 
 
@@ -34,13 +34,15 @@ internal class DataTreeBuilderTest {
     @Test
     fun testDynamicUpdates() = runBlocking {
         try {
+            lateinit var updateJob: Job
             supervisorScope {
-                val subNode = DataTree.active<Int> {
-                    launch {
+                val subNode = ActiveDataTree<Int> {
+                    updateJob = launch {
                         repeat(10) {
                             delay(10)
                             data("value", it)
                         }
+                        delay(10)
                     }
                 }
                 launch {
@@ -48,7 +50,7 @@ internal class DataTreeBuilderTest {
                         println(it)
                     }
                 }
-                val rootNode = DataTree.active<Int> {
+                val rootNode = ActiveDataTree<Int> {
                     setAndObserve("sub".toName(), subNode)
                 }
 
@@ -57,7 +59,7 @@ internal class DataTreeBuilderTest {
                         println(it)
                     }
                 }
-                delay(200)
+                updateJob.join()
                 assertEquals(9, rootNode.getData("sub.value")?.value())
                 cancel()
             }

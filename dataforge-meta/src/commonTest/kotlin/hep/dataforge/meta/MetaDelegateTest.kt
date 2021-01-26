@@ -38,7 +38,7 @@ class MetaDelegateTest {
         assertEquals("theString", testObject.myValue)
         assertEquals(TestEnum.NO, testObject.enumValue)
         assertEquals(2.2, testObject.safeValue)
-        assertEquals("ddd", testObject.inner?.innerValue)
+        assertEquals("ddd", testObject.inner.innerValue)
 
     }
 

@@ -62,7 +62,7 @@ public class LazyData<T : Any>(
     override val meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
     dependencies: Collection<Data<*>> = emptyList(),
-    block: suspend CoroutineScope.() -> T,
+    block: suspend () -> T,
 ) : Data<T>, LazyGoal<T>(context, dependencies, block)
 
 public class StaticData<T : Any>(
@@ -78,7 +78,7 @@ public fun <T : Any> Data(
     meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
     dependencies: Collection<Data<*>> = emptyList(),
-    block: suspend CoroutineScope.() -> T,
+    block: suspend () -> T,
 ): Data<T> = LazyData(type, meta, context, dependencies, block)
 
 @Suppress("FunctionName")
@@ -86,80 +86,5 @@ public inline fun <reified T : Any> Data(
     meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
     dependencies: Collection<Data<*>> = emptyList(),
-    noinline block: suspend CoroutineScope.() -> T,
+    noinline block: suspend () -> T,
 ): Data<T> = Data(T::class, meta, context, dependencies, block)
-
-
-
-public fun <T : Any, R : Any> Data<T>.map(
-    outputType: KClass<out R>,
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = this.meta,
-    block: suspend CoroutineScope.(T) -> R,
-): Data<R> = LazyData(outputType, meta, coroutineContext, listOf(this)) {
-    block(await())
-}
-
-
-/**
- * Create a data pipe
- */
-public inline fun <T : Any, reified R : Any> Data<T>.map(
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = this.meta,
-    noinline block: suspend CoroutineScope.(T) -> R,
-): Data<R> = LazyData(R::class, meta, coroutineContext, listOf(this)) {
-    block(await())
-}
-
-/**
- * Create a joined data.
- */
-public inline fun <T : Any, reified R : Any> Collection<Data<T>>.reduce(
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta,
-    noinline block: suspend CoroutineScope.(Collection<T>) -> R,
-): Data<R> = LazyData(
-    R::class,
-    meta,
-    coroutineContext,
-    this
-) {
-    block(map { run { it.await() } })
-}
-
-public fun <K, T : Any, R : Any> Map<K, Data<T>>.reduce(
-    outputType: KClass<out R>,
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta,
-    block: suspend CoroutineScope.(Map<K, T>) -> R,
-): LazyData<R> = LazyData(
-    outputType,
-    meta,
-    coroutineContext,
-    this.values
-) {
-    block(mapValues { it.value.await() })
-}
-
-
-/**
- * A joining of multiple data into a single one
- * @param K type of the map key
- * @param T type of the input goal
- * @param R type of the result goal
- */
-public inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.reduce(
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta,
-    noinline block: suspend CoroutineScope.(Map<K, T>) -> R,
-): LazyData<R> = LazyData(
-    R::class,
-    meta,
-    coroutineContext,
-    this.values
-) {
-    block(mapValues { it.value.await() })
-}
-
-

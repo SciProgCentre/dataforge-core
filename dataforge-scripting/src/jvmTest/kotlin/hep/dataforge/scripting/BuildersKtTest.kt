@@ -3,8 +3,9 @@ package hep.dataforge.scripting
 import hep.dataforge.context.Global
 import hep.dataforge.meta.get
 import hep.dataforge.meta.int
-import hep.dataforge.workspace.SimpleWorkspaceBuilder
-import hep.dataforge.workspace.context
+import hep.dataforge.workspace.WorkspaceBuilder
+
+import hep.dataforge.workspace.target
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -12,7 +13,7 @@ import kotlin.test.assertEquals
 class BuildersKtTest {
     @Test
     fun checkBuilder(){
-        val workspace = SimpleWorkspaceBuilder(Global).apply {
+        val workspace = WorkspaceBuilder(Global).apply {
             println("I am working")
 
             context("test")

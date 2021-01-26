@@ -4,9 +4,14 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
+/**
+ * Block the thread and get data content
+ */
+public fun <T : Any> Data<T>.value(): T = runBlocking { await() }
+
 class ActionsTest {
     val data: DataTree<Int> = runBlocking {
-        DataTree.static {
+        DataTree {
             repeat(10) {
                 data(it.toString(), it)
             }

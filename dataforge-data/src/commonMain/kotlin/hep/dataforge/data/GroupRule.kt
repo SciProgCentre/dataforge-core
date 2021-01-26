@@ -33,20 +33,26 @@ public interface GroupRule {
          * @param defaultTagValue
          * @return
          */
-        public fun byValue(scope: CoroutineScope, key: String, defaultTagValue: String): GroupRule =
-            object : GroupRule {
+        public fun byValue(
+            scope: CoroutineScope,
+            key: String,
+            defaultTagValue: String,
+        ): GroupRule = object : GroupRule {
 
-                override suspend fun <T : Any> gather(dataType: KClass<out T>, set: DataSet<T>): Map<String, DataSet<T>> {
-                    val map = HashMap<String, ActiveDataTree<T>>()
+            override suspend fun <T : Any> gather(
+                dataType: KClass<out T>,
+                set: DataSet<T>,
+            ): Map<String, DataSet<T>> {
+                val map = HashMap<String, ActiveDataTree<T>>()
 
-                    set.flow().collect { data ->
-                        val tagValue = data.meta[key]?.string ?: defaultTagValue
-                        map.getOrPut(tagValue) { ActiveDataTree(dataType) }.set(data.name, data.data)
-                    }
-
-                    return map
+                set.flow().collect { data ->
+                    val tagValue = data.meta[key]?.string ?: defaultTagValue
+                    map.getOrPut(tagValue) { ActiveDataTree(dataType) }.emit(data.name, data.data)
                 }
+
+                return map
             }
+        }
 
 
         //    @ValueDef(key = "byValue", required = true, info = "The name of annotation value by which grouping should be made")

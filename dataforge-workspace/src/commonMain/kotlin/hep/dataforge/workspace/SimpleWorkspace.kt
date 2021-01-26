@@ -12,16 +12,14 @@ import hep.dataforge.names.Name
  */
 public class SimpleWorkspace(
     override val context: Context,
-    override val data: DataSet<Any>,
+    data: DataSet<*>,
     override val targets: Map<String, Meta>,
-    stages: Map<Name, WorkStage<Any>>
+    private val externalTasks: Map<Name, Task<*>>,
 ) : Workspace {
 
-    override val stages: Map<Name, WorkStage<*>> by lazy {
-        context.gather<WorkStage<*>>(WorkStage.TYPE) + stages
-    }
+    override val data: TaskResult<*> = internalize(data, Name.EMPTY, Meta.EMPTY)
 
-    public companion object {
+    override val tasks: Map<Name, Task<*>>
+        get() = context.gather<Task<*>>(Task.TYPE) + externalTasks
 
-    }
 }

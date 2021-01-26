@@ -12,7 +12,7 @@ public suspend fun DataSet<*>.getMeta(): Meta? = getData(DataSet.META_KEY)?.meta
 /**
  * Add meta-data node to a [DataSet]
  */
-public suspend fun DataSetBuilder<*>.meta(meta: Meta): Unit = set(DataSet.META_KEY, Data.empty(meta))
+public suspend fun DataSetBuilder<*>.meta(meta: Meta): Unit = emit(DataSet.META_KEY, Data.empty(meta))
 
 /**
  * Add meta-data node to a [DataSet]
