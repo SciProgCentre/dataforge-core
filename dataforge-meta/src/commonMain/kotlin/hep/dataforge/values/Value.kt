@@ -179,10 +179,6 @@ public class EnumValue<E : Enum<*>>(override val value: E) : Value {
 }
 
 public class ListValue(override val list: List<Value>) : Value, Iterable<Value> {
-    init {
-        require(list.isNotEmpty()) { "Can't create list value from empty list" }
-    }
-
     override val value: List<Value> get() = list
     override val type: ValueType get() = ValueType.LIST
 
@@ -201,6 +197,10 @@ public class ListValue(override val list: List<Value>) : Value, Iterable<Value> 
 
     override fun hashCode(): Int {
         return list.hashCode()
+    }
+
+    public companion object{
+        public val EMPTY: ListValue = ListValue(emptyList())
     }
 }
 
