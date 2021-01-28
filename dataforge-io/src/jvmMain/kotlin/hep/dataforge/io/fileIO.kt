@@ -152,8 +152,8 @@ public fun IOPlugin.readEnvelopeFile(
     path: Path,
     readNonEnvelopes: Boolean = false,
     formatPicker: IOPlugin.(Path) -> EnvelopeFormat? = IOPlugin::peekFileEnvelopeFormat,
-): Envelope? {
-    if (!Files.exists(path)) return null
+): Envelope {
+    if (!Files.exists(path)) error("File with path $path does not exist")
 
     //read two-files directory
     if (Files.isDirectory(path)) {
@@ -182,7 +182,7 @@ public fun IOPlugin.readEnvelopeFile(
         path.readEnvelope(format)
     } ?: if (readNonEnvelopes) { // if no format accepts file, read it as binary
         SimpleEnvelope(Meta.EMPTY, path.asBinary())
-    } else null
+    } else error("Can't infer format for file $path")
 }
 
 /**
