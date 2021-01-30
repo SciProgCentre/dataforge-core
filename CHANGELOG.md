@@ -6,6 +6,7 @@
 - `Path` builders
 - Special ValueType for lists
 - `copy` method to descriptors
+- Multiplatform yaml meta
 
 ### Changed
 - `ListValue` and `DoubleArrayValue` implement `Iterable`.

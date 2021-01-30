@@ -22,7 +22,7 @@ public class FrontMatterEnvelopeFormat(
         var offset = 0u
         do {
             line = input.readUtf8Line() //?: error("Input does not contain front matter separator")
-            offset += line.toByteArray().size.toUInt()
+            offset += line.encodeToByteArray().size.toUInt()
         } while (!line.startsWith(SEPARATOR))
 
         val readMetaFormat =
@@ -34,7 +34,7 @@ public class FrontMatterEnvelopeFormat(
             do {
                 line = input.readUtf8Line()
                 writeUtf8String(line + "\r\n")
-                offset += line.toByteArray().size.toUInt()
+                offset += line.encodeToByteArray().size.toUInt()
             } while (!line.startsWith(SEPARATOR))
         }.read {
             readMetaFormat.readMeta(input)
