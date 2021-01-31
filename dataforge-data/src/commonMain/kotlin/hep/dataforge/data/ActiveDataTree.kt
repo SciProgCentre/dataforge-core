@@ -94,7 +94,7 @@ public class ActiveDataTree<T : Any>(
 public suspend fun <T : Any> ActiveDataTree(
     type: KClass<out T>,
     block: suspend ActiveDataTree<T>.() -> Unit,
-): DataTree<T> {
+): ActiveDataTree<T> {
     val tree = ActiveDataTree(type)
     tree.block()
     return tree
@@ -103,7 +103,7 @@ public suspend fun <T : Any> ActiveDataTree(
 @Suppress("FunctionName")
 public suspend inline fun <reified T : Any> ActiveDataTree(
     crossinline block: suspend ActiveDataTree<T>.() -> Unit,
-): DataTree<T> = ActiveDataTree(T::class).apply { block() }
+): ActiveDataTree<T> = ActiveDataTree(T::class).apply { block() }
 
 
 public suspend inline fun <reified T : Any> ActiveDataTree<T>.emit(
