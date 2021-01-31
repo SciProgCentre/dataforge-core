@@ -90,9 +90,18 @@ public suspend fun <T : Any> DataSetBuilder<T>.emit(data: NamedData<T>) {
  */
 public suspend inline fun <reified T : Any> DataSetBuilder<T>.emitLazy(
     name: String,
-    meta: Meta,
+    meta: Meta = Meta.EMPTY,
     noinline producer: suspend () -> T,
 ) {
+    val data = Data(meta, block = producer)
+    emit(name, data)
+}
+
+public suspend inline fun <reified T : Any> DataSetBuilder<T>.emitLazy(
+    name: Name,
+    meta: Meta = Meta.EMPTY,
+    noinline producer: suspend () -> T,
+){
     val data = Data(meta, block = producer)
     emit(name, data)
 }
@@ -101,6 +110,9 @@ public suspend inline fun <reified T : Any> DataSetBuilder<T>.emitLazy(
  * Emit a static data with the fixed value
  */
 public suspend fun <T : Any> DataSetBuilder<T>.emitStatic(name: String, data: T, meta: Meta = Meta.EMPTY): Unit =
+    emit(name, Data.static(data, meta))
+
+public suspend fun <T : Any> DataSetBuilder<T>.emitStatic(name: Name, data: T, meta: Meta = Meta.EMPTY): Unit =
     emit(name, Data.static(data, meta))
 
 public suspend fun <T : Any> DataSetBuilder<T>.emitStatic(
