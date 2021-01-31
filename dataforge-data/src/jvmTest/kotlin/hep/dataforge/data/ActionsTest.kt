@@ -14,7 +14,7 @@ class ActionsTest {
     val data: DataTree<Int> = runBlocking {
         DataTree {
             repeat(10) {
-                data(it.toString(), it)
+                emitStatic(it.toString(), it)
             }
         }
     }

@@ -74,18 +74,6 @@ public suspend fun <T : Any> DataSetBuilder<T>.emit(name: String, data: Data<T>)
     emit(name.toName(), data)
 }
 
-public suspend fun <T : Any> DataSetBuilder<T>.data(name: Name, data: T, meta: Meta = Meta.EMPTY) {
-    emit(name, Data.static(data, meta))
-}
-
-public suspend fun <T : Any> DataSetBuilder<T>.data(name: Name, data: T, block: MetaBuilder.() -> Unit = {}) {
-    emit(name, Data.static(data, Meta(block)))
-}
-
-public suspend fun <T : Any> DataSetBuilder<T>.data(name: String, data: T, block: MetaBuilder.() -> Unit = {}) {
-    emit(name.toName(), Data.static(data, Meta(block)))
-}
-
 public suspend fun <T : Any> DataSetBuilder<T>.emit(name: String, set: DataSet<T>) {
     this.emit(name.toName(), set)
 }
@@ -95,6 +83,32 @@ public suspend fun <T : Any> DataSetBuilder<T>.emit(name: String, block: suspend
 
 public suspend fun <T : Any> DataSetBuilder<T>.emit(data: NamedData<T>) {
     emit(data.name, data.data)
+}
+
+/**
+ * Produce lazy [Data] and emit it into the [DataSetBuilder]
+ */
+public suspend inline fun <reified T : Any> DataSetBuilder<T>.emitLazy(
+    name: String,
+    meta: Meta,
+    noinline producer: suspend () -> T,
+) {
+    val data = Data(meta, block = producer)
+    emit(name, data)
+}
+
+/**
+ * Emit a static data with the fixed value
+ */
+public suspend fun <T : Any> DataSetBuilder<T>.emitStatic(name: String, data: T, meta: Meta = Meta.EMPTY): Unit =
+    emit(name, Data.static(data, meta))
+
+public suspend fun <T : Any> DataSetBuilder<T>.emitStatic(
+    name: String,
+    data: T,
+    metaBuilder: MetaBuilder.() -> Unit,
+) {
+    emit(name.toName(), Data.static(data, Meta(metaBuilder)))
 }
 
 /**

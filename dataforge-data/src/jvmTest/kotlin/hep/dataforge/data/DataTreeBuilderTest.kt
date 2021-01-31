@@ -19,10 +19,10 @@ internal class DataTreeBuilderTest {
 
         val node = DataTree<Any> {
             emit("primary") {
-                data("a", "a")
-                data("b", "b")
+                emitStatic("a", "a")
+                emitStatic("b", "b")
             }
-            data("root", "root")
+            emitStatic("root", "root")
             populate(updateData)
         }
 
@@ -40,7 +40,7 @@ internal class DataTreeBuilderTest {
                     updateJob = launch {
                         repeat(10) {
                             delay(10)
-                            data("value", it)
+                            emitStatic("value", it)
                         }
                         delay(10)
                     }
