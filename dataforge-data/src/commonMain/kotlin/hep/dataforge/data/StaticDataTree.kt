@@ -2,7 +2,7 @@ package hep.dataforge.data
 
 import hep.dataforge.names.*
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collect
 import kotlin.reflect.KClass
 
 @PublishedApi
@@ -22,7 +22,7 @@ internal class StaticDataTree<T : Any>(
         }
     }
 
-    fun getOrCreateNode(name: Name): StaticDataTree<T> = when (name.length) {
+    private fun getOrCreateNode(name: Name): StaticDataTree<T> = when (name.length) {
         0 -> this
         1 -> {
             val itemName = name.firstOrNull()!!

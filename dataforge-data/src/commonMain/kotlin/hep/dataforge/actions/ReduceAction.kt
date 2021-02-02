@@ -39,7 +39,7 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
      */
     public fun byValue(tag: String, defaultTag: String = "@default", action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { node ->
-            GroupRule.byValue(scope, tag, defaultTag).gather(inputType, node).map {
+            GroupRule.byMetaValue(scope, tag, defaultTag).gather(inputType, node).map {
                 JoinGroup<T, R>(it.key, it.value).apply(action)
             }
         }

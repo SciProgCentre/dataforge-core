@@ -23,11 +23,11 @@ class FileDataTest {
     val dataNode = runBlocking {
         DataTree<String> {
             emit("dir") {
-                emitStatic("a", "Some string") {
+                static("a", "Some string") {
                     "content" put "Some string"
                 }
             }
-            emitStatic("b", "root data")
+            static("b", "root data")
             meta {
                 "content" put "This is root meta node"
             }

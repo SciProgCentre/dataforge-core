@@ -9,6 +9,22 @@ import kotlin.test.assertEquals
 
 internal class DataTreeBuilderTest {
     @Test
+    fun testTreeBuild() = runBlocking {
+        val node = DataTree<Any> {
+            "primary" put {
+                static("a", "a")
+                static("b", "b")
+            }
+            static("c.d", "c.d")
+            static("c.f", "c.f")
+        }
+        assertEquals("a", node.getData("primary.a")?.value())
+        assertEquals("b", node.getData("primary.b")?.value())
+        assertEquals("c.d", node.getData("c.d")?.value())
+        assertEquals("c.f", node.getData("c.f")?.value())
+    }
+
+    @Test
     fun testDataUpdate() = runBlocking {
         val updateData: DataTree<Any> = DataTree {
             "update" put {
@@ -18,11 +34,11 @@ internal class DataTreeBuilderTest {
         }
 
         val node = DataTree<Any> {
-            emit("primary") {
-                emitStatic("a", "a")
-                emitStatic("b", "b")
+            "primary" put {
+                static("a", "a")
+                static("b", "b")
             }
-            emitStatic("root", "root")
+            static("root", "root")
             populate(updateData)
         }
 
@@ -40,7 +56,7 @@ internal class DataTreeBuilderTest {
                     updateJob = launch {
                         repeat(10) {
                             delay(10)
-                            emitStatic("value", it)
+                            static("value", it)
                         }
                         delay(10)
                     }

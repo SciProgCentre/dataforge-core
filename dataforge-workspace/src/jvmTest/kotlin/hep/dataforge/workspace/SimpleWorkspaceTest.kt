@@ -56,7 +56,7 @@ class SimpleWorkspaceTest {
 
         data {
             repeat(100) {
-                emitStatic("myData[$it]", it)
+                static("myData[$it]", it)
             }
         }
 

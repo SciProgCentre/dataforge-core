@@ -32,7 +32,6 @@ public fun <T : Any> DataSet<T>.filter(
     }
 }
 
-
 /**
  * Generate a wrapper data set with a given name prefix appended to all names
  */
@@ -47,7 +46,6 @@ else object : ActiveDataSet<T> {
 
     override val updates: Flow<Name> get() = this@withNamePrefix.updates.map { prefix + it }
 }
-
 
 /**
  * Get a subset of data starting with a given [branchName]
