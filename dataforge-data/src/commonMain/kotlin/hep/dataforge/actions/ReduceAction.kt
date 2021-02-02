@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.fold
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 
 @DFExperimental
@@ -75,7 +76,7 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
 @DFExperimental
 public class ReduceAction<T : Any, R : Any>(
     private val inputType: KClass<out T>,
-    outputType: KClass<out R>,
+    outputType: KType,
     private val action: ReduceGroupBuilder<T, R>.() -> Unit,
 ) : CachingAction<T, R>(outputType) {
     //TODO optimize reduction. Currently the whole action recalculates on push

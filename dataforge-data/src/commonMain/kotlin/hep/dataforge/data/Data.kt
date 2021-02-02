@@ -7,7 +7,8 @@ import hep.dataforge.misc.Type
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 /**
  * A data element characterized by its meta
@@ -17,7 +18,7 @@ public interface Data<out T : Any> : Goal<T>, MetaRepr {
     /**
      * Type marker for the data. The type is known before the calculation takes place so it could be checked.
      */
-    public val type: KClass<out T>
+    public val type: KType
 
     /**
      * Meta for the data
@@ -25,7 +26,7 @@ public interface Data<out T : Any> : Goal<T>, MetaRepr {
     public val meta: Meta
 
     override fun toMeta(): Meta = Meta {
-        "type" put (type.simpleName ?: "undefined")
+        "type" put (type.toString())
         if (!meta.isEmpty()) {
             "meta" put meta
         }
@@ -34,16 +35,17 @@ public interface Data<out T : Any> : Goal<T>, MetaRepr {
     public companion object {
         public const val TYPE: String = "data"
 
-        public fun <T : Any> static(
+        public inline fun <reified T : Any> static(
             value: T,
             meta: Meta = Meta.EMPTY,
-        ): Data<T> = StaticData(value, meta)
+        ): Data<T> = StaticData(typeOf<T>(),value, meta)
 
         /**
          * An empty data containing only meta
          */
         public fun empty(meta: Meta): Data<Nothing> = object : Data<Nothing> {
-            override val type: KClass<out Nothing> = Nothing::class
+            private val nothing: Nothing get() = error("this is nothing")
+            override val type: KType = this::nothing.returnType
             override val meta: Meta = meta
             override val dependencies: Collection<Goal<*>> = emptyList()
             override val deferred: Deferred<Nothing>
@@ -58,7 +60,7 @@ public interface Data<out T : Any> : Goal<T>, MetaRepr {
 }
 
 public class LazyData<T : Any>(
-    override val type: KClass<out T>,
+    override val type: KType,
     override val meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
     dependencies: Collection<Data<*>> = emptyList(),
@@ -66,15 +68,14 @@ public class LazyData<T : Any>(
 ) : Data<T>, LazyGoal<T>(context, dependencies, block)
 
 public class StaticData<T : Any>(
+    override val type: KType,
     value: T,
     override val meta: Meta = Meta.EMPTY,
-) : Data<T>, StaticGoal<T>(value) {
-    override val type: KClass<out T> get() = value::class
-}
+) : Data<T>, StaticGoal<T>(value)
 
 @Suppress("FunctionName")
 public fun <T : Any> Data(
-    type: KClass<out T>,
+    type: KType,
     meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
     dependencies: Collection<Data<*>> = emptyList(),
@@ -87,4 +88,4 @@ public inline fun <reified T : Any> Data(
     context: CoroutineContext = EmptyCoroutineContext,
     dependencies: Collection<Data<*>> = emptyList(),
     noinline block: suspend () -> T,
-): Data<T> = Data(T::class, meta, context, dependencies, block)
+): Data<T> = Data(typeOf<T>(), meta, context, dependencies, block)

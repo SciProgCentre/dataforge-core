@@ -4,8 +4,8 @@ import hep.dataforge.meta.Meta
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
-import kotlin.reflect.full.cast
 import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.safeCast
 
 @Suppress("UNCHECKED_CAST")
 public fun <T : Any> Column<*>.cast(type: KClass<out T>): Column<T> {
@@ -22,7 +22,7 @@ public class CastColumn<T : Any>(private val origin: Column<*>, override val typ
     override val size: Int get() = origin.size
 
 
-    override fun get(index: Int): T? = type.cast(origin[index])
+    override fun get(index: Int): T? = type.safeCast(origin[index])
 }
 
 public class ColumnProperty<C: Any, T : C>(public val table: Table<C>, public val type: KClass<T>) : ReadOnlyProperty<Any?, Column<T>> {

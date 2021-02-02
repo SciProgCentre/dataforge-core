@@ -9,7 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 /**
  * Remove all values with keys starting with [name]
@@ -23,7 +23,7 @@ internal fun MutableMap<Name, *>.removeWhatStartsWith(name: Name) {
  * An action that caches results on-demand and recalculates them on source push
  */
 public abstract class CachingAction<in T : Any, out R : Any>(
-    public val outputType: KClass<out R>,
+    public val outputType: KType,
 ) : Action<T, R> {
 
     protected abstract fun CoroutineScope.transform(
@@ -36,7 +36,7 @@ public abstract class CachingAction<in T : Any, out R : Any>(
         dataSet: DataSet<T>,
         meta: Meta,
         scope: CoroutineScope?,
-    ): DataSet<R> = ActiveDataTree(outputType) {
+    ): DataSet<R> = ActiveDataTree<R>(outputType) {
         coroutineScope {
             populate(transform(dataSet, meta))
         }

@@ -8,13 +8,14 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 /**
  * A mutable [DataTree.Companion.active]. It
  */
 public class ActiveDataTree<T : Any>(
-    override val dataType: KClass<out T>,
+    override val dataType: KType,
 ) : DataTree<T>, DataSetBuilder<T>, ActiveDataSet<T> {
     private val mutex = Mutex()
     private val treeItems = HashMap<NameToken, DataTreeItem<T>>()
@@ -49,7 +50,7 @@ public class ActiveDataTree<T : Any>(
 
     private suspend fun getOrCreateNode(token: NameToken): ActiveDataTree<T> =
         (treeItems[token] as? DataTreeItem.Node<T>)?.tree as? ActiveDataTree<T>
-            ?: ActiveDataTree(dataType).also {
+            ?: ActiveDataTree<T>(dataType).also {
                 mutex.withLock {
                     treeItems[token] = DataTreeItem.Node(it)
                 }
@@ -92,10 +93,10 @@ public class ActiveDataTree<T : Any>(
  */
 @Suppress("FunctionName")
 public suspend fun <T : Any> ActiveDataTree(
-    type: KClass<out T>,
+    type: KType,
     block: suspend ActiveDataTree<T>.() -> Unit,
 ): ActiveDataTree<T> {
-    val tree = ActiveDataTree(type)
+    val tree = ActiveDataTree<T>(type)
     tree.block()
     return tree
 }
@@ -103,15 +104,15 @@ public suspend fun <T : Any> ActiveDataTree(
 @Suppress("FunctionName")
 public suspend inline fun <reified T : Any> ActiveDataTree(
     crossinline block: suspend ActiveDataTree<T>.() -> Unit,
-): ActiveDataTree<T> = ActiveDataTree(T::class).apply { block() }
+): ActiveDataTree<T> = ActiveDataTree<T>(typeOf<T>()).apply { block() }
 
 
 public suspend inline fun <reified T : Any> ActiveDataTree<T>.emit(
     name: Name,
     noinline block: suspend ActiveDataTree<T>.() -> Unit,
-): Unit = emit(name, ActiveDataTree(T::class, block))
+): Unit = emit(name, ActiveDataTree(typeOf<T>(), block))
 
 public suspend inline fun <reified T : Any> ActiveDataTree<T>.emit(
     name: String,
     noinline block: suspend ActiveDataTree<T>.() -> Unit,
-): Unit = emit(name.toName(), ActiveDataTree(T::class, block))
+): Unit = emit(name.toName(), ActiveDataTree(typeOf<T>(), block))

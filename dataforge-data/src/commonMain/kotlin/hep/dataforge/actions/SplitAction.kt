@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.collections.set
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 
 public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val meta: Meta) {
@@ -39,8 +39,8 @@ public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val me
 /**
  * Action that splits each incoming element into a number of fragments defined in builder
  */
-public class SplitAction<T : Any, R : Any>(
-    private val outputType: KClass<out R>,
+internal class SplitAction<T : Any, R : Any>(
+    private val outputType: KType,
     private val action: SplitBuilder<T, R>.() -> Unit,
 ) : Action<T, R> {
 
@@ -59,11 +59,11 @@ public class SplitAction<T : Any, R : Any>(
             // apply individual fragment rules to result
             return split.fragments.entries.asFlow().map { (fragmentName, rule) ->
                 val env = SplitBuilder.FragmentRule<T, R>(fragmentName, laminate.toMutableMeta()).apply(rule)
-                data.map(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
+                data.map<R>(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
             }
         }
 
-        return ActiveDataTree(outputType) {
+        return ActiveDataTree<R>(outputType) {
             populate(dataSet.flow().flatMapConcat(transform = ::splitOne))
             scope?.launch {
                 dataSet.updates.collect { name ->

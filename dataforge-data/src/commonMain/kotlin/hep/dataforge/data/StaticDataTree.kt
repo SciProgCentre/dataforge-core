@@ -3,11 +3,12 @@ package hep.dataforge.data
 import hep.dataforge.names.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 @PublishedApi
 internal class StaticDataTree<T : Any>(
-    override val dataType: KClass<out T>,
+    override val dataType: KType,
 ) : DataSetBuilder<T>, DataTree<T> {
 
     private val items: MutableMap<NameToken, DataTreeItem<T>> = HashMap()
@@ -26,7 +27,7 @@ internal class StaticDataTree<T : Any>(
         0 -> this
         1 -> {
             val itemName = name.firstOrNull()!!
-            (items[itemName].tree as? StaticDataTree<T>) ?: StaticDataTree(dataType).also {
+            (items[itemName].tree as? StaticDataTree<T>) ?: StaticDataTree<T>(dataType).also {
                 items[itemName] = DataTreeItem.Node(it)
             }
         }
@@ -61,14 +62,14 @@ internal class StaticDataTree<T : Any>(
 
 @Suppress("FunctionName")
 public suspend fun <T : Any> DataTree(
-    dataType: KClass<out T>,
+    dataType: KType,
     block: suspend DataSetBuilder<T>.() -> Unit,
-): DataTree<T> = StaticDataTree(dataType).apply { block() }
+): DataTree<T> = StaticDataTree<T>(dataType).apply { block() }
 
 @Suppress("FunctionName")
 public suspend inline fun <reified T : Any> DataTree(
     noinline block: suspend DataSetBuilder<T>.() -> Unit,
-): DataTree<T> = DataTree(T::class, block)
+): DataTree<T> = DataTree(typeOf<T>(), block)
 
 public suspend fun <T : Any> DataSet<T>.seal(): DataTree<T> = DataTree(dataType){
     populate(this@seal)
