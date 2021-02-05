@@ -86,16 +86,15 @@ public fun YamlMap.toMeta(): Meta = YamlMeta(this)
  */
 @DFExperimental
 public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
-    private val coder = Yaml.default
 
     override fun writeMeta(output: Output, meta: Meta, descriptor: NodeDescriptor?) {
         val yaml = meta.toYaml()
-        val string = coder.encodeToString(yaml)
+        val string = Yaml.encodeToString(yaml)
         output.writeUtf8String(string)
     }
 
     override fun readMeta(input: Input, descriptor: NodeDescriptor?): Meta {
-        val yaml = coder.decodeYamlMapFromString(input.readUtf8String())
+        val yaml = Yaml.decodeYamlMapFromString(input.readUtf8String())
         return yaml.toMeta()
     }
 
@@ -116,7 +115,7 @@ public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
         override fun writeMeta(output: Output, meta: Meta, descriptor: NodeDescriptor?): Unit =
             default.writeMeta(output, meta, descriptor)
 
-        override fun readMeta(input: kotlinx.io.Input, descriptor: NodeDescriptor?): Meta =
+        override fun readMeta(input: Input, descriptor: NodeDescriptor?): Meta =
             default.readMeta(input, descriptor)
     }
 }
