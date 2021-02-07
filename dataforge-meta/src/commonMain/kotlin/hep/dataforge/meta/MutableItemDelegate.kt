@@ -3,32 +3,29 @@ package hep.dataforge.meta
 import hep.dataforge.meta.transformations.MetaConverter
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
-import hep.dataforge.values.DoubleArrayValue
-import hep.dataforge.values.Value
-import hep.dataforge.values.asValue
-import hep.dataforge.values.doubleArray
+import hep.dataforge.values.*
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 /* Read-write delegates */
 
-public typealias MutableItemDelegate = ReadWriteProperty<Any?, MetaItem<*>?>
+public typealias MutableItemDelegate = ReadWriteProperty<Any?, MetaItem?>
 
 public fun MutableItemProvider.item(key: Name? = null): MutableItemDelegate = object : MutableItemDelegate {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): MetaItem<*>? {
-        return getItem(key ?: property.name.asName())
+    override fun getValue(thisRef: Any?, property: KProperty<*>): MetaItem? {
+        return get(key ?: property.name.asName())
     }
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: MetaItem<*>?) {
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: MetaItem?) {
         val name = key ?: property.name.asName()
-        setItem(name, value)
+        set(name, value)
     }
 }
 
 /* Mutable converters */
 
 /**
- * A type converter for a mutable [MetaItem] delegate
+ * A type converter for a mutable [TypedMetaItem] delegate
  */
 public fun <R : Any> MutableItemDelegate.convert(
     converter: MetaConverter<R>,
@@ -58,8 +55,8 @@ public fun <R : Any> MutableItemDelegate.convert(
 }
 
 public fun <R> MutableItemDelegate.convert(
-    reader: (MetaItem<*>?) -> R,
-    writer: (R) -> MetaItem<*>?,
+    reader: (MetaItem?) -> R,
+    writer: (R) -> MetaItem?,
 ): ReadWriteProperty<Any?, R> = object : ReadWriteProperty<Any?, R> {
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): R =
@@ -70,7 +67,6 @@ public fun <R> MutableItemDelegate.convert(
         this@convert.setValue(thisRef, property, item)
     }
 }
-
 
 
 /* Read-write delegates for [MutableItemProvider] */
@@ -117,8 +113,13 @@ public inline fun <reified E : Enum<E>> MutableItemProvider.enum(
 ): ReadWriteProperty<Any?, E> =
     item(key).convert(MetaConverter.enum()) { default }
 
+public fun MutableItemProvider.node(key: Name? = null): ReadWriteProperty<Any?, Meta?> = item(key).convert(
+    reader = { it.node },
+    writer = { it?.asMetaItem() }
+)
+
 public inline fun <reified M : MutableMeta<M>> M.node(key: Name? = null): ReadWriteProperty<Any?, M?> =
-    item(key).convert(reader = { it?.let { it.node as M } }, writer = { it?.let { MetaItem.NodeItem(it) } })
+    item(key).convert(reader = { it?.let { it.node as M } }, writer = { it?.let { MetaItemNode(it) } })
 
 /* Number delegates */
 
@@ -171,7 +172,7 @@ public fun MutableItemProvider.numberList(
     vararg default: Number,
     key: Name? = null,
 ): ReadWriteProperty<Any?, List<Number>> = item(key).convert(
-    reader = { it?.value?.list?.map { value -> value.number } ?: listOf(*default) },
+    reader = { it?.value?.list?.map { value -> value.numberOrNull ?: Double.NaN } ?: listOf(*default) },
     writer = { it.map { num -> num.asValue() }.asValue().asMetaItem() }
 )
 

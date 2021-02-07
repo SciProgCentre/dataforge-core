@@ -9,9 +9,9 @@ import hep.dataforge.meta.MetaBuilder
 public fun Value.isNull(): Boolean = this == Null
 
 /**
- * Check if value is list
+ * Check if value is list.
  */
-public fun Value.isList(): Boolean = this.list.size > 1
+public fun Value.isList(): Boolean = this.type == ValueType.LIST
 
 public val Value.boolean: Boolean
     get() = this == True

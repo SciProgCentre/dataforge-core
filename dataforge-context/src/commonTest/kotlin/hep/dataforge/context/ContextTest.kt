@@ -17,13 +17,13 @@ class ContextTest {
                 else -> emptyMap()
             }
         }
+
     }
 
     @Test
     fun testPluginManager() {
-        val context = Global.context("test"){
-            plugin(DummyPlugin())
-        }
+        val context = Global.context("test")
+        context.plugins.load(DummyPlugin())
         //Global.plugins.load(DummyPlugin())
         val members = context.gather<Name>("test")
         assertEquals(3, members.count())

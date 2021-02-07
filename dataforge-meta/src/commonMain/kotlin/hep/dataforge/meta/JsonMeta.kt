@@ -16,21 +16,17 @@ import kotlinx.serialization.json.*
 /**
  * @param descriptor reserved for custom serialization in future
  */
-public fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement {
-    return if (isList()) {
-        JsonArray(list.map { it.toJson() })
-    } else {
-        when (type) {
-            ValueType.NUMBER -> JsonPrimitive(number)
-            ValueType.STRING -> JsonPrimitive(string)
-            ValueType.BOOLEAN -> JsonPrimitive(boolean)
-            ValueType.NULL -> JsonNull
-        }
-    }
+public fun Value.toJson(descriptor: ValueDescriptor? = null): JsonElement = when (type) {
+    ValueType.NUMBER -> JsonPrimitive(numberOrNull)
+    ValueType.STRING -> JsonPrimitive(string)
+    ValueType.BOOLEAN -> JsonPrimitive(boolean)
+    ValueType.LIST -> JsonArray(list.map { it.toJson() })
+    ValueType.NULL -> JsonNull
 }
 
 //Use these methods to customize JSON key mapping
-private fun String.toJsonKey(descriptor: ItemDescriptor?) = descriptor?.attributes["jsonName"].string ?: toString()
+@Suppress("NULLABLE_EXTENSION_OPERATOR_WITH_SAFE_CALL_RECEIVER")
+private fun String.toJsonKey(descriptor: ItemDescriptor?) = descriptor?.attributes?.get("jsonName").string ?: toString()
 
 //private fun NodeDescriptor?.getDescriptor(key: String) = this?.items?.get(key)
 
@@ -41,11 +37,11 @@ private fun Meta.toJsonWithIndex(descriptor: NodeDescriptor?, indexValue: String
 
     val elementMap = HashMap<String, JsonElement>()
 
-    fun MetaItem<*>.toJsonElement(itemDescriptor: ItemDescriptor?, index: String?): JsonElement = when (this) {
-        is MetaItem.ValueItem -> {
+    fun MetaItem.toJsonElement(itemDescriptor: ItemDescriptor?, index: String?): JsonElement = when (this) {
+        is MetaItemValue -> {
             value.toJson(itemDescriptor as? ValueDescriptor)
         }
-        is MetaItem.NodeItem -> {
+        is MetaItemNode -> {
             node.toJsonWithIndex(itemDescriptor as? NodeDescriptor, index)
         }
     }
@@ -53,7 +49,7 @@ private fun Meta.toJsonWithIndex(descriptor: NodeDescriptor?, indexValue: String
     fun addElement(key: String) {
         val itemDescriptor = descriptor?.items?.get(key)
         val jsonKey = key.toJsonKey(itemDescriptor)
-        val items: Map<String?, MetaItem<*>> = getIndexed(key)
+        val items: Map<String?, MetaItem> = getIndexed(key)
         when (items.size) {
             0 -> {
                 //do nothing
@@ -100,14 +96,14 @@ public fun JsonPrimitive.toValue(descriptor: ValueDescriptor?): Value {
     }
 }
 
-public fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<JsonMeta> = when (this) {
+public fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): TypedMetaItem<JsonMeta> = when (this) {
     is JsonPrimitive -> {
         val value = this.toValue(descriptor as? ValueDescriptor)
-        MetaItem.ValueItem(value)
+        MetaItemValue(value)
     }
     is JsonObject -> {
         val meta = JsonMeta(this, descriptor as? NodeDescriptor)
-        MetaItem.NodeItem(meta)
+        MetaItemNode(meta)
     }
     is JsonArray -> {
         if (this.all { it is JsonPrimitive }) {
@@ -119,7 +115,7 @@ public fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<
                     (it as JsonPrimitive).toValue(descriptor as? ValueDescriptor)
                 }.asValue()
             }
-            MetaItem.ValueItem(value)
+            MetaItemValue(value)
         } else {
             //We can't return multiple items therefore we create top level node
             buildJsonObject { put(JSON_ARRAY_KEY, this@toMetaItem) }.toMetaItem(descriptor)
@@ -132,18 +128,18 @@ public fun JsonElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem<
  */
 public class JsonMeta(private val json: JsonObject, private val descriptor: NodeDescriptor? = null) : MetaBase() {
 
-    private fun buildItems(): Map<NameToken, MetaItem<JsonMeta>> {
-        val map = LinkedHashMap<NameToken, MetaItem<JsonMeta>>()
+    private fun buildItems(): Map<NameToken, TypedMetaItem<JsonMeta>> {
+        val map = LinkedHashMap<NameToken, TypedMetaItem<JsonMeta>>()
 
         json.forEach { (jsonKey, value) ->
             val key = NameToken(jsonKey)
             val itemDescriptor = descriptor?.items?.get(jsonKey)
             when (value) {
                 is JsonPrimitive -> {
-                    map[key] = MetaItem.ValueItem(value.toValue(itemDescriptor as? ValueDescriptor))
+                    map[key] = MetaItemValue(value.toValue(itemDescriptor as? ValueDescriptor))
                 }
                 is JsonObject -> {
-                    map[key] = MetaItem.NodeItem(
+                    map[key] = MetaItemNode(
                         JsonMeta(
                             value,
                             itemDescriptor as? NodeDescriptor
@@ -157,7 +153,7 @@ public class JsonMeta(private val json: JsonObject, private val descriptor: Node
                             (it as JsonPrimitive).toValue(itemDescriptor as? ValueDescriptor)
                         }
                     )
-                    map[key] = MetaItem.ValueItem(listValue)
+                    map[key] = MetaItemValue(listValue)
                 } else value.forEachIndexed { index, jsonElement ->
                     val indexKey = (itemDescriptor as? NodeDescriptor)?.indexKey ?: DEFAULT_INDEX_KEY
                     val indexValue: String = (jsonElement as? JsonObject)
@@ -172,7 +168,7 @@ public class JsonMeta(private val json: JsonObject, private val descriptor: Node
         return map
     }
 
-    override val items: Map<NameToken, MetaItem<JsonMeta>> by lazy(::buildItems)
+    override val items: Map<NameToken, TypedMetaItem<JsonMeta>> by lazy(::buildItems)
 
     public companion object {
         /**

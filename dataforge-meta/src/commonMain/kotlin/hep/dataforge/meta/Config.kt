@@ -10,16 +10,17 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlin.collections.set
+import kotlin.jvm.Synchronized
 
 //TODO add validator to configuration
 
-public data class MetaListener(
+public data class ItemListener(
     val owner: Any? = null,
-    val action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit
+    val action: (name: Name, oldItem: MetaItem?, newItem: MetaItem?) -> Unit
 )
 
-public interface ObservableMeta : Meta {
-    public fun onChange(owner: Any?, action: (name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) -> Unit)
+public interface ObservableItemProvider : ItemProvider {
+    public fun onChange(owner: Any?, action: (name: Name, oldItem: MetaItem?, newItem: MetaItem?) -> Unit)
     public fun removeListener(owner: Any?)
 }
 
@@ -27,37 +28,40 @@ public interface ObservableMeta : Meta {
  * Mutable meta representing object state
  */
 @Serializable(Config.Companion::class)
-public class Config() : AbstractMutableMeta<Config>(), ObservableMeta {
+public class Config() : AbstractMutableMeta<Config>(), ObservableItemProvider {
 
-    private val listeners = HashSet<MetaListener>()
+    private val listeners = HashSet<ItemListener>()
 
-    private fun itemChanged(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?) {
+    @Synchronized
+    private fun itemChanged(name: Name, oldItem: MetaItem?, newItem: MetaItem?) {
         listeners.forEach { it.action(name, oldItem, newItem) }
     }
 
     /**
      * Add change listener to this meta. Owner is declared to be able to remove listeners later. Listener without owner could not be removed
      */
-    override fun onChange(owner: Any?, action: (Name, MetaItem<*>?, MetaItem<*>?) -> Unit) {
-        listeners.add(MetaListener(owner, action))
+    @Synchronized
+    override fun onChange(owner: Any?, action: (Name, MetaItem?, MetaItem?) -> Unit) {
+        listeners.add(ItemListener(owner, action))
     }
 
     /**
      * Remove all listeners belonging to given owner
      */
+    @Synchronized
     override fun removeListener(owner: Any?) {
         listeners.removeAll { it.owner === owner }
     }
 
-    override fun replaceItem(key: NameToken, oldItem: MetaItem<Config>?, newItem: MetaItem<Config>?) {
+    override fun replaceItem(key: NameToken, oldItem: TypedMetaItem<Config>?, newItem: TypedMetaItem<Config>?) {
         if (newItem == null) {
             children.remove(key)
-            if (oldItem != null && oldItem is MetaItem.NodeItem<Config>) {
+            if (oldItem != null && oldItem is MetaItemNode<Config>) {
                 oldItem.node.removeListener(this)
             }
         } else {
             children[key] = newItem
-            if (newItem is MetaItem.NodeItem) {
+            if (newItem is MetaItemNode) {
                 newItem.node.onChange(this) { name, oldChild, newChild ->
                     itemChanged(key + name, oldChild, newChild)
                 }
@@ -88,14 +92,23 @@ public class Config() : AbstractMutableMeta<Config>(), ObservableMeta {
     }
 }
 
-public operator fun Config.get(token: NameToken): MetaItem<Config>? = items[token]
+public operator fun Config.get(token: NameToken): TypedMetaItem<Config>? = items[token]
 
-public fun Meta.asConfig(): Config = this as? Config ?: Config().also { builder ->
+/**
+ * Create a mutable copy of this [Meta]. The copy is created event if initial [Meta] is a [Config].
+ * Listeners are not preserved
+ */
+public fun Meta.toConfig(): Config = Config().also { builder ->
     this.items.mapValues { entry ->
         val item = entry.value
         builder[entry.key.asName()] = when (item) {
-            is MetaItem.ValueItem -> item.value
-            is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.asConfig())
+            is MetaItemValue -> item.value
+            is MetaItemNode -> MetaItemNode(item.node.asConfig())
         }
     }
 }
+
+/**
+ * Return this [Meta] as [Config] if it is [Config] and create a new copy otherwise
+ */
+public fun Meta.asConfig(): Config = this as? Config ?: toConfig()

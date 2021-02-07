@@ -12,12 +12,12 @@ kotlin {
         commonMain{
             dependencies {
                 api(project(":dataforge-meta"))
-            }
-        }
-        jvmMain{
-            dependencies{
                 api(kotlin("reflect"))
             }
         }
     }
+}
+
+readme{
+    maturity = ru.mipt.npm.gradle.Maturity.EXPERIMENTAL
 }

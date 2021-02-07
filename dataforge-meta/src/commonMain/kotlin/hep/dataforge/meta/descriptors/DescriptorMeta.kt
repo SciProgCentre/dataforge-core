@@ -1,16 +1,13 @@
 package hep.dataforge.meta.descriptors
 
-import hep.dataforge.meta.Laminate
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBase
-import hep.dataforge.meta.MetaItem
+import hep.dataforge.meta.*
 import hep.dataforge.names.NameToken
 
 /**
  * A [Meta] that is constructed from [NodeDescriptor]
  */
 private class DescriptorMeta(val descriptor: NodeDescriptor) : Meta, MetaBase() {
-    override val items: Map<NameToken, MetaItem<*>>
+    override val items: Map<NameToken, MetaItem>
         get() = buildMap {
             descriptor.items.forEach { (token, descriptorItem) ->
                 val item = descriptorItem.defaultItem()
@@ -27,22 +24,22 @@ private class DescriptorMeta(val descriptor: NodeDescriptor) : Meta, MetaBase() 
 public fun NodeDescriptor.defaultMeta(): Laminate = Laminate(default, DescriptorMeta(this))
 
 /**
- * Build a default [MetaItem.NodeItem] from this node descriptor
+ * Build a default [MetaItemNode] from this node descriptor
  */
-internal fun NodeDescriptor.defaultItem(): MetaItem.NodeItem<*> =
-    MetaItem.NodeItem(defaultMeta())
+internal fun NodeDescriptor.defaultItem(): MetaItemNode<*> =
+    MetaItemNode(defaultMeta())
 
 /**
- * Build a default [MetaItem.ValueItem] from this descriptor
+ * Build a default [MetaItemValue] from this descriptor
  */
-internal fun ValueDescriptor.defaultItem(): MetaItem.ValueItem? {
-    return MetaItem.ValueItem(default ?: return null)
+internal fun ValueDescriptor.defaultItem(): MetaItemValue? {
+    return MetaItemValue(default ?: return null)
 }
 
 /**
- * Build a default [MetaItem] from descriptor.
+ * Build a default [TypedMetaItem] from descriptor.
  */
-public fun ItemDescriptor.defaultItem(): MetaItem<*>? {
+public fun ItemDescriptor.defaultItem(): MetaItem? {
     return when (this) {
         is ValueDescriptor -> defaultItem()
         is NodeDescriptor -> defaultItem()

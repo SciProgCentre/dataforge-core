@@ -2,19 +2,8 @@ package hep.dataforge.context
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.provider.Type
 import kotlin.reflect.KClass
 
-
-@Type(PluginFactory.TYPE)
-public interface PluginFactory<T : Plugin> : Factory<T> {
-    public val tag: PluginTag
-    public val type: KClass<out T>
-
-    public companion object {
-        public const val TYPE: String = "pluginFactory"
-    }
-}
 
 /**
  * The manager for plugin system. Should monitor plugin dependencies and locks.
@@ -22,14 +11,14 @@ public interface PluginFactory<T : Plugin> : Factory<T> {
  * @property context A context for this plugin manager
  * @author Alexander Nozik
  */
-public class PluginManager(override val context: Context, plugins: Set<Plugin>) : ContextAware, Iterable<Plugin> {
+public class PluginManager(override val context: Context) : ContextAware, Iterable<Plugin> {
 
     //TODO refactor to read-only container
 
     /**
      * A set of loaded plugins
      */
-    private val plugins: HashSet<Plugin> = HashSet(plugins)
+    private val plugins: HashSet<Plugin> = HashSet()
 
     init {
         plugins.forEach { it.attach(context) }
@@ -100,8 +89,8 @@ public class PluginManager(override val context: Context, plugins: Set<Plugin>) 
         if (get(plugin::class, plugin.tag, recursive = false) != null) {
             error("Plugin with tag ${plugin.tag} already exists in ${context.name}")
         } else {
-            for (tag in plugin.dependsOn()) {
-                fetch(tag, true)
+            for ((factory, meta) in plugin.dependsOn()) {
+                fetch(factory, meta, true)
             }
 
             logger.info { "Loading plugin ${plugin.name} into ${context.name}" }
@@ -134,7 +123,7 @@ public class PluginManager(override val context: Context, plugins: Set<Plugin>) 
     /**
      * Get an existing plugin with given meta or load new one using provided factory
      */
-    public fun <T : Plugin> fetch(factory: PluginFactory<T>, recursive: Boolean = true, meta: Meta = Meta.EMPTY): T {
+    public fun <T : Plugin> fetch(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY, recursive: Boolean = true): T {
         val loaded = get(factory.type, factory.tag, recursive)
         return when {
             loaded == null -> load(factory(meta, context))
@@ -147,7 +136,7 @@ public class PluginManager(override val context: Context, plugins: Set<Plugin>) 
         factory: PluginFactory<T>,
         recursive: Boolean = true,
         metaBuilder: MetaBuilder.() -> Unit,
-    ): T = fetch(factory, recursive, Meta(metaBuilder))
+    ): T = fetch(factory, Meta(metaBuilder), recursive)
 
     override fun iterator(): Iterator<Plugin> = plugins.iterator()
 

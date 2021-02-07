@@ -2,6 +2,8 @@ package hep.dataforge.io
 
 import hep.dataforge.meta.*
 import hep.dataforge.meta.JsonMeta.Companion.JSON_ARRAY_KEY
+import hep.dataforge.values.ListValue
+import hep.dataforge.values.number
 import kotlinx.io.asBinary
 import kotlinx.serialization.json.*
 import kotlin.test.Test
@@ -76,6 +78,29 @@ class MetaFormatTest {
         assertEquals(true, meta["$JSON_ARRAY_KEY[0].$JSON_ARRAY_KEY[1].d"].boolean)
         assertEquals("value", meta["$JSON_ARRAY_KEY[1]"].string)
         assertEquals(listOf(1.0, 2.0, 3.0), meta["$JSON_ARRAY_KEY[2"].value?.list?.map { it.number.toDouble() })
+    }
+
+    @Test
+    fun testJsonStringToMeta(){
+        val jsonString = """
+            {
+                "comments": [
+                ],
+                "end_time": "2018-04-13T22:01:46",
+                "format_description": "https://docs.google.com/document/d/12qmnZRO55y6zr08Wf-BQYAmklqgf5y3j_gD_VkNscXc/edit?usp=sharing",
+                "iteration_info": {
+                    "iteration": 4,
+                    "reverse": false
+                },
+                "operator": "Vasiliy",
+                "programm_revision": "1.1.1-79-g7c0cad6",
+                "start_time": "2018-04-13T21:42:04",
+                "type": "info_file"
+            }
+        """.trimIndent()
+        val json = Json.parseToJsonElement(jsonString)
+        val meta = json.toMetaItem().node!!
+        assertEquals(ListValue.EMPTY, meta["comments"].value)
     }
 
 }

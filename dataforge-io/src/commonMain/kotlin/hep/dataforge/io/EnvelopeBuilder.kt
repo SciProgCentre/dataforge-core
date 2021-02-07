@@ -44,6 +44,12 @@ public class EnvelopeBuilder : Envelope {
 
 }
 
+
+/**
+ * Build a static envelope using provided [builder]
+ */
+public inline fun Envelope(builder: EnvelopeBuilder.() -> Unit): Envelope = EnvelopeBuilder().apply(builder).seal()
+
 //@ExperimentalContracts
 //suspend fun EnvelopeBuilder.buildData(block: suspend Output.() -> Unit): Binary{
 //    contract {

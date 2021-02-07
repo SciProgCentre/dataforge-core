@@ -1,11 +1,12 @@
 package hep.dataforge.properties
 
 import hep.dataforge.meta.Config
-import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.get
+import hep.dataforge.meta.set
 import hep.dataforge.meta.transformations.MetaConverter
 import hep.dataforge.meta.transformations.nullableItemToObject
 import hep.dataforge.meta.transformations.nullableObjectToMetaItem
+import hep.dataforge.misc.DFExperimental
 import hep.dataforge.names.Name
 
 @DFExperimental
@@ -18,7 +19,7 @@ public class ConfigProperty<T : Any>(
     override var value: T?
         get() = converter.nullableItemToObject(config[name])
         set(value) {
-            config.setItem(name,converter.nullableObjectToMetaItem(value))
+            config[name] = converter.nullableObjectToMetaItem(value)
         }
 
     override fun onChange(owner: Any?, callback: (T?) -> Unit) {

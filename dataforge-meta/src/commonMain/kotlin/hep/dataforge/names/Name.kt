@@ -1,5 +1,6 @@
 package hep.dataforge.names
 
+import hep.dataforge.misc.DFExperimental
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -38,6 +39,18 @@ public class Name(public val tokens: List<NameToken>) {
 
     public companion object : KSerializer<Name> {
         public const val NAME_SEPARATOR: String = "."
+
+        /**
+         * Match any single token (both body and index)
+         */
+        @DFExperimental
+        public val MATCH_ANY_TOKEN: NameToken = NameToken("*")
+
+        /**
+         * Token that allows to match the whole tail or the whole head of the name. Must match at least one token.
+         */
+        @DFExperimental
+        public val MATCH_ALL_TOKEN: NameToken = NameToken("**")
 
         public val EMPTY: Name = Name(emptyList())
 
@@ -114,7 +127,7 @@ public fun String.toName(): Name {
                 }
                 else -> when (it) {
                     '.' -> {
-                        val query = if(queryBuilder.isEmpty()) null else queryBuilder.toString()
+                        val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
                         yield(NameToken(bodyBuilder.toString(), query))
                         bodyBuilder = StringBuilder()
                         queryBuilder = StringBuilder()
@@ -128,7 +141,7 @@ public fun String.toName(): Name {
                 }
             }
         }
-        val query = if(queryBuilder.isEmpty()) null else queryBuilder.toString()
+        val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
         yield(NameToken(bodyBuilder.toString(), query))
     }
     return Name(tokens.toList())
@@ -173,7 +186,6 @@ public fun Name.withIndex(index: String): Name {
  * Fast [String]-based accessor for item map
  */
 public operator fun <T> Map<NameToken, T>.get(body: String, query: String? = null): T? = get(NameToken(body, query))
-
 public operator fun <T> Map<Name, T>.get(name: String): T? = get(name.toName())
 public operator fun <T> MutableMap<Name, T>.set(name: String, value: T): Unit = set(name.toName(), value)
 
@@ -184,7 +196,16 @@ public fun Name.startsWith(token: NameToken): Boolean = firstOrNull() == token
 public fun Name.endsWith(token: NameToken): Boolean = lastOrNull() == token
 
 public fun Name.startsWith(name: Name): Boolean =
-    this.length >= name.length && tokens.subList(0, name.length) == name.tokens
+    this.length >= name.length && (this == name || tokens.subList(0, name.length) == name.tokens)
 
 public fun Name.endsWith(name: Name): Boolean =
-    this.length >= name.length && tokens.subList(length - name.length, length) == name.tokens
+    this.length >= name.length && (this == name || tokens.subList(length - name.length, length) == name.tokens)
+
+/**
+ * if [this] starts with given [head] name, returns the reminder of the name (could be empty). Otherwise returns null
+ */
+public fun Name.removeHeadOrNull(head: Name): Name? = if (startsWith(head)) {
+    Name(tokens.subList(head.length, length))
+} else {
+    null
+}

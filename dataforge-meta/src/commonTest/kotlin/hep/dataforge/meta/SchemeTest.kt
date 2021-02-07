@@ -3,30 +3,21 @@ package hep.dataforge.meta
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-
-class SchemeTest{
+class SchemeTest {
     @Test
-    fun testMetaScheme(){
-        val styled = Meta {
-            repeat(10){
-                "b.a[$it]" put {
-                    "d" put it
-                }
-            }
-        }.asScheme()
-
-        val meta = styled.toMeta()
-
-        assertEquals(10, meta.values().count())
-
-        val bNode = styled.getItem("b").node
-
-        val aNodes = bNode?.getIndexed("a")
-
-        val allNodes = meta.getIndexed("b.a")
-
-        assertEquals(3, aNodes?.get("3").node["d"].int)
-        assertEquals(3, allNodes["3"].node["d"].int)
+    fun testSchemeWrappingBeforeEdit(){
+        val config = Config()
+        val scheme = TestScheme.wrap(config)
+        scheme.a = 29
+        assertEquals(29, config["a"].int)
     }
 
+    @Test
+    fun testSchemeWrappingAfterEdit(){
+        val scheme = TestScheme.empty()
+        scheme.a = 29
+        val config = Config()
+        scheme.retarget(config)
+        assertEquals(29, scheme.a)
+    }
 }

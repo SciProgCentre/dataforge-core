@@ -1,6 +1,6 @@
 package hep.dataforge.context
 
-import hep.dataforge.meta.DFExperimental
+import hep.dataforge.misc.DFExperimental
 import hep.dataforge.names.Name
 import hep.dataforge.names.plus
 import hep.dataforge.provider.Provider
@@ -48,8 +48,9 @@ public fun <T : Any> Context.gather(
     putAll(top(target, type))
     plugins.forEach { plugin ->
         plugin.top(target, type).forEach { (name, value) ->
-            if (containsKey(name)) error("Name conflict during gather. An item with name $name could not be gathered from $plugin because key is already present.")
-            put(plugin.name + name, value)
+            val itemName = plugin.name + name
+            if (containsKey(itemName)) error("Name conflict during gather. An item with name $name could not be gathered from $plugin because key is already present.")
+            put(itemName, value)
         }
     }
     if (inherit) {

@@ -17,7 +17,7 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
         }
     }
 
-    override val items: Map<NameToken, MetaItem<Meta>> by lazy {
+    override val items: Map<NameToken, TypedMetaItem<Meta>> by lazy {
         layers.map { it.items.keys }.flatten().associateWith { key ->
             layers.asSequence().map { it.items[key] }.filterNotNull().let(replaceRule)
         }
@@ -40,15 +40,15 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
          *
          * TODO add picture
          */
-        public val replaceRule: (Sequence<MetaItem<*>>) -> MetaItem<SealedMeta> = { it.first().seal() }
+        public val replaceRule: (Sequence<MetaItem>) -> TypedMetaItem<SealedMeta> = { it.first().seal() }
 
-        private fun Sequence<MetaItem<*>>.merge(): MetaItem<SealedMeta> {
+        private fun Sequence<MetaItem>.merge(): TypedMetaItem<SealedMeta> {
             return when {
-                all { it is MetaItem.ValueItem } -> //If all items are values, take first
+                all { it is MetaItemValue } -> //If all items are values, take first
                     first().seal()
-                all { it is MetaItem.NodeItem } -> {
+                all { it is MetaItemNode } -> {
                     //list nodes in item
-                    val nodes = map { (it as MetaItem.NodeItem).node }
+                    val nodes = map { (it as MetaItemNode).node }
                     //represent as key->value entries
                     val entries = nodes.flatMap { it.items.entries.asSequence() }
                     //group by keys
@@ -57,13 +57,13 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
                     val items = groups.mapValues { entry ->
                         entry.value.asSequence().map { it.value }.merge()
                     }
-                    MetaItem.NodeItem(SealedMeta(items))
+                    MetaItemNode(SealedMeta(items))
 
                 }
                 else -> map {
                     when (it) {
-                        is MetaItem.ValueItem -> MetaItem.NodeItem(Meta { Meta.VALUE_KEY put it.value })
-                        is MetaItem.NodeItem -> it
+                        is MetaItemValue -> MetaItemNode(Meta { Meta.VALUE_KEY put it.value })
+                        is MetaItemNode -> it
                     }
                 }.merge()
             }
@@ -74,7 +74,7 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
          * The values a replaced but meta children are joined
          * TODO add picture
          */
-        public val mergeRule: (Sequence<MetaItem<*>>) -> MetaItem<SealedMeta> = { it.merge() }
+        public val mergeRule: (Sequence<MetaItem>) -> TypedMetaItem<SealedMeta> = { it.merge() }
     }
 }
 
@@ -84,7 +84,7 @@ public fun Laminate(vararg layers: Meta?): Laminate = Laminate(layers.filterNotN
 /**
  * Performance optimized version of get method
  */
-public fun Laminate.getFirst(name: Name): MetaItem<*>? {
+public fun Laminate.getFirst(name: Name): MetaItem? {
     layers.forEach { layer ->
         layer[name]?.let { return it }
     }

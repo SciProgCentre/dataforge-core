@@ -111,8 +111,8 @@ public class TextTable(
 private fun Output.writeValue(value: Value, width: Int, left: Boolean = true) {
     require(width > 5) { "Width could not be less than 5" }
     val str: String = when (value.type) {
-        ValueType.NUMBER -> value.number.toString() //TODO apply decimal format
-        ValueType.STRING -> value.string.take(width)
+        ValueType.NUMBER -> value.numberOrNull.toString() //TODO apply decimal format
+        ValueType.STRING, ValueType.LIST -> value.string.take(width)
         ValueType.BOOLEAN -> if (value.boolean) {
             "true"
         } else {

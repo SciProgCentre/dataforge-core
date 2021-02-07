@@ -1,32 +1,57 @@
 package hep.dataforge.workspace
 
-import hep.dataforge.context.PluginTag
+import hep.dataforge.context.*
 import hep.dataforge.data.*
-import hep.dataforge.meta.boolean
-import hep.dataforge.meta.builder
-import hep.dataforge.meta.get
-import hep.dataforge.meta.int
+import hep.dataforge.meta.*
+import hep.dataforge.names.get
 import hep.dataforge.names.plus
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Timeout
+import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+
+
+/**
+ * Make a fake-factory for a one single plugin. Useful for unique or test plugins
+ */
+public inline fun <reified P : Plugin> P.toFactory(): PluginFactory<P> = object : PluginFactory<P> {
+    override fun invoke(meta: Meta, context: Context): P = this@toFactory
+
+    override val tag: PluginTag = this@toFactory.tag
+    override val type: KClass<out P> = P::class
+}
+
+public fun Workspace.runBlocking(task: String, block: MetaBuilder.() -> Unit = {}): DataSet<Any> = runBlocking {
+    produce(task, block)
+}
 
 
 class SimpleWorkspaceTest {
     val testPlugin = object : WorkspacePlugin() {
         override val tag: PluginTag = PluginTag("test")
 
-        val contextTask = task("test", Any::class) {
-            map<Any> {
-                context.logger.info { "Test: $it" }
-            }
+        val test by task<Any> {
+            populate(
+                workspace.data.map {
+                    it.also {
+                        logger.info { "Test: $it" }
+                    }
+                }
+            )
         }
     }
+
+
+    val testPluginFactory = testPlugin.toFactory()
 
     val workspace = Workspace {
 
         context {
-            plugin(testPlugin)
+            plugin(testPluginFactory)
         }
 
         data {
@@ -35,98 +60,82 @@ class SimpleWorkspaceTest {
             }
         }
 
-        val filterTask = task<Int>("filterOne") {
-            model {
-                data("myData\\[12\\]")
-            }
-            map<Int>{
-                it
+        val filterOne by task<Int> {
+            workspace.data.selectOne<Int>("myData[12]")?.let { source ->
+                emit(source.name, source.map { it })
             }
         }
 
-        val square = task<Int>("square") {
-            map<Int> { data ->
-                if (meta["testFlag"].boolean == true) {
+        val square by task<Int> {
+            workspace.data.select<Int>().forEach { data ->
+                if (data.meta["testFlag"].boolean == true) {
                     println("flag")
                 }
-                context.logger.info { "Starting square on $data" }
-                data * data
+                val value = data.await()
+                workspace.logger.info { "Starting square on $value" }
+                emit(data.name, data.map { it * it })
             }
         }
 
-        val linear = task<Int>("linear") {
-            map<Int> { data ->
-                context.logger.info { "Starting linear on $data" }
-                data * 2 + 1
+        val linear by task<Int> {
+            workspace.data.select<Int>().forEach { data ->
+                workspace.logger.info { "Starting linear on $data" }
+                emit(data.name, data.data.map { it * 2 + 1 })
             }
         }
 
-        val fullSquare = task<Int>("fullsquare") {
-            model {
-                val squareDep = dependsOn(square, placement = "square")
-                val linearDep = dependsOn(linear, placement = "linear")
-            }
-            transform { data ->
-                val squareNode = data["square"].node!!.cast<Int>()//squareDep()
-                val linearNode = data["linear"].node!!.cast<Int>()//linearDep()
-                return@transform DataNode(Int::class) {
-                    squareNode.dataSequence().forEach { (name, _) ->
-                        val newData = Data {
-                            val squareValue = squareNode[name].data!!.get()
-                            val linearValue = linearNode[name].data!!.get()
-                            squareValue + linearValue
-                        }
-                        set(name, newData)
-                    }
+        val fullSquare by task<Int> {
+            val squareData = from(square)
+            val linearData = from(linear)
+            squareData.forEach { data ->
+                val newData: Data<Int> = data.combine(linearData.getData(data.name)!!) { l, r ->
+                    l + r
                 }
+                emit(data.name, newData)
             }
         }
 
-        task<Int>("sum") {
-            model {
-                dependsOn(square)
+        val sum by task<Int> {
+            workspace.logger.info { "Starting sum" }
+            val res = from(square).foldToData(0) { l, r ->
+                l + r.await()
             }
-            reduce<Int> { data ->
-                context.logger.info { "Starting sum" }
-                data.values.sum()
-            }
+            emit("sum", res)
         }
 
-        val average = task<Double>("average") {
-            reduceByGroup<Int> { env ->
-                group("even", filter = { name, _ -> name.toString().toInt() % 2 == 0 }) {
-                    result { data ->
-                        env.context.logger.info { "Starting even" }
-                        data.values.average()
-                    }
-                }
-                group("odd", filter = { name, _ -> name.toString().toInt() % 2 == 1 }) {
-                    result { data ->
-                        env.context.logger.info { "Starting odd" }
-                        data.values.average()
-                    }
-                }
+        val averageByGroup by task<Int> {
+            val evenSum = workspace.data.filter { name, _ ->
+                name.toString().toInt() % 2 == 0
+            }.select<Int>().foldToData(0) { l, r ->
+                l + r.await()
             }
+
+            emit("even", evenSum)
+            val oddSum = workspace.data.filter { name, _ ->
+                name.toString().toInt() % 2 == 1
+            }.select<Int>().foldToData(0) { l, r ->
+                l + r.await()
+            }
+            emit("odd", oddSum)
         }
 
-        task("delta") {
-            model {
-                dependsOn(average)
+        val delta by task<Int> {
+            val averaged = from(averageByGroup)
+            val even = averaged.getData("event")!!
+            val odd = averaged.getData("odd")!!
+            val res = even.combine(odd) { l, r ->
+                l - r
             }
-            reduce<Double> { data ->
-                data["even"]!! - data["odd"]!!
-            }
+            emit("res", res)
         }
 
-        val customPipeTask = task<Int>("custom") {
-            mapAction<Int> {
-                meta = meta.builder().apply {
+        val customPipe by task<Int> {
+            workspace.data.select<Int>().forEach { data ->
+                val meta = data.meta.toMutableMeta().apply {
                     "newValue" put 22
                 }
-                name += "new"
-                result {
-                    meta["value"].int ?: 0 + it
-                }
+                emit(data.name + "new", data.map { (data.meta["value"].int ?: 0) + it })
+
             }
         }
 
@@ -134,16 +143,22 @@ class SimpleWorkspaceTest {
     }
 
     @Test
+    @Timeout(1)
     fun testWorkspace() {
-        val node = workspace.run("sum")
-        val res = node.first()
-        assertEquals(328350, res?.get())
+        runBlocking {
+            val node = workspace.runBlocking("sum")
+            val res = node.flow().single()
+            assertEquals(328350, res.await())
+        }
     }
 
     @Test
+    @Timeout(1)
     fun testMetaPropagation() {
-        val node = workspace.run("sum") { "testFlag" put true }
-        val res = node.first()?.get()
+        runBlocking {
+            val node = workspace.produce("sum") { "testFlag" put true }
+            val res = node.flow().single().await()
+        }
     }
 
     @Test
@@ -155,13 +170,17 @@ class SimpleWorkspaceTest {
 
     @Test
     fun testFullSquare() {
-        val node = workspace.run("fullsquare")
-        println(node.toMeta())
+        runBlocking {
+            val node = workspace.produce("fullSquare")
+            println(node.toMeta())
+        }
     }
 
     @Test
-    fun testGather() {
-        val node = workspace.run("filterOne")
-        assertEquals(12, node.first()?.get())
+    fun testFilter() {
+        runBlocking {
+            val node = workspace.produce("filterOne")
+            assertEquals(12, node.flow().first().await())
+        }
     }
 }

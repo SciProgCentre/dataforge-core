@@ -84,6 +84,6 @@ public fun <T : Any> Provider.top(target: String, type: KClass<out T>): Map<Name
 /**
  *  Typed top level content
  */
-public inline fun <reified T : Any> Provider.top(target: String): Map<Name, T> = top(target, T::class)
+public inline fun <reified T : Any> Provider.top(target: String ): Map<Name, T> = top(target, T::class)
 
 

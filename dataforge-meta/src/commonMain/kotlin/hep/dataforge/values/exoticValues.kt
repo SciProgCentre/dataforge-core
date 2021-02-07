@@ -4,18 +4,17 @@ package hep.dataforge.values
 /**
  * A value built from string which content and type are parsed on-demand
  */
-public class LazyParsedValue(override val string: String) : Value {
+public class LazyParsedValue(public val string: String) : Value {
     private val parsedValue by lazy { string.parseValue() }
 
     override val value: Any? get() = parsedValue.value
     override val type: ValueType get() = parsedValue.type
-    override val number: Number get() = parsedValue.number
 
     override fun toString(): String = string
 
     override fun equals(other: Any?): Boolean = other is Value && this.parsedValue == other
 
-    override fun hashCode(): Int  = string.hashCode()
+    override fun hashCode(): Int = string.hashCode()
 }
 
 public fun String.lazyParseValue(): LazyParsedValue = LazyParsedValue(this)
@@ -23,10 +22,8 @@ public fun String.lazyParseValue(): LazyParsedValue = LazyParsedValue(this)
 /**
  * A performance optimized version of list value for doubles
  */
-public class DoubleArrayValue(override val value: DoubleArray) : Value {
-    override val type: ValueType get() = ValueType.NUMBER
-    override val number: Double get() = value.first()
-    override val string: String get() = value.first().toString()
+public class DoubleArrayValue(override val value: DoubleArray) : Value, Iterable<Double> {
+    override val type: ValueType get() = ValueType.LIST
     override val list: List<Value> get() = value.map { NumberValue(it) }
 
     override fun equals(other: Any?): Boolean {
@@ -43,7 +40,9 @@ public class DoubleArrayValue(override val value: DoubleArray) : Value {
         return value.contentHashCode()
     }
 
-    override fun toString(): String = list.joinToString (prefix = "[", postfix = "]")
+    override fun toString(): String = list.joinToString(prefix = "[", postfix = "]")
+
+    override fun iterator(): Iterator<Double> = value.iterator()
 }
 
-public fun DoubleArray.asValue(): Value = if(isEmpty()) Null else DoubleArrayValue(this)
+public fun DoubleArray.asValue(): Value = if (isEmpty()) Null else DoubleArrayValue(this)

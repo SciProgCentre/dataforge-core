@@ -1,14 +1,15 @@
 package hep.dataforge.io
 
-import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.isEmpty
+import hep.dataforge.misc.DFExperimental
 import kotlinx.io.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import kotlin.reflect.full.isSuperclassOf
+import kotlin.reflect.full.isSupertypeOf
+import kotlin.reflect.typeOf
 import kotlin.streams.asSequence
 
 public fun <R> Path.read(block: Input.() -> R): R = asBinary().read(block = block)
@@ -59,7 +60,7 @@ public fun Path.readEnvelope(format: EnvelopeFormat): Envelope {
 @Suppress("UNCHECKED_CAST")
 @DFExperimental
 public inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
-    return ioFormatFactories.find { it.type.isSuperclassOf(T::class) } as IOFormat<T>?
+    return ioFormatFactories.find { it.type.isSupertypeOf(typeOf<T>())} as IOFormat<T>?
 }
 
 /**
@@ -115,18 +116,18 @@ public fun IOPlugin.writeMetaFile(
  * Return inferred [EnvelopeFormat] if only one format could read given file. If no format accepts file, return null. If
  * multiple formats accepts file, throw an error.
  */
-public fun IOPlugin.peekBinaryFormat(path: Path): EnvelopeFormat? {
+public fun IOPlugin.peekFileEnvelopeFormat(path: Path): EnvelopeFormat? {
     val binary = path.asBinary()
     val formats = envelopeFormatFactories.mapNotNull { factory ->
         binary.read {
-            factory.peekFormat(this@peekBinaryFormat, this@read)
+            factory.peekFormat(this@peekFileEnvelopeFormat, this@read)
         }
     }
 
     return when (formats.size) {
         0 -> null
         1 -> formats.first()
-        else -> error("Envelope format binary recognition clash")
+        else -> error("Envelope format binary recognition clash: $formats")
     }
 }
 
@@ -137,10 +138,10 @@ public val IOPlugin.Companion.DATA_FILE_NAME: String get() = "@data"
  * Read and envelope from file if the file exists, return null if file does not exist.
  *
  * If file is directory, then expect two files inside:
- * * **meta.<format name>** for meta
+ * * **meta.<meta format extension>** for meta
  * * **data** for data
  *
- * If the file is envelope read it using [EnvelopeFormatFactory.peekFormat] functionality to infer format.
+ * If the file is envelope read it using [EnvelopeFormatFactory.peekFormat] functionality to infer format (if not overridden with [formatPicker]).
  *
  * If the file is not an envelope and [readNonEnvelopes] is true, return an Envelope without meta, using file as binary.
  *
@@ -150,9 +151,9 @@ public val IOPlugin.Companion.DATA_FILE_NAME: String get() = "@data"
 public fun IOPlugin.readEnvelopeFile(
     path: Path,
     readNonEnvelopes: Boolean = false,
-    formatPeeker: IOPlugin.(Path) -> EnvelopeFormat? = IOPlugin::peekBinaryFormat,
-): Envelope? {
-    if (!Files.exists(path)) return null
+    formatPicker: IOPlugin.(Path) -> EnvelopeFormat? = IOPlugin::peekFileEnvelopeFormat,
+): Envelope {
+    if (!Files.exists(path)) error("File with path $path does not exist")
 
     //read two-files directory
     if (Files.isDirectory(path)) {
@@ -177,11 +178,11 @@ public fun IOPlugin.readEnvelopeFile(
         return SimpleEnvelope(meta, data)
     }
 
-    return formatPeeker(path)?.let { format ->
+    return formatPicker(path)?.let { format ->
         path.readEnvelope(format)
     } ?: if (readNonEnvelopes) { // if no format accepts file, read it as binary
         SimpleEnvelope(Meta.EMPTY, path.asBinary())
-    } else null
+    } else error("Can't infer format for file $path")
 }
 
 /**

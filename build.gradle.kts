@@ -2,23 +2,27 @@ plugins {
     id("ru.mipt.npm.project")
 }
 
-val dataforgeVersion by extra("0.2.0")
+val dataforgeVersion by extra("0.3.0")
 
-val bintrayRepo by extra("dataforge")
-val githubProject by extra("dataforge-core")
-val spaceRepo by extra("https://maven.jetbrains.space/mipt-npm/p/df/maven")
+
 
 allprojects {
     group = "hep.dataforge"
     version = dataforgeVersion
 
     apply<org.jetbrains.dokka.gradle.DokkaPlugin>()
-
-    repositories {
-        mavenLocal()
-    }
 }
 
 subprojects {
     apply(plugin = "ru.mipt.npm.publish")
+}
+
+readme {
+    readmeTemplate = file("docs/templates/README-TEMPLATE.md")
+}
+
+ksciencePublish {
+    bintrayRepo = "dataforge"
+    githubProject = "dataforge-core"
+    spaceRepo = "https://maven.jetbrains.space/mipt-npm/p/df/maven"
 }

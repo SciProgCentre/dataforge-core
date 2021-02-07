@@ -1,14 +1,15 @@
 package hep.dataforge.meta.descriptors
 
 import hep.dataforge.meta.*
+import hep.dataforge.misc.DFBuilder
 import hep.dataforge.names.*
 import hep.dataforge.values.*
 
 /**
- * A common parent for [ValueDescriptor] and [NodeDescriptor]. Describes a single [MetaItem] or a group of same-name-siblings.
+ * A common parent for [ValueDescriptor] and [NodeDescriptor]. Describes a single [TypedMetaItem] or a group of same-name-siblings.
  */
 @DFBuilder
-public sealed class ItemDescriptor(public val config: Config) {
+public sealed class ItemDescriptor(final override val config: Config) : Configurable {
 
     /**
      * True if same name siblings with this name are allowed
@@ -38,7 +39,9 @@ public sealed class ItemDescriptor(public val config: Config) {
      */
     public var indexKey: String by config.string(DEFAULT_INDEX_KEY)
 
-    public companion object{
+    public abstract fun copy(): ItemDescriptor
+
+    public companion object {
         public const val DEFAULT_INDEX_KEY: String = "@index"
     }
 }
@@ -46,14 +49,14 @@ public sealed class ItemDescriptor(public val config: Config) {
 /**
  * Configure attributes of the descriptor, creating an attributes node if needed.
  */
-public fun ItemDescriptor.attributes(block: Config.() -> Unit) {
+public inline fun ItemDescriptor.attributes(block: Config.() -> Unit) {
     (attributes ?: Config().also { this.attributes = it }).apply(block)
 }
 
 /**
  * Check if given item suits the descriptor
  */
-public fun ItemDescriptor.validateItem(item: MetaItem<*>?): Boolean {
+public fun ItemDescriptor.validateItem(item: MetaItem?): Boolean {
     if (item == null) return !required
     return when (this) {
         is ValueDescriptor -> isAllowedValue(item.value ?: return false)
@@ -93,12 +96,13 @@ public class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) 
      * The map of children item descriptors (both nodes and values)
      */
     public val items: Map<String, ItemDescriptor>
-        get() = config.getIndexed(ITEM_KEY).mapValues { (_, item) ->
+        get() = config.getIndexed(ITEM_KEY).entries.associate { (name, item) ->
+            if (name == null) error("Child item index should not be null")
             val node = item.node ?: error("Node descriptor must be a node")
             if (node[IS_NODE_KEY].boolean == true) {
-                NodeDescriptor(node)
+                name to NodeDescriptor(node as Config)
             } else {
-                ValueDescriptor(node)
+                name to ValueDescriptor(node as Config)
             }
         }
 
@@ -110,8 +114,9 @@ public class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) 
         get() = config.getIndexed(ITEM_KEY).entries.filter {
             it.value.node[IS_NODE_KEY].boolean == true
         }.associate { (name, item) ->
+            if (name == null) error("Child node index should not be null")
             val node = item.node ?: error("Node descriptor must be a node")
-            name to NodeDescriptor(node)
+            name to NodeDescriptor(node as Config)
         }
 
     /**
@@ -121,8 +126,9 @@ public class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) 
         get() = config.getIndexed(ITEM_KEY).entries.filter {
             it.value.node[IS_NODE_KEY].boolean != true
         }.associate { (name, item) ->
+            if (name == null) error("Child value index should not be null")
             val node = item.node ?: error("Node descriptor must be a node")
-            name to ValueDescriptor(node)
+            name to ValueDescriptor(node as Config)
         }
 
     private fun buildNode(name: Name): NodeDescriptor {
@@ -180,16 +186,19 @@ public class NodeDescriptor(config: Config = Config()) : ItemDescriptor(config) 
         value(name.toName(), block)
     }
 
+    override fun copy(): NodeDescriptor = NodeDescriptor(config.toConfig())
+
     public companion object {
 
         internal val ITEM_KEY: Name = "item".asName()
         internal val IS_NODE_KEY: Name = "@isNode".asName()
 
-        public inline operator fun invoke(block: NodeDescriptor.() -> Unit): NodeDescriptor = NodeDescriptor().apply(block)
-
         //TODO infer descriptor from spec
     }
 }
+
+public inline fun NodeDescriptor(block: NodeDescriptor.() -> Unit): NodeDescriptor =
+    NodeDescriptor().apply(block)
 
 /**
  * Get a descriptor item associated with given name or null if item for given name not provided
@@ -266,12 +275,12 @@ public class ValueDescriptor(config: Config = Config()) : ItemDescriptor(config)
             val value = it.value
             when {
                 value?.list != null -> value.list
-                type?.let { type -> type.size == 1 && type[0] === ValueType.BOOLEAN} ?: false -> listOf(True, False)
+                type?.let { type -> type.size == 1 && type[0] === ValueType.BOOLEAN } ?: false -> listOf(True, False)
                 else -> emptyList()
             }
         },
         writer = {
-            MetaItem.ValueItem(it.asValue())
+            MetaItemValue(it.asValue())
         }
     )
 
@@ -281,6 +290,8 @@ public class ValueDescriptor(config: Config = Config()) : ItemDescriptor(config)
     public fun allow(vararg v: Any) {
         this.allowedValues = v.map { Value.of(it) }
     }
+
+    override fun copy(): ValueDescriptor = ValueDescriptor(config.toConfig())
 }
 
 /**

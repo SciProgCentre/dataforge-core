@@ -10,13 +10,14 @@ import hep.dataforge.io.PartDescriptor.Companion.SEPARATOR_KEY
 import hep.dataforge.meta.*
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
+import hep.dataforge.names.toName
 import kotlinx.io.Binary
 import kotlinx.io.writeBinary
 
 private class PartDescriptor : Scheme() {
     var offset by int(0)
     var size by int(0)
-    var meta by node()
+    var partMeta by node("meta".toName())
 
     companion object : SchemeSpec<PartDescriptor>(::PartDescriptor) {
         val MULTIPART_KEY = ENVELOPE_NODE_KEY + "multipart"
@@ -48,7 +49,7 @@ public fun EnvelopeBuilder.multipart(
         PartDescriptor {
             offset = offsetCounter
             size = binary.size
-            meta = description
+            partMeta = description
         }.also {
             offsetCounter += binary.size
         }
@@ -95,7 +96,7 @@ public fun Envelope.parts(): EnvelopeParts {
     } else {
         parts.map {
             val binary = data!!.view(it.offset, it.size)
-            val meta = Laminate(it.meta, meta[MULTIPART_KEY].node)
+            val meta = Laminate(it.partMeta, meta[MULTIPART_KEY].node)
             EnvelopePart(binary, meta)
         }
     }

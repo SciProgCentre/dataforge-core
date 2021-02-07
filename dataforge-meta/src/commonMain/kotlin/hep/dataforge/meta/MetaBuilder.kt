@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.misc.DFBuilder
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.values.EnumValue
@@ -12,10 +13,10 @@ import kotlin.jvm.JvmName
  */
 @DFBuilder
 public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
-    override fun wrapNode(meta: Meta): MetaBuilder = if (meta is MetaBuilder) meta else meta.builder()
+    override fun wrapNode(meta: Meta): MetaBuilder = if (meta is MetaBuilder) meta else meta.toMutableMeta()
     override fun empty(): MetaBuilder = MetaBuilder()
 
-    public infix fun String.put(item: MetaItem<*>?) {
+    public infix fun String.put(item: MetaItem?) {
         set(this, item)
     }
 
@@ -71,7 +72,7 @@ public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
         set(this,value.toList())
     }
 
-    public infix fun String.put(metaBuilder: MetaBuilder.() -> Unit) {
+    public inline infix fun String.put(metaBuilder: MetaBuilder.() -> Unit) {
         this@MetaBuilder[this] = MetaBuilder().apply(metaBuilder)
     }
 
@@ -121,25 +122,20 @@ public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
 /**
  * For safety, builder always copies the initial meta even if it is builder itself
  */
-public fun Meta.builder(): MetaBuilder {
+public fun Meta.toMutableMeta(): MetaBuilder {
     return MetaBuilder().also { builder ->
         items.mapValues { entry ->
             val item = entry.value
             builder[entry.key.asName()] = when (item) {
-                is MetaItem.ValueItem -> item.value
-                is MetaItem.NodeItem -> MetaItem.NodeItem(item.node.builder())
+                is MetaItemValue -> item.value
+                is MetaItemNode -> MetaItemNode(item.node.toMutableMeta())
             }
         }
     }
 }
 
 /**
- * Create a deep copy of this meta and apply builder to it
- */
-public fun Meta.edit(builder: MetaBuilder.() -> Unit): MetaBuilder = builder().apply(builder)
-
-/**
  * Build a [MetaBuilder] using given transformation
  */
 @Suppress("FunctionName")
-public fun Meta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)
+public inline fun Meta(builder: MetaBuilder.() -> Unit): MetaBuilder = MetaBuilder().apply(builder)

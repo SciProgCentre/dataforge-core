@@ -15,14 +15,16 @@
  */
 package hep.dataforge.data
 
-import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.string
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 public interface GroupRule {
-    public operator fun <T : Any> invoke(node: DataNode<T>): Map<String, DataNode<T>>
+    public suspend fun <T : Any> gather(set: DataSet<T>): Map<String, DataSet<T>>
 
-    public companion object{
+    public companion object {
         /**
          * Create grouping rule that creates groups for different values of value
          * field with name [key]
@@ -31,38 +33,32 @@ public interface GroupRule {
          * @param defaultTagValue
          * @return
          */
-        public fun byValue(key: String, defaultTagValue: String): GroupRule = object :
-            GroupRule {
-            override fun <T : Any> invoke(node: DataNode<T>): Map<String, DataNode<T>> {
-                val map = HashMap<String, DataTreeBuilder<T>>()
+        public fun byMetaValue(
+            scope: CoroutineScope,
+            key: String,
+            defaultTagValue: String,
+        ): GroupRule = object : GroupRule {
 
-                node.dataSequence().forEach { (name, data) ->
+            override suspend fun <T : Any> gather(
+                set: DataSet<T>,
+            ): Map<String, DataSet<T>> {
+                val map = HashMap<String, ActiveDataTree<T>>()
+
+                set.flow().collect { data ->
                     val tagValue = data.meta[key]?.string ?: defaultTagValue
-                    map.getOrPut(tagValue) { DataNode.builder(node.type) }[name] = data
+                    map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.emit(data.name, data.data)
                 }
 
-                return map.mapValues { it.value.build() }
-            }
-        }
-
-
-        //    @ValueDef(key = "byValue", required = true, info = "The name of annotation value by which grouping should be made")
-//    @ValueDef(
-//        key = "defaultValue",
-//        def = "default",
-//        info = "Default value which should be used for content in which the grouping value is not presented"
-//    )
-        public fun byMeta(config: Meta): GroupRule {
-            //TODO expand grouping options
-            return config["byValue"]?.string?.let {
-                byValue(
-                    it,
-                    config["defaultValue"]?.string ?: "default"
-                )
-            }
-                ?: object : GroupRule {
-                    override fun <T : Any> invoke(node: DataNode<T>): Map<String, DataNode<T>> = mapOf("" to node)
+                scope.launch {
+                    set.updates.collect { name ->
+                        val data = set.getData(name)
+                        val tagValue = data?.meta[key]?.string ?: defaultTagValue
+                        map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.emit(name, data)
+                    }
                 }
+
+                return map
+            }
         }
     }
 }

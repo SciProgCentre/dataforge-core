@@ -3,10 +3,11 @@ package hep.dataforge.context
 import hep.dataforge.context.Plugin.Companion.TARGET
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
+import hep.dataforge.misc.Named
+import hep.dataforge.misc.Type
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import hep.dataforge.provider.Provider
-import hep.dataforge.provider.Type
 
 /**
  * The interface to define a Context plugin. A plugin stores all runtime features of a context.
@@ -37,7 +38,7 @@ public interface Plugin : Named, ContextAware, Provider, MetaRepr {
      * dependencies must be initialized and enabled in the Context before this
      * plugin is enabled.
      */
-    public fun dependsOn(): Collection<PluginFactory<*>>
+    public fun dependsOn(): Map<PluginFactory<*>, Meta>
 
     /**
      * Start this plugin and attach registration info to the context. This method

@@ -3,15 +3,13 @@ package hep.dataforge.context
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
-import hep.dataforge.meta.sequence
+import hep.dataforge.meta.itemSequence
+import hep.dataforge.misc.Named
 import hep.dataforge.names.Name
-import hep.dataforge.names.plus
 import hep.dataforge.provider.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import mu.KLogger
-import mu.KotlinLogging
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -24,11 +22,10 @@ import kotlin.coroutines.CoroutineContext
  * be overridden by plugin implementation.
  *
  */
-public open class Context(
+public open class Context internal constructor(
     final override val name: Name,
     public val parent: Context?,
     meta: Meta,
-    plugins: Set<Plugin> = emptySet(),
 ) : Named, MetaRepr, Provider, CoroutineScope {
 
     /**
@@ -41,27 +38,22 @@ public open class Context(
     }
 
     /**
-     * Context logger
-     */
-    public val logger: KLogger = KotlinLogging.logger(name.toString())
-
-    /**
      * A [PluginManager] for current context
      */
-    public val plugins: PluginManager by lazy { PluginManager(this, plugins)}
+    public val plugins: PluginManager by lazy { PluginManager(this) }
 
     override val defaultTarget: String get() = Plugin.TARGET
 
     public fun content(target: String, inherit: Boolean): Map<Name, Any> {
         return if (inherit) {
             when (target) {
-                PROPERTY_TARGET -> properties.sequence().toMap()
+                PROPERTY_TARGET -> properties.itemSequence().toMap()
                 Plugin.TARGET -> plugins.list(true).associateBy { it.name }
                 else -> emptyMap()
             }
         } else {
             when (target) {
-                PROPERTY_TARGET -> properties.layers.firstOrNull()?.sequence()?.toMap() ?: emptyMap()
+                PROPERTY_TARGET -> properties.layers.firstOrNull()?.itemSequence()?.toMap() ?: emptyMap()
                 Plugin.TARGET -> plugins.list(false).associateBy { it.name }
                 else -> emptyMap()
             }
@@ -95,6 +87,9 @@ public open class Context(
     }
 }
 
+public fun Context(name: String, parent: Context = Global, block: ContextBuilder.() -> Unit = {}): Context =
+    Global.context(name, parent, block)
+
 /**
  * The interface for something that encapsulated in context
  *
@@ -106,12 +101,4 @@ public interface ContextAware {
      * @return
      */
     public val context: Context
-
-    public val logger: KLogger
-        get() = if (this is Named) {
-            KotlinLogging.logger((context.name + this.name).toString())
-        } else {
-            context.logger
-        }
-
 }

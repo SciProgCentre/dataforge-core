@@ -29,6 +29,7 @@ public interface Envelope {
         /**
          * Build a static envelope using provided builder
          */
+        @Deprecated("Use top level function instead")
         public inline operator fun invoke(block: EnvelopeBuilder.() -> Unit): Envelope =
             EnvelopeBuilder().apply(block).seal()
     }

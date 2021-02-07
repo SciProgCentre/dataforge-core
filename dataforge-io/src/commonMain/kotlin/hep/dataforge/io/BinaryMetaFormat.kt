@@ -1,11 +1,8 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Context
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.MetaItem
+import hep.dataforge.meta.*
 import hep.dataforge.meta.descriptors.NodeDescriptor
-import hep.dataforge.meta.setItem
 import hep.dataforge.values.*
 import kotlinx.io.*
 import kotlinx.io.text.readUtf8String
@@ -22,7 +19,7 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
     override fun invoke(meta: Meta, context: Context): MetaFormat = this
 
     override fun readMeta(input: Input, descriptor: NodeDescriptor?): Meta {
-        return (input.readMetaItem() as MetaItem.NodeItem).node
+        return (input.readMetaItem() as MetaItemNode).node
     }
 
     private fun Output.writeChar(char: Char) = writeByte(char.toByte())
@@ -32,49 +29,48 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
         writeUtf8String(str)
     }
 
-    public fun Output.writeValue(value: Value) {
-        if (value.isList()) {
+    public fun Output.writeValue(value: Value): Unit = when (value.type) {
+        ValueType.NUMBER -> when (value.value) {
+            is Short -> {
+                writeChar('s')
+                writeShort(value.short)
+            }
+            is Int -> {
+                writeChar('i')
+                writeInt(value.int)
+            }
+            is Long -> {
+                writeChar('l')
+                writeLong(value.long)
+            }
+            is Float -> {
+                writeChar('f')
+                writeFloat(value.float)
+            }
+            else -> {
+                writeChar('d')
+                writeDouble(value.double)
+            }
+        }
+        ValueType.STRING -> {
+            writeChar('S')
+            writeString(value.string)
+        }
+        ValueType.BOOLEAN -> {
+            if (value.boolean) {
+                writeChar('+')
+            } else {
+                writeChar('-')
+            }
+        }
+        ValueType.NULL -> {
+            writeChar('N')
+        }
+        ValueType.LIST -> {
             writeChar('L')
             writeInt(value.list.size)
             value.list.forEach {
                 writeValue(it)
-            }
-        } else when (value.type) {
-            ValueType.NUMBER -> when (value.value) {
-                is Short -> {
-                    writeChar('s')
-                    writeShort(value.number.toShort())
-                }
-                is Int -> {
-                    writeChar('i')
-                    writeInt(value.number.toInt())
-                }
-                is Long -> {
-                    writeChar('l')
-                    writeLong(value.number.toLong())
-                }
-                is Float -> {
-                    writeChar('f')
-                    writeFloat(value.number.toFloat())
-                }
-                else -> {
-                    writeChar('d')
-                    writeDouble(value.number.toDouble())
-                }
-            }
-            ValueType.STRING -> {
-                writeChar('S')
-                writeString(value.string)
-            }
-            ValueType.BOOLEAN -> {
-                if (value.boolean) {
-                    writeChar('+')
-                } else {
-                    writeChar('-')
-                }
-            }
-            ValueType.NULL -> {
-                writeChar('N')
             }
         }
     }
@@ -82,17 +78,17 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
     override fun writeMeta(
         output: kotlinx.io.Output,
         meta: hep.dataforge.meta.Meta,
-        descriptor: hep.dataforge.meta.descriptors.NodeDescriptor?
+        descriptor: hep.dataforge.meta.descriptors.NodeDescriptor?,
     ) {
         output.writeChar('M')
         output.writeInt(meta.items.size)
         meta.items.forEach { (key, item) ->
             output.writeString(key.toString())
             when (item) {
-                is MetaItem.ValueItem -> {
+                is MetaItemValue -> {
                     output.writeValue(item.value)
                 }
-                is MetaItem.NodeItem -> {
+                is MetaItemNode -> {
                     writeObject(output, item.node)
                 }
             }
@@ -105,21 +101,21 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
     }
 
     @Suppress("UNCHECKED_CAST")
-    public fun Input.readMetaItem(): MetaItem<MetaBuilder> {
+    public fun Input.readMetaItem(): TypedMetaItem<MetaBuilder> {
         return when (val keyChar = readByte().toChar()) {
-            'S' -> MetaItem.ValueItem(StringValue(readString()))
-            'N' -> MetaItem.ValueItem(Null)
-            '+' -> MetaItem.ValueItem(True)
-            '-' -> MetaItem.ValueItem(True)
-            's' -> MetaItem.ValueItem(NumberValue(readShort()))
-            'i' -> MetaItem.ValueItem(NumberValue(readInt()))
-            'l' -> MetaItem.ValueItem(NumberValue(readInt()))
-            'f' -> MetaItem.ValueItem(NumberValue(readFloat()))
-            'd' -> MetaItem.ValueItem(NumberValue(readDouble()))
+            'S' -> MetaItemValue(StringValue(readString()))
+            'N' -> MetaItemValue(Null)
+            '+' -> MetaItemValue(True)
+            '-' -> MetaItemValue(True)
+            's' -> MetaItemValue(NumberValue(readShort()))
+            'i' -> MetaItemValue(NumberValue(readInt()))
+            'l' -> MetaItemValue(NumberValue(readInt()))
+            'f' -> MetaItemValue(NumberValue(readFloat()))
+            'd' -> MetaItemValue(NumberValue(readDouble()))
             'L' -> {
                 val length = readInt()
-                val list = (1..length).map { (readMetaItem() as MetaItem.ValueItem).value }
-                MetaItem.ValueItem(Value.of(list))
+                val list = (1..length).map { (readMetaItem() as MetaItemValue).value }
+                MetaItemValue(Value.of(list))
             }
             'M' -> {
                 val length = readInt()
@@ -127,10 +123,10 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
                     (1..length).forEach { _ ->
                         val name = readString()
                         val item = readMetaItem()
-                        setItem(name, item)
+                        set(name, item)
                     }
                 }
-                MetaItem.NodeItem(meta)
+                MetaItemNode(meta)
             }
             else -> error("Unknown serialization key character: $keyChar")
         }

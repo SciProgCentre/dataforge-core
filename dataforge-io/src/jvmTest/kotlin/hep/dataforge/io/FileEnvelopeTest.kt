@@ -1,7 +1,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Global
-import hep.dataforge.meta.DFExperimental
+import hep.dataforge.misc.DFExperimental
 import kotlinx.io.writeDouble
 import java.nio.file.Files
 import kotlin.test.Test
@@ -29,7 +29,7 @@ class FileEnvelopeTest {
             val tmpPath = Files.createTempFile("dataforge_test", ".df")
             writeEnvelopeFile(tmpPath, envelope)
             println(tmpPath.toUri())
-            val restored: Envelope = readEnvelopeFile(tmpPath)!!
+            val restored: Envelope = readEnvelopeFile(tmpPath)
             assertTrue { envelope.contentEquals(restored) }
         }
     }
@@ -40,7 +40,7 @@ class FileEnvelopeTest {
             val tmpPath = Files.createTempFile("dataforge_test_tagless", ".df")
             writeEnvelopeFile(tmpPath, envelope, envelopeFormat = TaglessEnvelopeFormat)
             println(tmpPath.toUri())
-            val restored: Envelope = readEnvelopeFile(tmpPath)!!
+            val restored: Envelope = readEnvelopeFile(tmpPath)
             assertTrue { envelope.contentEquals(restored) }
         }
     }

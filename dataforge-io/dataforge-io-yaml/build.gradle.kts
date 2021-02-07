@@ -1,16 +1,33 @@
 plugins {
-    id("ru.mipt.npm.jvm")
+    id("ru.mipt.npm.mpp")
+//    id("ru.mipt.npm.native")
 }
 
 description = "YAML meta IO"
 
 kscience {
-    useSerialization {
-        yaml()
+    useSerialization{
+        yamlKt("0.9.0-dev-1")
     }
 }
 
-dependencies {
-    api(project(":dataforge-io"))
-    api("org.yaml:snakeyaml:1.26")
+repositories{
+    maven("https://dl.bintray.com/mamoe/yamlkt")
+}
+
+kotlin {
+    sourceSets {
+        commonMain{
+            dependencies {
+                api(project(":dataforge-io"))
+            }
+        }
+    }
+}
+
+readme{
+    maturity = ru.mipt.npm.gradle.Maturity.PROTOTYPE
+    description ="""
+        YAML meta converters and Front Matter envelope format
+    """.trimIndent()
 }

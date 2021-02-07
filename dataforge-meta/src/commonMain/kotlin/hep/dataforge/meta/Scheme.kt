@@ -9,35 +9,39 @@ import hep.dataforge.names.asName
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
  * Default item provider and [NodeDescriptor] are optional
  */
-public open class Scheme(
-    config: Config = Config(),
-    internal var default: ItemProvider? = null,
-    descriptor: NodeDescriptor? = null,
-) : Configurable, MutableItemProvider, Described, MetaRepr {
+public open class Scheme() : MutableItemProvider, Described, MetaRepr {
 
-    override var config: Config = config
-        internal set(value) {
-            //Fix problem with `init` blocks in specifications
-            field = value.apply { update(field) }
-        }
+    private var items: MutableItemProvider = Config()
 
-    override var descriptor: NodeDescriptor? = descriptor
-        internal set
+    private var default: ItemProvider? = null
 
+    final override var descriptor: NodeDescriptor? = null
 
-    public fun getDefaultItem(name: Name): MetaItem<*>? {
-        return default?.getItem(name) ?: descriptor?.get(name)?.defaultItem()
+    internal fun wrap(
+        items: MutableItemProvider,
+        default: ItemProvider? = null,
+        descriptor: NodeDescriptor? = null,
+    ) {
+        //use properties in the init block as default
+        this.default = this.items.withDefault(default)
+        //reset values, defaults are already saved
+        this.items = items
+        this.descriptor = descriptor
+    }
+
+    private fun getDefaultItem(name: Name): MetaItem? {
+        return default?.get(name) ?: descriptor?.get(name)?.defaultItem()
     }
 
     /**
      * Get a property with default
      */
-    override fun getItem(name: Name): MetaItem<*>? = config[name] ?: getDefaultItem(name)
+    override fun getItem(name: Name): MetaItem? = items[name] ?: getDefaultItem(name)
 
     /**
      * Check if property with given [name] could be assigned to [item]
      */
-    public fun validateItem(name: Name, item: MetaItem<*>?): Boolean {
+    public open fun validateItem(name: Name, item: MetaItem?): Boolean {
         val descriptor = descriptor?.get(name)
         return descriptor?.validateItem(item) ?: true
     }
@@ -45,26 +49,26 @@ public open class Scheme(
     /**
      * Set a configurable property
      */
-    override fun setItem(name: Name, item: MetaItem<*>?) {
+    override fun setItem(name: Name, item: MetaItem?) {
         if (validateItem(name, item)) {
-            config.setItem(name, item)
+            items[name] = item
         } else {
             error("Validation failed for property $name with value $item")
         }
     }
 
     /**
-     * Provide a default layer which returns items from [defaultProvider] and falls back to descriptor
+     * Provide a default layer which returns items from [default] and falls back to descriptor
      * values if default value is unavailable.
-     * Values from [defaultProvider] completely replace
+     * Values from [default] completely replace
      */
     public open val defaultLayer: Meta
         get() = object : MetaBase() {
-            override val items: Map<NameToken, MetaItem<*>> = buildMap {
+            override val items: Map<NameToken, MetaItem> = buildMap {
                 descriptor?.items?.forEach { (key, itemDescriptor) ->
                     val token = NameToken(key)
                     val name = token.asName()
-                    val item = default?.getItem(name) ?: itemDescriptor.defaultItem()
+                    val item = default?.get(name) ?: itemDescriptor.defaultItem()
                     if (item != null) {
                         put(token, item)
                     }
@@ -72,10 +76,31 @@ public open class Scheme(
             }
         }
 
-    override fun toMeta(): Laminate = Laminate(config, defaultLayer)
-
-    public fun isEmpty(): Boolean = config.isEmpty()
+    override fun toMeta(): Laminate = Laminate(items[Name.EMPTY].node, defaultLayer)
 }
+
+/**
+ * The scheme is considered empty only if its root item does not exist.
+ */
+public fun Scheme.isEmpty(): Boolean = rootItem == null
+
+/**
+ * Create a new empty [Scheme] object (including defaults) and inflate it around existing [MutableItemProvider].
+ * Items already present in the scheme are used as defaults.
+ */
+public fun <T : Scheme, S : Specification<T>> S.wrap(
+    items: MutableItemProvider,
+    default: ItemProvider? = null,
+    descriptor: NodeDescriptor? = null,
+): T = empty().apply {
+    wrap(items, default, descriptor)
+}
+
+/**
+ * Relocate scheme target onto given [MutableItemProvider]. Old provider does not get updates anymore.
+ * Current state of the scheme used as a default.
+ */
+public fun <T : Scheme> T.retarget(provider: MutableItemProvider) :T = apply { wrap(provider) }
 
 /**
  * A shortcut to edit a [Scheme] object in-place
@@ -85,24 +110,16 @@ public inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit): T = apply
 /**
  * A specification for simplified generation of wrappers
  */
-public open class SchemeSpec<T : Scheme>(
-    private val builder: (config: Config, defaultProvider: ItemProvider, descriptor: NodeDescriptor?) -> T,
+public open class SchemeSpec<out T : Scheme>(
+    private val builder: () -> T,
 ) : Specification<T>, Described {
 
-    public constructor(emptyBuilder: () -> T) : this({ config: Config, defaultProvider: ItemProvider, descriptor: NodeDescriptor? ->
-        emptyBuilder().apply {
-            this.config = config
-            this.default = defaultProvider
-            this.descriptor = descriptor
-        }
-    })
+    override fun empty(): T = builder()
 
-    override fun read(meta: Meta, defaultProvider: ItemProvider): T =
-        builder(Config(), meta.withDefault(defaultProvider), descriptor)
+    override fun read(items: ItemProvider): T = wrap(Config(), items, descriptor)
 
-    override fun wrap(config: Config, defaultProvider: ItemProvider): T {
-        return builder(config, defaultProvider, descriptor)
-    }
+    override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): T =
+        wrap(target, defaultProvider, descriptor)
 
     //TODO Generate descriptor from Scheme class
     override val descriptor: NodeDescriptor? get() = null
@@ -110,21 +127,3 @@ public open class SchemeSpec<T : Scheme>(
     @Suppress("OVERRIDE_BY_INLINE")
     final override inline operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
 }
-
-///**
-// * A scheme that uses [Meta] as a default layer
-// */
-//public open class MetaScheme(
-//    private val meta: Meta,
-//    override val descriptor: NodeDescriptor? = null,
-//    config: Config = Config(),
-//) : Scheme(config, meta) {
-//    override val defaultLayer: Meta get() = Laminate(meta, descriptor?.defaultItem().node)
-//}
-
-public fun Meta.asScheme(): Scheme = Scheme().apply {
-    config = this@asScheme.asConfig()
-}
-
-public fun <T : MutableItemProvider> Meta.toScheme(spec: Specification<T>, block: T.() -> Unit = {}): T =
-    spec.read(this).apply(block)

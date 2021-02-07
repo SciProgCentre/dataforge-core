@@ -57,3 +57,10 @@ public final class hep/dataforge/io/yaml/YamlMetaFormat$Companion : hep/dataforg
 	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
 }
 
+public final class hep/dataforge/io/yaml/YamlMetaFormatKt {
+	public static final fun toMeta (Lnet/mamoe/yamlkt/YamlMap;)Lhep/dataforge/meta/Meta;
+	public static final fun toMetaItem (Lnet/mamoe/yamlkt/YamlElement;Lhep/dataforge/meta/descriptors/ItemDescriptor;)Lhep/dataforge/meta/TypedMetaItem;
+	public static synthetic fun toMetaItem$default (Lnet/mamoe/yamlkt/YamlElement;Lhep/dataforge/meta/descriptors/ItemDescriptor;ILjava/lang/Object;)Lhep/dataforge/meta/TypedMetaItem;
+	public static final fun toYaml (Lhep/dataforge/meta/Meta;)Lnet/mamoe/yamlkt/YamlMap;
+}
+
