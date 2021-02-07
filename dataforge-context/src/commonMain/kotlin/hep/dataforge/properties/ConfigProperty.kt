@@ -1,12 +1,12 @@
 package hep.dataforge.properties
 
 import hep.dataforge.meta.Config
-import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.get
 import hep.dataforge.meta.set
 import hep.dataforge.meta.transformations.MetaConverter
 import hep.dataforge.meta.transformations.nullableItemToObject
 import hep.dataforge.meta.transformations.nullableObjectToMetaItem
+import hep.dataforge.misc.DFExperimental
 import hep.dataforge.names.Name
 
 @DFExperimental

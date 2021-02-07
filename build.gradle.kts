@@ -2,7 +2,7 @@ plugins {
     id("ru.mipt.npm.project")
 }
 
-val dataforgeVersion by extra("0.3.0-dev-3")
+val dataforgeVersion by extra("0.3.0")
 
 val bintrayRepo by extra("dataforge")
 val githubProject by extra("dataforge-core")
@@ -13,20 +13,8 @@ allprojects {
     version = dataforgeVersion
 
     apply<org.jetbrains.dokka.gradle.DokkaPlugin>()
-
-    repositories {
-        mavenLocal()
-    }
-}
-
-apiValidation{
-    validationDisabled = true
 }
 
 subprojects {
     apply(plugin = "ru.mipt.npm.publish")
-}
-
-apiValidation{
-    ignoredProjects.add("dataforge-tables")
 }

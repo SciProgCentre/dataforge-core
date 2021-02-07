@@ -19,10 +19,10 @@ import hep.dataforge.meta.get
 import hep.dataforge.meta.string
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
-import kotlin.reflect.KClass
+import kotlinx.coroutines.launch
 
 public interface GroupRule {
-    public suspend fun <T : Any> gather(dataType: KClass<out T>, set: DataSet<T>): Map<String, DataSet<T>>
+    public suspend fun <T : Any> gather(set: DataSet<T>): Map<String, DataSet<T>>
 
     public companion object {
         /**
@@ -33,48 +33,32 @@ public interface GroupRule {
          * @param defaultTagValue
          * @return
          */
-        public fun byValue(
+        public fun byMetaValue(
             scope: CoroutineScope,
             key: String,
             defaultTagValue: String,
         ): GroupRule = object : GroupRule {
 
             override suspend fun <T : Any> gather(
-                dataType: KClass<out T>,
                 set: DataSet<T>,
             ): Map<String, DataSet<T>> {
                 val map = HashMap<String, ActiveDataTree<T>>()
 
                 set.flow().collect { data ->
                     val tagValue = data.meta[key]?.string ?: defaultTagValue
-                    map.getOrPut(tagValue) { ActiveDataTree(dataType) }.emit(data.name, data.data)
+                    map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.emit(data.name, data.data)
+                }
+
+                scope.launch {
+                    set.updates.collect { name ->
+                        val data = set.getData(name)
+                        val tagValue = data?.meta[key]?.string ?: defaultTagValue
+                        map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.emit(name, data)
+                    }
                 }
 
                 return map
             }
         }
-
-
-        //    @ValueDef(key = "byValue", required = true, info = "The name of annotation value by which grouping should be made")
-//    @ValueDef(
-//        key = "defaultValue",
-//        def = "default",
-//        info = "Default value which should be used for content in which the grouping value is not presented"
-//    )
-//        public fun byMeta(scope: CoroutineScope, config: Meta): GroupRule {
-//            //TODO expand grouping options
-//            return config["byValue"]?.string?.let {
-//                byValue(
-//                    scope,
-//                    it,
-//                    config["defaultValue"]?.string ?: "default"
-//                )
-//            } ?: object : GroupRule {
-//                override suspend fun <T : Any> gather(
-//                    dataType: KClass<T>,
-//                    source: DataSource<T>,
-//                ): Map<String, DataSource<T>> = mapOf("" to source)
-//            }
-//        }
     }
 }

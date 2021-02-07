@@ -3,15 +3,14 @@ package hep.dataforge.workspace
 import hep.dataforge.data.Data
 import hep.dataforge.data.await
 import hep.dataforge.io.*
-import kotlin.reflect.KClass
+import hep.dataforge.misc.DFInternal
 
 /**
  * Convert an [Envelope] to a data via given format. The actual parsing is done lazily.
  */
+@OptIn(DFInternal::class)
 public fun <T : Any> Envelope.toData(format: IOFormat<T>): Data<T> {
-    @Suppress("UNCHECKED_CAST")
-    val kclass: KClass<T> = format.type.classifier as? KClass<T> ?: error("IOFormat type is not a class")
-    return Data(kclass, meta) {
+    return Data(format.type, meta) {
         data?.readWith(format) ?: error("Can't convert envelope without data to Data")
     }
 }

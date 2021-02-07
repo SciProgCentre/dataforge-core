@@ -1,10 +1,10 @@
 package hep.dataforge.properties
 
-import hep.dataforge.meta.DFExperimental
+import hep.dataforge.misc.DFExperimental
 import org.w3c.dom.HTMLInputElement
 
 @DFExperimental
-fun HTMLInputElement.bindValue(property: Property<String>) {
+public fun HTMLInputElement.bindValue(property: Property<String>) {
     if (this.onchange != null) error("Input element already bound")
     this.onchange = {
         property.value = this.value
@@ -18,7 +18,7 @@ fun HTMLInputElement.bindValue(property: Property<String>) {
 }
 
 @DFExperimental
-fun HTMLInputElement.bindChecked(property: Property<Boolean>) {
+public fun HTMLInputElement.bindChecked(property: Property<Boolean>) {
     if (this.onchange != null) error("Input element already bound")
     this.onchange = {
         property.value = this.checked

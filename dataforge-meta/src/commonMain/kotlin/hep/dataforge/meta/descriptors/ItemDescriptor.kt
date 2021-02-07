@@ -1,6 +1,7 @@
 package hep.dataforge.meta.descriptors
 
 import hep.dataforge.meta.*
+import hep.dataforge.misc.DFBuilder
 import hep.dataforge.names.*
 import hep.dataforge.values.*
 

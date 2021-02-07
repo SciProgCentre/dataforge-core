@@ -2,10 +2,10 @@ package hep.dataforge.io.yaml
 
 import hep.dataforge.io.parse
 import hep.dataforge.io.toString
-import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.get
 import hep.dataforge.meta.seal
+import hep.dataforge.misc.DFExperimental
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

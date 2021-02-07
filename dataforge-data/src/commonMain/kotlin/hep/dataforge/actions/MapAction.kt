@@ -1,13 +1,20 @@
 package hep.dataforge.actions
 
 import hep.dataforge.data.*
-import hep.dataforge.meta.*
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.seal
+import hep.dataforge.meta.toMutableMeta
+import hep.dataforge.misc.DFBuilder
+import hep.dataforge.misc.DFExperimental
+import hep.dataforge.misc.DFInternal
 import hep.dataforge.names.Name
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 /**
  * Action environment includes data name, data meta and action configuration meta
@@ -33,9 +40,9 @@ public class MapActionBuilder<T, R>(public var name: Name, public var meta: Meta
     }
 }
 
-
-public class MapAction<in T : Any, out R : Any>(
-    public val outputType: KClass<out R>,
+@PublishedApi
+internal class MapAction<in T : Any, out R : Any>(
+    private val outputType: KType,
     private val block: MapActionBuilder<T, R>.() -> Unit,
 ) : Action<T, R> {
 
@@ -61,7 +68,9 @@ public class MapAction<in T : Any, out R : Any>(
             //getting new meta
             val newMeta = builder.meta.seal()
 
-            val newData = data.map(outputType, meta = newMeta) { builder.result(env, it) }
+            @OptIn(DFInternal::class) val newData = Data(outputType, newMeta, dependencies = listOf(data)) {
+                builder.result(env, data.await())
+            }
             //setting the data node
             return newData.named(newName)
         }
@@ -83,9 +92,13 @@ public class MapAction<in T : Any, out R : Any>(
 }
 
 
+/**
+ * A one-to-one mapping action
+ */
+@DFExperimental
 @Suppress("FunctionName")
-public inline fun <T : Any, reified R : Any> MapAction(
+public inline fun <T : Any, reified R : Any> Action.Companion.map(
     noinline builder: MapActionBuilder<T, R>.() -> Unit,
-): MapAction<T, R> = MapAction(R::class, builder)
+): Action<T, R> = MapAction(typeOf<R>(), builder)
 
 

@@ -14,3 +14,7 @@ kotlin {
         }
     }
 }
+
+readme{
+    maturity = ru.mipt.npm.gradle.Maturity.EXPERIMENTAL
+}

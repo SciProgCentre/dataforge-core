@@ -4,8 +4,8 @@ import hep.dataforge.context.Context
 import hep.dataforge.io.*
 import hep.dataforge.io.IOFormat.Companion.META_KEY
 import hep.dataforge.io.IOFormat.Companion.NAME_KEY
-import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
+import hep.dataforge.misc.DFExperimental
 import kotlinx.io.*
 import kotlinx.io.text.readUtf8Line
 import kotlinx.io.text.writeUtf8String
@@ -17,8 +17,7 @@ public class FrontMatterEnvelopeFormat(
 ) : EnvelopeFormat {
 
     override fun readPartial(input: Input): PartialEnvelope {
-        @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
-        var line = ""
+        var line: String
         var offset = 0u
         do {
             line = input.readUtf8Line() //?: error("Input does not contain front matter separator")
@@ -44,7 +43,7 @@ public class FrontMatterEnvelopeFormat(
     }
 
     override fun readObject(input: Input): Envelope {
-        var line = ""
+        var line: String
         do {
             line = input.readUtf8Line() //?: error("Input does not contain front matter separator")
         } while (!line.startsWith(SEPARATOR))

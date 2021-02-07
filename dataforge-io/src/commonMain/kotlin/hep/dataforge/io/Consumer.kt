@@ -1,6 +1,6 @@
 package hep.dataforge.io
 
-import hep.dataforge.meta.DFExperimental
+import hep.dataforge.misc.DFExperimental
 
 /**
  * A fire-and-forget consumer of messages

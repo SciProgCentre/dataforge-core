@@ -4,6 +4,7 @@ package hep.dataforge.workspace
 import hep.dataforge.data.*
 import hep.dataforge.io.*
 import hep.dataforge.meta.*
+import hep.dataforge.misc.DFExperimental
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -15,7 +16,6 @@ import java.nio.file.StandardOpenOption
 import java.nio.file.spi.FileSystemProvider
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 import kotlin.streams.toList
@@ -35,9 +35,6 @@ internal inline fun <reified T : Any> IOPlugin.formatResolver(): FileFormatResol
         override fun invoke(path: Path, meta: Meta): IOFormat<T> =
             resolveIOFormat<T>() ?: error("Can't resolve IO format for ${T::class}")
     }
-
-private val <T : Any> FileFormatResolver<T>.kClass: KClass<T>
-    get() = type.classifier as? KClass<T> ?: error("Format resolver actual type does not correspond to type parameter")
 
 private fun newZFS(path: Path): FileSystem {
     val fsProvider = FileSystemProvider.installedProviders().find { it.scheme == "jar" }
@@ -110,7 +107,7 @@ public suspend fun <T : Any> IOPlugin.readDataDirectory(
         return readDataDirectory(fs.rootDirectories.first(), formatResolver)
     }
     if (!Files.isDirectory(path)) error("Provided path $path is not a directory")
-    return DataTree(formatResolver.kClass) {
+    return DataTree(formatResolver.type) {
         Files.list(path).toList().forEach { path ->
             val fileName = path.fileName.toString()
             if (fileName.startsWith(IOPlugin.META_FILE_NAME)) {

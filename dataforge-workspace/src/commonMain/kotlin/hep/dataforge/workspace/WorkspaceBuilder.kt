@@ -7,16 +7,15 @@ import hep.dataforge.data.ActiveDataTree
 import hep.dataforge.data.DataSet
 import hep.dataforge.data.DataSetBuilder
 import hep.dataforge.data.DataTree
-import hep.dataforge.meta.DFBuilder
-import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.descriptors.NodeDescriptor
+import hep.dataforge.misc.DFBuilder
+import hep.dataforge.misc.DFExperimental
 import hep.dataforge.names.Name
 import hep.dataforge.names.toName
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KClass
 
 public data class TaskReference<T: Any>(public val taskName: Name, public val task: Task<T>)
 
@@ -24,25 +23,19 @@ public interface TaskContainer {
     public fun registerTask(taskName: Name, task: Task<*>)
 }
 
-public fun <T : Any> TaskContainer.registerTask(
-    resultType: KClass<out T>,
-    name: String,
-    descriptorBuilder: NodeDescriptor.() -> Unit = {},
-    builder: suspend TaskResultBuilder<T>.() -> Unit,
-): Unit = registerTask(name.toName(), Task(resultType, NodeDescriptor(descriptorBuilder), builder))
 
 public inline fun <reified T : Any> TaskContainer.registerTask(
     name: String,
     noinline descriptorBuilder: NodeDescriptor.() -> Unit = {},
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
-): Unit = registerTask(T::class, name, descriptorBuilder, builder)
+): Unit = registerTask(name.toName(), Task(NodeDescriptor(descriptorBuilder), builder))
 
 public inline fun <reified T : Any> TaskContainer.task(
     noinline descriptorBuilder: NodeDescriptor.() -> Unit = {},
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
     val taskName = property.name.toName()
-    val task = Task(T::class, NodeDescriptor(descriptorBuilder), builder)
+    val task = Task(NodeDescriptor(descriptorBuilder), builder)
     registerTask(taskName, task)
     ReadOnlyProperty { _, _ -> TaskReference(taskName, task) }
 }

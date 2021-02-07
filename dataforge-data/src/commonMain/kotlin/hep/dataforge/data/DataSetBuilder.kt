@@ -1,17 +1,19 @@
 package hep.dataforge.data
 
-import hep.dataforge.actions.NamedData
-import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.misc.DFExperimental
 import hep.dataforge.names.Name
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlin.reflect.KType
 
 public interface DataSetBuilder<in T : Any> {
+    public val dataType: KType
+
     /**
      * Remove all data items starting with [name]
      */
@@ -50,8 +52,12 @@ public interface DataSetBuilder<in T : Any> {
     public suspend infix fun String.put(block: suspend DataSetBuilder<T>.() -> Unit): Unit = emit(toName(), block)
 }
 
-private class SubSetBuilder<in T : Any>(private val parent: DataSetBuilder<T>, private val branch: Name) :
-    DataSetBuilder<T> {
+private class SubSetBuilder<in T : Any>(
+    private val parent: DataSetBuilder<T>,
+    private val branch: Name,
+) : DataSetBuilder<T> {
+    override val dataType: KType get() = parent.dataType
+
     override suspend fun remove(name: Name) {
         parent.remove(branch + name)
     }
@@ -88,7 +94,7 @@ public suspend fun <T : Any> DataSetBuilder<T>.emit(data: NamedData<T>) {
 /**
  * Produce lazy [Data] and emit it into the [DataSetBuilder]
  */
-public suspend inline fun <reified T : Any> DataSetBuilder<T>.emitLazy(
+public suspend inline fun <reified T : Any> DataSetBuilder<T>.produce(
     name: String,
     meta: Meta = Meta.EMPTY,
     noinline producer: suspend () -> T,
@@ -97,11 +103,11 @@ public suspend inline fun <reified T : Any> DataSetBuilder<T>.emitLazy(
     emit(name, data)
 }
 
-public suspend inline fun <reified T : Any> DataSetBuilder<T>.emitLazy(
+public suspend inline fun <reified T : Any> DataSetBuilder<T>.produce(
     name: Name,
     meta: Meta = Meta.EMPTY,
     noinline producer: suspend () -> T,
-){
+) {
     val data = Data(meta, block = producer)
     emit(name, data)
 }
@@ -109,19 +115,17 @@ public suspend inline fun <reified T : Any> DataSetBuilder<T>.emitLazy(
 /**
  * Emit a static data with the fixed value
  */
-public suspend fun <T : Any> DataSetBuilder<T>.emitStatic(name: String, data: T, meta: Meta = Meta.EMPTY): Unit =
+public suspend inline fun <reified T : Any> DataSetBuilder<T>.static(name: String, data: T, meta: Meta = Meta.EMPTY): Unit =
     emit(name, Data.static(data, meta))
 
-public suspend fun <T : Any> DataSetBuilder<T>.emitStatic(name: Name, data: T, meta: Meta = Meta.EMPTY): Unit =
+public suspend inline fun <reified T : Any> DataSetBuilder<T>.static(name: Name, data: T, meta: Meta = Meta.EMPTY): Unit =
     emit(name, Data.static(data, meta))
 
-public suspend fun <T : Any> DataSetBuilder<T>.emitStatic(
+public suspend inline fun <reified T : Any> DataSetBuilder<T>.static(
     name: String,
     data: T,
     metaBuilder: MetaBuilder.() -> Unit,
-) {
-    emit(name.toName(), Data.static(data, Meta(metaBuilder)))
-}
+): Unit = emit(name.toName(), Data.static(data, Meta(metaBuilder)))
 
 /**
  * Update data with given node data and meta with node meta.

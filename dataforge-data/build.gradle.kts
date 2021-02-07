@@ -12,10 +12,6 @@ kotlin {
         commonMain{
             dependencies {
                 api(project(":dataforge-meta"))
-            }
-        }
-        jvmMain{
-            dependencies{
                 api(kotlin("reflect"))
             }
         }

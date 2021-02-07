@@ -1,7 +1,7 @@
 package hep.dataforge.workspace
 
-import hep.dataforge.actions.NamedData
 import hep.dataforge.data.Data
+import hep.dataforge.data.NamedData
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 

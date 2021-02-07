@@ -1,20 +1,19 @@
 package hep.dataforge.data
 
-import hep.dataforge.actions.NamedData
-import hep.dataforge.actions.named
+import hep.dataforge.data.Data.Companion.TYPE_OF_NOTHING
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.set
 import hep.dataforge.names.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 public interface DataSet<out T : Any> {
 
     /**
      * The minimal common ancestor to all data in the node
      */
-    public val dataType: KClass<out T>
+    public val dataType: KType
 
     /**
      * Traverse this provider or its child. The order is not guaranteed.
@@ -43,7 +42,9 @@ public interface DataSet<out T : Any> {
          * An empty [DataSet] that suits all types
          */
         public val EMPTY: DataSet<Nothing> = object : DataSet<Nothing> {
-            override val dataType: KClass<out Nothing> = Nothing::class
+            override val dataType: KType = TYPE_OF_NOTHING
+
+            private val nothing: Nothing get() = error("this is nothing")
 
             override fun flow(): Flow<NamedData<Nothing>> = emptyFlow()
 
@@ -88,7 +89,7 @@ public suspend fun DataSet<*>.toMeta(): Meta = Meta {
             set(it.name, it.meta)
         } else {
             it.name put {
-                "type" put it.type.simpleName
+                "type" put it.type.toString()
                 "meta" put it.meta
             }
         }

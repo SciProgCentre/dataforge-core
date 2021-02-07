@@ -9,6 +9,24 @@ import kotlin.test.assertEquals
 
 internal class DataTreeBuilderTest {
     @Test
+    fun testTreeBuild() = runBlocking {
+        val node = DataTree<Any> {
+            "primary" put {
+                static("a", "a")
+                static("b", "b")
+            }
+            static("c.d", "c.d")
+            static("c.f", "c.f")
+        }
+        runBlocking {
+            assertEquals("a", node.getData("primary.a")?.await())
+            assertEquals("b", node.getData("primary.b")?.await())
+            assertEquals("c.d", node.getData("c.d")?.await())
+            assertEquals("c.f", node.getData("c.f")?.await())
+        }
+    }
+
+    @Test
     fun testDataUpdate() = runBlocking {
         val updateData: DataTree<Any> = DataTree {
             "update" put {
@@ -18,17 +36,18 @@ internal class DataTreeBuilderTest {
         }
 
         val node = DataTree<Any> {
-            emit("primary") {
-                emitStatic("a", "a")
-                emitStatic("b", "b")
+            "primary" put {
+                static("a", "a")
+                static("b", "b")
             }
-            emitStatic("root", "root")
+            static("root", "root")
             populate(updateData)
         }
 
-
-        assertEquals("a", node.getData("update.a")?.value())
-        assertEquals("a", node.getData("primary.a")?.value())
+        runBlocking {
+            assertEquals("a", node.getData("update.a")?.await())
+            assertEquals("a", node.getData("primary.a")?.await())
+        }
     }
 
     @Test
@@ -40,7 +59,7 @@ internal class DataTreeBuilderTest {
                     updateJob = launch {
                         repeat(10) {
                             delay(10)
-                            emitStatic("value", it)
+                            static("value", it)
                         }
                         delay(10)
                     }
@@ -60,7 +79,7 @@ internal class DataTreeBuilderTest {
                     }
                 }
                 updateJob.join()
-                assertEquals(9, rootNode.getData("sub.value")?.value())
+                assertEquals(9, rootNode.getData("sub.value")?.await())
                 cancel()
             }
         } catch (t: Throwable) {

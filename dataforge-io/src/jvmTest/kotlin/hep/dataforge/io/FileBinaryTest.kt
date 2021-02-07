@@ -1,7 +1,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Global
-import hep.dataforge.meta.DFExperimental
+import hep.dataforge.misc.DFExperimental
 import kotlinx.io.asBinary
 import kotlinx.io.toByteArray
 import kotlinx.io.writeDouble
@@ -54,7 +54,7 @@ class FileBinaryTest {
         val tmpPath = Files.createTempFile("dataforge_test", ".df")
         Global.io.writeEnvelopeFile(tmpPath, envelope)
 
-        val binary = Global.io.readEnvelopeFile(tmpPath)?.data!!
+        val binary = Global.io.readEnvelopeFile(tmpPath).data!!
         assertEquals(binary.size, binary.toByteArray().size)
     }
 }

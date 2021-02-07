@@ -1,6 +1,6 @@
 package hep.dataforge.names
 
-import hep.dataforge.meta.DFExperimental
+import hep.dataforge.misc.DFExperimental
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -186,7 +186,6 @@ public fun Name.withIndex(index: String): Name {
  * Fast [String]-based accessor for item map
  */
 public operator fun <T> Map<NameToken, T>.get(body: String, query: String? = null): T? = get(NameToken(body, query))
-
 public operator fun <T> Map<Name, T>.get(name: String): T? = get(name.toName())
 public operator fun <T> MutableMap<Name, T>.set(name: String, value: T): Unit = set(name.toName(), value)
 

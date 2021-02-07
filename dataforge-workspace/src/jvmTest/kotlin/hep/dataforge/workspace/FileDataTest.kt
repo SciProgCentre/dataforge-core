@@ -4,8 +4,8 @@ import hep.dataforge.context.Global
 import hep.dataforge.data.*
 import hep.dataforge.io.IOFormat
 import hep.dataforge.io.io
-import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
+import hep.dataforge.misc.DFExperimental
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.Input
 import kotlinx.io.Output
@@ -23,11 +23,11 @@ class FileDataTest {
     val dataNode = runBlocking {
         DataTree<String> {
             emit("dir") {
-                emitStatic("a", "Some string") {
+                static("a", "Some string") {
                     "content" put "Some string"
                 }
             }
-            emitStatic("b", "root data")
+            static("b", "root data")
             meta {
                 "content" put "This is root meta node"
             }
