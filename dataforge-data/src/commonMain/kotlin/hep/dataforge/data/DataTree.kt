@@ -1,22 +1,21 @@
 package hep.dataforge.data
 
-import hep.dataforge.actions.NamedData
-import hep.dataforge.actions.named
-import hep.dataforge.meta.*
 import hep.dataforge.misc.Type
 import hep.dataforge.names.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 public sealed class DataTreeItem<out T : Any> {
     public class Node<out T : Any>(public val tree: DataTree<T>) : DataTreeItem<T>()
     public class Leaf<out T : Any>(public val data: Data<T>) : DataTreeItem<T>()
 }
 
-public val <T : Any> DataTreeItem<T>.type: KClass<out T>
+public val <T : Any> DataTreeItem<T>.type: KType
     get() = when (this) {
         is DataTreeItem.Node -> tree.dataType
         is DataTreeItem.Leaf -> data.type
@@ -91,7 +90,7 @@ public fun <T : Any> DataTree<T>.itemFlow(): Flow<Pair<Name, DataTreeItem<T>>> =
  * The difference from similar method for [DataSet] is that internal logic is more simple and the return value is a [DataTree]
  */
 public fun <T : Any> DataTree<T>.branch(branchName: Name): DataTree<T> = object : DataTree<T> {
-    override val dataType: KClass<out T> get() = this@branch.dataType
+    override val dataType: KType get() = this@branch.dataType
 
     override suspend fun items(): Map<NameToken, DataTreeItem<T>> = getItem(branchName).tree?.items() ?: emptyMap()
 }

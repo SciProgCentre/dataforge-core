@@ -1,7 +1,5 @@
-package hep.dataforge.actions
+package hep.dataforge.data
 
-import hep.dataforge.data.Data
-import hep.dataforge.data.StaticData
 import hep.dataforge.meta.isEmpty
 import hep.dataforge.misc.Named
 import hep.dataforge.names.Name

@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.misc.DFBuilder
 import hep.dataforge.names.Name
 import kotlin.properties.ReadWriteProperty
 

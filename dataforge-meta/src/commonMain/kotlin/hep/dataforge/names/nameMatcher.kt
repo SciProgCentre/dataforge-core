@@ -1,6 +1,6 @@
 package hep.dataforge.names
 
-import hep.dataforge.meta.DFExperimental
+import hep.dataforge.misc.DFExperimental
 
 
 /**

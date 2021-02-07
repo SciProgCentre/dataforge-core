@@ -1,7 +1,6 @@
 package hep.dataforge.data
 
-import hep.dataforge.actions.NamedData
-import hep.dataforge.actions.named
+import hep.dataforge.data.Data.Companion.TYPE_OF_NOTHING
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.set
 import hep.dataforge.names.*
@@ -43,7 +42,7 @@ public interface DataSet<out T : Any> {
          * An empty [DataSet] that suits all types
          */
         public val EMPTY: DataSet<Nothing> = object : DataSet<Nothing> {
-            override val dataType: KType = this::nothing.returnType
+            override val dataType: KType = TYPE_OF_NOTHING
 
             private val nothing: Nothing get() = error("this is nothing")
 

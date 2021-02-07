@@ -16,7 +16,6 @@
 
 package hep.dataforge.descriptors
 
-import hep.dataforge.meta.DFExperimental
 import hep.dataforge.values.ValueType
 import kotlin.reflect.KClass
 

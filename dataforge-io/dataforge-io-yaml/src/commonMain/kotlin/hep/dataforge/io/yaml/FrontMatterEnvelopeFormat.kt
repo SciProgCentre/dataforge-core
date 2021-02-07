@@ -4,8 +4,8 @@ import hep.dataforge.context.Context
 import hep.dataforge.io.*
 import hep.dataforge.io.IOFormat.Companion.META_KEY
 import hep.dataforge.io.IOFormat.Companion.NAME_KEY
-import hep.dataforge.meta.DFExperimental
 import hep.dataforge.meta.Meta
+import hep.dataforge.misc.DFExperimental
 import kotlinx.io.*
 import kotlinx.io.text.readUtf8Line
 import kotlinx.io.text.writeUtf8String

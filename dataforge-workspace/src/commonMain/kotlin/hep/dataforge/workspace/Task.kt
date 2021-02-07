@@ -6,11 +6,13 @@ import hep.dataforge.data.GoalExecutionRestriction
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.Described
 import hep.dataforge.meta.descriptors.ItemDescriptor
+import hep.dataforge.misc.DFInternal
 import hep.dataforge.misc.Type
 import hep.dataforge.names.Name
 import hep.dataforge.workspace.Task.Companion.TYPE
 import kotlinx.coroutines.withContext
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 @Type(TYPE)
 public interface Task<out T : Any> : Described {
@@ -42,8 +44,9 @@ public class TaskResultBuilder<T : Any>(
  * Data dependency cycles are not allowed.
  */
 @Suppress("FunctionName")
+@DFInternal
 public fun <T : Any> Task(
-    resultType: KClass<out T>,
+    resultType: KType,
     descriptor: ItemDescriptor? = null,
     builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): Task<T> = object : Task<T> {
@@ -56,15 +59,16 @@ public fun <T : Any> Task(
         taskMeta: Meta,
     ): TaskResult<T> = withContext(GoalExecutionRestriction() + workspace.goalLogger) {
         //TODO use safe builder and check for external data on add and detects cycles
-        val dataset = DataTree(resultType) {
+        val dataset = DataTree<T>(resultType) {
             TaskResultBuilder(workspace,taskName, taskMeta, this).apply { builder() }
         }
         workspace.internalize(dataset, taskName, taskMeta)
     }
 }
 
+@OptIn(DFInternal::class)
 @Suppress("FunctionName")
 public inline fun <reified T : Any> Task(
     descriptor: ItemDescriptor? = null,
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
-): Task<T> = Task(T::class, descriptor, builder)
+): Task<T> = Task(typeOf<T>(), descriptor, builder)

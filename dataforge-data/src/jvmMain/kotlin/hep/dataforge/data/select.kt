@@ -1,8 +1,6 @@
 package hep.dataforge.data
 
-import hep.dataforge.actions.NamedData
-import hep.dataforge.actions.named
-import hep.dataforge.meta.DFExperimental
+import hep.dataforge.misc.DFExperimental
 import hep.dataforge.names.Name
 import hep.dataforge.names.matches
 import hep.dataforge.names.toName

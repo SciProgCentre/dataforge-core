@@ -1,7 +1,16 @@
 package hep.dataforge.context
 
-import hep.dataforge.meta.*
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.seal
+import hep.dataforge.misc.DFBuilder
+import hep.dataforge.misc.DFExperimental
 import hep.dataforge.names.toName
+import kotlin.collections.HashMap
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.forEach
+import kotlin.collections.set
 
 /**
  * A convenience builder for context

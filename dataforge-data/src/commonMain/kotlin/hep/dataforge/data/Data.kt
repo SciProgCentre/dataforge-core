@@ -3,6 +3,7 @@ package hep.dataforge.data
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaRepr
 import hep.dataforge.meta.isEmpty
+import hep.dataforge.misc.DFInternal
 import hep.dataforge.misc.Type
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
@@ -35,17 +36,21 @@ public interface Data<out T : Any> : Goal<T>, MetaRepr {
     public companion object {
         public const val TYPE: String = "data"
 
+        /**
+         * The type that can't have any subtypes
+         */
+        internal val TYPE_OF_NOTHING: KType = typeOf<Unit>()
+
         public inline fun <reified T : Any> static(
             value: T,
             meta: Meta = Meta.EMPTY,
-        ): Data<T> = StaticData(typeOf<T>(),value, meta)
+        ): Data<T> = StaticData(typeOf<T>(), value, meta)
 
         /**
          * An empty data containing only meta
          */
         public fun empty(meta: Meta): Data<Nothing> = object : Data<Nothing> {
-            private val nothing: Nothing get() = error("this is nothing")
-            override val type: KType = this::nothing.returnType
+            override val type: KType = TYPE_OF_NOTHING
             override val meta: Meta = meta
             override val dependencies: Collection<Goal<*>> = emptyList()
             override val deferred: Deferred<Nothing>
@@ -59,13 +64,17 @@ public interface Data<out T : Any> : Goal<T>, MetaRepr {
     }
 }
 
-public class LazyData<T : Any>(
+/**
+ * A lazily computed variant of [Data] based on [LazyGoal]
+ * One must ensure that proper [type] is used so this method should not be used
+ */
+private class LazyData<T : Any>(
     override val type: KType,
     override val meta: Meta = Meta.EMPTY,
-    context: CoroutineContext = EmptyCoroutineContext,
+    additionalContext: CoroutineContext = EmptyCoroutineContext,
     dependencies: Collection<Data<*>> = emptyList(),
     block: suspend () -> T,
-) : Data<T>, LazyGoal<T>(context, dependencies, block)
+) : Data<T>, LazyGoal<T>(additionalContext, dependencies, block)
 
 public class StaticData<T : Any>(
     override val type: KType,
@@ -74,6 +83,7 @@ public class StaticData<T : Any>(
 ) : Data<T>, StaticGoal<T>(value)
 
 @Suppress("FunctionName")
+@DFInternal
 public fun <T : Any> Data(
     type: KType,
     meta: Meta = Meta.EMPTY,
@@ -82,6 +92,7 @@ public fun <T : Any> Data(
     block: suspend () -> T,
 ): Data<T> = LazyData(type, meta, context, dependencies, block)
 
+@OptIn(DFInternal::class)
 @Suppress("FunctionName")
 public inline fun <reified T : Any> Data(
     meta: Meta = Meta.EMPTY,

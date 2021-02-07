@@ -1,6 +1,6 @@
 package hep.dataforge.names
 
-import hep.dataforge.meta.DFExperimental
+import hep.dataforge.misc.DFExperimental
 import kotlin.test.Test
 import kotlin.test.assertFails
 import kotlin.test.assertFalse

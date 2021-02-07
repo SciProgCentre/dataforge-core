@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.misc.DFBuilder
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.values.EnumValue

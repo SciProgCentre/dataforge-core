@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.misc.DFExperimental
 import hep.dataforge.names.*
 
 public interface MutableMeta<out M : MutableMeta<M>> : TypedMeta<M>, MutableItemProvider {

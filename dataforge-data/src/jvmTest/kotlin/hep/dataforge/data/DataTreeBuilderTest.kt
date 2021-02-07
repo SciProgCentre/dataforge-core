@@ -18,10 +18,12 @@ internal class DataTreeBuilderTest {
             static("c.d", "c.d")
             static("c.f", "c.f")
         }
-        assertEquals("a", node.getData("primary.a")?.value())
-        assertEquals("b", node.getData("primary.b")?.value())
-        assertEquals("c.d", node.getData("c.d")?.value())
-        assertEquals("c.f", node.getData("c.f")?.value())
+        runBlocking {
+            assertEquals("a", node.getData("primary.a")?.await())
+            assertEquals("b", node.getData("primary.b")?.await())
+            assertEquals("c.d", node.getData("c.d")?.await())
+            assertEquals("c.f", node.getData("c.f")?.await())
+        }
     }
 
     @Test
@@ -42,9 +44,10 @@ internal class DataTreeBuilderTest {
             populate(updateData)
         }
 
-
-        assertEquals("a", node.getData("update.a")?.value())
-        assertEquals("a", node.getData("primary.a")?.value())
+        runBlocking {
+            assertEquals("a", node.getData("update.a")?.await())
+            assertEquals("a", node.getData("primary.a")?.await())
+        }
     }
 
     @Test
@@ -76,7 +79,7 @@ internal class DataTreeBuilderTest {
                     }
                 }
                 updateJob.join()
-                assertEquals(9, rootNode.getData("sub.value")?.value())
+                assertEquals(9, rootNode.getData("sub.value")?.await())
                 cancel()
             }
         } catch (t: Throwable) {

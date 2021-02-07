@@ -1,7 +1,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.Global
-import hep.dataforge.meta.DFExperimental
+import hep.dataforge.misc.DFExperimental
 import kotlinx.io.asBinary
 import kotlinx.io.toByteArray
 import kotlinx.io.writeDouble

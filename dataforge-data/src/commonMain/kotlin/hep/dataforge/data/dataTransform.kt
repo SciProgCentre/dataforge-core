@@ -1,11 +1,10 @@
 package hep.dataforge.data
 
-import hep.dataforge.actions.NamedData
-import hep.dataforge.actions.named
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.seal
 import hep.dataforge.meta.toMutableMeta
+import hep.dataforge.misc.DFInternal
 import kotlinx.coroutines.flow.*
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -20,23 +19,11 @@ import kotlin.reflect.typeOf
  * @param meta for the resulting data. By default equals input data.
  * @param block the transformation itself
  */
-private fun <T : Any, R : Any> Data<T>.map(
-    outputType: KType,
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = this.meta,
-    block: suspend (T) -> R,
-): LazyData<R> = LazyData(outputType, meta, coroutineContext, listOf(this)) {
-    block(await())
-}
-
-/**
- * See [map]
- */
 public inline fun <T : Any, reified R : Any> Data<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = this.meta,
     crossinline block: suspend (T) -> R,
-): LazyData<R> = LazyData(typeOf<R>(), meta, coroutineContext, listOf(this)) {
+): Data<R> = Data(meta, coroutineContext, listOf(this)) {
     block(await())
 }
 
@@ -48,7 +35,7 @@ public inline fun <T1 : Any, T2 : Any, reified R : Any> Data<T1>.combine(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = this.meta,
     crossinline block: suspend (left: T1, right: T2) -> R,
-): LazyData<R> = LazyData(typeOf<R>(), meta, coroutineContext, listOf(this, other)) {
+): Data<R> = Data(meta, coroutineContext, listOf(this, other)) {
     block(await(), other.await())
 }
 
@@ -62,8 +49,7 @@ public inline fun <T : Any, reified R : Any> Collection<Data<T>>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     crossinline block: suspend (Collection<T>) -> R,
-): LazyData<R> = LazyData(
-    typeOf<R>(),
+): Data<R> = Data(
     meta,
     coroutineContext,
     this
@@ -71,12 +57,13 @@ public inline fun <T : Any, reified R : Any> Collection<Data<T>>.reduceToData(
     block(map { it.await() })
 }
 
+@DFInternal
 public fun <K, T : Any, R : Any> Map<K, Data<T>>.reduceToData(
     outputType: KType,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     block: suspend (Map<K, T>) -> R,
-): LazyData<R> = LazyData(
+): Data<R> = Data(
     outputType,
     meta,
     coroutineContext,
@@ -96,8 +83,7 @@ public inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     noinline block: suspend (Map<K, T>) -> R,
-): LazyData<R> = LazyData(
-    typeOf<R>(),
+): Data<R> = Data(
     meta,
     coroutineContext,
     this.values
@@ -110,12 +96,13 @@ public inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.reduceToData(
 /**
  * Transform a [Flow] of [NamedData] to a single [Data].
  */
+@DFInternal
 public suspend fun <T : Any, R : Any> Flow<NamedData<T>>.reduceToData(
     outputType: KType,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     transformation: suspend (Flow<NamedData<T>>) -> R,
-): LazyData<R> = LazyData(
+): Data<R> = Data(
     outputType,
     meta,
     coroutineContext,
@@ -124,11 +111,12 @@ public suspend fun <T : Any, R : Any> Flow<NamedData<T>>.reduceToData(
     transformation(this)
 }
 
+@OptIn(DFInternal::class)
 public suspend inline fun <T : Any, reified R : Any> Flow<NamedData<T>>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     noinline transformation: suspend (Flow<NamedData<T>>) -> R,
-): LazyData<R> = reduceToData(typeOf<R>(), coroutineContext, meta) {
+): Data<R> = reduceToData(typeOf<R>(), coroutineContext, meta) {
     transformation(it)
 }
 
@@ -140,7 +128,7 @@ public suspend inline fun <T : Any, reified R : Any> Flow<NamedData<T>>.foldToDa
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     noinline block: suspend (result: R, data: NamedData<T>) -> R,
-): LazyData<R> = reduceToData(
+): Data<R> = reduceToData(
     coroutineContext, meta
 ) {
     it.fold(initial, block)
@@ -148,6 +136,7 @@ public suspend inline fun <T : Any, reified R : Any> Flow<NamedData<T>>.foldToDa
 
 //DataSet operations
 
+@DFInternal
 public suspend fun <T : Any, R : Any> DataSet<T>.map(
     outputType: KType,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
@@ -157,11 +146,14 @@ public suspend fun <T : Any, R : Any> DataSet<T>.map(
     populate(
         flow().map {
             val newMeta = it.meta.toMutableMeta().apply(metaTransform).seal()
-            it.map(outputType, coroutineContext, newMeta, block).named(it.name)
+            Data(outputType, newMeta, coroutineContext, listOf(it)) {
+                block(it.await())
+            }.named(it.name)
         }
     )
 }
 
+@OptIn(DFInternal::class)
 public suspend inline fun <T : Any, reified R : Any> DataSet<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     noinline metaTransform: MetaBuilder.() -> Unit = {},
@@ -179,11 +171,11 @@ public suspend inline fun <T : Any, reified R : Any> DataSet<T>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     noinline transformation: suspend (Flow<NamedData<T>>) -> R,
-): LazyData<R> = flow().reduceToData(coroutineContext, meta, transformation)
+): Data<R> = flow().reduceToData(coroutineContext, meta, transformation)
 
 public suspend inline fun <T : Any, reified R : Any> DataSet<T>.foldToData(
     initial: R,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     noinline block: suspend (result: R, data: NamedData<T>) -> R,
-): LazyData<R> = flow().foldToData(initial, coroutineContext, meta, block)
+): Data<R> = flow().foldToData(initial, coroutineContext, meta, block)

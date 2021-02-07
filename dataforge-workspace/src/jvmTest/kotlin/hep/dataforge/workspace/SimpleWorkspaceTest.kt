@@ -1,9 +1,9 @@
 package hep.dataforge.workspace
 
-import hep.dataforge.actions.get
 import hep.dataforge.context.*
 import hep.dataforge.data.*
 import hep.dataforge.meta.*
+import hep.dataforge.names.get
 import hep.dataforge.names.plus
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.single
