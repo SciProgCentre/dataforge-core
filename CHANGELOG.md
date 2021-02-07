@@ -20,6 +20,7 @@
 - \[Major breaking change\] Moved `NodeItem` and `ValueItem` to a top level
 - Plugins are removed from Context constructor and added lazily in ContextBuilder
 - \[Major breaking change\] Full refactor of DataTree/DataSource
+- \[Major Breaking change\] Replace KClass with KType in data. Remove direct access to constructors with types.
 
 ### Deprecated
 

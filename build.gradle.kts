@@ -15,14 +15,6 @@ allprojects {
     apply<org.jetbrains.dokka.gradle.DokkaPlugin>()
 }
 
-apiValidation{
-    validationDisabled = true
-}
-
 subprojects {
     apply(plugin = "ru.mipt.npm.publish")
-}
-
-apiValidation{
-    ignoredProjects.add("dataforge-tables")
 }
