@@ -4,15 +4,15 @@ public abstract class hep/dataforge/context/AbstractPlugin : hep/dataforge/conte
 	public synthetic fun <init> (Lhep/dataforge/meta/Meta;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun attach (Lhep/dataforge/context/Context;)V
 	public fun content (Ljava/lang/String;)Ljava/util/Map;
-	public synthetic fun dependsOn ()Ljava/util/Collection;
-	public final fun dependsOn ()Ljava/util/List;
+	public final fun dependsOn ()Ljava/util/Map;
 	public fun detach ()V
 	public fun getContext ()Lhep/dataforge/context/Context;
 	public fun getDefaultChainTarget ()Ljava/lang/String;
 	public fun getDefaultTarget ()Ljava/lang/String;
 	public fun getMeta ()Lhep/dataforge/meta/Meta;
 	public fun getName ()Lhep/dataforge/names/Name;
-	protected final fun require (Lhep/dataforge/context/PluginFactory;)Lkotlin/properties/ReadOnlyProperty;
+	protected final fun require (Lhep/dataforge/context/PluginFactory;Lhep/dataforge/meta/Meta;)Lkotlin/properties/ReadOnlyProperty;
+	public static synthetic fun require$default (Lhep/dataforge/context/AbstractPlugin;Lhep/dataforge/context/PluginFactory;Lhep/dataforge/meta/Meta;ILjava/lang/Object;)Lkotlin/properties/ReadOnlyProperty;
 	public fun toMeta ()Lhep/dataforge/meta/Meta;
 }
 
@@ -35,10 +35,9 @@ public final class hep/dataforge/context/ClassLoaderPluginKt {
 	public static final fun getClassLoaderPlugin (Lhep/dataforge/context/Context;)Lhep/dataforge/context/ClassLoaderPlugin;
 }
 
-public class hep/dataforge/context/Context : hep/dataforge/context/Named, hep/dataforge/meta/MetaRepr, hep/dataforge/provider/Provider, kotlinx/coroutines/CoroutineScope {
+public class hep/dataforge/context/Context : hep/dataforge/meta/MetaRepr, hep/dataforge/misc/Named, hep/dataforge/provider/Provider, kotlinx/coroutines/CoroutineScope {
 	public static final field Companion Lhep/dataforge/context/Context$Companion;
 	public static final field PROPERTY_TARGET Ljava/lang/String;
-	public fun <init> (Lhep/dataforge/names/Name;Lhep/dataforge/context/Context;Lhep/dataforge/meta/Meta;)V
 	public fun close ()V
 	public fun content (Ljava/lang/String;)Ljava/util/Map;
 	public final fun content (Ljava/lang/String;Z)Ljava/util/Map;
@@ -74,6 +73,11 @@ public final class hep/dataforge/context/ContextBuilder {
 	public final fun setName (Ljava/lang/String;)V
 }
 
+public final class hep/dataforge/context/ContextKt {
+	public static final fun Context (Ljava/lang/String;Lhep/dataforge/context/Context;Lkotlin/jvm/functions/Function1;)Lhep/dataforge/context/Context;
+	public static synthetic fun Context$default (Ljava/lang/String;Lhep/dataforge/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/context/Context;
+}
+
 public abstract interface class hep/dataforge/context/Factory {
 	public abstract fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
 }
@@ -96,24 +100,11 @@ public final class hep/dataforge/context/LoggingKt {
 	public static final fun getLogger (Lhep/dataforge/context/ContextAware;)Lmu/KLogger;
 }
 
-public abstract interface class hep/dataforge/context/Named {
-	public static final field Companion Lhep/dataforge/context/Named$Companion;
-	public abstract fun getName ()Lhep/dataforge/names/Name;
-}
-
-public final class hep/dataforge/context/Named$Companion {
-	public final fun nameOf (Ljava/lang/Object;)Lhep/dataforge/names/Name;
-}
-
-public final class hep/dataforge/context/NamedKt {
-	public static final fun isAnonymous (Lhep/dataforge/context/Named;)Z
-}
-
-public abstract interface class hep/dataforge/context/Plugin : hep/dataforge/context/ContextAware, hep/dataforge/context/Named, hep/dataforge/meta/MetaRepr, hep/dataforge/provider/Provider {
+public abstract interface class hep/dataforge/context/Plugin : hep/dataforge/context/ContextAware, hep/dataforge/meta/MetaRepr, hep/dataforge/misc/Named, hep/dataforge/provider/Provider {
 	public static final field Companion Lhep/dataforge/context/Plugin$Companion;
 	public static final field TARGET Ljava/lang/String;
 	public abstract fun attach (Lhep/dataforge/context/Context;)V
-	public abstract fun dependsOn ()Ljava/util/Collection;
+	public abstract fun dependsOn ()Ljava/util/Map;
 	public abstract fun detach ()V
 	public abstract fun getMeta ()Lhep/dataforge/meta/Meta;
 	public abstract fun getName ()Lhep/dataforge/names/Name;
@@ -146,9 +137,9 @@ public final class hep/dataforge/context/PluginFactory$Companion {
 
 public final class hep/dataforge/context/PluginManager : hep/dataforge/context/ContextAware, java/lang/Iterable, kotlin/jvm/internal/markers/KMappedMarker {
 	public fun <init> (Lhep/dataforge/context/Context;)V
-	public final fun fetch (Lhep/dataforge/context/PluginFactory;ZLhep/dataforge/meta/Meta;)Lhep/dataforge/context/Plugin;
+	public final fun fetch (Lhep/dataforge/context/PluginFactory;Lhep/dataforge/meta/Meta;Z)Lhep/dataforge/context/Plugin;
 	public final fun fetch (Lhep/dataforge/context/PluginFactory;ZLkotlin/jvm/functions/Function1;)Lhep/dataforge/context/Plugin;
-	public static synthetic fun fetch$default (Lhep/dataforge/context/PluginManager;Lhep/dataforge/context/PluginFactory;ZLhep/dataforge/meta/Meta;ILjava/lang/Object;)Lhep/dataforge/context/Plugin;
+	public static synthetic fun fetch$default (Lhep/dataforge/context/PluginManager;Lhep/dataforge/context/PluginFactory;Lhep/dataforge/meta/Meta;ZILjava/lang/Object;)Lhep/dataforge/context/Plugin;
 	public static synthetic fun fetch$default (Lhep/dataforge/context/PluginManager;Lhep/dataforge/context/PluginFactory;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/context/Plugin;
 	public final fun find (ZLkotlin/jvm/functions/Function1;)Lhep/dataforge/context/Plugin;
 	public static synthetic fun find$default (Lhep/dataforge/context/PluginManager;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/context/Plugin;
@@ -262,9 +253,6 @@ public final class hep/dataforge/provider/Path : java/lang/Iterable, kotlin/jvm/
 	public fun equals (Ljava/lang/Object;)Z
 	public static fun equals-impl (Ljava/util/List;Ljava/lang/Object;)Z
 	public static final fun equals-impl0 (Ljava/util/List;Ljava/util/List;)Z
-	public static final fun getHead-impl (Ljava/util/List;)Lhep/dataforge/provider/PathToken;
-	public static final fun getLength-impl (Ljava/util/List;)I
-	public static final fun getTail-e2ET3QM (Ljava/util/List;)Ljava/util/List;
 	public final fun getTokens ()Ljava/util/List;
 	public fun hashCode ()I
 	public static fun hashCode-impl (Ljava/util/List;)I
@@ -276,7 +264,7 @@ public final class hep/dataforge/provider/Path : java/lang/Iterable, kotlin/jvm/
 }
 
 public final class hep/dataforge/provider/Path$Companion {
-	public final fun parse-IN54j3k (Ljava/lang/String;)Ljava/util/List;
+	public final fun parse-AnEnhig (Ljava/lang/String;)Ljava/util/List;
 }
 
 public final class hep/dataforge/provider/PathKt {
@@ -285,7 +273,10 @@ public final class hep/dataforge/provider/PathKt {
 	public static final fun asPath (Lhep/dataforge/names/Name;Ljava/lang/String;)Ljava/util/List;
 	public static final fun asPath (Lhep/dataforge/provider/PathToken;)Ljava/util/List;
 	public static synthetic fun asPath$default (Lhep/dataforge/names/Name;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
-	public static final fun plus-MQiGgVU (Ljava/util/List;Ljava/util/List;)Ljava/util/List;
+	public static final fun getHead-Ipm_iiw (Ljava/util/List;)Lhep/dataforge/provider/PathToken;
+	public static final fun getLength-Ipm_iiw (Ljava/util/List;)I
+	public static final fun getTail-Ipm_iiw (Ljava/util/List;)Ljava/util/List;
+	public static final fun plus-BlTXZnM (Ljava/util/List;Ljava/util/List;)Ljava/util/List;
 }
 
 public final class hep/dataforge/provider/PathToken {
@@ -321,8 +312,8 @@ public final class hep/dataforge/provider/Provider$DefaultImpls {
 }
 
 public final class hep/dataforge/provider/ProviderKt {
-	public static final fun provide-0Dbucg0 (Lhep/dataforge/provider/Provider;Ljava/util/List;Ljava/lang/String;)Ljava/lang/Object;
-	public static synthetic fun provide-0Dbucg0$default (Lhep/dataforge/provider/Provider;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun provide-mzxrFLw (Lhep/dataforge/provider/Provider;Ljava/util/List;Ljava/lang/String;)Ljava/lang/Object;
+	public static synthetic fun provide-mzxrFLw$default (Lhep/dataforge/provider/Provider;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun top (Lhep/dataforge/provider/Provider;Ljava/lang/String;Lkotlin/reflect/KClass;)Ljava/util/Map;
 }
 

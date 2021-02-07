@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.3.0]
+### Added
 - Yaml meta format based on yaml.kt
 - `Path` builders
 - Special ValueType for lists
