@@ -7,8 +7,12 @@ description = "YAML meta IO"
 
 kscience {
     useSerialization{
-        yamlKt()
+        yamlKt("0.9.0-dev-1")
     }
+}
+
+repositories{
+    maven("https://dl.bintray.com/mamoe/yamlkt")
 }
 
 kotlin {
@@ -16,7 +20,6 @@ kotlin {
         commonMain{
             dependencies {
                 api(project(":dataforge-io"))
-                //api("net.mamoe.yamlkt:yamlkt:${ru.mipt.npm.gradle.KScienceVersions.Serialization.yamlKtVersion}")
             }
         }
     }
