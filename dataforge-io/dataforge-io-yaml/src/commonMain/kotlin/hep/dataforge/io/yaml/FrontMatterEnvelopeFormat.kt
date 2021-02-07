@@ -17,8 +17,7 @@ public class FrontMatterEnvelopeFormat(
 ) : EnvelopeFormat {
 
     override fun readPartial(input: Input): PartialEnvelope {
-        @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
-        var line = ""
+        var line: String
         var offset = 0u
         do {
             line = input.readUtf8Line() //?: error("Input does not contain front matter separator")
@@ -44,7 +43,7 @@ public class FrontMatterEnvelopeFormat(
     }
 
     override fun readObject(input: Input): Envelope {
-        var line = ""
+        var line: String
         do {
             line = input.readUtf8Line() //?: error("Input does not contain front matter separator")
         } while (!line.startsWith(SEPARATOR))
