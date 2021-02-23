@@ -1,27 +1,36 @@
 package hep.dataforge.tables
 
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.invoke
 import hep.dataforge.values.Value
-import kotlin.reflect.KClass
+import kotlin.properties.PropertyDelegateProvider
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 public class MutableTable<C : Any>(
     override val rows: MutableList<Row<C>>,
-    override val header: MutableList<ColumnHeader<C>>
-) : RowTable<C>(rows, header) {
+    override val headers: MutableList<ColumnHeader<C>>,
+) : RowTable<C>(rows, headers) {
 
-    public fun <R : C> column(name: String, type: KClass<out R>, meta: Meta): ColumnHeader<R> {
-        val column = SimpleColumnHeader(name, type, meta)
-        header.add(column)
+    @PublishedApi
+    internal fun <T : C> addColumn(name: String, type: KType, meta: Meta): ColumnHeader<T> {
+        val column = SimpleColumnHeader<T>(name, type, meta)
+        headers.add(column)
         return column
     }
 
-    public inline fun <reified T : C> column(
+    public inline fun <reified T : C> addColumn(
         name: String,
+        noinline columnMetaBuilder: ColumnScheme.() -> Unit = {},
+    ): ColumnHeader<T> = addColumn(name, typeOf<T>(), ColumnScheme(columnMetaBuilder).toMeta())
+
+    public inline fun <reified T : C> column(
         noinline columnMetaBuilder: ColumnScheme.() -> Unit = {}
-    ): ColumnHeader<T> {
-        return column(name, T::class, ColumnScheme(columnMetaBuilder).toMeta())
-    }
+    ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, ColumnHeader<T>>> =
+        PropertyDelegateProvider { _, property ->
+            val res = addColumn<T>(property.name, columnMetaBuilder)
+            ReadOnlyProperty { _, _ -> res }
+        }
 
     public fun row(map: Map<String, C?>): Row<C> {
         val row = MapRow(map)
@@ -37,5 +46,5 @@ public fun MutableTable<Value>.row(vararg pairs: Pair<ColumnHeader<Value>, Any?>
     row(pairs.associate { it.first.name to Value.of(it.second) })
 
 public fun <C : Any> Table<C>.edit(block: MutableTable<C>.() -> Unit): Table<C> {
-    return MutableTable(rows.toMutableList(), header.toMutableList()).apply(block)
+    return MutableTable(rows.toMutableList(), headers.toMutableList()).apply(block)
 }

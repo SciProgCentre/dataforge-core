@@ -32,7 +32,7 @@ private fun readLine(header: ValueTableHeader, line: String): Row<Value> {
  * Finite or infinite [Rows] created from a fixed width text binary
  */
 @ExperimentalIoApi
-public class TextRows(override val header: ValueTableHeader, private val binary: Binary) : Rows<Value> {
+public class TextRows(override val headers: ValueTableHeader, private val binary: Binary) : Rows<Value> {
 
     /**
      * A flow of indexes of string start offsets ignoring empty strings
@@ -52,7 +52,7 @@ public class TextRows(override val header: ValueTableHeader, private val binary:
         flow {
             forEachUtf8Line { line ->
                 if (line.isNotBlank()) {
-                    val row = readLine(header, line)
+                    val row = readLine(headers, line)
                     emit(row)
                 }
             }
@@ -73,25 +73,25 @@ public suspend fun TextRows.buildRowIndex(): List<Int> = indexFlow().toList()
  */
 @ExperimentalIoApi
 public class TextTable(
-    override val header: ValueTableHeader,
+    override val headers: ValueTableHeader,
     private val binary: Binary,
     public val index: List<Int>
 ) : Table<Value> {
 
-    override val columns: Collection<Column<Value>> get() = header.map { RowTableColumn(this, it) }
+    override val columns: Collection<Column<Value>> get() = headers.map { RowTableColumn(this, it) }
 
     override val rows: List<Row<Value>> get() = index.map { readAt(it) }
 
-    override fun rowFlow(): Flow<Row<Value>> = TextRows(header, binary).rowFlow()
+    override fun rowFlow(): Flow<Row<Value>> = TextRows(headers, binary).rowFlow()
 
     private fun readAt(offset: Int): Row<Value> {
         return binary.read(offset) {
             val line = readUtf8Line()
-            return@read readLine(header, line)
+            return@read readLine(headers, line)
         }
     }
 
-    override fun getValue(row: Int, column: String): Value? {
+    override fun get(row: Int, column: String): Value? {
         val offset = index[row]
         return readAt(offset)[column]
     }
@@ -132,11 +132,11 @@ private fun Output.writeValue(value: Value, width: Int, left: Boolean = true) {
  * Write rows without header to the output
  */
 public suspend fun Output.writeRows(rows: Rows<Value>) {
-    val widths: List<Int> = rows.header.map {
+    val widths: List<Int> = rows.headers.map {
         it.textWidth
     }
     rows.rowFlow().collect { row ->
-        rows.header.forEachIndexed { index, columnHeader ->
+        rows.headers.forEachIndexed { index, columnHeader ->
             writeValue(row[columnHeader] ?: Null, widths[index])
         }
         writeUtf8String("\r\n")

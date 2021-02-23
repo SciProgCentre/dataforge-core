@@ -13,11 +13,11 @@ public class ColumnTable<T : Any>(override val columns: Collection<Column<T>>) :
     override val rows: List<Row<T>>
         get() = (0 until rowsNum).map { VirtualRow(this, it) }
 
-    override fun getValue(row: Int, column: String): T? = columns[column]?.get(row)
+    override fun get(row: Int, column: String): T? = columns[column]?.get(row)
 }
 
 internal class VirtualRow<T : Any>(val table: Table<T>, val index: Int) : Row<T> {
-    override fun getValue(column: String): T? = table.getValue(index, column)
+    override fun get(column: String): T? = table.get(index, column)
 
 //    override fun <T : C> get(columnHeader: ColumnHeader<T>): T? {
 //        return table.co[columnHeader][index]

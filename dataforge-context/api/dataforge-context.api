@@ -95,6 +95,10 @@ public final class hep/dataforge/context/Global : hep/dataforge/context/Context 
 	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
 }
 
+public final class hep/dataforge/context/LoggingJvmKt {
+	public static final fun buildLogger (Lhep/dataforge/context/Context;Ljava/lang/String;)Lmu/KLogger;
+}
+
 public final class hep/dataforge/context/LoggingKt {
 	public static final fun getLogger (Lhep/dataforge/context/Context;)Lmu/KLogger;
 	public static final fun getLogger (Lhep/dataforge/context/ContextAware;)Lmu/KLogger;

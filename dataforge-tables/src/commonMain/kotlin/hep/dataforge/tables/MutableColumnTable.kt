@@ -11,7 +11,7 @@ public class MutableColumnTable<C: Any>(public val size: Int) : Table<C> {
         VirtualRow(this, it)
     }
 
-    override fun getValue(row: Int, column: String): C? = columns[column]?.get(row)
+    override fun get(row: Int, column: String): C? = columns[column]?.get(row)
 
     /**
      * Add a fixed column to the end of the table

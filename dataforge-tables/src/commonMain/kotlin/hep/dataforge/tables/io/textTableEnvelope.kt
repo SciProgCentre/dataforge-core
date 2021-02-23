@@ -10,12 +10,13 @@ import kotlinx.io.Binary
 import kotlinx.io.ByteArrayOutput
 import kotlinx.io.ExperimentalIoApi
 import kotlinx.io.asBinary
+import kotlin.reflect.typeOf
 
 
 @ExperimentalIoApi
-public suspend fun Table<Value>.wrap(): Envelope = Envelope {
+public suspend fun Table<Value>.toEnvelope(): Envelope = Envelope {
     meta {
-        header.forEachIndexed { index, columnHeader ->
+        headers.forEachIndexed { index, columnHeader ->
             set("column", index.toString(), Meta {
                 "name" put columnHeader.name
                 if (!columnHeader.meta.isEmpty()) {
@@ -26,9 +27,9 @@ public suspend fun Table<Value>.wrap(): Envelope = Envelope {
     }
 
     type = "table.value"
-    dataID = "valueTable[${this@wrap.hashCode()}]"
+    dataID = "valueTable[${this@toEnvelope.hashCode()}]"
 
-    data = ByteArrayOutput().apply { writeRows(this@wrap) }.toByteArray().asBinary()
+    data = ByteArrayOutput().apply { writeRows(this@toEnvelope) }.toByteArray().asBinary()
 }
 
 @DFExperimental
@@ -37,7 +38,7 @@ public fun TextRows.Companion.readEnvelope(envelope: Envelope): TextRows {
     val header = envelope.meta.getIndexed("column")
         .entries.sortedBy { it.key?.toInt() }
         .map { (_, item) ->
-            SimpleColumnHeader(item.node["name"].string!!, Value::class, item.node["meta"].node ?: Meta.EMPTY)
+            SimpleColumnHeader<Value>(item.node["name"].string!!, typeOf<Value>(), item.node["meta"].node ?: Meta.EMPTY)
         }
     return TextRows(header, envelope.data ?: Binary.EMPTY)
 }

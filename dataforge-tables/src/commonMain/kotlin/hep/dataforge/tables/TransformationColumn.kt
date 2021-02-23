@@ -1,17 +1,18 @@
 package hep.dataforge.tables
 
 import hep.dataforge.meta.Meta
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 /**
  * A virtual column obtained by transforming Given row to a single value
  */
 public class TransformationColumn<T : Any, R : Any>(
     public val table: Table<T>,
-    override val type: KClass<out R>,
+    override val type: KType,
     override val name: String,
     override val meta: Meta,
-    public val mapper: (Row<T>) -> R?
+    public val mapper: (Row<T>) -> R?,
 ) : Column<R> {
     override val size: Int get() = table.rows.size
 
@@ -25,10 +26,10 @@ public class TransformationColumn<T : Any, R : Any>(
  */
 public class CachedTransformationColumn<T : Any, R : Any>(
     public val table: Table<T>,
-    override val type: KClass<out R>,
+    override val type: KType,
     override val name: String,
     override val meta: Meta,
-    public val mapper: (Row<T>) -> R?
+    public val mapper: (Row<T>) -> R?,
 ) : Column<R> {
     override val size: Int get() = table.rows.size
     private val values: HashMap<Int, R?> = HashMap()
@@ -42,14 +43,18 @@ public inline fun <T : Any, reified R : Any> Table<T>.mapRows(
     name: String,
     meta: Meta = Meta.EMPTY,
     cache: Boolean = false,
-    noinline mapper: (Row<T>) -> R?
+    noinline mapper: (Row<T>) -> R?,
 ): Column<R> = if (cache) {
-    CachedTransformationColumn(this, R::class, name, meta, mapper)
+    CachedTransformationColumn(this, typeOf<R>(), name, meta, mapper)
 } else {
-    TransformationColumn(this, R::class, name, meta, mapper)
+    TransformationColumn(this, typeOf<R>(), name, meta, mapper)
 }
 
-public fun <T : Any> Table<T>.mapRowsToDouble(name: String, meta: Meta = Meta.EMPTY, block: (Row<T>) -> Double): RealColumn {
+public fun <T : Any> Table<T>.mapRowsToDouble(
+    name: String,
+    meta: Meta = Meta.EMPTY,
+    block: (Row<T>) -> Double,
+): RealColumn {
     val data = DoubleArray(rows.size) { block(rows[it]) }
     return RealColumn(name, data, meta)
 }

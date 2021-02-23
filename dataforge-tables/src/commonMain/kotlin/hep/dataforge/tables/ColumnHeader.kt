@@ -6,7 +6,7 @@ import hep.dataforge.meta.int
 import hep.dataforge.meta.string
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 public typealias TableHeader<C> = List<ColumnHeader<C>>
 
@@ -14,13 +14,13 @@ public typealias ValueTableHeader = List<ColumnHeader<Value>>
 
 public interface ColumnHeader<out T : Any> {
     public val name: String
-    public val type: KClass<out T>
+    public val type: KType
     public val meta: Meta
 }
 
 public data class SimpleColumnHeader<T : Any>(
     override val name: String,
-    override val type: KClass<out T>,
+    override val type: KType,
     override val meta: Meta
 ) : ColumnHeader<T>
 

@@ -1,20 +1,20 @@
 plugins {
-    id("ru.mipt.npm.project")
+    id("ru.mipt.npm.gradle.project")
 }
-
-val dataforgeVersion by extra("0.3.0")
-
-
 
 allprojects {
     group = "hep.dataforge"
-    version = dataforgeVersion
+    version = "0.3.1"
 
     apply<org.jetbrains.dokka.gradle.DokkaPlugin>()
 }
 
 subprojects {
-    apply(plugin = "ru.mipt.npm.publish")
+    apply(plugin = "ru.mipt.npm.gradle.publish")
+    repositories{
+        maven("https://dl.bintray.com/mipt-npm/kscience")
+        maven("https://dl.bintray.com/mipt-npm/dev")
+    }
 }
 
 readme {

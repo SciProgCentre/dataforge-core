@@ -1,8 +1,8 @@
 package hep.dataforge.tables
 
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.invoke
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 
 public class RealColumn(
@@ -10,7 +10,7 @@ public class RealColumn(
     public val data: DoubleArray,
     override val meta: Meta = Meta.EMPTY
 ) : Column<Double> {
-    override val type: KClass<out Double> get() = Double::class
+    override val type: KType get() = typeOf<Double>()
 
     override val size: Int get() = data.size
 
@@ -49,7 +49,7 @@ public class IntColumn(
     public val data: IntArray,
     override val meta: Meta = Meta.EMPTY
 ) : Column<Int> {
-    override val type: KClass<out Int> get() = Int::class
+    override val type: KType get() = typeOf<Int>()
 
     override val size: Int get() = data.size
 
