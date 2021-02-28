@@ -1,23 +1,18 @@
 package hep.dataforge.tables.io
 
+import hep.dataforge.io.Binary
+import hep.dataforge.io.readSafeUtf8Line
+import hep.dataforge.io.writeUtf8String
 import hep.dataforge.tables.*
 import hep.dataforge.values.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.toList
-import kotlinx.io.Binary
-import kotlinx.io.ExperimentalIoApi
-import kotlinx.io.Output
-import kotlinx.io.text.forEachUtf8Line
-import kotlinx.io.text.readUtf8Line
-import kotlinx.io.text.readUtf8StringUntilDelimiter
-import kotlinx.io.text.writeUtf8String
+import io.ktor.utils.io.core.Output
+import io.ktor.utils.io.core.readBytes
+import kotlinx.coroutines.flow.*
 
 /**
  * Read a lin as a fixed width [Row]
  */
-private fun readLine(header: ValueTableHeader, line: String): Row<Value> {
+private fun readRow(header: ValueTableHeader, line: String): Row<Value> {
     val values = line.trim().split("\\s+".toRegex()).map { it.lazyParseValue() }
 
     if (values.size == header.size) {
@@ -31,32 +26,45 @@ private fun readLine(header: ValueTableHeader, line: String): Row<Value> {
 /**
  * Finite or infinite [Rows] created from a fixed width text binary
  */
-@ExperimentalIoApi
 public class TextRows(override val headers: ValueTableHeader, private val binary: Binary) : Rows<Value> {
 
     /**
      * A flow of indexes of string start offsets ignoring empty strings
      */
     public fun indexFlow(): Flow<Int> = binary.read {
-        var counter: Int = 0
-        flow {
-            val string = readUtf8StringUntilDelimiter('\n')
-            counter += string.length
-            if (!string.isBlank()) {
-                emit(counter)
-            }
-        }
+        //TODO replace by line reader
+        val text = readBytes().decodeToString()
+        text.lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .scan(0) { acc, str -> acc + str.length }.asFlow()
+//        var counter: Int = 0
+//        flow {
+//            do {
+//                val line = readUTF8Line()
+//                counter += line?.length ?: 0
+//                if (!line.isNullOrBlank()) {
+//                    emit(counter)
+//                }
+//            } while (!endOfInput)
+//        }
     }
 
     override fun rowFlow(): Flow<Row<Value>> = binary.read {
-        flow {
-            forEachUtf8Line { line ->
-                if (line.isNotBlank()) {
-                    val row = readLine(headers, line)
-                    emit(row)
-                }
-            }
-        }
+        val text = readBytes().decodeToString()
+        text.lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .map { readRow(headers, it) }.asFlow()
+//        flow {
+//            do {
+//                val line = readUTF8Line()
+//                if (!line.isNullOrBlank()) {
+//                    val row = readRow(headers, line)
+//                    emit(row)
+//                }
+//            } while (!endOfInput)
+//        }
     }
 
     public companion object
@@ -65,17 +73,15 @@ public class TextRows(override val headers: ValueTableHeader, private val binary
 /**
  * Create a row offset index for [TextRows]
  */
-@ExperimentalIoApi
 public suspend fun TextRows.buildRowIndex(): List<Int> = indexFlow().toList()
 
 /**
  * Finite table created from [RandomAccessBinary] with fixed width text table
  */
-@ExperimentalIoApi
 public class TextTable(
     override val headers: ValueTableHeader,
     private val binary: Binary,
-    public val index: List<Int>
+    public val index: List<Int>,
 ) : Table<Value> {
 
     override val columns: Collection<Column<Value>> get() = headers.map { RowTableColumn(this, it) }
@@ -86,8 +92,8 @@ public class TextTable(
 
     private fun readAt(offset: Int): Row<Value> {
         return binary.read(offset) {
-            val line = readUtf8Line()
-            return@read readLine(headers, line)
+            val line = readSafeUtf8Line()
+            return@read readRow(headers, line)
         }
     }
 
@@ -139,6 +145,7 @@ public suspend fun Output.writeRows(rows: Rows<Value>) {
         rows.headers.forEachIndexed { index, columnHeader ->
             writeValue(row[columnHeader] ?: Null, widths[index])
         }
+//        appendLine()
         writeUtf8String("\r\n")
     }
 }

@@ -9,9 +9,7 @@ import hep.dataforge.meta.isEmpty
 import hep.dataforge.meta.string
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
-import kotlinx.io.*
-import kotlinx.io.text.readUtf8Line
-import kotlinx.io.text.writeUtf8String
+import io.ktor.utils.io.core.*
 import kotlin.collections.set
 
 /**
@@ -27,7 +25,7 @@ public class TaglessEnvelopeFormat(
     private val dataStart = meta[DATA_START_PROPERTY].string ?: DEFAULT_DATA_START
 
     private fun Output.writeProperty(key: String, value: Any) {
-        writeUtf8String("#? $key: $value;\r\n")
+        writeFully("#? $key: $value;\r\n".encodeToByteArray())
     }
 
     override fun writeEnvelope(
@@ -69,7 +67,7 @@ public class TaglessEnvelopeFormat(
     override fun readObject(input: Input): Envelope {
         var line: String
         do {
-            line = input.readUtf8Line() // ?: error("Input does not contain tagless envelope header")
+            line = input.readSafeUtf8Line() // ?: error("Input does not contain tagless envelope header")
         } while (!line.startsWith(TAGLESS_ENVELOPE_HEADER))
         val properties = HashMap<String, String>()
 
@@ -82,8 +80,8 @@ public class TaglessEnvelopeFormat(
                 properties[key] = value
             }
             //If can't read line, return envelope without data
-            if (input.exhausted()) return SimpleEnvelope(Meta.EMPTY, null)
-            line = input.readUtf8Line()
+            if (input.endOfInput) return SimpleEnvelope(Meta.EMPTY, null)
+            line = input.readSafeUtf8Line()
         }
 
         var meta: Meta = Meta.EMPTY
@@ -92,7 +90,7 @@ public class TaglessEnvelopeFormat(
             val metaFormat = properties[META_TYPE_PROPERTY]?.let { io.resolveMetaFormat(it) } ?: JsonMetaFormat
             val metaSize = properties[META_LENGTH_PROPERTY]?.toInt()
             meta = if (metaSize != null) {
-                metaFormat.readObject(input.limit(metaSize))
+                metaFormat.readObject(input.readBinary(metaSize))
             } else {
                 metaFormat.readObject(input)
             }
@@ -100,14 +98,14 @@ public class TaglessEnvelopeFormat(
 
         do {
             try {
-                line = input.readUtf8Line()
+                line = input.readSafeUtf8Line()
             } catch (ex: EOFException) {
                 //returning an Envelope without data if end of input is reached
                 return SimpleEnvelope(meta, null)
             }
         } while (!line.startsWith(dataStart))
 
-        val data: Binary? = if (properties.containsKey(DATA_LENGTH_PROPERTY)) {
+        val data: Binary = if (properties.containsKey(DATA_LENGTH_PROPERTY)) {
             input.readBinary(properties[DATA_LENGTH_PROPERTY]!!.toInt())
 //            val bytes = ByteArray(properties[DATA_LENGTH_PROPERTY]!!.toInt())
 //            readByteArray(bytes)
@@ -125,7 +123,7 @@ public class TaglessEnvelopeFormat(
         var offset = 0u
         var line: String
         do {
-            line = input.readUtf8Line()// ?: error("Input does not contain tagless envelope header")
+            line = input.readSafeUtf8Line()// ?: error("Input does not contain tagless envelope header")
             offset += line.encodeToByteArray().size.toUInt()
         } while (!line.startsWith(TAGLESS_ENVELOPE_HEADER))
         val properties = HashMap<String, String>()
@@ -139,7 +137,7 @@ public class TaglessEnvelopeFormat(
                 properties[key] = value
             }
             try {
-                line = input.readUtf8Line()
+                line = input.readSafeUtf8Line()
                 offset += line.encodeToByteArray().size.toUInt()
             } catch (ex: EOFException) {
                 return PartialEnvelope(Meta.EMPTY, offset.toUInt(), 0.toULong())
@@ -153,14 +151,14 @@ public class TaglessEnvelopeFormat(
             val metaSize = properties[META_LENGTH_PROPERTY]?.toInt()
             meta = if (metaSize != null) {
                 offset += metaSize.toUInt()
-                metaFormat.readObject(input.limit(metaSize))
+                metaFormat.readObject(input.readBinary(metaSize))
             } else {
                 error("Can't partially read an envelope with undefined meta size")
             }
         }
 
         do {
-            line = input.readUtf8Line() //?: return PartialEnvelope(Meta.EMPTY, offset.toUInt(), 0.toULong())
+            line = input.readSafeUtf8Line() //?: return PartialEnvelope(Meta.EMPTY, offset.toUInt(), 0.toULong())
             offset += line.encodeToByteArray().size.toUInt()
             //returning an Envelope without data if end of input is reached
         } while (!line.startsWith(dataStart))
@@ -220,11 +218,11 @@ public class TaglessEnvelopeFormat(
 
         override fun readObject(input: Input): Envelope = default.readObject(input)
 
-        override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
+        override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? {
             return try {
-                input.preview {
+                binary.read {
                     val string = readRawString(TAGLESS_ENVELOPE_HEADER.length)
-                    return@preview if (string == TAGLESS_ENVELOPE_HEADER) {
+                    return@read if (string == TAGLESS_ENVELOPE_HEADER) {
                         TaglessEnvelopeFormat(io)
                     } else {
                         null

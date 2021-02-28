@@ -1,7 +1,7 @@
 package hep.dataforge.io
 
-import kotlinx.io.readDouble
-import kotlinx.io.writeDouble
+import io.ktor.utils.io.core.readDouble
+import io.ktor.utils.io.core.writeDouble
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

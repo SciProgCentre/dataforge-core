@@ -1,8 +1,6 @@
 package hep.dataforge.io
 
-import kotlinx.io.asBinary
-import kotlinx.io.readByte
-import kotlinx.io.readInt
+import io.ktor.utils.io.core.readInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

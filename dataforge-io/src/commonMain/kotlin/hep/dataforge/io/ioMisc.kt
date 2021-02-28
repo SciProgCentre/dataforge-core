@@ -1,21 +1,33 @@
 package hep.dataforge.io
 
-import kotlinx.io.*
+import io.ktor.utils.io.charsets.Charsets
+import io.ktor.utils.io.charsets.decodeExactBytes
+import io.ktor.utils.io.core.*
 import kotlin.math.min
 
 public fun Output.writeRawString(str: String) {
-    str.forEach { writeByte(it.toByte()) }
+    writeFully(str.toByteArray(Charsets.ISO_8859_1))
 }
 
+public fun Output.writeUtf8String(str: String) {
+    writeFully(str.encodeToByteArray())
+}
+
+@OptIn(ExperimentalIoApi::class)
 public fun Input.readRawString(size: Int): String {
-    val array = CharArray(size) { readByte().toChar() }
-    return array.concatToString()
+    return Charsets.ISO_8859_1.newDecoder().decodeExactBytes(this, size)
 }
 
-public inline fun buildByteArray(expectedSize: Int = 16, block: Output.() -> Unit): ByteArray =
-    ByteArrayOutput(expectedSize).apply(block).toByteArray()
+public fun Input.readUtf8String(): String = readBytes().decodeToString()
 
-@Suppress("FunctionName")
+public fun Input.readSafeUtf8Line(): String = readUTF8Line() ?: error("Line not found")
+
+public inline fun buildByteArray(expectedSize: Int = 16, block: Output.() -> Unit): ByteArray {
+    val builder = BytePacketBuilder(expectedSize)
+    builder.block()
+    return builder.build().readBytes()
+}
+
 public inline fun Binary(expectedSize: Int = 16, block: Output.() -> Unit): Binary =
     buildByteArray(expectedSize, block).asBinary()
 

@@ -4,13 +4,38 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.isEmpty
 import hep.dataforge.misc.DFExperimental
-import kotlinx.io.*
+import io.ktor.utils.io.core.*
+import io.ktor.utils.io.streams.asOutput
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.inputStream
+import kotlin.math.min
 import kotlin.reflect.full.isSupertypeOf
 import kotlin.reflect.typeOf
 import kotlin.streams.asSequence
+
+
+internal class PathBinary(
+    private val path: Path,
+    private val fileOffset: Int = 0,
+    override val size: Int = Files.size(path).toInt() - fileOffset,
+) : Binary {
+
+    @OptIn(ExperimentalPathApi::class)
+    override fun <R> read(offset: Int, atMost: Int, block: Input.() -> R): R {
+        val actualOffset = offset + fileOffset
+        val actualSize = min(atMost, size - offset)
+        val array = path.inputStream().use {
+            it.skip(actualOffset.toLong())
+            it.readNBytes(actualSize)
+        }
+        return ByteReadPacket(array).block()
+    }
+}
+
+public fun Path.asBinary(): Binary = PathBinary(this)
 
 public fun <R> Path.read(block: Input.() -> R): R = asBinary().read(block = block)
 
@@ -46,11 +71,13 @@ public fun Path.rewrite(block: Output.() -> Unit): Unit {
 
 public fun Path.readEnvelope(format: EnvelopeFormat): Envelope {
     val partialEnvelope: PartialEnvelope = asBinary().read {
-        format.run { readPartial(this@read) }
+        format.run {
+            readPartial(this@read)
+        }
     }
     val offset: Int = partialEnvelope.dataOffset.toInt()
     val size: Int = partialEnvelope.dataSize?.toInt() ?: (Files.size(this).toInt() - offset)
-    val binary = FileBinary(this, offset, size)
+    val binary = PathBinary(this, offset, size)
     return SimpleEnvelope(partialEnvelope.meta, binary)
 }
 
@@ -60,7 +87,7 @@ public fun Path.readEnvelope(format: EnvelopeFormat): Envelope {
 @Suppress("UNCHECKED_CAST")
 @DFExperimental
 public inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
-    return ioFormatFactories.find { it.type.isSupertypeOf(typeOf<T>())} as IOFormat<T>?
+    return ioFormatFactories.find { it.type.isSupertypeOf(typeOf<T>()) } as IOFormat<T>?
 }
 
 /**
@@ -119,9 +146,7 @@ public fun IOPlugin.writeMetaFile(
 public fun IOPlugin.peekFileEnvelopeFormat(path: Path): EnvelopeFormat? {
     val binary = path.asBinary()
     val formats = envelopeFormatFactories.mapNotNull { factory ->
-        binary.read {
-            factory.peekFormat(this@peekFileEnvelopeFormat, this@read)
-        }
+        factory.peekFormat(this@peekFileEnvelopeFormat, binary)
     }
 
     return when (formats.size) {
@@ -231,7 +256,7 @@ public fun IOPlugin.writeEnvelopeDirectory(
     dataFile.write {
         envelope.data?.read {
             val copied = copyTo(this@write)
-            if (copied != envelope.data?.size) {
+            if (copied != envelope.data?.size?.toLong()) {
                 error("The number of copied bytes does not equal data size")
             }
         }

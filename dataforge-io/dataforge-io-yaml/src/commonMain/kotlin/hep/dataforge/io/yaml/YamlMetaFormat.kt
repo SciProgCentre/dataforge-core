@@ -5,6 +5,8 @@ import hep.dataforge.io.IOFormat.Companion.META_KEY
 import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.io.MetaFormat
 import hep.dataforge.io.MetaFormatFactory
+import hep.dataforge.io.readUtf8String
+import hep.dataforge.io.writeUtf8String
 import hep.dataforge.meta.*
 import hep.dataforge.meta.descriptors.ItemDescriptor
 import hep.dataforge.meta.descriptors.NodeDescriptor
@@ -14,10 +16,8 @@ import hep.dataforge.names.withIndex
 import hep.dataforge.values.ListValue
 import hep.dataforge.values.Null
 import hep.dataforge.values.parseValue
-import kotlinx.io.Input
-import kotlinx.io.Output
-import kotlinx.io.text.readUtf8String
-import kotlinx.io.text.writeUtf8String
+import io.ktor.utils.io.core.Input
+import io.ktor.utils.io.core.Output
 import net.mamoe.yamlkt.*
 
 public fun Meta.toYaml(): YamlMap {

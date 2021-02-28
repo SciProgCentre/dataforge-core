@@ -1,7 +1,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.meta.*
-import kotlinx.io.*
+import io.ktor.utils.io.core.Output
 
 public class EnvelopeBuilder : Envelope {
     private val metaBuilder = MetaBuilder()
@@ -33,11 +33,8 @@ public class EnvelopeBuilder : Envelope {
     /**
      * Construct a data binary from given builder
      */
-    @OptIn(ExperimentalIoApi::class)
     public fun data(block: Output.() -> Unit) {
-        val arrayBuilder = ByteArrayOutput()
-        arrayBuilder.block()
-        data = arrayBuilder.toByteArray().asBinary()
+        data = buildByteArray { block() }.asBinary()
     }
 
     public fun seal(): Envelope = SimpleEnvelope(metaBuilder.seal(), data)

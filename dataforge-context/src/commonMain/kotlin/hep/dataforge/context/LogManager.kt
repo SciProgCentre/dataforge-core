@@ -1,10 +1,14 @@
 package hep.dataforge.context
 
+import hep.dataforge.misc.Named
 import hep.dataforge.names.Name
+import hep.dataforge.names.plus
 
-public interface LogManager : Plugin {
-
+public interface Logable{
     public fun log(name: Name, tag: String, body: () -> String)
+}
+
+public interface LogManager : Plugin, Logable {
 
     public companion object {
         public const val TRACE: String = "TRACE"
@@ -15,24 +19,40 @@ public interface LogManager : Plugin {
     }
 }
 
-public fun LogManager.info(name: Name = Name.EMPTY, body: () -> String): Unit = log(name,LogManager.INFO,body)
 
+
+public fun Logable.trace(name: Name = Name.EMPTY, body: () -> String): Unit = log(name, LogManager.TRACE, body)
+public fun Logable.info(name: Name = Name.EMPTY, body: () -> String): Unit = log(name, LogManager.INFO, body)
+public fun Logable.debug(name: Name = Name.EMPTY, body: () -> String): Unit = log(name, LogManager.DEBUG, body)
+public fun Logable.warn(name: Name = Name.EMPTY, body: () -> String): Unit = log(name, LogManager.WARNING, body)
+public fun Logable.error(name: Name = Name.EMPTY, body: () -> String): Unit = log(name, LogManager.ERROR, body)
+
+public fun Logable.error(throwable: Throwable?, name: Name = Name.EMPTY, body: () -> String): Unit =
+    log(name, LogManager.ERROR) {
+        buildString {
+            appendLine(body())
+            throwable?.let { appendLine(throwable.stackTraceToString())}
+        }
+    }
+
+/**
+ * Context log manager inherited from parent
+ */
 public val Context.logger: LogManager
     get() = plugins.find(inherit = true) { it is LogManager } as? LogManager ?: Global.logger
 
-
-///**
-// * The logger specific to this context
-// */
-//public val Context.logger: Logger get() = buildLogger(name.toString())
-//
-///**
-// * The logger
-// */
-//public val ContextAware.logger: Logger
-//    get() = if (this is Named) {
-//        context.buildLogger(Path(context.name, this.name).toString())
-//    } else {
-//        context.logger
-//    }
+/**
+ * The named proxy logger for a context member
+ */
+public val ContextAware.logger: Logable
+    get() = if (this is Named) {
+        object :Logable{
+            val contextLog = context.logger
+            override fun log(name: Name, tag: String, body: () -> String) {
+                contextLog.log(this@logger.name + name,tag, body)
+            }
+        }
+    } else {
+        context.logger
+    }
 

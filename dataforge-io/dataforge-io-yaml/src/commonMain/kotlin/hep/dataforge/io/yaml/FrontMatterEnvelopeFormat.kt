@@ -6,9 +6,10 @@ import hep.dataforge.io.IOFormat.Companion.META_KEY
 import hep.dataforge.io.IOFormat.Companion.NAME_KEY
 import hep.dataforge.meta.Meta
 import hep.dataforge.misc.DFExperimental
-import kotlinx.io.*
-import kotlinx.io.text.readUtf8Line
-import kotlinx.io.text.writeUtf8String
+import io.ktor.utils.io.core.Input
+import io.ktor.utils.io.core.Output
+import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.core.readUTF8Line
 
 @DFExperimental
 public class FrontMatterEnvelopeFormat(
@@ -20,7 +21,7 @@ public class FrontMatterEnvelopeFormat(
         var line: String
         var offset = 0u
         do {
-            line = input.readUtf8Line() //?: error("Input does not contain front matter separator")
+            line = input.readUTF8Line() ?: error("Input does not contain front matter separator")
             offset += line.encodeToByteArray().size.toUInt()
         } while (!line.startsWith(SEPARATOR))
 
@@ -31,7 +32,7 @@ public class FrontMatterEnvelopeFormat(
         //TODO replace by preview
         val meta = Binary {
             do {
-                line = input.readUtf8Line()
+                line = input.readSafeUtf8Line()
                 writeUtf8String(line + "\r\n")
                 offset += line.encodeToByteArray().size.toUInt()
             } while (!line.startsWith(SEPARATOR))
@@ -45,7 +46,7 @@ public class FrontMatterEnvelopeFormat(
     override fun readObject(input: Input): Envelope {
         var line: String
         do {
-            line = input.readUtf8Line() //?: error("Input does not contain front matter separator")
+            line = input.readSafeUtf8Line() //?: error("Input does not contain front matter separator")
         } while (!line.startsWith(SEPARATOR))
 
         val readMetaFormat =
@@ -54,12 +55,12 @@ public class FrontMatterEnvelopeFormat(
 
         val meta = Binary {
             do {
-                writeUtf8String(input.readUtf8Line() + "\r\n")
+                writeUtf8String(input.readSafeUtf8Line() + "\r\n")
             } while (!line.startsWith(SEPARATOR))
         }.read {
             readMetaFormat.readMeta(input)
         }
-        val bytes = input.readByteArray()
+        val bytes = input.readBytes()
         val data = bytes.asBinary()
         return SimpleEnvelope(meta, data)
     }
@@ -94,14 +95,12 @@ public class FrontMatterEnvelopeFormat(
             return FrontMatterEnvelopeFormat(context.io, meta)
         }
 
-        override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
-            return input.preview {
-                val line = readUtf8Line()
-                return@preview if (line.startsWith("---")) {
-                    invoke()
-                } else {
-                    null
-                }
+        override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? = binary.read {
+            val line = readSafeUtf8Line()
+            return@read if (line.startsWith("---")) {
+                invoke()
+            } else {
+                null
             }
         }
 

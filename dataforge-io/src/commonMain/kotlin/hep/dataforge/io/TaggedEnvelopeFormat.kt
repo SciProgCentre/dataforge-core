@@ -10,7 +10,7 @@ import hep.dataforge.meta.string
 import hep.dataforge.names.Name
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
-import kotlinx.io.*
+import io.ktor.utils.io.core.*
 
 /**
  * A streaming-friendly envelope format with a short binary tag.
@@ -57,7 +57,6 @@ public class TaggedEnvelopeFormat(
         envelope.data?.let {
             output.writeBinary(it)
         }
-        output.flush()
     }
 
     /**
@@ -72,7 +71,9 @@ public class TaggedEnvelopeFormat(
         val metaFormat = io.resolveMetaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
-        val meta: Meta = metaFormat.readObject(input.limit(tag.metaSize.toInt()))
+        val metaBinary = input.readBinary(tag.metaSize.toInt())
+
+        val meta: Meta = metaFormat.readObject(metaBinary)
 
         val data = input.readBinary(tag.dataSize.toInt())
 
@@ -85,7 +86,9 @@ public class TaggedEnvelopeFormat(
         val metaFormat = io.resolveMetaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
-        val meta: Meta = metaFormat.readObject(input.limit(tag.metaSize.toInt()))
+        val metaBinary = input.readBinary(tag.metaSize.toInt())
+
+        val meta: Meta = metaFormat.readObject(metaBinary)
 
 
         return PartialEnvelope(meta, version.tagSize + tag.metaSize, tag.dataSize)
@@ -143,11 +146,11 @@ public class TaggedEnvelopeFormat(
             return Tag(metaFormatKey, metaLength, dataLength)
         }
 
-        override fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat? {
+        override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? {
             return try {
-                input.preview {
+                binary.read{
                     val header = readRawString(6)
-                    return@preview when (header.substring(2..5)) {
+                    return@read when (header.substring(2..5)) {
                         VERSION.DF02.name -> TaggedEnvelopeFormat(io, VERSION.DF02)
                         VERSION.DF03.name -> TaggedEnvelopeFormat(io, VERSION.DF03)
                         else -> null

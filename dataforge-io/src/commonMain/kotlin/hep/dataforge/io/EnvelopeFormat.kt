@@ -6,8 +6,8 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.misc.Type
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
-import kotlinx.io.Input
-import kotlinx.io.Output
+import io.ktor.utils.io.core.Input
+import io.ktor.utils.io.core.Output
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -48,7 +48,7 @@ public interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeForm
      * Try to infer specific format from input and return null if the attempt is failed.
      * This method does **not** return Input into initial state.
      */
-    public fun peekFormat(io: IOPlugin, input: Input): EnvelopeFormat?
+    public fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat?
 
     public companion object {
         public const val ENVELOPE_FORMAT_TYPE: String = "io.format.envelope"

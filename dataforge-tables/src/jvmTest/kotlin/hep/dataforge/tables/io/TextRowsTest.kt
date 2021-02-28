@@ -1,5 +1,6 @@
 package hep.dataforge.tables.io
 
+import hep.dataforge.io.toByteArray
 import hep.dataforge.misc.DFExperimental
 import hep.dataforge.tables.Table
 import hep.dataforge.tables.row
@@ -8,14 +9,11 @@ import hep.dataforge.values.int
 import hep.dataforge.values.string
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.ExperimentalIoApi
-import kotlinx.io.toByteArray
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
 @DFExperimental
-@ExperimentalIoApi
 class TextRowsTest {
     val table = Table<Value> {
         val a by column<Value>()

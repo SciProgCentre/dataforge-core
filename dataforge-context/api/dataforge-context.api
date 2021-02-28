@@ -110,14 +110,13 @@ public final class hep/dataforge/context/KLoggingManager$Companion : hep/datafor
 	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
 }
 
-public abstract interface class hep/dataforge/context/LogManager : hep/dataforge/context/Plugin {
+public abstract interface class hep/dataforge/context/LogManager : hep/dataforge/context/Logable, hep/dataforge/context/Plugin {
 	public static final field Companion Lhep/dataforge/context/LogManager$Companion;
 	public static final field DEBUG Ljava/lang/String;
 	public static final field ERROR Ljava/lang/String;
 	public static final field INFO Ljava/lang/String;
 	public static final field TRACE Ljava/lang/String;
 	public static final field WARNING Ljava/lang/String;
-	public abstract fun log (Lhep/dataforge/names/Name;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
 }
 
 public final class hep/dataforge/context/LogManager$Companion {
@@ -137,9 +136,24 @@ public final class hep/dataforge/context/LogManager$DefaultImpls {
 }
 
 public final class hep/dataforge/context/LogManagerKt {
+	public static final fun debug (Lhep/dataforge/context/Logable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun debug$default (Lhep/dataforge/context/Logable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun error (Lhep/dataforge/context/Logable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)V
+	public static final fun error (Lhep/dataforge/context/Logable;Ljava/lang/Throwable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun error$default (Lhep/dataforge/context/Logable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static synthetic fun error$default (Lhep/dataforge/context/Logable;Ljava/lang/Throwable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 	public static final fun getLogger (Lhep/dataforge/context/Context;)Lhep/dataforge/context/LogManager;
-	public static final fun info (Lhep/dataforge/context/LogManager;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)V
-	public static synthetic fun info$default (Lhep/dataforge/context/LogManager;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun getLogger (Lhep/dataforge/context/ContextAware;)Lhep/dataforge/context/Logable;
+	public static final fun info (Lhep/dataforge/context/Logable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun info$default (Lhep/dataforge/context/Logable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun trace (Lhep/dataforge/context/Logable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun trace$default (Lhep/dataforge/context/Logable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun warn (Lhep/dataforge/context/Logable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun warn$default (Lhep/dataforge/context/Logable;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+}
+
+public abstract interface class hep/dataforge/context/Logable {
+	public abstract fun log (Lhep/dataforge/names/Name;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
 }
 
 public abstract interface class hep/dataforge/context/Plugin : hep/dataforge/context/ContextAware, hep/dataforge/meta/MetaRepr, hep/dataforge/misc/Named, hep/dataforge/provider/Provider {

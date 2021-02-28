@@ -2,9 +2,7 @@ package hep.dataforge.io
 
 import hep.dataforge.context.Global
 import hep.dataforge.misc.DFExperimental
-import kotlinx.io.asBinary
-import kotlinx.io.toByteArray
-import kotlinx.io.writeDouble
+import io.ktor.utils.io.core.writeDouble
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals

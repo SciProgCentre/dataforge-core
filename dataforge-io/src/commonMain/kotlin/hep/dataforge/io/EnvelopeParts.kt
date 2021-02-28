@@ -11,8 +11,6 @@ import hep.dataforge.meta.*
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
 import hep.dataforge.names.toName
-import kotlinx.io.Binary
-import kotlinx.io.writeBinary
 
 private class PartDescriptor : Scheme() {
     var offset by int(0)

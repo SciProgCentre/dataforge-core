@@ -4,9 +4,7 @@ import hep.dataforge.context.Context
 import hep.dataforge.meta.*
 import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.values.*
-import kotlinx.io.*
-import kotlinx.io.text.readUtf8String
-import kotlinx.io.text.writeUtf8String
+import io.ktor.utils.io.core.*
 
 /**
  * A DataForge-specific simplified binary format for meta
@@ -26,7 +24,7 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
 
     private fun Output.writeString(str: String) {
         writeInt(str.length)
-        writeUtf8String(str)
+        writeFully(str.encodeToByteArray())
     }
 
     public fun Output.writeValue(value: Value): Unit = when (value.type) {
@@ -76,8 +74,8 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
     }
 
     override fun writeMeta(
-        output: kotlinx.io.Output,
-        meta: hep.dataforge.meta.Meta,
+        output: Output,
+        meta: Meta,
         descriptor: hep.dataforge.meta.descriptors.NodeDescriptor?,
     ) {
         output.writeChar('M')
@@ -97,7 +95,8 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
 
     private fun Input.readString(): String {
         val length = readInt()
-        return readUtf8String(length)
+        val array = readBytes(length)
+        return array.decodeToString()
     }
 
     @Suppress("UNCHECKED_CAST")

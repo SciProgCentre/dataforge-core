@@ -10,10 +10,9 @@ import hep.dataforge.meta.descriptors.NodeDescriptor
 import hep.dataforge.meta.node
 import hep.dataforge.meta.toJson
 import hep.dataforge.meta.toMetaItem
-import kotlinx.io.Input
-import kotlinx.io.Output
-import kotlinx.io.text.readUtf8String
-import kotlinx.io.text.writeUtf8String
+import io.ktor.utils.io.core.Input
+import io.ktor.utils.io.core.Output
+
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlin.reflect.KType

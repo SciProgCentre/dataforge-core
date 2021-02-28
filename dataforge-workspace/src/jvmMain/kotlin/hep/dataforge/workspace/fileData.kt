@@ -5,10 +5,10 @@ import hep.dataforge.data.*
 import hep.dataforge.io.*
 import hep.dataforge.meta.*
 import hep.dataforge.misc.DFExperimental
+import io.ktor.utils.io.streams.asOutput
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlinx.io.asOutput
 import java.nio.file.FileSystem
 import java.nio.file.Files
 import java.nio.file.Path
@@ -166,6 +166,7 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
 }
 
 
+@Suppress("BlockingMethodInNonBlockingContext")
 private suspend fun <T : Any> ZipOutputStream.writeNode(
     name: String,
     treeItem: DataTreeItem<T>,
@@ -180,7 +181,10 @@ private suspend fun <T : Any> ZipOutputStream.writeNode(
                 val entry = ZipEntry(name)
                 putNextEntry(entry)
                 envelopeFormat.run {
-                    writeObject(asOutput(), envelope)
+                    asOutput().run {
+                        writeEnvelope(this, envelope)
+                        flush()
+                    }
                 }
             }
             is DataTreeItem.Node -> {
@@ -196,8 +200,9 @@ private suspend fun <T : Any> ZipOutputStream.writeNode(
     }
 }
 
+@Suppress("BlockingMethodInNonBlockingContext")
 @DFExperimental
-suspend fun <T : Any> IOPlugin.writeZip(
+public suspend fun <T : Any> IOPlugin.writeZip(
     path: Path,
     tree: DataTree<T>,
     format: IOFormat<T>,
@@ -217,22 +222,6 @@ suspend fun <T : Any> IOPlugin.writeZip(
         zos.use {
             it.writeNode("", DataTreeItem.Node(tree), format, envelopeFormat)
         }
-
-//        if (Files.exists(actualFile) && Files.size(path) == 0.toLong()) {
-//            Files.delete(path)
-//        }
-//        //Files.createFile(actualFile)
-//        newZFS(actualFile).use { zipfs ->
-//            val zipRootPath = zipfs.getPath("/")
-//            Files.createDirectories(zipRootPath)
-//            val tmp = Files.createTempDirectory("df_zip")
-//            writeDataDirectory(tmp, node, format, envelopeFormat, metaFormat)
-//            Files.list(tmp).forEach { sourcePath ->
-//                val targetPath = sourcePath.fileName.toString()
-//                val internalTargetPath = zipRootPath.resolve(targetPath)
-//                Files.copy(sourcePath, internalTargetPath, StandardCopyOption.REPLACE_EXISTING)
-//            }
-//        }
     }
 }
 

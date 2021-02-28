@@ -4,7 +4,7 @@ import hep.dataforge.meta.*
 import hep.dataforge.meta.JsonMeta.Companion.JSON_ARRAY_KEY
 import hep.dataforge.values.ListValue
 import hep.dataforge.values.number
-import kotlinx.io.asBinary
+
 import kotlinx.serialization.json.*
 import kotlin.test.Test
 import kotlin.test.assertEquals

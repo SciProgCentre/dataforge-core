@@ -7,7 +7,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlin.coroutines.CoroutineContext
 import kotlin.native.concurrent.ThreadLocal
 
-
 internal expect val globalLogger: LogManager
 
 /**

@@ -1,8 +1,6 @@
 package hep.dataforge.scripting
 
-import hep.dataforge.context.Context
-import hep.dataforge.context.Global
-import hep.dataforge.context.logger
+import hep.dataforge.context.*
 import hep.dataforge.workspace.Workspace
 import hep.dataforge.workspace.WorkspaceBuilder
 import java.io.File
@@ -44,7 +42,7 @@ public object Builders {
                         error(scriptDiagnostic.toString())
                     }
                     ScriptDiagnostic.Severity.WARNING -> context.logger.warn { scriptDiagnostic.toString() }
-                    ScriptDiagnostic.Severity.INFO -> context.logger.info { scriptDiagnostic.toString() }
+                    ScriptDiagnostic.Severity.INFO -> context.logger.info {  scriptDiagnostic.toString() }
                     ScriptDiagnostic.Severity.DEBUG -> context.logger.debug { scriptDiagnostic.toString() }
                 }
             }

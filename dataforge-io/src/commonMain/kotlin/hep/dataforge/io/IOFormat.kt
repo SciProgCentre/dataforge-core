@@ -12,9 +12,7 @@ import hep.dataforge.misc.Type
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.values.Value
-import kotlinx.io.*
-import kotlinx.io.buffer.Buffer
-import kotlinx.io.pool.ObjectPool
+import io.ktor.utils.io.core.*
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -34,6 +32,10 @@ public interface IOFormat<T : Any> : MetaRepr {
 }
 
 public fun <T : Any> Input.readWith(format: IOFormat<T>): T = format.readObject(this@readWith)
+
+public fun <T: Any> IOFormat<T>.readObject(binary: Binary): T = binary.read {
+    readObject(this)
+}
 
 /**
  * Read given binary as object using given format
@@ -73,15 +75,15 @@ public inline fun <reified T : Any> IOFormat.Companion.listOf(
 
 }
 
-public fun ObjectPool<Buffer>.fill(block: Buffer.() -> Unit): Buffer {
-    val buffer = borrow()
-    return try {
-        buffer.apply(block)
-    } catch (ex: Exception) {
-        //recycle(buffer)
-        throw ex
-    }
-}
+//public fun ObjectPool<Buffer>.fill(block: Buffer.() -> Unit): Buffer {
+//    val buffer = borrow()
+//    return try {
+//        buffer.apply(block)
+//    } catch (ex: Exception) {
+//        //recycle(buffer)
+//        throw ex
+//    }
+//}
 
 @Type(IO_FORMAT_TYPE)
 public interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named, MetaRepr {

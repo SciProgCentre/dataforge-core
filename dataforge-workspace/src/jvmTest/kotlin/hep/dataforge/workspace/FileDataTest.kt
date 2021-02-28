@@ -4,13 +4,13 @@ import hep.dataforge.context.Global
 import hep.dataforge.data.*
 import hep.dataforge.io.IOFormat
 import hep.dataforge.io.io
+import hep.dataforge.io.readUtf8String
+import hep.dataforge.io.writeUtf8String
 import hep.dataforge.meta.Meta
 import hep.dataforge.misc.DFExperimental
+import io.ktor.utils.io.core.Input
+import io.ktor.utils.io.core.Output
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.Input
-import kotlinx.io.Output
-import kotlinx.io.text.readUtf8String
-import kotlinx.io.text.writeUtf8String
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.reflect.KType

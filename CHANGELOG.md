@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- LogManager plugin
 
 ### Changed
 - Kotlin-logging moved from common to JVM and JS. Replaced by console for native.
@@ -9,6 +10,8 @@
 ### Deprecated
 
 ### Removed
+- Common dependency on Kotlin-logging
+- Kotlinx-io fork dependency. Replaced by Ktor-io.
 
 ### Fixed
 

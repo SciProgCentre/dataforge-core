@@ -8,10 +8,11 @@ import hep.dataforge.misc.Type
 import hep.dataforge.names.Name
 import hep.dataforge.names.asName
 import hep.dataforge.names.plus
-import kotlinx.io.ByteArrayInput
-import kotlinx.io.Input
-import kotlinx.io.Output
-import kotlinx.io.use
+import io.ktor.utils.io.core.ByteReadPacket
+import io.ktor.utils.io.core.Input
+import io.ktor.utils.io.core.Output
+import io.ktor.utils.io.core.use
+
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -54,13 +55,15 @@ public interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
 }
 
 public fun Meta.toString(format: MetaFormat): String = buildByteArray {
-    format.run { writeObject(this@buildByteArray, this@toString) }
+    format.run {
+        writeObject(this@buildByteArray, this@toString)
+    }
 }.decodeToString()
 
 public fun Meta.toString(formatFactory: MetaFormatFactory): String = toString(formatFactory())
 
 public fun MetaFormat.parse(str: String): Meta {
-    return ByteArrayInput(str.encodeToByteArray()).use { readObject(it) }
+    return ByteReadPacket(str.encodeToByteArray()).use { readObject(it) }
 }
 
 public fun MetaFormatFactory.parse(str: String, formatMeta: Meta): Meta = invoke(formatMeta).parse(str)
