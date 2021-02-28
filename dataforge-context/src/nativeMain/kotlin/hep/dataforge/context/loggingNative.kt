@@ -1,53 +1,29 @@
 package hep.dataforge.context
 
+import hep.dataforge.meta.Meta
+import hep.dataforge.names.Name
+import kotlin.reflect.KClass
 
-public actual interface Logger {
-    /**
-     * Lazy add a log message if isTraceEnabled is true
-     */
-    public actual fun trace(msg: () -> Any?)
 
-    /**
-     * Lazy add a log message if isDebugEnabled is true
-     */
-    public actual fun debug(msg: () -> Any?)
+public class NativeLogManager : AbstractPlugin(), LogManager {
 
-    /**
-     * Lazy add a log message if isInfoEnabled is true
-     */
-    public actual fun info(msg: () -> Any?)
+    override fun log(name: Name, tag: String, body: () -> String) {
+        val text = try {
+            body()
+        } catch (t: Throwable){
+            "Error while evaluating log string: ${t.message}"
+        }
+        println("[${context.name}] $name: $text")
+    }
 
-    /**
-     * Lazy add a log message if isWarnEnabled is true
-     */
-    public actual fun warn(msg: () -> Any?)
+    override val tag: PluginTag get() = Companion.tag
 
-    /**
-     * Lazy add a log message if isErrorEnabled is true
-     */
-    public actual fun error(msg: () -> Any?)
+    public companion object : PluginFactory<NativeLogManager> {
+        override fun invoke(meta: Meta, context: Context): NativeLogManager = NativeLogManager()
 
+        override val tag: PluginTag = PluginTag(group = PluginTag.DATAFORGE_GROUP, name = "log.native")
+        override val type: KClass<out NativeLogManager> = NativeLogManager::class
+    }
 }
 
-public actual fun Context.buildLogger(name: String): Logger = object :Logger{
-    override fun trace(msg: () -> Any?) {
-        println("[TRACE] $name - ${msg()}")
-    }
-
-    override fun debug(msg: () -> Any?) {
-        println("[DEBUG] $name - ${msg()}")
-    }
-
-    override fun info(msg: () -> Any?) {
-        println("[INFO] $name - ${msg()}")
-    }
-
-    override fun warn(msg: () -> Any?) {
-        println("[WARNING] $name - ${msg()}")
-    }
-
-    override fun error(msg: () -> Any?) {
-        println("[ERROR] $name - ${msg()}")
-    }
-
-}
+internal actual val globalLogger: LogManager = NativeLogManager().apply { attach(Global) }

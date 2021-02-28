@@ -28,16 +28,6 @@ kotlin {
                 api("io.github.microutils:kotlin-logging-js:2.0.4")
             }
         }
-//
-//        val nativeMain by getting{
-//            dependsOn(commonMain)
-//        }
-//        val mingwX64Main by getting{
-//            dependsOn(nativeMain)
-//        }
-//        val linuxX64Main by getting{
-//            dependsOn(nativeMain)
-//        }
     }
 }
 

@@ -93,15 +93,53 @@ public final class hep/dataforge/context/Global : hep/dataforge/context/Context 
 	public static synthetic fun context$default (Lhep/dataforge/context/Global;Ljava/lang/String;Lhep/dataforge/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lhep/dataforge/context/Context;
 	public final fun getContext (Ljava/lang/String;)Lhep/dataforge/context/Context;
 	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
+	public final fun getLogger ()Lhep/dataforge/context/LogManager;
 }
 
-public final class hep/dataforge/context/LoggingJvmKt {
-	public static final fun buildLogger (Lhep/dataforge/context/Context;Ljava/lang/String;)Lmu/KLogger;
+public final class hep/dataforge/context/KLoggingManager : hep/dataforge/context/AbstractPlugin, hep/dataforge/context/LogManager {
+	public static final field Companion Lhep/dataforge/context/KLoggingManager$Companion;
+	public fun <init> ()V
+	public fun getTag ()Lhep/dataforge/context/PluginTag;
+	public fun log (Lhep/dataforge/names/Name;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
 }
 
-public final class hep/dataforge/context/LoggingKt {
-	public static final fun getLogger (Lhep/dataforge/context/Context;)Lmu/KLogger;
-	public static final fun getLogger (Lhep/dataforge/context/ContextAware;)Lmu/KLogger;
+public final class hep/dataforge/context/KLoggingManager$Companion : hep/dataforge/context/PluginFactory {
+	public fun getTag ()Lhep/dataforge/context/PluginTag;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/context/KLoggingManager;
+	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
+}
+
+public abstract interface class hep/dataforge/context/LogManager : hep/dataforge/context/Plugin {
+	public static final field Companion Lhep/dataforge/context/LogManager$Companion;
+	public static final field DEBUG Ljava/lang/String;
+	public static final field ERROR Ljava/lang/String;
+	public static final field INFO Ljava/lang/String;
+	public static final field TRACE Ljava/lang/String;
+	public static final field WARNING Ljava/lang/String;
+	public abstract fun log (Lhep/dataforge/names/Name;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class hep/dataforge/context/LogManager$Companion {
+	public static final field DEBUG Ljava/lang/String;
+	public static final field ERROR Ljava/lang/String;
+	public static final field INFO Ljava/lang/String;
+	public static final field TRACE Ljava/lang/String;
+	public static final field WARNING Ljava/lang/String;
+}
+
+public final class hep/dataforge/context/LogManager$DefaultImpls {
+	public static fun content (Lhep/dataforge/context/LogManager;Ljava/lang/String;)Ljava/util/Map;
+	public static fun getDefaultChainTarget (Lhep/dataforge/context/LogManager;)Ljava/lang/String;
+	public static fun getDefaultTarget (Lhep/dataforge/context/LogManager;)Ljava/lang/String;
+	public static fun getName (Lhep/dataforge/context/LogManager;)Lhep/dataforge/names/Name;
+	public static fun toMeta (Lhep/dataforge/context/LogManager;)Lhep/dataforge/meta/Meta;
+}
+
+public final class hep/dataforge/context/LogManagerKt {
+	public static final fun getLogger (Lhep/dataforge/context/Context;)Lhep/dataforge/context/LogManager;
+	public static final fun info (Lhep/dataforge/context/LogManager;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun info$default (Lhep/dataforge/context/LogManager;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 }
 
 public abstract interface class hep/dataforge/context/Plugin : hep/dataforge/context/ContextAware, hep/dataforge/meta/MetaRepr, hep/dataforge/misc/Named, hep/dataforge/provider/Provider {
@@ -188,7 +226,6 @@ public final class hep/dataforge/context/PluginTag$Companion {
 public final class hep/dataforge/context/ResolveKt {
 	public static final fun gather (Lhep/dataforge/context/Context;Ljava/lang/String;Lkotlin/reflect/KClass;Z)Ljava/util/Map;
 	public static synthetic fun gather$default (Lhep/dataforge/context/Context;Ljava/lang/String;Lkotlin/reflect/KClass;ZILjava/lang/Object;)Ljava/util/Map;
-	public static final fun gatherInSequence (Lhep/dataforge/context/Context;Ljava/lang/String;Lkotlin/reflect/KClass;Z)Lkotlin/sequences/Sequence;
 	public static synthetic fun gatherInSequence$default (Lhep/dataforge/context/Context;Ljava/lang/String;Lkotlin/reflect/KClass;ZILjava/lang/Object;)Lkotlin/sequences/Sequence;
 	public static final fun getValues (Lkotlin/sequences/Sequence;)Lkotlin/sequences/Sequence;
 	public static final fun resolve (Lhep/dataforge/context/Context;Ljava/lang/String;Lhep/dataforge/names/Name;Lkotlin/reflect/KClass;)Ljava/lang/Object;
@@ -216,33 +253,12 @@ public abstract interface annotation class hep/dataforge/descriptors/ValueDef : 
 	public abstract fun type ()[Lhep/dataforge/values/ValueType;
 }
 
-public final class hep/dataforge/properties/ConfigProperty : hep/dataforge/properties/Property {
-	public fun <init> (Lhep/dataforge/meta/Config;Lhep/dataforge/names/Name;Lhep/dataforge/meta/transformations/MetaConverter;)V
-	public final fun getConfig ()Lhep/dataforge/meta/Config;
-	public final fun getConverter ()Lhep/dataforge/meta/transformations/MetaConverter;
-	public final fun getName ()Lhep/dataforge/names/Name;
-	public fun getValue ()Ljava/lang/Object;
-	public fun onChange (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
-	public fun removeChangeListener (Ljava/lang/Object;)V
-	public fun setValue (Ljava/lang/Object;)V
-}
-
-public abstract interface class hep/dataforge/properties/Property {
-	public abstract fun getValue ()Ljava/lang/Object;
-	public abstract fun onChange (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
-	public abstract fun removeChangeListener (Ljava/lang/Object;)V
-	public abstract fun setValue (Ljava/lang/Object;)V
-}
-
 public final class hep/dataforge/properties/Property$DefaultImpls {
 	public static synthetic fun onChange$default (Lhep/dataforge/properties/Property;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun removeChangeListener$default (Lhep/dataforge/properties/Property;Ljava/lang/Object;ILjava/lang/Object;)V
 }
 
 public final class hep/dataforge/properties/PropertyKt {
-	public static final fun bind (Lhep/dataforge/properties/Property;Lhep/dataforge/properties/Property;)V
-	public static final fun mirror (Lhep/dataforge/properties/Property;Lhep/dataforge/properties/Property;Lkotlinx/coroutines/CoroutineScope;)V
-	public static final fun toFlow (Lhep/dataforge/properties/Property;)Lkotlinx/coroutines/flow/StateFlow;
 }
 
 public final class hep/dataforge/provider/DfTypeKt {

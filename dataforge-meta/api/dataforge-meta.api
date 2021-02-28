@@ -175,7 +175,6 @@ public final class hep/dataforge/meta/LaminateKt {
 public final class hep/dataforge/meta/MapMetaKt {
 	public static final fun toMap (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Ljava/util/Map;
 	public static synthetic fun toMap$default (Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILjava/lang/Object;)Ljava/util/Map;
-	public static final fun toMeta (Ljava/util/Map;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Meta;
 	public static synthetic fun toMeta$default (Ljava/util/Map;Lhep/dataforge/meta/descriptors/NodeDescriptor;ILjava/lang/Object;)Lhep/dataforge/meta/Meta;
 }
 
@@ -417,7 +416,6 @@ public final class hep/dataforge/meta/MutableMeta$DefaultImpls {
 public final class hep/dataforge/meta/MutableMetaKt {
 	public static final fun append (Lhep/dataforge/meta/MutableItemProvider;Lhep/dataforge/names/Name;Ljava/lang/Object;)V
 	public static final fun append (Lhep/dataforge/meta/MutableItemProvider;Ljava/lang/String;Ljava/lang/Object;)V
-	public static final fun edit (Lhep/dataforge/meta/AbstractMutableMeta;Lhep/dataforge/names/Name;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class hep/dataforge/meta/ObservableItemProvider : hep/dataforge/meta/ItemProvider {
@@ -662,7 +660,6 @@ public final class hep/dataforge/meta/transformations/MetaTransformation {
 	public fun equals (Ljava/lang/Object;)Z
 	public static fun equals-impl (Ljava/util/Collection;Ljava/lang/Object;)Z
 	public static final fun equals-impl0 (Ljava/util/Collection;Ljava/util/Collection;)Z
-	public static final fun generate-impl (Ljava/util/Collection;Lhep/dataforge/meta/Config;)Lhep/dataforge/meta/ObservableItemProvider;
 	public static final fun generate-impl (Ljava/util/Collection;Lhep/dataforge/meta/Meta;)Lhep/dataforge/meta/Meta;
 	public final fun getTransformations ()Ljava/util/Collection;
 	public fun hashCode ()I
@@ -805,9 +802,7 @@ public final class hep/dataforge/names/NameKt {
 }
 
 public final class hep/dataforge/names/NameMatcherKt {
-	public static final fun matches (Lhep/dataforge/names/Name;Lhep/dataforge/names/Name;)Z
 	public static final fun matches (Lhep/dataforge/names/Name;Ljava/lang/String;)Z
-	public static final fun matches (Lhep/dataforge/names/NameToken;Lhep/dataforge/names/NameToken;)Z
 }
 
 public final class hep/dataforge/names/NameToken {

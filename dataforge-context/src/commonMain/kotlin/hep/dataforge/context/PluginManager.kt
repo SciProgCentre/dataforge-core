@@ -93,7 +93,7 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
                 fetch(factory, meta, true)
             }
 
-            logger.info { "Loading plugin ${plugin.name} into ${context.name}" }
+            Global.logger.info { "Loading plugin ${plugin.name} into ${context.name}" }
             plugin.attach(context)
             plugins.add(plugin)
             return plugin
@@ -114,7 +114,7 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
      */
     public fun remove(plugin: Plugin) {
         if (plugins.contains(plugin)) {
-            logger.info { "Removing plugin ${plugin.name} from ${context.name}" }
+            Global.logger.info { "Removing plugin ${plugin.name} from ${context.name}" }
             plugin.detach()
             plugins.remove(plugin)
         }

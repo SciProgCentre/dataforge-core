@@ -7,6 +7,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlin.coroutines.CoroutineContext
 import kotlin.native.concurrent.ThreadLocal
 
+
+internal expect val globalLogger: LogManager
+
 /**
  * A global root context. Closing [Global] terminates the framework.
  */
@@ -14,6 +17,11 @@ import kotlin.native.concurrent.ThreadLocal
 public object Global : Context("GLOBAL".asName(), null, Meta.EMPTY) {
 
     override val coroutineContext: CoroutineContext = GlobalScope.coroutineContext + SupervisorJob()
+
+    /**
+     * The default logging manager
+     */
+    public val logger: LogManager = globalLogger
 
     /**
      * Closing all contexts
