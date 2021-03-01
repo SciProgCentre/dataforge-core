@@ -7,7 +7,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlin.coroutines.CoroutineContext
 import kotlin.native.concurrent.ThreadLocal
 
-internal expect val globalLogger: LogManager
+internal expect val globalLoggerFactory: PluginFactory<out LogManager>
 
 /**
  * A global root context. Closing [Global] terminates the framework.
@@ -20,7 +20,7 @@ public object Global : Context("GLOBAL".asName(), null, Meta.EMPTY) {
     /**
      * The default logging manager
      */
-    public val logger: LogManager = globalLogger
+    public val logger: LogManager by lazy { globalLoggerFactory.invoke(context = this).apply { attach(this@Global) } }
 
     /**
      * Closing all contexts

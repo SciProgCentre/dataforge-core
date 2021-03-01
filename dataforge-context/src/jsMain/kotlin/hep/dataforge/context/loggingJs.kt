@@ -2,30 +2,28 @@ package hep.dataforge.context
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
-import mu.KotlinLogging
 import kotlin.reflect.KClass
 
-public class KLoggingManager : AbstractPlugin(), LogManager {
+public class ConsoleLogManager : AbstractPlugin(), LogManager {
 
     override fun log(name: Name, tag: String, body: () -> String) {
-        val logger = KotlinLogging.logger("[${context.name}] $name")
+        val message: String = body.safe
         when (tag) {
-            LogManager.DEBUG -> logger.debug(body)
-            LogManager.INFO -> logger.info(body)
-            LogManager.WARNING -> logger.warn(body)
-            LogManager.ERROR -> logger.error(body)
-            else -> logger.trace(body)
+            LogManager.INFO -> console.info("[${context.name}] $name: $message")
+            LogManager.WARNING ->  console.warn("[${context.name}] $name: $message")
+            LogManager.ERROR -> console.error("[${context.name}] $name: $message")
+            else ->  console.log("[${context.name}] $name: $message")
         }
     }
 
     override val tag: PluginTag get() = Companion.tag
 
-    public companion object : PluginFactory<KLoggingManager> {
-        override fun invoke(meta: Meta, context: Context): KLoggingManager = KLoggingManager()
+    public companion object : PluginFactory<ConsoleLogManager> {
+        override fun invoke(meta: Meta, context: Context): ConsoleLogManager = ConsoleLogManager()
 
-        override val tag: PluginTag = PluginTag(group = PluginTag.DATAFORGE_GROUP, name = "log.kotlinLogging")
-        override val type: KClass<out KLoggingManager> = KLoggingManager::class
+        override val tag: PluginTag = PluginTag(group = PluginTag.DATAFORGE_GROUP, name = "log.jsConsole")
+        override val type: KClass<out ConsoleLogManager> = ConsoleLogManager::class
     }
 }
 
-internal actual val globalLogger: LogManager = KLoggingManager().apply { attach(Global) }
+internal actual val globalLoggerFactory: PluginFactory<out LogManager> = ConsoleLogManager

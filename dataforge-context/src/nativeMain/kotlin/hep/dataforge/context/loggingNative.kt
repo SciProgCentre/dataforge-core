@@ -8,12 +8,8 @@ import kotlin.reflect.KClass
 public class NativeLogManager : AbstractPlugin(), LogManager {
 
     override fun log(name: Name, tag: String, body: () -> String) {
-        val text = try {
-            body()
-        } catch (t: Throwable){
-            "Error while evaluating log string: ${t.message}"
-        }
-        println("[${context.name}] $name: $text")
+        val message: String = body.safe
+        println("[${context.name}] $name: $message")
     }
 
     override val tag: PluginTag get() = Companion.tag
@@ -26,4 +22,4 @@ public class NativeLogManager : AbstractPlugin(), LogManager {
     }
 }
 
-internal actual val globalLogger: LogManager = NativeLogManager().apply { attach(Global) }
+internal actual val globalLoggerFactory: PluginFactory<out LogManager> = NativeLogManager

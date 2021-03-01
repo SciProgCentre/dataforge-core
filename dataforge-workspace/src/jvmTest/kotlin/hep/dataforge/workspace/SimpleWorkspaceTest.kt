@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_VARIABLE")
+
 package hep.dataforge.workspace
 
 import hep.dataforge.context.*

@@ -96,20 +96,6 @@ public final class hep/dataforge/context/Global : hep/dataforge/context/Context 
 	public final fun getLogger ()Lhep/dataforge/context/LogManager;
 }
 
-public final class hep/dataforge/context/KLoggingManager : hep/dataforge/context/AbstractPlugin, hep/dataforge/context/LogManager {
-	public static final field Companion Lhep/dataforge/context/KLoggingManager$Companion;
-	public fun <init> ()V
-	public fun getTag ()Lhep/dataforge/context/PluginTag;
-	public fun log (Lhep/dataforge/names/Name;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
-}
-
-public final class hep/dataforge/context/KLoggingManager$Companion : hep/dataforge/context/PluginFactory {
-	public fun getTag ()Lhep/dataforge/context/PluginTag;
-	public fun getType ()Lkotlin/reflect/KClass;
-	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/context/KLoggingManager;
-	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
-}
-
 public abstract interface class hep/dataforge/context/LogManager : hep/dataforge/context/Logable, hep/dataforge/context/Plugin {
 	public static final field Companion Lhep/dataforge/context/LogManager$Companion;
 	public static final field DEBUG Ljava/lang/String;
@@ -243,6 +229,20 @@ public final class hep/dataforge/context/ResolveKt {
 	public static synthetic fun gatherInSequence$default (Lhep/dataforge/context/Context;Ljava/lang/String;Lkotlin/reflect/KClass;ZILjava/lang/Object;)Lkotlin/sequences/Sequence;
 	public static final fun getValues (Lkotlin/sequences/Sequence;)Lkotlin/sequences/Sequence;
 	public static final fun resolve (Lhep/dataforge/context/Context;Ljava/lang/String;Lhep/dataforge/names/Name;Lkotlin/reflect/KClass;)Ljava/lang/Object;
+}
+
+public final class hep/dataforge/context/SlfLogManager : hep/dataforge/context/AbstractPlugin, hep/dataforge/context/LogManager {
+	public static final field Companion Lhep/dataforge/context/SlfLogManager$Companion;
+	public fun <init> ()V
+	public fun getTag ()Lhep/dataforge/context/PluginTag;
+	public fun log (Lhep/dataforge/names/Name;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class hep/dataforge/context/SlfLogManager$Companion : hep/dataforge/context/PluginFactory {
+	public fun getTag ()Lhep/dataforge/context/PluginTag;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/context/SlfLogManager;
+	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
 }
 
 public abstract interface annotation class hep/dataforge/descriptors/Attribute : java/lang/annotation/Annotation {
