@@ -1,4 +1,4 @@
-package hep.dataforge.output
+package space.kscience.dataforge.output
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

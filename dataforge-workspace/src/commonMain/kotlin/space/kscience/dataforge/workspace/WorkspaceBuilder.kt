@@ -1,0 +1,96 @@
+package space.kscience.dataforge.workspace
+
+import space.kscience.dataforge.context.Context
+import space.kscience.dataforge.context.ContextBuilder
+import space.kscience.dataforge.context.Global
+import space.kscience.dataforge.data.ActiveDataTree
+import space.kscience.dataforge.data.DataSet
+import space.kscience.dataforge.data.DataSetBuilder
+import space.kscience.dataforge.data.DataTree
+import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.descriptors.NodeDescriptor
+import space.kscience.dataforge.misc.DFBuilder
+import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.toName
+import kotlin.properties.PropertyDelegateProvider
+import kotlin.properties.ReadOnlyProperty
+
+public data class TaskReference<T: Any>(public val taskName: Name, public val task: Task<T>)
+
+public interface TaskContainer {
+    public fun registerTask(taskName: Name, task: Task<*>)
+}
+
+
+public inline fun <reified T : Any> TaskContainer.registerTask(
+    name: String,
+    noinline descriptorBuilder: NodeDescriptor.() -> Unit = {},
+    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+): Unit = registerTask(name.toName(), Task(NodeDescriptor(descriptorBuilder), builder))
+
+public inline fun <reified T : Any> TaskContainer.task(
+    noinline descriptorBuilder: NodeDescriptor.() -> Unit = {},
+    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
+    val taskName = property.name.toName()
+    val task = Task(NodeDescriptor(descriptorBuilder), builder)
+    registerTask(taskName, task)
+    ReadOnlyProperty { _, _ -> TaskReference(taskName, task) }
+}
+
+
+public class WorkspaceBuilder(private val parentContext: Context = Global) : TaskContainer {
+    private var context: Context? = null
+    private var data: DataSet<*>? = null
+    private val targets: HashMap<String, Meta> = HashMap()
+    private val tasks = HashMap<Name, Task<*>>()
+
+    /**
+     * Define a context for the workspace
+     */
+    public fun context(name: String = "workspace", block: ContextBuilder.() -> Unit = {}) {
+        this.context = ContextBuilder(parentContext, name).apply(block).build()
+    }
+
+    /**
+     * Define intrinsic data for the workspace
+     */
+    public suspend fun buildData(builder: suspend DataSetBuilder<Any>.() -> Unit) {
+        data = DataTree(builder)
+    }
+
+    @DFExperimental
+    public suspend fun buildActiveData(builder: suspend ActiveDataTree<Any>.() -> Unit) {
+        data = ActiveDataTree(builder)
+    }
+
+    /**
+     * Define a new target
+     */
+    public fun target(name: String, meta: Meta?) {
+        if (meta == null) {
+            targets.remove(name)
+        } else {
+            targets[name] = meta
+        }
+    }
+
+    override fun registerTask(taskName: Name, task: Task<*>) {
+        tasks[taskName] = task
+    }
+
+    public fun build(): Workspace = SimpleWorkspace(context ?: parentContext, data ?: DataSet.EMPTY, targets, tasks)
+}
+
+/**
+ * Define a new target with a builder
+ */
+public inline fun WorkspaceBuilder.target(name: String, metaBuilder: MetaBuilder.() -> Unit): Unit =
+    target(name, Meta(metaBuilder))
+
+@DFBuilder
+public fun Workspace(parentContext: Context = Global, builder: WorkspaceBuilder.() -> Unit): Workspace {
+    return WorkspaceBuilder(parentContext).apply(builder).build()
+}

@@ -1,7 +1,7 @@
-package hep.dataforge.output
+package space.kscience.dataforge.output
 
-import hep.dataforge.context.ContextAware
-import hep.dataforge.meta.Meta
+import space.kscience.dataforge.context.ContextAware
+import space.kscience.dataforge.meta.Meta
 
 /**
  * A generic way to render any object in the output.

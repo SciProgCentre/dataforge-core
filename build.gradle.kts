@@ -3,7 +3,7 @@ plugins {
 }
 
 allprojects {
-    group = "hep.dataforge"
+    group = "space.kscience"
     version = "0.4.0-dev-1"
 
     apply<org.jetbrains.dokka.gradle.DokkaPlugin>()
@@ -28,5 +28,5 @@ ksciencePublish {
 }
 
 apiValidation{
-    nonPublicMarkers.add("hep.dataforge.misc.DFExperimental")
+    nonPublicMarkers.add("space.kscience.dataforge.misc.DFExperimental")
 }

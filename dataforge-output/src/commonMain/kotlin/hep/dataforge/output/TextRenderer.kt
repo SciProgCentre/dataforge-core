@@ -1,10 +1,10 @@
-package hep.dataforge.output
+package space.kscience.dataforge.output
 
-import hep.dataforge.context.Context
-import hep.dataforge.meta.Meta
-import hep.dataforge.output.TextFormat.Companion.TEXT_RENDERER_TYPE
-import hep.dataforge.provider.Type
-import hep.dataforge.provider.top
+import space.kscience.dataforge.context.Context
+import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.output.TextFormat.Companion.TEXT_RENDERER_TYPE
+import space.kscience.dataforge.provider.Type
+import space.kscience.dataforge.provider.top
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass

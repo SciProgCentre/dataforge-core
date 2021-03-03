@@ -6,6 +6,7 @@
 
 ### Changed
 - Kotlin-logging moved from common to JVM and JS. Replaced by console for native.
+- Package changed to `space.kscience`
 
 ### Deprecated
 
