@@ -3,8 +3,6 @@
 
 ![Gradle build](https://github.com/mipt-npm/dataforge-core/workflows/Gradle%20build/badge.svg)
 
-[ ![Download](https://api.bintray.com/packages/mipt-npm/dataforge/dataforge-meta/images/download.svg) ](https://bintray.com/mipt-npm/dataforge/dataforge-meta/_latestVersion)
-
 <hr/>
 
 * ### [dataforge-context](dataforge-context)
@@ -49,7 +47,7 @@
 > **Maturity**: EXPERIMENTAL
 <hr/>
 
-* ### [dataforge-io-yaml](dataforge-io-yaml)
+* ### [dataforge-io-yaml](dataforge-io/dataforge-io-yaml)
 > YAML meta converters and Front Matter envelope format
 >
 > **Maturity**: PROTOTYPE

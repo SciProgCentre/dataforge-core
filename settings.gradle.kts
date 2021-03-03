@@ -4,13 +4,9 @@ pluginManagement {
         jcenter()
         gradlePluginPortal()
         maven("https://dl.bintray.com/kotlin/kotlin-eap")
-        maven("https://dl.bintray.com/kotlin/kotlin-dev")
-        maven("https://dl.bintray.com/mipt-npm/dataforge")
-        maven("https://dl.bintray.com/mipt-npm/kscience")
-        maven("https://dl.bintray.com/mipt-npm/dev")
     }
 
-    val toolsVersion = "0.8.3"
+    val toolsVersion = "0.8.4"
     val kotlinVersion = "1.4.30"
 
     plugins {
