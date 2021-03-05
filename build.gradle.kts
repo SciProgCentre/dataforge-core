@@ -11,7 +11,7 @@ allprojects {
 
 subprojects {
     apply(plugin = "ru.mipt.npm.gradle.publish")
-    repositories{
+    repositories {
         maven("https://dl.bintray.com/mipt-npm/kscience")
         maven("https://dl.bintray.com/mipt-npm/dev")
     }
@@ -24,9 +24,9 @@ readme {
 ksciencePublish {
     bintrayRepo = "dataforge"
     githubProject = "dataforge-core"
-    spaceRepo = "https://maven.jetbrains.space/mipt-npm/p/df/maven"
+    spaceRepo = "https://maven.pkg.jetbrains.space/mipt-npm/p/sci/maven"
 }
 
-apiValidation{
+apiValidation {
     nonPublicMarkers.add("space.kscience.dataforge.misc.DFExperimental")
 }
