@@ -4,9 +4,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.4.0-dev-1"
-
-    apply<org.jetbrains.dokka.gradle.DokkaPlugin>()
+    version = "0.4.0-dev-2"
 }
 
 subprojects {

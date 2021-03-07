@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 - LogManager plugin
+- dataforge-context API dependency on SLF4j
 
 ### Changed
 - Kotlin-logging moved from common to JVM and JS. Replaced by console for native.

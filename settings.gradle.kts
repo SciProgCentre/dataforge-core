@@ -7,7 +7,7 @@ pluginManagement {
     }
 
     val toolsVersion = "0.8.4"
-    val kotlinVersion = "1.4.30"
+    val kotlinVersion = "1.4.31"
 
     plugins {
         id("ru.mipt.npm.gradle.project") version toolsVersion
