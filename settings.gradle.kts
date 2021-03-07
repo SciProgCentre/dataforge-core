@@ -1,12 +1,13 @@
 pluginManagement {
     repositories {
         maven("https://repo.kotlin.link")
+        mavenCentral()
         jcenter()
         gradlePluginPortal()
         maven("https://dl.bintray.com/kotlin/kotlin-eap")
     }
 
-    val toolsVersion = "0.9.0"
+    val toolsVersion = "0.9.1"
     val kotlinVersion = "1.4.31"
 
     plugins {
@@ -14,7 +15,6 @@ pluginManagement {
         id("ru.mipt.npm.gradle.mpp") version toolsVersion
         id("ru.mipt.npm.gradle.jvm") version toolsVersion
         id("ru.mipt.npm.gradle.js") version toolsVersion
-        id("ru.mipt.npm.gradle.publish") version toolsVersion
         kotlin("jvm") version kotlinVersion
         kotlin("js") version kotlinVersion
     }
