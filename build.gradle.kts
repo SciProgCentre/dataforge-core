@@ -8,7 +8,7 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = "ru.mipt.npm.gradle.publish")
+    apply(plugin = "maven-publish")
     repositories {
         maven("https://dl.bintray.com/mipt-npm/kscience")
         maven("https://dl.bintray.com/mipt-npm/dev")
@@ -20,9 +20,9 @@ readme {
 }
 
 ksciencePublish {
-    bintrayRepo = "dataforge"
-    githubProject = "dataforge-core"
-    spaceRepo = "https://maven.pkg.jetbrains.space/mipt-npm/p/sci/maven"
+    github("dataforge-core")
+    space("https://maven.pkg.jetbrains.space/mipt-npm/p/sci/maven")
+    sonatype()
 }
 
 apiValidation {

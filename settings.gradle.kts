@@ -6,7 +6,7 @@ pluginManagement {
         maven("https://dl.bintray.com/kotlin/kotlin-eap")
     }
 
-    val toolsVersion = "0.8.4"
+    val toolsVersion = "0.9.0"
     val kotlinVersion = "1.4.31"
 
     plugins {
