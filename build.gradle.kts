@@ -1,20 +1,18 @@
 plugins {
-    id("ru.mipt.npm.project")
+    id("ru.mipt.npm.gradle.project")
 }
 
-val dataforgeVersion by extra("0.3.0")
-
-
-
 allprojects {
-    group = "hep.dataforge"
-    version = dataforgeVersion
-
-    apply<org.jetbrains.dokka.gradle.DokkaPlugin>()
+    group = "space.kscience"
+    version = "0.4.0-dev-2"
 }
 
 subprojects {
-    apply(plugin = "ru.mipt.npm.publish")
+    apply(plugin = "maven-publish")
+    repositories {
+        maven("https://dl.bintray.com/mipt-npm/kscience")
+        maven("https://dl.bintray.com/mipt-npm/dev")
+    }
 }
 
 readme {
@@ -22,7 +20,11 @@ readme {
 }
 
 ksciencePublish {
-    bintrayRepo = "dataforge"
-    githubProject = "dataforge-core"
-    spaceRepo = "https://maven.jetbrains.space/mipt-npm/p/df/maven"
+    github("dataforge-core")
+    space("https://maven.pkg.jetbrains.space/mipt-npm/p/sci/maven")
+    sonatype()
+}
+
+apiValidation {
+    nonPublicMarkers.add("space.kscience.dataforge.misc.DFExperimental")
 }

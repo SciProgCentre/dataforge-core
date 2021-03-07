@@ -1,6 +1,6 @@
 plugins {
-    id("ru.mipt.npm.mpp")
-    id("ru.mipt.npm.native")
+    id("ru.mipt.npm.gradle.mpp")
+    id("ru.mipt.npm.gradle.native")
 }
 
 description = "Context and provider definitions"
@@ -11,20 +11,20 @@ kscience {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        val commonMain by getting{
             dependencies {
                 api(project(":dataforge-meta"))
-                api("io.github.microutils:kotlin-logging:1.9.0-dev-npm-2")
             }
         }
-        val jvmMain by getting {
+        jvmMain {
             dependencies {
                 api(kotlin("reflect"))
-                api("ch.qos.logback:logback-classic:1.2.3")
+                api("org.slf4j:slf4j-api:1.7.30")
             }
         }
-        val jsMain by getting {
+        jsMain {
             dependencies {
+
             }
         }
     }

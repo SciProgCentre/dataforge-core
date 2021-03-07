@@ -1,2 +1,2 @@
-hep.dataforge.io.BinaryMetaFormatFactory
-hep.dataforge.io.JsonMetaFormatFactory
+space.kscience.dataforge.io.BinaryMetaFormatFactory
+space.kscience.dataforge.io.JsonMetaFormatFactory

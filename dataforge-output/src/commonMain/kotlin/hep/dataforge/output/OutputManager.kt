@@ -1,9 +1,9 @@
-package hep.dataforge.output
+package space.kscience.dataforge.output
 
-import hep.dataforge.context.*
-import hep.dataforge.context.PluginTag.Companion.DATAFORGE_GROUP
-import hep.dataforge.meta.Meta
-import hep.dataforge.names.Name
+import space.kscience.dataforge.context.*
+import space.kscience.dataforge.context.PluginTag.Companion.DATAFORGE_GROUP
+import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.names.Name
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlin.reflect.KClass
