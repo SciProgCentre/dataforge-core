@@ -42,6 +42,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: >
           ./gradlew release --no-daemon
+          -Ppublishing.enabled=true
           -Ppublishing.github.user=${{ secrets.PUBLISHING_GITHUB_USER }}
           -Ppublishing.github.token=${{ secrets.PUBLISHING_GITHUB_TOKEN }}
           -Ppublishing.space.user=${{ secrets.PUBLISHING_SPACE_USER }}
@@ -50,7 +51,8 @@ jobs:
         if: matrix.os == 'macOS-latest'
         run: >
           ./gradlew release --no-daemon
-          -Ppublication.platform=macosX64
+          -Ppublishing.enabled=true
+          -Ppublishing.platform=macosX64
           -Ppublishing.github.user=${{ secrets.PUBLISHING_GITHUB_USER }}
           -Ppublishing.github.token=${{ secrets.PUBLISHING_GITHUB_TOKEN }}
           -Ppublishing.space.user=${{ secrets.PUBLISHING_SPACE_USER }}
