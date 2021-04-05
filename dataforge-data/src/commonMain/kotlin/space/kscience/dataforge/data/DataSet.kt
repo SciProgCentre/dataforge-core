@@ -28,12 +28,11 @@ public interface DataSet<out T : Any> {
     public suspend fun getData(name: Name): Data<T>?
 
     /**
-     * Get a snapshot of names of children of given node. Empty if node does not exist or is a leaf.
-     *
-     * By default traverses the whole tree. Could be optimized in descendants
+     * Get a snapshot of names of top level children of given node. Empty if node does not exist or is a leaf.
      */
-    public suspend fun listChildren(prefix: Name = Name.EMPTY): List<Name> =
+    public suspend fun listTop(prefix: Name = Name.EMPTY): List<Name> =
         flow().map { it.name }.filter { it.startsWith(prefix) && (it.length == prefix.length + 1) }.toList()
+    // By default traverses the whole tree. Could be optimized in descendants
 
     public companion object {
         public val META_KEY: Name = "@meta".asName()

@@ -433,12 +433,14 @@ public final class space/kscience/dataforge/meta/ReadOnlySpecification$DefaultIm
 	public static fun invoke (Lspace/kscience/dataforge/meta/ReadOnlySpecification;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/ItemProvider;
 }
 
-public class space/kscience/dataforge/meta/Scheme : space/kscience/dataforge/meta/MetaRepr, space/kscience/dataforge/meta/MutableItemProvider, space/kscience/dataforge/meta/descriptors/Described {
+public class space/kscience/dataforge/meta/Scheme : space/kscience/dataforge/meta/MetaRepr, space/kscience/dataforge/meta/MutableItemProvider, space/kscience/dataforge/meta/ObservableItemProvider, space/kscience/dataforge/meta/descriptors/Described {
 	public fun <init> ()V
 	public fun getDefaultLayer ()Lspace/kscience/dataforge/meta/Meta;
 	public synthetic fun getDescriptor ()Lspace/kscience/dataforge/meta/descriptors/ItemDescriptor;
 	public final fun getDescriptor ()Lspace/kscience/dataforge/meta/descriptors/NodeDescriptor;
 	public fun getItem (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/TypedMetaItem;
+	public fun onChange (Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)V
+	public fun removeListener (Ljava/lang/Object;)V
 	public final fun setDescriptor (Lspace/kscience/dataforge/meta/descriptors/NodeDescriptor;)V
 	public fun setItem (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/TypedMetaItem;)V
 	public fun toMeta ()Lspace/kscience/dataforge/meta/Laminate;

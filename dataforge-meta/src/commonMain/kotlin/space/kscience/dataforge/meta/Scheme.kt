@@ -4,18 +4,41 @@ import space.kscience.dataforge.meta.descriptors.*
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName
+import kotlin.jvm.Synchronized
 
 /**
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
  * Default item provider and [NodeDescriptor] are optional
  */
-public open class Scheme() : MutableItemProvider, Described, MetaRepr {
+public open class Scheme() : MutableItemProvider, Described, MetaRepr, ObservableItemProvider {
 
     private var items: MutableItemProvider = Config()
+
+    private val listeners = HashSet<ItemListener>()
 
     private var default: ItemProvider? = null
 
     final override var descriptor: NodeDescriptor? = null
+
+
+    /**
+     * Add a listener to this scheme changes. If the inner provider is observable, then listening will be delegated to it.
+     * Otherwise, local listeners will be created.
+     */
+    @Synchronized
+    override fun onChange(owner: Any?, action: (Name, MetaItem?, MetaItem?) -> Unit) {
+        (items as? ObservableItemProvider)?.onChange(owner, action)
+            ?: run { listeners.add(ItemListener(owner, action)) }
+    }
+
+    /**
+     * Remove all listeners belonging to given owner
+     */
+    @Synchronized
+    override fun removeListener(owner: Any?) {
+        (items as? ObservableItemProvider)?.removeListener(owner)
+            ?: listeners.removeAll { it.owner === owner }
+    }
 
     internal fun wrap(
         items: MutableItemProvider,
@@ -50,12 +73,15 @@ public open class Scheme() : MutableItemProvider, Described, MetaRepr {
      * Set a configurable property
      */
     override fun setItem(name: Name, item: MetaItem?) {
+        val oldItem = items[name]
         if (validateItem(name, item)) {
             items[name] = item
+            listeners.forEach { it.action(name, oldItem, item) }
         } else {
             error("Validation failed for property $name with value $item")
         }
     }
+
 
     /**
      * Provide a default layer which returns items from [default] and falls back to descriptor
@@ -100,7 +126,7 @@ public fun <T : Scheme, S : Specification<T>> S.wrap(
  * Relocate scheme target onto given [MutableItemProvider]. Old provider does not get updates anymore.
  * Current state of the scheme used as a default.
  */
-public fun <T : Scheme> T.retarget(provider: MutableItemProvider) :T = apply { wrap(provider) }
+public fun <T : Scheme> T.retarget(provider: MutableItemProvider): T = apply { wrap(provider) }
 
 /**
  * A shortcut to edit a [Scheme] object in-place

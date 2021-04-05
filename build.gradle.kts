@@ -4,15 +4,11 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.4.0-dev-2"
+    version = "0.4.0-dev-5"
 }
 
 subprojects {
     apply(plugin = "maven-publish")
-    repositories {
-        maven("https://dl.bintray.com/mipt-npm/kscience")
-        maven("https://dl.bintray.com/mipt-npm/dev")
-    }
 }
 
 readme {
