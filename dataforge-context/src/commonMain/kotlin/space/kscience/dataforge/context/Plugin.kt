@@ -63,5 +63,4 @@ public interface Plugin : Named, ContextAware, Provider, MetaRepr {
     public companion object {
         public const val TARGET: String = "plugin"
     }
-
 }

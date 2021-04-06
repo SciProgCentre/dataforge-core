@@ -1,15 +1,16 @@
 package space.kscience.dataforge.context
 
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.plus
+import kotlin.reflect.KClass
 
-public interface Logable {
+public fun interface Logable {
     public fun log(name: Name, tag: String, body: () -> String)
 }
 
 public interface LogManager : Plugin, Logable {
-
     public companion object {
         public const val TRACE: String = "TRACE"
         public const val INFO: String = "INFO"
@@ -41,11 +42,30 @@ public fun Logable.error(throwable: Throwable?, name: Name = Name.EMPTY, body: (
         }
     }
 
+
+public class DefaultLogManager : AbstractPlugin(), LogManager {
+
+    override fun log(name: Name, tag: String, body: () -> String) {
+        val message: String = body.safe
+        println("[${context.name}] $name: $message")
+    }
+
+    override val tag: PluginTag get() = Companion.tag
+
+    public companion object : PluginFactory<DefaultLogManager> {
+        override fun invoke(meta: Meta, context: Context): DefaultLogManager = DefaultLogManager()
+
+        override val tag: PluginTag = PluginTag(group = PluginTag.DATAFORGE_GROUP, name = "log.default")
+        override val type: KClass<out DefaultLogManager> = DefaultLogManager::class
+    }
+}
+
 /**
  * Context log manager inherited from parent
  */
-public val Context.logger: LogManager
-    get() = plugins.find(inherit = true) { it is LogManager } as? LogManager ?: Global.logger
+public val Context.logger: Logable
+    get() = plugins.find(inherit = true) { it is LogManager } as? LogManager
+        ?: globalLoggerFactory(context = Global).apply { attach(Global) }
 
 /**
  * The named proxy logger for a context member

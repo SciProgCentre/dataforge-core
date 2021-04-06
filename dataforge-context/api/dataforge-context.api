@@ -38,6 +38,7 @@ public final class space/kscience/dataforge/context/ClassLoaderPluginKt {
 public class space/kscience/dataforge/context/Context : kotlinx/coroutines/CoroutineScope, space/kscience/dataforge/meta/MetaRepr, space/kscience/dataforge/misc/Named, space/kscience/dataforge/provider/Provider {
 	public static final field Companion Lspace/kscience/dataforge/context/Context$Companion;
 	public static final field PROPERTY_TARGET Ljava/lang/String;
+	public final fun buildContext (Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Context;
 	public fun close ()V
 	public fun content (Ljava/lang/String;)Ljava/util/Map;
 	public final fun content (Ljava/lang/String;Z)Ljava/util/Map;
@@ -47,6 +48,7 @@ public class space/kscience/dataforge/context/Context : kotlinx/coroutines/Corou
 	public final fun getName ()Lspace/kscience/dataforge/names/Name;
 	public final fun getParent ()Lspace/kscience/dataforge/context/Context;
 	public final fun getPlugins ()Lspace/kscience/dataforge/context/PluginManager;
+	public final fun getProperties ()Lspace/kscience/dataforge/meta/Laminate;
 	public fun toMeta ()Lspace/kscience/dataforge/meta/Meta;
 }
 
@@ -58,24 +60,35 @@ public abstract interface class space/kscience/dataforge/context/ContextAware {
 }
 
 public final class space/kscience/dataforge/context/ContextBuilder {
-	public fun <init> ()V
-	public fun <init> (Lspace/kscience/dataforge/context/Context;Ljava/lang/String;)V
-	public synthetic fun <init> (Lspace/kscience/dataforge/context/Context;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun build ()Lspace/kscience/dataforge/context/Context;
-	public final fun getName ()Ljava/lang/String;
+	public final fun getName ()Lspace/kscience/dataforge/names/Name;
+	public final fun name (Ljava/lang/String;)V
 	public final fun plugin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun plugin (Lspace/kscience/dataforge/context/PluginFactory;Lkotlin/jvm/functions/Function1;)V
+	public final fun plugin (Lspace/kscience/dataforge/context/PluginFactory;Lspace/kscience/dataforge/meta/Meta;)V
 	public final fun plugin (Lspace/kscience/dataforge/context/PluginTag;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun plugin$default (Lspace/kscience/dataforge/context/ContextBuilder;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun plugin$default (Lspace/kscience/dataforge/context/ContextBuilder;Lspace/kscience/dataforge/context/PluginFactory;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun plugin$default (Lspace/kscience/dataforge/context/ContextBuilder;Lspace/kscience/dataforge/context/PluginTag;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun properties (Lkotlin/jvm/functions/Function1;)V
-	public final fun setName (Ljava/lang/String;)V
+	public final fun setName (Lspace/kscience/dataforge/names/Name;)V
 }
 
-public final class space/kscience/dataforge/context/ContextKt {
-	public static final fun Context (Ljava/lang/String;Lspace/kscience/dataforge/context/Context;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Context;
-	public static synthetic fun Context$default (Ljava/lang/String;Lspace/kscience/dataforge/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/context/Context;
+public final class space/kscience/dataforge/context/ContextBuilderKt {
+}
+
+public final class space/kscience/dataforge/context/DefaultLogManager : space/kscience/dataforge/context/AbstractPlugin, space/kscience/dataforge/context/LogManager {
+	public static final field Companion Lspace/kscience/dataforge/context/DefaultLogManager$Companion;
+	public fun <init> ()V
+	public fun getTag ()Lspace/kscience/dataforge/context/PluginTag;
+	public fun log (Lspace/kscience/dataforge/names/Name;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class space/kscience/dataforge/context/DefaultLogManager$Companion : space/kscience/dataforge/context/PluginFactory {
+	public fun getTag ()Lspace/kscience/dataforge/context/PluginTag;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public synthetic fun invoke (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/context/Context;)Ljava/lang/Object;
+	public fun invoke (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/context/Context;)Lspace/kscience/dataforge/context/DefaultLogManager;
 }
 
 public abstract interface class space/kscience/dataforge/context/Factory {
@@ -88,12 +101,13 @@ public final class space/kscience/dataforge/context/Factory$DefaultImpls {
 
 public final class space/kscience/dataforge/context/Global : space/kscience/dataforge/context/Context {
 	public static final field INSTANCE Lspace/kscience/dataforge/context/Global;
-	public fun close ()V
-	public final fun context (Ljava/lang/String;Lspace/kscience/dataforge/context/Context;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Context;
-	public static synthetic fun context$default (Lspace/kscience/dataforge/context/Global;Ljava/lang/String;Lspace/kscience/dataforge/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/context/Context;
-	public final fun getContext (Ljava/lang/String;)Lspace/kscience/dataforge/context/Context;
 	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
-	public final fun getLogger ()Lspace/kscience/dataforge/context/LogManager;
+	public final fun getDefaultLogger ()Lspace/kscience/dataforge/context/LogManager;
+}
+
+public final class space/kscience/dataforge/context/GlobalKt {
+	public static final fun Context (Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Context;
+	public static synthetic fun Context$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/context/Context;
 }
 
 public abstract interface class space/kscience/dataforge/context/LogManager : space/kscience/dataforge/context/Logable, space/kscience/dataforge/context/Plugin {
@@ -128,7 +142,7 @@ public final class space/kscience/dataforge/context/LogManagerKt {
 	public static final fun error (Lspace/kscience/dataforge/context/Logable;Lspace/kscience/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)V
 	public static synthetic fun error$default (Lspace/kscience/dataforge/context/Logable;Ljava/lang/Throwable;Lspace/kscience/dataforge/names/Name;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 	public static synthetic fun error$default (Lspace/kscience/dataforge/context/Logable;Lspace/kscience/dataforge/names/Name;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
-	public static final fun getLogger (Lspace/kscience/dataforge/context/Context;)Lspace/kscience/dataforge/context/LogManager;
+	public static final fun getLogger (Lspace/kscience/dataforge/context/Context;)Lspace/kscience/dataforge/context/Logable;
 	public static final fun getLogger (Lspace/kscience/dataforge/context/ContextAware;)Lspace/kscience/dataforge/context/Logable;
 	public static final fun info (Lspace/kscience/dataforge/context/Logable;Lspace/kscience/dataforge/names/Name;Lkotlin/jvm/functions/Function0;)V
 	public static synthetic fun info$default (Lspace/kscience/dataforge/context/Logable;Lspace/kscience/dataforge/names/Name;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V

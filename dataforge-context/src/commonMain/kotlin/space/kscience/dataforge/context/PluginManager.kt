@@ -13,8 +13,6 @@ import kotlin.reflect.KClass
  */
 public class PluginManager(override val context: Context) : ContextAware, Iterable<Plugin> {
 
-    //TODO refactor to read-only container
-
     /**
      * A set of loaded plugins
      */
@@ -85,6 +83,7 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
      * @param plugin
      * @return
      */
+    @Deprecated("Use immutable contexts instead")
     public fun <T : Plugin> load(plugin: T): T {
         if (get(plugin::class, plugin.tag, recursive = false) != null) {
             error("Plugin with tag ${plugin.tag} already exists in ${context.name}")
@@ -93,7 +92,7 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
                 fetch(factory, meta, true)
             }
 
-            Global.logger.info { "Loading plugin ${plugin.name} into ${context.name}" }
+            logger.info { "Loading plugin ${plugin.name} into ${context.name}" }
             plugin.attach(context)
             plugins.add(plugin)
             return plugin
@@ -103,15 +102,18 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
     /**
      * Load a plugin using its factory
      */
+    @Deprecated("Use immutable contexts instead")
     public fun <T : Plugin> load(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY): T =
         load(factory(meta, context))
 
+    @Deprecated("Use immutable contexts instead")
     public fun <T : Plugin> load(factory: PluginFactory<T>, metaBuilder: MetaBuilder.() -> Unit): T =
         load(factory, Meta(metaBuilder))
 
     /**
      * Remove a plugin from [PluginManager]
      */
+    @Deprecated("Use immutable contexts instead")
     public fun remove(plugin: Plugin) {
         if (plugins.contains(plugin)) {
             Global.logger.info { "Removing plugin ${plugin.name} from ${context.name}" }
@@ -123,6 +125,7 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
     /**
      * Get an existing plugin with given meta or load new one using provided factory
      */
+    @Deprecated("Use immutable contexts instead")
     public fun <T : Plugin> fetch(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY, recursive: Boolean = true): T {
         val loaded = get(factory.type, factory.tag, recursive)
         return when {
@@ -132,6 +135,7 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
         }
     }
 
+    @Deprecated("Use immutable contexts instead")
     public fun <T : Plugin> fetch(
         factory: PluginFactory<T>,
         recursive: Boolean = true,
@@ -140,4 +144,18 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
 
     override fun iterator(): Iterator<Plugin> = plugins.iterator()
 
+}
+
+/**
+ * Fetch a plugin with given meta from the context. If the plugin (with given meta) is already registered, it is returned.
+ * Otherwise, new child context with the plugin is created. In the later case the context could be retrieved from the plugin.
+ */
+public inline fun <reified T : Plugin> Context.fetch(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY): T {
+    val existing = plugins[factory]
+    return if (existing != null && existing.meta == meta) existing
+    else {
+        buildContext {
+            plugin(factory, meta)
+        }.plugins[factory]!!
+    }
 }

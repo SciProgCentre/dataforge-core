@@ -4,12 +4,16 @@
 ### Added
 - LogManager plugin
 - dataforge-context API dependency on SLF4j
+- Context `withEnv` and `fetch` methods to manipulate plugins without changing plugins after creation.
 
 ### Changed
 - Kotlin-logging moved from common to JVM and JS. Replaced by console for native.
 - Package changed to `space.kscience`
+- Scheme made observable
+- Global context is a variable (the singleton is hidden and will be deprecated in future)
 
 ### Deprecated
+- Direct use of PluginManager
 
 ### Removed
 - Common dependency on Kotlin-logging

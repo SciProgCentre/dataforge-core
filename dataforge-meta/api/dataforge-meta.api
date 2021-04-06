@@ -193,6 +193,7 @@ public abstract interface class space/kscience/dataforge/meta/Meta : space/kscie
 public final class space/kscience/dataforge/meta/Meta$Companion {
 	public static final field TYPE Ljava/lang/String;
 	public static final field VALUE_KEY Ljava/lang/String;
+	public final fun equals (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/Meta;)Z
 	public final fun getEMPTY ()Lspace/kscience/dataforge/meta/Meta;
 }
 
