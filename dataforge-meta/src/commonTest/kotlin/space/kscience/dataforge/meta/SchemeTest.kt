@@ -20,4 +20,15 @@ class SchemeTest {
         scheme.retarget(config)
         assertEquals(29, scheme.a)
     }
+
+    @Test
+    fun testSchemeSubscription(){
+        val scheme = TestScheme.empty()
+        var flag: Int? = null
+        scheme.onChange(TestScheme::a){a->
+            flag = a
+        }
+        scheme.a = 2
+        assertEquals(2, flag)
+    }
 }

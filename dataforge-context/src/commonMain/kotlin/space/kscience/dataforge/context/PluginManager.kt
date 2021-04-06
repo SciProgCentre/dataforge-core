@@ -102,13 +102,8 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
     /**
      * Load a plugin using its factory
      */
-    @Deprecated("Use immutable contexts instead")
-    public fun <T : Plugin> load(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY): T =
+    internal fun <T : Plugin> load(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY): T =
         load(factory(meta, context))
-
-    @Deprecated("Use immutable contexts instead")
-    public fun <T : Plugin> load(factory: PluginFactory<T>, metaBuilder: MetaBuilder.() -> Unit): T =
-        load(factory, Meta(metaBuilder))
 
     /**
      * Remove a plugin from [PluginManager]

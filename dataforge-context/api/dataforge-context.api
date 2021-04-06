@@ -75,6 +75,7 @@ public final class space/kscience/dataforge/context/ContextBuilder {
 }
 
 public final class space/kscience/dataforge/context/ContextBuilderKt {
+	public static final fun withEnv (Lspace/kscience/dataforge/context/Context;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Context;
 }
 
 public final class space/kscience/dataforge/context/DefaultLogManager : space/kscience/dataforge/context/AbstractPlugin, space/kscience/dataforge/context/LogManager {
@@ -99,15 +100,10 @@ public final class space/kscience/dataforge/context/Factory$DefaultImpls {
 	public static synthetic fun invoke$default (Lspace/kscience/dataforge/context/Factory;Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/context/Context;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
-public final class space/kscience/dataforge/context/Global : space/kscience/dataforge/context/Context {
-	public static final field INSTANCE Lspace/kscience/dataforge/context/Global;
-	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
-	public final fun getDefaultLogger ()Lspace/kscience/dataforge/context/LogManager;
-}
-
 public final class space/kscience/dataforge/context/GlobalKt {
 	public static final fun Context (Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Context;
 	public static synthetic fun Context$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/context/Context;
+	public static final fun getGlobal ()Lspace/kscience/dataforge/context/Context;
 }
 
 public abstract interface class space/kscience/dataforge/context/LogManager : space/kscience/dataforge/context/Logable, space/kscience/dataforge/context/Plugin {
@@ -207,9 +203,6 @@ public final class space/kscience/dataforge/context/PluginManager : java/lang/It
 	public fun iterator ()Ljava/util/Iterator;
 	public final fun list (Z)Ljava/util/Collection;
 	public final fun load (Lspace/kscience/dataforge/context/Plugin;)Lspace/kscience/dataforge/context/Plugin;
-	public final fun load (Lspace/kscience/dataforge/context/PluginFactory;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Plugin;
-	public final fun load (Lspace/kscience/dataforge/context/PluginFactory;Lspace/kscience/dataforge/meta/Meta;)Lspace/kscience/dataforge/context/Plugin;
-	public static synthetic fun load$default (Lspace/kscience/dataforge/context/PluginManager;Lspace/kscience/dataforge/context/PluginFactory;Lspace/kscience/dataforge/meta/Meta;ILjava/lang/Object;)Lspace/kscience/dataforge/context/Plugin;
 	public final fun remove (Lspace/kscience/dataforge/context/Plugin;)V
 }
 
@@ -287,6 +280,9 @@ public final class space/kscience/dataforge/properties/Property$DefaultImpls {
 }
 
 public final class space/kscience/dataforge/properties/PropertyKt {
+}
+
+public final class space/kscience/dataforge/properties/SchemePropertyKt {
 }
 
 public final class space/kscience/dataforge/provider/DfTypeKt {

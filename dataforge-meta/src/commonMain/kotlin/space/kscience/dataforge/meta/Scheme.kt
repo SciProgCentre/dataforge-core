@@ -10,7 +10,7 @@ import kotlin.jvm.Synchronized
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
  * Default item provider and [NodeDescriptor] are optional
  */
-public open class Scheme() : MutableItemProvider, Described, MetaRepr, ObservableItemProvider {
+public open class Scheme() : Described, MetaRepr, ItemPropertyProvider {
 
     private var items: MutableItemProvider = Config()
 
