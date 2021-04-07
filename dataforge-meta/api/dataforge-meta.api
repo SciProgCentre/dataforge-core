@@ -414,8 +414,7 @@ public abstract interface class space/kscience/dataforge/meta/ObservableItemProv
 }
 
 public final class space/kscience/dataforge/meta/ObservableItemProviderKt {
-	public static final fun onChange (Lspace/kscience/dataforge/meta/ObservableItemProvider;Lkotlin/reflect/KProperty1;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V
-	public static synthetic fun onChange$default (Lspace/kscience/dataforge/meta/ObservableItemProvider;Lkotlin/reflect/KProperty1;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public static synthetic fun useProperty$default (Lspace/kscience/dataforge/meta/ObservableItemProvider;Lkotlin/reflect/KProperty1;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 }
 
 public abstract interface class space/kscience/dataforge/meta/ReadOnlySpecification {

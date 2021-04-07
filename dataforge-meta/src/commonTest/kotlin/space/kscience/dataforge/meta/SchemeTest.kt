@@ -1,8 +1,10 @@
 package space.kscience.dataforge.meta
 
+import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@DFExperimental
 class SchemeTest {
     @Test
     fun testSchemeWrappingBeforeEdit(){
@@ -25,7 +27,7 @@ class SchemeTest {
     fun testSchemeSubscription(){
         val scheme = TestScheme.empty()
         var flag: Int? = null
-        scheme.onChange(TestScheme::a){a->
+        scheme.useProperty(TestScheme::a){a->
             flag = a
         }
         scheme.a = 2

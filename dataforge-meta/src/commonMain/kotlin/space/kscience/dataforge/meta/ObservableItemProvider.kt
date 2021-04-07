@@ -1,5 +1,6 @@
 package space.kscience.dataforge.meta
 
+import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.toName
 import kotlin.reflect.KProperty1
@@ -18,12 +19,21 @@ public interface ObservableItemProvider : ItemProvider {
 
 public interface ItemPropertyProvider: ObservableItemProvider, MutableItemProvider
 
-public fun <O : ObservableItemProvider, T : Any> O.onChange(
+/**
+ * Use the value of the property in a [callBack].
+ * The callback is called once immediately after subscription to pass the initial value.
+ *
+ * Optional [owner] property is used for
+ */
+@DFExperimental
+public fun <O : ObservableItemProvider, T : Any> O.useProperty(
     property: KProperty1<O, T?>,
     owner: Any? = null,
     callBack: O.(T?) -> Unit,
 ) {
-    onChange(null) { name, oldItem, newItem ->
+    //Pass initial value.
+    callBack(property.get(this))
+    onChange(owner) { name, oldItem, newItem ->
         if (name == property.name.toName() && oldItem != newItem) {
             callBack(property.get(this))
         }
