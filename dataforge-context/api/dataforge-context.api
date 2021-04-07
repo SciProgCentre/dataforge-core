@@ -38,7 +38,8 @@ public final class space/kscience/dataforge/context/ClassLoaderPluginKt {
 public class space/kscience/dataforge/context/Context : kotlinx/coroutines/CoroutineScope, space/kscience/dataforge/meta/MetaRepr, space/kscience/dataforge/misc/Named, space/kscience/dataforge/provider/Provider {
 	public static final field Companion Lspace/kscience/dataforge/context/Context$Companion;
 	public static final field PROPERTY_TARGET Ljava/lang/String;
-	public final fun buildContext (Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Context;
+	public final fun buildContext (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Context;
+	public static synthetic fun buildContext$default (Lspace/kscience/dataforge/context/Context;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/context/Context;
 	public fun close ()V
 	public fun content (Ljava/lang/String;)Ljava/util/Map;
 	public final fun content (Ljava/lang/String;Z)Ljava/util/Map;
@@ -102,8 +103,8 @@ public final class space/kscience/dataforge/context/Factory$DefaultImpls {
 }
 
 public final class space/kscience/dataforge/context/GlobalKt {
-	public static final fun Context (Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Context;
-	public static synthetic fun Context$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/context/Context;
+	public static final fun Context (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Context;
+	public static synthetic fun Context$default (Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/context/Context;
 	public static final fun getGlobal ()Lspace/kscience/dataforge/context/Context;
 }
 

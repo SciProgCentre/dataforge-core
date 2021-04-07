@@ -19,4 +19,5 @@ private object GlobalContext : Context("GLOBAL".asName(), null, Meta.EMPTY) {
 
 public val Global: Context get() = GlobalContext
 
-public fun Context(block: ContextBuilder.() -> Unit = {}): Context = Global.buildContext(block)
+public fun Context(name: String? = null, block: ContextBuilder.() -> Unit = {}): Context =
+    Global.buildContext(name, block)
