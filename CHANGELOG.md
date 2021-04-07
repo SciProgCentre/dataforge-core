@@ -11,6 +11,7 @@
 - Package changed to `space.kscience`
 - Scheme made observable
 - Global context is a variable (the singleton is hidden and will be deprecated in future)
+- Kotlin 1.5
 
 ### Deprecated
 - Direct use of PluginManager

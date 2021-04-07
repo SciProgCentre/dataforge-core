@@ -64,6 +64,7 @@ public final class space/kscience/dataforge/context/ContextBuilder {
 	public final fun getName ()Lspace/kscience/dataforge/names/Name;
 	public final fun name (Ljava/lang/String;)V
 	public final fun plugin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun plugin (Lspace/kscience/dataforge/context/Plugin;)V
 	public final fun plugin (Lspace/kscience/dataforge/context/PluginFactory;Lkotlin/jvm/functions/Function1;)V
 	public final fun plugin (Lspace/kscience/dataforge/context/PluginFactory;Lspace/kscience/dataforge/meta/Meta;)V
 	public final fun plugin (Lspace/kscience/dataforge/context/PluginTag;Lkotlin/jvm/functions/Function1;)V
@@ -202,7 +203,6 @@ public final class space/kscience/dataforge/context/PluginManager : java/lang/It
 	public fun getContext ()Lspace/kscience/dataforge/context/Context;
 	public fun iterator ()Ljava/util/Iterator;
 	public final fun list (Z)Ljava/util/Collection;
-	public final fun load (Lspace/kscience/dataforge/context/Plugin;)Lspace/kscience/dataforge/context/Plugin;
 	public final fun remove (Lspace/kscience/dataforge/context/Plugin;)V
 }
 

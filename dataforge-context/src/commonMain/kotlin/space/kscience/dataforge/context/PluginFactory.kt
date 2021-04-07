@@ -1,5 +1,6 @@
 package space.kscience.dataforge.context
 
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.Type
 import kotlin.reflect.KClass
 
@@ -11,4 +12,13 @@ public interface PluginFactory<T : Plugin> : Factory<T> {
     public companion object {
         public const val TYPE: String = "pluginFactory"
     }
+}
+
+/**
+ * Plugin factory created for the specific actual plugin
+ */
+internal class DeFactoPluginFactory<T : Plugin>(val plugin: T) : PluginFactory<T> {
+    override fun invoke(meta: Meta, context: Context): T = plugin
+    override val tag: PluginTag get() = plugin.tag
+    override val type: KClass<out T> get() = plugin::class
 }

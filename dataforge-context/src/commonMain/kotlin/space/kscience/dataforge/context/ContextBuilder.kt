@@ -29,7 +29,7 @@ public class ContextBuilder internal constructor(
         meta.action()
     }
 
-    public fun name(string: String){
+    public fun name(string: String) {
         this.name = string.toName()
     }
 
@@ -43,7 +43,7 @@ public class ContextBuilder internal constructor(
         factories[factory] = Meta(metaBuilder)
     }
 
-    public fun plugin(factory: PluginFactory<*>, meta: Meta){
+    public fun plugin(factory: PluginFactory<*>, meta: Meta) {
         factories[factory] = meta
     }
 
@@ -53,6 +53,13 @@ public class ContextBuilder internal constructor(
 
     public fun plugin(name: String, group: String = "", version: String = "", action: MetaBuilder.() -> Unit = {}) {
         plugin(PluginTag(name, group, version), action)
+    }
+
+    /**
+     * Add de-facto existing plugin as a dependency
+     */
+    public fun plugin(plugin: Plugin) {
+        plugin(DeFactoPluginFactory(plugin))
     }
 
     public fun build(): Context {

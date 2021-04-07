@@ -3,6 +3,7 @@ package space.kscience.dataforge.meta.transformations
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
+import kotlin.jvm.JvmInline
 
 /**
  * A transformation for meta item or a group of items
@@ -85,7 +86,8 @@ public data class RegexItemTransformationRule(
 /**
  * A set of [TransformationRule] to either transform static meta or create dynamically updated [MutableMeta]
  */
-public inline class MetaTransformation(public val transformations: Collection<TransformationRule>) {
+@JvmInline
+public value class MetaTransformation(private val transformations: Collection<TransformationRule>) {
 
     /**
      * Produce new meta using only those items that match transformation rules

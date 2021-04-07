@@ -3,6 +3,7 @@ package space.kscience.dataforge.properties
 import space.kscience.dataforge.meta.Scheme
 import space.kscience.dataforge.meta.SchemeSpec
 import space.kscience.dataforge.meta.int
+import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -12,6 +13,7 @@ internal class TestScheme : Scheme() {
     companion object : SchemeSpec<TestScheme>(::TestScheme)
 }
 
+@DFExperimental
 class ItemPropertiesTest {
     @Test
     fun testBinding() {
