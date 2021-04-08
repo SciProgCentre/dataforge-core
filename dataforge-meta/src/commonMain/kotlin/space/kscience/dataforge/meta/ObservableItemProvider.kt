@@ -26,10 +26,10 @@ public interface ItemPropertyProvider: ObservableItemProvider, MutableItemProvid
  * Optional [owner] property is used for
  */
 @DFExperimental
-public fun <O : ObservableItemProvider, T : Any> O.useProperty(
-    property: KProperty1<O, T?>,
+public fun <O : ObservableItemProvider, T> O.useProperty(
+    property: KProperty1<O, T>,
     owner: Any? = null,
-    callBack: O.(T?) -> Unit,
+    callBack: O.(T) -> Unit,
 ) {
     //Pass initial value.
     callBack(property.get(this))
