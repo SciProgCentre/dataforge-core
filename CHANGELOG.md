@@ -22,6 +22,7 @@
 - Kotlinx-io fork dependency. Replaced by Ktor-io.
 
 ### Fixed
+- Scheme properties properly handle children property change.
 
 ### Security
 
