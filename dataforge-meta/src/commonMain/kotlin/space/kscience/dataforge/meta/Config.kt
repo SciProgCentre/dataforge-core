@@ -99,6 +99,12 @@ public fun Meta.toConfig(): Config = Config().also { builder ->
 }
 
 /**
+ * Create a copy of this config, optionally applying the given [block].
+ * The listeners of the original Config are not retained.
+ */
+public inline fun Config.copy(block: Config.() -> Unit = {}): Config = toConfig().apply(block)
+
+/**
  * Return this [Meta] as [Config] if it is [Config] and create a new copy otherwise
  */
 public fun Meta.asConfig(): Config = this as? Config ?: toConfig()

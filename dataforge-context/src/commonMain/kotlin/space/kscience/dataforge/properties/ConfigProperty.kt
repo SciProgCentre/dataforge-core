@@ -8,6 +8,7 @@ import space.kscience.dataforge.meta.transformations.nullableItemToObject
 import space.kscience.dataforge.meta.transformations.nullableObjectToMetaItem
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.startsWith
 
 @DFExperimental
 public class ConfigProperty<T : Any>(
@@ -24,7 +25,7 @@ public class ConfigProperty<T : Any>(
 
     override fun onChange(owner: Any?, callback: (T?) -> Unit) {
         config.onChange(owner) { name, oldItem, newItem ->
-            if (name == this.name && oldItem != newItem) callback(converter.nullableItemToObject(newItem))
+            if (name.startsWith(this.name) && oldItem != newItem) callback(converter.nullableItemToObject(newItem))
         }
     }
 

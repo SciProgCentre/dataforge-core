@@ -5,6 +5,7 @@
 - LogManager plugin
 - dataforge-context API dependency on SLF4j
 - Context `withEnv` and `fetch` methods to manipulate plugins without changing plugins after creation.
+- Split `ItemDescriptor` into builder and read-only part
 
 ### Changed
 - Kotlin-logging moved from common to JVM and JS. Replaced by console for native.

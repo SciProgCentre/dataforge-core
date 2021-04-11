@@ -2,6 +2,7 @@ package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.startsWith
 import space.kscience.dataforge.names.toName
 import kotlin.reflect.KProperty1
 
@@ -34,7 +35,7 @@ public fun <O : ObservableItemProvider, T> O.useProperty(
     //Pass initial value.
     callBack(property.get(this))
     onChange(owner) { name, oldItem, newItem ->
-        if (name == property.name.toName() && oldItem != newItem) {
+        if (name.startsWith(property.name.toName()) && oldItem != newItem) {
             callBack(property.get(this))
         }
     }

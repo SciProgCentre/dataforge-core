@@ -4,7 +4,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.4.0-dev-7"
+    version = "0.4.0-dev-8"
 }
 
 subprojects {
@@ -22,5 +22,8 @@ ksciencePublish {
 }
 
 apiValidation {
+    if(project.version.toString().contains("dev")) {
+        validationDisabled = true
+    }
     nonPublicMarkers.add("space.kscience.dataforge.misc.DFExperimental")
 }

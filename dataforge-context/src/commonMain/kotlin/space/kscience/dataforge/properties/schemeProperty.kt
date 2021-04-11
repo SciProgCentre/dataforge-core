@@ -2,6 +2,7 @@ package space.kscience.dataforge.properties
 
 import space.kscience.dataforge.meta.ItemPropertyProvider
 import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.names.startsWith
 import space.kscience.dataforge.names.toName
 import kotlin.reflect.KMutableProperty1
 
@@ -16,7 +17,7 @@ public fun <P : ItemPropertyProvider, T : Any> P.property(property: KMutableProp
 
         override fun onChange(owner: Any?, callback: (T?) -> Unit) {
             this@property.onChange(this) { name, oldItem, newItem ->
-                if (name == property.name.toName() && oldItem != newItem) {
+                if (name.startsWith(property.name.toName()) && oldItem != newItem) {
                     callback(property.get(this@property))
                 }
             }
