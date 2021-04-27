@@ -15,6 +15,10 @@ readme {
     readmeTemplate = file("docs/templates/README-TEMPLATE.md")
 }
 
+changelog{
+    version = project.version.toString()
+}
+
 ksciencePublish {
     github("dataforge-core")
     space("https://maven.pkg.jetbrains.space/mipt-npm/p/sci/maven")

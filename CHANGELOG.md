@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+## [0.4.0]
+### Added
 - LogManager plugin
 - dataforge-context API dependency on SLF4j
 - Context `withEnv` and `fetch` methods to manipulate plugins without changing plugins after creation.

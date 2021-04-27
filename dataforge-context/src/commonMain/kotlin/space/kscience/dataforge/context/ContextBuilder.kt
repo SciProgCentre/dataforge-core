@@ -66,6 +66,7 @@ public class ContextBuilder internal constructor(
         val contextName = name ?: "@auto[${hashCode().toUInt().toString(16)}]".toName()
         return Context(contextName, parent, meta.seal()).apply {
             factories.forEach { (factory, meta) ->
+                @Suppress("DEPRECATION")
                 plugins.load(factory, meta)
             }
         }
