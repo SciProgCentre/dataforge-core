@@ -13,6 +13,8 @@
 - Scheme made observable
 - Global context is a variable (the singleton is hidden and will be deprecated in future)
 - Kotlin 1.5
+- Added blank builders for children context.
+- Refactor loggers
 
 ### Deprecated
 - Direct use of PluginManager

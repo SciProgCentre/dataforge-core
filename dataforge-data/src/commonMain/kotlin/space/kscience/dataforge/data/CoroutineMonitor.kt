@@ -48,9 +48,9 @@ public val CoroutineScope.monitor: CoroutineMonitor? get() = coroutineContext.mo
 public val Job.dependencies: Collection<Job> get() = this[Dependencies]?.values ?: emptyList()
 
 @DFExperimental
-public val Job.totalWork: Double get() = dependencies.sumByDouble { totalWork } + (monitor?.totalWork ?: 0.0)
+public val Job.totalWork: Double get() = dependencies.sumOf { totalWork } + (monitor?.totalWork ?: 0.0)
 @DFExperimental
-public val Job.workDone: Double get() = dependencies.sumByDouble { workDone } + (monitor?.workDone ?: 0.0)
+public val Job.workDone: Double get() = dependencies.sumOf { workDone } + (monitor?.workDone ?: 0.0)
 @DFExperimental
 public val Job.status: String get() = monitor?.status ?: ""
 @DFExperimental

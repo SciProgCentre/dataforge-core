@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 
 public class SlfLogManager : AbstractPlugin(), LogManager {
 
-    override fun log(name: Name, tag: String, body: () -> String) {
+    override fun logger(name: Name): Logger = Logger { tag, body ->
         val logger = LoggerFactory.getLogger("[${context.name}] $name") //KotlinLogging.logger("[${context.name}] $name")
         val message = body.safe
         when (tag) {
@@ -18,6 +18,8 @@ public class SlfLogManager : AbstractPlugin(), LogManager {
             else -> logger.trace(message)
         }
     }
+
+    override val defaultLogger: Logger = logger(Name.EMPTY)
 
     override val tag: PluginTag get() = Companion.tag
 

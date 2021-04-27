@@ -76,7 +76,7 @@ public open class Context internal constructor(
      * Build and register a child context
      */
     @Synchronized
-    public fun buildContext(name: String? = null, block: ContextBuilder.() -> Unit): Context {
+    public fun buildContext(name: String? = null, block: ContextBuilder.() -> Unit = {}): Context {
         val newContext = ContextBuilder(this)
             .apply { name?.let { name(it) } }
             .apply(block)
