@@ -11,6 +11,7 @@ import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.provider.Provider
 import kotlin.coroutines.CoroutineContext
+import kotlin.jvm.Synchronized
 
 /**
  * The local environment for anything being done in DataForge framework. Contexts are organized into tree structure with [Global] at the top.
@@ -31,11 +32,12 @@ public open class Context internal constructor(
     /**
      * Context properties. Working as substitute for environment variables
      */
-    private val properties: Laminate = if (parent == null) {
+    public val properties: Laminate = if (parent == null) {
         Laminate(meta)
     } else {
         Laminate(meta, parent.properties)
     }
+
 
     /**
      * A [PluginManager] for current context
@@ -68,10 +70,27 @@ public open class Context internal constructor(
         }
     }
 
+    private val childrenContexts = HashMap<Name, Context>()
+
     /**
-     * Detach all plugins and terminate context
+     * Build and register a child context
+     */
+    @Synchronized
+    public fun buildContext(name: String? = null, block: ContextBuilder.() -> Unit = {}): Context {
+        val newContext = ContextBuilder(this)
+            .apply { name?.let { name(it) } }
+            .apply(block)
+            .build()
+        childrenContexts[newContext.name] = newContext
+        return newContext
+    }
+
+    /**
+     * Detach all plugins, and close child contexts
      */
     public open fun close() {
+        //recursively closed child context
+        childrenContexts.forEach { it.value.close() }
         //detach all plugins
         plugins.forEach { it.detach() }
     }
@@ -86,9 +105,6 @@ public open class Context internal constructor(
         public const val PROPERTY_TARGET: String = "context.property"
     }
 }
-
-public fun Context(name: String, parent: Context = Global, block: ContextBuilder.() -> Unit = {}): Context =
-    Global.context(name, parent, block)
 
 /**
  * The interface for something that encapsulated in context

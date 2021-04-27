@@ -9,6 +9,7 @@ import space.kscience.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.toName
+import kotlin.native.concurrent.ThreadLocal
 import kotlin.reflect.KClass
 
 public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
@@ -62,7 +63,8 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
 
     public companion object : PluginFactory<IOPlugin> {
         public val defaultMetaFormats: List<MetaFormatFactory> = listOf(JsonMetaFormat, BinaryMetaFormat)
-        public val defaultEnvelopeFormats: List<EnvelopeFormatFactory> = listOf(TaggedEnvelopeFormat, TaglessEnvelopeFormat)
+        public val defaultEnvelopeFormats: List<EnvelopeFormatFactory> =
+            listOf(TaggedEnvelopeFormat, TaglessEnvelopeFormat)
 
         override val tag: PluginTag = PluginTag("io", group = PluginTag.DATAFORGE_GROUP)
 
@@ -71,4 +73,10 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     }
 }
 
-public val Context.io: IOPlugin get() = plugins.fetch(IOPlugin)
+@ThreadLocal
+internal val ioContext = Global.withEnv {
+    name("IO")
+    plugin(IOPlugin)
+}
+
+public val Context.io: IOPlugin get() = (if (this == Global) ioContext else this).fetch(IOPlugin)

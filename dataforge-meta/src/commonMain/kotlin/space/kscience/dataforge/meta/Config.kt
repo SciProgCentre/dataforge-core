@@ -14,21 +14,11 @@ import kotlin.jvm.Synchronized
 
 //TODO add validator to configuration
 
-public data class ItemListener(
-    val owner: Any? = null,
-    val action: (name: Name, oldItem: MetaItem?, newItem: MetaItem?) -> Unit
-)
-
-public interface ObservableItemProvider : ItemProvider {
-    public fun onChange(owner: Any?, action: (name: Name, oldItem: MetaItem?, newItem: MetaItem?) -> Unit)
-    public fun removeListener(owner: Any?)
-}
-
 /**
  * Mutable meta representing object state
  */
 @Serializable(Config.Companion::class)
-public class Config() : AbstractMutableMeta<Config>(), ObservableItemProvider {
+public class Config : AbstractMutableMeta<Config>(), ItemPropertyProvider {
 
     private val listeners = HashSet<ItemListener>()
 
@@ -107,6 +97,12 @@ public fun Meta.toConfig(): Config = Config().also { builder ->
         }
     }
 }
+
+/**
+ * Create a copy of this config, optionally applying the given [block].
+ * The listeners of the original Config are not retained.
+ */
+public inline fun Config.copy(block: Config.() -> Unit = {}): Config = toConfig().apply(block)
 
 /**
  * Return this [Meta] as [Config] if it is [Config] and create a new copy otherwise

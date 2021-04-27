@@ -20,7 +20,7 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
         return (input.readMetaItem() as MetaItemNode).node
     }
 
-    private fun Output.writeChar(char: Char) = writeByte(char.toByte())
+    private fun Output.writeChar(char: Char) = writeByte(char.code.toByte())
 
     private fun Output.writeString(str: String) {
         writeInt(str.length)
@@ -101,7 +101,7 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
 
     @Suppress("UNCHECKED_CAST")
     public fun Input.readMetaItem(): TypedMetaItem<MetaBuilder> {
-        return when (val keyChar = readByte().toChar()) {
+        return when (val keyChar = readByte().toInt().toChar()) {
             'S' -> MetaItemValue(StringValue(readString()))
             'N' -> MetaItemValue(Null)
             '+' -> MetaItemValue(True)

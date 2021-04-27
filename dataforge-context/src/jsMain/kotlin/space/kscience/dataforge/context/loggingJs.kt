@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 
 public class ConsoleLogManager : AbstractPlugin(), LogManager {
 
-    override fun log(name: Name, tag: String, body: () -> String) {
+    override fun logger(name: Name): Logger  = Logger { tag, body ->
         val message: String = body.safe
         when (tag) {
             LogManager.INFO -> console.info("[${context.name}] $name: $message")
@@ -15,6 +15,9 @@ public class ConsoleLogManager : AbstractPlugin(), LogManager {
             else ->  console.log("[${context.name}] $name: $message")
         }
     }
+
+    override val defaultLogger: Logger = logger(Name.EMPTY)
+
 
     override val tag: PluginTag get() = Companion.tag
 

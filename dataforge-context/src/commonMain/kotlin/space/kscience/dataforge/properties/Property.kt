@@ -1,6 +1,5 @@
 package space.kscience.dataforge.properties
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,12 +22,12 @@ public fun <T> Property<T>.toFlow(): StateFlow<T> = MutableStateFlow(value).also
 }
 
 /**
- * Reflect all changes in the [source] property onto this property
+ * Reflect all changes in the [source] property onto this property. Does not reflect changes back.
  *
  * @return a mirroring job
  */
 @DFExperimental
-public fun <T> Property<T>.mirror(source: Property<T>, scope: CoroutineScope) {
+public fun <T> Property<T>.mirror(source: Property<T>) {
     source.onChange(this) {
         this.value = it
     }

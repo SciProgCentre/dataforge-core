@@ -161,7 +161,7 @@ public class TaggedEnvelopeFormat(
             }
         }
 
-        private val default by lazy { invoke() }
+        private val default by lazy { invoke(context = ioContext) }
 
         override fun readPartial(input: Input): PartialEnvelope =
             default.run { readPartial(input) }

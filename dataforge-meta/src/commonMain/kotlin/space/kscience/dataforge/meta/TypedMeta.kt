@@ -32,7 +32,7 @@ public operator fun <M : TypedMeta<M>> M.get(key: NameToken): TypedMetaItem<M>? 
 public abstract class MetaBase : Meta {
 
     override fun equals(other: Any?): Boolean = if (other is Meta) {
-        this.items == other.items
+        Meta.equals(this, other)
     } else {
         false
     }

@@ -50,8 +50,8 @@ public class WorkspaceBuilder(private val parentContext: Context = Global) : Tas
     /**
      * Define a context for the workspace
      */
-    public fun context(name: String = "workspace", block: ContextBuilder.() -> Unit = {}) {
-        this.context = ContextBuilder(parentContext, name).apply(block).build()
+    public fun context(block: ContextBuilder.() -> Unit = {}) {
+        this.context = parentContext.buildContext("workspace", block)
     }
 
     /**

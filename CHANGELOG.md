@@ -2,20 +2,41 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+## [0.4.0]
+### Added
 - LogManager plugin
 - dataforge-context API dependency on SLF4j
+- Context `withEnv` and `fetch` methods to manipulate plugins without changing plugins after creation.
+- Split `ItemDescriptor` into builder and read-only part
 
 ### Changed
 - Kotlin-logging moved from common to JVM and JS. Replaced by console for native.
 - Package changed to `space.kscience`
+- Scheme made observable
+- Global context is a variable (the singleton is hidden and will be deprecated in future)
+- Kotlin 1.5
+- Added blank builders for children context.
+- Refactor loggers
 
 ### Deprecated
+- Direct use of PluginManager
 
 ### Removed
 - Common dependency on Kotlin-logging
 - Kotlinx-io fork dependency. Replaced by Ktor-io.
 
 ### Fixed
+- Scheme properties properly handle children property change.
 
 ### Security
 

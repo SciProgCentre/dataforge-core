@@ -43,7 +43,7 @@ public interface DataTree<out T : Any> : DataSet<T> {
         }
     }
 
-    override suspend fun listChildren(prefix: Name): List<Name> =
+    override suspend fun listTop(prefix: Name): List<Name> =
         getItem(prefix).tree?.items()?.keys?.map { prefix + it } ?: emptyList()
 
     override suspend fun getData(name: Name): Data<T>? = when (name.length) {

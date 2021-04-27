@@ -17,12 +17,14 @@ package space.kscience.dataforge.provider
 
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.toName
+import kotlin.jvm.JvmInline
 
 /**
  * Path interface.
  *
  */
-public inline class Path(public val tokens: List<PathToken>) : Iterable<PathToken> {
+@JvmInline
+public value class Path(public val tokens: List<PathToken>) : Iterable<PathToken> {
 
     override fun iterator(): Iterator<PathToken> = tokens.iterator()
 

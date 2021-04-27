@@ -2,9 +2,11 @@ package space.kscience.dataforge.tables
 
 import kotlinx.coroutines.flow.toList
 import space.kscience.dataforge.meta.Meta
+import kotlin.jvm.JvmInline
 import kotlin.reflect.KType
 
-public inline class MapRow<C : Any>(private val values: Map<String, C?>) : Row<C> {
+@JvmInline
+public value class MapRow<C : Any>(private val values: Map<String, C?>) : Row<C> {
     override fun get(column: String): C? = values[column]
 }
 
