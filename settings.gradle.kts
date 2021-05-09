@@ -27,5 +27,6 @@ include(
 //    ":dataforge-output",
     ":dataforge-tables",
     ":dataforge-workspace",
+    ":dataforge-exposed",
     ":dataforge-scripting"
 )
