@@ -37,6 +37,11 @@ public sealed interface ItemDescriptor: MetaRepr {
      */
     public val indexKey: String
 
+    /**
+     * Compute and cache the default [MetaItem] value described by this descriptor
+     */
+    public val defaultValue: MetaItem?
+
     public companion object {
         public const val DEFAULT_INDEX_KEY: String = "@index"
     }

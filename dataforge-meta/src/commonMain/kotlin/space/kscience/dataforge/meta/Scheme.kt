@@ -1,6 +1,9 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.meta.descriptors.*
+import space.kscience.dataforge.meta.descriptors.Described
+import space.kscience.dataforge.meta.descriptors.NodeDescriptor
+import space.kscience.dataforge.meta.descriptors.get
+import space.kscience.dataforge.meta.descriptors.validateItem
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName
@@ -53,7 +56,7 @@ public open class Scheme() : Described, MetaRepr, ItemPropertyProvider {
     }
 
     private fun getDefaultItem(name: Name): MetaItem? {
-        return default?.get(name) ?: descriptor?.get(name)?.defaultItem()
+        return default?.get(name) ?: descriptor?.get(name)?.defaultValue
     }
 
     /**
@@ -94,7 +97,7 @@ public open class Scheme() : Described, MetaRepr, ItemPropertyProvider {
                 descriptor?.items?.forEach { (key, itemDescriptor) ->
                     val token = NameToken(key)
                     val name = token.asName()
-                    val item = default?.get(name) ?: itemDescriptor.defaultItem()
+                    val item = default?.get(name) ?: itemDescriptor.defaultValue
                     if (item != null) {
                         put(token, item)
                     }

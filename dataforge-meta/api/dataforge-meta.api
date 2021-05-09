@@ -501,15 +501,11 @@ public abstract interface class space/kscience/dataforge/meta/descriptors/Descri
 public final class space/kscience/dataforge/meta/descriptors/Described$Companion {
 }
 
-public final class space/kscience/dataforge/meta/descriptors/DescriptorMetaKt {
-	public static final fun defaultItem (Lspace/kscience/dataforge/meta/descriptors/ItemDescriptor;)Lspace/kscience/dataforge/meta/TypedMetaItem;
-	public static final fun defaultMeta (Lspace/kscience/dataforge/meta/descriptors/NodeDescriptor;)Lspace/kscience/dataforge/meta/Laminate;
-}
-
 public abstract interface class space/kscience/dataforge/meta/descriptors/ItemDescriptor : space/kscience/dataforge/meta/MetaRepr {
 	public static final field Companion Lspace/kscience/dataforge/meta/descriptors/ItemDescriptor$Companion;
 	public static final field DEFAULT_INDEX_KEY Ljava/lang/String;
 	public abstract fun getAttributes ()Lspace/kscience/dataforge/meta/Meta;
+	public abstract fun getDefaultValue ()Lspace/kscience/dataforge/meta/TypedMetaItem;
 	public abstract fun getIndexKey ()Ljava/lang/String;
 	public abstract fun getInfo ()Ljava/lang/String;
 	public abstract fun getMultiple ()Z
@@ -552,6 +548,7 @@ public final class space/kscience/dataforge/meta/descriptors/ItemDescriptorKt {
 
 public abstract interface class space/kscience/dataforge/meta/descriptors/NodeDescriptor : space/kscience/dataforge/meta/descriptors/ItemDescriptor {
 	public static final field Companion Lspace/kscience/dataforge/meta/descriptors/NodeDescriptor$Companion;
+	public fun defaultMeta ()Lspace/kscience/dataforge/meta/Laminate;
 	public abstract fun getDefault ()Lspace/kscience/dataforge/meta/Config;
 	public abstract fun getItems ()Ljava/util/Map;
 	public abstract fun getNodes ()Ljava/util/Map;
@@ -570,6 +567,7 @@ public final class space/kscience/dataforge/meta/descriptors/NodeDescriptorBuild
 	public synthetic fun build ()Lspace/kscience/dataforge/meta/descriptors/ItemDescriptor;
 	public fun build ()Lspace/kscience/dataforge/meta/descriptors/NodeDescriptor;
 	public fun getDefault ()Lspace/kscience/dataforge/meta/Config;
+	public fun getDefaultValue ()Lspace/kscience/dataforge/meta/TypedMetaItem;
 	public fun getItems ()Ljava/util/Map;
 	public fun getNodes ()Ljava/util/Map;
 	public fun getRequired ()Z
@@ -610,6 +608,7 @@ public final class space/kscience/dataforge/meta/descriptors/ValueDescriptorBuil
 	public final fun default (Ljava/lang/Object;)V
 	public fun getAllowedValues ()Ljava/util/List;
 	public fun getDefault ()Lspace/kscience/dataforge/values/Value;
+	public fun getDefaultValue ()Lspace/kscience/dataforge/meta/TypedMetaItem;
 	public fun getRequired ()Z
 	public fun getType ()Ljava/util/List;
 	public fun isAllowedValue (Lspace/kscience/dataforge/values/Value;)Z

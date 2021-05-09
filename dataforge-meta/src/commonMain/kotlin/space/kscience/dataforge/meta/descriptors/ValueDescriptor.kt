@@ -131,5 +131,7 @@ public class ValueDescriptorBuilder(config: Config = Config()) : ItemDescriptorB
         this.allowedValues = v.map { Value.of(it) }
     }
 
+    override val defaultValue: MetaItem? get() = default?.asMetaItem()
+
     override fun build(): ValueDescriptor = ValueDescriptorBuilder(config.copy())
 }
