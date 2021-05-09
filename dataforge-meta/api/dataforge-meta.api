@@ -548,8 +548,8 @@ public final class space/kscience/dataforge/meta/descriptors/ItemDescriptorKt {
 
 public abstract interface class space/kscience/dataforge/meta/descriptors/NodeDescriptor : space/kscience/dataforge/meta/descriptors/ItemDescriptor {
 	public static final field Companion Lspace/kscience/dataforge/meta/descriptors/NodeDescriptor$Companion;
-	public fun defaultMeta ()Lspace/kscience/dataforge/meta/Laminate;
 	public abstract fun getDefault ()Lspace/kscience/dataforge/meta/Config;
+	public abstract fun getDefaultMeta ()Lspace/kscience/dataforge/meta/Laminate;
 	public abstract fun getItems ()Ljava/util/Map;
 	public abstract fun getNodes ()Ljava/util/Map;
 	public abstract fun getRequired ()Z
@@ -567,6 +567,7 @@ public final class space/kscience/dataforge/meta/descriptors/NodeDescriptorBuild
 	public synthetic fun build ()Lspace/kscience/dataforge/meta/descriptors/ItemDescriptor;
 	public fun build ()Lspace/kscience/dataforge/meta/descriptors/NodeDescriptor;
 	public fun getDefault ()Lspace/kscience/dataforge/meta/Config;
+	public fun getDefaultMeta ()Lspace/kscience/dataforge/meta/Laminate;
 	public fun getDefaultValue ()Lspace/kscience/dataforge/meta/TypedMetaItem;
 	public fun getItems ()Ljava/util/Map;
 	public fun getNodes ()Ljava/util/Map;
