@@ -85,7 +85,7 @@ public fun Context.withEnv(block: ContextBuilder.() -> Unit): Context {
     }
 
     val builder = ContextBuilder(this, name + "env", properties).apply(block)
-    val requiresFork = builder.factories.values.any { (factory, meta) ->
+    val requiresFork = builder.factories.any { (factory, meta) ->
         !contains(factory, meta)
     } || ((properties as Meta) == builder.meta)
     return if (requiresFork) builder.build() else this
