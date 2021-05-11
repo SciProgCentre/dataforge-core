@@ -83,7 +83,6 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
      * @param plugin
      * @return
      */
-    @Deprecated("Use immutable contexts instead")
     private fun <T : Plugin> load(plugin: T): T {
         if (get(plugin::class, plugin.tag, recursive = false) != null) {
             error("Plugin with tag ${plugin.tag} already exists in ${context.name}")
@@ -99,12 +98,6 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
         }
     }
 
-    /**
-     * Load a plugin using its factory
-     */
-    @Deprecated("Use immutable contexts instead")
-    internal fun <T : Plugin> load(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY): T =
-        load(factory(meta, context))
 
     /**
      * Remove a plugin from [PluginManager]

@@ -68,7 +68,7 @@ public fun ItemProvider.getIndexed(name: Name): Map<String?, MetaItem> {
     }
 }
 
-public fun ItemProvider.getIndexed(name: String): Map<String?, MetaItem> = this@getIndexed.getIndexed(name.toName())
+public fun ItemProvider.getIndexed(name: String): Map<String?, MetaItem> = getIndexed(name.toName())
 
 /**
  * Return a provider referencing a child node

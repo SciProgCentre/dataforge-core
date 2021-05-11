@@ -67,7 +67,7 @@ public class ContextBuilder internal constructor(
         return Context(contextName, parent, meta.seal()).apply {
             factories.forEach { (factory, meta) ->
                 @Suppress("DEPRECATION")
-                plugins.load(factory, meta)
+                plugins.fetch(factory, meta)
             }
         }
     }
@@ -85,7 +85,7 @@ public fun Context.withEnv(block: ContextBuilder.() -> Unit): Context {
     }
 
     val builder = ContextBuilder(this, name + "env", properties).apply(block)
-    val requiresFork = builder.factories.any { (factory, meta) ->
+    val requiresFork = builder.factories.values.any { (factory, meta) ->
         !contains(factory, meta)
     } || ((properties as Meta) == builder.meta)
     return if (requiresFork) builder.build() else this

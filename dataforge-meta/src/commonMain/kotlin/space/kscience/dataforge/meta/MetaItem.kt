@@ -1,6 +1,8 @@
 package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.isEmpty
 import space.kscience.dataforge.values.*
 
 /**
@@ -9,7 +11,7 @@ import space.kscience.dataforge.values.*
  * * a [MetaItemNode] (node)
  */
 @Serializable(MetaItemSerializer::class)
-public sealed class TypedMetaItem<out M : Meta>() {
+public sealed class TypedMetaItem<out M : Meta> : ItemProvider {
 
     abstract override fun equals(other: Any?): Boolean
 
@@ -32,6 +34,8 @@ public typealias MetaItem = TypedMetaItem<*>
 
 @Serializable(MetaItemSerializer::class)
 public class MetaItemValue(public val value: Value) : TypedMetaItem<Nothing>() {
+    override fun getItem(name: Name): MetaItem? = if (name.isEmpty()) this else null
+
     override fun toString(): String = value.toString()
 
     override fun equals(other: Any?): Boolean {
@@ -45,6 +49,8 @@ public class MetaItemValue(public val value: Value) : TypedMetaItem<Nothing>() {
 
 @Serializable(MetaItemSerializer::class)
 public class MetaItemNode<M : Meta>(public val node: M) : TypedMetaItem<M>() {
+    override fun getItem(name: Name): MetaItem? = if (name.isEmpty()) this else node.getItem(name)
+
     //Fixing serializer for node could cause class cast problems, but it should not since Meta descendants are not serializable
     override fun toString(): String = node.toString()
 

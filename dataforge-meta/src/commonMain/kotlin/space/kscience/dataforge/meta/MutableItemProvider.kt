@@ -96,6 +96,8 @@ public fun MutableItemProvider.getChild(childName: Name): MutableItemProvider {
 
 public fun MutableItemProvider.getChild(childName: String): MutableItemProvider = getChild(childName.toName())
 
+
+
 /**
  * Update existing mutable node with another node. The rules are following:
  *  * value replaces anything
