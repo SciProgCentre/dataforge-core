@@ -54,7 +54,7 @@ public class MetaItemNode<M : Meta>(public val node: M) : TypedMetaItem<M>() {
     //Fixing serializer for node could cause class cast problems, but it should not since Meta descendants are not serializable
     override fun toString(): String = node.toString()
 
-    override fun equals(other: Any?): Boolean = node == (other as? MetaItemNode<*>)?.node
+    override fun equals(other: Any?): Boolean = Meta.equals(node, (other as? MetaItemNode<*>)?.node)
 
     override fun hashCode(): Int = node.hashCode()
 }

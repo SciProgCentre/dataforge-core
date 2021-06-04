@@ -88,6 +88,7 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
             error("Plugin with tag ${plugin.tag} already exists in ${context.name}")
         } else {
             for ((factory, meta) in plugin.dependsOn()) {
+                @Suppress("DEPRECATION")
                 fetch(factory, meta, true)
             }
 

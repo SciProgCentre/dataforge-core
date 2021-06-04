@@ -16,35 +16,32 @@
 
 package space.kscience.dataforge.descriptors
 
-import space.kscience.dataforge.values.ValueType
-import kotlin.reflect.KClass
-
-@MustBeDocumented
-annotation class Attribute(
-    val key: String,
-    val value: String
-)
-
-@MustBeDocumented
-annotation class Attributes(
-    val attrs: Array<Attribute>
-)
-
-@MustBeDocumented
-annotation class ItemDef(
-    val info: String = "",
-    val multiple: Boolean = false,
-    val required: Boolean = false
-)
-
-@Target(AnnotationTarget.PROPERTY)
-@MustBeDocumented
-annotation class ValueDef(
-    val type: Array<ValueType> = [ValueType.STRING],
-    val def: String = "",
-    val allowed: Array<String> = [],
-    val enumeration: KClass<*> = Any::class
-)
+//@MustBeDocumented
+//annotation class Attribute(
+//    val key: String,
+//    val value: String
+//)
+//
+//@MustBeDocumented
+//annotation class Attributes(
+//    val attrs: Array<Attribute>
+//)
+//
+//@MustBeDocumented
+//annotation class ItemDef(
+//    val info: String = "",
+//    val multiple: Boolean = false,
+//    val required: Boolean = false
+//)
+//
+//@Target(AnnotationTarget.PROPERTY)
+//@MustBeDocumented
+//annotation class ValueDef(
+//    val type: Array<ValueType> = [ValueType.STRING],
+//    val def: String = "",
+//    val allowed: Array<String> = [],
+//    val enumeration: KClass<*> = Any::class
+//)
 
 ///**
 // * Description text for meta property, node or whole object

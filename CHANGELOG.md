@@ -6,6 +6,7 @@
 
 ### Changed
 - **API breaking** Descriptor no has a member property `defaultValue` instead of `defaultItem()` extension. It cahces default value state on the first call. It is done because computing default on each call is too expensive.
+- Kotlin 1.5.10
 
 ### Deprecated
 

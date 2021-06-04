@@ -228,28 +228,6 @@ public final class space/kscience/dataforge/context/SlfLogManager$Companion : sp
 	public fun invoke (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/context/Context;)Lspace/kscience/dataforge/context/SlfLogManager;
 }
 
-public abstract interface annotation class space/kscience/dataforge/descriptors/Attribute : java/lang/annotation/Annotation {
-	public abstract fun key ()Ljava/lang/String;
-	public abstract fun value ()Ljava/lang/String;
-}
-
-public abstract interface annotation class space/kscience/dataforge/descriptors/Attributes : java/lang/annotation/Annotation {
-	public abstract fun attrs ()[Lspace/kscience/dataforge/descriptors/Attribute;
-}
-
-public abstract interface annotation class space/kscience/dataforge/descriptors/ItemDef : java/lang/annotation/Annotation {
-	public abstract fun info ()Ljava/lang/String;
-	public abstract fun multiple ()Z
-	public abstract fun required ()Z
-}
-
-public abstract interface annotation class space/kscience/dataforge/descriptors/ValueDef : java/lang/annotation/Annotation {
-	public abstract fun allowed ()[Ljava/lang/String;
-	public abstract fun def ()Ljava/lang/String;
-	public abstract fun enumeration ()Ljava/lang/Class;
-	public abstract fun type ()[Lspace/kscience/dataforge/values/ValueType;
-}
-
 public final class space/kscience/dataforge/properties/PropertyKt {
 }
 

@@ -54,7 +54,7 @@ public interface Meta : MetaRepr, ItemProvider {
          */
         public const val VALUE_KEY: String = "@value"
 
-        public fun equals(meta1: Meta, meta2: Meta): Boolean = meta1.items == meta2.items
+        public fun equals(meta1: Meta?, meta2: Meta?): Boolean = meta1?.items == meta2?.items
 
         public val EMPTY: Meta = object : MetaBase() {
             override val items: Map<NameToken, MetaItem> = emptyMap()

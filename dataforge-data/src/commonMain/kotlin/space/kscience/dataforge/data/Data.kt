@@ -49,6 +49,7 @@ public interface Data<out T : Any> : Goal<T>, MetaRepr {
         /**
          * An empty data containing only meta
          */
+        @OptIn(DelicateCoroutinesApi::class)
         public fun empty(meta: Meta): Data<Nothing> = object : Data<Nothing> {
             override val type: KType = TYPE_OF_NOTHING
             override val meta: Meta = meta

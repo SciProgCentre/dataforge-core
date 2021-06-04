@@ -68,7 +68,8 @@ internal class MapAction<in T : Any, out R : Any>(
             //getting new meta
             val newMeta = builder.meta.seal()
 
-            @OptIn(DFInternal::class) val newData = Data(outputType, newMeta, dependencies = listOf(data)) {
+            @OptIn(DFInternal::class)
+            val newData = Data(outputType, newMeta, dependencies = listOf(data)) {
                 builder.result(env, data.await())
             }
             //setting the data node
