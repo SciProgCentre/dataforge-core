@@ -53,7 +53,7 @@ public fun MutableItemProvider.setIndexedItems(
     val tokens = name.tokens.toMutableList()
     val last = tokens.last()
     items.forEachIndexed { index, meta ->
-        val indexedToken = NameToken(last.body, last.index + indexFactory(meta, index))
+        val indexedToken = NameToken(last.body, (last.index ?: "") + indexFactory(meta, index))
         tokens[tokens.lastIndex] = indexedToken
         set(Name(tokens), meta)
     }
@@ -95,7 +95,6 @@ public fun MutableItemProvider.getChild(childName: Name): MutableItemProvider {
 }
 
 public fun MutableItemProvider.getChild(childName: String): MutableItemProvider = getChild(childName.toName())
-
 
 
 /**

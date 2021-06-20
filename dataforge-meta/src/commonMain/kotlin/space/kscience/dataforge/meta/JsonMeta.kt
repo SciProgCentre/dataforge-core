@@ -55,7 +55,16 @@ private fun Meta.toJsonWithIndex(descriptor: NodeDescriptor?, indexValue: String
                 //do nothing
             }
             1 -> {
-                elementMap[jsonKey] = items.values.first().toJsonElement(itemDescriptor, null)
+                val (index, item) = items.entries.first()
+                val element = item.toJsonElement(itemDescriptor, null)
+                if (index == null) {
+                    elementMap[jsonKey] = element
+                } else {
+                    //treat arrays with single element
+                    elementMap[jsonKey] = buildJsonArray {
+                        add(element)
+                    }
+                }
             }
             else -> {
                 val array = buildJsonArray {

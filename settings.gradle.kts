@@ -5,16 +5,13 @@ pluginManagement {
         gradlePluginPortal()
     }
 
-    val toolsVersion = "0.9.10"
-    val kotlinVersion = "1.5.10"
+    val toolsVersion = "0.10.0"
 
     plugins {
         id("ru.mipt.npm.gradle.project") version toolsVersion
         id("ru.mipt.npm.gradle.mpp") version toolsVersion
         id("ru.mipt.npm.gradle.jvm") version toolsVersion
         id("ru.mipt.npm.gradle.js") version toolsVersion
-        kotlin("jvm") version kotlinVersion
-        kotlin("js") version kotlinVersion
     }
 }
 
