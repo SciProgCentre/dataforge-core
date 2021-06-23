@@ -6,7 +6,7 @@ import space.kscience.dataforge.values.*
 /**
  * A converter of generic object to and from [TypedMetaItem]
  */
-public interface MetaConverter<T : Any> {
+public interface MetaConverter<T> {
     public fun itemToObject(item: MetaItem): T
     public fun objectToMetaItem(obj: T): MetaItem
 
@@ -120,5 +120,5 @@ public interface MetaConverter<T : Any> {
 public fun <T : Any> MetaConverter<T>.nullableItemToObject(item: MetaItem?): T? = item?.let { itemToObject(it) }
 public fun <T : Any> MetaConverter<T>.nullableObjectToMetaItem(obj: T?): MetaItem? = obj?.let { objectToMetaItem(it) }
 
-public fun <T : Any> MetaConverter<T>.metaToObject(meta: Meta): T = itemToObject(MetaItemNode(meta))
-public fun <T : Any> MetaConverter<T>.valueToObject(value: Value): T = itemToObject(MetaItemValue(value))
+public fun <T> MetaConverter<T>.metaToObject(meta: Meta): T = itemToObject(MetaItemNode(meta))
+public fun <T> MetaConverter<T>.valueToObject(value: Value): T = itemToObject(MetaItemValue(value))
