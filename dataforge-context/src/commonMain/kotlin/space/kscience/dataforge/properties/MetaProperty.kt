@@ -1,6 +1,6 @@
 package space.kscience.dataforge.properties
 
-import space.kscience.dataforge.meta.Config
+import space.kscience.dataforge.meta.ObservableMeta
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.set
 import space.kscience.dataforge.meta.transformations.MetaConverter
@@ -11,25 +11,25 @@ import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.startsWith
 
 @DFExperimental
-public class ConfigProperty<T : Any>(
-    public val config: Config,
+public class MetaProperty<T : Any>(
+    public val meta: ObservableMeta,
     public val name: Name,
     public val converter: MetaConverter<T>,
 ) : Property<T?> {
 
     override var value: T?
-        get() = converter.nullableItemToObject(config[name])
+        get() = converter.nullableItemToObject(meta[name])
         set(value) {
-            config[name] = converter.nullableObjectToMetaItem(value)
+            meta[name] = converter.nullableObjectToMetaItem(value)
         }
 
     override fun onChange(owner: Any?, callback: (T?) -> Unit) {
-        config.onChange(owner) { name, oldItem, newItem ->
+        meta.onChange(owner) { name, oldItem, newItem ->
             if (name.startsWith(this.name) && oldItem != newItem) callback(converter.nullableItemToObject(newItem))
         }
     }
 
     override fun removeChangeListener(owner: Any?) {
-        config.removeListener(owner)
+        meta.removeListener(owner)
     }
 }
