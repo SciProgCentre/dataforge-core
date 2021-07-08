@@ -13,16 +13,11 @@ import kotlin.jvm.Synchronized
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
  * Default item provider and [NodeDescriptor] are optional
  */
-public open class Scheme() : Described, MetaRepr, ItemPropertyProvider {
-
-    private var items: MutableItemProvider = Config()
-
-    private val listeners = HashSet<ItemListener>()
-
+public open class Scheme(
+    private var items: ObservableItemProvider = ObservableMeta(),
+    final override var descriptor: NodeDescriptor? = null,
     private var default: ItemProvider? = null
-
-    final override var descriptor: NodeDescriptor? = null
-
+) : Described, MetaRepr, ObservableItemProvider, MutableItemProvider {
 
     /**
      * Add a listener to this scheme changes. If the inner provider is observable, then listening will be delegated to it.
@@ -30,8 +25,7 @@ public open class Scheme() : Described, MetaRepr, ItemPropertyProvider {
      */
     @Synchronized
     override fun onChange(owner: Any?, action: (Name, MetaItem?, MetaItem?) -> Unit) {
-        (items as? ObservableItemProvider)?.onChange(owner, action)
-            ?: run { listeners.add(ItemListener(owner, action)) }
+        items.onChange(owner, action)
     }
 
     /**
@@ -39,8 +33,7 @@ public open class Scheme() : Described, MetaRepr, ItemPropertyProvider {
      */
     @Synchronized
     override fun removeListener(owner: Any?) {
-        (items as? ObservableItemProvider)?.removeListener(owner)
-            ?: listeners.removeAll { it.owner === owner }
+        items.removeListener(owner)
     }
 
     internal fun wrap(
@@ -51,11 +44,11 @@ public open class Scheme() : Described, MetaRepr, ItemPropertyProvider {
         //use properties in the init block as default
         this.default = this.items.withDefault(default)
         //reset values, defaults are already saved
-        this.items = items
+        this.items = items.asObservable()
         this.descriptor = descriptor
     }
 
-    private fun getDefaultItem(name: Name): MetaItem? {
+    protected open fun getDefaultItem(name: Name): MetaItem? {
         return default?.get(name) ?: descriptor?.get(name)?.defaultValue
     }
 
@@ -79,7 +72,6 @@ public open class Scheme() : Described, MetaRepr, ItemPropertyProvider {
         val oldItem = items[name]
         if (validateItem(name, item)) {
             items[name] = item
-            listeners.forEach { it.action(name, oldItem, item) }
         } else {
             error("Validation failed for property $name with value $item")
         }
@@ -105,7 +97,7 @@ public open class Scheme() : Described, MetaRepr, ItemPropertyProvider {
             }
         }
 
-    override fun toMeta(): Laminate = Laminate(items[Name.EMPTY].node, defaultLayer)
+    override fun toMeta(): Laminate = Laminate(items.rootNode, defaultLayer)
 }
 
 /**
@@ -145,7 +137,7 @@ public open class SchemeSpec<out T : Scheme>(
 
     override fun empty(): T = builder()
 
-    override fun read(items: ItemProvider): T = wrap(Config(), items, descriptor)
+    override fun read(items: ItemProvider): T = wrap(ObservableMeta(), items, descriptor)
 
     override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): T =
         wrap(target, defaultProvider, descriptor)

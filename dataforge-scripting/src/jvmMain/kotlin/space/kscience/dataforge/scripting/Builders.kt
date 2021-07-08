@@ -51,7 +51,7 @@ public object Builders {
         return builder.build()
     }
 
-    public fun buildWorkspace(file: File): Workspace = buildWorkspace(file.toScriptSource())
+    public fun buildWorkspace(scriptFile: File): Workspace = buildWorkspace(scriptFile.toScriptSource())
 
-    public fun buildWorkspace(string: String): Workspace = buildWorkspace(string.toScriptSource())
+    public fun buildWorkspace(scriptString: String): Workspace = buildWorkspace(scriptString.toScriptSource())
 }

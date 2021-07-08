@@ -26,6 +26,7 @@ import kotlin.jvm.Synchronized
 public open class Context internal constructor(
     final override val name: Name,
     public val parent: Context?,
+    plugins: Set<Plugin>,
     meta: Meta,
 ) : Named, MetaRepr, Provider, CoroutineScope {
 
@@ -42,7 +43,7 @@ public open class Context internal constructor(
     /**
      * A [PluginManager] for current context
      */
-    public val plugins: PluginManager by lazy { PluginManager(this) }
+    public val plugins: PluginManager by lazy { PluginManager(this, plugins) }
 
     override val defaultTarget: String get() = Plugin.TARGET
 

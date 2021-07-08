@@ -13,7 +13,7 @@ internal expect val globalLoggerFactory: PluginFactory<out LogManager>
  * A global root context. Closing [Global] terminates the framework.
  */
 @ThreadLocal
-private object GlobalContext : Context("GLOBAL".asName(), null, Meta.EMPTY) {
+private object GlobalContext : Context("GLOBAL".asName(), null, emptySet(), Meta.EMPTY) {
     override val coroutineContext: CoroutineContext = Job() + CoroutineName("GlobalContext")
 }
 

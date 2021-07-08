@@ -5,7 +5,6 @@ import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.values.*
 
 
-
 /**
  * A descriptor for meta value
  *
@@ -14,7 +13,7 @@ import space.kscience.dataforge.values.*
  * @author Alexander Nozik
  */
 @DFBuilder
-public sealed interface ValueDescriptor: ItemDescriptor{
+public sealed interface ValueDescriptor : ItemDescriptor {
 
     /**
      * True if the value is required
@@ -37,6 +36,7 @@ public sealed interface ValueDescriptor: ItemDescriptor{
      * @return
      */
     public val type: List<ValueType>?
+
     /**
      * Check if given value is allowed for here. The type should be allowed and
      * if it is value should be within allowed values
@@ -61,7 +61,9 @@ public sealed interface ValueDescriptor: ItemDescriptor{
  * A builder fir [ValueDescriptor]
  */
 @DFBuilder
-public class ValueDescriptorBuilder(config: Config = Config()) : ItemDescriptorBuilder(config), ValueDescriptor {
+public class ValueDescriptorBuilder(
+    config: ObservableMeta = ObservableMeta()
+) : ItemDescriptorBuilder(config), ValueDescriptor {
 
     /**
      * True if the value is required

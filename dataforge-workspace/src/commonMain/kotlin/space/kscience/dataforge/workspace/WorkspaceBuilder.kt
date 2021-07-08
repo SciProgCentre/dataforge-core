@@ -91,6 +91,5 @@ public inline fun WorkspaceBuilder.target(name: String, metaBuilder: MetaBuilder
     target(name, Meta(metaBuilder))
 
 @DFBuilder
-public fun Workspace(parentContext: Context = Global, builder: WorkspaceBuilder.() -> Unit): Workspace {
-    return WorkspaceBuilder(parentContext).apply(builder).build()
-}
+public fun Workspace(parentContext: Context = Global, builder: WorkspaceBuilder.() -> Unit): Workspace =
+    WorkspaceBuilder(parentContext).apply(builder).build()

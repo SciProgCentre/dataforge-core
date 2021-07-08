@@ -52,7 +52,7 @@ public sealed interface ItemDescriptor: MetaRepr {
  * The builder for [ItemDescriptor]
  */
 @DFBuilder
-public sealed class ItemDescriptorBuilder(final override val config: Config) : Configurable, ItemDescriptor {
+public sealed class ItemDescriptorBuilder(final override val config: ObservableMeta) : Configurable, ItemDescriptor {
 
     /**
      * True if same name siblings with this name are allowed
@@ -75,7 +75,7 @@ public sealed class ItemDescriptorBuilder(final override val config: Config) : C
      *
      * @return
      */
-    override var attributes: Config? by config.node()
+    override var attributes: ObservableMeta? by config.node()
 
     /**
      * An index field by which this node is identified in case of same name siblings construct
@@ -94,8 +94,8 @@ public sealed class ItemDescriptorBuilder(final override val config: Config) : C
 /**
  * Configure attributes of the descriptor, creating an attributes node if needed.
  */
-public inline fun ItemDescriptorBuilder.attributes(block: Config.() -> Unit) {
-    (attributes ?: Config().also { this.attributes = it }).apply(block)
+public inline fun ItemDescriptorBuilder.attributes(block: ObservableMeta.() -> Unit) {
+    (attributes ?: ObservableMeta().also { this.attributes = it }).apply(block)
 }
 
 /**

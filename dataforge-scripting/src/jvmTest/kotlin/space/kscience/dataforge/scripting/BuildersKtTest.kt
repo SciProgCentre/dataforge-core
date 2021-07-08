@@ -3,7 +3,7 @@ package space.kscience.dataforge.scripting
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.int
-import space.kscience.dataforge.workspace.WorkspaceBuilder
+import space.kscience.dataforge.workspace.Workspace
 import space.kscience.dataforge.workspace.target
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 class BuildersKtTest {
     @Test
     fun checkBuilder() {
-        val workspace = WorkspaceBuilder(Global).apply {
+        Workspace(Global){
             println("I am working")
 
             context { name("test") }

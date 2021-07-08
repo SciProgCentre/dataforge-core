@@ -41,7 +41,7 @@ public sealed interface NodeDescriptor : ItemDescriptor {
      *
      * @return
      */
-    public val default: Config?
+    public val default: Meta?
 
     /**
      * The map of children item descriptors (both nodes and values)
@@ -74,7 +74,7 @@ public sealed interface NodeDescriptor : ItemDescriptor {
 
 
 @DFBuilder
-public class NodeDescriptorBuilder(config: Config = Config()) : ItemDescriptorBuilder(config), NodeDescriptor {
+public class NodeDescriptorBuilder(config: ObservableMeta = ObservableMeta()) : ItemDescriptorBuilder(config), NodeDescriptor {
     init {
         config[IS_NODE_KEY] = true
     }
@@ -91,7 +91,7 @@ public class NodeDescriptorBuilder(config: Config = Config()) : ItemDescriptorBu
      *
      * @return
      */
-    override var default: Config? by config.node()
+    override var default: ObservableMeta? by config.node()
 
     /**
      * The map of children item descriptors (both nodes and values)
@@ -101,9 +101,9 @@ public class NodeDescriptorBuilder(config: Config = Config()) : ItemDescriptorBu
             if (name == null) error("Child item index should not be null")
             val node = item.node ?: error("Node descriptor must be a node")
             if (node[IS_NODE_KEY].boolean == true) {
-                name to NodeDescriptorBuilder(node as Config)
+                name to NodeDescriptorBuilder(node as ObservableMeta)
             } else {
-                name to ValueDescriptorBuilder(node as Config)
+                name to ValueDescriptorBuilder(node as ObservableMeta)
             }
         }
 
@@ -117,7 +117,7 @@ public class NodeDescriptorBuilder(config: Config = Config()) : ItemDescriptorBu
         }.associate { (name, item) ->
             if (name == null) error("Child node index should not be null")
             val node = item.node ?: error("Node descriptor must be a node")
-            name to NodeDescriptorBuilder(node as Config)
+            name to NodeDescriptorBuilder(node as ObservableMeta)
         }
 
     /**
@@ -129,7 +129,7 @@ public class NodeDescriptorBuilder(config: Config = Config()) : ItemDescriptorBu
         }.associate { (name, item) ->
             if (name == null) error("Child value index should not be null")
             val node = item.node ?: error("Node descriptor must be a node")
-            name to ValueDescriptorBuilder(node as Config)
+            name to ValueDescriptorBuilder(node as ObservableMeta)
         }
 
     private fun buildNode(name: Name): NodeDescriptorBuilder {
@@ -137,7 +137,7 @@ public class NodeDescriptorBuilder(config: Config = Config()) : ItemDescriptorBu
             0 -> this
             1 -> {
                 val token = NameToken(ITEM_KEY.toString(), name.toString())
-                val config: Config = config[token].node ?: Config().also {
+                val config: ObservableMeta = config[token].node ?: ObservableMeta().also {
                     it[IS_NODE_KEY] = true
                     config[token] = it
                 }

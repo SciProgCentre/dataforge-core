@@ -1,7 +1,6 @@
 package space.kscience.dataforge.context
 
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
 import kotlin.reflect.KClass
 
 
@@ -11,12 +10,10 @@ import kotlin.reflect.KClass
  * @property context A context for this plugin manager
  * @author Alexander Nozik
  */
-public class PluginManager(override val context: Context) : ContextAware, Iterable<Plugin> {
-
-    /**
-     * A set of loaded plugins
-     */
-    private val plugins: HashSet<Plugin> = HashSet()
+public class PluginManager internal constructor(
+    override val context: Context,
+    private val plugins: Set<Plugin>
+) : ContextAware, Iterable<Plugin> {
 
     init {
         plugins.forEach { it.attach(context) }
@@ -76,64 +73,7 @@ public class PluginManager(override val context: Context) : ContextAware, Iterab
     public inline operator fun <reified T : Plugin> get(factory: PluginFactory<T>, recursive: Boolean = true): T? =
         get(factory.type, factory.tag, recursive)
 
-    /**
-     * Load given plugin into this manager and return loaded instance.
-     * Throw error if plugin of the same type and tag already exists in manager.
-     *
-     * @param plugin
-     * @return
-     */
-    private fun <T : Plugin> load(plugin: T): T {
-        if (get(plugin::class, plugin.tag, recursive = false) != null) {
-            error("Plugin with tag ${plugin.tag} already exists in ${context.name}")
-        } else {
-            for ((factory, meta) in plugin.dependsOn()) {
-                @Suppress("DEPRECATION")
-                fetch(factory, meta, true)
-            }
-
-            logger.info { "Loading plugin ${plugin.name} into ${context.name}" }
-            plugin.attach(context)
-            plugins.add(plugin)
-            return plugin
-        }
-    }
-
-
-    /**
-     * Remove a plugin from [PluginManager]
-     */
-    @Deprecated("Use immutable contexts instead")
-    public fun remove(plugin: Plugin) {
-        if (plugins.contains(plugin)) {
-            Global.logger.info { "Removing plugin ${plugin.name} from ${context.name}" }
-            plugin.detach()
-            plugins.remove(plugin)
-        }
-    }
-
-    /**
-     * Get an existing plugin with given meta or load new one using provided factory
-     */
-    @Deprecated("Use immutable contexts instead")
-    public fun <T : Plugin> fetch(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY, recursive: Boolean = true): T {
-        val loaded = get(factory.type, factory.tag, recursive)
-        return when {
-            loaded == null -> load(factory(meta, context))
-            loaded.meta == meta -> loaded // if meta is the same, return existing plugin
-            else -> throw RuntimeException("Can't load plugin with tag ${factory.tag}. Plugin with this tag and different configuration already exists in context.")
-        }
-    }
-
-    @Deprecated("Use immutable contexts instead")
-    public fun <T : Plugin> fetch(
-        factory: PluginFactory<T>,
-        recursive: Boolean = true,
-        metaBuilder: MetaBuilder.() -> Unit,
-    ): T = fetch(factory, Meta(metaBuilder), recursive)
-
     override fun iterator(): Iterator<Plugin> = plugins.iterator()
-
 }
 
 /**

@@ -13,7 +13,7 @@ internal class TestScheme : Scheme() {
         override fun empty(): TestScheme = TestScheme()
 
         override fun read(items: ItemProvider): TestScheme =
-            wrap(Config(), items)
+            wrap(MetaBuilder(), items)
 
         override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): TestScheme =
             wrap(target, defaultProvider)
@@ -58,7 +58,7 @@ class SpecificationTest {
 
     @Test
     fun testChildModification() {
-        val config = Config()
+        val config = MetaBuilder()
         val child = config.getChild("child")
         val scheme = TestScheme.write(child)
         scheme.a = 22
@@ -69,7 +69,7 @@ class SpecificationTest {
 
     @Test
     fun testChildUpdate() {
-        val config = Config()
+        val config = MetaBuilder()
         val child = config.getChild("child")
         child.update(TestScheme) {
             a = 22

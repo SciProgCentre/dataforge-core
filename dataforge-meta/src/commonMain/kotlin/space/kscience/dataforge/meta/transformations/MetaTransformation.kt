@@ -105,7 +105,7 @@ public value class MetaTransformation(private val transformations: Collection<Tr
      * Generate an observable configuration that contains only elements defined by transformation rules and changes with the source
      */
     @DFExperimental
-    public fun generate(source: Config): ObservableItemProvider = Config().apply {
+    public fun generate(source: ObservableMeta): ObservableItemProvider = ObservableMeta().apply {
         transformations.forEach { rule ->
             rule.selectItems(source).forEach { name ->
                 rule.transformItem(name, source[name], this)
@@ -131,7 +131,7 @@ public value class MetaTransformation(private val transformations: Collection<Tr
     /**
      * Listens for changes in the source node and translates them into second node if transformation set contains a corresponding rule.
      */
-    public fun <M : MutableMeta<M>> bind(source: Config, target: M) {
+    public fun <M : MutableMeta<M>> bind(source: ObservableMeta, target: M) {
         source.onChange(target) { name, _, newItem ->
             transformations.forEach { t ->
                 if (t.matches(name, newItem)) {

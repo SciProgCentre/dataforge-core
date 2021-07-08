@@ -64,12 +64,32 @@ public class ContextBuilder internal constructor(
 
     public fun build(): Context {
         val contextName = name ?: "@auto[${hashCode().toUInt().toString(16)}]".toName()
-        return Context(contextName, parent, meta.seal()).apply {
-            factories.forEach { (factory, meta) ->
-                @Suppress("DEPRECATION")
-                plugins.fetch(factory, meta)
+        val plugins = HashMap<PluginTag, Plugin>()
+
+        fun addPlugin(factory: PluginFactory<*>, meta: Meta) {
+            val existing = plugins[factory.tag]
+            // Add if does not exist
+            if (existing == null) {
+                //TODO bypass if parent already has plugin with given meta?
+                val plugin = factory(meta, parent)
+
+                for ((depFactory, deoMeta) in plugin.dependsOn()) {
+                    addPlugin(depFactory, deoMeta)
+                }
+
+                parent.logger.info { "Loading plugin ${plugin.name} into $contextName" }
+                plugins[plugin.tag] = plugin
+            } else if (existing.meta != meta) {
+                error("Plugin with tag ${factory.tag} and meta $meta already exists in $contextName")
             }
+            //bypass if exists with the same meta
         }
+
+        factories.forEach { (factory, meta) ->
+            addPlugin(factory, meta)
+        }
+
+        return Context(contextName, parent, plugins.values.toSet(), meta.seal())
     }
 }
 

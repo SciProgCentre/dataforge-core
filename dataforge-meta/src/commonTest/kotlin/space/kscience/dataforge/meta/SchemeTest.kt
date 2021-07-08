@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 class SchemeTest {
     @Test
     fun testSchemeWrappingBeforeEdit(){
-        val config = Config()
+        val config = MetaBuilder()
         val scheme = TestScheme.wrap(config)
         scheme.a = 29
         assertEquals(29, config["a"].int)
@@ -18,7 +18,7 @@ class SchemeTest {
     fun testSchemeWrappingAfterEdit(){
         val scheme = TestScheme.empty()
         scheme.a = 29
-        val config = Config()
+        val config = MetaBuilder()
         scheme.retarget(config)
         assertEquals(29, scheme.a)
     }

@@ -14,7 +14,7 @@ class MutableMetaTest{
                 "b" put 22
                 "c" put "StringValue"
             }
-        }.asConfig()
+        }.asObservable()
 
         meta.remove("aNode.c")
         assertEquals(meta["aNode.c"], null)
