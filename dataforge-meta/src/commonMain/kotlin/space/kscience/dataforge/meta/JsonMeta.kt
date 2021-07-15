@@ -56,7 +56,7 @@ private fun Meta.toJsonWithIndex(descriptor: NodeDescriptor?, indexValue: String
             }
             1 -> {
                 val (index, item) = items.entries.first()
-                val element = item.toJsonElement(itemDescriptor, null)
+                val element = item.toJsonElement(itemDescriptor, index)
                 if (index == null) {
                     elementMap[jsonKey] = element
                 } else {

@@ -13,10 +13,10 @@ public interface MutableMeta<out M : MutableMeta<M>> : TypedMeta<M>, MutableItem
  * Changes in Meta are not thread safe.
  */
 public abstract class AbstractMutableMeta<M : MutableMeta<M>> : AbstractTypedMeta<M>(), MutableMeta<M> {
-    protected val children: MutableMap<NameToken, TypedMetaItem<M>> = LinkedHashMap()
 
-    override val items: Map<NameToken, TypedMetaItem<M>>
-        get() = children
+    protected abstract val children: MutableMap<NameToken, TypedMetaItem<M>>
+
+    override val items: Map<NameToken, TypedMetaItem<M>> get() = children
 
     //protected abstract fun itemChanged(name: Name, oldItem: MetaItem<*>?, newItem: MetaItem<*>?)
 

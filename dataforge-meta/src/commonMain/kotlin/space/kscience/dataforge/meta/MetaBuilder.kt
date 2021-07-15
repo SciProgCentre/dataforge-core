@@ -2,6 +2,7 @@ package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.values.EnumValue
 import space.kscience.dataforge.values.Value
@@ -13,6 +14,8 @@ import kotlin.jvm.JvmName
  */
 @DFBuilder
 public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
+    override val children: MutableMap<NameToken, TypedMetaItem<MetaBuilder>> = LinkedHashMap()
+
     override fun wrapNode(meta: Meta): MetaBuilder = if (meta is MetaBuilder) meta else meta.toMutableMeta()
     override fun empty(): MetaBuilder = MetaBuilder()
 

@@ -39,10 +39,15 @@ public abstract class MetaBase : Meta {
 
     override fun hashCode(): Int = items.hashCode()
 
-    override fun toString(): String = Json {
-        prettyPrint = true
-        useArrayPolymorphism = true
-    }.encodeToString(MetaSerializer, this)
+    override fun toString(): String = json.encodeToString(MetaSerializer, this)
+
+    public companion object{
+        private val json = Json {
+            prettyPrint = true
+            useArrayPolymorphism = true
+        }
+
+    }
 }
 
 /**

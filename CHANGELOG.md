@@ -18,7 +18,8 @@
 - Public PluginManager mutability
 
 ### Fixed
-- Proper json array index treatment
+- Proper json array index treatment.
+- Proper json index for single-value array.
 
 ### Security
 ## [0.4.0]

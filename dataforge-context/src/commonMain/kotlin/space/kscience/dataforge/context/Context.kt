@@ -26,7 +26,7 @@ import kotlin.jvm.Synchronized
 public open class Context internal constructor(
     final override val name: Name,
     public val parent: Context?,
-    plugins: Set<Plugin>,
+    plugins: Set<Plugin>, // set of unattached plugins
     meta: Meta,
 ) : Named, MetaRepr, Provider, CoroutineScope {
 
