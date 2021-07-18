@@ -1,10 +1,33 @@
 package space.kscience.dataforge.meta
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import space.kscience.dataforge.names.*
 import space.kscience.dataforge.values.Value
 
+@Serializable(MutableItemProviderSerializer::class)
 public interface MutableItemProvider : ItemProvider {
     public fun setItem(name: Name, item: MetaItem?)
+}
+
+/**
+ * A serializer form [MutableItemProvider]
+ */
+public class MutableItemProviderSerializer : KSerializer<MutableItemProvider> {
+    override val descriptor: SerialDescriptor = MetaSerializer.descriptor
+
+
+    override fun deserialize(decoder: Decoder): MutableItemProvider {
+        val meta = decoder.decodeSerializableValue(MetaSerializer)
+        return (meta as? MetaBuilder) ?: meta.toMutableMeta()
+    }
+
+    override fun serialize(encoder: Encoder, value: MutableItemProvider) {
+        encoder.encodeSerializableValue(MetaSerializer, value.rootItem?.node ?: Meta.EMPTY)
+    }
 }
 
 public operator fun MutableItemProvider.set(name: Name, item: MetaItem?): Unit = setItem(name, item)

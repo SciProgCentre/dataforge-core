@@ -1,5 +1,6 @@
 package space.kscience.dataforge.meta
 
+import kotlinx.serialization.Serializable
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
@@ -13,6 +14,7 @@ import kotlin.jvm.JvmName
  * DSL builder for meta. Is not intended to store mutable state
  */
 @DFBuilder
+@Serializable
 public class MetaBuilder : AbstractMutableMeta<MetaBuilder>() {
     override val children: MutableMap<NameToken, TypedMetaItem<MetaBuilder>> = LinkedHashMap()
 

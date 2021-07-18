@@ -9,16 +9,7 @@ internal class TestScheme : Scheme() {
     var a by int()
     var b by string()
 
-    companion object : Specification<TestScheme> {
-        override fun empty(): TestScheme = TestScheme()
-
-        override fun read(items: ItemProvider): TestScheme =
-            wrap(MetaBuilder(), items)
-
-        override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): TestScheme =
-            wrap(target, defaultProvider)
-
-    }
+    companion object : SchemeSpec<TestScheme>(::TestScheme)
 }
 
 class SpecificationTest {

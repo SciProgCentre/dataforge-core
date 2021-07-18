@@ -5,8 +5,6 @@ import space.kscience.dataforge.meta.descriptors.NodeDescriptor
 import space.kscience.dataforge.meta.descriptors.get
 import space.kscience.dataforge.meta.descriptors.validateItem
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.names.asName
 import kotlin.jvm.Synchronized
 
 /**
@@ -15,8 +13,7 @@ import kotlin.jvm.Synchronized
  */
 public open class Scheme(
     private var items: ObservableItemProvider = ObservableMeta(),
-    final override var descriptor: NodeDescriptor? = null,
-    private var default: ItemProvider? = null
+    final override var descriptor: NodeDescriptor? = null
 ) : Described, MetaRepr, ObservableItemProvider {
 
     /**
@@ -38,24 +35,15 @@ public open class Scheme(
 
     internal fun wrap(
         items: MutableItemProvider,
-        default: ItemProvider? = null,
-        descriptor: NodeDescriptor? = null,
+        preserveDefault: Boolean = false
     ) {
-        //use properties in the init block as default
-        this.default = this.items.withDefault(default)
-        //reset values, defaults are already saved
-        this.items = items.asObservable()
-        this.descriptor = descriptor
-    }
-
-    protected open fun getDefaultItem(name: Name): MetaItem? {
-        return default?.get(name) ?: descriptor?.get(name)?.defaultValue
+        this.items = if (preserveDefault) items.withDefault(this.items).asObservable() else items.asObservable()
     }
 
     /**
      * Get a property with default
      */
-    override fun getItem(name: Name): MetaItem? = items[name] ?: getDefaultItem(name)
+    override fun getItem(name: Name): MetaItem? = items[name] ?: descriptor?.get(name)?.defaultValue
 
     /**
      * Check if property with given [name] could be assigned to [item]
@@ -70,34 +58,16 @@ public open class Scheme(
      */
     override fun setItem(name: Name, item: MetaItem?) {
         val oldItem = items[name]
-        if (validateItem(name, item)) {
-            items[name] = item
-        } else {
-            error("Validation failed for property $name with value $item")
+        if (oldItem != item) {
+            if (validateItem(name, item)) {
+                items[name] = item
+            } else {
+                error("Validation failed for property $name with value $item")
+            }
         }
     }
 
-
-    /**
-     * Provide a default layer which returns items from [default] and falls back to descriptor
-     * values if default value is unavailable.
-     * Values from [default] completely replace
-     */
-    public open val defaultLayer: Meta
-        get() = object : MetaBase() {
-            override val items: Map<NameToken, MetaItem> = buildMap {
-                descriptor?.items?.forEach { (key, itemDescriptor) ->
-                    val token = NameToken(key)
-                    val name = token.asName()
-                    val item = default?.get(name) ?: itemDescriptor.defaultValue
-                    if (item != null) {
-                        put(token, item)
-                    }
-                }
-            }
-        }
-
-    override fun toMeta(): Laminate = Laminate(items.rootNode, defaultLayer)
+    override fun toMeta(): Laminate = Laminate(items.rootNode, descriptor?.defaultMeta)
 }
 
 /**
@@ -106,22 +76,12 @@ public open class Scheme(
 public fun Scheme.isEmpty(): Boolean = rootItem == null
 
 /**
- * Create a new empty [Scheme] object (including defaults) and inflate it around existing [MutableItemProvider].
- * Items already present in the scheme are used as defaults.
- */
-public fun <T : Scheme, S : Specification<T>> S.wrap(
-    items: MutableItemProvider,
-    default: ItemProvider? = null,
-    descriptor: NodeDescriptor? = null,
-): T = empty().apply {
-    wrap(items, default, descriptor)
-}
-
-/**
  * Relocate scheme target onto given [MutableItemProvider]. Old provider does not get updates anymore.
  * Current state of the scheme used as a default.
  */
-public fun <T : Scheme> T.retarget(provider: MutableItemProvider): T = apply { wrap(provider) }
+public fun <T : Scheme> T.retarget(provider: MutableItemProvider): T = apply {
+    wrap(provider, true)
+}
 
 /**
  * A shortcut to edit a [Scheme] object in-place
@@ -135,16 +95,22 @@ public open class SchemeSpec<out T : Scheme>(
     private val builder: () -> T,
 ) : Specification<T>, Described {
 
-    override fun empty(): T = builder()
+    override fun read(items: ItemProvider): T = empty().also {
+        it.wrap(ObservableMeta().withDefault(items))
+    }
 
-    override fun read(items: ItemProvider): T = wrap(ObservableMeta(), items, descriptor)
-
-    override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): T =
-        wrap(target, defaultProvider, descriptor)
+    override fun write(target: MutableItemProvider): T = empty().also {
+        it.wrap(target)
+    }
 
     //TODO Generate descriptor from Scheme class
     override val descriptor: NodeDescriptor? get() = null
 
+    override fun empty(): T = builder().also {
+        it.descriptor = descriptor
+    }
+
     @Suppress("OVERRIDE_BY_INLINE")
     final override inline operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
+
 }

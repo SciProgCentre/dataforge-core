@@ -35,7 +35,7 @@ public interface Specification<out T : MutableItemProvider> : ReadOnlySpecificat
     /**
      * Wrap [MutableItemProvider], using it as inner storage (changes to [Specification] are reflected on [MutableItemProvider]
      */
-    public fun write(target: MutableItemProvider, defaultProvider: ItemProvider = ItemProvider.EMPTY): T
+    public fun write(target: MutableItemProvider): T
 }
 
 /**
