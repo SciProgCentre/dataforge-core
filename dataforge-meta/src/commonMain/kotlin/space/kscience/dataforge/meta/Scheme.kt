@@ -17,7 +17,7 @@ public open class Scheme(
     private var items: ObservableItemProvider = ObservableMeta(),
     final override var descriptor: NodeDescriptor? = null,
     private var default: ItemProvider? = null
-) : Described, MetaRepr, ObservableItemProvider, MutableItemProvider {
+) : Described, MetaRepr, ObservableItemProvider {
 
     /**
      * Add a listener to this scheme changes. If the inner provider is observable, then listening will be delegated to it.

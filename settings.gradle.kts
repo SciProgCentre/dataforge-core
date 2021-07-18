@@ -21,9 +21,6 @@ include(
     ":dataforge-io:dataforge-io-yaml",
     ":dataforge-context",
     ":dataforge-data",
-//    ":dataforge-output",
-    ":dataforge-tables",
     ":dataforge-workspace",
-    ":dataforge-exposed",
     ":dataforge-scripting"
 )

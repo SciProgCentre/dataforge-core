@@ -16,6 +16,7 @@
 
 ### Removed
 - Public PluginManager mutability
+- Tables and tables-exposed moved to the separate project `tables.kt`
 
 ### Fixed
 - Proper json array index treatment.

@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
@@ -123,7 +122,6 @@ public fun ObservableMeta(): ObservableMeta = MetaBuilder().asObservable()
  *
  * Optional [owner] property is used for
  */
-@DFExperimental
 public fun <O : ObservableItemProvider, T> O.useProperty(
     property: KProperty1<O, T>,
     owner: Any? = null,

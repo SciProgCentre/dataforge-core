@@ -21,6 +21,7 @@ public interface MetaRepr {
  *
  *   * Same name siblings are supported via elements with the same [Name] but different queries
  */
+@Serializable(MetaSerializer::class)
 public interface Meta : MetaRepr, ItemProvider {
     /**
      * Top level items of meta tree
