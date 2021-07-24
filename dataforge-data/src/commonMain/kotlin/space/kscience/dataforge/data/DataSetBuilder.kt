@@ -4,7 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.plus
@@ -124,8 +124,8 @@ public suspend inline fun <reified T : Any> DataSetBuilder<T>.static(name: Name,
 public suspend inline fun <reified T : Any> DataSetBuilder<T>.static(
     name: String,
     data: T,
-    metaBuilder: MetaBuilder.() -> Unit,
-): Unit = emit(name.toName(), Data.static(data, Meta(metaBuilder)))
+    mutableMeta: MutableMeta.() -> Unit,
+): Unit = emit(name.toName(), Data.static(data, Meta(mutableMeta)))
 
 /**
  * Update data with given node data and meta with node meta.

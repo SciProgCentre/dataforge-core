@@ -1,7 +1,7 @@
 package space.kscience.dataforge.context
 
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFBuilder
@@ -25,7 +25,7 @@ public class ContextBuilder internal constructor(
     internal val factories = HashMap<PluginFactory<*>, Meta>()
     internal var meta = meta.toMutableMeta()
 
-    public fun properties(action: MetaBuilder.() -> Unit) {
+    public fun properties(action: MutableMeta.() -> Unit) {
         meta.action()
     }
 
@@ -38,20 +38,20 @@ public class ContextBuilder internal constructor(
         parent.gatherInSequence<PluginFactory<*>>(PluginFactory.TYPE).values
             .find { it.tag.matches(tag) } ?: error("Can't resolve plugin factory for $tag")
 
-    public fun plugin(tag: PluginTag, metaBuilder: MetaBuilder.() -> Unit = {}) {
+    public fun plugin(tag: PluginTag, mutableMeta: MutableMeta.() -> Unit = {}) {
         val factory = findPluginFactory(tag)
-        factories[factory] = Meta(metaBuilder)
+        factories[factory] = Meta(mutableMeta)
     }
 
     public fun plugin(factory: PluginFactory<*>, meta: Meta) {
         factories[factory] = meta
     }
 
-    public fun plugin(factory: PluginFactory<*>, metaBuilder: MetaBuilder.() -> Unit = {}) {
-        factories[factory] = Meta(metaBuilder)
+    public fun plugin(factory: PluginFactory<*>, mutableMeta: MutableMeta.() -> Unit = {}) {
+        factories[factory] = Meta(mutableMeta)
     }
 
-    public fun plugin(name: String, group: String = "", version: String = "", action: MetaBuilder.() -> Unit = {}) {
+    public fun plugin(name: String, group: String = "", version: String = "", action: MutableMeta.() -> Unit = {}) {
         plugin(PluginTag(name, group, version), action)
     }
 

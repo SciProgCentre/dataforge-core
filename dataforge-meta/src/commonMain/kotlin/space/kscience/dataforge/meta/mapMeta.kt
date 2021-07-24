@@ -1,6 +1,6 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.meta.descriptors.NodeDescriptor
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.toName
 import space.kscience.dataforge.values.ListValue
@@ -9,7 +9,7 @@ import space.kscience.dataforge.values.Value
 /**
  * Convert meta to map of maps
  */
-public fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
+public fun Meta.toMap(descriptor: MetaDescriptor? = null): Map<String, Any?> {
     return items.entries.associate { (token, item) ->
         token.toString() to when (item) {
             is MetaItemNode -> item.node.toMap()
@@ -23,7 +23,7 @@ public fun Meta.toMap(descriptor: NodeDescriptor? = null): Map<String, Any?> {
  * All other values will be converted to values.
  */
 @DFExperimental
-public fun Map<String, Any?>.toMeta(descriptor: NodeDescriptor? = null): Meta = Meta {
+public fun Map<String, Any?>.toMeta(descriptor: MetaDescriptor? = null): Meta = Meta {
     @Suppress("UNCHECKED_CAST")
     fun toItem(value: Any?): MetaItem = when (value) {
         is MetaItem -> value

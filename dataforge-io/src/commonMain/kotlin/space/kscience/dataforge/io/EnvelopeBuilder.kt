@@ -4,7 +4,7 @@ import io.ktor.utils.io.core.Output
 import space.kscience.dataforge.meta.*
 
 public class EnvelopeBuilder : Envelope {
-    private val metaBuilder = MetaBuilder()
+    private val metaBuilder = MutableMeta()
 
     override var data: Binary? = null
     override var meta: Meta
@@ -13,7 +13,7 @@ public class EnvelopeBuilder : Envelope {
             metaBuilder.update(value)
         }
 
-    public fun meta(block: MetaBuilder.() -> Unit) {
+    public fun meta(block: MutableMeta.() -> Unit) {
         metaBuilder.apply(block)
     }
 

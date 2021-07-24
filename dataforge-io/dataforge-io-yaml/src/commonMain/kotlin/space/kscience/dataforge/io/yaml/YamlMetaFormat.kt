@@ -34,7 +34,7 @@ public fun Meta.toYaml(): YamlMap {
     return YamlMap(map)
 }
 
-private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: NodeDescriptor? = null) : MetaBase() {
+private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: NodeDescriptor? = null) : AbstractTypedMeta() {
 
     private fun buildItems(): Map<NameToken, MetaItem> {
         val map = LinkedHashMap<NameToken, MetaItem>()

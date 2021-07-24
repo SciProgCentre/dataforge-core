@@ -1,7 +1,7 @@
 package space.kscience.dataforge.data
 
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 
 
 /**
@@ -17,4 +17,4 @@ public suspend fun DataSetBuilder<*>.meta(meta: Meta): Unit = emit(DataSet.META_
 /**
  * Add meta-data node to a [DataSet]
  */
-public suspend fun DataSetBuilder<*>.meta(metaBuilder: MetaBuilder.() -> Unit): Unit = meta(Meta(metaBuilder))
+public suspend fun DataSetBuilder<*>.meta(mutableMeta: MutableMeta.() -> Unit): Unit = meta(Meta(mutableMeta))

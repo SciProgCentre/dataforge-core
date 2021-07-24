@@ -2,7 +2,7 @@ package space.kscience.dataforge.workspace
 
 import space.kscience.dataforge.context.ContextAware
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.toName
@@ -55,5 +55,5 @@ public suspend fun Workspace.produce(task: String, target: String): TaskResult<*
 public suspend fun Workspace.produce(task: String, meta: Meta): TaskResult<*> =
     produce(task.toName(), meta)
 
-public suspend fun Workspace.produce(task: String, block: MetaBuilder.() -> Unit = {}): TaskResult<*> =
+public suspend fun Workspace.produce(task: String, block: MutableMeta.() -> Unit = {}): TaskResult<*> =
     produce(task, Meta(block))

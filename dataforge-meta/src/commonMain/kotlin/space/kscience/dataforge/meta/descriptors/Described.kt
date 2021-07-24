@@ -4,7 +4,7 @@ package space.kscience.dataforge.meta.descriptors
  * An object which provides its descriptor
  */
 public interface Described {
-    public val descriptor: ItemDescriptor?
+    public val descriptor: MetaDescriptor?
 
     public companion object {
         //public const val DESCRIPTOR_NODE: String = "@descriptor"

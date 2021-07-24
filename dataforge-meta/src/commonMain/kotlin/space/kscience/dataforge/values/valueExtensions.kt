@@ -1,7 +1,7 @@
 package space.kscience.dataforge.values
 
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 
 /**
  * Check if value is null
@@ -35,4 +35,4 @@ public val Value.doubleArray: DoubleArray
     }
 
 
-public fun Value.toMeta(): MetaBuilder = Meta { Meta.VALUE_KEY put this }
+public fun Value.toMeta(): MutableMeta = Meta { Meta.VALUE_KEY put this }

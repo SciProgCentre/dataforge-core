@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.fold
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.DFInternal
@@ -18,7 +18,7 @@ import kotlin.reflect.typeOf
 
 public class JoinGroup<T : Any, R : Any>(public var name: String, internal val set: DataSet<T>) {
 
-    public var meta: MetaBuilder = MetaBuilder()
+    public var meta: MutableMeta = MutableMeta()
 
     public lateinit var result: suspend ActionEnv.(Map<Name, T>) -> R
 

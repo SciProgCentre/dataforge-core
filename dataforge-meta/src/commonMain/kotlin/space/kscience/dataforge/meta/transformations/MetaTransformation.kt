@@ -21,12 +21,12 @@ public interface TransformationRule {
      * @return a sequence of item paths to be transformed
      */
     public fun selectItems(meta: Meta): Sequence<Name> =
-        meta.itemSequence().filter { matches(it.first, it.second) }.map { it.first }
+        meta.nodeSequence().filter { matches(it.first, it.second) }.map { it.first }
 
     /**
      * Apply transformation for a single item (Node or Value) to the target
      */
-    public fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem?, target: M): Unit
+    public fun transformItem(name: Name, item: MetaItem?, target: MutableTypedMeta): Unit
 }
 
 /**
@@ -39,9 +39,9 @@ public data class KeepTransformationRule(val selector: (Name) -> Boolean) :
     }
 
     override fun selectItems(meta: Meta): Sequence<Name> =
-        meta.itemSequence().map { it.first }.filter(selector)
+        meta.nodeSequence().map { it.first }.filter(selector)
 
-    override fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem?, target: M) {
+    override fun transformItem(name: Name, item: MetaItem?, target: MutableTypedMeta) {
         if (selector(name)) target.set(name, item)
     }
 }
@@ -51,7 +51,7 @@ public data class KeepTransformationRule(val selector: (Name) -> Boolean) :
  */
 public data class SingleItemTransformationRule(
     val from: Name,
-    val transform: MutableMeta<*>.(Name, MetaItem?) -> Unit,
+    val transform: MutableTypedMeta.(Name, MetaItem?) -> Unit,
 ) : TransformationRule {
     override fun matches(name: Name, item: MetaItem?): Boolean {
         return name == from
@@ -59,7 +59,7 @@ public data class SingleItemTransformationRule(
 
     override fun selectItems(meta: Meta): Sequence<Name> = sequenceOf(from)
 
-    override fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem?, target: M) {
+    override fun transformItem(name: Name, item: MetaItem?, target: MutableTypedMeta) {
         if (name == this.from) {
             target.transform(name, item)
         }
@@ -68,13 +68,13 @@ public data class SingleItemTransformationRule(
 
 public data class RegexItemTransformationRule(
     val from: Regex,
-    val transform: MutableMeta<*>.(name: Name, MatchResult, MetaItem?) -> Unit,
+    val transform: MutableTypedMeta.(name: Name, MatchResult, MetaItem?) -> Unit,
 ) : TransformationRule {
     override fun matches(name: Name, item: MetaItem?): Boolean {
         return from.matches(name.toString())
     }
 
-    override fun <M : MutableMeta<M>> transformItem(name: Name, item: MetaItem?, target: M) {
+    override fun transformItem(name: Name, item: MetaItem?, target: MutableTypedMeta) {
         val match = from.matchEntire(name.toString())
         if (match != null) {
             target.transform(name, match, item)
@@ -105,7 +105,7 @@ public value class MetaTransformation(private val transformations: Collection<Tr
      * Generate an observable configuration that contains only elements defined by transformation rules and changes with the source
      */
     @DFExperimental
-    public fun generate(source: ObservableMeta): ObservableItemProvider = ObservableMeta().apply {
+    public fun generate(source: MutableMeta): ObservableMeta = MutableMeta().apply {
         transformations.forEach { rule ->
             rule.selectItems(source).forEach { name ->
                 rule.transformItem(name, source[name], this)
@@ -131,7 +131,7 @@ public value class MetaTransformation(private val transformations: Collection<Tr
     /**
      * Listens for changes in the source node and translates them into second node if transformation set contains a corresponding rule.
      */
-    public fun <M : MutableMeta<M>> bind(source: ObservableMeta, target: M) {
+    public fun bind(source: ObservableMeta, target: MutableTypedMeta) {
         source.onChange(target) { name, _, newItem ->
             transformations.forEach { t ->
                 if (t.matches(name, newItem)) {

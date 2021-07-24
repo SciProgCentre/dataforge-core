@@ -8,7 +8,7 @@ import space.kscience.dataforge.data.DataSet
 import space.kscience.dataforge.data.DataSetBuilder
 import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.descriptors.NodeDescriptor
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
@@ -87,8 +87,8 @@ public class WorkspaceBuilder(private val parentContext: Context = Global) : Tas
 /**
  * Define a new target with a builder
  */
-public inline fun WorkspaceBuilder.target(name: String, metaBuilder: MetaBuilder.() -> Unit): Unit =
-    target(name, Meta(metaBuilder))
+public inline fun WorkspaceBuilder.target(name: String, mutableMeta: MutableMeta.() -> Unit): Unit =
+    target(name, Meta(mutableMeta))
 
 @DFBuilder
 public fun Workspace(parentContext: Context = Global, builder: WorkspaceBuilder.() -> Unit): Workspace =

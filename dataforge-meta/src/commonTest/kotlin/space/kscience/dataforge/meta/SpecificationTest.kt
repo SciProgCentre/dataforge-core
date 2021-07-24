@@ -49,7 +49,7 @@ class SpecificationTest {
 
     @Test
     fun testChildModification() {
-        val config = MetaBuilder()
+        val config = MutableMeta()
         val child = config.getChild("child")
         val scheme = TestScheme.write(child)
         scheme.a = 22
@@ -60,7 +60,7 @@ class SpecificationTest {
 
     @Test
     fun testChildUpdate() {
-        val config = MetaBuilder()
+        val config = MutableMeta()
         val child = config.getChild("child")
         child.update(TestScheme) {
             a = 22

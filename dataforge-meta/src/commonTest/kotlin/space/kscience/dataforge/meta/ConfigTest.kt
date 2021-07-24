@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 class ConfigTest {
     @Test
     fun testIndexedWrite(){
-        val config = MetaBuilder()
+        val config = MutableMeta()
         config["a[1].b"] = 1
         assertEquals(null, config["a.b"].int)
         assertEquals(1, config["a[1].b"].int)

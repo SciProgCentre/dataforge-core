@@ -100,7 +100,7 @@ public object BinaryMetaFormat : MetaFormat, MetaFormatFactory {
     }
 
     @Suppress("UNCHECKED_CAST")
-    public fun Input.readMetaItem(): TypedMetaItem<MetaBuilder> {
+    public fun Input.readMetaItem(): TypedMetaItem<MutableMeta> {
         return when (val keyChar = readByte().toInt().toChar()) {
             'S' -> MetaItemValue(StringValue(readString()))
             'N' -> MetaItemValue(Null)

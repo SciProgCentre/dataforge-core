@@ -4,7 +4,6 @@ import kotlinx.serialization.json.*
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.JsonMeta.Companion.JSON_ARRAY_KEY
 import space.kscience.dataforge.values.ListValue
-import space.kscience.dataforge.values.number
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -72,7 +71,7 @@ class MetaFormatTest {
                 add(JsonPrimitive(3.0))
             })
         }
-        val meta = json.toMetaItem().node!!
+        val meta = json.toMeta().node!!
 
         assertEquals(true, meta["$JSON_ARRAY_KEY[0].$JSON_ARRAY_KEY[1].d"].boolean)
         assertEquals("value", meta["$JSON_ARRAY_KEY[1]"].string)
@@ -98,7 +97,7 @@ class MetaFormatTest {
             }
         """.trimIndent()
         val json = Json.parseToJsonElement(jsonString)
-        val meta = json.toMetaItem().node!!
+        val meta = json.toMeta().node!!
         assertEquals(ListValue.EMPTY, meta["comments"].value)
     }
 

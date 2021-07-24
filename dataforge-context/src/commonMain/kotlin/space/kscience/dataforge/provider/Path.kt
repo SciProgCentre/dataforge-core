@@ -33,11 +33,7 @@ public value class Path(public val tokens: List<PathToken>) : Iterable<PathToken
     public companion object {
         public const val PATH_SEGMENT_SEPARATOR: String = "/"
 
-        public fun parse(path: String): Path {
-            val head = path.substringBefore(PATH_SEGMENT_SEPARATOR)
-            val tail = path.substringAfter(PATH_SEGMENT_SEPARATOR)
-            return PathToken.parse(head).asPath() + parse(tail)
-        }
+        public fun parse(path: String): Path = Path(path.split(PATH_SEGMENT_SEPARATOR).map { PathToken.parse(it) })
     }
 }
 

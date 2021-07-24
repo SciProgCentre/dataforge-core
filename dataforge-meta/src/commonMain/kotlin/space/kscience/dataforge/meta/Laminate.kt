@@ -2,12 +2,15 @@ package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
+import space.kscience.dataforge.values.Value
 
 /**
  * A meta laminate consisting of multiple immutable meta layers. For mutable front layer, use [Scheme].
  * If [layers] list contains a [Laminate] it is flat-mapped.
  */
-public class Laminate(layers: List<Meta>) : MetaBase() {
+public class Laminate(layers: List<Meta>) : TypedMeta<SealedMeta> {
+
+    override val value: Value? = layers.firstNotNullOfOrNull { it.value }
 
     public val layers: List<Meta> = layers.flatMap {
         if (it is Laminate) {
@@ -17,7 +20,7 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
         }
     }
 
-    override val items: Map<NameToken, TypedMetaItem<Meta>> by lazy {
+    override val items: Map<NameToken, SealedMeta> by lazy {
         layers.map { it.items.keys }.flatten().associateWith { key ->
             layers.asSequence().map { it.items[key] }.filterNotNull().let(replaceRule)
         }
@@ -30,7 +33,7 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
         val items = layers.map { it.items.keys }.flatten().associateWith { key ->
             layers.asSequence().map { it.items[key] }.filterNotNull().merge()
         }
-        return SealedMeta(items)
+        return SealedMeta(value, items)
     }
 
     public companion object {
@@ -40,33 +43,21 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
          *
          * TODO add picture
          */
-        public val replaceRule: (Sequence<MetaItem>) -> TypedMetaItem<SealedMeta> = { it.first().seal() }
+        public val replaceRule: (Sequence<Meta>) -> SealedMeta = { it.first().seal() }
 
-        private fun Sequence<MetaItem>.merge(): TypedMetaItem<SealedMeta> {
-            return when {
-                all { it is MetaItemValue } -> //If all items are values, take first
-                    first().seal()
-                all { it is MetaItemNode } -> {
-                    //list nodes in item
-                    val nodes = map { (it as MetaItemNode).node }
-                    //represent as key->value entries
-                    val entries = nodes.flatMap { it.items.entries.asSequence() }
-                    //group by keys
-                    val groups = entries.groupBy { it.key }
-                    // recursively apply the rule
-                    val items = groups.mapValues { entry ->
-                        entry.value.asSequence().map { it.value }.merge()
-                    }
-                    MetaItemNode(SealedMeta(items))
-
-                }
-                else -> map {
-                    when (it) {
-                        is MetaItemValue -> MetaItemNode(Meta { Meta.VALUE_KEY put it.value })
-                        is MetaItemNode -> it
-                    }
-                }.merge()
+        private fun Sequence<Meta>.merge(): SealedMeta {
+            val value = firstNotNullOfOrNull { it.value }
+            //list nodes in item
+            val nodes = toList()
+            //represent as key->value entries
+            val entries = nodes.flatMap { it.items.entries.asSequence() }
+            //group by keys
+            val groups = entries.groupBy { it.key }
+            // recursively apply the rule
+            val items = groups.mapValues { entry ->
+                entry.value.asSequence().map { it.value }.merge()
             }
+            return SealedMeta(value,items)
         }
 
 
@@ -74,7 +65,7 @@ public class Laminate(layers: List<Meta>) : MetaBase() {
          * The values a replaced but meta children are joined
          * TODO add picture
          */
-        public val mergeRule: (Sequence<MetaItem>) -> TypedMetaItem<SealedMeta> = { it.merge() }
+        public val mergeRule: (Sequence<Meta>) -> TypedMeta<SealedMeta> = { it.merge() }
     }
 }
 
@@ -84,7 +75,7 @@ public fun Laminate(vararg layers: Meta?): Laminate = Laminate(layers.filterNotN
 /**
  * Performance optimized version of get method
  */
-public fun Laminate.getFirst(name: Name): MetaItem? {
+public fun Laminate.getFirst(name: Name): Meta? {
     layers.forEach { layer ->
         layer[name]?.let { return it }
     }

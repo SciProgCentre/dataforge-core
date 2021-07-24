@@ -11,9 +11,8 @@ import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.descriptors.NodeDescriptor
-import space.kscience.dataforge.meta.node
 import space.kscience.dataforge.meta.toJson
-import space.kscience.dataforge.meta.toMetaItem
+import space.kscience.dataforge.meta.toMeta
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -36,7 +35,7 @@ public class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat 
     override fun readMeta(input: Input, descriptor: NodeDescriptor?): Meta {
         val str = input.readUtf8String()//readByteArray().decodeToString()
         val jsonElement = json.parseToJsonElement(str)
-        val item = jsonElement.toMetaItem(descriptor)
+        val item = jsonElement.toMeta(descriptor)
         return item.node ?: Meta.EMPTY
     }
 
