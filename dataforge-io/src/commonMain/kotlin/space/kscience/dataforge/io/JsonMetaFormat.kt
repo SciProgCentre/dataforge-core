@@ -6,11 +6,11 @@ package space.kscience.dataforge.io
 import io.ktor.utils.io.core.Input
 import io.ktor.utils.io.core.Output
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonElement
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.descriptors.NodeDescriptor
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.toJson
 import space.kscience.dataforge.meta.toMeta
 import kotlin.reflect.KType
@@ -23,20 +23,19 @@ public class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat 
 
     override val type: KType get() = typeOf<Meta>()
 
-    override fun writeMeta(output: Output, meta: Meta, descriptor: NodeDescriptor?) {
+    override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?) {
         val jsonObject = meta.toJson(descriptor)
-        output.writeUtf8String(json.encodeToString(JsonObject.serializer(), jsonObject))
+        output.writeUtf8String(json.encodeToString(JsonElement.serializer(), jsonObject))
     }
 
     override fun toMeta(): Meta = Meta {
         NAME_KEY put name.toString()
     }
 
-    override fun readMeta(input: Input, descriptor: NodeDescriptor?): Meta {
+    override fun readMeta(input: Input, descriptor: MetaDescriptor?): Meta {
         val str = input.readUtf8String()//readByteArray().decodeToString()
         val jsonElement = json.parseToJsonElement(str)
-        val item = jsonElement.toMeta(descriptor)
-        return item.node ?: Meta.EMPTY
+        return jsonElement.toMeta(descriptor)
     }
 
     public companion object : MetaFormatFactory {
@@ -49,10 +48,10 @@ public class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat 
 
         private val default = JsonMetaFormat()
 
-        override fun writeMeta(output: Output, meta: Meta, descriptor: NodeDescriptor?): Unit =
+        override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?): Unit =
             default.run { writeMeta(output, meta, descriptor) }
 
-        override fun readMeta(input: Input, descriptor: NodeDescriptor?): Meta =
+        override fun readMeta(input: Input, descriptor: MetaDescriptor?): Meta =
             default.run { readMeta(input, descriptor) }
     }
 }

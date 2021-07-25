@@ -63,6 +63,11 @@ public interface Meta : MetaRepr {
     }
 }
 
+/**
+ * True if this [Meta] does not have children
+ */
+public val Meta.isLeaf: Boolean get() = items.isEmpty()
+
 
 public operator fun Meta.get(token: NameToken): Meta? = items[token]
 

@@ -74,6 +74,11 @@ public fun Name.lastOrNull(): NameToken? = tokens.lastOrNull()
  */
 public fun Name.firstOrNull(): NameToken? = tokens.firstOrNull()
 
+/**
+ * First token or throw exception
+ */
+public fun Name.first(): NameToken = tokens.first()
+
 
 /**
  * Convert a [String] to name parsing it and extracting name tokens and index syntax.

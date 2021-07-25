@@ -25,7 +25,7 @@ public fun MutableMeta.item(key: Name? = null): MutableMetaDelegate = object : M
 /* Mutable converters */
 
 /**
- * A type converter for a mutable [TypedMetaItem] delegate
+ * A type converter for a [MutableMetaDelegate]
  */
 public fun <R : Any> MutableMetaDelegate.convert(
     converter: MetaConverter<R>,

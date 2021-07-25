@@ -32,11 +32,11 @@ public interface ObservableMeta : Meta {
 /**
  * A [Meta] which is both observable and mutable
  */
-public interface ObservableMutableMeta : ObservableMeta, MutableTypedMeta<ObservableMutableMeta>
+public interface ObservableMutableMeta : ObservableMeta, MutableMeta, TypedMeta<ObservableMutableMeta>
 
-private class ObservableMetaWrapper<M : MutableTypedMeta<M>>(
-    val origin: M,
-) : ObservableMutableMeta,  Meta by origin {
+private class ObservableMetaWrapper(
+    val origin: MutableMeta,
+) : ObservableMutableMeta, Meta by origin {
 
     private val listeners = HashSet<MetaListener>()
 
@@ -54,7 +54,7 @@ private class ObservableMetaWrapper<M : MutableTypedMeta<M>>(
         listeners.removeAll { it.owner === owner }
     }
 
-    override val items: Map<NameToken, ObservableMetaWrapper<M>>
+    override val items: Map<NameToken, ObservableMetaWrapper>
         get() = origin.items.mapValues { ObservableMetaWrapper(it.value) }
 
     override var value: Value?
@@ -63,11 +63,6 @@ private class ObservableMetaWrapper<M : MutableTypedMeta<M>>(
             origin.value = value
             changed(Name.EMPTY)
         }
-
-    override fun attach(name: Name, node: ObservableMutableMeta) {
-        origin.attach(name, node.origin)
-        changed(name)
-    }
 
     override fun getOrCreate(name: Name): ObservableMutableMeta =
         get(name) ?: ObservableMetaWrapper(origin.getOrCreate(name))
@@ -91,8 +86,8 @@ private class ObservableMetaWrapper<M : MutableTypedMeta<M>>(
     }
 }
 
-public fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.asObservable(): ObservableMeta =
-    (this as? ObservableMeta) ?: ObservableMetaWrapper(self)
+public fun MutableMeta.asObservable(): ObservableMeta =
+    (this as? ObservableMeta) ?: ObservableMetaWrapper(this)
 
 
 /**

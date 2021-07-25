@@ -116,6 +116,10 @@ public class JsonMeta(
         }
     }
 
+    override fun toString(): String = Meta.toString(this)
+    override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
+    override fun hashCode(): Int = Meta.hashCode(this)
+
     public companion object {
         /**
          * A key representing top-level json array of nodes, which could not be directly represented by a meta node

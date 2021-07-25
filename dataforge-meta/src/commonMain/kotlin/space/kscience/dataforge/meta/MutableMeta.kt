@@ -17,6 +17,8 @@ import kotlin.jvm.Synchronized
 @Serializable(MutableMetaSerializer::class)
 public interface MutableMeta : Meta {
 
+    override val items: Map<NameToken, MutableMeta>
+
     /**
      * Get or set value of this node
      */
@@ -241,12 +243,12 @@ private class MutableMetaImpl(
     children: Map<NameToken, Meta> = emptyMap()
 ) : ObservableMutableMeta {
 
-    private val children: LinkedHashMap<NameToken, ObservableMutableMeta> =
+    private val children: LinkedHashMap<NameToken, MutableMetaImpl> =
         LinkedHashMap(children.mapValues { (key, meta) ->
             MutableMetaImpl(meta.value, meta.items).apply { adoptBy(this, key) }
         })
 
-    override val items: Map<NameToken, ObservableMutableMeta> get() = children
+    override val items: Map<NameToken, MutableMetaImpl> get() = children
 
     private val listeners = HashSet<MetaListener>()
 
@@ -271,21 +273,37 @@ private class MutableMetaImpl(
         }
     }
 
-    override fun attach(name: Name, node: ObservableMutableMeta) {
+
+//    fun attach(name: Name, node: MutableMetaImpl) {
+//        when (name.length) {
+//            0 -> error("Can't set a meta with empty name")
+//            1 -> {
+//                val key = name.firstOrNull()!!
+//                children[key] = node
+//                adoptBy(this, key)
+//                changed(name)
+//            }
+//            else -> get(name.cutLast())?.attach(name.lastOrNull()!!.asName(), node)
+//        }
+//    }
+
+    /**
+     * Create and attach empty node
+     */
+    private fun createNode(name: Name): ObservableMutableMeta {
+        val newNode = MutableMetaImpl(null)
         when (name.length) {
-            0 -> error("Can't set a meta with empty name")
+            0 -> throw IllegalArgumentException("Can't create a node with empty name")
             1 -> {
-                val key = name.firstOrNull()!!
-                children[key] = node
-                adoptBy(this, key)
-                changed(name)
-            }
-            else -> get(name.cutLast())?.attach(name.lastOrNull()!!.asName(), node)
+                children[name.first()] = newNode
+                newNode.adoptBy(this, name.first())
+            } //do not notify, no value changed
+            else -> getOrCreate(name.first().asName()).getOrCreate(name.cutFirst())
         }
+        return newNode
     }
 
-    override fun getOrCreate(name: Name): ObservableMutableMeta =
-        get(name) ?: MutableMetaImpl(null).also { attach(name, it) }
+    override fun getOrCreate(name: Name): ObservableMutableMeta = get(name) ?: createNode(name)
 
     override fun removeNode(name: Name) {
         when (name.length) {

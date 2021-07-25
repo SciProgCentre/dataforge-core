@@ -36,6 +36,10 @@ public class Laminate(layers: List<Meta>) : TypedMeta<SealedMeta> {
         return SealedMeta(value, items)
     }
 
+    override fun toString(): String = Meta.toString(this)
+    override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
+    override fun hashCode(): Int = Meta.hashCode(this)
+
     public companion object {
 
         /**
