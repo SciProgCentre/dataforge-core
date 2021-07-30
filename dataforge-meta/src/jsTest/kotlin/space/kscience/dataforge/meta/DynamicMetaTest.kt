@@ -39,6 +39,7 @@ class DynamicMetaTest {
         }
 
         val dynamic = meta.toDynamic()
+        println(JSON.stringify(dynamic))
         assertEquals(2,dynamic.array[1])
         assertEquals(22, dynamic.a)
         val keys = js("Object.keys(dynamic)") as Array<String>

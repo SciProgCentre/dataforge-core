@@ -1,5 +1,6 @@
 package space.kscience.dataforge.meta
 
+import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.values.Value
 import space.kscience.dataforge.values.asValue
@@ -7,7 +8,7 @@ import space.kscience.dataforge.values.isList
 
 
 //TODO add Meta wrapper for dynamic
-
+@DFExperimental
 public fun Value.toDynamic(): dynamic {
     return if (isList()) {
         list.map { it.toDynamic() }.toTypedArray().asDynamic()
@@ -19,11 +20,13 @@ public fun Value.toDynamic(): dynamic {
 /**
  * Represent or copy this [Meta] to dynamic object to be passed to JS libraries
  */
+@DFExperimental
 public fun Meta.toDynamic(): dynamic {
     if (this is DynamicMeta) return this.obj
+    if(items.isEmpty()) return value?.toDynamic()
 
     val res = js("{}")
-    this.items.entries.groupBy { it.key.body }.forEach { (key, value) ->
+    items.entries.groupBy { it.key.body }.forEach { (key, value) ->
         val list = value.map { it.value }
         res[key] = when (list.size) {
             1 -> list.first().toDynamic()
@@ -33,8 +36,9 @@ public fun Meta.toDynamic(): dynamic {
     return res
 }
 
-public class DynamicMeta(internal val obj: dynamic) : Meta {
-    private fun keys(): Array<String> = js("Object").keys(obj)
+@DFExperimental
+public class DynamicMeta(internal val obj: dynamic) : TypedMeta<DynamicMeta> {
+    private fun keys(): Array<String> = js("Object").keys(obj) as Array<String>
 
     private fun isArray(@Suppress("UNUSED_PARAMETER") obj: dynamic): Boolean =
         js("Array").isArray(obj) as Boolean
@@ -52,23 +56,25 @@ public class DynamicMeta(internal val obj: dynamic) : Meta {
             else -> null
         }
 
-    override val items: Map<NameToken, Meta>
+    override val items: Map<NameToken, DynamicMeta>
         get() = if (isPrimitive(obj)) {
             emptyMap()
         } else if (isArray(obj)) {
             if((obj as Array<Any?>).all { isPrimitive(it) }){
                 emptyMap()
             } else{
-                TODO()
+                (obj as Array<dynamic>).mapIndexed{ index: Int, b: dynamic ->
+                    val indexString = b[Meta.INDEX_KEY]?.toString() ?: index.toString()
+                    NameToken(Meta.JSON_ARRAY_KEY, indexString) to DynamicMeta(b)
+                }.toMap()
             }
-        } else keys().flatMap<String, Pair<NameToken, Meta>> { key ->
+        } else keys().flatMap { key ->
             val value = obj[key] ?: return@flatMap emptyList()
             when {
                 isArray(value) -> {
                     val array = value as Array<Any?>
                     if (array.all { isPrimitive(it) }) {
                         //primitive value
-                        //emptyList()
                         listOf(NameToken(key) to DynamicMeta(value))
                     } else {
                         array.mapIndexedNotNull { index, it ->
