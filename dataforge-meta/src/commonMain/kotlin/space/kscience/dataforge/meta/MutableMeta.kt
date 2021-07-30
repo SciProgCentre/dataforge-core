@@ -384,19 +384,25 @@ private class MutableMetaImpl(
  * Append the node with a same-name-sibling, automatically generating numerical index
  */
 @DFExperimental
-public fun MutableMeta.append(name: Name, value: Value?) {
+public fun MutableMeta.append(name: Name, meta: Meta) {
     require(!name.isEmpty()) { "Name could not be empty for append operation" }
     val newIndex = name.lastOrNull()!!.index
     if (newIndex != null) {
-        set(name, value)
+        set(name, meta)
     } else {
         val index = (getIndexed(name).keys.mapNotNull { it?.toIntOrNull() }.maxOrNull() ?: -1) + 1
-        set(name.withIndex(index.toString()), value)
+        set(name.withIndex(index.toString()), meta)
     }
 }
 
 @DFExperimental
-public fun MutableMeta.append(name: String, value: Value?): Unit = append(name.toName(), value)
+public fun MutableMeta.append(name: String, meta: Meta): Unit = append(name.toName(), meta)
+
+@DFExperimental
+public fun MutableMeta.append(name: Name, value: Value): Unit = append(name, Meta(value))
+
+@DFExperimental
+public fun MutableMeta.append(name: String, value: Value): Unit = append(name.toName(), value)
 
 ///**
 // * Apply existing node with given [builder] or create a new element with it.
