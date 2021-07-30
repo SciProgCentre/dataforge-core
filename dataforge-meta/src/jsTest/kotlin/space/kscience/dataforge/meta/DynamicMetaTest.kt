@@ -1,5 +1,6 @@
 package space.kscience.dataforge.meta
 
+import space.kscience.dataforge.values.ListValue
 import space.kscience.dataforge.values.int
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,7 +22,7 @@ class DynamicMetaTest {
         val meta = DynamicMeta(d)
         println(meta)
         assertEquals(true, meta["ob.booleanNode"].boolean)
-        assertEquals(2, meta["array"].value?.list?.get(1)?.int)
+        assertEquals(2, meta["array"]?.value?.list?.get(1)?.int)
         assertEquals(4, meta.items.size)
     }
 
@@ -29,7 +30,7 @@ class DynamicMetaTest {
     fun testMetaToDynamic(){
         val meta = Meta {
             "a" put 22
-            "array" put listOf(1, 2, 3)
+            "array" put ListValue(1, 2, 3)
             "b" put "myString"
             "ob" put {
                 "childNode" put 18

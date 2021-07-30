@@ -1,20 +1,27 @@
 package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
-import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
 import space.kscience.dataforge.values.EnumValue
 import space.kscience.dataforge.values.Value
 import space.kscience.dataforge.values.asValue
+import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 
+
+/**
+ * Mark a meta builder
+ */
+@DslMarker
+public annotation class MetaBuilder
 
 /**
  * Mutable variant of [Meta]
  * TODO documentation
  */
 @Serializable(MutableMetaSerializer::class)
+@MetaBuilder
 public interface MutableMeta : Meta {
 
     override val items: Map<NameToken, MutableMeta>
@@ -30,9 +37,9 @@ public interface MutableMeta : Meta {
     public operator fun set(name: Name, meta: Meta)
 
     /**
-     * Remove a note at a given [name] if it is present
+     * Remove a node at a given [name] if it is present
      */
-    public fun removeNode(name: Name)
+    public fun remove(name: Name)
 
     /**
      * Get existing node or create a new one
@@ -109,10 +116,16 @@ public interface MutableMeta : Meta {
         toName() put repr.toMeta()
     }
 
+    public infix fun String.put(iterable: Iterable<Meta>) {
+        setIndexed(toName(), iterable)
+    }
+
     public infix fun String.put(builder: MutableMeta.() -> Unit) {
         set(toName(), MutableMeta(builder))
     }
 }
+
+public fun MutableMeta.getOrCreate(string: String): MutableMeta = getOrCreate(string.toName())
 
 @Serializable(MutableMetaSerializer::class)
 public interface MutableTypedMeta<M : MutableTypedMeta<M>> : TypedMeta<M>, MutableMeta {
@@ -125,33 +138,58 @@ public interface MutableTypedMeta<M : MutableTypedMeta<M>> : TypedMeta<M>, Mutab
     override fun getOrCreate(name: Name): M
 }
 
-public operator fun MutableMeta.set(key: String, item: Meta?): Unit =
-    set(key.toName(), item)
+public fun <M : MutableTypedMeta<M>> M.getOrCreate(string: String): M = getOrCreate(string.toName())
 
+public fun MutableMeta.remove(name: String){
+    remove(name.toName())
+}
 
-public fun MutableMeta.remove(name: Name): Unit = set(name, null)
+// node setters
 
-public fun MutableMeta.remove(name: String): Unit = remove(name.toName())
+public operator fun MutableMeta.set(name: NameToken, value: Meta): Unit = set(name.asName(), value)
+public operator fun MutableMeta.set(name: Name, meta: Meta?): Unit {
+    if (meta == null) {
+        remove(name)
+    } else {
+        set(name, meta)
+    }
+}
+
+public operator fun MutableMeta.set(key: String, meta: Meta?): Unit {
+    set(key.toName(), meta)
+}
+
+//value setters
+
+public operator fun MutableMeta.set(name: NameToken, value: Value?): Unit = set(name.asName(), value)
+public operator fun MutableMeta.set(key: String, value: Value?): Unit = set(key.toName(), value)
+
+public operator fun MutableMeta.set(name: Name, value: String): Unit = set(name, value.asValue())
+public operator fun MutableMeta.set(name: NameToken, value: String): Unit = set(name.asName(), value.asValue())
+public operator fun MutableMeta.set(key: String, value: String): Unit = set(key.toName(), value.asValue())
+
+public operator fun MutableMeta.set(name: Name, value: Boolean): Unit = set(name, value.asValue())
+public operator fun MutableMeta.set(name: NameToken, value: Boolean): Unit = set(name.asName(), value.asValue())
+public operator fun MutableMeta.set(key: String, value: Boolean): Unit = set(key.toName(), value.asValue())
+
+public operator fun MutableMeta.set(name: Name, value: Number): Unit = set(name, value.asValue())
+public operator fun MutableMeta.set(name: NameToken, value: Number): Unit = set(name.asName(), value.asValue())
+public operator fun MutableMeta.set(key: String, value: Number): Unit = set(key.toName(), value.asValue())
+
+public operator fun MutableMeta.set(name: Name, value: List<Value>): Unit = set(name, value.asValue())
+public operator fun MutableMeta.set(name: NameToken, value: List<Value>): Unit = set(name.asName(), value.asValue())
+public operator fun MutableMeta.set(key: String, value: List<Value>): Unit = set(key.toName(), value.asValue())
+
+//public fun MutableMeta.set(key: String, index: String, value: Value?): Unit =
+//    set(key.toName().withIndex(index), value)
+
 
 /**
  * Universal unsafe set method
  */
-public operator fun MutableMeta.set(name: Name, value: Any?) {
-    when (value) {
-        null -> remove(name)
-        else -> set(name, Value.of(value))
-    }
+public operator fun MutableMeta.set(name: Name, value: Value?) {
+    getOrCreate(name).value = Value.of(value)
 }
-
-public operator fun MutableMeta.set(name: NameToken, value: Any?): Unit =
-    set(name.asName(), value)
-
-public operator fun MutableMeta.set(key: String, value: Any?): Unit =
-    set(key.toName(), value)
-
-public operator fun MutableMeta.set(key: String, index: String, value: Any?): Unit =
-    set(key.toName().withIndex(index), value)
-
 
 /* Same name siblings generation */
 
@@ -177,10 +215,10 @@ public fun MutableMeta.setIndexed(
     setIndexedItems(name, metas) { item, index -> indexFactory(item, index) }
 }
 
-public operator fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.set(name: Name, metas: Iterable<Meta>): Unit =
+public operator fun MutableMeta.set(name: Name, metas: Iterable<Meta>): Unit =
     setIndexed(name, metas)
 
-public operator fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.set(name: String, metas: Iterable<Meta>): Unit =
+public operator fun MutableMeta.set(name: String, metas: Iterable<Meta>): Unit =
     setIndexed(name.toName(), metas)
 
 
@@ -190,7 +228,7 @@ public operator fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.set(name: Stri
  *  * node updates node and replaces anything but node
  *  * node list updates node list if number of nodes in the list is the same and replaces anything otherwise
  */
-public fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.update(meta: Meta) {
+public fun MutableMeta.update(meta: Meta) {
     meta.valueSequence().forEach { (name, value) ->
         set(name, value)
     }
@@ -217,38 +255,24 @@ public operator fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.set(name: Name
     }
 }
 
-///**
-// * Create a mutable item provider that uses given provider for default values if those are not found in this provider.
-// * Changes are propagated only to this provider.
-// */
-//public fun <M : MutableTypedMeta<M>> M.withDefault(default: Meta?): MutableTypedMeta<*> =
-//    if (default == null || default.isEmpty()) {
-//        //Optimize for use with empty default
-//        this
-//    } else object : MutableTypedMeta<M> {
-//        override fun set(name: Name, item: MetaItem?) {
-//            this@withDefault.set(name, item)
-//        }
-//
-//        override fun getItem(name: Name): MetaItem? = this@withDefault.getItem(name) ?: default.getItem(name)
-//    }
-
 /**
  * A general implementation of mutable [Meta] which implements both [MutableTypedMeta] and [ObservableMeta].
  * The implementation uses blocking synchronization on mutation on JVM
  */
-@DFBuilder
 private class MutableMetaImpl(
-    override var value: Value?,
+    value: Value?,
     children: Map<NameToken, Meta> = emptyMap()
 ) : ObservableMutableMeta {
 
-    private val children: LinkedHashMap<NameToken, MutableMetaImpl> =
+    override var value = value
+        @Synchronized set
+
+    private val children: LinkedHashMap<NameToken, ObservableMutableMeta> =
         LinkedHashMap(children.mapValues { (key, meta) ->
             MutableMetaImpl(meta.value, meta.items).apply { adoptBy(this, key) }
         })
 
-    override val items: Map<NameToken, MutableMetaImpl> get() = children
+    override val items: Map<NameToken, ObservableMutableMeta> get() = children
 
     private val listeners = HashSet<MetaListener>()
 
@@ -267,60 +291,56 @@ private class MutableMetaImpl(
     }
 
 
-    private fun adoptBy(parent: MutableMetaImpl, key: NameToken) {
+    private fun ObservableMeta.adoptBy(parent: MutableMetaImpl, key: NameToken) {
         onChange(parent) { name ->
             parent.changed(key + name)
         }
     }
 
-
-//    fun attach(name: Name, node: MutableMetaImpl) {
-//        when (name.length) {
-//            0 -> error("Can't set a meta with empty name")
-//            1 -> {
-//                val key = name.firstOrNull()!!
-//                children[key] = node
-//                adoptBy(this, key)
-//                changed(name)
-//            }
-//            else -> get(name.cutLast())?.attach(name.lastOrNull()!!.asName(), node)
-//        }
-//    }
+    override fun attach(name: Name, node: ObservableMutableMeta) {
+        when (name.length) {
+            0 -> error("Can't set a meta with empty name")
+            1 -> {
+                replaceItem(name.first(), get(name), node)
+            }
+            else -> get(name.cutLast())?.attach(name.lastOrNull()!!.asName(), node)
+        }
+    }
 
     /**
      * Create and attach empty node
      */
-    private fun createNode(name: Name): ObservableMutableMeta {
-        val newNode = MutableMetaImpl(null)
-        when (name.length) {
-            0 -> throw IllegalArgumentException("Can't create a node with empty name")
-            1 -> {
-                children[name.first()] = newNode
-                newNode.adoptBy(this, name.first())
-            } //do not notify, no value changed
-            else -> getOrCreate(name.first().asName()).getOrCreate(name.cutFirst())
-        }
-        return newNode
+    private fun createNode(name: Name): ObservableMutableMeta = when (name.length) {
+        0 -> throw IllegalArgumentException("Can't create a node with empty name")
+        1 -> {
+            val newNode = MutableMetaImpl(null)
+            children[name.first()] = newNode
+            newNode.adoptBy(this, name.first())
+            newNode
+        } //do not notify, no value changed
+        else -> getOrCreate(name.first().asName()).getOrCreate(name.cutFirst())
     }
 
     override fun getOrCreate(name: Name): ObservableMutableMeta = get(name) ?: createNode(name)
 
-    override fun removeNode(name: Name) {
+    override fun remove(name: Name) {
         when (name.length) {
             0 -> error("Can't remove self")
             1 -> if (children.remove(name.firstOrNull()!!) != null) changed(name)
-            else -> get(name.cutLast())?.removeNode(name.lastOrNull()!!.asName())
+            else -> get(name.cutLast())?.remove(name.lastOrNull()!!.asName())
         }
     }
 
+    @Synchronized
     private fun replaceItem(
         key: NameToken,
         oldItem: ObservableMutableMeta?,
-        newItem: MutableMetaImpl?
+        newItem: ObservableMutableMeta?
     ) {
         if (oldItem != newItem) {
             if (newItem == null) {
-                children.remove(key)
+                //remove child and remove stale listener
+                children.remove(key)?.removeListener(this)
             } else {
                 newItem.adoptBy(this, key)
                 children[key] = newItem
@@ -364,7 +384,7 @@ private class MutableMetaImpl(
  * Append the node with a same-name-sibling, automatically generating numerical index
  */
 @DFExperimental
-public fun MutableMeta.append(name: Name, value: Any?) {
+public fun MutableMeta.append(name: Name, value: Value?) {
     require(!name.isEmpty()) { "Name could not be empty for append operation" }
     val newIndex = name.lastOrNull()!!.index
     if (newIndex != null) {
@@ -376,7 +396,7 @@ public fun MutableMeta.append(name: Name, value: Any?) {
 }
 
 @DFExperimental
-public fun MutableMeta.append(name: String, value: Any?): Unit = append(name.toName(), value)
+public fun MutableMeta.append(name: String, value: Value?): Unit = append(name.toName(), value)
 
 ///**
 // * Apply existing node with given [builder] or create a new element with it.
@@ -398,12 +418,15 @@ public fun Meta.toMutableMeta(): ObservableMutableMeta = MutableMetaImpl(value, 
 
 public fun Meta.asMutableMeta(): MutableMeta = (this as? MutableMeta) ?: toMutableMeta()
 
+@JsName("newMutableMeta")
+public fun MutableMeta(): ObservableMutableMeta = MutableMetaImpl(null)
+
 /**
  * Build a [MutableMeta] using given transformation
  */
 @Suppress("FunctionName")
-public fun MutableMeta(builder: MutableMeta.() -> Unit = {}): ObservableMutableMeta =
-    MutableMetaImpl(null).apply(builder)
+public inline fun MutableMeta(builder: MutableMeta.() -> Unit = {}): ObservableMutableMeta =
+    MutableMeta().apply(builder)
 
 
 /**
@@ -412,3 +435,31 @@ public fun MutableMeta(builder: MutableMeta.() -> Unit = {}): ObservableMutableM
  */
 public inline fun Meta.copy(block: MutableMeta.() -> Unit = {}): Meta =
     toMutableMeta().apply(block)
+
+
+private class MutableMetaWithDefault(val source: MutableMeta, val default: Meta, val name: Name) :
+    MutableMeta by source {
+    override val items: Map<NameToken, MutableMeta>
+        get() = (source.items.keys + default.items.keys).associateWith {
+            MutableMetaWithDefault(source, default, name + it)
+        }
+
+    override var value: Value?
+        get() = source[name]?.value ?: default[name]?.value
+        set(value) {
+            source[name] = value
+        }
+
+    override fun toString(): String = Meta.toString(this)
+    override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
+    override fun hashCode(): Int = Meta.hashCode(this)
+}
+
+/**
+ * Create a mutable item provider that uses given provider for default values if those are not found in this provider.
+ * Changes are propagated only to this provider.
+ */
+public fun MutableMeta.withDefault(default: Meta?): MutableMeta = if (default == null || default.isEmpty()) {
+    //Optimize for use with empty default
+    this
+} else MutableMetaWithDefault(this, default, Name.EMPTY)

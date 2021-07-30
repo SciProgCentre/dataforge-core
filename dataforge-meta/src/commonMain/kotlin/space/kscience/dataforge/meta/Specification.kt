@@ -33,15 +33,15 @@ public interface ReadOnlySpecification<out T : Any> {
  */
 public interface Specification<out T : Any> : ReadOnlySpecification<T> {
     /**
-     * Wrap [MutableTypedMeta], using it as inner storage (changes to [Specification] are reflected on [MutableTypedMeta]
+     * Wrap [MutableMeta], using it as inner storage (changes to [Specification] are reflected on [MutableMeta]
      */
     public fun write(target: MutableMeta): T
 }
 
 /**
- * Update a [MutableTypedMeta] using given specification
+ * Update a [MutableMeta] using given specification
  */
-public fun <M : MutableTypedMeta<M>, T : Any> M.update(
+public fun <T : Any> MutableMeta.update(
     spec: Specification<T>,
     action: T.() -> Unit
 ): T = spec.write(this).apply(action)

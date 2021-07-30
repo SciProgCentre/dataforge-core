@@ -9,7 +9,8 @@ import space.kscience.dataforge.data.DataSetBuilder
 import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.meta.descriptors.NodeDescriptor
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
+import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
@@ -26,16 +27,16 @@ public interface TaskContainer {
 
 public inline fun <reified T : Any> TaskContainer.registerTask(
     name: String,
-    noinline descriptorBuilder: NodeDescriptor.() -> Unit = {},
+    noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
-): Unit = registerTask(name.toName(), Task(NodeDescriptor(descriptorBuilder), builder))
+): Unit = registerTask(name.toName(), Task(MetaDescriptor(descriptorBuilder), builder))
 
 public inline fun <reified T : Any> TaskContainer.task(
-    noinline descriptorBuilder: NodeDescriptor.() -> Unit = {},
+    noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
     val taskName = property.name.toName()
-    val task = Task(NodeDescriptor(descriptorBuilder), builder)
+    val task = Task(MetaDescriptor(descriptorBuilder), builder)
     registerTask(taskName, task)
     ReadOnlyProperty { _, _ -> TaskReference(taskName, task) }
 }

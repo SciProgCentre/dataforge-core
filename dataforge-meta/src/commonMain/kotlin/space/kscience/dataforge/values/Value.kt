@@ -1,6 +1,7 @@
 package space.kscience.dataforge.values
 
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmInline
 
 
 /**
@@ -153,16 +154,10 @@ public class NumberValue(public val number: Number) : Value {
     override fun hashCode(): Int = numberOrNull.hashCode()
 }
 
-public class StringValue(public val string: String) : Value {
+@JvmInline
+public value class StringValue(public val string: String) : Value {
     override val value: Any get() = string
     override val type: ValueType get() = ValueType.STRING
-
-    override fun equals(other: Any?): Boolean {
-        return this.string == (other as? Value)?.string
-    }
-
-    override fun hashCode(): Int = string.hashCode()
-
     override fun toString(): String = string
 }
 
@@ -203,6 +198,9 @@ public class ListValue(override val list: List<Value>) : Value, Iterable<Value> 
         public val EMPTY: ListValue = ListValue(emptyList())
     }
 }
+
+public fun ListValue(vararg numbers: Number): ListValue = ListValue(numbers.map{it.asValue()})
+public fun ListValue(vararg strings: String): ListValue = ListValue(strings.map{it.asValue()})
 
 public fun Number.asValue(): Value = NumberValue(this)
 

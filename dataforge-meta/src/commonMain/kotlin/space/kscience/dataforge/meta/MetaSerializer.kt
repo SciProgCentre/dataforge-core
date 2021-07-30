@@ -1,30 +1,35 @@
 package space.kscience.dataforge.meta
 
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
-import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.names.NameTokenSerializer
+import kotlinx.serialization.json.JsonEncoder
 
 /**
- * Serialized for meta
+ * Serialized for [Meta]
  */
 public object MetaSerializer : KSerializer<Meta> {
+    private val genericMetaSerializer = SealedMeta.serializer()
 
-    private val itemsSerializer: KSerializer<Map<NameToken, Meta>> = MapSerializer(
-        NameTokenSerializer,
-        MetaSerializer
-    )
+    private val jsonSerializer = JsonElement.serializer()
 
-    override val descriptor: SerialDescriptor = JsonElement.serializer().descriptor
+    override val descriptor: SerialDescriptor = jsonSerializer.descriptor
 
-    override fun deserialize(decoder: Decoder): Meta = JsonElement.serializer().deserialize(decoder).toMeta()
+    override fun deserialize(decoder: Decoder): Meta = if (decoder is JsonDecoder) {
+        jsonSerializer.deserialize(decoder).toMeta()
+    } else {
+        genericMetaSerializer.deserialize(decoder)
+    }
 
     override fun serialize(encoder: Encoder, value: Meta) {
-        JsonElement.serializer().serialize(encoder, value.toJson())
+        if (encoder is JsonEncoder) {
+            jsonSerializer.serialize(encoder, value.toJson())
+        } else {
+            genericMetaSerializer.serialize(encoder, value.seal())
+        }
     }
 }
 
@@ -32,8 +37,8 @@ public object MetaSerializer : KSerializer<Meta> {
  * A serializer for [MutableMeta]
  */
 public object MutableMetaSerializer : KSerializer<MutableMeta> {
-    override val descriptor: SerialDescriptor = MetaSerializer.descriptor
 
+    override val descriptor: SerialDescriptor = MetaSerializer.descriptor
 
     override fun deserialize(decoder: Decoder): MutableMeta {
         val meta = decoder.decodeSerializableValue(MetaSerializer)

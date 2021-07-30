@@ -10,6 +10,7 @@
 - Kotlin 1.5.10
 - Build tools 0.10.0
 - Relaxed type restriction on `MetaConverter`. Now nullables are available.
+- **Huge API-breaking refactoring of Meta**. Meta now can hava both value and children.
 
 ### Deprecated
 - Direct use of `Config`
@@ -17,6 +18,7 @@
 ### Removed
 - Public PluginManager mutability
 - Tables and tables-exposed moved to the separate project `tables.kt`
+- BinaryMetaFormat. Use CBOR encoding instead
 
 ### Fixed
 - Proper json array index treatment.

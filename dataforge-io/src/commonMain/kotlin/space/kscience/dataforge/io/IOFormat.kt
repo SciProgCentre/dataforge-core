@@ -6,13 +6,11 @@ import space.kscience.dataforge.context.Factory
 import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaItemValue
 import space.kscience.dataforge.meta.MetaRepr
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
-import space.kscience.dataforge.values.Value
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -117,19 +115,19 @@ public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
     override fun readObject(input: Input): Double = input.readDouble()
 }
 
-public object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
-    override fun invoke(meta: Meta, context: Context): IOFormat<Value> = this
-
-    override val name: Name = "value".asName()
-
-    override val type: KType get() = typeOf<Value>()
-
-    override fun writeObject(output: Output, obj: Value) {
-        BinaryMetaFormat.run { output.writeValue(obj) }
-    }
-
-    override fun readObject(input: Input): Value {
-        return (BinaryMetaFormat.run { input.readMetaItem() } as? MetaItemValue)?.value
-            ?: error("The item is not a value")
-    }
-}
+//public object ValueIOFormat : IOFormat<Value>, IOFormatFactory<Value> {
+//    override fun invoke(meta: Meta, context: Context): IOFormat<Value> = this
+//
+//    override val name: Name = "value".asName()
+//
+//    override val type: KType get() = typeOf<Value>()
+//
+//    override fun writeObject(output: Output, obj: Value) {
+//        BinaryMetaFormat.run { output.writeValue(obj) }
+//    }
+//
+//    override fun readObject(input: Input): Value {
+//        return (BinaryMetaFormat.run { input.readMetaItem() } as? MetaItemValue)?.value
+//            ?: error("The item is not a value")
+//    }
+//}

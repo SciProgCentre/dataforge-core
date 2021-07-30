@@ -10,43 +10,49 @@ import space.kscience.dataforge.io.MetaFormat
 import space.kscience.dataforge.io.MetaFormatFactory
 import space.kscience.dataforge.io.readUtf8String
 import space.kscience.dataforge.io.writeUtf8String
-import space.kscience.dataforge.meta.*
-import space.kscience.dataforge.meta.descriptors.ItemDescriptor
-import space.kscience.dataforge.meta.descriptors.NodeDescriptor
+import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
+import space.kscience.dataforge.meta.descriptors.get
+import space.kscience.dataforge.meta.isLeaf
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.withIndex
 import space.kscience.dataforge.values.ListValue
 import space.kscience.dataforge.values.Null
+import space.kscience.dataforge.values.Value
 import space.kscience.dataforge.values.parseValue
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 
 public fun Meta.toYaml(): YamlMap {
     val map: Map<String, Any?> = items.entries.associate { (key, item) ->
-        key.toString() to when (item) {
-            is MetaItemValue -> {
-                item.value.value
-            }
-            is MetaItemNode -> {
-                item.node.toYaml()
-            }
+        key.toString() to if (item.isLeaf) {
+            item.value?.value
+        } else {
+            item.toYaml()
         }
     }
+
     return YamlMap(map)
 }
 
-private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: NodeDescriptor? = null) : AbstractTypedMeta() {
+private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: MetaDescriptor? = null) : Meta {
 
-    private fun buildItems(): Map<NameToken, MetaItem> {
-        val map = LinkedHashMap<NameToken, MetaItem>()
+    override val value: Value?
+        get() = yamlMap.getStringOrNull(null)?.parseValue()
+
+    private fun buildItems(): Map<NameToken, Meta> {
+        val map = LinkedHashMap<NameToken, Meta>()
 
         yamlMap.content.entries.forEach { (key, value) ->
             val stringKey = key.toString()
-            val itemDescriptor = descriptor?.items?.get(stringKey)
+            val itemDescriptor = descriptor?.get(stringKey)
             val token = NameToken(stringKey)
             when (value) {
-                YamlNull -> Null.asMetaItem()
-                is YamlLiteral -> map[token] = value.content.parseValue().asMetaItem()
-                is YamlMap -> map[token] = value.toMeta().asMetaItem()
+                YamlNull -> Meta(Null)
+                is YamlLiteral -> map[token] = Meta(value.content.parseValue())
+                is YamlMap -> map[token] = value.toMeta()
                 is YamlList -> if (value.all { it is YamlLiteral }) {
                     val listValue = ListValue(
                         value.map {
@@ -54,29 +60,33 @@ private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: Nod
                             (it as YamlLiteral).content.parseValue()
                         }
                     )
-                    map[token] = MetaItemValue(listValue)
+                    map[token] = Meta(listValue)
                 } else value.forEachIndexed { index, yamlElement ->
-                    val indexKey = (itemDescriptor as? NodeDescriptor)?.indexKey ?: ItemDescriptor.DEFAULT_INDEX_KEY
+                    val indexKey = itemDescriptor?.indexKey
                     val indexValue: String = (yamlElement as? YamlMap)?.getStringOrNull(indexKey)
                         ?: index.toString() //In case index is non-string, the backward transformation will be broken.
 
                     val tokenWithIndex = token.withIndex(indexValue)
-                    map[tokenWithIndex] = yamlElement.toMetaItem(itemDescriptor)
+                    map[tokenWithIndex] = yamlElement.toMeta(itemDescriptor)
                 }
             }
         }
         return map
     }
 
-    override val items: Map<NameToken, MetaItem> get() = buildItems()
+    override val items: Map<NameToken, Meta> get() = buildItems()
+
+    override fun toString(): String = Meta.toString(this)
+    override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
+    override fun hashCode(): Int = Meta.hashCode(this)
 }
 
-public fun YamlElement.toMetaItem(descriptor: ItemDescriptor? = null): MetaItem = when (this) {
-    YamlNull -> Null.asMetaItem()
-    is YamlLiteral -> content.parseValue().asMetaItem()
-    is YamlMap -> toMeta().asMetaItem()
+public fun YamlElement.toMeta(descriptor: MetaDescriptor? = null): Meta = when (this) {
+    YamlNull -> Meta(Null)
+    is YamlLiteral -> Meta(content.parseValue())
+    is YamlMap -> toMeta()
     //We can't return multiple items therefore we create top level node
-    is YamlList -> YamlMap(mapOf("@yamlArray" to this)).toMetaItem(descriptor)
+    is YamlList -> YamlMap(mapOf("@yamlArray" to this)).toMeta(descriptor)
 }
 
 public fun YamlMap.toMeta(): Meta = YamlMeta(this)
@@ -88,13 +98,13 @@ public fun YamlMap.toMeta(): Meta = YamlMeta(this)
 @DFExperimental
 public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
 
-    override fun writeMeta(output: Output, meta: Meta, descriptor: NodeDescriptor?) {
+    override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?) {
         val yaml = meta.toYaml()
         val string = Yaml.encodeToString(yaml)
         output.writeUtf8String(string)
     }
 
-    override fun readMeta(input: Input, descriptor: NodeDescriptor?): Meta {
+    override fun readMeta(input: Input, descriptor: MetaDescriptor?): Meta {
         val yaml = Yaml.decodeYamlMapFromString(input.readUtf8String())
         return yaml.toMeta()
     }
@@ -113,10 +123,10 @@ public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
 
         private val default = YamlMetaFormat()
 
-        override fun writeMeta(output: Output, meta: Meta, descriptor: NodeDescriptor?): Unit =
+        override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?): Unit =
             default.writeMeta(output, meta, descriptor)
 
-        override fun readMeta(input: Input, descriptor: NodeDescriptor?): Meta =
+        override fun readMeta(input: Input, descriptor: MetaDescriptor?): Meta =
             default.readMeta(input, descriptor)
     }
 }

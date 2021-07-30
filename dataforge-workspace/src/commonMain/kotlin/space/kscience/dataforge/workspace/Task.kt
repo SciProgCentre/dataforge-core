@@ -6,7 +6,7 @@ import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.data.GoalExecutionRestriction
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.descriptors.Described
-import space.kscience.dataforge.meta.descriptors.ItemDescriptor
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.Name
@@ -47,11 +47,11 @@ public class TaskResultBuilder<T : Any>(
 @DFInternal
 public fun <T : Any> Task(
     resultType: KType,
-    descriptor: ItemDescriptor? = null,
+    descriptor: MetaDescriptor? = null,
     builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): Task<T> = object : Task<T> {
 
-    override val descriptor: ItemDescriptor? = descriptor
+    override val descriptor: MetaDescriptor? = descriptor
 
     override suspend fun execute(
         workspace: Workspace,
@@ -69,6 +69,6 @@ public fun <T : Any> Task(
 @OptIn(DFInternal::class)
 @Suppress("FunctionName")
 public inline fun <reified T : Any> Task(
-    descriptor: ItemDescriptor? = null,
+    descriptor: MetaDescriptor? = null,
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): Task<T> = Task(typeOf<T>(), descriptor, builder)

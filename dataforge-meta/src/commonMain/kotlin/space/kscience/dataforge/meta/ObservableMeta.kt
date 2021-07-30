@@ -32,7 +32,7 @@ public interface ObservableMeta : Meta {
 /**
  * A [Meta] which is both observable and mutable
  */
-public interface ObservableMutableMeta : ObservableMeta, MutableMeta, TypedMeta<ObservableMutableMeta>
+public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTypedMeta<ObservableMutableMeta>
 
 private class ObservableMetaWrapper(
     val origin: MutableMeta,
@@ -68,8 +68,8 @@ private class ObservableMetaWrapper(
         get(name) ?: ObservableMetaWrapper(origin.getOrCreate(name))
 
 
-    override fun removeNode(name: Name) {
-        origin.removeNode(name)
+    override fun remove(name: Name) {
+        origin.remove(name)
         changed(name)
     }
 
@@ -84,10 +84,18 @@ private class ObservableMetaWrapper(
     override fun toMeta(): Meta {
         return origin.toMeta()
     }
+
+    override fun attach(name: Name, node: ObservableMutableMeta) {
+        TODO("Not yet implemented")
+    }
 }
 
-public fun MutableMeta.asObservable(): ObservableMeta =
-    (this as? ObservableMeta) ?: ObservableMetaWrapper(this)
+/**
+ * Cast this [MutableMeta] to [ObservableMutableMeta] or create an observable wrapper. Only changes made to the result
+ * are guaranteed to be observed.
+ */
+public fun MutableMeta.asObservable(): ObservableMutableMeta =
+    (this as? ObservableMutableMeta) ?: ObservableMetaWrapper(this)
 
 
 /**

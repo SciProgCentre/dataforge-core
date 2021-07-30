@@ -54,7 +54,7 @@ public interface GroupRule {
                         val data = set.getData(name)
 
                         @Suppress("NULLABLE_EXTENSION_OPERATOR_WITH_SAFE_CALL_RECEIVER")
-                        val tagValue = data?.meta[key]?.string ?: defaultTagValue
+                        val tagValue = data?.meta?.get(key)?.string ?: defaultTagValue
                         map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.emit(name, data)
                     }
                 }

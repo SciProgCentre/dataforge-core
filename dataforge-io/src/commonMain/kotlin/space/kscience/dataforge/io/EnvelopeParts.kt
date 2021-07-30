@@ -15,7 +15,7 @@ import space.kscience.dataforge.names.toName
 private class PartDescriptor : Scheme() {
     var offset by int(0)
     var size by int(0)
-    var partMeta by node("meta".toName())
+    var partMeta by item("meta".toName())
 
     companion object : SchemeSpec<PartDescriptor>(::PartDescriptor) {
         val MULTIPART_KEY = ENVELOPE_NODE_KEY + "multipart"
@@ -86,15 +86,15 @@ public fun EnvelopeBuilder.envelopes(
 public fun Envelope.parts(): EnvelopeParts {
     if (data == null) return emptyList()
     //TODO add zip folder reader
-    val parts = meta.getIndexed(PARTS_KEY).values.mapNotNull { it.node }.map {
+    val parts = meta.getIndexed(PARTS_KEY).values.map {
         PartDescriptor.read(it)
     }
     return if (parts.isEmpty()) {
-        listOf(EnvelopePart(data!!, meta[MULTIPART_KEY].node))
+        listOf(EnvelopePart(data!!, meta[MULTIPART_KEY]))
     } else {
         parts.map {
             val binary = data!!.view(it.offset, it.size)
-            val meta = Laminate(it.partMeta, meta[MULTIPART_KEY].node)
+            val meta = Laminate(it.partMeta, meta[MULTIPART_KEY])
             EnvelopePart(binary, meta)
         }
     }

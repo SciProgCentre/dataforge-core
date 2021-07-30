@@ -49,7 +49,13 @@ public interface Meta : MetaRepr {
         }
 
         public fun equals(meta1: Meta?, meta2: Meta?): Boolean {
-            return meta1?.value == meta2?.value && meta1?.items == meta2?.items
+            if (meta1 == null && meta2 == null) return true
+            if (meta1 == null || meta2 == null) return false
+            if (meta1.value != meta2.value) return false
+            if (meta1.items.keys != meta2.items.keys) return false
+            return meta1.items.keys.all {
+                equals(meta1[it], meta2[it])
+            }
         }
 
         private val json = Json {

@@ -32,10 +32,10 @@ public fun <R : Any> MutableMetaDelegate.convert(
 ): ReadWriteProperty<Any?, R?> = object : ReadWriteProperty<Any?, R?> {
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): R? =
-        this@convert.getValue(thisRef, property)?.let(converter::itemToObject)
+        this@convert.getValue(thisRef, property)?.let(converter::metaToObject)
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: R?) {
-        val item = value?.let(converter::objectToMetaItem)
+        val item = value?.let(converter::objectToMeta)
         this@convert.setValue(thisRef, property, item)
     }
 }
@@ -46,10 +46,10 @@ public fun <R : Any> MutableMetaDelegate.convert(
 ): ReadWriteProperty<Any?, R> = object : ReadWriteProperty<Any?, R> {
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): R =
-        this@convert.getValue(thisRef, property)?.let(converter::itemToObject) ?: default()
+        this@convert.getValue(thisRef, property)?.let(converter::metaToObject) ?: default()
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: R) {
-        val item = value.let(converter::objectToMetaItem)
+        val item = value.let(converter::objectToMeta)
         this@convert.setValue(thisRef, property, item)
     }
 }

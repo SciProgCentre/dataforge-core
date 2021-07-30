@@ -23,7 +23,7 @@ public fun Meta.item(key: Name? = null): MetaDelegate = ReadOnlyProperty { _, pr
 public fun <R : Any> MetaDelegate.convert(
     converter: MetaConverter<R>,
 ): ReadOnlyProperty<Any?, R?> = ReadOnlyProperty { thisRef, property ->
-    this@convert.getValue(thisRef, property)?.let(converter::itemToObject)
+    this@convert.getValue(thisRef, property)?.let(converter::metaToObject)
 }
 
 /*
@@ -33,7 +33,7 @@ public fun <R : Any> MetaDelegate.convert(
     converter: MetaConverter<R>,
     default: () -> R,
 ): ReadOnlyProperty<Any?, R> = ReadOnlyProperty<Any?, R> { thisRef, property ->
-    this@convert.getValue(thisRef, property)?.let(converter::itemToObject) ?: default()
+    this@convert.getValue(thisRef, property)?.let(converter::metaToObject) ?: default()
 }
 
 /**

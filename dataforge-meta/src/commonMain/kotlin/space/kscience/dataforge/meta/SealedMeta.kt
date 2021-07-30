@@ -1,5 +1,6 @@
 package space.kscience.dataforge.meta
 
+import kotlinx.serialization.Serializable
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.values.Value
 
@@ -8,6 +9,7 @@ import space.kscience.dataforge.values.Value
  *
  * If the argument is possibly mutable node, it is copied on creation
  */
+@Serializable
 public class SealedMeta internal constructor(
     override val value: Value?,
     override val items: Map<NameToken, SealedMeta>
@@ -28,6 +30,6 @@ public fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(value, it
 public fun Meta(value: Value): SealedMeta = SealedMeta(value, emptyMap())
 
 @Suppress("FunctionName")
-public fun Meta(builder: MutableMeta.() -> Unit): SealedMeta =
+public inline fun Meta(builder: MutableMeta.() -> Unit): SealedMeta =
     MutableMeta(builder).seal()
 

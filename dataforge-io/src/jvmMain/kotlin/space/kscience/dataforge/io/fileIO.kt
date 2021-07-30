@@ -3,7 +3,7 @@ package space.kscience.dataforge.io
 import io.ktor.utils.io.core.*
 import io.ktor.utils.io.streams.asOutput
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.descriptors.NodeDescriptor
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.isEmpty
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
@@ -97,7 +97,7 @@ public inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
 public fun IOPlugin.readMetaFile(
     path: Path,
     formatOverride: MetaFormat? = null,
-    descriptor: NodeDescriptor? = null,
+    descriptor: MetaDescriptor? = null,
 ): Meta {
     if (!Files.exists(path)) error("Meta file $path does not exist")
 
@@ -125,7 +125,7 @@ public fun IOPlugin.writeMetaFile(
     path: Path,
     meta: Meta,
     metaFormat: MetaFormatFactory = JsonMetaFormat,
-    descriptor: NodeDescriptor? = null,
+    descriptor: MetaDescriptor? = null,
 ) {
     val actualPath = if (Files.isDirectory(path)) {
         path.resolve("@" + metaFormat.name.toString())
