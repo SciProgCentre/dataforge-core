@@ -53,22 +53,29 @@ public class DynamicMeta(internal val obj: dynamic) : Meta {
         }
 
     override val items: Map<NameToken, Meta>
-        get() = keys().flatMap<String, Pair<NameToken, Meta>> { key ->
+        get() = if (isPrimitive(obj)) {
+            emptyMap()
+        } else if (isArray(obj)) {
+            if((obj as Array<Any?>).all { isPrimitive(it) }){
+                emptyMap()
+            } else{
+                TODO()
+            }
+        } else keys().flatMap<String, Pair<NameToken, Meta>> { key ->
             val value = obj[key] ?: return@flatMap emptyList()
             when {
                 isArray(value) -> {
                     val array = value as Array<Any?>
                     if (array.all { isPrimitive(it) }) {
-                        emptyList()
+                        //primitive value
+                        //emptyList()
+                        listOf(NameToken(key) to DynamicMeta(value))
                     } else {
                         array.mapIndexedNotNull { index, it ->
                             val item = DynamicMeta(it)
                             NameToken(key, index.toString()) to item
                         }
                     }
-                }
-                isPrimitive(obj) -> {
-                    emptyList()
                 }
                 else -> {
                     val item = DynamicMeta(value)
