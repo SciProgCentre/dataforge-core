@@ -43,7 +43,7 @@ public operator fun MetaDescriptor.get(name: Name): MetaDescriptor? = when (name
     else -> get(name.firstOrNull()!!.asName())?.get(name.cutFirst())
 }
 
-public operator fun MetaDescriptor.get(name: String): MetaDescriptor? = get(name.toName())
+public operator fun MetaDescriptor.get(name: String): MetaDescriptor? = get(Name.parse(name))
 
 /**
  * A node constructed of default values for this descriptor and its children

@@ -2,35 +2,24 @@ package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.meta.descriptors.*
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.values.Value
 
 /**
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
- * Default item provider and [NodeDescriptor] are optional
+ * Default item provider and [MetaDescriptor] are optional
  */
-public open class Scheme(
-    source: MutableMeta = MutableMeta()
-) : Described, MutableMeta, ObservableMeta, Meta by source {
+public open class Scheme : Described, MetaRepr, MutableMetaProvider {
 
-    private var source = source.asObservable()
+    public var meta: ObservableMutableMeta = MutableMeta()
+        private set
 
     final override var descriptor: MetaDescriptor? = null
         internal set
-
-    override var value: Value?
-        get() = source.value
-        set(value) {
-            source.value = value
-        }
-
-    override val items: Map<NameToken, MutableMeta> get() = source.items
 
     internal fun wrap(
         items: MutableMeta,
         preserveDefault: Boolean = false
     ) {
-        this.source = (if (preserveDefault) items.withDefault(this.source) else items).asObservable()
+        meta = (if (preserveDefault) items.withDefault(meta.seal()) else items).asObservable()
     }
 
     /**
@@ -41,35 +30,17 @@ public open class Scheme(
         return descriptor?.validate(meta) ?: true
     }
 
-    /**
-     * Set a configurable property
-     */
-    override fun set(name: Name, meta: Meta) {
-        val oldItem = source[name]
-        if (oldItem != meta) {
-            if (validate(name, meta)) {
-                source[name] = meta
-            } else {
-                error("Validation failed for property $name with value $meta")
-            }
+    override fun getMeta(name: Name): Meta? = meta.getMeta(name)
+
+    override fun setMeta(name: Name, node: Meta?) {
+        if (validate(name, meta)) {
+            meta.setMeta(name, node)
+        } else {
+            error("Validation failed for node $node at $name")
         }
     }
 
-    override fun toMeta(): Laminate = Laminate(source, descriptor?.defaultNode)
-
-    override fun remove(name: Name) {
-        source.remove(name)
-    }
-
-    override fun getOrCreate(name: Name): MutableMeta = source.getOrCreate(name)
-
-    override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
-        source.onChange(owner ?: this, callback)
-    }
-
-    override fun removeListener(owner: Any?) {
-        source.removeListener(owner ?: this)
-    }
+    override fun toMeta(): Laminate = Laminate(meta, descriptor?.defaultNode)
 }
 
 /**

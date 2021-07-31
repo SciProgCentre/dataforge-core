@@ -1,6 +1,5 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.values.Value
 import space.kscience.dataforge.values.asValue
@@ -8,7 +7,6 @@ import space.kscience.dataforge.values.isList
 
 
 //TODO add Meta wrapper for dynamic
-@DFExperimental
 public fun Value.toDynamic(): dynamic {
     return if (isList()) {
         list.map { it.toDynamic() }.toTypedArray().asDynamic()
@@ -20,7 +18,6 @@ public fun Value.toDynamic(): dynamic {
 /**
  * Represent or copy this [Meta] to dynamic object to be passed to JS libraries
  */
-@DFExperimental
 public fun Meta.toDynamic(): dynamic {
     if (this is DynamicMeta) return this.obj
     if(items.isEmpty()) return value?.toDynamic()
@@ -36,7 +33,6 @@ public fun Meta.toDynamic(): dynamic {
     return res
 }
 
-@DFExperimental
 public class DynamicMeta(internal val obj: dynamic) : TypedMeta<DynamicMeta> {
     private fun keys(): Array<String> = js("Object").keys(obj) as Array<String>
 

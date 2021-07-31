@@ -11,6 +11,7 @@
 - Build tools 0.10.0
 - Relaxed type restriction on `MetaConverter`. Now nullables are available.
 - **Huge API-breaking refactoring of Meta**. Meta now can hava both value and children.
+- **API breaking** `String.toName()` is replaced by `Name.parse()`
 
 ### Deprecated
 - Direct use of `Config`

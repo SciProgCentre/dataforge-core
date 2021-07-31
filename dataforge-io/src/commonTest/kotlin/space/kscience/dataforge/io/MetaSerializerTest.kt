@@ -7,7 +7,6 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaSerializer
 import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.toName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -43,7 +42,7 @@ class MetaSerializerTest {
 
     @Test
     fun testNameSerialization() {
-        val name = "a.b.c".toName()
+        val name = Name.parse("a.b.c")
         val string = JSON_PRETTY.encodeToString(Name.serializer(), name)
         val restored = JSON_PLAIN.decodeFromString(Name.serializer(), string)
         assertEquals(name, restored)

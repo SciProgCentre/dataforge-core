@@ -4,10 +4,22 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.set
-import space.kscience.dataforge.names.*
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.cutFirst
+import space.kscience.dataforge.names.first
+import space.kscience.dataforge.names.length
 import space.kscience.dataforge.values.Value
 import space.kscience.dataforge.values.ValueType
 import space.kscience.dataforge.values.asValue
+import kotlin.collections.List
+import kotlin.collections.MutableMap
+import kotlin.collections.emptyList
+import kotlin.collections.getOrPut
+import kotlin.collections.hashMapOf
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.mapValues
+import kotlin.collections.set
 
 public class MetaDescriptorBuilder {
     public var info: String? = null
@@ -67,7 +79,7 @@ public class MetaDescriptorBuilder {
 }
 
 public fun MetaDescriptorBuilder.item(name: String, block: MetaDescriptorBuilder.() -> Unit) {
-    item(name.toName(), block)
+    item(Name.parse(name), block)
 }
 
 public fun MetaDescriptor(block: MetaDescriptorBuilder.() -> Unit): MetaDescriptor =
@@ -94,7 +106,7 @@ public fun MetaDescriptorBuilder.value(
     vararg additionalTypes: ValueType,
     block: MetaDescriptorBuilder.() -> Unit
 ) {
-    value(name.toName(), type, additionalTypes = additionalTypes, block)
+    value(Name.parse(name), type, additionalTypes = additionalTypes, block)
 }
 
 /**
@@ -108,7 +120,7 @@ public fun MetaDescriptorBuilder.node(name: Name, block: MetaDescriptorBuilder.(
 }
 
 public fun MetaDescriptorBuilder.node(name: String, block: MetaDescriptorBuilder.() -> Unit) {
-    node(name.toName(), block)
+    node(Name.parse(name), block)
 }
 
 public inline fun <reified E : Enum<E>> MetaDescriptorBuilder.enum(

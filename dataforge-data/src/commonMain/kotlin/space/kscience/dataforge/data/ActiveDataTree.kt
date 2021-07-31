@@ -115,4 +115,4 @@ public suspend inline fun <reified T : Any> ActiveDataTree<T>.emit(
 public suspend inline fun <reified T : Any> ActiveDataTree<T>.emit(
     name: String,
     noinline block: suspend ActiveDataTree<T>.() -> Unit,
-): Unit = emit(name.toName(), ActiveDataTree(typeOf<T>(), block))
+): Unit = emit(Name.parse(name), ActiveDataTree(typeOf<T>(), block))

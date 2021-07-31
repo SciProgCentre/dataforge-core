@@ -17,15 +17,24 @@ public interface MetaRepr {
 }
 
 /**
+ * A container for meta nodes
+ */
+public fun interface MetaProvider {
+    public fun getMeta(name: Name): Meta?
+}
+
+/**
  * A meta node
  * TODO add documentation
  * Same name siblings are supported via elements with the same [Name] but different indices.
  */
 @Type(Meta.TYPE)
 @Serializable(MetaSerializer::class)
-public interface Meta : MetaRepr {
+public interface Meta : MetaRepr, MetaProvider {
     public val value: Value?
     public val items: Map<NameToken, Meta>
+
+    override fun getMeta(name: Name): Meta? = find(name)
 
     override fun toMeta(): Meta = this
 
@@ -66,6 +75,12 @@ public interface Meta : MetaRepr {
         public fun toString(meta: Meta): String = json.encodeToString(MetaSerializer, meta)
 
         public val EMPTY: Meta = SealedMeta(null, emptyMap())
+
+        private tailrec fun Meta.find(name: Name): Meta? = if (name.isEmpty()) {
+            this
+        } else {
+            items[name.firstOrNull()!!]?.find(name.cutFirst())
+        }
     }
 }
 
@@ -82,16 +97,12 @@ public operator fun Meta.get(token: NameToken): Meta? = items[token]
  *
  * If [name] is empty return current [Meta]
  */
-public tailrec operator fun Meta.get(name: Name): Meta? = if (name.isEmpty()) {
-    this
-} else {
-    get(name.firstOrNull()!!)?.get(name.cutFirst())
-}
+public operator fun Meta.get(name: Name): Meta? = getMeta(name)
 
 /**
  * Parse [Name] from [key] using full name notation and pass it to [Meta.get]
  */
-public operator fun Meta.get(key: String): Meta? = this[key.toName()]
+public operator fun Meta.get(key: String): Meta? = this[Name.parse(key)]
 
 /**
  * Get all items matching given name. The index of the last element, if present is used as a [Regex],
@@ -155,7 +166,7 @@ public tailrec operator fun <M : TypedMeta<M>> TypedMeta<M>.get(name: Name): M? 
 /**
  * Parse [Name] from [key] using full name notation and pass it to [TypedMeta.get]
  */
-public operator fun <M : TypedMeta<M>> TypedMeta<M>.get(key: String): M? = this[key.toName()]
+public operator fun <M : TypedMeta<M>> TypedMeta<M>.get(key: String): M? = this[Name.parse(key)]
 
 
 /**
@@ -197,7 +208,7 @@ public fun Meta.isEmpty(): Boolean = this === Meta.EMPTY || (value == null && it
 public fun <M : TypedMeta<M>> TypedMeta<M>.getIndexed(name: Name): Map<String?, M> =
     (this as Meta).getIndexed(name) as Map<String?, M>
 
-public fun <M : TypedMeta<M>> TypedMeta<M>.getIndexed(name: String): Map<String?, Meta> = getIndexed(name.toName())
+public fun <M : TypedMeta<M>> TypedMeta<M>.getIndexed(name: String): Map<String?, Meta> = getIndexed(Name.parse(name))
 
 
 public val Meta?.string: String? get() = this?.value?.string

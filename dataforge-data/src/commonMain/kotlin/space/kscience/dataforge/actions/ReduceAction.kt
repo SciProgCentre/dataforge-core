@@ -11,7 +11,6 @@ import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.toName
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -95,7 +94,7 @@ internal class ReduceAction<T : Any, R : Any>(
 
             val groupMeta = group.meta
 
-            val env = ActionEnv(groupName.toName(), groupMeta, meta)
+            val env = ActionEnv(Name.parse(groupName), groupMeta, meta)
             @OptIn(DFInternal::class) val res: Data<R> = dataFlow.reduceToData(
                 outputType,
                 meta = groupMeta

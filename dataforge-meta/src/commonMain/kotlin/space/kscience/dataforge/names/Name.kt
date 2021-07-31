@@ -47,6 +47,61 @@ public class Name(public val tokens: List<NameToken>) {
         public val MATCH_ALL_TOKEN: NameToken = NameToken("**")
 
         public val EMPTY: Name = Name(emptyList())
+
+        /**
+         * Convert a [String] to name parsing it and extracting name tokens and index syntax.
+         * This operation is rather heavy so it should be used with care in high performance code.
+         */
+        public fun parse(string: String): Name{
+            if (string.isBlank()) return Name.EMPTY
+            val tokens = sequence {
+                var bodyBuilder = StringBuilder()
+                var queryBuilder = StringBuilder()
+                var bracketCount: Int = 0
+                var escape: Boolean = false
+                fun queryOn() = bracketCount > 0
+
+                for (it in string) {
+                    when {
+                        escape -> {
+                            if (queryOn()) {
+                                queryBuilder.append(it)
+                            } else {
+                                bodyBuilder.append(it)
+                            }
+                            escape = false
+                        }
+                        it == '\\' -> {
+                            escape = true
+                        }
+                        queryOn() -> {
+                            when (it) {
+                                '[' -> bracketCount++
+                                ']' -> bracketCount--
+                            }
+                            if (queryOn()) queryBuilder.append(it)
+                        }
+                        else -> when (it) {
+                            '.' -> {
+                                val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
+                                yield(NameToken(bodyBuilder.toString(), query))
+                                bodyBuilder = StringBuilder()
+                                queryBuilder = StringBuilder()
+                            }
+                            '[' -> bracketCount++
+                            ']' -> error("Syntax error: closing bracket ] not have not matching open bracket")
+                            else -> {
+                                if (queryBuilder.isNotEmpty()) error("Syntax error: only name end and name separator are allowed after index")
+                                bodyBuilder.append(it)
+                            }
+                        }
+                    }
+                }
+                val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
+                yield(NameToken(bodyBuilder.toString(), query))
+            }
+            return Name(tokens.toList())
+        }
     }
 }
 
@@ -81,61 +136,6 @@ public fun Name.first(): NameToken = tokens.first()
 
 
 /**
- * Convert a [String] to name parsing it and extracting name tokens and index syntax.
- * This operation is rather heavy so it should be used with care in high performance code.
- */
-public fun String.toName(): Name {
-    if (isBlank()) return Name.EMPTY
-    val tokens = sequence {
-        var bodyBuilder = StringBuilder()
-        var queryBuilder = StringBuilder()
-        var bracketCount: Int = 0
-        var escape: Boolean = false
-        fun queryOn() = bracketCount > 0
-
-        for (it in this@toName) {
-            when {
-                escape -> {
-                    if (queryOn()) {
-                        queryBuilder.append(it)
-                    } else {
-                        bodyBuilder.append(it)
-                    }
-                    escape = false
-                }
-                it == '\\' -> {
-                    escape = true
-                }
-                queryOn() -> {
-                    when (it) {
-                        '[' -> bracketCount++
-                        ']' -> bracketCount--
-                    }
-                    if (queryOn()) queryBuilder.append(it)
-                }
-                else -> when (it) {
-                    '.' -> {
-                        val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
-                        yield(NameToken(bodyBuilder.toString(), query))
-                        bodyBuilder = StringBuilder()
-                        queryBuilder = StringBuilder()
-                    }
-                    '[' -> bracketCount++
-                    ']' -> error("Syntax error: closing bracket ] not have not matching open bracket")
-                    else -> {
-                        if (queryBuilder.isNotEmpty()) error("Syntax error: only name end and name separator are allowed after index")
-                        bodyBuilder.append(it)
-                    }
-                }
-            }
-        }
-        val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
-        yield(NameToken(bodyBuilder.toString(), query))
-    }
-    return Name(tokens.toList())
-}
-
-/**
  * Convert the [String] to a [Name] by simply wrapping it in a single name token without parsing.
  * The input string could contain dots and braces, but they are just escaped, not parsed.
  */
@@ -145,7 +145,7 @@ public operator fun NameToken.plus(other: Name): Name = Name(listOf(this) + othe
 
 public operator fun Name.plus(other: Name): Name = Name(this.tokens + other.tokens)
 
-public operator fun Name.plus(other: String): Name = this + other.toName()
+public operator fun Name.plus(other: String): Name = this + Name.parse(other)
 
 public operator fun Name.plus(other: NameToken): Name = Name(tokens + other)
 
@@ -174,8 +174,8 @@ public fun Name.withIndex(index: String): Name {
  * Fast [String]-based accessor for item map
  */
 public operator fun <T> Map<NameToken, T>.get(body: String, query: String? = null): T? = get(NameToken(body, query))
-public operator fun <T> Map<Name, T>.get(name: String): T? = get(name.toName())
-public operator fun <T> MutableMap<Name, T>.set(name: String, value: T): Unit = set(name.toName(), value)
+public operator fun <T> Map<Name, T>.get(name: String): T? = get(Name.parse(name))
+public operator fun <T> MutableMap<Name, T>.set(name: String, value: T): Unit = set(Name.parse(name), value)
 
 /* Name comparison operations */
 

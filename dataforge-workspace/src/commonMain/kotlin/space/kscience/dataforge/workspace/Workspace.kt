@@ -5,7 +5,6 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.toName
 import space.kscience.dataforge.provider.Provider
 
 
@@ -28,7 +27,7 @@ public interface Workspace : ContextAware, Provider {
 
     override fun content(target: String): Map<Name, Any> {
         return when (target) {
-            "target", Meta.TYPE -> targets.mapKeys { it.key.toName() }
+            "target", Meta.TYPE -> targets.mapKeys { Name.parse(it.key)}
             Task.TYPE -> tasks
             //Data.TYPE -> data.flow().toMap()
             else -> emptyMap()
@@ -50,10 +49,10 @@ public interface Workspace : ContextAware, Provider {
 }
 
 public suspend fun Workspace.produce(task: String, target: String): TaskResult<*> =
-    produce(task.toName(), targets[target] ?: error("Target with key $target not found in $this"))
+    produce(Name.parse(task), targets[target] ?: error("Target with key $target not found in $this"))
 
 public suspend fun Workspace.produce(task: String, meta: Meta): TaskResult<*> =
-    produce(task.toName(), meta)
+    produce(Name.parse(task), meta)
 
 public suspend fun Workspace.produce(task: String, block: MutableMeta.() -> Unit = {}): TaskResult<*> =
     produce(task, Meta(block))

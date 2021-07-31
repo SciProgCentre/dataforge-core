@@ -3,7 +3,7 @@ package space.kscience.dataforge.meta
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.get
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.names.toName
+import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.values.ListValue
 import space.kscience.dataforge.values.Value
 
@@ -28,7 +28,7 @@ public fun Meta.toMap(descriptor: MetaDescriptor? = null): Map<String, Any?> = b
 
 /**
  * Convert map of maps to meta. This method will recognize [Meta], [Map]<String,Any?> and [List] of all mentioned above as value.
- * All other values will be converted to values.
+ * All other values will be converted to [Value].
  */
 @DFExperimental
 public fun Map<String, Any?>.toMeta(descriptor: MetaDescriptor? = null): Meta = Meta {
@@ -45,7 +45,7 @@ public fun Map<String, Any?>.toMeta(descriptor: MetaDescriptor? = null): Meta = 
             if (items.all { it.isLeaf }) {
                 set(key, ListValue(items.map { it.value!! }))
             } else {
-                setIndexedItems(key.toName(), value.map { toMeta(it) })
+                setIndexedItems(Name.parse(key), value.map { toMeta(it) })
             }
         } else {
             set(key, toMeta(value))

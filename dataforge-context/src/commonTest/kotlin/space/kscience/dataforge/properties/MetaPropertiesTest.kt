@@ -14,7 +14,7 @@ internal class TestScheme : Scheme() {
 }
 
 @DFExperimental
-class ItemPropertiesTest {
+class MetaPropertiesTest {
     @Test
     fun testBinding() {
         val scheme = TestScheme.empty()

@@ -16,13 +16,17 @@ import kotlin.jvm.Synchronized
 @DslMarker
 public annotation class MetaBuilder
 
+public interface MutableMetaProvider : MetaProvider {
+    public fun setMeta(name: Name, node: Meta?)
+}
+
 /**
  * Mutable variant of [Meta]
  * TODO documentation
  */
 @Serializable(MutableMetaSerializer::class)
 @MetaBuilder
-public interface MutableMeta : Meta {
+public interface MutableMeta : Meta, MutableMetaProvider {
 
     override val items: Map<NameToken, MutableMeta>
 
@@ -35,6 +39,14 @@ public interface MutableMeta : Meta {
      * Set or replace node at given [name]
      */
     public operator fun set(name: Name, meta: Meta)
+
+    override fun setMeta(name: Name, node: Meta?) {
+        if (node == null) {
+            remove(name)
+        } else {
+            set(name, node)
+        }
+    }
 
     /**
      * Remove a node at a given [name] if it is present
@@ -85,47 +97,47 @@ public interface MutableMeta : Meta {
     }
 
     public infix fun String.put(meta: Meta) {
-        toName() put meta
+        Name.parse(this) put meta
     }
 
     public infix fun String.put(value: Value?) {
-        set(toName(), value)
+        set(Name.parse(this), value)
     }
 
     public infix fun String.put(string: String) {
-        set(toName(), string.asValue())
+        set(Name.parse(this), string.asValue())
     }
 
     public infix fun String.put(number: Number) {
-        set(toName(), number.asValue())
+        set(Name.parse(this), number.asValue())
     }
 
     public infix fun String.put(boolean: Boolean) {
-        set(toName(), boolean.asValue())
+        set(Name.parse(this), boolean.asValue())
     }
 
     public infix fun String.put(enum: Enum<*>) {
-        set(toName(), EnumValue(enum))
+        set(Name.parse(this), EnumValue(enum))
     }
 
     public infix fun String.put(array: DoubleArray) {
-        set(toName(), array.asValue())
+        set(Name.parse(this), array.asValue())
     }
 
     public infix fun String.put(repr: MetaRepr) {
-        toName() put repr.toMeta()
+        Name.parse(this) put repr.toMeta()
     }
 
     public infix fun String.put(iterable: Iterable<Meta>) {
-        setIndexed(toName(), iterable)
+        setIndexed(Name.parse(this), iterable)
     }
 
     public infix fun String.put(builder: MutableMeta.() -> Unit) {
-        set(toName(), MutableMeta(builder))
+        set(Name.parse(this), MutableMeta(builder))
     }
 }
 
-public fun MutableMeta.getOrCreate(string: String): MutableMeta = getOrCreate(string.toName())
+public fun MutableMeta.getOrCreate(key: String): MutableMeta = getOrCreate(Name.parse(key))
 
 @Serializable(MutableMetaSerializer::class)
 public interface MutableTypedMeta<M : MutableTypedMeta<M>> : TypedMeta<M>, MutableMeta {
@@ -138,47 +150,37 @@ public interface MutableTypedMeta<M : MutableTypedMeta<M>> : TypedMeta<M>, Mutab
     override fun getOrCreate(name: Name): M
 }
 
-public fun <M : MutableTypedMeta<M>> M.getOrCreate(string: String): M = getOrCreate(string.toName())
+public fun <M : MutableTypedMeta<M>> M.getOrCreate(key: String): M = getOrCreate(Name.parse(key))
 
-public fun MutableMeta.remove(name: String){
-    remove(name.toName())
+public fun MutableMeta.remove(key: String) {
+    remove(Name.parse(key))
 }
 
 // node setters
 
-public operator fun MutableMeta.set(name: NameToken, value: Meta): Unit = set(name.asName(), value)
-public operator fun MutableMeta.set(name: Name, meta: Meta?): Unit {
-    if (meta == null) {
-        remove(name)
-    } else {
-        set(name, meta)
-    }
-}
-
-public operator fun MutableMeta.set(key: String, meta: Meta?): Unit {
-    set(key.toName(), meta)
-}
+public operator fun MutableMetaProvider.set(Key: NameToken, value: Meta): Unit = setMeta(Key.asName(), value)
+public operator fun MutableMetaProvider.set(key: String, value: Meta): Unit = setMeta(Name.parse(key), value)
 
 //value setters
 
 public operator fun MutableMeta.set(name: NameToken, value: Value?): Unit = set(name.asName(), value)
-public operator fun MutableMeta.set(key: String, value: Value?): Unit = set(key.toName(), value)
+public operator fun MutableMeta.set(key: String, value: Value?): Unit = set(Name.parse(key), value)
 
 public operator fun MutableMeta.set(name: Name, value: String): Unit = set(name, value.asValue())
 public operator fun MutableMeta.set(name: NameToken, value: String): Unit = set(name.asName(), value.asValue())
-public operator fun MutableMeta.set(key: String, value: String): Unit = set(key.toName(), value.asValue())
+public operator fun MutableMeta.set(key: String, value: String): Unit = set(Name.parse(key), value.asValue())
 
 public operator fun MutableMeta.set(name: Name, value: Boolean): Unit = set(name, value.asValue())
 public operator fun MutableMeta.set(name: NameToken, value: Boolean): Unit = set(name.asName(), value.asValue())
-public operator fun MutableMeta.set(key: String, value: Boolean): Unit = set(key.toName(), value.asValue())
+public operator fun MutableMeta.set(key: String, value: Boolean): Unit = set(Name.parse(key), value.asValue())
 
 public operator fun MutableMeta.set(name: Name, value: Number): Unit = set(name, value.asValue())
 public operator fun MutableMeta.set(name: NameToken, value: Number): Unit = set(name.asName(), value.asValue())
-public operator fun MutableMeta.set(key: String, value: Number): Unit = set(key.toName(), value.asValue())
+public operator fun MutableMeta.set(key: String, value: Number): Unit = set(Name.parse(key), value.asValue())
 
 public operator fun MutableMeta.set(name: Name, value: List<Value>): Unit = set(name, value.asValue())
 public operator fun MutableMeta.set(name: NameToken, value: List<Value>): Unit = set(name.asName(), value.asValue())
-public operator fun MutableMeta.set(key: String, value: List<Value>): Unit = set(key.toName(), value.asValue())
+public operator fun MutableMeta.set(key: String, value: List<Value>): Unit = set(Name.parse(key), value.asValue())
 
 //public fun MutableMeta.set(key: String, index: String, value: Value?): Unit =
 //    set(key.toName().withIndex(index), value)
@@ -218,8 +220,8 @@ public fun MutableMeta.setIndexed(
 public operator fun MutableMeta.set(name: Name, metas: Iterable<Meta>): Unit =
     setIndexed(name, metas)
 
-public operator fun MutableMeta.set(name: String, metas: Iterable<Meta>): Unit =
-    setIndexed(name.toName(), metas)
+public operator fun MutableMeta.set(key: String, metas: Iterable<Meta>): Unit =
+    setIndexed(Name.parse(key), metas)
 
 
 /**
@@ -396,13 +398,13 @@ public fun MutableMeta.append(name: Name, meta: Meta) {
 }
 
 @DFExperimental
-public fun MutableMeta.append(name: String, meta: Meta): Unit = append(name.toName(), meta)
+public fun MutableMeta.append(key: String, meta: Meta): Unit = append(Name.parse(key), meta)
 
 @DFExperimental
 public fun MutableMeta.append(name: Name, value: Value): Unit = append(name, Meta(value))
 
 @DFExperimental
-public fun MutableMeta.append(name: String, value: Value): Unit = append(name.toName(), value)
+public fun MutableMeta.append(key: String, value: Value): Unit = append(Name.parse(key), value)
 
 ///**
 // * Apply existing node with given [builder] or create a new element with it.
@@ -443,8 +445,9 @@ public inline fun Meta.copy(block: MutableMeta.() -> Unit = {}): Meta =
     toMutableMeta().apply(block)
 
 
-private class MutableMetaWithDefault(val source: MutableMeta, val default: Meta, val name: Name) :
-    MutableMeta by source {
+private class MutableMetaWithDefault(
+    val source: MutableMeta, val default: Meta, val name: Name
+) : MutableMeta by source {
     override val items: Map<NameToken, MutableMeta>
         get() = (source.items.keys + default.items.keys).associateWith {
             MutableMetaWithDefault(source, default, name + it)
@@ -455,6 +458,8 @@ private class MutableMetaWithDefault(val source: MutableMeta, val default: Meta,
         set(value) {
             source[name] = value
         }
+
+    override fun getMeta(name: Name): Meta? = source.getMeta(name) ?: default.getMeta(name)
 
     override fun toString(): String = Meta.toString(this)
     override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)

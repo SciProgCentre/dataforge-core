@@ -1,9 +1,6 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.names.asName
-import space.kscience.dataforge.names.startsWith
+import space.kscience.dataforge.names.*
 import space.kscience.dataforge.values.Value
 import kotlin.jvm.Synchronized
 import kotlin.reflect.KProperty1
@@ -57,6 +54,8 @@ private class ObservableMetaWrapper(
     override val items: Map<NameToken, ObservableMetaWrapper>
         get() = origin.items.mapValues { ObservableMetaWrapper(it.value) }
 
+    override fun getMeta(name: Name): Meta? = origin.getMeta(name)
+
     override var value: Value?
         get() = origin.value
         set(value) {
@@ -86,7 +85,10 @@ private class ObservableMetaWrapper(
     }
 
     override fun attach(name: Name, node: ObservableMutableMeta) {
-        TODO("Not yet implemented")
+        set(name, node)
+        node.onChange(this) { changeName ->
+            setMeta(name + changeName, node[changeName])
+        }
     }
 }
 
@@ -104,14 +106,14 @@ public fun MutableMeta.asObservable(): ObservableMutableMeta =
  *
  * Optional [owner] property is used for
  */
-public fun <O : ObservableMeta, T> O.useProperty(
-    property: KProperty1<O, T>,
+public fun <S : Scheme, T> S.useProperty(
+    property: KProperty1<S, T>,
     owner: Any? = null,
-    callBack: O.(T) -> Unit,
+    callBack: S.(T) -> Unit,
 ) {
     //Pass initial value.
     callBack(property.get(this))
-    onChange(owner) { name ->
+    meta.onChange(owner) { name ->
         if (name.startsWith(property.name.asName())) {
             callBack(property.get(this@useProperty))
         }

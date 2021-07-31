@@ -14,7 +14,6 @@ import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.toName
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
@@ -29,13 +28,13 @@ public inline fun <reified T : Any> TaskContainer.registerTask(
     name: String,
     noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
-): Unit = registerTask(name.toName(), Task(MetaDescriptor(descriptorBuilder), builder))
+): Unit = registerTask(Name.parse(name), Task(MetaDescriptor(descriptorBuilder), builder))
 
 public inline fun <reified T : Any> TaskContainer.task(
     noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
-    val taskName = property.name.toName()
+    val taskName = Name.parse(property.name)
     val task = Task(MetaDescriptor(descriptorBuilder), builder)
     registerTask(taskName, task)
     ReadOnlyProperty { _, _ -> TaskReference(taskName, task) }

@@ -12,7 +12,7 @@ public object NameSerializer : KSerializer<Name> {
         PrimitiveSerialDescriptor("space.kscience.dataforge.names.Name", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): Name {
-        return decoder.decodeString().toName()
+        return Name.parse(decoder.decodeString())
     }
 
     override fun serialize(encoder: Encoder, value: Name) {
@@ -25,7 +25,7 @@ public object NameTokenSerializer: KSerializer<NameToken> {
         PrimitiveSerialDescriptor("space.kscience.dataforge.names.NameToken", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): NameToken {
-        return decoder.decodeString().toName().firstOrNull()!!
+        return Name.parse(decoder.decodeString()).firstOrNull()!!
     }
 
     override fun serialize(

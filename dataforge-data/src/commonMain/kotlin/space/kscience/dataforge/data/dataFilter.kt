@@ -5,7 +5,10 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.names.*
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.isEmpty
+import space.kscience.dataforge.names.plus
+import space.kscience.dataforge.names.removeHeadOrNull
 import kotlin.reflect.KType
 
 
@@ -64,7 +67,7 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
     override val updates: Flow<Name> get() = this@branch.updates.mapNotNull { it.removeHeadOrNull(branchName) }
 }
 
-public fun <T : Any> DataSet<T>.branch(branchName: String): DataSet<T> = this@branch.branch(branchName.toName())
+public fun <T : Any> DataSet<T>.branch(branchName: String): DataSet<T> = this@branch.branch(Name.parse(branchName))
 
 @DFExperimental
 public suspend fun <T : Any> DataSet<T>.rootData(): Data<T>? = getData(Name.EMPTY)

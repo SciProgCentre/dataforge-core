@@ -77,6 +77,11 @@ public fun <T : Scheme> MutableMeta.spec(
     }
 }
 
+public fun <T : Scheme> Scheme.spec(
+    spec: Specification<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, T> = meta.spec(spec, key)
+
 /**
  * A delegate that uses a [Specification] to wrap a list of child providers.
  * If children are mutable, the changes in list elements are reflected on them.

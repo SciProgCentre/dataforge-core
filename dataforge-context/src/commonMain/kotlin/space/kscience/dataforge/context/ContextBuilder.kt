@@ -7,8 +7,9 @@ import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.NameToken
+import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
-import space.kscience.dataforge.names.toName
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
@@ -30,7 +31,7 @@ public class ContextBuilder internal constructor(
     }
 
     public fun name(string: String) {
-        this.name = string.toName()
+        this.name = Name.parse(string)
     }
 
     @OptIn(DFExperimental::class)
@@ -63,7 +64,7 @@ public class ContextBuilder internal constructor(
     }
 
     public fun build(): Context {
-        val contextName = name ?: "@auto[${hashCode().toUInt().toString(16)}]".toName()
+        val contextName = name ?: NameToken("@auto",hashCode().toUInt().toString(16)).asName()
         val plugins = HashMap<PluginTag, Plugin>()
 
         fun addPlugin(factory: PluginFactory<*>, meta: Meta) {

@@ -10,7 +10,7 @@ import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.plus
-import space.kscience.dataforge.names.toName
+
 
 /**
  * A streaming-friendly envelope format with a short binary tag.
@@ -121,7 +121,7 @@ public class TaggedEnvelopeFormat(
         override fun invoke(meta: Meta, context: Context): EnvelopeFormat {
             val io = context.io
 
-            val metaFormatName = meta["name"].string?.toName() ?: JsonMetaFormat.name
+            val metaFormatName = meta["name"].string?.let { Name.parse(it) } ?: JsonMetaFormat.name
             //Check if appropriate factory exists
             io.metaFormatFactories.find { it.name == metaFormatName } ?: error("Meta format could not be resolved")
 

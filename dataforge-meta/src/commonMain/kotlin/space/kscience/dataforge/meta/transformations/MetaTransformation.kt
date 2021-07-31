@@ -42,7 +42,7 @@ public data class KeepTransformationRule(val selector: (Name) -> Boolean) :
         meta.nodeSequence().map { it.first }.filter(selector)
 
     override fun transformItem(name: Name, item: Meta?, target: MutableMeta) {
-        if (selector(name)) target.set(name, item)
+        if (selector(name)) target.setMeta(name, item)
     }
 }
 
@@ -174,7 +174,7 @@ public class MetaTransformationBuilder {
     public fun keep(regex: String) {
         transformations.add(
             RegexItemTransformationRule(regex.toRegex()) { name, _, Meta ->
-                set(name, Meta)
+                setMeta(name, Meta)
             })
     }
 
@@ -184,7 +184,7 @@ public class MetaTransformationBuilder {
     public fun move(from: Name, to: Name, operation: (Meta?) -> Meta? = { it }) {
         transformations.add(
             SingleItemTransformationRule(from) { _, item ->
-                set(to, operation(item))
+                setMeta(to, operation(item))
             }
         )
     }
