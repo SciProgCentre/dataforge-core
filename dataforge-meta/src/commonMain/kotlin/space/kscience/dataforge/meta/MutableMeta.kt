@@ -1,7 +1,6 @@
 package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
 import space.kscience.dataforge.values.EnumValue
 import space.kscience.dataforge.values.Value
@@ -385,7 +384,6 @@ private class MutableMetaImpl(
 /**
  * Append the node with a same-name-sibling, automatically generating numerical index
  */
-@DFExperimental
 public fun MutableMeta.append(name: Name, meta: Meta) {
     require(!name.isEmpty()) { "Name could not be empty for append operation" }
     val newIndex = name.lastOrNull()!!.index
@@ -397,13 +395,10 @@ public fun MutableMeta.append(name: Name, meta: Meta) {
     }
 }
 
-@DFExperimental
 public fun MutableMeta.append(key: String, meta: Meta): Unit = append(Name.parse(key), meta)
 
-@DFExperimental
 public fun MutableMeta.append(name: Name, value: Value): Unit = append(name, Meta(value))
 
-@DFExperimental
 public fun MutableMeta.append(key: String, value: Value): Unit = append(Name.parse(key), value)
 
 ///**

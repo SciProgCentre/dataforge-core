@@ -9,11 +9,11 @@ public interface Configurable {
     /**
      * Backing config
      */
-    public val config: MutableMeta
+    public val meta: MutableMeta
 }
 
 
-public fun <T : Configurable> T.configure(meta: Meta): T = this.apply { config.update(meta) }
+public fun <T : Configurable> T.configure(meta: Meta): T = this.apply { this.meta.update(meta) }
 
 @DFBuilder
-public inline fun <T : Configurable> T.configure(action: MutableMeta.() -> Unit): T = apply { config.apply(action) }
+public inline fun <T : Configurable> T.configure(action: MutableMeta.() -> Unit): T = apply { meta.apply(action) }

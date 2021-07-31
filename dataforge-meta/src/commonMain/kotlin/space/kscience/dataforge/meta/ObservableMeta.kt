@@ -75,6 +75,12 @@ private class ObservableMetaWrapper(
     override fun set(name: Name, meta: Meta) {
         val oldMeta = get(name)
         origin[name] = meta
+        // if meta is observable propagate changes from it
+        if(meta is ObservableMeta){
+            meta.onChange(this) { changeName ->
+                setMeta(name + changeName, meta[changeName])
+            }
+        }
         if (oldMeta != meta) {
             changed(name)
         }

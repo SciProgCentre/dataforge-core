@@ -7,9 +7,9 @@ import space.kscience.dataforge.names.Name
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
  * Default item provider and [MetaDescriptor] are optional
  */
-public open class Scheme : Described, MetaRepr, MutableMetaProvider {
+public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurable {
 
-    public var meta: ObservableMutableMeta = MutableMeta()
+    final override var meta: ObservableMutableMeta = MutableMeta()
         private set
 
     final override var descriptor: MetaDescriptor? = null

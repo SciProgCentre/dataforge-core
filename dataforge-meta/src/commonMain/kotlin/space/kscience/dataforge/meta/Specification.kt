@@ -53,7 +53,7 @@ public fun <T : Any> MutableMeta.update(
 public fun <T : Any> Configurable.update(
     spec: Specification<T>,
     action: T.() -> Unit,
-): T = spec.write(config).apply(action)
+): T = spec.write(meta).apply(action)
 
 //
 //public fun  <M : MutableTypedMeta<M>> MutableMeta.withSpec(spec: Specification<M>): M? =

@@ -12,6 +12,7 @@
 - Relaxed type restriction on `MetaConverter`. Now nullables are available.
 - **Huge API-breaking refactoring of Meta**. Meta now can hava both value and children.
 - **API breaking** `String.toName()` is replaced by `Name.parse()`
+- **API breaking** Configurable`config` changed to `meta`
 
 ### Deprecated
 - Direct use of `Config`
