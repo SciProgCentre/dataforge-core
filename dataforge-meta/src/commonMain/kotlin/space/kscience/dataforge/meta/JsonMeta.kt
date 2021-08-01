@@ -28,26 +28,22 @@ public fun Value.toJson(descriptor: MetaDescriptor? = null): JsonElement = when 
 private fun String.toJsonKey(descriptor: MetaDescriptor?) = descriptor?.attributes?.get("jsonName").string ?: toString()
 
 private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): JsonElement = if (items.isEmpty()) {
-    value?.toJson(descriptor) ?: JsonNull
+    value?.toJson(descriptor) ?: JsonObject(emptyMap())
 } else {
     val pairs: MutableList<Pair<String, JsonElement>> = items.entries.groupBy {
         it.key.body
-    }.mapNotNullTo(ArrayList()) { (body, list) ->
+    }.mapTo(ArrayList()) { (body, list) ->
         val childDescriptor = descriptor?.children?.get(body)
         if (list.size == 1) {
             val (token, element) = list.first()
             //do not add empty element
-            if (!element.isEmpty()) {
-                val child: JsonElement = element.toJsonWithIndex(childDescriptor, token.index)
-                body to child
-            } else null
+            val child: JsonElement = element.toJsonWithIndex(childDescriptor, token.index)
+            body to child
         } else {
-            val elements: List<JsonElement> = list.sortedBy { it.key.index }.mapIndexedNotNull { index, entry ->
-                if (!entry.value.isEmpty()) {
-                    //Use index if it is not equal to the item order
-                    val actualIndex = if (index.toString() != entry.key.index) entry.key.index else null
-                    entry.value.toJsonWithIndex(childDescriptor, actualIndex)
-                } else null
+            val elements: List<JsonElement> = list.sortedBy { it.key.index }.mapIndexed { index, entry ->
+                //Use index if it is not equal to the item order
+                val actualIndex = if (index.toString() != entry.key.index) entry.key.index else null
+                entry.value.toJsonWithIndex(childDescriptor, actualIndex)
             }
             body to JsonArray(elements)
         }
