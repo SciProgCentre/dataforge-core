@@ -22,9 +22,12 @@ public class SealedMeta internal constructor(
 /**
  * Generate sealed node from [this]. If it is already sealed return it as is
  */
-public fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(value, items.mapValues { entry ->
-    entry.value.seal()
-})
+public fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(
+    value,
+    items.mapValues { entry ->
+        entry.value.seal()
+    }
+)
 
 @Suppress("FunctionName")
 public fun Meta(value: Value): SealedMeta = SealedMeta(value, emptyMap())

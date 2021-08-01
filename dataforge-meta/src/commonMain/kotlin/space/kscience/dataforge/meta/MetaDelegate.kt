@@ -3,109 +3,83 @@ package space.kscience.dataforge.meta
 import space.kscience.dataforge.meta.transformations.MetaConverter
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
-import space.kscience.dataforge.values.Value
+import space.kscience.dataforge.values.*
 import kotlin.properties.ReadOnlyProperty
 
 /* Meta delegates */
 
-public typealias MetaDelegate = ReadOnlyProperty<Any?, Meta?>
-
-public fun MetaProvider.item(key: Name? = null): MetaDelegate = ReadOnlyProperty { _, property ->
+public fun MetaProvider.node(key: Name? = null): ReadOnlyProperty<Any?, Meta?> = ReadOnlyProperty { _, property ->
     getMeta(key ?: property.name.asName())
 }
 
-//TODO add caching for sealed nodes
-
-
-/**
- * Apply a converter to this delegate creating a delegate with a custom type
- */
-public fun <R : Any> MetaDelegate.convert(
-    converter: MetaConverter<R>,
-): ReadOnlyProperty<Any?, R?> = ReadOnlyProperty { thisRef, property ->
-    this@convert.getValue(thisRef, property)?.let(converter::metaToObject)
+public fun <T> MetaProvider.node(
+    key: Name? = null,
+    converter: MetaConverter<T>
+): ReadOnlyProperty<Any?, T?> = ReadOnlyProperty { _, property ->
+    getMeta(key ?: property.name.asName())?.let { converter.metaToObject(it) }
 }
-
-/*
- *
- */
-public fun <R : Any> MetaDelegate.convert(
-    converter: MetaConverter<R>,
-    default: () -> R,
-): ReadOnlyProperty<Any?, R> = ReadOnlyProperty<Any?, R> { thisRef, property ->
-    this@convert.getValue(thisRef, property)?.let(converter::metaToObject) ?: default()
-}
-
-/**
- * A converter with a custom reader transformation
- */
-public fun <R> MetaDelegate.convert(
-    reader: (Meta?) -> R,
-): ReadOnlyProperty<Any?, R> = ReadOnlyProperty<Any?, R> { thisRef, property ->
-    this@convert.getValue(thisRef, property).let(reader)
-}
-
-/* Read-only delegates for [Meta] */
 
 /**
  * A property delegate that uses custom key
  */
-public fun MetaProvider.value(key: Name? = null): ReadOnlyProperty<Any?, Value?> =
-    item(key).convert(MetaConverter.value)
+public fun MetaProvider.value(key: Name? = null): ReadOnlyProperty<Any?, Value?> = ReadOnlyProperty { _, property ->
+    getMeta(key ?: property.name.asName())?.value
+}
 
-public fun MetaProvider.string(key: Name? = null): ReadOnlyProperty<Any?, String?> =
-    item(key).convert(MetaConverter.string)
+public fun <R> MetaProvider.value(
+    key: Name? = null,
+    reader: (Value?) -> R
+): ReadOnlyProperty<Any?, R> = ReadOnlyProperty { _, property ->
+    reader(getMeta(key ?: property.name.asName())?.value)
+}
 
-public fun MetaProvider.boolean(key: Name? = null): ReadOnlyProperty<Any?, Boolean?> =
-    item(key).convert(MetaConverter.boolean)
+//TODO add caching for sealed nodes
 
-public fun MetaProvider.number(key: Name? = null): ReadOnlyProperty<Any?, Number?> =
-    item(key).convert(MetaConverter.number)
+/* Read-only delegates for [Meta] */
 
-public fun MetaProvider.double(key: Name? = null): ReadOnlyProperty<Any?, Double?> =
-    item(key).convert(MetaConverter.double)
+public fun MetaProvider.string(key: Name? = null): ReadOnlyProperty<Any?, String?> = value(key) { it?.string }
 
-public fun MetaProvider.float(key: Name? = null): ReadOnlyProperty<Any?, Float?> =
-    item(key).convert(MetaConverter.float)
+public fun MetaProvider.boolean(key: Name? = null): ReadOnlyProperty<Any?, Boolean?> = value(key) { it?.boolean }
 
-public fun MetaProvider.int(key: Name? = null): ReadOnlyProperty<Any?, Int?> =
-    item(key).convert(MetaConverter.int)
+public fun MetaProvider.number(key: Name? = null): ReadOnlyProperty<Any?, Number?> = value(key) { it?.numberOrNull }
 
-public fun MetaProvider.long(key: Name? = null): ReadOnlyProperty<Any?, Long?> =
-    item(key).convert(MetaConverter.long)
+public fun MetaProvider.double(key: Name? = null): ReadOnlyProperty<Any?, Double?> = value(key) { it?.double }
 
-public fun MetaProvider.node(key: Name? = null): ReadOnlyProperty<Any?, Meta?> =
-    item(key).convert(MetaConverter.meta)
+public fun MetaProvider.float(key: Name? = null): ReadOnlyProperty<Any?, Float?> = value(key) { it?.float }
+
+public fun MetaProvider.int(key: Name? = null): ReadOnlyProperty<Any?, Int?> = value(key) { it?.int }
+
+public fun MetaProvider.long(key: Name? = null): ReadOnlyProperty<Any?, Long?> = value(key) { it?.long }
 
 public fun MetaProvider.string(default: String, key: Name? = null): ReadOnlyProperty<Any?, String> =
-    item(key).convert(MetaConverter.string) { default }
+    value(key) { it?.string ?: default }
 
 public fun MetaProvider.boolean(default: Boolean, key: Name? = null): ReadOnlyProperty<Any?, Boolean> =
-    item(key).convert(MetaConverter.boolean) { default }
+    value(key) { it?.boolean ?: default }
 
 public fun MetaProvider.number(default: Number, key: Name? = null): ReadOnlyProperty<Any?, Number> =
-    item(key).convert(MetaConverter.number) { default }
+    value(key) { it?.numberOrNull ?: default }
 
 public fun MetaProvider.double(default: Double, key: Name? = null): ReadOnlyProperty<Any?, Double> =
-    item(key).convert(MetaConverter.double) { default }
+    value(key) { it?.double ?: default }
 
 public fun MetaProvider.float(default: Float, key: Name? = null): ReadOnlyProperty<Any?, Float> =
-    item(key).convert(MetaConverter.float) { default }
+    value(key) { it?.float ?: default }
 
 public fun MetaProvider.int(default: Int, key: Name? = null): ReadOnlyProperty<Any?, Int> =
-    item(key).convert(MetaConverter.int) { default }
+    value(key) { it?.int ?: default }
 
 public fun MetaProvider.long(default: Long, key: Name? = null): ReadOnlyProperty<Any?, Long> =
-    item(key).convert(MetaConverter.long) { default }
+    value(key) { it?.long ?: default }
 
 public inline fun <reified E : Enum<E>> MetaProvider.enum(default: E, key: Name? = null): ReadOnlyProperty<Any?, E> =
-    item(key).convert(MetaConverter.enum()) { default }
+    value<E>(key) { it?.enum<E>() ?: default }
 
 public fun MetaProvider.string(key: Name? = null, default: () -> String): ReadOnlyProperty<Any?, String> =
-    item(key).convert(MetaConverter.string, default)
+    value(key) { it?.string ?: default() }
 
 public fun MetaProvider.boolean(key: Name? = null, default: () -> Boolean): ReadOnlyProperty<Any?, Boolean> =
-    item(key).convert(MetaConverter.boolean, default)
+    value(key) { it?.boolean ?: default() }
 
 public fun MetaProvider.number(key: Name? = null, default: () -> Number): ReadOnlyProperty<Any?, Number> =
-    item(key).convert(MetaConverter.number, default)
+    value(key) { it?.numberOrNull ?: default() }

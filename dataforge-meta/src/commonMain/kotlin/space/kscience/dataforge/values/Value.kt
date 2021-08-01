@@ -194,13 +194,13 @@ public class ListValue(override val list: List<Value>) : Value, Iterable<Value> 
         return list.hashCode()
     }
 
-    public companion object{
+    public companion object {
         public val EMPTY: ListValue = ListValue(emptyList())
     }
 }
 
-public fun ListValue(vararg numbers: Number): ListValue = ListValue(numbers.map{it.asValue()})
-public fun ListValue(vararg strings: String): ListValue = ListValue(strings.map{it.asValue()})
+public fun ListValue(vararg numbers: Number): ListValue = ListValue(numbers.map { it.asValue() })
+public fun ListValue(vararg strings: String): ListValue = ListValue(strings.map { it.asValue() })
 
 public fun Number.asValue(): Value = NumberValue(this)
 

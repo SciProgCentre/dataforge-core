@@ -31,7 +31,7 @@ public fun Meta.toMap(descriptor: MetaDescriptor? = null): Map<String, Any?> = b
  * All other values will be converted to [Value].
  */
 @DFExperimental
-public fun Map<String, Any?>.toMeta(descriptor: MetaDescriptor? = null): Meta = Meta {
+public fun Map<String, Any?>.toMeta(@Suppress("UNUSED_PARAMETER") descriptor: MetaDescriptor? = null): Meta = Meta {
     @Suppress("UNCHECKED_CAST")
     fun toMeta(value: Any?): Meta = when (value) {
         is Meta -> value
@@ -45,7 +45,7 @@ public fun Map<String, Any?>.toMeta(descriptor: MetaDescriptor? = null): Meta = 
             if (items.all { it.isLeaf }) {
                 set(key, ListValue(items.map { it.value!! }))
             } else {
-                setIndexedItems(Name.parse(key), value.map { toMeta(it) })
+                setIndexed(Name.parse(key), value.map { toMeta(it) })
             }
         } else {
             set(key, toMeta(value))

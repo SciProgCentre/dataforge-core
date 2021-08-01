@@ -14,7 +14,7 @@ import space.kscience.dataforge.names.plus
 private class PartDescriptor : Scheme() {
     var offset by int(0)
     var size by int(0)
-    var partMeta by item("meta".asName())
+    var partMeta by node("meta".asName())
 
     companion object : SchemeSpec<PartDescriptor>(::PartDescriptor) {
         val MULTIPART_KEY = ENVELOPE_NODE_KEY + "multipart"

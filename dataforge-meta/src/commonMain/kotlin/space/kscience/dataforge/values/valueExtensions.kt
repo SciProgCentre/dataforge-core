@@ -24,6 +24,13 @@ public val Value.float: Float get() = number.toFloat()
 public val Value.short: Short get() = number.toShort()
 public val Value.long: Long get() = number.toLong()
 
+public inline fun <reified E : Enum<E>> Value.enum(): E = if (this is EnumValue<*>) {
+    value as E
+} else {
+    enumValueOf<E>(string)
+}
+
+
 public val Value.stringList: List<String> get() = list.map { it.string }
 
 public val Value.doubleArray: DoubleArray

@@ -2,6 +2,7 @@ package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.meta.descriptors.*
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.values.Value
 
 /**
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
@@ -30,7 +31,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
         return descriptor?.validate(meta) ?: true
     }
 
-    override fun getMeta(name: Name): Meta? = meta.getMeta(name)
+    override fun getMeta(name: Name): MutableMeta? = meta.getMeta(name)
 
     override fun setMeta(name: Name, node: Meta?) {
         if (validate(name, meta)) {
@@ -38,6 +39,11 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
         } else {
             error("Validation failed for node $node at $name")
         }
+    }
+
+    override fun setValue(name: Name, value: Value?) {
+        //TODO add validation
+        meta.setValue(name,value)
     }
 
     override fun toMeta(): Laminate = Laminate(meta, descriptor?.defaultNode)

@@ -1,6 +1,5 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.values.asValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -30,7 +29,7 @@ class MetaDelegateTest {
     fun delegateTest() {
 
         val testObject = TestScheme.empty()
-        testObject.meta["myValue"] = "theString".asValue()
+        testObject.meta["myValue"] = "theString"
         testObject.enumValue = TestEnum.NO
 
         testObject.inner = InnerScheme { innerValue = "ddd" }

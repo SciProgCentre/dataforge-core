@@ -96,7 +96,7 @@ public open class Context internal constructor(
     override fun toMeta(): Meta = Meta {
         "parent" to parent?.name
         properties.layers.firstOrNull()?.let { set("properties", it) }
-        "plugins" put plugins.map { it.toMeta() }
+        "plugins" putIndexed plugins.map { it.toMeta() }
     }
 
     public companion object {

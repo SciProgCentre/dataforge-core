@@ -34,7 +34,15 @@ public interface Meta : MetaRepr, MetaProvider {
     public val value: Value?
     public val items: Map<NameToken, Meta>
 
-    override fun getMeta(name: Name): Meta? = find(name)
+    override fun getMeta(name: Name): Meta?{
+        tailrec fun Meta.find(name: Name): Meta? = if (name.isEmpty()) {
+            this
+        } else {
+            items[name.firstOrNull()!!]?.find(name.cutFirst())
+        }
+
+        return find(name)
+    }
 
     override fun toMeta(): Meta = this
 
@@ -75,12 +83,6 @@ public interface Meta : MetaRepr, MetaProvider {
         public fun toString(meta: Meta): String = json.encodeToString(MetaSerializer, meta)
 
         public val EMPTY: Meta = SealedMeta(null, emptyMap())
-
-        private tailrec fun Meta.find(name: Name): Meta? = if (name.isEmpty()) {
-            this
-        } else {
-            items[name.firstOrNull()!!]?.find(name.cutFirst())
-        }
     }
 }
 

@@ -4,6 +4,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import space.kscience.dataforge.data.Data.Companion.TYPE_OF_NOTHING
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.set
 import space.kscience.dataforge.names.*
 import kotlin.reflect.KType
 

@@ -15,8 +15,13 @@ import kotlin.jvm.Synchronized
 @DslMarker
 public annotation class MetaBuilder
 
+/**
+ * A generic interface that gives access to getting and setting meta notes and values
+ */
 public interface MutableMetaProvider : MetaProvider {
+    override fun getMeta(name: Name): MutableMeta?
     public fun setMeta(name: Name, node: Meta?)
+    public fun setValue(name: Name, value: Value?)
 }
 
 /**
@@ -34,23 +39,19 @@ public interface MutableMeta : Meta, MutableMetaProvider {
      */
     override var value: Value?
 
-    /**
-     * Set or replace node at given [name]
-     */
-    public operator fun set(name: Name, meta: Meta)
-
-    override fun setMeta(name: Name, node: Meta?) {
-        if (node == null) {
-            remove(name)
+    override fun getMeta(name: Name): MutableMeta? {
+        tailrec fun MutableMeta.find(name: Name): MutableMeta? = if (name.isEmpty()) {
+            this
         } else {
-            set(name, node)
+            items[name.firstOrNull()!!]?.find(name.cutFirst())
         }
+
+        return find(name)
     }
 
-    /**
-     * Remove a node at a given [name] if it is present
-     */
-    public fun remove(name: Name)
+    override fun setValue(name: Name, value: Value?) {
+        getOrCreate(name).value = value
+    }
 
     /**
      * Get existing node or create a new one
@@ -60,81 +61,91 @@ public interface MutableMeta : Meta, MutableMetaProvider {
     //TODO to be moved to extensions with multi-receivers
 
     public infix fun Name.put(value: Value?) {
-        set(this, value)
+        setValue(this, value)
     }
 
     public infix fun Name.put(string: String) {
-        set(this, string.asValue())
+        setValue(this, string.asValue())
     }
 
     public infix fun Name.put(number: Number) {
-        set(this, number.asValue())
+        setValue(this, number.asValue())
     }
 
     public infix fun Name.put(boolean: Boolean) {
-        set(this, boolean.asValue())
+        setValue(this, boolean.asValue())
     }
 
     public infix fun Name.put(enum: Enum<*>) {
-        set(this, EnumValue(enum))
+        setValue(this, EnumValue(enum))
     }
 
-    public infix fun Name.put(iterable: Iterable<Meta>) {
+    public infix fun Name.putIndexed(iterable: Iterable<Meta>) {
         setIndexed(this, iterable)
     }
 
     public infix fun Name.put(meta: Meta) {
-        set(this, meta)
+        setMeta(this, meta)
     }
 
     public infix fun Name.put(repr: MetaRepr) {
-        put(repr.toMeta())
+        setMeta(this, repr.toMeta())
     }
 
     public infix fun Name.put(mutableMeta: MutableMeta.() -> Unit) {
-        set(this, Meta(mutableMeta))
+        setMeta(this, Meta(mutableMeta))
     }
 
     public infix fun String.put(meta: Meta) {
-        Name.parse(this) put meta
+        setMeta(Name.parse(this), meta)
     }
 
     public infix fun String.put(value: Value?) {
-        set(Name.parse(this), value)
+        setValue(Name.parse(this), value)
     }
 
     public infix fun String.put(string: String) {
-        set(Name.parse(this), string.asValue())
+        setValue(Name.parse(this), string.asValue())
     }
 
     public infix fun String.put(number: Number) {
-        set(Name.parse(this), number.asValue())
+        setValue(Name.parse(this), number.asValue())
     }
 
     public infix fun String.put(boolean: Boolean) {
-        set(Name.parse(this), boolean.asValue())
+        setValue(Name.parse(this), boolean.asValue())
     }
 
     public infix fun String.put(enum: Enum<*>) {
-        set(Name.parse(this), EnumValue(enum))
+        setValue(Name.parse(this), EnumValue(enum))
     }
 
     public infix fun String.put(array: DoubleArray) {
-        set(Name.parse(this), array.asValue())
+        setValue(Name.parse(this), array.asValue())
     }
 
     public infix fun String.put(repr: MetaRepr) {
-        Name.parse(this) put repr.toMeta()
+        setMeta(Name.parse(this), repr.toMeta())
     }
 
-    public infix fun String.put(iterable: Iterable<Meta>) {
+    public infix fun String.putIndexed(iterable: Iterable<Meta>) {
         setIndexed(Name.parse(this), iterable)
     }
 
     public infix fun String.put(builder: MutableMeta.() -> Unit) {
-        set(Name.parse(this), MutableMeta(builder))
+        setMeta(Name.parse(this), MutableMeta(builder))
     }
 }
+
+/**
+ * Set or replace node at given [name]
+ */
+public operator fun MutableMeta.set(name: Name, meta: Meta): Unit = setMeta(name, meta)
+
+/**
+ * Set or replace value at given [name]
+ */
+public operator fun MutableMeta.set(name: Name, value: Value?): Unit = setValue(name, value)
 
 public fun MutableMeta.getOrCreate(key: String): MutableMeta = getOrCreate(Name.parse(key))
 
@@ -151,8 +162,12 @@ public interface MutableTypedMeta<M : MutableTypedMeta<M>> : TypedMeta<M>, Mutab
 
 public fun <M : MutableTypedMeta<M>> M.getOrCreate(key: String): M = getOrCreate(Name.parse(key))
 
-public fun MutableMeta.remove(key: String) {
-    remove(Name.parse(key))
+public fun MutableMetaProvider.remove(name: Name) {
+    setMeta(name, null)
+}
+
+public fun MutableMetaProvider.remove(key: String) {
+    setMeta(Name.parse(key), null)
 }
 
 // node setters
@@ -185,35 +200,21 @@ public operator fun MutableMeta.set(key: String, value: List<Value>): Unit = set
 //    set(key.toName().withIndex(index), value)
 
 
-/**
- * Universal unsafe set method
- */
-public operator fun MutableMeta.set(name: Name, value: Value?) {
-    getOrCreate(name).value = Value.of(value)
-}
-
 /* Same name siblings generation */
 
-public fun MutableMeta.setIndexedItems(
-    name: Name,
-    items: Iterable<Meta>,
-    indexFactory: (Meta, index: Int) -> String = { _, index -> index.toString() },
-) {
-    val tokens = name.tokens.toMutableList()
-    val last = tokens.last()
-    items.forEachIndexed { index, meta ->
-        val indexedToken = NameToken(last.body, (last.index ?: "") + indexFactory(meta, index))
-        tokens[tokens.lastIndex] = indexedToken
-        set(Name(tokens), meta)
-    }
-}
 
 public fun MutableMeta.setIndexed(
     name: Name,
     metas: Iterable<Meta>,
     indexFactory: (Meta, index: Int) -> String = { _, index -> index.toString() },
 ) {
-    setIndexedItems(name, metas) { item, index -> indexFactory(item, index) }
+    val tokens = name.tokens.toMutableList()
+    val last = tokens.last()
+    metas.forEachIndexed { index, meta ->
+        val indexedToken = NameToken(last.body, (last.index ?: "") + indexFactory(meta, index))
+        tokens[tokens.lastIndex] = indexedToken
+        set(Name(tokens), meta)
+    }
 }
 
 public operator fun MutableMeta.set(name: Name, metas: Iterable<Meta>): Unit =
@@ -265,8 +266,20 @@ private class MutableMetaImpl(
     children: Map<NameToken, Meta> = emptyMap()
 ) : ObservableMutableMeta {
 
+    private val listeners = HashSet<MetaListener>()
+
+    private fun changed(name: Name) {
+        listeners.forEach { it.callback(this, name) }
+    }
+
     override var value = value
-        @Synchronized set
+        @Synchronized set(value) {
+            val oldValue = field
+            field = value
+            if (oldValue != value) {
+                changed(Name.EMPTY)
+            }
+        }
 
     private val children: LinkedHashMap<NameToken, ObservableMutableMeta> =
         LinkedHashMap(children.mapValues { (key, meta) ->
@@ -275,11 +288,6 @@ private class MutableMetaImpl(
 
     override val items: Map<NameToken, ObservableMutableMeta> get() = children
 
-    private val listeners = HashSet<MetaListener>()
-
-    private fun changed(name: Name) {
-        listeners.forEach { it.callback(this, name) }
-    }
 
     @Synchronized
     override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
@@ -322,15 +330,8 @@ private class MutableMetaImpl(
         else -> getOrCreate(name.first().asName()).getOrCreate(name.cutFirst())
     }
 
-    override fun getOrCreate(name: Name): ObservableMutableMeta = get(name) ?: createNode(name)
-
-    override fun remove(name: Name) {
-        when (name.length) {
-            0 -> error("Can't remove self")
-            1 -> if (children.remove(name.firstOrNull()!!) != null) changed(name)
-            else -> get(name.cutLast())?.remove(name.lastOrNull()!!.asName())
-        }
-    }
+    override fun getOrCreate(name: Name): ObservableMutableMeta =
+        if (name.isEmpty()) this else get(name) ?: createNode(name)
 
     @Synchronized
     private fun replaceItem(
@@ -354,14 +355,14 @@ private class MutableMetaImpl(
         MutableMetaImpl(meta.value, meta.items.mapValuesTo(LinkedHashMap()) { wrapItem(it.value) })
 
 
-    override fun set(name: Name, meta: Meta) {
+    override fun setMeta(name: Name, node: Meta?) {
         val oldItem: ObservableMutableMeta? = get(name)
-        if (oldItem != meta) {
+        if (oldItem != node) {
             when (name.length) {
                 0 -> error("Can't set a meta with empty name")
                 1 -> {
                     val token = name.firstOrNull()!!
-                    replaceItem(token, oldItem, wrapItem(meta))
+                    replaceItem(token, oldItem, node?.let { wrapItem(node) })
                 }
                 else -> {
                     val token = name.firstOrNull()!!
@@ -369,7 +370,7 @@ private class MutableMetaImpl(
                     if (items[token] == null) {
                         replaceItem(token, null, MutableMetaImpl(null))
                     }
-                    items[token]?.set(name.cutFirst(), meta)
+                    items[token]?.setMeta(name.cutFirst(), node)
                 }
             }
             changed(name)
@@ -421,6 +422,7 @@ public fun Meta.toMutableMeta(): ObservableMutableMeta = MutableMetaImpl(value, 
 
 public fun Meta.asMutableMeta(): MutableMeta = (this as? MutableMeta) ?: toMutableMeta()
 
+@Suppress("FunctionName")
 @JsName("newMutableMeta")
 public fun MutableMeta(): ObservableMutableMeta = MutableMetaImpl(null)
 
@@ -441,20 +443,25 @@ public inline fun Meta.copy(block: MutableMeta.() -> Unit = {}): Meta =
 
 
 private class MutableMetaWithDefault(
-    val source: MutableMeta, val default: Meta, val name: Name
+    val source: MutableMeta, val default: Meta, val rootName: Name
 ) : MutableMeta by source {
     override val items: Map<NameToken, MutableMeta>
-        get() = (source.items.keys + default.items.keys).associateWith {
-            MutableMetaWithDefault(source, default, name + it)
+        get() {
+            val sourceKeys: Collection<NameToken> = source[rootName]?.items?.keys ?: emptyList()
+            val defaultKeys: Collection<NameToken> = default[rootName]?.items?.keys ?: emptyList()
+            //merging keys for primary and default node
+            return (sourceKeys + defaultKeys).associateWith {
+                MutableMetaWithDefault(source, default, rootName + it)
+            }
         }
 
     override var value: Value?
-        get() = source[name]?.value ?: default[name]?.value
+        get() = source[rootName]?.value ?: default[rootName]?.value
         set(value) {
-            source[name] = value
+            source[rootName] = value
         }
 
-    override fun getMeta(name: Name): Meta? = source.getMeta(name) ?: default.getMeta(name)
+    override fun getMeta(name: Name): MutableMeta = MutableMetaWithDefault(source, default, rootName + name)
 
     override fun toString(): String = Meta.toString(this)
     override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)

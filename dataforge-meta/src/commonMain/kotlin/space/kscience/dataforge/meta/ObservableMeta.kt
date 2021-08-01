@@ -54,7 +54,7 @@ private class ObservableMetaWrapper(
     override val items: Map<NameToken, ObservableMetaWrapper>
         get() = origin.items.mapValues { ObservableMetaWrapper(it.value) }
 
-    override fun getMeta(name: Name): Meta? = origin.getMeta(name)
+    override fun getMeta(name: Name): MutableMeta? = origin.getMeta(name)
 
     override var value: Value?
         get() = origin.value
@@ -66,22 +66,18 @@ private class ObservableMetaWrapper(
     override fun getOrCreate(name: Name): ObservableMutableMeta =
         get(name) ?: ObservableMetaWrapper(origin.getOrCreate(name))
 
-
-    override fun remove(name: Name) {
-        origin.remove(name)
-        changed(name)
-    }
-
-    override fun set(name: Name, meta: Meta) {
+    override fun setMeta(name: Name, node: Meta?) {
         val oldMeta = get(name)
-        origin[name] = meta
+        origin.setMeta(name, node)
+        //
         // if meta is observable propagate changes from it
-        if(meta is ObservableMeta){
-            meta.onChange(this) { changeName ->
-                setMeta(name + changeName, meta[changeName])
+        if(node is ObservableMeta){
+
+            node.onChange(this) { changeName ->
+                setMeta(name + changeName, node[changeName])
             }
         }
-        if (oldMeta != meta) {
+        if (oldMeta != node) {
             changed(name)
         }
     }
