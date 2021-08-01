@@ -5,7 +5,6 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonEncoder
 
 /**
@@ -14,19 +13,17 @@ import kotlinx.serialization.json.JsonEncoder
 public object MetaSerializer : KSerializer<Meta> {
     private val genericMetaSerializer = SealedMeta.serializer()
 
-    private val jsonSerializer = JsonElement.serializer()
-
-    override val descriptor: SerialDescriptor = jsonSerializer.descriptor
+    override val descriptor: SerialDescriptor = genericMetaSerializer.descriptor
 
     override fun deserialize(decoder: Decoder): Meta = if (decoder is JsonDecoder) {
-        jsonSerializer.deserialize(decoder).toMeta()
+        decoder.decodeJsonElement().toMeta()
     } else {
         genericMetaSerializer.deserialize(decoder)
     }
 
     override fun serialize(encoder: Encoder, value: Meta) {
         if (encoder is JsonEncoder) {
-            jsonSerializer.serialize(encoder, value.toJson())
+            encoder.encodeJsonElement(value.toJson())
         } else {
             genericMetaSerializer.serialize(encoder, value.seal())
         }

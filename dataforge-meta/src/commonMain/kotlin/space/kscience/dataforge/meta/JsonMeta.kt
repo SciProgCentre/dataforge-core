@@ -61,7 +61,16 @@ private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): J
     JsonObject(pairs.toMap())
 }
 
-public fun Meta.toJson(descriptor: MetaDescriptor? = null): JsonElement = toJsonWithIndex(descriptor, null)
+public fun Meta.toJson(descriptor: MetaDescriptor? = null): JsonObject {
+    val element =  toJsonWithIndex(descriptor, null)
+    return if(element is JsonObject){
+        element
+    } else {
+        buildJsonObject {
+            put("@value", element)
+        }
+    }
+}
 
 /**
  * Convert a Json primitive to a [Value]

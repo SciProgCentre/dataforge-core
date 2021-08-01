@@ -6,7 +6,7 @@ package space.kscience.dataforge.io
 import io.ktor.utils.io.core.Input
 import io.ktor.utils.io.core.Output
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.meta.Meta
@@ -25,7 +25,7 @@ public class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat 
 
     override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?) {
         val jsonObject = meta.toJson(descriptor)
-        output.writeUtf8String(json.encodeToString(JsonElement.serializer(), jsonObject))
+        output.writeUtf8String(json.encodeToString(JsonObject.serializer(), jsonObject))
     }
 
     override fun toMeta(): Meta = Meta {
