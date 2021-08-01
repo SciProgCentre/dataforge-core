@@ -32,17 +32,22 @@ private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): J
 } else {
     val pairs: MutableList<Pair<String, JsonElement>> = items.entries.groupBy {
         it.key.body
-    }.mapTo(ArrayList()) { (body, list) ->
+    }.mapNotNullTo(ArrayList()) { (body, list) ->
         val childDescriptor = descriptor?.children?.get(body)
         if (list.size == 1) {
             val (token, element) = list.first()
-            val child: JsonElement = element.toJsonWithIndex(childDescriptor, token.index)
-            body to child
+            //do not add empty element
+            if (!element.isEmpty()) {
+                val child: JsonElement = element.toJsonWithIndex(childDescriptor, token.index)
+                body to child
+            } else null
         } else {
-            val elements: List<JsonElement> = list.sortedBy { it.key.index }.mapIndexed { index, entry ->
-                //Use index if it is not equal to the item order
-                val actualIndex = if (index.toString() != entry.key.index) entry.key.index else null
-                entry.value.toJsonWithIndex(childDescriptor, actualIndex)
+            val elements: List<JsonElement> = list.sortedBy { it.key.index }.mapIndexedNotNull { index, entry ->
+                if (!entry.value.isEmpty()) {
+                    //Use index if it is not equal to the item order
+                    val actualIndex = if (index.toString() != entry.key.index) entry.key.index else null
+                    entry.value.toJsonWithIndex(childDescriptor, actualIndex)
+                } else null
             }
             body to JsonArray(elements)
         }
@@ -55,15 +60,15 @@ private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): J
 
     //Add value if needed
     if (value != null) {
-        pairs += Meta.VALUE_KEY to value!!.toJson(null)
+        pairs += Meta.VALUE_KEY to value!!.toJson(descriptor)
     }
 
     JsonObject(pairs.toMap())
 }
 
 public fun Meta.toJson(descriptor: MetaDescriptor? = null): JsonObject {
-    val element =  toJsonWithIndex(descriptor, null)
-    return if(element is JsonObject){
+    val element = toJsonWithIndex(descriptor, null)
+    return if (element is JsonObject) {
         element
     } else {
         buildJsonObject {
@@ -96,7 +101,7 @@ public fun JsonElement.toValueOrNull(descriptor: MetaDescriptor?): Value? = when
     is JsonPrimitive -> toValue(descriptor)
     is JsonObject -> get(Meta.VALUE_KEY)?.toValueOrNull(descriptor)
     is JsonArray -> {
-        if(isEmpty()) ListValue.EMPTY else {
+        if (isEmpty()) ListValue.EMPTY else {
             val values = map { it.toValueOrNull(descriptor) }
             values.map { it ?: return null }.asValue()
         }

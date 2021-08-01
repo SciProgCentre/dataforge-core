@@ -34,7 +34,7 @@ public interface Meta : MetaRepr, MetaProvider {
     public val value: Value?
     public val items: Map<NameToken, Meta>
 
-    override fun getMeta(name: Name): Meta?{
+    override fun getMeta(name: Name): Meta? {
         tailrec fun Meta.find(name: Name): Meta? = if (name.isEmpty()) {
             this
         } else {
@@ -197,7 +197,8 @@ public fun Meta.nodeSequence(): Sequence<Pair<Name, Meta>> = sequence {
 
 public operator fun Meta.iterator(): Iterator<Pair<Name, Meta>> = nodeSequence().iterator()
 
-public fun Meta.isEmpty(): Boolean = this === Meta.EMPTY || (value == null && items.isEmpty())
+public fun Meta.isEmpty(): Boolean = this === Meta.EMPTY
+        || (value == null && (items.isEmpty() || items.values.all { it.isEmpty() }))
 
 
 /* Get operations*/
