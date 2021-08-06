@@ -14,10 +14,8 @@
 - **API breaking** `String.toName()` is replaced by `Name.parse()`
 - **API breaking** Configurable`config` changed to `meta`
 
-### Deprecated
-- Direct use of `Config`
-
 ### Removed
+- `Config`
 - Public PluginManager mutability
 - Tables and tables-exposed moved to the separate project `tables.kt`
 - BinaryMetaFormat. Use CBOR encoding instead

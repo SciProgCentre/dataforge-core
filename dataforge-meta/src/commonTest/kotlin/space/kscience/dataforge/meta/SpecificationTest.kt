@@ -62,7 +62,7 @@ class SpecificationTest {
     fun testChildUpdate() {
         val config = MutableMeta()
         val child = config.getOrCreate("child")
-        child.update(TestScheme) {
+        child.updateWith(TestScheme) {
             a = 22
             b = "test"
         }

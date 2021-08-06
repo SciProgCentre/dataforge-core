@@ -3,6 +3,7 @@ package space.kscience.dataforge.meta
 import kotlinx.serialization.Serializable
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.values.Value
+import space.kscience.dataforge.values.asValue
 
 /**
  * The meta implementation which is guaranteed to be immutable.
@@ -31,6 +32,15 @@ public fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(
 
 @Suppress("FunctionName")
 public fun Meta(value: Value): SealedMeta = SealedMeta(value, emptyMap())
+
+@Suppress("FunctionName")
+public fun Meta(value: Number): SealedMeta = Meta(value.asValue())
+
+@Suppress("FunctionName")
+public fun Meta(value: String): SealedMeta = Meta(value.asValue())
+
+@Suppress("FunctionName")
+public fun Meta(value: Boolean): SealedMeta = Meta(value.asValue())
 
 @Suppress("FunctionName")
 public inline fun Meta(builder: MutableMeta.() -> Unit): SealedMeta =

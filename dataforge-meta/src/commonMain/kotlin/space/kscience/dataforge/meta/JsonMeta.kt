@@ -91,9 +91,9 @@ public fun JsonPrimitive.toValue(descriptor: MetaDescriptor?): Value {
 }
 
 /**
- * Turn this [JsonArray] into a [ListValue] with recursion or return null if it contains objects
+ * Turn this [JsonElement] into a [ListValue] with recursion or return null if it contains objects
  */
-public fun JsonElement.toValueOrNull(descriptor: MetaDescriptor?): Value? = when (this) {
+private fun JsonElement.toValueOrNull(descriptor: MetaDescriptor?): Value? = when (this) {
     is JsonPrimitive -> toValue(descriptor)
     is JsonObject -> get(Meta.VALUE_KEY)?.toValueOrNull(descriptor)
     is JsonArray -> {

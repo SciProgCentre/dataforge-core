@@ -49,6 +49,11 @@ public class Name(public val tokens: List<NameToken>) {
         public val EMPTY: Name = Name(emptyList())
 
         /**
+         * Convert a list of strings to a [Name] interpreting all arguments as token bodies without indices
+         */
+        public fun of(vararg strings: String): Name = Name(strings.map { NameToken(it) })
+
+        /**
          * Convert a [String] to name parsing it and extracting name tokens and index syntax.
          * This operation is rather heavy so it should be used with care in high performance code.
          */

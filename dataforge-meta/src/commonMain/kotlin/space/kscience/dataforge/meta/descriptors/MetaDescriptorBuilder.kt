@@ -1,9 +1,6 @@
 package space.kscience.dataforge.meta.descriptors
 
-import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.meta.get
-import space.kscience.dataforge.meta.set
+import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.cutFirst
 import space.kscience.dataforge.names.first
@@ -11,21 +8,13 @@ import space.kscience.dataforge.names.length
 import space.kscience.dataforge.values.Value
 import space.kscience.dataforge.values.ValueType
 import space.kscience.dataforge.values.asValue
-import kotlin.collections.List
-import kotlin.collections.MutableMap
-import kotlin.collections.emptyList
-import kotlin.collections.getOrPut
-import kotlin.collections.hashMapOf
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.mapValues
 import kotlin.collections.set
 
-public class MetaDescriptorBuilder {
+public class MetaDescriptorBuilder internal constructor() {
     public var info: String? = null
     public var children: MutableMap<String, MetaDescriptorBuilder> = hashMapOf()
     public var multiple: Boolean = false
-    public var required: Boolean = false
+    public var required: MetaNodeRequirements = MetaNodeRequirements.NONE
 
     public var type: List<ValueType>? = null
 
@@ -41,6 +30,22 @@ public class MetaDescriptorBuilder {
     }
 
     public var attributes: MutableMeta = MutableMeta()
+
+    public inline fun attributes(block: MutableMeta.() -> Unit) {
+        attributes.apply(block)
+    }
+
+    public fun item(name: Name, descriptor: MetaDescriptor) {
+        when (name.length) {
+            0 -> {}
+            1 -> {
+                children[name.first().body] = descriptor.toBuilder()
+            }
+            else -> {
+                children.getOrPut(name.first().body) { MetaDescriptorBuilder() }.item(name.cutFirst(), descriptor)
+            }
+        }
+    }
 
     public fun item(name: Name, block: MetaDescriptorBuilder.() -> Unit) {
         when (name.length) {
@@ -71,7 +76,7 @@ public class MetaDescriptorBuilder {
         children = children.mapValues { it.value.build() },
         multiple = multiple,
         required = required,
-        type = type,
+        valueTypes = type,
         indexKey = indexKey,
         defaultValue = default,
         attributes = attributes
@@ -127,10 +132,27 @@ public inline fun <reified E : Enum<E>> MetaDescriptorBuilder.enum(
     key: Name,
     default: E?,
     crossinline modifier: MetaDescriptorBuilder.() -> Unit = {},
-): Unit = value(key,ValueType.STRING) {
+): Unit = value(key, ValueType.STRING) {
     default?.let {
         this.default = default.asValue()
     }
     allowedValues = enumValues<E>().map { it.asValue() }
     modifier()
 }
+
+private fun MetaDescriptor.toBuilder(): MetaDescriptorBuilder = MetaDescriptorBuilder().apply {
+    info = this@toBuilder.info
+    children = this@toBuilder.children.mapValuesTo(LinkedHashMap()) { it.value.toBuilder() }
+    multiple = this@toBuilder.multiple
+    required = this@toBuilder.required
+    type = this@toBuilder.valueTypes
+    indexKey = this@toBuilder.indexKey
+    default = defaultValue
+    attributes = this@toBuilder.attributes.toMutableMeta()
+}
+
+/**
+ * Make a deep copy of this descriptor applying given transformation [block]
+ */
+public fun MetaDescriptor.copy(block: MetaDescriptorBuilder.() -> Unit = {}): MetaDescriptor =
+    toBuilder().apply(block).build()

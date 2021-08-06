@@ -41,7 +41,7 @@ public interface Specification<out T : Any> : ReadOnlySpecification<T> {
 /**
  * Update a [MutableMeta] using given specification
  */
-public fun <T : Any> MutableMeta.update(
+public fun <T : Any> MutableMeta.updateWith(
     spec: Specification<T>,
     action: T.() -> Unit
 ): T = spec.write(this).apply(action)
@@ -50,7 +50,7 @@ public fun <T : Any> MutableMeta.update(
 /**
  * Update configuration using given specification
  */
-public fun <T : Any> Configurable.update(
+public fun <T : Any> Configurable.updateWith(
     spec: Specification<T>,
     action: T.() -> Unit,
 ): T = spec.write(meta).apply(action)
