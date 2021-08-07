@@ -149,7 +149,6 @@ public operator fun MutableMeta.set(name: Name, value: Value?): Unit = setValue(
 
 public fun MutableMeta.getOrCreate(key: String): MutableMeta = getOrCreate(Name.parse(key))
 
-@Serializable(MutableMetaSerializer::class)
 public interface MutableTypedMeta<M : MutableTypedMeta<M>> : TypedMeta<M>, MutableMeta {
     /**
      * Zero-copy attach or replace existing node. Node is used with any additional state, listeners, etc.

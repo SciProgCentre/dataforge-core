@@ -71,7 +71,7 @@ private class ObservableMetaWrapper(
         origin.setMeta(name, node)
         //
         // if meta is observable propagate changes from it
-        if(node is ObservableMeta){
+        if (node is ObservableMeta) {
 
             node.onChange(this) { changeName ->
                 setMeta(name + changeName, node[changeName])

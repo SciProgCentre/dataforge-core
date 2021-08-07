@@ -9,23 +9,23 @@ import space.kscience.dataforge.values.Value
 import space.kscience.dataforge.values.ValueType
 
 /**
- * The restriction on Meta node content
+ * Restrictions on value in the node
  */
-public enum class MetaNodeRequirements {
+public enum class ValueRequirement {
     /**
-     * no restrictions
+     * No restrictions
      */
     NONE,
 
     /**
-     * The node itself must exist
+     * The value is required
      */
-    EXIST,
+    REQUIRED,
 
     /**
-     * Value must be present
+     * The value must be null
      */
-    HAS_VALUE
+    ABSENT
 }
 
 /**
@@ -45,7 +45,7 @@ public data class MetaDescriptor(
     public val info: String? = null,
     public val children: Map<String, MetaDescriptor> = emptyMap(),
     public val multiple: Boolean = false,
-    public val required: MetaNodeRequirements = MetaNodeRequirements.NONE,
+    public val valueRequirement: ValueRequirement = ValueRequirement.NONE,
     public val valueTypes: List<ValueType>? = null,
     public val indexKey: String = Meta.INDEX_KEY,
     public val defaultValue: Value? = null,
@@ -55,6 +55,8 @@ public data class MetaDescriptor(
         internal const val ALLOWED_VALUES_KEY = "allowedValues"
     }
 }
+
+public val MetaDescriptor.required: Boolean get() = valueRequirement == ValueRequirement.REQUIRED || children.values.any { required }
 
 public val MetaDescriptor.allowedValues: List<Value>? get() = attributes[MetaDescriptor.ALLOWED_VALUES_KEY]?.value?.list
 
@@ -80,16 +82,19 @@ public val MetaDescriptor.defaultNode: Meta
     }
 
 public fun MetaDescriptor.validate(value: Value?): Boolean = if (value == null) {
-    required != MetaNodeRequirements.HAS_VALUE
+    valueRequirement != ValueRequirement.REQUIRED
 } else {
-    (valueTypes == null || value.type in valueTypes) && (allowedValues?.let { value in it } ?: true)
+    if (valueRequirement == ValueRequirement.ABSENT) false
+    else {
+        (valueTypes == null || value.type in valueTypes) && (allowedValues?.let { value in it } ?: true)
+    }
 }
 
 /**
  * Check if given item suits the descriptor
  */
 public fun MetaDescriptor.validate(item: Meta?): Boolean {
-    if (item == null) return required == MetaNodeRequirements.NONE
+    if (item == null) return !required
     if (!validate(item.value)) return false
 
     children.forEach { (key, childDescriptor) ->

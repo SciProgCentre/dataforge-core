@@ -14,7 +14,7 @@ public class MetaDescriptorBuilder internal constructor() {
     public var info: String? = null
     public var children: MutableMap<String, MetaDescriptorBuilder> = hashMapOf()
     public var multiple: Boolean = false
-    public var required: MetaNodeRequirements = MetaNodeRequirements.NONE
+    public var valueRequirement: ValueRequirement = ValueRequirement.NONE
 
     public var type: List<ValueType>? = null
 
@@ -35,15 +35,14 @@ public class MetaDescriptorBuilder internal constructor() {
         attributes.apply(block)
     }
 
-    public fun item(name: Name, descriptor: MetaDescriptor) {
+    public fun item(name: Name, descriptor: MetaDescriptor, block: MetaDescriptorBuilder.() -> Unit) {
         when (name.length) {
-            0 -> {}
-            1 -> {
-                children[name.first().body] = descriptor.toBuilder()
+            0 -> {
             }
-            else -> {
-                children.getOrPut(name.first().body) { MetaDescriptorBuilder() }.item(name.cutFirst(), descriptor)
-            }
+            1 -> children[name.first().body] = descriptor.toBuilder().apply(block)
+            else -> children.getOrPut(name.first().body) {
+                MetaDescriptorBuilder()
+            }.item(name.cutFirst(), descriptor, block)
         }
     }
 
@@ -75,7 +74,7 @@ public class MetaDescriptorBuilder internal constructor() {
         info = info,
         children = children.mapValues { it.value.build() },
         multiple = multiple,
-        required = required,
+        valueRequirement = valueRequirement,
         valueTypes = type,
         indexKey = indexKey,
         defaultValue = default,
@@ -98,11 +97,9 @@ public fun MetaDescriptorBuilder.value(
     type: ValueType,
     vararg additionalTypes: ValueType,
     block: MetaDescriptorBuilder.() -> Unit
-) {
-    item(name) {
-        type(type, *additionalTypes)
-        block()
-    }
+): Unit = item(name) {
+    type(type, *additionalTypes)
+    block()
 }
 
 public fun MetaDescriptorBuilder.value(
@@ -110,22 +107,22 @@ public fun MetaDescriptorBuilder.value(
     type: ValueType,
     vararg additionalTypes: ValueType,
     block: MetaDescriptorBuilder.() -> Unit
-) {
-    value(Name.parse(name), type, additionalTypes = additionalTypes, block)
-}
+): Unit = value(Name.parse(name), type, additionalTypes = additionalTypes, block)
 
 /**
  * Create and configure child value descriptor
  */
-public fun MetaDescriptorBuilder.node(name: Name, block: MetaDescriptorBuilder.() -> Unit) {
-    item(name) {
-        type(ValueType.NULL)
-        block()
-    }
+public fun MetaDescriptorBuilder.node(name: Name, block: MetaDescriptorBuilder.() -> Unit): Unit = item(name) {
+    valueRequirement = ValueRequirement.ABSENT
+    block()
 }
 
 public fun MetaDescriptorBuilder.node(name: String, block: MetaDescriptorBuilder.() -> Unit) {
     node(Name.parse(name), block)
+}
+
+public fun MetaDescriptorBuilder.required() {
+    valueRequirement = ValueRequirement.REQUIRED
 }
 
 public inline fun <reified E : Enum<E>> MetaDescriptorBuilder.enum(
@@ -144,7 +141,7 @@ private fun MetaDescriptor.toBuilder(): MetaDescriptorBuilder = MetaDescriptorBu
     info = this@toBuilder.info
     children = this@toBuilder.children.mapValuesTo(LinkedHashMap()) { it.value.toBuilder() }
     multiple = this@toBuilder.multiple
-    required = this@toBuilder.required
+    valueRequirement = this@toBuilder.valueRequirement
     type = this@toBuilder.valueTypes
     indexKey = this@toBuilder.indexKey
     default = defaultValue
