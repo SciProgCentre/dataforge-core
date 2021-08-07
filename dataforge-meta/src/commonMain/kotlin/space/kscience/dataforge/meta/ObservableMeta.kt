@@ -1,5 +1,6 @@
 package space.kscience.dataforge.meta
 
+import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
 import space.kscience.dataforge.values.Value
 import kotlin.jvm.Synchronized
@@ -34,7 +35,20 @@ public interface ObservableMeta : Meta {
 /**
  * A [Meta] which is both observable and mutable
  */
-public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTypedMeta<ObservableMutableMeta>
+public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTypedMeta<ObservableMutableMeta>{
+    override fun getOrCreate(name: Name): ObservableMutableMeta
+
+
+    override fun getMeta(name: Name): ObservableMutableMeta?{
+        tailrec fun ObservableMutableMeta.find(name: Name): ObservableMutableMeta? = if (name.isEmpty()) {
+            this
+        } else {
+            items[name.firstOrNull()!!]?.find(name.cutFirst())
+        }
+
+        return find(name)
+    }
+}
 
 private class ObservableMetaWrapper(
     val origin: MutableMeta,
@@ -59,7 +73,7 @@ private class ObservableMetaWrapper(
     override val items: Map<NameToken, ObservableMetaWrapper>
         get() = origin.items.mapValues { ObservableMetaWrapper(it.value) }
 
-    override fun getMeta(name: Name): MutableMeta? = origin.getMeta(name)
+    override fun getMeta(name: Name): ObservableMetaWrapper? = origin.getMeta(name)?.let{ObservableMetaWrapper(it)}
 
     override var value: Value?
         get() = origin.value
@@ -91,6 +105,7 @@ private class ObservableMetaWrapper(
         return origin.toMeta()
     }
 
+    @DFExperimental
     override fun attach(name: Name, node: ObservableMutableMeta) {
         set(name, node)
         node.onChange(this) { changeName ->

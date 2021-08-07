@@ -8,7 +8,6 @@ import space.kscience.dataforge.values.asValue
 /**
  * The meta implementation which is guaranteed to be immutable.
  *
- * If the argument is possibly mutable node, it is copied on creation
  */
 @Serializable
 public class SealedMeta internal constructor(
@@ -21,7 +20,7 @@ public class SealedMeta internal constructor(
 }
 
 /**
- * Generate sealed node from [this]. If it is already sealed return it as is
+ * Generate sealed node from [this]. If it is already sealed return it as is.
  */
 public fun Meta.seal(): SealedMeta = this as? SealedMeta ?: SealedMeta(
     value,

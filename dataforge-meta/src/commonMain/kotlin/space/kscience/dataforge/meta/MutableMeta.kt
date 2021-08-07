@@ -1,6 +1,7 @@
 package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
+import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
 import space.kscience.dataforge.values.EnumValue
 import space.kscience.dataforge.values.Value
@@ -154,8 +155,9 @@ public interface MutableTypedMeta<M : MutableTypedMeta<M>> : TypedMeta<M>, Mutab
      * Zero-copy attach or replace existing node. Node is used with any additional state, listeners, etc.
      * In some cases it is possible to have the same node as a child to several others
      */
+    @DFExperimental
     public fun attach(name: Name, node: M)
-
+    override fun getMeta(name: Name): M?
     override fun getOrCreate(name: Name): M
 }
 
@@ -298,13 +300,13 @@ private class MutableMetaImpl(
         listeners.removeAll { it.owner === owner }
     }
 
-
     private fun ObservableMeta.adoptBy(parent: MutableMetaImpl, key: NameToken) {
         onChange(parent) { name ->
             parent.invalidate(key + name)
         }
     }
 
+    @DFExperimental
     override fun attach(name: Name, node: ObservableMutableMeta) {
         when (name.length) {
             0 -> error("Can't set a meta with empty name")

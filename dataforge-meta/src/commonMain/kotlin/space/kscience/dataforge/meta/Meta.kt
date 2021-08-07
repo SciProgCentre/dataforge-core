@@ -144,8 +144,17 @@ public interface TypedMeta<out M : TypedMeta<M>> : Meta {
     public val self: M
         get() = this as M
 
-    override val value: Value?
     override val items: Map<NameToken, M>
+
+    override fun getMeta(name: Name): M? {
+        tailrec fun M.find(name: Name): M? = if (name.isEmpty()) {
+            this
+        } else {
+            items[name.firstOrNull()!!]?.find(name.cutFirst())
+        }
+
+        return self.find(name)
+    }
 
     override fun toMeta(): Meta = this
 }
