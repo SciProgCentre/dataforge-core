@@ -12,7 +12,7 @@ import kotlin.collections.set
 
 public class MetaDescriptorBuilder internal constructor() {
     public var info: String? = null
-    public var children: MutableMap<String, MetaDescriptorBuilder> = hashMapOf()
+    public var children: MutableMap<String, MetaDescriptorBuilder> = linkedMapOf()
     public var multiple: Boolean = false
     public var valueRequirement: ValueRequirement = ValueRequirement.NONE
 
@@ -35,24 +35,6 @@ public class MetaDescriptorBuilder internal constructor() {
         attributes.apply(block)
     }
 
-    public fun item(
-        name: Name,
-        descriptor: MetaDescriptor,
-        block: MetaDescriptorBuilder.() -> Unit = {}
-    ): MetaDescriptorBuilder {
-        return when (name.length) {
-            0 -> error("Can't set descriptor to root")
-            1 -> {
-                val item = descriptor.toBuilder().apply(block)
-                children[name.first().body] = item
-                item
-            }
-            else -> children.getOrPut(name.first().body) {
-                MetaDescriptorBuilder()
-            }.item(name.cutFirst(), descriptor, block)
-        }
-    }
-
     public fun item(name: Name, block: MetaDescriptorBuilder.() -> Unit = {}): MetaDescriptorBuilder {
         return when (name.length) {
             0 -> apply(block)
@@ -65,6 +47,24 @@ public class MetaDescriptorBuilder internal constructor() {
                 children.getOrPut(name.first().body) { MetaDescriptorBuilder() }.item(name.cutFirst(), block)
             }
         }
+    }
+
+    public fun node(
+        name: Name,
+        descriptor: MetaDescriptor,
+        block: MetaDescriptorBuilder.() -> Unit = {}
+    ): MetaDescriptorBuilder = when (name.length) {
+        0 -> error("Can't set descriptor to root")
+        1 -> {
+            val item = descriptor.toBuilder().apply {
+                valueRequirement = ValueRequirement.ABSENT
+            }.apply(block)
+            children[name.first().body] = item
+            item
+        }
+        else -> children.getOrPut(name.first().body) {
+            MetaDescriptorBuilder()
+        }.node(name.cutFirst(), descriptor, block)
     }
 
     public var allowedValues: List<Value>
@@ -129,6 +129,16 @@ public fun MetaDescriptorBuilder.node(
 
 public fun MetaDescriptorBuilder.node(name: String, block: MetaDescriptorBuilder.() -> Unit) {
     node(Name.parse(name), block)
+}
+
+public fun MetaDescriptorBuilder.node(
+    key: String,
+    described: Described,
+    block: MetaDescriptorBuilder.() -> Unit = {},
+) {
+    described.descriptor?.let {
+        node(Name.parse(key), it, block)
+    }
 }
 
 public fun MetaDescriptorBuilder.required() {
