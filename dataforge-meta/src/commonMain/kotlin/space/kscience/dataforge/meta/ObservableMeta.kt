@@ -24,6 +24,11 @@ public interface ObservableMeta : Meta {
      * Remove all listeners belonging to given owner
      */
     public fun removeListener(owner: Any?)
+
+    /**
+     * Force-send invalidation signal for given name to all listeners
+     */
+    public fun invalidate(name: Name)
 }
 
 /**
@@ -37,7 +42,7 @@ private class ObservableMetaWrapper(
 
     private val listeners = HashSet<MetaListener>()
 
-    private fun changed(name: Name) {
+    override fun invalidate(name: Name) {
         listeners.forEach { it.callback(this, name) }
     }
 
@@ -60,7 +65,7 @@ private class ObservableMetaWrapper(
         get() = origin.value
         set(value) {
             origin.value = value
-            changed(Name.EMPTY)
+            invalidate(Name.EMPTY)
         }
 
     override fun getOrCreate(name: Name): ObservableMutableMeta =
@@ -78,7 +83,7 @@ private class ObservableMetaWrapper(
             }
         }
         if (oldMeta != node) {
-            changed(name)
+            invalidate(name)
         }
     }
 
