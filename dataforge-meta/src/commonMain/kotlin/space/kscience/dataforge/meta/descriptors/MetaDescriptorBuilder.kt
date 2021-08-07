@@ -90,9 +90,8 @@ public class MetaDescriptorBuilder internal constructor() {
     )
 }
 
-public fun MetaDescriptorBuilder.item(name: String, block: MetaDescriptorBuilder.() -> Unit) {
+public fun MetaDescriptorBuilder.item(name: String, block: MetaDescriptorBuilder.() -> Unit): MetaDescriptorBuilder =
     item(Name.parse(name), block)
-}
 
 public fun MetaDescriptor(block: MetaDescriptorBuilder.() -> Unit): MetaDescriptor =
     MetaDescriptorBuilder().apply(block).build()
