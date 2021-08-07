@@ -35,23 +35,31 @@ public class MetaDescriptorBuilder internal constructor() {
         attributes.apply(block)
     }
 
-    public fun item(name: Name, descriptor: MetaDescriptor, block: MetaDescriptorBuilder.() -> Unit) {
-        when (name.length) {
-            0 -> {
+    public fun item(
+        name: Name,
+        descriptor: MetaDescriptor,
+        block: MetaDescriptorBuilder.() -> Unit = {}
+    ): MetaDescriptorBuilder {
+        return when (name.length) {
+            0 -> error("Can't set descriptor to root")
+            1 -> {
+                val item = descriptor.toBuilder().apply(block)
+                children[name.first().body] = item
+                item
             }
-            1 -> children[name.first().body] = descriptor.toBuilder().apply(block)
             else -> children.getOrPut(name.first().body) {
                 MetaDescriptorBuilder()
             }.item(name.cutFirst(), descriptor, block)
         }
     }
 
-    public fun item(name: Name, block: MetaDescriptorBuilder.() -> Unit) {
-        when (name.length) {
+    public fun item(name: Name, block: MetaDescriptorBuilder.() -> Unit = {}): MetaDescriptorBuilder {
+        return when (name.length) {
             0 -> apply(block)
             1 -> {
                 val target = MetaDescriptorBuilder().apply(block)
                 children[name.first().body] = target
+                target
             }
             else -> {
                 children.getOrPut(name.first().body) { MetaDescriptorBuilder() }.item(name.cutFirst(), block)
@@ -96,8 +104,8 @@ public fun MetaDescriptorBuilder.value(
     name: Name,
     type: ValueType,
     vararg additionalTypes: ValueType,
-    block: MetaDescriptorBuilder.() -> Unit
-): Unit = item(name) {
+    block: MetaDescriptorBuilder.() -> Unit = {}
+): MetaDescriptorBuilder = item(name) {
     type(type, *additionalTypes)
     block()
 }
@@ -106,13 +114,15 @@ public fun MetaDescriptorBuilder.value(
     name: String,
     type: ValueType,
     vararg additionalTypes: ValueType,
-    block: MetaDescriptorBuilder.() -> Unit
-): Unit = value(Name.parse(name), type, additionalTypes = additionalTypes, block)
+    block: MetaDescriptorBuilder.() -> Unit = {}
+): MetaDescriptorBuilder = value(Name.parse(name), type, additionalTypes = additionalTypes, block)
 
 /**
  * Create and configure child value descriptor
  */
-public fun MetaDescriptorBuilder.node(name: Name, block: MetaDescriptorBuilder.() -> Unit): Unit = item(name) {
+public fun MetaDescriptorBuilder.node(
+    name: Name, block: MetaDescriptorBuilder.() -> Unit
+): MetaDescriptorBuilder = item(name) {
     valueRequirement = ValueRequirement.ABSENT
     block()
 }
@@ -129,7 +139,7 @@ public inline fun <reified E : Enum<E>> MetaDescriptorBuilder.enum(
     key: Name,
     default: E?,
     crossinline modifier: MetaDescriptorBuilder.() -> Unit = {},
-): Unit = value(key, ValueType.STRING) {
+): MetaDescriptorBuilder = value(key, ValueType.STRING) {
     default?.let {
         this.default = default.asValue()
     }
