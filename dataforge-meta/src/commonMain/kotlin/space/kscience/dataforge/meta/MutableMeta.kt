@@ -267,7 +267,7 @@ private class MutableMetaImpl(
 
     private val listeners = HashSet<MetaListener>()
 
-    private fun changed(name: Name) {
+    override fun invalidate(name: Name) {
         listeners.forEach { it.callback(this, name) }
     }
 
@@ -276,7 +276,7 @@ private class MutableMetaImpl(
             val oldValue = field
             field = value
             if (oldValue != value) {
-                changed(Name.EMPTY)
+                invalidate(Name.EMPTY)
             }
         }
 
@@ -301,7 +301,7 @@ private class MutableMetaImpl(
 
     private fun ObservableMeta.adoptBy(parent: MutableMetaImpl, key: NameToken) {
         onChange(parent) { name ->
-            parent.changed(key + name)
+            parent.invalidate(key + name)
         }
     }
 
@@ -346,7 +346,7 @@ private class MutableMetaImpl(
                 newItem.adoptBy(this, key)
                 children[key] = newItem
             }
-            changed(key.asName())
+            invalidate(key.asName())
         }
     }
 
@@ -372,7 +372,7 @@ private class MutableMetaImpl(
                     items[token]?.setMeta(name.cutFirst(), node)
                 }
             }
-            changed(name)
+            invalidate(name)
         }
     }
 
