@@ -10,17 +10,19 @@ import space.kscience.dataforge.values.Value
  */
 public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurable {
 
-    final override var meta: ObservableMutableMeta = MutableMeta()
-        private set
+    private var _meta = MutableMeta()
 
-    final override var descriptor: MetaDescriptor? = null
-        internal set
+    final override val meta: ObservableMutableMeta get() = _meta
+
+    internal var metaDescriptor: MetaDescriptor? = null
+
+    final override val descriptor: MetaDescriptor? get() = metaDescriptor
 
     internal fun wrap(
         items: MutableMeta,
         preserveDefault: Boolean = false
     ) {
-        meta = (if (preserveDefault) items.withDefault(meta.seal()) else items).asObservable()
+        _meta = (if (preserveDefault) items.withDefault(meta.seal()) else items).asObservable()
     }
 
     /**
@@ -69,7 +71,7 @@ public open class SchemeSpec<out T : Scheme>(
     private val builder: () -> T,
 ) : Specification<T>, Described {
 
-    override fun read(source: Meta): T = empty().also {
+    override fun read(source: Meta): T = builder().also {
         it.wrap(MutableMeta().withDefault(source))
     }
 
@@ -81,7 +83,7 @@ public open class SchemeSpec<out T : Scheme>(
     override val descriptor: MetaDescriptor? get() = null
 
     override fun empty(): T = builder().also {
-        it.descriptor = descriptor
+        it.metaDescriptor = descriptor
     }
 
     @Suppress("OVERRIDE_BY_INLINE")
