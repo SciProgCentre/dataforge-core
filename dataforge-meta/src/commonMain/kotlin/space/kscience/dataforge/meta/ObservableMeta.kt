@@ -1,8 +1,6 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
-import space.kscience.dataforge.values.Value
 import kotlin.jvm.Synchronized
 import kotlin.reflect.KProperty1
 
@@ -35,11 +33,10 @@ public interface ObservableMeta : Meta {
 /**
  * A [Meta] which is both observable and mutable
  */
-public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTypedMeta<ObservableMutableMeta>{
+public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTypedMeta<ObservableMutableMeta> {
     override fun getOrCreate(name: Name): ObservableMutableMeta
 
-
-    override fun getMeta(name: Name): ObservableMutableMeta?{
+    override fun getMeta(name: Name): ObservableMutableMeta? {
         tailrec fun ObservableMutableMeta.find(name: Name): ObservableMutableMeta? = if (name.isEmpty()) {
             this
         } else {
@@ -50,10 +47,7 @@ public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTyp
     }
 }
 
-private class ObservableMetaWrapper(
-    val origin: MutableMeta,
-) : ObservableMutableMeta, Meta by origin {
-
+internal abstract class AbstractObservableMeta : ObservableMeta {
     private val listeners = HashSet<MetaListener>()
 
     override fun invalidate(name: Name) {
@@ -70,57 +64,10 @@ private class ObservableMetaWrapper(
         listeners.removeAll { it.owner === owner }
     }
 
-    override val items: Map<NameToken, ObservableMetaWrapper>
-        get() = origin.items.mapValues { ObservableMetaWrapper(it.value) }
-
-    override fun getMeta(name: Name): ObservableMetaWrapper? = origin.getMeta(name)?.let{ObservableMetaWrapper(it)}
-
-    override var value: Value?
-        get() = origin.value
-        set(value) {
-            origin.value = value
-            invalidate(Name.EMPTY)
-        }
-
-    override fun getOrCreate(name: Name): ObservableMutableMeta =
-        get(name) ?: ObservableMetaWrapper(origin.getOrCreate(name))
-
-    override fun setMeta(name: Name, node: Meta?) {
-        val oldMeta = get(name)
-        origin.setMeta(name, node)
-        //
-        // if meta is observable propagate changes from it
-        if (node is ObservableMeta) {
-
-            node.onChange(this) { changeName ->
-                setMeta(name + changeName, node[changeName])
-            }
-        }
-        if (oldMeta != node) {
-            invalidate(name)
-        }
-    }
-
-    override fun toMeta(): Meta {
-        return origin.toMeta()
-    }
-
-    @DFExperimental
-    override fun attach(name: Name, node: ObservableMutableMeta) {
-        set(name, node)
-        node.onChange(this) { changeName ->
-            setMeta(name + changeName, node[changeName])
-        }
-    }
+    override fun toString(): String = Meta.toString(this)
+    override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
+    override fun hashCode(): Int = Meta.hashCode(this)
 }
-
-/**
- * Cast this [MutableMeta] to [ObservableMutableMeta] or create an observable wrapper. Only changes made to the result
- * are guaranteed to be observed.
- */
-public fun MutableMeta.asObservable(): ObservableMutableMeta =
-    (this as? ObservableMutableMeta) ?: ObservableMetaWrapper(this)
-
 
 /**
  * Use the value of the property in a [callBack].

@@ -1,8 +1,10 @@
 package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.meta.descriptors.*
-import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.names.*
 import space.kscience.dataforge.values.Value
+import kotlin.jvm.Synchronized
 
 /**
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
@@ -10,19 +12,23 @@ import space.kscience.dataforge.values.Value
  */
 public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurable {
 
-    private var _meta = MutableMeta()
+    private var targetMeta: MutableMeta = MutableMeta()
 
-    final override val meta: ObservableMutableMeta get() = _meta
+    private var defaultMeta: Meta? = null
 
-    internal var metaDescriptor: MetaDescriptor? = null
+    final override val meta: ObservableMutableMeta = SchemeMeta(Name.EMPTY)
 
-    final override val descriptor: MetaDescriptor? get() = metaDescriptor
+    final override var descriptor: MetaDescriptor? = null
+        internal set
 
     internal fun wrap(
-        items: MutableMeta,
+        newMeta: MutableMeta,
         preserveDefault: Boolean = false
     ) {
-        _meta = (if (preserveDefault) items.withDefault(meta.seal()) else items).asObservable()
+        if(preserveDefault){
+            defaultMeta = targetMeta.seal()
+        }
+        targetMeta = newMeta
     }
 
     /**
@@ -44,11 +50,70 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
     }
 
     override fun setValue(name: Name, value: Value?) {
-        //TODO add validation
-        meta.setValue(name,value)
+        val valueDescriptor = descriptor?.get(name)
+        if (valueDescriptor?.validate(value) != false) {
+            meta.setValue(name, value)
+        } else error("Value $value is not validated by $valueDescriptor")
     }
 
     override fun toMeta(): Laminate = Laminate(meta, descriptor?.defaultNode)
+
+    private val listeners = HashSet<MetaListener>()
+
+    private inner class SchemeMeta(val pathName: Name) : ObservableMutableMeta {
+        override var value: Value?
+            get() = targetMeta[pathName]?.value ?: defaultMeta?.get(pathName)?.value
+            set(value) {
+                val oldValue = targetMeta[pathName]?.value
+                targetMeta[pathName] = value
+                if (oldValue != value) {
+                    invalidate(pathName)
+                }
+            }
+
+        override val items: Map<NameToken, ObservableMutableMeta>
+            get() {
+                val targetKeys = targetMeta[pathName]?.items?.keys ?: emptySet()
+                val defaultKeys = defaultMeta?.get(pathName)?.items?.keys ?: emptySet()
+                return (targetKeys + defaultKeys).associateWith { SchemeMeta(pathName + it) }
+            }
+
+        override fun invalidate(name: Name) {
+            listeners.forEach { it.callback(this@Scheme.meta, pathName + name) }
+        }
+
+        @Synchronized
+        override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
+            listeners.add(MetaListener(owner) { changedeName ->
+                if (changedeName.startsWith(pathName)) {
+                    this@Scheme.meta.callback(changedeName.removeHeadOrNull(pathName)!!)
+                }
+            })
+        }
+
+        @Synchronized
+        override fun removeListener(owner: Any?) {
+            listeners.removeAll { it.owner === owner }
+        }
+
+        override fun toString(): String = Meta.toString(this)
+        override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
+        override fun hashCode(): Int = Meta.hashCode(this)
+
+        override fun setMeta(name: Name, node: Meta?) {
+            targetMeta.setMeta(name, node)
+            invalidate(name)
+        }
+
+        override fun getOrCreate(name: Name): ObservableMutableMeta = SchemeMeta(pathName + name)
+
+        @DFExperimental
+        override fun attach(name: Name, node: ObservableMutableMeta) {
+            TODO("Not yet implemented")
+        }
+
+
+    }
 }
 
 /**
@@ -83,7 +148,7 @@ public open class SchemeSpec<out T : Scheme>(
     override val descriptor: MetaDescriptor? get() = null
 
     override fun empty(): T = builder().also {
-        it.metaDescriptor = descriptor
+        it.descriptor = descriptor
     }
 
     @Suppress("OVERRIDE_BY_INLINE")

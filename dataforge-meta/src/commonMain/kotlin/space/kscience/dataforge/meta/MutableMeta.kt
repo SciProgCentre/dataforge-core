@@ -265,14 +265,7 @@ public operator fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.set(name: Name
 private class MutableMetaImpl(
     value: Value?,
     children: Map<NameToken, Meta> = emptyMap()
-) : ObservableMutableMeta {
-
-    private val listeners = HashSet<MetaListener>()
-
-    override fun invalidate(name: Name) {
-        listeners.forEach { it.callback(this, name) }
-    }
-
+) : AbstractObservableMeta(), ObservableMutableMeta {
     override var value = value
         @Synchronized set(value) {
             val oldValue = field
@@ -288,17 +281,6 @@ private class MutableMetaImpl(
         })
 
     override val items: Map<NameToken, ObservableMutableMeta> get() = children
-
-
-    @Synchronized
-    override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
-        listeners.add(MetaListener(owner, callback))
-    }
-
-    @Synchronized
-    override fun removeListener(owner: Any?) {
-        listeners.removeAll { it.owner === owner }
-    }
 
     private fun ObservableMeta.adoptBy(parent: MutableMetaImpl, key: NameToken) {
         onChange(parent) { name ->
@@ -377,10 +359,6 @@ private class MutableMetaImpl(
             invalidate(name)
         }
     }
-
-    override fun toString(): String = Meta.toString(this)
-    override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
-    override fun hashCode(): Int = Meta.hashCode(this)
 }
 
 /**
