@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
 import space.kscience.dataforge.values.EnumValue
+import space.kscience.dataforge.values.MutableValueProvider
 import space.kscience.dataforge.values.Value
 import space.kscience.dataforge.values.asValue
 import kotlin.js.JsName
@@ -19,10 +20,12 @@ public annotation class MetaBuilder
 /**
  * A generic interface that gives access to getting and setting meta notes and values
  */
-public interface MutableMetaProvider : MetaProvider {
+public interface MutableMetaProvider : MetaProvider, MutableValueProvider {
     override fun getMeta(name: Name): MutableMeta?
     public fun setMeta(name: Name, node: Meta?)
-    public fun setValue(name: Name, value: Value?)
+    override fun setValue(name: Name, value: Value?) {
+        getMeta(name)?.value = value
+    }
 }
 
 /**

@@ -12,8 +12,14 @@ import kotlin.jvm.Synchronized
  */
 public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurable {
 
+    /**
+     * Meta to be mutated by this schme
+     */
     private var targetMeta: MutableMeta = MutableMeta()
 
+    /**
+     * Default values provided by this scheme
+     */
     private var defaultMeta: Meta? = null
 
     final override val meta: ObservableMutableMeta = SchemeMeta(Name.EMPTY)
@@ -25,7 +31,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
         newMeta: MutableMeta,
         preserveDefault: Boolean = false
     ) {
-        if(preserveDefault){
+        if (preserveDefault) {
             defaultMeta = targetMeta.seal()
         }
         targetMeta = newMeta
@@ -62,12 +68,14 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
     private inner class SchemeMeta(val pathName: Name) : ObservableMutableMeta {
         override var value: Value?
-            get() = targetMeta[pathName]?.value ?: defaultMeta?.get(pathName)?.value
+            get() = targetMeta[pathName]?.value
+                ?: defaultMeta?.get(pathName)?.value
+                ?: descriptor?.get(pathName)?.defaultValue
             set(value) {
                 val oldValue = targetMeta[pathName]?.value
                 targetMeta[pathName] = value
                 if (oldValue != value) {
-                    invalidate(pathName)
+                    invalidate(Name.EMPTY)
                 }
             }
 
@@ -84,9 +92,9 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
         @Synchronized
         override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
-            listeners.add(MetaListener(owner) { changedeName ->
-                if (changedeName.startsWith(pathName)) {
-                    this@Scheme.meta.callback(changedeName.removeHeadOrNull(pathName)!!)
+            listeners.add(MetaListener(owner) { changedName ->
+                if (changedName.startsWith(pathName)) {
+                    this@Scheme.meta.callback(changedName.removeHeadOrNull(pathName)!!)
                 }
             })
         }

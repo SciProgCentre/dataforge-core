@@ -19,8 +19,10 @@ public interface MetaRepr {
 /**
  * A container for meta nodes
  */
-public fun interface MetaProvider {
+public fun interface MetaProvider : ValueProvider {
     public fun getMeta(name: Name): Meta?
+
+    override fun getValue(name: Name): Value? = getMeta(name)?.value
 }
 
 /**
