@@ -51,6 +51,20 @@ public data class MetaDescriptor(
     public val defaultValue: Value? = null,
     public val attributes: Meta = Meta.EMPTY,
 ) {
+    /**
+     * A node constructed of default values for this descriptor and its children
+     */
+    public val defaultNode: Meta by lazy {
+        Meta {
+            defaultValue?.let { defaultValue ->
+                this.value = defaultValue
+            }
+            children.forEach { (key, descriptor) ->
+                set(key, descriptor.defaultNode)
+            }
+        }
+    }
+
     public companion object {
         internal const val ALLOWED_VALUES_KEY = "allowedValues"
     }
@@ -67,19 +81,6 @@ public operator fun MetaDescriptor.get(name: Name): MetaDescriptor? = when (name
 }
 
 public operator fun MetaDescriptor.get(name: String): MetaDescriptor? = get(Name.parse(name))
-
-/**
- * A node constructed of default values for this descriptor and its children
- */
-public val MetaDescriptor.defaultNode: Meta
-    get() = Meta {
-        defaultValue?.let { defaultValue ->
-            this.value = defaultValue
-        }
-        children.forEach { (key, descriptor) ->
-            set(key, descriptor.defaultNode)
-        }
-    }
 
 public fun MetaDescriptor.validate(value: Value?): Boolean = if (value == null) {
     valueRequirement != ValueRequirement.REQUIRED

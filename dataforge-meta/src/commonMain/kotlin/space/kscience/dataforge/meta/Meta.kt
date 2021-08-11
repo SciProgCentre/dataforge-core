@@ -3,6 +3,7 @@ package space.kscience.dataforge.meta
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import space.kscience.dataforge.misc.Type
+import space.kscience.dataforge.misc.unsafeCast
 import space.kscience.dataforge.names.*
 import space.kscience.dataforge.values.*
 
@@ -139,13 +140,6 @@ public fun Meta.getIndexed(name: Name): Map<String?, Meta> {
  */
 public interface TypedMeta<out M : TypedMeta<M>> : Meta {
 
-    /**
-     * Access self as a recursive type instance
-     */
-    @Suppress("UNCHECKED_CAST")
-    public val self: M
-        get() = this as M
-
     override val items: Map<NameToken, M>
 
     override fun getMeta(name: Name): M? {
@@ -160,6 +154,11 @@ public interface TypedMeta<out M : TypedMeta<M>> : Meta {
 
     override fun toMeta(): Meta = this
 }
+
+/**
+ * Access self as a recursive type instance
+ */
+public inline val <M : TypedMeta<M>> TypedMeta<M>.self: M get() = unsafeCast()
 
 //public typealias Meta = TypedMeta<*>
 
