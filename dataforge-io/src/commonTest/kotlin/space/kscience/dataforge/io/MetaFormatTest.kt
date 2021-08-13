@@ -2,11 +2,11 @@ package space.kscience.dataforge.io
 
 import kotlinx.serialization.json.*
 import space.kscience.dataforge.meta.*
-import space.kscience.dataforge.meta.JsonMeta.Companion.JSON_ARRAY_KEY
 import space.kscience.dataforge.values.ListValue
-import space.kscience.dataforge.values.number
+import space.kscience.dataforge.values.double
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
 
 fun Meta.toByteArray(format: MetaFormat = JsonMetaFormat) = buildByteArray {
     format.writeObject(this@buildByteArray, this@toByteArray)
@@ -17,20 +17,6 @@ fun MetaFormat.fromByteArray(packet: ByteArray): Meta {
 }
 
 class MetaFormatTest {
-    @Test
-    fun testBinaryMetaFormat() {
-        val meta = Meta {
-            "a" put 22
-            "node" put {
-                "b" put "DDD"
-                "c" put 11.1
-                "array" put doubleArrayOf(1.0, 2.0, 3.0)
-            }
-        }
-        val bytes = meta.toByteArray(BinaryMetaFormat)
-        val result = BinaryMetaFormat.fromByteArray(bytes)
-        assertEquals(meta, result)
-    }
 
     @Test
     fun testJsonMetaFormat() {
@@ -51,36 +37,36 @@ class MetaFormatTest {
             if (meta[it] != result[it]) error("${meta[it]} != ${result[it]}")
         }
 
-        assertEquals<Meta>(meta, result)
+        assertEquals(meta, result)
     }
 
     @Test
     fun testJsonToMeta() {
         val json = buildJsonArray {
             //top level array
-            add(buildJsonArray {
-                add(JsonPrimitive(88))
-                add(buildJsonObject {
+            addJsonArray {
+                add(88)
+                addJsonObject {
                     put("c", "aasdad")
                     put("d", true)
-                })
-            })
+                }
+            }
             add("value")
-            add(buildJsonArray {
-                add(JsonPrimitive(1.0))
-                add(JsonPrimitive(2.0))
-                add(JsonPrimitive(3.0))
-            })
+            addJsonArray {
+                add(1.0)
+                add(2.0)
+                add(3.0)
+            }
         }
-        val meta = json.toMetaItem().node!!
+        val meta = json.toMeta()
 
-        assertEquals(true, meta["$JSON_ARRAY_KEY[0].$JSON_ARRAY_KEY[1].d"].boolean)
-        assertEquals("value", meta["$JSON_ARRAY_KEY[1]"].string)
-        assertEquals(listOf(1.0, 2.0, 3.0), meta["$JSON_ARRAY_KEY[2"].value?.list?.map { it.number.toDouble() })
+        assertEquals(true, meta["${Meta.JSON_ARRAY_KEY}[0].${Meta.JSON_ARRAY_KEY}[1].d"].boolean)
+        assertEquals("value", meta["${Meta.JSON_ARRAY_KEY}[1]"].string)
+        assertEquals(listOf(1.0, 2.0, 3.0), meta["${Meta.JSON_ARRAY_KEY}[2]"]?.value?.list?.map { it.double })
     }
 
     @Test
-    fun testJsonStringToMeta(){
+    fun testJsonStringToMeta() {
         val jsonString = """
             {
                 "comments": [
@@ -98,8 +84,8 @@ class MetaFormatTest {
             }
         """.trimIndent()
         val json = Json.parseToJsonElement(jsonString)
-        val meta = json.toMetaItem().node!!
-        assertEquals(ListValue.EMPTY, meta["comments"].value)
+        val meta = json.toMeta()
+        assertEquals(ListValue.EMPTY, meta["comments"]?.value)
     }
 
 }

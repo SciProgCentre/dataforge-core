@@ -28,7 +28,7 @@ public inline fun <reified P : Plugin> P.toFactory(): PluginFactory<P> = object 
     override val type: KClass<out P> = P::class
 }
 
-public fun Workspace.runBlocking(task: String, block: MetaBuilder.() -> Unit = {}): DataSet<Any> = runBlocking {
+public fun Workspace.runBlocking(task: String, block: MutableMeta.() -> Unit = {}): DataSet<Any> = runBlocking {
     produce(task, block)
 }
 

@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.map
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.matches
-import space.kscience.dataforge.names.toName
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.typeOf
@@ -61,4 +60,4 @@ public suspend fun <R : Any> DataSet<*>.selectOne(type: KType, name: Name): Name
 public suspend inline fun <reified R : Any> DataSet<*>.selectOne(name: Name): NamedData<R>? = selectOne(typeOf<R>(), name)
 
 public suspend inline fun <reified R : Any> DataSet<*>.selectOne(name: String): NamedData<R>? =
-    selectOne(typeOf<R>(), name.toName())
+    selectOne(typeOf<R>(), Name.parse(name))

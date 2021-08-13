@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFBuilder
@@ -29,7 +29,7 @@ public data class ActionEnv(
  * Action environment
  */
 @DFBuilder
-public class MapActionBuilder<T, R>(public var name: Name, public var meta: MetaBuilder, public val actionMeta: Meta) {
+public class MapActionBuilder<T, R>(public var name: Name, public var meta: MutableMeta, public val actionMeta: Meta) {
     public lateinit var result: suspend ActionEnv.(T) -> R
 
     /**
@@ -68,7 +68,8 @@ internal class MapAction<in T : Any, out R : Any>(
             //getting new meta
             val newMeta = builder.meta.seal()
 
-            @OptIn(DFInternal::class) val newData = Data(outputType, newMeta, dependencies = listOf(data)) {
+            @OptIn(DFInternal::class)
+            val newData = Data(outputType, newMeta, dependencies = listOf(data)) {
                 builder.result(env, data.await())
             }
             //setting the data node

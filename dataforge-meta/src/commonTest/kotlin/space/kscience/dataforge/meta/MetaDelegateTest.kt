@@ -1,6 +1,5 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.values.asValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -11,17 +10,17 @@ class MetaDelegateTest {
         NO
     }
 
-    class InnerSpec : Scheme() {
+    class InnerScheme : Scheme() {
         var innerValue by string()
 
-        companion object : SchemeSpec<InnerSpec>(::InnerSpec)
+        companion object : SchemeSpec<InnerScheme>(::InnerScheme)
     }
 
     class TestScheme : Scheme() {
         var myValue by string()
         var safeValue by double(2.2)
         var enumValue by enum(TestEnum.YES)
-        var inner by spec(InnerSpec)
+        var inner by spec(InnerScheme)
 
         companion object : SchemeSpec<TestScheme>(::TestScheme)
     }
@@ -30,10 +29,10 @@ class MetaDelegateTest {
     fun delegateTest() {
 
         val testObject = TestScheme.empty()
-        testObject.set("myValue","theString".asValue())
+        testObject.meta["myValue"] = "theString"
         testObject.enumValue = TestEnum.NO
 
-        testObject.inner = InnerSpec { innerValue = "ddd" }
+        testObject.inner = InnerScheme { innerValue = "ddd" }
 
         assertEquals("theString", testObject.myValue)
         assertEquals(TestEnum.NO, testObject.enumValue)

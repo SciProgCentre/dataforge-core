@@ -35,12 +35,6 @@
 > **Maturity**: PROTOTYPE
 <hr/>
 
-* ### [dataforge-tables](dataforge-tables)
-> 
->
-> **Maturity**: PROTOTYPE
-<hr/>
-
 * ### [dataforge-workspace](dataforge-workspace)
 > 
 >

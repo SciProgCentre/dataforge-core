@@ -7,7 +7,6 @@ import space.kscience.dataforge.context.PluginFactory
 import space.kscience.dataforge.context.PluginTag
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.names.toName
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,7 +24,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
 
 
     val singleData by task<Int> {
-        workspace.data.select<Int>().getData("myData[12]".toName())?.let {
+        workspace.data.select<Int>().getData("myData[12]")?.let {
             emit("result", it)
         }
     }

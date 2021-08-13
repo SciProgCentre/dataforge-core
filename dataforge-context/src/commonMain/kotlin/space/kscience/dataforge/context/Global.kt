@@ -1,6 +1,6 @@
 package space.kscience.dataforge.context
 
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Job
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.asName
@@ -13,8 +13,8 @@ internal expect val globalLoggerFactory: PluginFactory<out LogManager>
  * A global root context. Closing [Global] terminates the framework.
  */
 @ThreadLocal
-private object GlobalContext : Context("GLOBAL".asName(), null, Meta.EMPTY) {
-    override val coroutineContext: CoroutineContext = GlobalScope.coroutineContext + Job()
+private object GlobalContext : Context("GLOBAL".asName(), null, emptySet(), Meta.EMPTY) {
+    override val coroutineContext: CoroutineContext = Job() + CoroutineName("GlobalContext")
 }
 
 public val Global: Context get() = GlobalContext

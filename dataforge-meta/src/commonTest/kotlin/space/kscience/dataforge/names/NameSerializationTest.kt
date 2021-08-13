@@ -9,7 +9,7 @@ class NameSerializationTest {
 
     @Test
     fun testNameSerialization() {
-        val name = "aaa.bbb.ccc".toName()
+        val name = Name.parse("aaa.bbb.ccc")
         val json = Json.encodeToJsonElement(Name.serializer(), name)
         println(json)
         val reconstructed = Json.decodeFromJsonElement(Name.serializer(), json)

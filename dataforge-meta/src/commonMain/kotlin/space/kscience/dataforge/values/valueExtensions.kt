@@ -1,7 +1,6 @@
 package space.kscience.dataforge.values
 
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
 
 /**
  * Check if value is null
@@ -25,6 +24,13 @@ public val Value.float: Float get() = number.toFloat()
 public val Value.short: Short get() = number.toShort()
 public val Value.long: Long get() = number.toLong()
 
+public inline fun <reified E : Enum<E>> Value.enum(): E = if (this is EnumValue<*>) {
+    value as E
+} else {
+    enumValueOf<E>(string)
+}
+
+
 public val Value.stringList: List<String> get() = list.map { it.string }
 
 public val Value.doubleArray: DoubleArray
@@ -35,4 +41,4 @@ public val Value.doubleArray: DoubleArray
     }
 
 
-public fun Value.toMeta(): MetaBuilder = Meta { Meta.VALUE_KEY put this }
+public fun Value.toMeta(): Meta = Meta(this)

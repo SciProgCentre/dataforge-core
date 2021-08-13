@@ -8,12 +8,12 @@ import space.kscience.dataforge.data.DataSet
 import space.kscience.dataforge.data.DataSetBuilder
 import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
-import space.kscience.dataforge.meta.descriptors.NodeDescriptor
+import space.kscience.dataforge.meta.MutableMeta
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
+import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.toName
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
@@ -26,16 +26,16 @@ public interface TaskContainer {
 
 public inline fun <reified T : Any> TaskContainer.registerTask(
     name: String,
-    noinline descriptorBuilder: NodeDescriptor.() -> Unit = {},
+    noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
-): Unit = registerTask(name.toName(), Task(NodeDescriptor(descriptorBuilder), builder))
+): Unit = registerTask(Name.parse(name), Task(MetaDescriptor(descriptorBuilder), builder))
 
 public inline fun <reified T : Any> TaskContainer.task(
-    noinline descriptorBuilder: NodeDescriptor.() -> Unit = {},
+    noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
-    val taskName = property.name.toName()
-    val task = Task(NodeDescriptor(descriptorBuilder), builder)
+    val taskName = Name.parse(property.name)
+    val task = Task(MetaDescriptor(descriptorBuilder), builder)
     registerTask(taskName, task)
     ReadOnlyProperty { _, _ -> TaskReference(taskName, task) }
 }
@@ -87,10 +87,9 @@ public class WorkspaceBuilder(private val parentContext: Context = Global) : Tas
 /**
  * Define a new target with a builder
  */
-public inline fun WorkspaceBuilder.target(name: String, metaBuilder: MetaBuilder.() -> Unit): Unit =
-    target(name, Meta(metaBuilder))
+public inline fun WorkspaceBuilder.target(name: String, mutableMeta: MutableMeta.() -> Unit): Unit =
+    target(name, Meta(mutableMeta))
 
 @DFBuilder
-public fun Workspace(parentContext: Context = Global, builder: WorkspaceBuilder.() -> Unit): Workspace {
-    return WorkspaceBuilder(parentContext).apply(builder).build()
-}
+public fun Workspace(parentContext: Context = Global, builder: WorkspaceBuilder.() -> Unit): Workspace =
+    WorkspaceBuilder(parentContext).apply(builder).build()

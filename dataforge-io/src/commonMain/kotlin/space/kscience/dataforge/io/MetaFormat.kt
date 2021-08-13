@@ -7,7 +7,7 @@ import io.ktor.utils.io.core.use
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.descriptors.NodeDescriptor
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
@@ -30,10 +30,10 @@ public interface MetaFormat : IOFormat<Meta> {
     public fun writeMeta(
         output: Output,
         meta: Meta,
-        descriptor: NodeDescriptor? = null,
+        descriptor: MetaDescriptor? = null,
     )
 
-    public fun readMeta(input: Input, descriptor: NodeDescriptor? = null): Meta
+    public fun readMeta(input: Input, descriptor: MetaDescriptor? = null): Meta
 }
 
 @Type(META_FORMAT_TYPE)

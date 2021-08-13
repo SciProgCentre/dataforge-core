@@ -4,7 +4,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.4.0"
+    version = "0.5.0"
 }
 
 subprojects {
@@ -13,10 +13,6 @@ subprojects {
 
 readme {
     readmeTemplate = file("docs/templates/README-TEMPLATE.md")
-}
-
-changelog{
-    version = project.version.toString()
 }
 
 ksciencePublish {

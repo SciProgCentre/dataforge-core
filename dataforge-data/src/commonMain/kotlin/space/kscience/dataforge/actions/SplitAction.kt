@@ -7,12 +7,11 @@ import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Laminate
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.toName
 import kotlin.collections.set
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -20,7 +19,7 @@ import kotlin.reflect.typeOf
 
 public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val meta: Meta) {
 
-    public class FragmentRule<T : Any, R : Any>(public val name: Name, public var meta: MetaBuilder) {
+    public class FragmentRule<T : Any, R : Any>(public val name: Name, public var meta: MutableMeta) {
         public lateinit var result: suspend (T) -> R
 
         public fun result(f: suspend (T) -> R) {
@@ -36,7 +35,7 @@ public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val me
      * @param rule the rule to transform fragment name and meta using
      */
     public fun fragment(name: String, rule: FragmentRule<T, R>.() -> Unit) {
-        fragments[name.toName()] = rule
+        fragments[Name.parse(name)] = rule
     }
 }
 

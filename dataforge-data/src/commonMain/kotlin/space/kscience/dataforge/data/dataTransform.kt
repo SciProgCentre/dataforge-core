@@ -2,7 +2,7 @@ package space.kscience.dataforge.data
 
 import kotlinx.coroutines.flow.*
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFInternal
@@ -140,7 +140,7 @@ public suspend inline fun <T : Any, reified R : Any> Flow<NamedData<T>>.foldToDa
 public suspend fun <T : Any, R : Any> DataSet<T>.map(
     outputType: KType,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    metaTransform: MetaBuilder.() -> Unit = {},
+    metaTransform: MutableMeta.() -> Unit = {},
     block: suspend (T) -> R,
 ): DataTree<R> = DataTree<R>(outputType) {
     populate(
@@ -156,7 +156,7 @@ public suspend fun <T : Any, R : Any> DataSet<T>.map(
 @OptIn(DFInternal::class)
 public suspend inline fun <T : Any, reified R : Any> DataSet<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    noinline metaTransform: MetaBuilder.() -> Unit = {},
+    noinline metaTransform: MutableMeta.() -> Unit = {},
     noinline block: suspend (T) -> R,
 ): DataTree<R> = map(typeOf<R>(), coroutineContext, metaTransform, block)
 

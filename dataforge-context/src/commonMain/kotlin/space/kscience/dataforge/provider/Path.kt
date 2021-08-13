@@ -16,7 +16,6 @@
 package space.kscience.dataforge.provider
 
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.toName
 import kotlin.jvm.JvmInline
 
 /**
@@ -33,11 +32,7 @@ public value class Path(public val tokens: List<PathToken>) : Iterable<PathToken
     public companion object {
         public const val PATH_SEGMENT_SEPARATOR: String = "/"
 
-        public fun parse(path: String): Path {
-            val head = path.substringBefore(PATH_SEGMENT_SEPARATOR)
-            val tail = path.substringAfter(PATH_SEGMENT_SEPARATOR)
-            return PathToken.parse(head).asPath() + parse(tail)
-        }
+        public fun parse(path: String): Path = Path(path.split(PATH_SEGMENT_SEPARATOR).map { PathToken.parse(it) })
     }
 }
 
@@ -67,7 +62,7 @@ public data class PathToken(val name: Name, val target: String? = null) {
         public const val TARGET_SEPARATOR: String = "::"
         public fun parse(token: String): PathToken {
             val target = token.substringBefore(TARGET_SEPARATOR, "")
-            val name = token.substringAfter(TARGET_SEPARATOR).toName()
+            val name = Name.parse(token.substringAfter(TARGET_SEPARATOR))
             if (target.contains("[")) TODO("target separators in queries are not supported")
             return PathToken(name, target)
         }

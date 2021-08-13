@@ -9,16 +9,7 @@ internal class TestScheme : Scheme() {
     var a by int()
     var b by string()
 
-    companion object : Specification<TestScheme> {
-        override fun empty(): TestScheme = TestScheme()
-
-        override fun read(items: ItemProvider): TestScheme =
-            wrap(Config(), items)
-
-        override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): TestScheme =
-            wrap(target, defaultProvider)
-
-    }
+    companion object : SchemeSpec<TestScheme>(::TestScheme)
 }
 
 class SpecificationTest {
@@ -58,8 +49,8 @@ class SpecificationTest {
 
     @Test
     fun testChildModification() {
-        val config = Config()
-        val child = config.getChild("child")
+        val config = MutableMeta()
+        val child = config.getOrCreate("child")
         val scheme = TestScheme.write(child)
         scheme.a = 22
         scheme.b = "test"
@@ -69,9 +60,9 @@ class SpecificationTest {
 
     @Test
     fun testChildUpdate() {
-        val config = Config()
-        val child = config.getChild("child")
-        child.update(TestScheme) {
+        val config = MutableMeta()
+        val child = config.getOrCreate("child")
+        child.updateWith(TestScheme) {
             a = 22
             b = "test"
         }

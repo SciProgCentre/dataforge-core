@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 class NameMatchTest {
     @Test
     fun matchWildCards() {
-        val theName = "a.b.c.d".toName()
+        val theName = Name.parse("a.b.c.d")
         assertTrue { theName.matches("a.b.**") }
         assertTrue { theName.matches("a.*.c.**") }
         assertTrue { theName.matches("**.d") }
@@ -22,7 +22,7 @@ class NameMatchTest {
 
     @Test
     fun matchPattern() {
-        val theName = "a[dd+2].b[13].c.d[\"d\"]".toName()
+        val theName = Name.parse("a[dd+2].b[13].c.d[\"d\"]")
         assertTrue { theName.matches("a[.*].b[.*].c[.*].d[.*]") }
         assertTrue { theName.matches("a[.*].b[.*].c.d[.*]") }
         assertFalse { theName.matches("a[.*].b[.*].*.d") }

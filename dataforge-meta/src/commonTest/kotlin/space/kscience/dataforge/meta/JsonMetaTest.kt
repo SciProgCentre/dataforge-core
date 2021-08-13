@@ -1,7 +1,8 @@
 package space.kscience.dataforge.meta
 
 import kotlinx.serialization.json.*
-import space.kscience.dataforge.meta.descriptors.NodeDescriptor
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
+import space.kscience.dataforge.meta.descriptors.item
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -30,8 +31,8 @@ class JsonMetaTest {
         })
     }
 
-    val descriptor = NodeDescriptor{
-        node("nodeArray"){
+    val descriptor = MetaDescriptor {
+        item("nodeArray") {
             indexKey = "index"
         }
     }
@@ -43,8 +44,17 @@ class JsonMetaTest {
         //println(meta)
         val reconstructed = meta.toJson(descriptor)
         println(reconstructed)
-        assertEquals(2,
-            reconstructed["nodeArray"]?.jsonArray?.get(1)?.jsonObject?.get("index")?.jsonPrimitive?.int)
-        assertEquals(json,reconstructed)
+        assertEquals(
+            2,
+            reconstructed
+                .jsonObject["nodeArray"]
+                ?.jsonArray
+                ?.get(1)
+                ?.jsonObject
+                ?.get("index")
+                ?.jsonPrimitive
+                ?.int
+        )
+        assertEquals(json, reconstructed)
     }
 }

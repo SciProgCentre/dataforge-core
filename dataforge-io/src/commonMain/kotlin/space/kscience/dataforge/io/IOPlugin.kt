@@ -6,9 +6,11 @@ import space.kscience.dataforge.io.IOFormat.Companion.META_KEY
 import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
 import space.kscience.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
-import space.kscience.dataforge.meta.*
+import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.get
+import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.toName
+
 import kotlin.native.concurrent.ThreadLocal
 import kotlin.reflect.KClass
 
@@ -19,13 +21,13 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         context.gather<IOFormatFactory<*>>(IO_FORMAT_TYPE).values
     }
 
-    public fun <T : Any> resolveIOFormat(item: MetaItem, type: KClass<out T>): IOFormat<T>? {
-        val key = item.string ?: item.node[NAME_KEY]?.string ?: error("Format name not defined")
-        val name = key.toName()
+    public fun <T : Any> resolveIOFormat(item: Meta, type: KClass<out T>): IOFormat<T>? {
+        val key = item.string ?: item[NAME_KEY]?.string ?: error("Format name not defined")
+        val name = Name.parse(key)
         return ioFormatFactories.find { it.name == name }?.let {
             @Suppress("UNCHECKED_CAST")
             if (it.type != type) error("Format type ${it.type} is not the same as requested type $type")
-            else it.invoke(item.node[META_KEY].node ?: Meta.EMPTY, context) as IOFormat<T>
+            else it.invoke(item[META_KEY] ?: Meta.EMPTY, context) as IOFormat<T>
         }
     }
 
@@ -47,10 +49,10 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     private fun resolveEnvelopeFormat(name: Name, meta: Meta = Meta.EMPTY): EnvelopeFormat? =
         envelopeFormatFactories.find { it.name == name }?.invoke(meta, context)
 
-    public fun resolveEnvelopeFormat(item: MetaItem): EnvelopeFormat? {
-        val name = item.string ?: item.node[NAME_KEY]?.string ?: error("Envelope format name not defined")
-        val meta = item.node[META_KEY].node ?: Meta.EMPTY
-        return resolveEnvelopeFormat(name.toName(), meta)
+    public fun resolveEnvelopeFormat(item: Meta): EnvelopeFormat? {
+        val name = item.string ?: item[NAME_KEY]?.string ?: error("Envelope format name not defined")
+        val meta = item[META_KEY] ?: Meta.EMPTY
+        return resolveEnvelopeFormat(Name.parse(name), meta)
     }
 
     override fun content(target: String): Map<Name, Any> {
@@ -62,7 +64,7 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     }
 
     public companion object : PluginFactory<IOPlugin> {
-        public val defaultMetaFormats: List<MetaFormatFactory> = listOf(JsonMetaFormat, BinaryMetaFormat)
+        public val defaultMetaFormats: List<MetaFormatFactory> = listOf(JsonMetaFormat)
         public val defaultEnvelopeFormats: List<EnvelopeFormatFactory> =
             listOf(TaggedEnvelopeFormat, TaglessEnvelopeFormat)
 

@@ -9,16 +9,14 @@ import kotlin.test.assertNotNull
 
 class DescriptorTest {
 
-    val descriptor = NodeDescriptor {
+    val descriptor = MetaDescriptor {
         node("aNode") {
             info = "A root demo node"
-            value("b") {
+            value("b", ValueType.NUMBER) {
                 info = "b number value"
-                type(ValueType.NUMBER)
             }
             node("otherNode") {
-                value("otherValue") {
-                    type(ValueType.BOOLEAN)
+                value("otherValue", ValueType.BOOLEAN) {
                     default(false)
                     info = "default value"
                 }
@@ -30,13 +28,13 @@ class DescriptorTest {
     fun testAllowedValues() {
         val child = descriptor["aNode.b"]
         assertNotNull(child)
-        val allowed = descriptor.nodes["aNode"]?.values?.get("b")?.allowedValues
-        assertEquals(emptyList(), allowed)
+        val allowed = descriptor["aNode"]?.get("b")?.allowedValues
+        assertEquals(null, allowed)
     }
 
     @Test
-    fun testDefaultMetaNode(){
-        val meta = descriptor.defaultMeta()
+    fun testDefaultMetaNode() {
+        val meta = descriptor.defaultNode
         assertEquals(false, meta["aNode.otherNode.otherValue"].boolean)
     }
 }

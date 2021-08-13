@@ -1,13 +1,12 @@
 package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.values.Null
 import space.kscience.dataforge.values.Value
+import space.kscience.dataforge.values.asValue
 import space.kscience.dataforge.values.isList
 
 
 //TODO add Meta wrapper for dynamic
-
 public fun Value.toDynamic(): dynamic {
     return if (isList()) {
         list.map { it.toDynamic() }.toTypedArray().asDynamic()
@@ -21,14 +20,10 @@ public fun Value.toDynamic(): dynamic {
  */
 public fun Meta.toDynamic(): dynamic {
     if (this is DynamicMeta) return this.obj
-
-    fun MetaItem.toDynamic(): dynamic = when (this) {
-        is MetaItemValue -> this.value.toDynamic()
-        is MetaItemNode -> this.node.toDynamic()
-    }
+    if(items.isEmpty()) return value?.toDynamic()
 
     val res = js("{}")
-    this.items.entries.groupBy { it.key.body }.forEach { (key, value) ->
+    items.entries.groupBy { it.key.body }.forEach { (key, value) ->
         val list = value.map { it.value }
         res[key] = when (list.size) {
             1 -> list.first().toDynamic()
@@ -38,46 +33,60 @@ public fun Meta.toDynamic(): dynamic {
     return res
 }
 
-public class DynamicMeta(internal val obj: dynamic) : MetaBase() {
-    private fun keys(): Array<String> = js("Object").keys(obj)
+public class DynamicMeta(internal val obj: dynamic) : TypedMeta<DynamicMeta> {
+    private fun keys(): Array<String> = js("Object").keys(obj) as Array<String>
 
     private fun isArray(@Suppress("UNUSED_PARAMETER") obj: dynamic): Boolean =
-        js("Array.isArray(obj)") as Boolean
+        js("Array").isArray(obj) as Boolean
 
     private fun isPrimitive(obj: dynamic): Boolean =
         (jsTypeOf(obj) != "object")
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    private fun asItem(obj: dynamic): TypedMetaItem<DynamicMeta>? {
-        return when {
-            obj == null -> MetaItemValue(Null)
-            isArray(obj) && (obj as Array<Any?>).all { isPrimitive(it) } -> MetaItemValue(Value.of(obj as Array<Any?>))
-            else -> when (jsTypeOf(obj)) {
-                "boolean" -> MetaItemValue(Value.of(obj as Boolean))
-                "number" -> MetaItemValue(Value.of(obj as Number))
-                "string" -> MetaItemValue(Value.of(obj as String))
-                "object" -> MetaItemNode(DynamicMeta(obj))
-                else -> null
-            }
+    @Suppress("USELESS_CAST")
+    override val value: Value?
+        get() = if (isArray(obj) && (obj as Array<Any?>).all { isPrimitive(it) }) Value.of(obj as Array<Any?>)
+        else when (jsTypeOf(obj)) {
+            "boolean" -> (obj as Boolean).asValue()
+            "number" -> (obj as Number).asValue()
+            "string" -> (obj as String).asValue()
+            else -> null
         }
-    }
 
-    override val items: Map<NameToken, TypedMetaItem<DynamicMeta>>
-        get() = keys().flatMap<String, Pair<NameToken, TypedMetaItem<DynamicMeta>>> { key ->
+    override val items: Map<NameToken, DynamicMeta>
+        get() = if (isPrimitive(obj)) {
+            emptyMap()
+        } else if (isArray(obj)) {
+            if((obj as Array<Any?>).all { isPrimitive(it) }){
+                emptyMap()
+            } else{
+                (obj as Array<dynamic>).mapIndexed{ index: Int, b: dynamic ->
+                    val indexString = b[Meta.INDEX_KEY]?.toString() ?: index.toString()
+                    NameToken(Meta.JSON_ARRAY_KEY, indexString) to DynamicMeta(b)
+                }.toMap()
+            }
+        } else keys().flatMap { key ->
             val value = obj[key] ?: return@flatMap emptyList()
-            if (isArray(value)) {
-                val array = value as Array<Any?>
-                return@flatMap if (array.all { isPrimitive(it) }) {
-                    listOf(NameToken(key) to MetaItemValue(Value.of(array)))
-                } else {
-                    array.mapIndexedNotNull { index, it ->
-                        val item = asItem(it) ?: return@mapIndexedNotNull null
-                        NameToken(key, index.toString()) to item
+            when {
+                isArray(value) -> {
+                    val array = value as Array<Any?>
+                    if (array.all { isPrimitive(it) }) {
+                        //primitive value
+                        listOf(NameToken(key) to DynamicMeta(value))
+                    } else {
+                        array.mapIndexedNotNull { index, it ->
+                            val item = DynamicMeta(it)
+                            NameToken(key, index.toString()) to item
+                        }
                     }
                 }
-            } else {
-                val item = asItem(value) ?: return@flatMap emptyList()
-                listOf(NameToken(key) to item)
+                else -> {
+                    val item = DynamicMeta(value)
+                    listOf(NameToken(key) to item)
+                }
             }
-        }.associate { it }
+        }.toMap()
+
+    override fun toString(): String = Meta.toString(this)
+    override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
+    override fun hashCode(): Int = Meta.hashCode(this)
 }

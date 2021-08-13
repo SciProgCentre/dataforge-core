@@ -1,14 +1,15 @@
 package space.kscience.dataforge.context
 
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.NameToken
+import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
-import space.kscience.dataforge.names.toName
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
@@ -25,12 +26,12 @@ public class ContextBuilder internal constructor(
     internal val factories = HashMap<PluginFactory<*>, Meta>()
     internal var meta = meta.toMutableMeta()
 
-    public fun properties(action: MetaBuilder.() -> Unit) {
+    public fun properties(action: MutableMeta.() -> Unit) {
         meta.action()
     }
 
     public fun name(string: String) {
-        this.name = string.toName()
+        this.name = Name.parse(string)
     }
 
     @OptIn(DFExperimental::class)
@@ -38,20 +39,20 @@ public class ContextBuilder internal constructor(
         parent.gatherInSequence<PluginFactory<*>>(PluginFactory.TYPE).values
             .find { it.tag.matches(tag) } ?: error("Can't resolve plugin factory for $tag")
 
-    public fun plugin(tag: PluginTag, metaBuilder: MetaBuilder.() -> Unit = {}) {
+    public fun plugin(tag: PluginTag, mutableMeta: MutableMeta.() -> Unit = {}) {
         val factory = findPluginFactory(tag)
-        factories[factory] = Meta(metaBuilder)
+        factories[factory] = Meta(mutableMeta)
     }
 
     public fun plugin(factory: PluginFactory<*>, meta: Meta) {
         factories[factory] = meta
     }
 
-    public fun plugin(factory: PluginFactory<*>, metaBuilder: MetaBuilder.() -> Unit = {}) {
-        factories[factory] = Meta(metaBuilder)
+    public fun plugin(factory: PluginFactory<*>, mutableMeta: MutableMeta.() -> Unit = {}) {
+        factories[factory] = Meta(mutableMeta)
     }
 
-    public fun plugin(name: String, group: String = "", version: String = "", action: MetaBuilder.() -> Unit = {}) {
+    public fun plugin(name: String, group: String = "", version: String = "", action: MutableMeta.() -> Unit = {}) {
         plugin(PluginTag(name, group, version), action)
     }
 
@@ -63,13 +64,33 @@ public class ContextBuilder internal constructor(
     }
 
     public fun build(): Context {
-        val contextName = name ?: "@auto[${hashCode().toUInt().toString(16)}]".toName()
-        return Context(contextName, parent, meta.seal()).apply {
-            factories.forEach { (factory, meta) ->
-                @Suppress("DEPRECATION")
-                plugins.load(factory, meta)
+        val contextName = name ?: NameToken("@auto",hashCode().toUInt().toString(16)).asName()
+        val plugins = HashMap<PluginTag, Plugin>()
+
+        fun addPlugin(factory: PluginFactory<*>, meta: Meta) {
+            val existing = plugins[factory.tag]
+            // Add if does not exist
+            if (existing == null) {
+                //TODO bypass if parent already has plugin with given meta?
+                val plugin = factory(meta, parent)
+
+                for ((depFactory, deoMeta) in plugin.dependsOn()) {
+                    addPlugin(depFactory, deoMeta)
+                }
+
+                parent.logger.info { "Loading plugin ${plugin.name} into $contextName" }
+                plugins[plugin.tag] = plugin
+            } else if (existing.meta != meta) {
+                error("Plugin with tag ${factory.tag} and meta $meta already exists in $contextName")
             }
+            //bypass if exists with the same meta
         }
+
+        factories.forEach { (factory, meta) ->
+            addPlugin(factory, meta)
+        }
+
+        return Context(contextName, parent, plugins.values.toSet(), meta.seal())
     }
 }
 

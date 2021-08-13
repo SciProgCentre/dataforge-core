@@ -3,7 +3,7 @@ package space.kscience.dataforge.data
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.names.toName
+import space.kscience.dataforge.names.asName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -72,7 +72,7 @@ internal class DataTreeBuilderTest {
                     }
                 }
                 val rootNode = ActiveDataTree<Int> {
-                    setAndObserve("sub".toName(), subNode)
+                    setAndObserve("sub".asName(), subNode)
                 }
 
                 launch {

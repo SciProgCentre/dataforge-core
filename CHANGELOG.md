@@ -12,6 +12,31 @@
 ### Fixed
 
 ### Security
+## [0.5.0]
+### Added
+- Experimental `listOfSpec` delegate.
+
+### Changed
+- **API breaking** Config is deprecated, use `ObservableMeta` instead.
+- **API breaking** Descriptor no has a member property `defaultValue` instead of `defaultItem()` extension. It caches default value state on the first call. It is done because computing default on each call is too expensive.
+- Kotlin 1.5.10
+- Build tools 0.10.0
+- Relaxed type restriction on `MetaConverter`. Now nullables are available.
+- **Huge API-breaking refactoring of Meta**. Meta now can have both value and children. There is only one kind of descriptor now.
+- **API breaking** `String.toName()` is replaced by `Name.parse()`
+- **API breaking** Configurable`config` changed to `meta`
+
+### Removed
+- `Config`
+- Public PluginManager mutability
+- Tables and tables-exposed moved to the separate project `tables.kt`
+- BinaryMetaFormat. Use CBOR encoding instead
+
+### Fixed
+- Proper json array index treatment.
+- Proper json index for single-value array.
+
+### Security
 ## [0.4.0]
 ### Added
 - LogManager plugin

@@ -3,10 +3,7 @@ package space.kscience.dataforge.context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import space.kscience.dataforge.meta.Laminate
-import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaRepr
-import space.kscience.dataforge.meta.itemSequence
+import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.provider.Provider
@@ -26,6 +23,7 @@ import kotlin.jvm.Synchronized
 public open class Context internal constructor(
     final override val name: Name,
     public val parent: Context?,
+    plugins: Set<Plugin>, // set of unattached plugins
     meta: Meta,
 ) : Named, MetaRepr, Provider, CoroutineScope {
 
@@ -42,20 +40,20 @@ public open class Context internal constructor(
     /**
      * A [PluginManager] for current context
      */
-    public val plugins: PluginManager by lazy { PluginManager(this) }
+    public val plugins: PluginManager by lazy { PluginManager(this, plugins) }
 
     override val defaultTarget: String get() = Plugin.TARGET
 
     public fun content(target: String, inherit: Boolean): Map<Name, Any> {
         return if (inherit) {
             when (target) {
-                PROPERTY_TARGET -> properties.itemSequence().toMap()
+                PROPERTY_TARGET -> properties.nodeSequence().toMap()
                 Plugin.TARGET -> plugins.list(true).associateBy { it.name }
                 else -> emptyMap()
             }
         } else {
             when (target) {
-                PROPERTY_TARGET -> properties.layers.firstOrNull()?.itemSequence()?.toMap() ?: emptyMap()
+                PROPERTY_TARGET -> properties.layers.firstOrNull()?.nodeSequence()?.toMap() ?: emptyMap()
                 Plugin.TARGET -> plugins.list(false).associateBy { it.name }
                 else -> emptyMap()
             }
@@ -97,8 +95,8 @@ public open class Context internal constructor(
 
     override fun toMeta(): Meta = Meta {
         "parent" to parent?.name
-        "properties" put properties.layers.firstOrNull()
-        "plugins" put plugins.map { it.toMeta() }
+        properties.layers.firstOrNull()?.let { set("properties", it) }
+        "plugins" putIndexed plugins.map { it.toMeta() }
     }
 
     public companion object {

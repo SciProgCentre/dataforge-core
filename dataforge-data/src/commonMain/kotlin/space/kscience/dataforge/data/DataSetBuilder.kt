@@ -4,11 +4,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaBuilder
+import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.plus
-import space.kscience.dataforge.names.toName
 import kotlin.reflect.KType
 
 public interface DataSetBuilder<in T : Any> {
@@ -39,17 +38,17 @@ public interface DataSetBuilder<in T : Any> {
     /**
      * Append data to node
      */
-    public suspend infix fun String.put(data: Data<T>): Unit = emit(toName(), data)
+    public suspend infix fun String.put(data: Data<T>): Unit = emit(Name.parse(this), data)
 
     /**
      * Append node
      */
-    public suspend infix fun String.put(dataSet: DataSet<T>): Unit = emit(toName(), dataSet)
+    public suspend infix fun String.put(dataSet: DataSet<T>): Unit = emit(Name.parse(this), dataSet)
 
     /**
      * Build and append node
      */
-    public suspend infix fun String.put(block: suspend DataSetBuilder<T>.() -> Unit): Unit = emit(toName(), block)
+    public suspend infix fun String.put(block: suspend DataSetBuilder<T>.() -> Unit): Unit = emit(Name.parse(this), block)
 }
 
 private class SubSetBuilder<in T : Any>(
@@ -77,15 +76,15 @@ public suspend fun <T : Any> DataSetBuilder<T>.emit(name: Name, block: suspend D
 
 
 public suspend fun <T : Any> DataSetBuilder<T>.emit(name: String, data: Data<T>) {
-    emit(name.toName(), data)
+    emit(Name.parse(name), data)
 }
 
 public suspend fun <T : Any> DataSetBuilder<T>.emit(name: String, set: DataSet<T>) {
-    this.emit(name.toName(), set)
+    this.emit(Name.parse(name), set)
 }
 
 public suspend fun <T : Any> DataSetBuilder<T>.emit(name: String, block: suspend DataSetBuilder<T>.() -> Unit): Unit =
-    this@emit.emit(name.toName(), block)
+    this@emit.emit(Name.parse(name), block)
 
 public suspend fun <T : Any> DataSetBuilder<T>.emit(data: NamedData<T>) {
     emit(data.name, data.data)
@@ -115,17 +114,25 @@ public suspend inline fun <reified T : Any> DataSetBuilder<T>.produce(
 /**
  * Emit a static data with the fixed value
  */
-public suspend inline fun <reified T : Any> DataSetBuilder<T>.static(name: String, data: T, meta: Meta = Meta.EMPTY): Unit =
+public suspend inline fun <reified T : Any> DataSetBuilder<T>.static(
+    name: String,
+    data: T,
+    meta: Meta = Meta.EMPTY
+): Unit =
     emit(name, Data.static(data, meta))
 
-public suspend inline fun <reified T : Any> DataSetBuilder<T>.static(name: Name, data: T, meta: Meta = Meta.EMPTY): Unit =
+public suspend inline fun <reified T : Any> DataSetBuilder<T>.static(
+    name: Name,
+    data: T,
+    meta: Meta = Meta.EMPTY
+): Unit =
     emit(name, Data.static(data, meta))
 
 public suspend inline fun <reified T : Any> DataSetBuilder<T>.static(
     name: String,
     data: T,
-    metaBuilder: MetaBuilder.() -> Unit,
-): Unit = emit(name.toName(), Data.static(data, Meta(metaBuilder)))
+    mutableMeta: MutableMeta.() -> Unit,
+): Unit = emit(Name.parse(name), Data.static(data, Meta(mutableMeta)))
 
 /**
  * Update data with given node data and meta with node meta.

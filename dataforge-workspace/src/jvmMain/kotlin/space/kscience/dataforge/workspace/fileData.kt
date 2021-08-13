@@ -86,7 +86,7 @@ public suspend fun <T : Any> DataSetBuilder<T>.file(
         //otherwise, read as directory
         plugin.run {
             val data = readDataDirectory(path, formatResolver)
-            val name = data.getMeta()[Envelope.ENVELOPE_NAME_KEY].string
+            val name = data.getMeta()?.get(Envelope.ENVELOPE_NAME_KEY).string
                 ?: path.fileName.toString().replace(".df", "")
             emit(name, data)
         }

@@ -1,132 +1,136 @@
 package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.meta.descriptors.*
-import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.names.*
+import space.kscience.dataforge.values.Value
 import kotlin.jvm.Synchronized
 
 /**
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
- * Default item provider and [NodeDescriptor] are optional
+ * Default item provider and [MetaDescriptor] are optional
  */
-public open class Scheme() : Described, MetaRepr, ItemPropertyProvider {
-
-    private var items: MutableItemProvider = Config()
-
-    private val listeners = HashSet<ItemListener>()
-
-    private var default: ItemProvider? = null
-
-    final override var descriptor: NodeDescriptor? = null
-
+public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurable {
 
     /**
-     * Add a listener to this scheme changes. If the inner provider is observable, then listening will be delegated to it.
-     * Otherwise, local listeners will be created.
+     * Meta to be mutated by this schme
      */
-    @Synchronized
-    override fun onChange(owner: Any?, action: (Name, MetaItem?, MetaItem?) -> Unit) {
-        (items as? ObservableItemProvider)?.onChange(owner, action)
-            ?: run { listeners.add(ItemListener(owner, action)) }
-    }
+    private var targetMeta: MutableMeta = MutableMeta()
 
     /**
-     * Remove all listeners belonging to given owner
+     * Default values provided by this scheme
      */
-    @Synchronized
-    override fun removeListener(owner: Any?) {
-        (items as? ObservableItemProvider)?.removeListener(owner)
-            ?: listeners.removeAll { it.owner === owner }
-    }
+    private var defaultMeta: Meta? = null
+
+    final override val meta: ObservableMutableMeta = SchemeMeta(Name.EMPTY)
+
+    final override var descriptor: MetaDescriptor? = null
+        internal set
 
     internal fun wrap(
-        items: MutableItemProvider,
-        default: ItemProvider? = null,
-        descriptor: NodeDescriptor? = null,
+        newMeta: MutableMeta,
+        preserveDefault: Boolean = false
     ) {
-        //use properties in the init block as default
-        this.default = this.items.withDefault(default)
-        //reset values, defaults are already saved
-        this.items = items
-        this.descriptor = descriptor
-    }
-
-    private fun getDefaultItem(name: Name): MetaItem? {
-        return default?.get(name) ?: descriptor?.get(name)?.defaultItem()
+        if (preserveDefault) {
+            defaultMeta = targetMeta.seal()
+        }
+        targetMeta = newMeta
     }
 
     /**
-     * Get a property with default
+     * Check if property with given [name] could be assigned to [meta]
      */
-    override fun getItem(name: Name): MetaItem? = items[name] ?: getDefaultItem(name)
-
-    /**
-     * Check if property with given [name] could be assigned to [item]
-     */
-    public open fun validateItem(name: Name, item: MetaItem?): Boolean {
+    public open fun validate(name: Name, meta: Meta?): Boolean {
         val descriptor = descriptor?.get(name)
-        return descriptor?.validateItem(item) ?: true
+        return descriptor?.validate(meta) ?: true
     }
 
-    /**
-     * Set a configurable property
-     */
-    override fun setItem(name: Name, item: MetaItem?) {
-        val oldItem = items[name]
-        if (validateItem(name, item)) {
-            items[name] = item
-            listeners.forEach { it.action(name, oldItem, item) }
+    override fun getMeta(name: Name): MutableMeta? = meta.getMeta(name)
+
+    override fun setMeta(name: Name, node: Meta?) {
+        if (validate(name, meta)) {
+            meta.setMeta(name, node)
         } else {
-            error("Validation failed for property $name with value $item")
+            error("Validation failed for node $node at $name")
         }
     }
 
+    override fun setValue(name: Name, value: Value?) {
+        val valueDescriptor = descriptor?.get(name)
+        if (valueDescriptor?.validate(value) != false) {
+            meta.setValue(name, value)
+        } else error("Value $value is not validated by $valueDescriptor")
+    }
 
-    /**
-     * Provide a default layer which returns items from [default] and falls back to descriptor
-     * values if default value is unavailable.
-     * Values from [default] completely replace
-     */
-    public open val defaultLayer: Meta
-        get() = object : MetaBase() {
-            override val items: Map<NameToken, MetaItem> = buildMap {
-                descriptor?.items?.forEach { (key, itemDescriptor) ->
-                    val token = NameToken(key)
-                    val name = token.asName()
-                    val item = default?.get(name) ?: itemDescriptor.defaultItem()
-                    if (item != null) {
-                        put(token, item)
-                    }
+    override fun toMeta(): Laminate = Laminate(meta, descriptor?.defaultNode)
+
+    private val listeners = HashSet<MetaListener>()
+
+    private inner class SchemeMeta(val pathName: Name) : ObservableMutableMeta {
+        override var value: Value?
+            get() = targetMeta[pathName]?.value
+                ?: defaultMeta?.get(pathName)?.value
+                ?: descriptor?.get(pathName)?.defaultValue
+            set(value) {
+                val oldValue = targetMeta[pathName]?.value
+                targetMeta[pathName] = value
+                if (oldValue != value) {
+                    invalidate(Name.EMPTY)
                 }
             }
+
+        override val items: Map<NameToken, ObservableMutableMeta>
+            get() {
+                val targetKeys = targetMeta[pathName]?.items?.keys ?: emptySet()
+                val defaultKeys = defaultMeta?.get(pathName)?.items?.keys ?: emptySet()
+                return (targetKeys + defaultKeys).associateWith { SchemeMeta(pathName + it) }
+            }
+
+        override fun invalidate(name: Name) {
+            listeners.forEach { it.callback(this@Scheme.meta, pathName + name) }
         }
 
-    override fun toMeta(): Laminate = Laminate(items[Name.EMPTY].node, defaultLayer)
+        @Synchronized
+        override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
+            listeners.add(MetaListener(owner) { changedName ->
+                if (changedName.startsWith(pathName)) {
+                    this@Scheme.meta.callback(changedName.removeHeadOrNull(pathName)!!)
+                }
+            })
+        }
+
+        @Synchronized
+        override fun removeListener(owner: Any?) {
+            listeners.removeAll { it.owner === owner }
+        }
+
+        override fun toString(): String = Meta.toString(this)
+        override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
+        override fun hashCode(): Int = Meta.hashCode(this)
+
+        override fun setMeta(name: Name, node: Meta?) {
+            targetMeta.setMeta(name, node)
+            invalidate(name)
+        }
+
+        override fun getOrCreate(name: Name): ObservableMutableMeta = SchemeMeta(pathName + name)
+
+        @DFExperimental
+        override fun attach(name: Name, node: ObservableMutableMeta) {
+            TODO("Not yet implemented")
+        }
+
+
+    }
 }
 
 /**
- * The scheme is considered empty only if its root item does not exist.
- */
-public fun Scheme.isEmpty(): Boolean = rootItem == null
-
-/**
- * Create a new empty [Scheme] object (including defaults) and inflate it around existing [MutableItemProvider].
- * Items already present in the scheme are used as defaults.
- */
-public fun <T : Scheme, S : Specification<T>> S.wrap(
-    items: MutableItemProvider,
-    default: ItemProvider? = null,
-    descriptor: NodeDescriptor? = null,
-): T = empty().apply {
-    wrap(items, default, descriptor)
-}
-
-/**
- * Relocate scheme target onto given [MutableItemProvider]. Old provider does not get updates anymore.
+ * Relocate scheme target onto given [MutableMeta]. Old provider does not get updates anymore.
  * Current state of the scheme used as a default.
  */
-public fun <T : Scheme> T.retarget(provider: MutableItemProvider): T = apply { wrap(provider) }
+public fun <T : Scheme> T.retarget(provider: MutableMeta): T = apply {
+    wrap(provider, true)
+}
 
 /**
  * A shortcut to edit a [Scheme] object in-place
@@ -140,16 +144,22 @@ public open class SchemeSpec<out T : Scheme>(
     private val builder: () -> T,
 ) : Specification<T>, Described {
 
-    override fun empty(): T = builder()
+    override fun read(source: Meta): T = builder().also {
+        it.wrap(MutableMeta().withDefault(source))
+    }
 
-    override fun read(items: ItemProvider): T = wrap(Config(), items, descriptor)
-
-    override fun write(target: MutableItemProvider, defaultProvider: ItemProvider): T =
-        wrap(target, defaultProvider, descriptor)
+    override fun write(target: MutableMeta): T = empty().also {
+        it.wrap(target)
+    }
 
     //TODO Generate descriptor from Scheme class
-    override val descriptor: NodeDescriptor? get() = null
+    override val descriptor: MetaDescriptor? get() = null
+
+    override fun empty(): T = builder().also {
+        it.descriptor = descriptor
+    }
 
     @Suppress("OVERRIDE_BY_INLINE")
     final override inline operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
+
 }

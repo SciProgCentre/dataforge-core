@@ -40,7 +40,7 @@ class MetaTest {
             "b" put {
                 "c" put "ddd"
             }
-            "list" put (0..4).map {
+            "list" putIndexed (0..4).map {
                 Meta {
                     "value" put it
                 }

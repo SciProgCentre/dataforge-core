@@ -44,4 +44,4 @@ public fun Name.matches(pattern: Name): Boolean = when {
 }
 
 @OptIn(DFExperimental::class)
-public fun Name.matches(pattern: String): Boolean = matches(pattern.toName())
+public fun Name.matches(pattern: String): Boolean = matches(Name.parse(pattern))

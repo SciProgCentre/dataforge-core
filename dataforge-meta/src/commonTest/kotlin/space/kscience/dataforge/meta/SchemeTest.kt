@@ -7,27 +7,27 @@ import kotlin.test.assertEquals
 @DFExperimental
 class SchemeTest {
     @Test
-    fun testSchemeWrappingBeforeEdit(){
-        val config = Config()
-        val scheme = TestScheme.wrap(config)
+    fun testSchemeWrappingBeforeEdit() {
+        val config = MutableMeta()
+        val scheme = TestScheme.write(config)
         scheme.a = 29
         assertEquals(29, config["a"].int)
     }
 
     @Test
-    fun testSchemeWrappingAfterEdit(){
+    fun testSchemeWrappingAfterEdit() {
         val scheme = TestScheme.empty()
         scheme.a = 29
-        val config = Config()
+        val config = MutableMeta()
         scheme.retarget(config)
         assertEquals(29, scheme.a)
     }
 
     @Test
-    fun testSchemeSubscription(){
+    fun testSchemeSubscription() {
         val scheme = TestScheme.empty()
         var flag: Int? = null
-        scheme.useProperty(TestScheme::a){a->
+        scheme.useProperty(TestScheme::a) { a ->
             flag = a
         }
         scheme.a = 2
