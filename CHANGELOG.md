@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+## [0.5.0]
+### Added
 - Experimental `listOfSpec` delegate.
 
 ### Changed
@@ -10,7 +22,7 @@
 - Kotlin 1.5.10
 - Build tools 0.10.0
 - Relaxed type restriction on `MetaConverter`. Now nullables are available.
-- **Huge API-breaking refactoring of Meta**. Meta now can hava both value and children.
+- **Huge API-breaking refactoring of Meta**. Meta now can have both value and children. There is only one kind of descriptor now.
 - **API breaking** `String.toName()` is replaced by `Name.parse()`
 - **API breaking** Configurable`config` changed to `meta`
 
