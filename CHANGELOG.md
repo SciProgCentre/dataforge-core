@@ -10,6 +10,7 @@
 ### Removed
 
 ### Fixed
+- MutableMetaImpl attachment and checks
 
 ### Security
 ## [0.5.0]

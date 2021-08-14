@@ -261,6 +261,13 @@ public operator fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.set(name: Name
     }
 }
 
+private fun ObservableMeta.adoptBy(parent: MutableMetaImpl, key: NameToken) {
+    if (this === parent) error("Can't attach a node to itself")
+    onChange(parent) { name ->
+        parent.invalidate(key + name)
+    }
+}
+
 /**
  * A general implementation of mutable [Meta] which implements both [MutableTypedMeta] and [ObservableMeta].
  * The implementation uses blocking synchronization on mutation on JVM
@@ -280,16 +287,10 @@ private class MutableMetaImpl(
 
     private val children: LinkedHashMap<NameToken, ObservableMutableMeta> =
         LinkedHashMap(children.mapValues { (key, meta) ->
-            MutableMetaImpl(meta.value, meta.items).apply { adoptBy(this, key) }
+            MutableMetaImpl(meta.value, meta.items).also { it.adoptBy(this, key) }
         })
 
     override val items: Map<NameToken, ObservableMutableMeta> get() = children
-
-    private fun ObservableMeta.adoptBy(parent: MutableMetaImpl, key: NameToken) {
-        onChange(parent) { name ->
-            parent.invalidate(key + name)
-        }
-    }
 
     @DFExperimental
     override fun attach(name: Name, node: ObservableMutableMeta) {
@@ -338,9 +339,14 @@ private class MutableMetaImpl(
     }
 
     private fun wrapItem(meta: Meta): MutableMetaImpl =
-        MutableMetaImpl(meta.value, meta.items.mapValuesTo(LinkedHashMap()) { wrapItem(it.value) })
+        meta as? MutableMetaImpl ?: MutableMetaImpl(
+            meta.value,
+            meta.items.mapValuesTo(LinkedHashMap()) {
+                wrapItem(it.value)
+            }
+        )
 
-
+    @Synchronized
     override fun setMeta(name: Name, node: Meta?) {
         val oldItem: ObservableMutableMeta? = get(name)
         if (oldItem != node) {
@@ -348,13 +354,24 @@ private class MutableMetaImpl(
                 0 -> error("Can't set a meta with empty name")
                 1 -> {
                     val token = name.firstOrNull()!!
-                    replaceItem(token, oldItem, node?.let { wrapItem(node) })
+                    //remove child and invalidate if argument is null
+                    if (node == null) {
+                        children.remove(token)?.removeListener(this)
+                        // old item is not null otherwise we can't be here
+                        invalidate(name)
+                    } else {
+                        val newNode = wrapItem(node)
+                        newNode.adoptBy(this, token)
+                        children[token] = newNode
+                    }
                 }
                 else -> {
                     val token = name.firstOrNull()!!
-                    //get existing or create new node. Index is ignored for new node
+                    //get existing or create new node.
                     if (items[token] == null) {
-                        replaceItem(token, null, MutableMetaImpl(null))
+                        val newNode = MutableMetaImpl(null)
+                        newNode.adoptBy(this, token)
+                        children[token] = newNode
                     }
                     items[token]?.setMeta(name.cutFirst(), node)
                 }
@@ -383,19 +400,6 @@ public fun MutableMeta.append(key: String, meta: Meta): Unit = append(Name.parse
 public fun MutableMeta.append(name: Name, value: Value): Unit = append(name, Meta(value))
 
 public fun MutableMeta.append(key: String, value: Value): Unit = append(Name.parse(key), value)
-
-///**
-// * Apply existing node with given [builder] or create a new element with it.
-// */
-//@DFExperimental
-//public fun MutableMeta.edit(name: Name, builder: MutableMeta.() -> Unit) {
-//    val item = when (val existingItem = get(name)) {
-//        null -> MutableMeta().also { set(name, it) }
-//        is MetaItemNode<MutableMeta> -> existingItem.node
-//        else -> error("Can't edit value meta item")
-//    }
-//    item.apply(builder)
-//}
 
 /**
  * Create a mutable copy of this meta. The copy is created even if the Meta is already mutable
