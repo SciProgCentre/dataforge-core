@@ -48,7 +48,7 @@ public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTyp
 }
 
 internal abstract class AbstractObservableMeta : ObservableMeta {
-    private val listeners = ArrayList<MetaListener>()
+    private val listeners: MutableList<MetaListener> = mutableListOf()
 
     override fun invalidate(name: Name) {
         listeners.forEach { it.callback(this, name) }

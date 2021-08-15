@@ -1,6 +1,9 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.meta.descriptors.*
+import space.kscience.dataforge.meta.descriptors.Described
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
+import space.kscience.dataforge.meta.descriptors.get
+import space.kscience.dataforge.meta.descriptors.validate
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
 import space.kscience.dataforge.values.Value
@@ -64,7 +67,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
     override fun toMeta(): Laminate = Laminate(meta, descriptor?.defaultNode)
 
-    private val listeners = HashSet<MetaListener>()
+    private val listeners: MutableList<MetaListener> = mutableListOf()
 
     private inner class SchemeMeta(val pathName: Name) : ObservableMutableMeta {
         override var value: Value?

@@ -11,6 +11,7 @@
 
 ### Fixed
 - MutableMetaImpl attachment and checks
+- Listeners in observable meta are replaced by lists
 
 ### Security
 ## [0.5.0]
