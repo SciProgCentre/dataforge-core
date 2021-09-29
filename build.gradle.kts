@@ -5,6 +5,9 @@ plugins {
 allprojects {
     group = "space.kscience"
     version = "0.5.1"
+    repositories{
+        mavenCentral()
+    }
 }
 
 subprojects {
@@ -22,8 +25,5 @@ ksciencePublish {
 }
 
 apiValidation {
-    if(project.version.toString().contains("dev")) {
-        validationDisabled = true
-    }
     nonPublicMarkers.add("space.kscience.dataforge.misc.DFExperimental")
 }
