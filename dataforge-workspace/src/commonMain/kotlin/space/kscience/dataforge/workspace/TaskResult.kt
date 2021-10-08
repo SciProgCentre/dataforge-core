@@ -37,13 +37,16 @@ private class TaskResultImpl<out T : Any>(
 ) : TaskResult<T>, DataSet<T> by dataSet {
 
     override fun flow(): Flow<TaskData<T>> = dataSet.flow().map {
-        workspace.internalize(it, it.name, taskName, taskMeta)
+        workspace.wrapResult(it, it.name, taskName, taskMeta)
     }
 
     override suspend fun getData(name: Name): TaskData<T>? = dataSet.getData(name)?.let {
-        workspace.internalize(it, name, taskName, taskMeta)
+        workspace.wrapResult(it, name, taskName, taskMeta)
     }
 }
 
-internal fun <T : Any> Workspace.internalize(dataSet: DataSet<T>, stage: Name, stageMeta: Meta): TaskResult<T> =
-    TaskResultImpl(this, dataSet, stage, stageMeta)
+/**
+ * Wrap data into [TaskResult]
+ */
+public fun <T : Any> Workspace.wrapResult(dataSet: DataSet<T>, taskName: Name, taskMeta: Meta): TaskResult<T> =
+    TaskResultImpl(this, dataSet, taskName, taskMeta)

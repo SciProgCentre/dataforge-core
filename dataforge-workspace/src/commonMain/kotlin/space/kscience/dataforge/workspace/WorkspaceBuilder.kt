@@ -17,7 +17,18 @@ import space.kscience.dataforge.names.Name
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
-public data class TaskReference<T: Any>(public val taskName: Name, public val task: Task<T>)
+public data class TaskReference<T: Any>(public val taskName: Name, public val task: Task<T>): DataSelector<T>{
+
+    @Suppress("UNCHECKED_CAST")
+    override suspend fun select(workspace: Workspace, meta: Meta): DataSet<T> {
+        if (workspace.tasks[taskName] == task) {
+            return workspace.produce(taskName, meta) as TaskResult<T>
+        } else {
+            error("Task $taskName does not belong to the workspace")
+        }
+    }
+
+}
 
 public interface TaskContainer {
     public fun registerTask(taskName: Name, task: Task<*>)

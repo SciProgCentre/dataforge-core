@@ -42,6 +42,6 @@ private class TaskDataImpl<out T : Any>(
 //    }
 }
 
-internal fun <T : Any> Workspace.internalize(data: Data<T>, name: Name, stage: Name, stageMeta: Meta): TaskData<T> =
+internal fun <T : Any> Workspace.wrapResult(data: Data<T>, name: Name, stage: Name, stageMeta: Meta): TaskData<T> =
     TaskDataImpl(this, data, name, stage, stageMeta)
 
