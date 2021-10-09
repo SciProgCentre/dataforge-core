@@ -11,6 +11,10 @@ public fun WorkspaceBuilder.data(builder: suspend DataSetBuilder<Any>.() -> Unit
     buildData(builder)
 }
 
+public inline fun <reified T: Any> TaskResultBuilder<*>.selectData(namePattern: Name? = null): DataSelector<T> = object : DataSelector<T> {
+    override suspend fun select(workspace: Workspace, meta: Meta): DataSet<T> = workspace.data.select(namePattern)
+}
+
 public suspend inline fun <reified T : Any> TaskResultBuilder<*>.from(
     task: Name,
     taskMeta: Meta = Meta.EMPTY,

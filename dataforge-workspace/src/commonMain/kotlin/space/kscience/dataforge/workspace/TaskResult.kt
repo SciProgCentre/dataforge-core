@@ -37,11 +37,11 @@ private class TaskResultImpl<out T : Any>(
 ) : TaskResult<T>, DataSet<T> by dataSet {
 
     override fun flow(): Flow<TaskData<T>> = dataSet.flow().map {
-        workspace.wrapResult(it, it.name, taskName, taskMeta)
+        workspace.wrapData(it, it.name, taskName, taskMeta)
     }
 
     override suspend fun getData(name: Name): TaskData<T>? = dataSet.getData(name)?.let {
-        workspace.wrapResult(it, name, taskName, taskMeta)
+        workspace.wrapData(it, name, taskName, taskMeta)
     }
 }
 

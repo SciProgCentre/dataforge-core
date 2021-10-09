@@ -16,8 +16,12 @@ import kotlin.reflect.typeOf
  */
 @Suppress("UNCHECKED_CAST")
 private fun <R : Any> Data<*>.castOrNull(type: KType): Data<R>? =
-    if (!this.type.isSubtypeOf(type)) null else object : Data<R> by (this as Data<R>) {
-        override val type: KType = type
+    if (!this.type.isSubtypeOf(type)) {
+        null
+    } else {
+        object : Data<R> by (this as Data<R>) {
+            override val type: KType = type
+        }
     }
 
 /**
@@ -30,7 +34,6 @@ internal fun <R : Any> DataSet<*>.select(
     namePattern: Name? = null,
 ): ActiveDataSet<R> = object : ActiveDataSet<R> {
     override val dataType = type
-
 
     override fun flow(): Flow<NamedData<R>> = this@select.flow().filter { datum ->
         datum.type.isSubtypeOf(type) && (namePattern == null || datum.name.matches(namePattern))
@@ -45,7 +48,6 @@ internal fun <R : Any> DataSet<*>.select(
         val datum = this@select.getData(it)
         datum?.type?.isSubtypeOf(type) ?: false
     }
-
 }
 
 /**
