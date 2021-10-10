@@ -3,11 +3,13 @@ package space.kscience.dataforge.context
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Job
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.Name.Companion.parse
 import space.kscience.dataforge.names.asName
 import kotlin.coroutines.CoroutineContext
 import kotlin.native.concurrent.ThreadLocal
 
-internal expect val globalLoggerFactory: PluginFactory<out LogManager>
+internal expect fun getGlobalLoggerFactory(): PluginFactory<out LogManager>
 
 /**
  * A global root context. Closing [Global] terminates the framework.
@@ -20,4 +22,4 @@ private object GlobalContext : Context("GLOBAL".asName(), null, emptySet(), Meta
 public val Global: Context get() = GlobalContext
 
 public fun Context(name: String? = null, block: ContextBuilder.() -> Unit = {}): Context =
-    Global.buildContext(name, block)
+    Global.buildContext(name?.let(Name::parse), block)

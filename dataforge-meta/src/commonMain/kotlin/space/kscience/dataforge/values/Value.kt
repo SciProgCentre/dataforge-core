@@ -166,9 +166,7 @@ public class EnumValue<E : Enum<*>>(override val value: E) : Value {
 
     override fun toString(): String = value.toString()
 
-    override fun equals(other: Any?): Boolean {
-        return string == (other as? Value)?.string
-    }
+    override fun equals(other: Any?): Boolean = string == (other as? Value)?.string
 
     override fun hashCode(): Int = value.hashCode()
 }

@@ -1,7 +1,6 @@
 package space.kscience.dataforge.data
 
 import kotlinx.coroutines.*
-import space.kscience.dataforge.misc.DFExperimental
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -67,7 +66,6 @@ public open class LazyGoal<T>(
      * If [GoalExecutionRestriction] is present in the [coroutineScope] context, the call could produce a error a warning
      * depending on the settings.
      */
-    @DFExperimental
     override fun async(coroutineScope: CoroutineScope): Deferred<T> {
         val log = coroutineScope.coroutineContext[GoalLogger]
         // Check if context restricts goal computation

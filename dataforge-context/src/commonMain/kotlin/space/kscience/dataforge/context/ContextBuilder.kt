@@ -20,7 +20,7 @@ import kotlin.collections.set
 @DFBuilder
 public class ContextBuilder internal constructor(
     private val parent: Context,
-    public var name: Name? = null,
+    public val name: Name? = null,
     meta: Meta = Meta.EMPTY,
 ) {
     internal val factories = HashMap<PluginFactory<*>, Meta>()
@@ -28,10 +28,6 @@ public class ContextBuilder internal constructor(
 
     public fun properties(action: MutableMeta.() -> Unit) {
         meta.action()
-    }
-
-    public fun name(string: String) {
-        this.name = Name.parse(string)
     }
 
     @OptIn(DFExperimental::class)
@@ -95,19 +91,21 @@ public class ContextBuilder internal constructor(
 }
 
 /**
- * Check if current context contains all plugins required by the builder and return it it does or forks to a new context
+ * Check if current context contains all plugins required by the builder and return it does or forks to a new context
  * if it does not.
  */
-public fun Context.withEnv(block: ContextBuilder.() -> Unit): Context {
+@DFExperimental
+public fun Context.modify(block: ContextBuilder.() -> Unit): Context {
 
     fun Context.contains(factory: PluginFactory<*>, meta: Meta): Boolean {
         val loaded = plugins[factory.tag] ?: return false
         return loaded.meta == meta
     }
 
-    val builder = ContextBuilder(this, name + "env", properties).apply(block)
+    val builder = ContextBuilder(this, name + "mod", properties).apply(block)
     val requiresFork = builder.factories.any { (factory, meta) ->
         !contains(factory, meta)
     } || ((properties as Meta) == builder.meta)
+
     return if (requiresFork) builder.build() else this
 }

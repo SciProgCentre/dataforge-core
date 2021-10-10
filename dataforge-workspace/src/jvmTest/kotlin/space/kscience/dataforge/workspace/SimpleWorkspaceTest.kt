@@ -71,21 +71,32 @@ class SimpleWorkspaceTest {
         }
 
         val square by task<Int> {
-            workspace.data.select<Int>().forEach { data ->
-                if (data.meta["testFlag"].boolean == true) {
+            pipeFrom(selectData<Int>()) { arg, name, meta ->
+                if (meta["testFlag"].boolean == true) {
                     println("flag")
                 }
-                val value = data.await()
-                workspace.logger.info { "Starting square on $value" }
-                emit(data.name, data.map { it * it })
+                workspace.logger.info { "Starting square on $name" }
+                arg * arg
             }
+//            workspace.data.select<Int>().forEach { data ->
+//                if (data.meta["testFlag"].boolean == true) {
+//                    println("flag")
+//                }
+//                val value = data.await()
+//                workspace.logger.info { "Starting square on $value" }
+//                emit(data.name, data.map { it * it })
+//            }
         }
 
         val linear by task<Int> {
-            workspace.data.select<Int>().forEach { data ->
-                workspace.logger.info { "Starting linear on $data" }
-                emit(data.name, data.data.map { it * 2 + 1 })
+            pipeFrom(selectData<Int>()) { arg, name, _ ->
+                workspace.logger.info { "Starting linear on $name" }
+                arg * 2 + 1
             }
+//            workspace.data.select<Int>().forEach { data ->
+//                workspace.logger.info { "Starting linear on $data" }
+//                emit(data.name, data.data.map { it * 2 + 1 })
+//            }
         }
 
         val fullSquare by task<Int> {

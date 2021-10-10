@@ -14,10 +14,22 @@ import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.asName
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
-public data class TaskReference<T: Any>(public val taskName: Name, public val task: Task<T>)
+public data class TaskReference<T: Any>(public val taskName: Name, public val task: Task<T>): DataSelector<T>{
+
+    @Suppress("UNCHECKED_CAST")
+    override suspend fun select(workspace: Workspace, meta: Meta): DataSet<T> {
+        if (workspace.tasks[taskName] == task) {
+            return workspace.produce(taskName, meta) as TaskResult<T>
+        } else {
+            error("Task $taskName does not belong to the workspace")
+        }
+    }
+
+}
 
 public interface TaskContainer {
     public fun registerTask(taskName: Name, task: Task<*>)
@@ -51,7 +63,7 @@ public class WorkspaceBuilder(private val parentContext: Context = Global) : Tas
      * Define a context for the workspace
      */
     public fun context(block: ContextBuilder.() -> Unit = {}) {
-        this.context = parentContext.buildContext("workspace", block)
+        this.context = parentContext.buildContext("workspace".asName(), block)
     }
 
     /**

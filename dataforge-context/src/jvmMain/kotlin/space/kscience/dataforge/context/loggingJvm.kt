@@ -31,4 +31,4 @@ public class SlfLogManager : AbstractPlugin(), LogManager {
     }
 }
 
-internal actual val globalLoggerFactory: PluginFactory<out LogManager> = SlfLogManager
+internal actual fun getGlobalLoggerFactory(): PluginFactory<out LogManager> = SlfLogManager

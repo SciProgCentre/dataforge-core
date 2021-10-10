@@ -17,7 +17,7 @@ public class SimpleWorkspace(
     private val externalTasks: Map<Name, Task<*>>,
 ) : Workspace {
 
-    override val data: TaskResult<*> = internalize(data, Name.EMPTY, Meta.EMPTY)
+    override val data: TaskResult<*> = wrapResult(data, Name.EMPTY, Meta.EMPTY)
 
     override val tasks: Map<Name, Task<*>>
         get() = context.gather<Task<*>>(Task.TYPE) + externalTasks

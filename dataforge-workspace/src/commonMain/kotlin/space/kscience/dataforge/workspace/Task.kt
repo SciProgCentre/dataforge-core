@@ -28,7 +28,7 @@ public interface Task<out T : Any> : Described {
     public suspend fun execute(workspace: Workspace, taskName: Name, taskMeta: Meta): TaskResult<T>
 
     public companion object {
-        public const val TYPE: String = "workspace.stage"
+        public const val TYPE: String = "workspace.task"
     }
 }
 
@@ -42,6 +42,10 @@ public class TaskResultBuilder<T : Any>(
 /**
  * Create a [Task] that composes a result using [builder]. Only data from the workspace could be used.
  * Data dependency cycles are not allowed.
+ *
+ * @param resultType the type boundary for data produced by this task
+ * @param descriptor of meta accepted by this task
+ * @param builder for resulting data set
  */
 @Suppress("FunctionName")
 @DFInternal
@@ -60,9 +64,9 @@ public fun <T : Any> Task(
     ): TaskResult<T> = withContext(GoalExecutionRestriction() + workspace.goalLogger) {
         //TODO use safe builder and check for external data on add and detects cycles
         val dataset = DataTree<T>(resultType) {
-            TaskResultBuilder(workspace,taskName, taskMeta, this).apply { builder() }
+            TaskResultBuilder(workspace, taskName, taskMeta, this).apply { builder() }
         }
-        workspace.internalize(dataset, taskName, taskMeta)
+        workspace.wrapResult(dataset, taskName, taskMeta)
     }
 }
 
