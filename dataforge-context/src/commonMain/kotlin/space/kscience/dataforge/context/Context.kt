@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import space.kscience.dataforge.meta.*
+import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.provider.Provider
@@ -71,16 +72,16 @@ public open class Context internal constructor(
     private val childrenContexts = HashMap<Name, Context>()
 
     /**
-     * Build and register a child context
+     * Get and validate existing context or build and register a new child context.
+     * @param name the relative (tail) name of the new context. If null, uses context hash code as a marker.
      */
+    @OptIn(DFExperimental::class)
     @Synchronized
-    public fun buildContext(name: String? = null, block: ContextBuilder.() -> Unit = {}): Context {
-        val newContext = ContextBuilder(this)
-            .apply { name?.let { name(it) } }
-            .apply(block)
-            .build()
-        childrenContexts[newContext.name] = newContext
-        return newContext
+    public fun buildContext(name: Name? = null, block: ContextBuilder.() -> Unit = {}): Context {
+        val existing = name?.let { childrenContexts[name] }
+        return  existing?.modify(block)?: ContextBuilder(this, name).apply(block).build().also {
+            childrenContexts[it.name] = it
+        }
     }
 
     /**

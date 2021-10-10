@@ -32,7 +32,7 @@ public interface DataSet<out T : Any> {
      */
     public suspend fun listTop(prefix: Name = Name.EMPTY): List<Name> =
         flow().map { it.name }.filter { it.startsWith(prefix) && (it.length == prefix.length + 1) }.toList()
-    // By default traverses the whole tree. Could be optimized in descendants
+    // By default, traverses the whole tree. Could be optimized in descendants
 
     public companion object {
         public val META_KEY: Name = "@meta".asName()
@@ -43,7 +43,7 @@ public interface DataSet<out T : Any> {
         public val EMPTY: DataSet<Nothing> = object : DataSet<Nothing> {
             override val dataType: KType = TYPE_OF_NOTHING
 
-            private val nothing: Nothing get() = error("this is nothing")
+            //private val nothing: Nothing get() = error("this is nothing")
 
             override fun flow(): Flow<NamedData<Nothing>> = emptyFlow()
 

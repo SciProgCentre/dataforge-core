@@ -193,11 +193,9 @@ public class TaglessEnvelopeFormat(
 
         override val name: Name = TAGLESS_ENVELOPE_TYPE.asName()
 
-        override fun invoke(meta: Meta, context: Context): EnvelopeFormat {
-            return TaglessEnvelopeFormat(context.io, meta)
-        }
+        override fun invoke(meta: Meta, context: Context): EnvelopeFormat = TaglessEnvelopeFormat(context.io, meta)
 
-        private val default by lazy { invoke(context = ioContext) }
+        private val default by lazy { invoke() }
 
         override fun readPartial(input: Input): PartialEnvelope =
             default.run { readPartial(input) }
