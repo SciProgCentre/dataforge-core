@@ -10,7 +10,6 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import kotlin.reflect.KClass
 
 public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
@@ -74,11 +73,13 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     }
 }
 
+internal val ioContext = Context("IO") {
+    plugin(IOPlugin)
+}
+
 public val Context.io: IOPlugin
     get() = if (this == Global) {
-        Global.buildContext("IO".asName()) {
-            plugin(IOPlugin)
-        }.fetch(IOPlugin)
+        ioContext.fetch(IOPlugin)
     } else {
         fetch(IOPlugin)
     }

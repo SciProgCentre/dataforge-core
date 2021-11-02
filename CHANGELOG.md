@@ -12,6 +12,7 @@
 ### Fixed
 - MutableMetaImpl attachment and checks
 - Listeners in observable meta are replaced by lists
+- JS number comparison bug.
 
 ### Security
 ## [0.5.0]

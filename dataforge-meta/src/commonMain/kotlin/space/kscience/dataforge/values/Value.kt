@@ -140,14 +140,17 @@ public class NumberValue(public val number: Number) : Value {
 
         val otherNumber = other.numberOrNull ?: return false
 
+        if(number == otherNumber) return true
+
+        //Do not change the order of comparison. On JS number is the instance of all types
         return when (numberOrNull) {
-            is Short -> number.toShort() == otherNumber.toShort()
-            is Long -> number.toLong() == otherNumber.toLong()
-            is Byte -> number.toByte() == otherNumber.toByte()
-            is Int -> number.toInt() == otherNumber.toInt()
-            is Float -> number.toFloat() == otherNumber.toFloat()
             is Double -> number.toDouble() == otherNumber.toDouble()
-            else -> number.toString() == otherNumber.toString()
+            is Float -> number.toFloat() == otherNumber.toFloat()
+            is Long -> number.toLong() == otherNumber.toLong()
+            is Short -> number.toShort() == otherNumber.toShort()
+            is Int -> number.toInt() == otherNumber.toInt()
+            is Byte -> number.toByte() == otherNumber.toByte()
+            else -> false
         }
     }
 
@@ -188,9 +191,7 @@ public class ListValue(override val list: List<Value>) : Value, Iterable<Value> 
         return list == other.list
     }
 
-    override fun hashCode(): Int {
-        return list.hashCode()
-    }
+    override fun hashCode(): Int = list.hashCode()
 
     public companion object {
         public val EMPTY: ListValue = ListValue(emptyList())

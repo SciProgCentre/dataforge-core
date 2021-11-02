@@ -18,7 +18,7 @@ import space.kscience.dataforge.names.asName
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
-public data class TaskReference<T: Any>(public val taskName: Name, public val task: Task<T>): DataSelector<T>{
+public data class TaskReference<T : Any>(public val taskName: Name, public val task: Task<T>) : DataSelector<T> {
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun select(workspace: Workspace, meta: Meta): DataSet<T> {
@@ -35,7 +35,6 @@ public interface TaskContainer {
     public fun registerTask(taskName: Name, task: Task<*>)
 }
 
-
 public inline fun <reified T : Any> TaskContainer.registerTask(
     name: String,
     noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
@@ -43,15 +42,20 @@ public inline fun <reified T : Any> TaskContainer.registerTask(
 ): Unit = registerTask(Name.parse(name), Task(MetaDescriptor(descriptorBuilder), builder))
 
 public inline fun <reified T : Any> TaskContainer.task(
-    noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
+    descriptor: MetaDescriptor,
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
     val taskName = Name.parse(property.name)
-    val task = Task(MetaDescriptor(descriptorBuilder), builder)
+    val task = Task(descriptor, builder)
     registerTask(taskName, task)
     ReadOnlyProperty { _, _ -> TaskReference(taskName, task) }
 }
 
+public inline fun <reified T : Any> TaskContainer.task(
+    noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
+    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> =
+    task(MetaDescriptor(descriptorBuilder), builder)
 
 public class WorkspaceBuilder(private val parentContext: Context = Global) : TaskContainer {
     private var context: Context? = null

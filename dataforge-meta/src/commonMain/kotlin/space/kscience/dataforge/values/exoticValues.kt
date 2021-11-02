@@ -36,9 +36,7 @@ public class DoubleArrayValue(override val value: DoubleArray) : Value, Iterable
         }
     }
 
-    override fun hashCode(): Int {
-        return value.contentHashCode()
-    }
+    override fun hashCode(): Int = value.contentHashCode()
 
     override fun toString(): String = list.joinToString(prefix = "[", postfix = "]")
 

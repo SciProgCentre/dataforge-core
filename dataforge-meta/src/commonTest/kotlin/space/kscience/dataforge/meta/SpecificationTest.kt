@@ -9,6 +9,8 @@ internal class TestScheme : Scheme() {
     var a by int()
     var b by string()
 
+    var v by value()
+
     companion object : SchemeSpec<TestScheme>(::TestScheme)
 }
 
