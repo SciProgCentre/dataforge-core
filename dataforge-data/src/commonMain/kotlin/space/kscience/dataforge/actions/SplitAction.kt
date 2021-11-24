@@ -72,7 +72,7 @@ internal class SplitAction<T : Any, R : Any>(
         }
 
         return ActiveDataTree<R>(outputType) {
-            populate(dataSet.flow().flatMapConcat(transform = ::splitOne))
+            populate(dataSet.flowData().flatMapConcat(transform = ::splitOne))
             scope?.launch {
                 dataSet.updates.collect { name ->
                     //clear old nodes

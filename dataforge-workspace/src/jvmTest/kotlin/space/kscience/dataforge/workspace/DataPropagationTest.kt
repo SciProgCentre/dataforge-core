@@ -16,7 +16,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
 
     val allData by task<Int> {
         val selectedData = workspace.data.select<Int>()
-        val result: Data<Int> = selectedData.flow().foldToData(0) { result, data ->
+        val result: Data<Int> = selectedData.flowData().foldToData(0) { result, data ->
             result + data.await()
         }
         emit("result", result)
@@ -58,7 +58,7 @@ class DataPropagationTest {
     fun testAllData() {
         runBlocking {
             val node = testWorkspace.produce("Test.allData")
-            assertEquals(4950, node.flow().single().await())
+            assertEquals(4950, node.flowData().single().await())
         }
     }
 
@@ -66,7 +66,7 @@ class DataPropagationTest {
     fun testSingleData() {
         runBlocking {
             val node = testWorkspace.produce("Test.singleData")
-            assertEquals(12, node.flow().single().await())
+            assertEquals(12, node.flowData().single().await())
         }
     }
 }

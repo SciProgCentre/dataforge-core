@@ -20,8 +20,8 @@ public fun <T : Any> DataSet<T>.filter(
 ): ActiveDataSet<T> = object : ActiveDataSet<T> {
     override val dataType: KType get() = this@filter.dataType
 
-    override fun flow(): Flow<NamedData<T>> =
-        this@filter.flow().filter { predicate(it.name, it.data) }
+    override fun flowData(): Flow<NamedData<T>> =
+        this@filter.flowData().filter { predicate(it.name, it.data) }
 
     override suspend fun getData(name: Name): Data<T>? = this@filter.getData(name)?.takeIf {
         predicate(name, it)
@@ -40,7 +40,7 @@ public fun <T : Any> DataSet<T>.withNamePrefix(prefix: Name): DataSet<T> = if (p
 else object : ActiveDataSet<T> {
     override val dataType: KType get() = this@withNamePrefix.dataType
 
-    override fun flow(): Flow<NamedData<T>> = this@withNamePrefix.flow().map { it.data.named(prefix + it.name) }
+    override fun flowData(): Flow<NamedData<T>> = this@withNamePrefix.flowData().map { it.data.named(prefix + it.name) }
 
     override suspend fun getData(name: Name): Data<T>? =
         name.removeHeadOrNull(name)?.let { this@withNamePrefix.getData(it) }
@@ -56,7 +56,7 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
 } else object : ActiveDataSet<T> {
     override val dataType: KType get() = this@branch.dataType
 
-    override fun flow(): Flow<NamedData<T>> = this@branch.flow().mapNotNull {
+    override fun flowData(): Flow<NamedData<T>> = this@branch.flowData().mapNotNull {
         it.name.removeHeadOrNull(branchName)?.let { name ->
             it.data.named(name)
         }

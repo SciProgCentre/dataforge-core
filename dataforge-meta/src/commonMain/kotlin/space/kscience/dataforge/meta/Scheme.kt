@@ -32,7 +32,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
     internal fun wrap(
         newMeta: MutableMeta,
-        preserveDefault: Boolean = false
+        preserveDefault: Boolean = false,
     ) {
         if (preserveDefault) {
             defaultMeta = targetMeta.seal()
@@ -120,7 +120,11 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
         @DFExperimental
         override fun attach(name: Name, node: ObservableMutableMeta) {
-            TODO("Not yet implemented")
+            //TODO implement zero-copy attachment
+            setMeta(name, meta)
+            node.onChange(this) { changeName ->
+                setMeta(name + changeName, this[changeName])
+            }
         }
 
     }
@@ -138,6 +142,12 @@ public fun <T : Scheme> T.retarget(provider: MutableMeta): T = apply {
  * A shortcut to edit a [Scheme] object in-place
  */
 public inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit): T = apply(block)
+
+/**
+ * Create a copy of given [Scheme]
+ */
+public inline fun <T : Scheme> T.copy(spec: SchemeSpec<T>, block: T.() -> Unit = {}): T =
+    spec.read(meta.copy()).apply(block)
 
 /**
  * A specification for simplified generation of wrappers

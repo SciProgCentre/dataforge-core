@@ -155,7 +155,7 @@ public fun MutableMeta.getOrCreate(key: String): MutableMeta = getOrCreate(Name.
 
 public interface MutableTypedMeta<M : MutableTypedMeta<M>> : TypedMeta<M>, MutableMeta {
     /**
-     * Zero-copy attach or replace existing node. Node is used with any additional state, listeners, etc.
+     * Zero-copy (if possible) attach or replace existing node. Node is used with any additional state, listeners, etc.
      * In some cases it is possible to have the same node as a child to several others
      */
     @DFExperimental

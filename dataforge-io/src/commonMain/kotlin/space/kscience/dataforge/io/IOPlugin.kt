@@ -29,7 +29,6 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         }
     }
 
-
     public val metaFormatFactories: Collection<MetaFormatFactory> by lazy {
         context.gather<MetaFormatFactory>(META_FORMAT_TYPE).values
     }

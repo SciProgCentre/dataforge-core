@@ -144,7 +144,7 @@ public suspend fun <T : Any, R : Any> DataSet<T>.map(
     block: suspend (T) -> R,
 ): DataTree<R> = DataTree<R>(outputType) {
     populate(
-        flow().map {
+        flowData().map {
             val newMeta = it.meta.toMutableMeta().apply(metaTransform).seal()
             Data(outputType, newMeta, coroutineContext, listOf(it)) {
                 block(it.await())
@@ -162,7 +162,7 @@ public suspend inline fun <T : Any, reified R : Any> DataSet<T>.map(
 
 public suspend fun <T : Any> DataSet<T>.forEach(block: suspend (NamedData<T>) -> Unit) {
     contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
-    flow().collect {
+    flowData().collect {
         block(it)
     }
 }
@@ -171,11 +171,11 @@ public suspend inline fun <T : Any, reified R : Any> DataSet<T>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     noinline transformation: suspend (Flow<NamedData<T>>) -> R,
-): Data<R> = flow().reduceToData(coroutineContext, meta, transformation)
+): Data<R> = flowData().reduceToData(coroutineContext, meta, transformation)
 
 public suspend inline fun <T : Any, reified R : Any> DataSet<T>.foldToData(
     initial: R,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     noinline block: suspend (result: R, data: NamedData<T>) -> R,
-): Data<R> = flow().foldToData(initial, coroutineContext, meta, block)
+): Data<R> = flowData().foldToData(initial, coroutineContext, meta, block)

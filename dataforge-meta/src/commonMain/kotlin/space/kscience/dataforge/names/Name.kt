@@ -202,3 +202,5 @@ public fun Name.removeHeadOrNull(head: Name): Name? = if (startsWith(head)) {
 } else {
     null
 }
+
+public fun String.parseAsName(): Name = Name.parse(this)

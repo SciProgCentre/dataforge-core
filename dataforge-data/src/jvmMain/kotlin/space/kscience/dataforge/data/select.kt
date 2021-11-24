@@ -43,7 +43,7 @@ public fun <R : Any> DataSet<*>.select(
             && (namePattern == null || name.matches(namePattern))
             && filter(name, datum.meta)
 
-    override fun flow(): Flow<NamedData<R>> = this@select.flow().filter {
+    override fun flowData(): Flow<NamedData<R>> = this@select.flowData().filter {
         checkDatum(it.name, it.data)
     }.map {
         @Suppress("UNCHECKED_CAST")
