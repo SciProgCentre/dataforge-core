@@ -52,12 +52,10 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         return resolveEnvelopeFormat(Name.parse(name), meta)
     }
 
-    override fun content(target: String): Map<Name, Any> {
-        return when (target) {
-            META_FORMAT_TYPE -> defaultMetaFormats.toMap()
-            ENVELOPE_FORMAT_TYPE -> defaultEnvelopeFormats.toMap()
-            else -> super.content(target)
-        }
+    override fun content(target: String): Map<Name, Any> = when (target) {
+        META_FORMAT_TYPE -> defaultMetaFormats.toMap()
+        ENVELOPE_FORMAT_TYPE -> defaultEnvelopeFormats.toMap()
+        else -> super.content(target)
     }
 
     public companion object : PluginFactory<IOPlugin> {

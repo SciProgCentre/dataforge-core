@@ -110,7 +110,7 @@ public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
     }
 
     override fun toMeta(): Meta = Meta {
-        NAME_KEY put space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.name.toString()
+        NAME_KEY put FrontMatterEnvelopeFormat.name.toString()
         META_KEY put meta
     }
 
