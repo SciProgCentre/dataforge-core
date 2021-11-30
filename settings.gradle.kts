@@ -5,7 +5,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 
-    val toolsVersion = "0.10.2"
+    val toolsVersion = "0.10.7"
 
     plugins {
         id("ru.mipt.npm.gradle.project") version toolsVersion

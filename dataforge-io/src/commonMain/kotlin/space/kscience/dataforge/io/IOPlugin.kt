@@ -10,8 +10,6 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.names.Name
-
-import kotlin.native.concurrent.ThreadLocal
 import kotlin.reflect.KClass
 
 public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
@@ -30,7 +28,6 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
             else it.invoke(item[META_KEY] ?: Meta.EMPTY, context) as IOFormat<T>
         }
     }
-
 
     public val metaFormatFactories: Collection<MetaFormatFactory> by lazy {
         context.gather<MetaFormatFactory>(META_FORMAT_TYPE).values
@@ -55,12 +52,10 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         return resolveEnvelopeFormat(Name.parse(name), meta)
     }
 
-    override fun content(target: String): Map<Name, Any> {
-        return when (target) {
-            META_FORMAT_TYPE -> defaultMetaFormats.toMap()
-            ENVELOPE_FORMAT_TYPE -> defaultEnvelopeFormats.toMap()
-            else -> super.content(target)
-        }
+    override fun content(target: String): Map<Name, Any> = when (target) {
+        META_FORMAT_TYPE -> defaultMetaFormats.toMap()
+        ENVELOPE_FORMAT_TYPE -> defaultEnvelopeFormats.toMap()
+        else -> super.content(target)
     }
 
     public companion object : PluginFactory<IOPlugin> {
@@ -75,10 +70,13 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     }
 }
 
-@ThreadLocal
-internal val ioContext = Global.withEnv {
-    name("IO")
+internal val ioContext = Context("IO") {
     plugin(IOPlugin)
 }
 
-public val Context.io: IOPlugin get() = (if (this == Global) ioContext else this).fetch(IOPlugin)
+public val Context.io: IOPlugin
+    get() = if (this == Global) {
+        ioContext.fetch(IOPlugin)
+    } else {
+        fetch(IOPlugin)
+    }

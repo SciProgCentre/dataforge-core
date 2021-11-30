@@ -29,4 +29,4 @@ public class ConsoleLogManager : AbstractPlugin(), LogManager {
     }
 }
 
-internal actual val globalLoggerFactory: PluginFactory<out LogManager> = ConsoleLogManager
+internal actual fun getGlobalLoggerFactory(): PluginFactory<out LogManager> = ConsoleLogManager

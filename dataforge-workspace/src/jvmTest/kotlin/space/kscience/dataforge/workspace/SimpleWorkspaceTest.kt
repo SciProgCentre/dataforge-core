@@ -71,21 +71,32 @@ class SimpleWorkspaceTest {
         }
 
         val square by task<Int> {
-            workspace.data.select<Int>().forEach { data ->
-                if (data.meta["testFlag"].boolean == true) {
+            pipeFrom(data<Int>()) { arg, name, meta ->
+                if (meta["testFlag"].boolean == true) {
                     println("flag")
                 }
-                val value = data.await()
-                workspace.logger.info { "Starting square on $value" }
-                emit(data.name, data.map { it * it })
+                workspace.logger.info { "Starting square on $name" }
+                arg * arg
             }
+//            workspace.data.select<Int>().forEach { data ->
+//                if (data.meta["testFlag"].boolean == true) {
+//                    println("flag")
+//                }
+//                val value = data.await()
+//                workspace.logger.info { "Starting square on $value" }
+//                emit(data.name, data.map { it * it })
+//            }
         }
 
         val linear by task<Int> {
-            workspace.data.select<Int>().forEach { data ->
-                workspace.logger.info { "Starting linear on $data" }
-                emit(data.name, data.data.map { it * 2 + 1 })
+            pipeFrom(data<Int>()) { arg, name, _ ->
+                workspace.logger.info { "Starting linear on $name" }
+                arg * 2 + 1
             }
+//            workspace.data.select<Int>().forEach { data ->
+//                workspace.logger.info { "Starting linear on $data" }
+//                emit(data.name, data.data.map { it * 2 + 1 })
+//            }
         }
 
         val fullSquare by task<Int> {
@@ -151,7 +162,7 @@ class SimpleWorkspaceTest {
     fun testWorkspace() {
         runBlocking {
             val node = workspace.runBlocking("sum")
-            val res = node.flow().single()
+            val res = node.flowData().single()
             assertEquals(328350, res.await())
         }
     }
@@ -161,7 +172,7 @@ class SimpleWorkspaceTest {
     fun testMetaPropagation() {
         runBlocking {
             val node = workspace.produce("sum") { "testFlag" put true }
-            val res = node.flow().single().await()
+            val res = node.flowData().single().await()
         }
     }
 
@@ -184,7 +195,7 @@ class SimpleWorkspaceTest {
     fun testFilter() {
         runBlocking {
             val node = workspace.produce("filterOne")
-            assertEquals(12, node.flow().first().await())
+            assertEquals(12, node.flowData().first().await())
         }
     }
 }

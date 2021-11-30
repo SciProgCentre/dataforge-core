@@ -25,7 +25,7 @@ public interface TaskResult<out T : Any> : DataSet<T> {
      */
     public val taskMeta: Meta
 
-    override fun flow(): Flow<TaskData<T>>
+    override fun flowData(): Flow<TaskData<T>>
     override suspend fun getData(name: Name): TaskData<T>?
 }
 
@@ -36,14 +36,17 @@ private class TaskResultImpl<out T : Any>(
     override val taskMeta: Meta,
 ) : TaskResult<T>, DataSet<T> by dataSet {
 
-    override fun flow(): Flow<TaskData<T>> = dataSet.flow().map {
-        workspace.internalize(it, it.name, taskName, taskMeta)
+    override fun flowData(): Flow<TaskData<T>> = dataSet.flowData().map {
+        workspace.wrapData(it, it.name, taskName, taskMeta)
     }
 
     override suspend fun getData(name: Name): TaskData<T>? = dataSet.getData(name)?.let {
-        workspace.internalize(it, name, taskName, taskMeta)
+        workspace.wrapData(it, name, taskName, taskMeta)
     }
 }
 
-internal fun <T : Any> Workspace.internalize(dataSet: DataSet<T>, stage: Name, stageMeta: Meta): TaskResult<T> =
-    TaskResultImpl(this, dataSet, stage, stageMeta)
+/**
+ * Wrap data into [TaskResult]
+ */
+public fun <T : Any> Workspace.wrapResult(dataSet: DataSet<T>, taskName: Name, taskMeta: Meta): TaskResult<T> =
+    TaskResultImpl(this, dataSet, taskName, taskMeta)

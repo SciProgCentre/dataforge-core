@@ -23,11 +23,11 @@ public class FrontMatterEnvelopeFormat(
         do {
             line = input.readUTF8Line() ?: error("Input does not contain front matter separator")
             offset += line.encodeToByteArray().size.toUInt()
-        } while (!line.startsWith(space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.SEPARATOR))
+        } while (!line.startsWith(SEPARATOR))
 
         val readMetaFormat =
-            space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.metaTypeRegex.matchEntire(line)?.groupValues?.first()
-                ?.let { io.resolveMetaFormat(it) } ?: space.kscience.dataforge.io.yaml.YamlMetaFormat
+            metaTypeRegex.matchEntire(line)?.groupValues?.first()
+                ?.let { io.resolveMetaFormat(it) } ?: YamlMetaFormat
 
         //TODO replace by preview
         val meta = Binary {
@@ -35,7 +35,7 @@ public class FrontMatterEnvelopeFormat(
                 line = input.readSafeUtf8Line()
                 writeUtf8String(line + "\r\n")
                 offset += line.encodeToByteArray().size.toUInt()
-            } while (!line.startsWith(space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.SEPARATOR))
+            } while (!line.startsWith(SEPARATOR))
         }.read {
             readMetaFormat.readMeta(input)
 
@@ -47,16 +47,16 @@ public class FrontMatterEnvelopeFormat(
         var line: String
         do {
             line = input.readSafeUtf8Line() //?: error("Input does not contain front matter separator")
-        } while (!line.startsWith(space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.SEPARATOR))
+        } while (!line.startsWith(SEPARATOR))
 
         val readMetaFormat =
-            space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.metaTypeRegex.matchEntire(line)?.groupValues?.first()
-                ?.let { io.resolveMetaFormat(it) } ?: space.kscience.dataforge.io.yaml.YamlMetaFormat
+            metaTypeRegex.matchEntire(line)?.groupValues?.first()
+                ?.let { io.resolveMetaFormat(it) } ?: YamlMetaFormat
 
         val meta = Binary {
             do {
                 writeUtf8String(input.readSafeUtf8Line() + "\r\n")
-            } while (!line.startsWith(space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.SEPARATOR))
+            } while (!line.startsWith(SEPARATOR))
         }.read {
             readMetaFormat.readMeta(input)
         }
@@ -72,9 +72,9 @@ public class FrontMatterEnvelopeFormat(
         formatMeta: Meta,
     ) {
         val metaFormat = metaFormatFactory(formatMeta, this@FrontMatterEnvelopeFormat.io.context)
-        output.writeRawString("${space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.SEPARATOR}\r\n")
+        output.writeRawString("$SEPARATOR\r\n")
         metaFormat.run { this.writeObject(output, envelope.meta) }
-        output.writeRawString("${space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.SEPARATOR}\r\n")
+        output.writeRawString("$SEPARATOR\r\n")
         //Printing data
         envelope.data?.let { data ->
             output.writeBinary(data)
@@ -92,32 +92,32 @@ public class FrontMatterEnvelopeFormat(
         private val metaTypeRegex = "---(\\w*)\\s*".toRegex()
 
         override fun invoke(meta: Meta, context: Context): EnvelopeFormat {
-            return space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat(context.io, meta)
+            return FrontMatterEnvelopeFormat(context.io, meta)
         }
 
         override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? = binary.read {
             val line = readSafeUtf8Line()
             return@read if (line.startsWith("---")) {
-                space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.invoke()
+                invoke()
             } else {
                 null
             }
         }
 
-        private val default by lazy { space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.invoke() }
+        private val default by lazy { invoke() }
 
         override fun readPartial(input: Input): PartialEnvelope =
-            space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.default.readPartial(input)
+            default.readPartial(input)
 
         override fun writeEnvelope(
             output: Output,
             envelope: Envelope,
             metaFormatFactory: MetaFormatFactory,
             formatMeta: Meta,
-        ): Unit = space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.default.writeEnvelope(output, envelope, metaFormatFactory, formatMeta)
+        ): Unit = FrontMatterEnvelopeFormat.default.writeEnvelope(output, envelope, metaFormatFactory, formatMeta)
 
 
-        override fun readObject(input: Input): Envelope = space.kscience.dataforge.io.yaml.FrontMatterEnvelopeFormat.Companion.default.readObject(input)
+        override fun readObject(input: Input): Envelope = default.readObject(input)
 
     }
 }

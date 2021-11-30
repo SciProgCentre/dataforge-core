@@ -1,8 +1,11 @@
 package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.values.ListValue
+import space.kscience.dataforge.values.Value
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 @DFExperimental
 class SchemeTest {
@@ -32,5 +35,17 @@ class SchemeTest {
         }
         scheme.a = 2
         assertEquals(2, flag)
+    }
+
+    @Test
+    fun testListSubscription(){
+        val scheme = TestScheme.empty()
+        var value: Value? = null
+        scheme.v = ListValue(0.0,0.0,0.0)
+        scheme.useProperty(TestScheme::v){
+            value = it
+        }
+        scheme.v = ListValue(1.0, 2.0, 3.0)
+        assertNotNull(value)
     }
 }

@@ -84,7 +84,7 @@ internal class ReduceAction<T : Any, R : Any>(
 
     override fun CoroutineScope.transform(set: DataSet<T>, meta: Meta, key: Name): Flow<NamedData<R>> = flow {
         ReduceGroupBuilder<T, R>(inputType, this@transform, meta).apply(action).buildGroups(set).forEach { group ->
-            val dataFlow: Map<Name, Data<T>> = group.set.flow().fold(HashMap()) { acc, value ->
+            val dataFlow: Map<Name, Data<T>> = group.set.flowData().fold(HashMap()) { acc, value ->
                 acc.apply {
                     acc[value.name] = value.data
                 }

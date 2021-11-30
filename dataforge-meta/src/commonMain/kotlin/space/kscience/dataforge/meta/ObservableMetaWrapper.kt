@@ -68,7 +68,7 @@ private class ObservableMetaWrapper(
     override fun attach(name: Name, node: ObservableMutableMeta) {
         set(name, node)
         node.onChange(this) { changeName ->
-            setMeta(name + changeName, node[changeName])
+            setMeta(name + changeName, this[changeName])
         }
     }
 }

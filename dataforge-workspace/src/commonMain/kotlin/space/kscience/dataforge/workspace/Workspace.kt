@@ -1,12 +1,17 @@
 package space.kscience.dataforge.workspace
 
 import space.kscience.dataforge.context.ContextAware
+import space.kscience.dataforge.data.DataSet
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.provider.Provider
 
+
+public interface DataSelector<T: Any>{
+    public suspend fun select(workspace: Workspace, meta: Meta): DataSet<T>
+}
 
 @Type(Workspace.TYPE)
 public interface Workspace : ContextAware, Provider {

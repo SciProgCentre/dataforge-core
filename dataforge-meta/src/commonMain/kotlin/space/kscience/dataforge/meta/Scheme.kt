@@ -1,6 +1,9 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.meta.descriptors.*
+import space.kscience.dataforge.meta.descriptors.Described
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
+import space.kscience.dataforge.meta.descriptors.get
+import space.kscience.dataforge.meta.descriptors.validate
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
 import space.kscience.dataforge.values.Value
@@ -29,7 +32,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
     internal fun wrap(
         newMeta: MutableMeta,
-        preserveDefault: Boolean = false
+        preserveDefault: Boolean = false,
     ) {
         if (preserveDefault) {
             defaultMeta = targetMeta.seal()
@@ -64,7 +67,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
     override fun toMeta(): Laminate = Laminate(meta, descriptor?.defaultNode)
 
-    private val listeners = HashSet<MetaListener>()
+    private val listeners: MutableList<MetaListener> = mutableListOf()
 
     private inner class SchemeMeta(val pathName: Name) : ObservableMutableMeta {
         override var value: Value?
@@ -117,9 +120,12 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
         @DFExperimental
         override fun attach(name: Name, node: ObservableMutableMeta) {
-            TODO("Not yet implemented")
+            //TODO implement zero-copy attachment
+            setMeta(name, meta)
+            node.onChange(this) { changeName ->
+                setMeta(name + changeName, this[changeName])
+            }
         }
-
 
     }
 }
@@ -136,6 +142,12 @@ public fun <T : Scheme> T.retarget(provider: MutableMeta): T = apply {
  * A shortcut to edit a [Scheme] object in-place
  */
 public inline operator fun <T : Scheme> T.invoke(block: T.() -> Unit): T = apply(block)
+
+/**
+ * Create a copy of given [Scheme]
+ */
+public inline fun <T : Scheme> T.copy(spec: SchemeSpec<T>, block: T.() -> Unit = {}): T =
+    spec.read(meta.copy()).apply(block)
 
 /**
  * A specification for simplified generation of wrappers

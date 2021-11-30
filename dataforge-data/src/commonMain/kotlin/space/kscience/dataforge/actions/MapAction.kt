@@ -76,7 +76,7 @@ internal class MapAction<in T : Any, out R : Any>(
             return newData.named(newName)
         }
 
-        val flow = dataSet.flow().map(::mapOne)
+        val flow = dataSet.flowData().map(::mapOne)
 
         return ActiveDataTree(outputType) {
             populate(flow)

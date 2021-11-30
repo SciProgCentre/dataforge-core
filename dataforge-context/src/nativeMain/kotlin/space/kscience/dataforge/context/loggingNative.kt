@@ -1,4 +1,4 @@
 package space.kscience.dataforge.context
 
 
-internal actual val globalLoggerFactory: PluginFactory<out LogManager> = DefaultLogManager
+internal actual fun getGlobalLoggerFactory(): PluginFactory<out LogManager> = DefaultLogManager

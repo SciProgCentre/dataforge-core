@@ -54,6 +54,7 @@ public fun Binary.toByteArray(): ByteArray = if (this is ByteArrayBinary) {
     }
 }
 
+//TODO optimize for file-based Inputs
 public fun Input.readBinary(size: Int): Binary {
     val array = readBytes(size)
     return ByteArrayBinary(array)

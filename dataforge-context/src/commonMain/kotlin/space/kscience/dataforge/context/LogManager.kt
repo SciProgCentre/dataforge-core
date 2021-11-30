@@ -75,7 +75,7 @@ public class DefaultLogManager : AbstractPlugin(), LogManager {
  */
 public val Context.logger: LogManager
     get() = plugins.find(inherit = true) { it is LogManager } as? LogManager
-        ?: globalLoggerFactory(context = Global).apply { attach(Global) }
+        ?: getGlobalLoggerFactory()(context = Global).apply { attach(Global) }
 
 /**
  * The named proxy logger for a context member

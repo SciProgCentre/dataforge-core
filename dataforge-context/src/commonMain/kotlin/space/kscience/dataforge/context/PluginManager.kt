@@ -1,6 +1,7 @@
 package space.kscience.dataforge.context
 
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.names.plus
 import kotlin.reflect.KClass
 
 
@@ -84,7 +85,7 @@ public inline fun <reified T : Plugin> Context.fetch(factory: PluginFactory<T>, 
     val existing = plugins[factory]
     return if (existing != null && existing.meta == meta) existing
     else {
-        buildContext {
+        buildContext(name = this@fetch.name + factory.tag.name) {
             plugin(factory, meta)
         }.plugins[factory]!!
     }

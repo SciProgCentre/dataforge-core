@@ -17,10 +17,8 @@ public interface DataSet<out T : Any> {
 
     /**
      * Traverse this provider or its child. The order is not guaranteed.
-     * [root] points to a root name for traversal. If it is empty, traverse this source, if it points to a [Data],
-     * return flow, that contains single [Data], if it points to a node with children, return children.
      */
-    public fun flow(): Flow<NamedData<T>>
+    public fun flowData(): Flow<NamedData<T>>
 
     /**
      * Get data with given name.
@@ -31,8 +29,8 @@ public interface DataSet<out T : Any> {
      * Get a snapshot of names of top level children of given node. Empty if node does not exist or is a leaf.
      */
     public suspend fun listTop(prefix: Name = Name.EMPTY): List<Name> =
-        flow().map { it.name }.filter { it.startsWith(prefix) && (it.length == prefix.length + 1) }.toList()
-    // By default traverses the whole tree. Could be optimized in descendants
+        flowData().map { it.name }.filter { it.startsWith(prefix) && (it.length == prefix.length + 1) }.toList()
+    // By default, traverses the whole tree. Could be optimized in descendants
 
     public companion object {
         public val META_KEY: Name = "@meta".asName()
@@ -43,9 +41,9 @@ public interface DataSet<out T : Any> {
         public val EMPTY: DataSet<Nothing> = object : DataSet<Nothing> {
             override val dataType: KType = TYPE_OF_NOTHING
 
-            private val nothing: Nothing get() = error("this is nothing")
+            //private val nothing: Nothing get() = error("this is nothing")
 
-            override fun flow(): Flow<NamedData<Nothing>> = emptyFlow()
+            override fun flowData(): Flow<NamedData<Nothing>> = emptyFlow()
 
             override suspend fun getData(name: Name): Data<Nothing>? = null
         }
@@ -67,7 +65,7 @@ public val <T : Any> DataSet<T>.updates: Flow<Name> get() = if (this is ActiveDa
 /**
  * Flow all data nodes with names starting with [branchName]
  */
-public fun <T : Any> DataSet<T>.flowChildren(branchName: Name): Flow<NamedData<T>> = this@flowChildren.flow().filter {
+public fun <T : Any> DataSet<T>.flowChildren(branchName: Name): Flow<NamedData<T>> = this@flowChildren.flowData().filter {
     it.name.startsWith(branchName)
 }
 
@@ -75,7 +73,7 @@ public fun <T : Any> DataSet<T>.flowChildren(branchName: Name): Flow<NamedData<T
  * Start computation for all goals in data node and return a job for the whole node
  */
 public fun <T : Any> DataSet<T>.startAll(coroutineScope: CoroutineScope): Job = coroutineScope.launch {
-    flow().map {
+    flowData().map {
         it.launch(this@launch)
     }.toList().joinAll()
 }
@@ -83,7 +81,7 @@ public fun <T : Any> DataSet<T>.startAll(coroutineScope: CoroutineScope): Job = 
 public suspend fun <T : Any> DataSet<T>.join(): Unit = coroutineScope { startAll(this).join() }
 
 public suspend fun DataSet<*>.toMeta(): Meta = Meta {
-    flow().collect {
+    flowData().collect {
         if (it.name.endsWith(DataSet.META_KEY)) {
             set(it.name, it.meta)
         } else {

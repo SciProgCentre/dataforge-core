@@ -11,7 +11,7 @@ kscience {
 
 kotlin {
     sourceSets {
-        val commonMain by getting{
+        val commonMain by getting {
             dependencies {
                 api(project(":dataforge-meta"))
             }
@@ -30,6 +30,6 @@ kotlin {
     }
 }
 
-readme{
+readme {
     maturity = ru.mipt.npm.gradle.Maturity.DEVELOPMENT
 }

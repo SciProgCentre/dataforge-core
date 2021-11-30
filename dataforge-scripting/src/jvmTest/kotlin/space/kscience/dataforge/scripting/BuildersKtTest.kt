@@ -15,7 +15,7 @@ class BuildersKtTest {
         Workspace(Global){
             println("I am working")
 
-            context { name("test") }
+            //context { name("test") }
 
             target("testTarget") {
                 "a" put 12
@@ -27,8 +27,6 @@ class BuildersKtTest {
     fun testWorkspaceBuilder() {
         val script = """
             println("I am working")
-
-            context{ name("test") }
 
             target("testTarget"){
                 "a" put 12
