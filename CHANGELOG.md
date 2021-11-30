@@ -10,14 +10,33 @@
 ### Removed
 
 ### Fixed
+
+### Security
+
+## [0.5.2]
+### Added
+- Yaml plugin
+- Partial fix to #53
+
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
 - MutableMetaImpl attachment and checks
 - Listeners in observable meta are replaced by lists
 - JS number comparison bug.
 
+
 ### Security
+
 ## [0.5.0]
 ### Added
 - Experimental `listOfSpec` delegate.
+
 
 ### Changed
 - **API breaking** Config is deprecated, use `ObservableMeta` instead.
@@ -29,23 +48,25 @@
 - **API breaking** `String.toName()` is replaced by `Name.parse()`
 - **API breaking** Configurable`config` changed to `meta`
 
+
 ### Removed
 - `Config`
 - Public PluginManager mutability
 - Tables and tables-exposed moved to the separate project `tables.kt`
 - BinaryMetaFormat. Use CBOR encoding instead
 
+
 ### Fixed
 - Proper json array index treatment.
 - Proper json index for single-value array.
 
-### Security
 ## [0.4.0]
 ### Added
 - LogManager plugin
 - dataforge-context API dependency on SLF4j
 - Context `withEnv` and `fetch` methods to manipulate plugins without changing plugins after creation.
 - Split `ItemDescriptor` into builder and read-only part
+
 
 ### Changed
 - Kotlin-logging moved from common to JVM and JS. Replaced by console for native.
@@ -56,17 +77,18 @@
 - Added blank builders for children context.
 - Refactor loggers
 
+
 ### Deprecated
 - Direct use of PluginManager
+
 
 ### Removed
 - Common dependency on Kotlin-logging
 - Kotlinx-io fork dependency. Replaced by Ktor-io.
 
+
 ### Fixed
 - Scheme properties properly handle children property change.
-
-### Security
 
 ## [0.3.0]
 ### Added
@@ -75,6 +97,7 @@
 - Special ValueType for lists
 - `copy` method to descriptors
 - Multiplatform yaml meta
+
 
 ### Changed
 - `ListValue` and `DoubleArrayValue` implement `Iterable`.
@@ -90,17 +113,7 @@
 - \[Major breaking change\] Full refactor of DataTree/DataSource
 - \[Major Breaking change\] Replace KClass with KType in data. Remove direct access to constructors with types.
 
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-
 ## [0.2.0]
-### Added
-
 ### Changed
 - Context content resolution refactor
 - Kotlin 1.4.10 (build tools 0.6.0)
@@ -110,16 +123,17 @@
 - Removed io depdendency from `dataforge-output`. Replaced Output by Appendable.
 - Configurable is no longer MutableItemProvider. All functionality moved to Scheme.
 
+
 ### Deprecated
 - Context activation API
 - TextRenderer
+
 
 ### Removed
 - Functional server prototype
 - `dataforge-output` module
 
+
 ### Fixed
 - Global context CoroutineScope resolution
 - Library mode compliance
-
-### Security

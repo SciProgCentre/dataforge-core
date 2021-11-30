@@ -365,6 +365,8 @@ public class space/kscience/dataforge/meta/Scheme : space/kscience/dataforge/met
 }
 
 public final class space/kscience/dataforge/meta/SchemeKt {
+	public static final fun copy (Lspace/kscience/dataforge/meta/Scheme;Lspace/kscience/dataforge/meta/SchemeSpec;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/Scheme;
+	public static synthetic fun copy$default (Lspace/kscience/dataforge/meta/Scheme;Lspace/kscience/dataforge/meta/SchemeSpec;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/Scheme;
 	public static final fun invoke (Lspace/kscience/dataforge/meta/Scheme;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/Scheme;
 	public static final fun retarget (Lspace/kscience/dataforge/meta/Scheme;Lspace/kscience/dataforge/meta/MutableMeta;)Lspace/kscience/dataforge/meta/Scheme;
 }
@@ -726,6 +728,7 @@ public final class space/kscience/dataforge/names/NameKt {
 	public static final fun getLength (Lspace/kscience/dataforge/names/Name;)I
 	public static final fun isEmpty (Lspace/kscience/dataforge/names/Name;)Z
 	public static final fun lastOrNull (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/names/NameToken;
+	public static final fun parseAsName (Ljava/lang/String;)Lspace/kscience/dataforge/names/Name;
 	public static final fun plus (Lspace/kscience/dataforge/names/Name;Ljava/lang/String;)Lspace/kscience/dataforge/names/Name;
 	public static final fun plus (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/names/Name;
 	public static final fun plus (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/names/NameToken;)Lspace/kscience/dataforge/names/Name;

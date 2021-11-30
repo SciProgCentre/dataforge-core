@@ -296,9 +296,7 @@ private class MutableMetaImpl(
     override fun attach(name: Name, node: ObservableMutableMeta) {
         when (name.length) {
             0 -> error("Can't set a meta with empty name")
-            1 -> {
-                replaceItem(name.first(), get(name), node)
-            }
+            1 -> replaceItem(name.first(), get(name), node)
             else -> get(name.cutLast())?.attach(name.lastOrNull()!!.asName(), node)
         }
     }
