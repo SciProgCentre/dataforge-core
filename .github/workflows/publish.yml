@@ -9,6 +9,8 @@ jobs:
   publish:
     environment:
       name: publish
+    env:
+      publishing.github: false
     strategy:
       matrix:
         os: [ macOS-latest, windows-latest ]
