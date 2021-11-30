@@ -2,7 +2,6 @@ package space.kscience.dataforge.meta
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFails
 
 class MutableMetaTest{
     @Test
@@ -19,14 +18,5 @@ class MutableMetaTest{
 
         meta.remove("aNode.c")
         assertEquals(meta["aNode.c"], null)
-    }
-
-    @Test
-    fun recursiveMeta(){
-        val meta = MutableMeta {
-            "a" put 2
-        }
-
-        assertFails { meta["child.a"] = meta}
     }
 }
