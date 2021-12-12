@@ -22,7 +22,7 @@ public class ConsoleLogManager : AbstractPlugin(), LogManager {
     override val tag: PluginTag get() = Companion.tag
 
     public companion object : PluginFactory<ConsoleLogManager> {
-        override fun invoke(meta: Meta, context: Context): ConsoleLogManager = ConsoleLogManager()
+        override fun build(context: Context, meta: Meta): ConsoleLogManager = ConsoleLogManager()
 
         override val tag: PluginTag = PluginTag(group = PluginTag.DATAFORGE_GROUP, name = "log.jsConsole")
         override val type: KClass<out ConsoleLogManager> = ConsoleLogManager::class

@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- `Factory` is now `fun interface` and uses `build` instead of `invoke`. `invoke moved to an extension.
 
 ### Deprecated
 

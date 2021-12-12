@@ -5,6 +5,7 @@ import io.ktor.utils.io.core.Output
 import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.core.readUTF8Line
 import space.kscience.dataforge.context.Context
+import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.io.IOFormat.Companion.META_KEY
 import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
@@ -71,7 +72,7 @@ public class FrontMatterEnvelopeFormat(
         metaFormatFactory: MetaFormatFactory,
         formatMeta: Meta,
     ) {
-        val metaFormat = metaFormatFactory(formatMeta, this@FrontMatterEnvelopeFormat.io.context)
+        val metaFormat = metaFormatFactory.build(this@FrontMatterEnvelopeFormat.io.context, formatMeta)
         output.writeRawString("$SEPARATOR\r\n")
         metaFormat.run { this.writeObject(output, envelope.meta) }
         output.writeRawString("$SEPARATOR\r\n")
@@ -91,20 +92,20 @@ public class FrontMatterEnvelopeFormat(
 
         private val metaTypeRegex = "---(\\w*)\\s*".toRegex()
 
-        override fun invoke(meta: Meta, context: Context): EnvelopeFormat {
+        override fun build(context: Context, meta: Meta): EnvelopeFormat {
             return FrontMatterEnvelopeFormat(context.io, meta)
         }
 
         override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? = binary.read {
             val line = readSafeUtf8Line()
             return@read if (line.startsWith("---")) {
-                invoke()
+                default
             } else {
                 null
             }
         }
 
-        private val default by lazy { invoke() }
+        private val default by lazy { build(Global, Meta.EMPTY) }
 
         override fun readPartial(input: Input): PartialEnvelope =
             default.readPartial(input)

@@ -24,7 +24,7 @@ public class SlfLogManager : AbstractPlugin(), LogManager {
     override val tag: PluginTag get() = Companion.tag
 
     public companion object : PluginFactory<SlfLogManager> {
-        override fun invoke(meta: Meta, context: Context): SlfLogManager = SlfLogManager()
+        override fun build(context: Context, meta: Meta): SlfLogManager = SlfLogManager()
 
         override val tag: PluginTag = PluginTag(group = PluginTag.DATAFORGE_GROUP, name = "log.kotlinLogging")
         override val type: KClass<out SlfLogManager> = SlfLogManager::class

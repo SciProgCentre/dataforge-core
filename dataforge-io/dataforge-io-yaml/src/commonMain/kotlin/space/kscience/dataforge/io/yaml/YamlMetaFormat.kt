@@ -115,13 +115,13 @@ public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
     }
 
     public companion object : MetaFormatFactory {
-        override fun invoke(meta: Meta, context: Context): MetaFormat = YamlMetaFormat(meta)
+        override fun build(context: Context, meta: Meta): MetaFormat = YamlMetaFormat(meta)
 
         override val shortName: String = "yaml"
 
         override val key: Short = 0x594d //YM
 
-        private val default = YamlMetaFormat()
+        private val default = YamlMetaFormat(Meta.EMPTY)
 
         override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?): Unit =
             default.writeMeta(output, meta, descriptor)

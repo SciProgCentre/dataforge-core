@@ -33,7 +33,7 @@ public class EnvelopeBuilder : Envelope {
     /**
      * Construct a data binary from given builder
      */
-    public fun data(block: Output.() -> Unit) {
+    public inline fun data(block: Output.() -> Unit) {
         data = buildByteArray { block() }.asBinary()
     }
 

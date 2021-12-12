@@ -27,6 +27,6 @@ public class YamlPlugin(meta: Meta) : AbstractPlugin(meta) {
         override val tag: PluginTag = PluginTag("io.yaml", group = PluginTag.DATAFORGE_GROUP)
 
         override val type: KClass<out YamlPlugin> = YamlPlugin::class
-        override fun invoke(meta: Meta, context: Context): YamlPlugin = YamlPlugin(meta)
+        override fun build(context: Context, meta: Meta): YamlPlugin = YamlPlugin(meta)
     }
 }

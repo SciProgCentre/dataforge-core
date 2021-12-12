@@ -25,7 +25,7 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         return ioFormatFactories.find { it.name == name }?.let {
             @Suppress("UNCHECKED_CAST")
             if (it.type != type) error("Format type ${it.type} is not the same as requested type $type")
-            else it.invoke(item[META_KEY] ?: Meta.EMPTY, context) as IOFormat<T>
+            else it.build(context, item[META_KEY] ?: Meta.EMPTY) as IOFormat<T>
         }
     }
 
@@ -34,17 +34,17 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     }
 
     public fun resolveMetaFormat(key: Short, meta: Meta = Meta.EMPTY): MetaFormat? =
-        metaFormatFactories.find { it.key == key }?.invoke(meta)
+        metaFormatFactories.find { it.key == key }?.build(context, meta)
 
     public fun resolveMetaFormat(name: String, meta: Meta = Meta.EMPTY): MetaFormat? =
-        metaFormatFactories.find { it.shortName == name }?.invoke(meta)
+        metaFormatFactories.find { it.shortName == name }?.build(context, meta)
 
     public val envelopeFormatFactories: Collection<EnvelopeFormatFactory> by lazy {
         context.gather<EnvelopeFormatFactory>(ENVELOPE_FORMAT_TYPE).values
     }
 
     private fun resolveEnvelopeFormat(name: Name, meta: Meta = Meta.EMPTY): EnvelopeFormat? =
-        envelopeFormatFactories.find { it.name == name }?.invoke(meta, context)
+        envelopeFormatFactories.find { it.name == name }?.build(context, meta)
 
     public fun resolveEnvelopeFormat(item: Meta): EnvelopeFormat? {
         val name = item.string ?: item[NAME_KEY]?.string ?: error("Envelope format name not defined")
@@ -66,7 +66,7 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         override val tag: PluginTag = PluginTag("io", group = PluginTag.DATAFORGE_GROUP)
 
         override val type: KClass<out IOPlugin> = IOPlugin::class
-        override fun invoke(meta: Meta, context: Context): IOPlugin = IOPlugin(meta)
+        override fun build(context: Context, meta: Meta): IOPlugin = IOPlugin(meta)
     }
 }
 

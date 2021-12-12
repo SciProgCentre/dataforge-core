@@ -2,6 +2,7 @@ package space.kscience.dataforge.io
 
 import io.ktor.utils.io.core.*
 import space.kscience.dataforge.context.Context
+import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.io.IOFormat.Companion.META_KEY
 import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.meta.Meta
@@ -47,7 +48,7 @@ public class TaggedEnvelopeFormat(
         metaFormatFactory: MetaFormatFactory,
         formatMeta: Meta,
     ) {
-        val metaFormat = metaFormatFactory.invoke(formatMeta, this@TaggedEnvelopeFormat.io.context)
+        val metaFormat = metaFormatFactory.build(this@TaggedEnvelopeFormat.io.context, formatMeta)
         val metaBytes = metaFormat.toBinary(envelope.meta)
         val actualSize: ULong = (envelope.data?.size ?: 0).toULong()
         val tag = Tag(metaFormatFactory.key, metaBytes.size.toUInt() + 2u, actualSize)
@@ -118,7 +119,7 @@ public class TaggedEnvelopeFormat(
 
         override val name: Name = super.name + "tagged"
 
-        override fun invoke(meta: Meta, context: Context): EnvelopeFormat {
+        override fun build(context: Context, meta: Meta): EnvelopeFormat {
             val io = context.io
 
             val metaFormatName = meta["name"].string?.let { Name.parse(it) } ?: JsonMetaFormat.name
@@ -161,7 +162,7 @@ public class TaggedEnvelopeFormat(
             }
         }
 
-        private val default by lazy { invoke() }
+        private val default by lazy { build(Global, Meta.EMPTY) }
 
         override fun readPartial(input: Input): PartialEnvelope =
             default.run { readPartial(input) }

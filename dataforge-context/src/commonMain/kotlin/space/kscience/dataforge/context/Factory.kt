@@ -2,6 +2,11 @@ package space.kscience.dataforge.context
 
 import space.kscience.dataforge.meta.Meta
 
-public interface Factory<out T : Any> {
-    public operator fun invoke(meta: Meta = Meta.EMPTY, context: Context = Global): T
+public fun interface Factory<out T> {
+    public fun build(context: Context, meta: Meta): T
 }
+
+public operator fun <T> Factory<T>.invoke(
+    meta: Meta = Meta.EMPTY,
+    context: Context = Global,
+): T = build(context, meta)
