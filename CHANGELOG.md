@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Add `specOrNull` delegate to meta and Scheme
 
 ### Changed
 - `Factory` is now `fun interface` and uses `build` instead of `invoke`. `invoke moved to an extension.
