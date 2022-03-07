@@ -1,12 +1,13 @@
 package space.kscience.dataforge.meta
 
+import space.kscience.dataforge.meta.descriptors.Described
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-public interface ReadOnlySpecification<out T : Any> {
+public interface ReadOnlySpecification<out T : Any>: Described {
 
     /**
      * Read generic read-only meta with this [Specification] producing instance of desired type.

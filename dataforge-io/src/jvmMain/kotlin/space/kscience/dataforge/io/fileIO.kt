@@ -2,6 +2,7 @@ package space.kscience.dataforge.io
 
 import io.ktor.utils.io.core.*
 import io.ktor.utils.io.streams.asOutput
+import kotlinx.coroutines.runBlocking
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.isEmpty
@@ -9,7 +10,6 @@ import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.inputStream
 import kotlin.math.min
 import kotlin.reflect.full.isSupertypeOf
@@ -23,8 +23,11 @@ internal class PathBinary(
     override val size: Int = Files.size(path).toInt() - fileOffset,
 ) : Binary {
 
-    @OptIn(ExperimentalPathApi::class)
-    override fun <R> read(offset: Int, atMost: Int, block: Input.() -> R): R {
+    override fun <R> read(offset: Int, atMost: Int, block: Input.() -> R): R = runBlocking {
+        readSuspend(offset, atMost, block)
+    }
+
+    override suspend fun <R> readSuspend(offset: Int, atMost: Int, block: suspend Input.() -> R): R {
         val actualOffset = offset + fileOffset
         val actualSize = min(atMost, size - offset)
         val array = path.inputStream().use {
@@ -69,15 +72,14 @@ public fun Path.rewrite(block: Output.() -> Unit): Unit {
     stream.asOutput().use(block)
 }
 
-public fun Path.readEnvelope(format: EnvelopeFormat): Envelope {
-    val partialEnvelope: PartialEnvelope = asBinary().read {
-        format.run {
-            readPartial(this@read)
-        }
+@DFExperimental
+public fun EnvelopeFormat.readFile(path: Path): Envelope {
+    val partialEnvelope: PartialEnvelope = path.asBinary().read {
+        readPartial(this@read)
     }
     val offset: Int = partialEnvelope.dataOffset.toInt()
-    val size: Int = partialEnvelope.dataSize?.toInt() ?: (Files.size(this).toInt() - offset)
-    val binary = PathBinary(this, offset, size)
+    val size: Int = partialEnvelope.dataSize?.toInt() ?: (Files.size(path).toInt() - offset)
+    val binary = PathBinary(path, offset, size)
     return SimpleEnvelope(partialEnvelope.meta, binary)
 }
 
@@ -110,10 +112,8 @@ public fun IOPlugin.readMetaFile(
     val extension = actualPath.fileName.toString().substringAfterLast('.')
 
     val metaFormat = formatOverride ?: resolveMetaFormat(extension) ?: error("Can't resolve meta format $extension")
-    return metaFormat.run {
-        actualPath.read {
-            readMeta(this, descriptor)
-        }
+    return actualPath.read {
+        metaFormat.readMeta(this, descriptor)
     }
 }
 
@@ -145,15 +145,7 @@ public fun IOPlugin.writeMetaFile(
  */
 public fun IOPlugin.peekFileEnvelopeFormat(path: Path): EnvelopeFormat? {
     val binary = path.asBinary()
-    val formats = envelopeFormatFactories.mapNotNull { factory ->
-        factory.peekFormat(this@peekFileEnvelopeFormat, binary)
-    }
-
-    return when (formats.size) {
-        0 -> null
-        1 -> formats.first()
-        else -> error("Envelope format binary recognition clash: $formats")
-    }
+    return peekBinaryEnvelopeFormat(binary)
 }
 
 public val IOPlugin.Companion.META_FILE_NAME: String get() = "@meta"
@@ -204,7 +196,7 @@ public fun IOPlugin.readEnvelopeFile(
     }
 
     return formatPicker(path)?.let { format ->
-        path.readEnvelope(format)
+        format.readFile(path)
     } ?: if (readNonEnvelopes) { // if no format accepts file, read it as binary
         SimpleEnvelope(Meta.EMPTY, path.asBinary())
     } else error("Can't infer format for file $path")
