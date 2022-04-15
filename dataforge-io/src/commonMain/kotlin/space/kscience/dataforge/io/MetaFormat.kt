@@ -54,9 +54,9 @@ public interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
     }
 }
 
-public fun Meta.toString(format: MetaFormat): String = buildByteArray {
+public fun Meta.toString(format: MetaFormat): String = ByteArray {
     format.run {
-        writeObject(this@buildByteArray, this@toString)
+        writeObject(this@ByteArray, this@toString)
     }
 }.decodeToString()
 

@@ -1,3 +1,5 @@
+import ru.mipt.npm.gradle.KScienceVersions
+
 plugins {
     id("ru.mipt.npm.gradle.mpp")
     id("ru.mipt.npm.gradle.native")
@@ -18,7 +20,7 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":dataforge-context"))
-                api(npmlibs.ktor.io)
+                api("io.ktor:ktor-io:${KScienceVersions.ktorVersion}")
             }
         }
     }

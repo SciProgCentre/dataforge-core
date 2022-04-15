@@ -27,7 +27,7 @@ public object Builders {
                 dependenciesFromCurrentContext(wholeClasspath = true)
             }
             hostConfiguration(defaultJvmScriptingHostConfiguration)
-            compilerOptions("-jvm-target", Runtime.version().feature().toString())
+            compilerOptions("-jvm-target", Runtime.version().feature().toString(),"-Xcontext-receivers")
         }
 
         val evaluationConfiguration = ScriptEvaluationConfiguration {

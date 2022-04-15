@@ -62,7 +62,7 @@ internal class ByteArrayBinary(
 public fun ByteArray.asBinary(): Binary = ByteArrayBinary(this)
 
 /**
- * Produce a [buildByteArray] representing an exact copy of this [Binary]
+ * Produce a [ByteArray] representing an exact copy of this [Binary]
  */
 public fun Binary.toByteArray(): ByteArray = if (this is ByteArrayBinary) {
     array.copyOf() // TODO do we need to ensure data safety here?

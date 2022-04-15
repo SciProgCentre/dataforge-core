@@ -8,8 +8,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-fun Meta.toByteArray(format: MetaFormat = JsonMetaFormat) = buildByteArray {
-    format.writeObject(this@buildByteArray, this@toByteArray)
+fun Meta.toByteArray(format: MetaFormat = JsonMetaFormat) = ByteArray {
+    format.writeObject(this@ByteArray, this@toByteArray)
 }
 
 fun MetaFormat.fromByteArray(packet: ByteArray): Meta {

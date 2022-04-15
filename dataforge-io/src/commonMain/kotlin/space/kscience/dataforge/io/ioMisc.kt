@@ -15,7 +15,6 @@ public fun Output.writeUtf8String(str: String) {
     writeFully(str.encodeToByteArray())
 }
 
-@OptIn(ExperimentalIoApi::class)
 public fun Input.readRawString(size: Int): String {
     return Charsets.ISO_8859_1.newDecoder().decodeExactBytes(this, size)
 }
@@ -24,14 +23,11 @@ public fun Input.readUtf8String(): String = readBytes().decodeToString()
 
 public fun Input.readSafeUtf8Line(): String = readUTF8Line() ?: error("Line not found")
 
-public inline fun buildByteArray(expectedSize: Int = 16, block: Output.() -> Unit): ByteArray {
-    val builder = BytePacketBuilder(expectedSize)
-    builder.block()
-    return builder.build().readBytes()
-}
+public inline fun ByteArray(block: Output.() -> Unit): ByteArray =
+    buildPacket(block).readBytes()
 
-public inline fun Binary(expectedSize: Int = 16, block: Output.() -> Unit): Binary =
-    buildByteArray(expectedSize, block).asBinary()
+public inline fun Binary(block: Output.() -> Unit): Binary =
+    ByteArray(block).asBinary()
 
 /**
  * View section of a [Binary] as an independent binary

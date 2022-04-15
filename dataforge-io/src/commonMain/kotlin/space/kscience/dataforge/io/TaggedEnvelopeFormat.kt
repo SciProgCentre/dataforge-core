@@ -26,7 +26,7 @@ public class TaggedEnvelopeFormat(
 //        ?: error("Meta format with key $metaFormatKey could not be resolved in $io")
 
 
-    private fun Tag.toBinary() = Binary(24) {
+    private fun Tag.toBinary() = Binary {
         writeRawString(START_SEQUENCE)
         writeRawString(version.name)
         writeShort(metaFormatKey)
@@ -149,7 +149,7 @@ public class TaggedEnvelopeFormat(
 
         override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? {
             return try {
-                binary.read{
+                binary.read {
                     val header = readRawString(6)
                     return@read when (header.substring(2..5)) {
                         VERSION.DF02.name -> TaggedEnvelopeFormat(io, VERSION.DF02)
