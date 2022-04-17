@@ -35,9 +35,11 @@ private fun <R : Any> Data<*>.castOrNull(type: KType): Data<R>? =
 public fun <R : Any> DataSet<*>.select(
     type: KType,
     namePattern: Name? = null,
-    filter: (name: Name, meta: Meta) -> Boolean = { _, _ -> true }
+    filter: (name: Name, meta: Meta) -> Boolean = { _, _ -> true },
 ): ActiveDataSet<R> = object : ActiveDataSet<R> {
     override val dataType = type
+
+    override val meta: Meta get() = this@select.meta
 
     private fun checkDatum(name: Name, datum: Data<*>): Boolean = datum.type.isSubtypeOf(type)
             && (namePattern == null || name.matches(namePattern))
@@ -65,7 +67,7 @@ public fun <R : Any> DataSet<*>.select(
  */
 public inline fun <reified R : Any> DataSet<*>.select(
     namePattern: Name? = null,
-    noinline filter: (name: Name, meta: Meta) -> Boolean = { _, _ -> true }
+    noinline filter: (name: Name, meta: Meta) -> Boolean = { _, _ -> true },
 ): DataSet<R> = select(typeOf<R>(), namePattern, filter)
 
 /**
