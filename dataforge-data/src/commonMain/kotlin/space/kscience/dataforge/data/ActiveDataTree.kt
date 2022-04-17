@@ -1,9 +1,6 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import space.kscience.dataforge.meta.*
@@ -12,7 +9,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
 /**
- * A mutable [DataTree.Companion.active]. It
+ * A mutable [DataTree].
  */
 public class ActiveDataTree<T : Any>(
     override val dataType: KType,
@@ -20,20 +17,17 @@ public class ActiveDataTree<T : Any>(
     private val mutex = Mutex()
     private val treeItems = HashMap<NameToken, DataTreeItem<T>>()
 
-    override suspend fun items(): Map<NameToken, DataTreeItem<T>> = mutex.withLock {
-        treeItems.filter { !it.key.body.startsWith("@") }
-    }
+    override val items: Map<NameToken, DataTreeItem<T>>
+        get() = treeItems.filter { !it.key.body.startsWith("@") }
 
     private val _updates = MutableSharedFlow<Name>()
 
     override val updates: Flow<Name>
         get() = _updates
 
-    private suspend fun remove(token: NameToken) {
-        mutex.withLock {
-            if (treeItems.remove(token) != null) {
-                _updates.emit(token.asName())
-            }
+    private suspend fun remove(token: NameToken) = mutex.withLock {
+        if (treeItems.remove(token) != null) {
+            _updates.emit(token.asName())
         }
     }
 
@@ -42,10 +36,8 @@ public class ActiveDataTree<T : Any>(
         (getItem(name.cutLast()).tree as? ActiveDataTree)?.remove(name.lastOrNull()!!)
     }
 
-    private suspend fun set(token: NameToken, data: Data<T>) {
-        mutex.withLock {
-            treeItems[token] = DataTreeItem.Leaf(data)
-        }
+    private suspend fun set(token: NameToken, data: Data<T>) = mutex.withLock {
+        treeItems[token] = DataTreeItem.Leaf(data)
     }
 
     private suspend fun getOrCreateNode(token: NameToken): ActiveDataTree<T> =
@@ -56,15 +48,13 @@ public class ActiveDataTree<T : Any>(
                 }
             }
 
-    private suspend fun getOrCreateNode(name: Name): ActiveDataTree<T> {
-        return when (name.length) {
-            0 -> this
-            1 -> getOrCreateNode(name.firstOrNull()!!)
-            else -> getOrCreateNode(name.firstOrNull()!!).getOrCreateNode(name.cutFirst())
-        }
+    private suspend fun getOrCreateNode(name: Name): ActiveDataTree<T> = when (name.length) {
+        0 -> this
+        1 -> getOrCreateNode(name.firstOrNull()!!)
+        else -> getOrCreateNode(name.firstOrNull()!!).getOrCreateNode(name.cutFirst())
     }
 
-    override suspend fun emit(name: Name, data: Data<T>?) {
+    override suspend fun data(name: Name, data: Data<T>?) {
         if (data == null) {
             remove(name)
         } else {
@@ -77,14 +67,10 @@ public class ActiveDataTree<T : Any>(
         _updates.emit(name)
     }
 
-    /**
-     * Copy given data set and mirror its changes to this [ActiveDataTree] in [this@setAndObserve]. Returns an update [Job]
-     */
-    public fun CoroutineScope.setAndObserve(name: Name, dataSet: DataSet<T>): Job = launch {
-        emit(name, dataSet)
-        dataSet.updates.collect { nameInBranch ->
-            emit(name + nameInBranch, dataSet.getData(nameInBranch))
-        }
+    override suspend fun meta(name: Name, meta: Meta) {
+        val item = getItem(name)
+        if(item is DataTreeItem.Leaf) error("TODO: Can't change meta of existing leaf item.")
+        data(name + DataTree.META_ITEM_NAME_TOKEN, Data.empty(meta))
     }
 }
 
@@ -106,13 +92,12 @@ public suspend inline fun <reified T : Any> ActiveDataTree(
     crossinline block: suspend ActiveDataTree<T>.() -> Unit,
 ): ActiveDataTree<T> = ActiveDataTree<T>(typeOf<T>()).apply { block() }
 
-
 public suspend inline fun <reified T : Any> ActiveDataTree<T>.emit(
     name: Name,
     noinline block: suspend ActiveDataTree<T>.() -> Unit,
-): Unit = emit(name, ActiveDataTree(typeOf<T>(), block))
+): Unit = node(name, ActiveDataTree(typeOf<T>(), block))
 
 public suspend inline fun <reified T : Any> ActiveDataTree<T>.emit(
     name: String,
     noinline block: suspend ActiveDataTree<T>.() -> Unit,
-): Unit = emit(Name.parse(name), ActiveDataTree(typeOf<T>(), block))
+): Unit = node(Name.parse(name), ActiveDataTree(typeOf<T>(), block))

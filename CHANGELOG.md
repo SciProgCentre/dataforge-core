@@ -4,11 +4,12 @@
 ### Added
 - Add `specOrNull` delegate to meta and Scheme
 - Suspended read methods to the `Binary`
-- Static `Meta` to all `DataSet`s
+- Synchronously accessed `meta` to all `DataSet`s
 
 ### Changed
 - `Factory` is now `fun interface` and uses `build` instead of `invoke`. `invoke moved to an extension.
 - KTor 2.0
+- DataTree `items` call is blocking.
 
 ### Deprecated
 

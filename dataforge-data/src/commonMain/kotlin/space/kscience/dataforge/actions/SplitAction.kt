@@ -2,7 +2,10 @@ package space.kscience.dataforge.actions
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Laminate
@@ -72,13 +75,13 @@ internal class SplitAction<T : Any, R : Any>(
         }
 
         return ActiveDataTree<R>(outputType) {
-            populate(dataSet.flowData().flatMapConcat(transform = ::splitOne))
+            populateWith(dataSet.flowData().flatMapConcat(transform = ::splitOne))
             scope?.launch {
                 dataSet.updates.collect { name ->
                     //clear old nodes
                     remove(name)
                     //collect new items
-                    populate(dataSet.flowChildren(name).flatMapConcat(transform = ::splitOne))
+                    populateWith(dataSet.flowChildren(name).flatMapConcat(transform = ::splitOne))
                 }
             }
         }

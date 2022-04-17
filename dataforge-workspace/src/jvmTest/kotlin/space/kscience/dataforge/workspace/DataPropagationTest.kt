@@ -19,13 +19,13 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
         val result: Data<Int> = selectedData.flowData().foldToData(0) { result, data ->
             result + data.await()
         }
-        emit("result", result)
+        data("result", result)
     }
 
 
     val singleData by task<Int> {
         workspace.data.select<Int>().getData("myData[12]")?.let {
-            emit("result", it)
+            data("result", it)
         }
     }
 

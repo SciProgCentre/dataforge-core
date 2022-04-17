@@ -39,7 +39,7 @@ class SimpleWorkspaceTest {
         override val tag: PluginTag = PluginTag("test")
 
         val test by task<Any> {
-            populate(
+            populateFrom(
                 workspace.data.map {
                     it.also {
                         logger.info { "Test: $it" }
@@ -66,7 +66,7 @@ class SimpleWorkspaceTest {
 
         val filterOne by task<Int> {
             workspace.data.selectOne<Int>("myData[12]")?.let { source ->
-                emit(source.name, source.map { it })
+                data(source.name, source.map { it })
             }
         }
 
@@ -106,7 +106,7 @@ class SimpleWorkspaceTest {
                 val newData: Data<Int> = data.combine(linearData.getData(data.name)!!) { l, r ->
                     l + r
                 }
-                emit(data.name, newData)
+                data(data.name, newData)
             }
         }
 
@@ -115,7 +115,7 @@ class SimpleWorkspaceTest {
             val res = from(square).foldToData(0) { l, r ->
                 l + r.await()
             }
-            emit("sum", res)
+            data("sum", res)
         }
 
         val averageByGroup by task<Int> {
@@ -125,13 +125,13 @@ class SimpleWorkspaceTest {
                 l + r.await()
             }
 
-            emit("even", evenSum)
+            data("even", evenSum)
             val oddSum = workspace.data.filter { name, _ ->
                 name.toString().toInt() % 2 == 1
             }.select<Int>().foldToData(0) { l, r ->
                 l + r.await()
             }
-            emit("odd", oddSum)
+            data("odd", oddSum)
         }
 
         val delta by task<Int> {
@@ -141,7 +141,7 @@ class SimpleWorkspaceTest {
             val res = even.combine(odd) { l, r ->
                 l - r
             }
-            emit("res", res)
+            data("res", res)
         }
 
         val customPipe by task<Int> {
@@ -149,8 +149,7 @@ class SimpleWorkspaceTest {
                 val meta = data.meta.toMutableMeta().apply {
                     "newValue" put 22
                 }
-                emit(data.name + "new", data.map { (data.meta["value"].int ?: 0) + it })
-
+                data(data.name + "new", data.map { (data.meta["value"].int ?: 0) + it })
             }
         }
 

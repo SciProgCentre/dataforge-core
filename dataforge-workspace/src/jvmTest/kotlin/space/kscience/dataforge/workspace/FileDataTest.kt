@@ -22,7 +22,7 @@ import kotlin.test.assertEquals
 class FileDataTest {
     val dataNode = runBlocking {
         DataTree<String> {
-            emit("dir") {
+            node("dir") {
                 static("a", "Some string") {
                     "content" put "Some string"
                 }

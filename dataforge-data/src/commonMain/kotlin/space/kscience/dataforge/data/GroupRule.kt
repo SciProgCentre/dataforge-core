@@ -16,7 +16,6 @@
 package space.kscience.dataforge.data
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
@@ -46,7 +45,7 @@ public interface GroupRule {
 
                 set.flowData().collect { data ->
                     val tagValue = data.meta[key]?.string ?: defaultTagValue
-                    map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.emit(data.name, data.data)
+                    map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.data(data.name, data.data)
                 }
 
                 scope.launch {
@@ -55,7 +54,7 @@ public interface GroupRule {
 
                         @Suppress("NULLABLE_EXTENSION_OPERATOR_WITH_SAFE_CALL_RECEIVER")
                         val tagValue = data?.meta?.get(key)?.string ?: defaultTagValue
-                        map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.emit(name, data)
+                        map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.data(name, data)
                     }
                 }
 

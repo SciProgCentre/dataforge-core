@@ -1,7 +1,6 @@
 package space.kscience.dataforge.data
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.asName
 import kotlin.test.Test
@@ -43,7 +42,7 @@ internal class DataTreeBuilderTest {
                 static("b", "b")
             }
             static("root", "root")
-            populate(updateData)
+            populateFrom(updateData)
         }
 
         runBlocking {
@@ -72,7 +71,7 @@ internal class DataTreeBuilderTest {
                     }
                 }
                 val rootNode = ActiveDataTree<Int> {
-                    setAndObserve("sub".asName(), subNode)
+                    setAndWatch("sub".asName(), subNode)
                 }
 
                 launch {
@@ -85,7 +84,7 @@ internal class DataTreeBuilderTest {
                 cancel()
             }
         } catch (t: Throwable) {
-            if (t !is CancellationException) throw  t
+            if (t !is CancellationException) throw t
         }
 
     }

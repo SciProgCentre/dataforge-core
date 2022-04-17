@@ -16,6 +16,11 @@ public interface DataSet<out T : Any> {
     public val dataType: KType
 
     /**
+     * Meta-data associated with this node. If no meta is provided, returns [Meta.EMPTY].
+     */
+    public val meta: Meta
+
+    /**
      * Traverse this provider or its child. The order is not guaranteed.
      */
     public fun flowData(): Flow<NamedData<T>>
@@ -24,6 +29,7 @@ public interface DataSet<out T : Any> {
      * Get data with given name.
      */
     public suspend fun getData(name: Name): Data<T>?
+
 
     /**
      * Get a snapshot of names of top level children of given node. Empty if node does not exist or is a leaf.
@@ -40,6 +46,7 @@ public interface DataSet<out T : Any> {
          */
         public val EMPTY: DataSet<Nothing> = object : DataSet<Nothing> {
             override val dataType: KType = TYPE_OF_NOTHING
+            override val meta: Meta get() = Meta.EMPTY
 
             //private val nothing: Nothing get() = error("this is nothing")
 
@@ -65,9 +72,10 @@ public val <T : Any> DataSet<T>.updates: Flow<Name> get() = if (this is ActiveDa
 /**
  * Flow all data nodes with names starting with [branchName]
  */
-public fun <T : Any> DataSet<T>.flowChildren(branchName: Name): Flow<NamedData<T>> = this@flowChildren.flowData().filter {
-    it.name.startsWith(branchName)
-}
+public fun <T : Any> DataSet<T>.flowChildren(branchName: Name): Flow<NamedData<T>> =
+    this@flowChildren.flowData().filter {
+        it.name.startsWith(branchName)
+    }
 
 /**
  * Start computation for all goals in data node and return a job for the whole node

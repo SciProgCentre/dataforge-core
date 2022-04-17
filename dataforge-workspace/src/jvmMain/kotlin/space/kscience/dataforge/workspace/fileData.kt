@@ -80,15 +80,15 @@ public suspend fun <T : Any> DataSetBuilder<T>.file(
             val data = readDataFile(path, formatResolver)
             val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string
                 ?: path.fileName.toString().replace(".df", "")
-            emit(name, data)
+            data(name, data)
         }
     } else {
         //otherwise, read as directory
         plugin.run {
             val data = readDataDirectory(path, formatResolver)
-            val name = data.getMeta()?.get(Envelope.ENVELOPE_NAME_KEY).string
+            val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string
                 ?: path.fileName.toString().replace(".df", "")
-            emit(name, data)
+            node(name, data)
         }
     }
 }
@@ -143,7 +143,7 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
         } else if (!Files.isDirectory(path)) {
             error("Can't write a node into file")
         }
-        tree.items().forEach { (token, item) ->
+        tree.items.forEach { (token, item) ->
             val childPath = path.resolve(token.toString())
             when (item) {
                 is DataTreeItem.Node -> {
@@ -159,10 +159,8 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
                 }
             }
         }
-        val treeMeta = tree.getMeta()
-        if (treeMeta != null) {
-            writeMetaFile(path, treeMeta, metaFormat ?: JsonMetaFormat)
-        }
+        val treeMeta = tree.meta
+        writeMetaFile(path, treeMeta, metaFormat ?: JsonMetaFormat)
     }
 }
 
@@ -192,7 +190,7 @@ private suspend fun <T : Any> ZipOutputStream.writeNode(
                 val entry = ZipEntry("$name/")
                 putNextEntry(entry)
                 closeEntry()
-                treeItem.tree.items().forEach { (token, item) ->
+                treeItem.tree.items.forEach { (token, item) ->
                     val childName = "$name/$token"
                     writeNode(childName, item, dataFormat, envelopeFormat)
                 }

@@ -4,11 +4,12 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.actions.map
+import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.assertEquals
 
-@Suppress("EXPERIMENTAL_API_USAGE")
-class ActionsTest {
-    val data: DataTree<Int> = runBlocking {
+@OptIn(DFExperimental::class)
+internal class ActionsTest {
+    private val data: DataTree<Int> = runBlocking {
         DataTree {
             repeat(10) {
                 static(it.toString(), it)
@@ -32,6 +33,7 @@ class ActionsTest {
         val plusOne = Action.map<Int, Int> {
             result { it + 1 }
         }
+
         val datum = runBlocking {
             val result = plusOne.execute(data, scope = this)
             result.getData("1")?.await()

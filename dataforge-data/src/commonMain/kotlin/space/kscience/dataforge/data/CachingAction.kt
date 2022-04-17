@@ -3,7 +3,6 @@ package space.kscience.dataforge.data
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
@@ -37,14 +36,14 @@ public abstract class CachingAction<in T : Any, out R : Any>(
         scope: CoroutineScope?,
     ): DataSet<R> = ActiveDataTree<R>(outputType) {
         coroutineScope {
-            populate(transform(dataSet, meta))
+            populateWith(transform(dataSet, meta))
         }
         scope?.let {
             dataSet.updates.collect {
                 //clear old nodes
                 remove(it)
                 //collect new items
-                populate(scope.transform(dataSet, meta, it))
+                populateWith(scope.transform(dataSet, meta, it))
                 //FIXME if the target is data, updates are fired twice
             }
         }

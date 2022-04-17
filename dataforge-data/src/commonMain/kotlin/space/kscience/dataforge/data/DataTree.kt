@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.*
 import kotlin.collections.component1
@@ -11,8 +12,16 @@ import kotlin.collections.component2
 import kotlin.reflect.KType
 
 public sealed class DataTreeItem<out T : Any> {
-    public class Node<out T : Any>(public val tree: DataTree<T>) : DataTreeItem<T>()
-    public class Leaf<out T : Any>(public val data: Data<T>) : DataTreeItem<T>()
+
+    public abstract val meta: Meta
+
+    public class Node<out T : Any>(public val tree: DataTree<T>) : DataTreeItem<T>() {
+        override val meta: Meta get() = tree.meta
+    }
+
+    public class Leaf<out T : Any>(public val data: Data<T>) : DataTreeItem<T>() {
+        override val meta: Meta get() = data.meta
+    }
 }
 
 public val <T : Any> DataTreeItem<T>.type: KType
@@ -28,13 +37,15 @@ public val <T : Any> DataTreeItem<T>.type: KType
 public interface DataTree<out T : Any> : DataSet<T> {
 
     /**
-     * Children items of this [DataTree] provided asynchronously
+     * Top-level children items of this [DataTree]
      */
-    public suspend fun items(): Map<NameToken, DataTreeItem<T>>
+    public val items: Map<NameToken, DataTreeItem<T>>
+
+    override val meta: Meta get() = items[META_ITEM_NAME_TOKEN]?.meta ?: Meta.EMPTY
 
     override fun flowData(): Flow<NamedData<T>> = flow {
-        items().forEach { (token, childItem: DataTreeItem<T>) ->
-            if(!token.body.startsWith("@")) {
+        items.forEach { (token, childItem: DataTreeItem<T>) ->
+            if (!token.body.startsWith("@")) {
                 when (childItem) {
                     is DataTreeItem.Leaf -> emit(childItem.data.named(token.asName()))
                     is DataTreeItem.Node -> emitAll(childItem.tree.flowData().map { it.named(token + it.name) })
@@ -44,28 +55,33 @@ public interface DataTree<out T : Any> : DataSet<T> {
     }
 
     override suspend fun listTop(prefix: Name): List<Name> =
-        getItem(prefix).tree?.items()?.keys?.map { prefix + it } ?: emptyList()
+        getItem(prefix).tree?.items?.keys?.map { prefix + it } ?: emptyList()
 
     override suspend fun getData(name: Name): Data<T>? = when (name.length) {
         0 -> null
-        1 -> items()[name.firstOrNull()!!].data
-        else -> items()[name.firstOrNull()!!].tree?.getData(name.cutFirst())
+        1 -> items[name.firstOrNull()!!].data
+        else -> items[name.firstOrNull()!!].tree?.getData(name.cutFirst())
     }
 
     public companion object {
         public const val TYPE: String = "dataTree"
+
+        /**
+         * A name token used to designate tree node meta
+         */
+        public val META_ITEM_NAME_TOKEN: NameToken = NameToken("@meta")
     }
 }
 
-public suspend fun <T: Any> DataSet<T>.getData(name: String): Data<T>? = getData(Name.parse(name))
+public suspend fun <T : Any> DataSet<T>.getData(name: String): Data<T>? = getData(Name.parse(name))
 
 /**
  * Get a [DataTreeItem] with given [name] or null if the item does not exist
  */
-public tailrec suspend fun <T : Any> DataTree<T>.getItem(name: Name): DataTreeItem<T>? = when (name.length) {
+public tailrec fun <T : Any> DataTree<T>.getItem(name: Name): DataTreeItem<T>? = when (name.length) {
     0 -> DataTreeItem.Node(this)
-    1 -> items()[name.firstOrNull()]
-    else -> items()[name.firstOrNull()!!].tree?.getItem(name.cutFirst())
+    1 -> items[name.firstOrNull()]
+    else -> items[name.firstOrNull()!!].tree?.getItem(name.cutFirst())
 }
 
 public val <T : Any> DataTreeItem<T>?.tree: DataTree<T>? get() = (this as? DataTreeItem.Node<T>)?.tree
@@ -75,7 +91,7 @@ public val <T : Any> DataTreeItem<T>?.data: Data<T>? get() = (this as? DataTreeI
  * Flow of all children including nodes
  */
 public fun <T : Any> DataTree<T>.itemFlow(): Flow<Pair<Name, DataTreeItem<T>>> = flow {
-    items().forEach { (head, item) ->
+    items.forEach { (head, item) ->
         emit(head.asName() to item)
         if (item is DataTreeItem.Node) {
             val subSequence = item.tree.itemFlow()
@@ -92,5 +108,9 @@ public fun <T : Any> DataTree<T>.itemFlow(): Flow<Pair<Name, DataTreeItem<T>>> =
 public fun <T : Any> DataTree<T>.branch(branchName: Name): DataTree<T> = object : DataTree<T> {
     override val dataType: KType get() = this@branch.dataType
 
-    override suspend fun items(): Map<NameToken, DataTreeItem<T>> = getItem(branchName).tree?.items() ?: emptyMap()
+    override val meta: Meta
+        get() = getItem(branchName)?.meta ?: Meta.EMPTY
+
+    override val items: Map<NameToken, DataTreeItem<T>>
+        get() = getItem(branchName).tree?.items ?: emptyMap()
 }

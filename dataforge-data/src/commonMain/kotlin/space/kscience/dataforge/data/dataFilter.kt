@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.isEmpty
@@ -18,7 +19,10 @@ import kotlin.reflect.KType
 public fun <T : Any> DataSet<T>.filter(
     predicate: suspend (Name, Data<T>) -> Boolean,
 ): ActiveDataSet<T> = object : ActiveDataSet<T> {
+
     override val dataType: KType get() = this@filter.dataType
+
+    override val meta: Meta get() = this@filter.meta
 
     override fun flowData(): Flow<NamedData<T>> =
         this@filter.flowData().filter { predicate(it.name, it.data) }
@@ -38,7 +42,11 @@ public fun <T : Any> DataSet<T>.filter(
  */
 public fun <T : Any> DataSet<T>.withNamePrefix(prefix: Name): DataSet<T> = if (prefix.isEmpty()) this
 else object : ActiveDataSet<T> {
+
     override val dataType: KType get() = this@withNamePrefix.dataType
+
+    override val meta: Meta get() = this@withNamePrefix.meta
+
 
     override fun flowData(): Flow<NamedData<T>> = this@withNamePrefix.flowData().map { it.data.named(prefix + it.name) }
 
@@ -55,6 +63,8 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
     this
 } else object : ActiveDataSet<T> {
     override val dataType: KType get() = this@branch.dataType
+
+    override val meta: Meta get() = this@branch.meta
 
     override fun flowData(): Flow<NamedData<T>> = this@branch.flowData().mapNotNull {
         it.name.removeHeadOrNull(branchName)?.let { name ->

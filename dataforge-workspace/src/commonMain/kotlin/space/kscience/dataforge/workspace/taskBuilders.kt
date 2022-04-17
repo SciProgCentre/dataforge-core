@@ -38,7 +38,7 @@ public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.pipeFr
             action(it, data.name, meta)
         }
 
-        emit(data.name, res)
+        data(data.name, res)
     }
 }
 

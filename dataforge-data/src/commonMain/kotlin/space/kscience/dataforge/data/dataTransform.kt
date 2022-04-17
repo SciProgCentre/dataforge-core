@@ -1,6 +1,9 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.fold
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.seal
@@ -143,7 +146,7 @@ public suspend fun <T : Any, R : Any> DataSet<T>.map(
     metaTransform: MutableMeta.() -> Unit = {},
     block: suspend (T) -> R,
 ): DataTree<R> = DataTree<R>(outputType) {
-    populate(
+    populateWith(
         flowData().map {
             val newMeta = it.meta.toMutableMeta().apply(metaTransform).seal()
             Data(outputType, newMeta, coroutineContext, listOf(it)) {

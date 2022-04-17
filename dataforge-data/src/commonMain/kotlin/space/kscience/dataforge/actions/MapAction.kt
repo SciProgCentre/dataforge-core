@@ -1,7 +1,6 @@
 package space.kscience.dataforge.actions
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
@@ -79,13 +78,13 @@ internal class MapAction<in T : Any, out R : Any>(
         val flow = dataSet.flowData().map(::mapOne)
 
         return ActiveDataTree(outputType) {
-            populate(flow)
+            populateWith(flow)
             scope?.launch {
                 dataSet.updates.collect { name ->
                     //clear old nodes
                     remove(name)
                     //collect new items
-                    populate(dataSet.flowChildren(name).map(::mapOne))
+                    populateWith(dataSet.flowChildren(name).map(::mapOne))
                 }
             }
         }
