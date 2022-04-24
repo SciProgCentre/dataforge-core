@@ -57,10 +57,10 @@ public interface DataTree<out T : Any> : DataSet<T> {
     override suspend fun listTop(prefix: Name): List<Name> =
         getItem(prefix).tree?.items?.keys?.map { prefix + it } ?: emptyList()
 
-    override suspend fun getData(name: Name): Data<T>? = when (name.length) {
+    override fun get(name: Name): Data<T>? = when (name.length) {
         0 -> null
         1 -> items[name.firstOrNull()!!].data
-        else -> items[name.firstOrNull()!!].tree?.getData(name.cutFirst())
+        else -> items[name.firstOrNull()!!].tree?.get(name.cutFirst())
     }
 
     public companion object {
@@ -73,7 +73,7 @@ public interface DataTree<out T : Any> : DataSet<T> {
     }
 }
 
-public suspend fun <T : Any> DataSet<T>.getData(name: String): Data<T>? = getData(Name.parse(name))
+public suspend fun <T : Any> DataSet<T>.getData(name: String): Data<T>? = get(Name.parse(name))
 
 /**
  * Get a [DataTreeItem] with given [name] or null if the item does not exist

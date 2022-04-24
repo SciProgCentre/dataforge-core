@@ -28,7 +28,7 @@ public interface DataSet<out T : Any> {
     /**
      * Get data with given name.
      */
-    public suspend fun getData(name: Name): Data<T>?
+    public operator fun get(name: Name): Data<T>?
 
 
     /**
@@ -52,7 +52,7 @@ public interface DataSet<out T : Any> {
 
             override fun flowData(): Flow<NamedData<Nothing>> = emptyFlow()
 
-            override suspend fun getData(name: Name): Data<Nothing>? = null
+            override fun get(name: Name): Data<Nothing>? = null
         }
     }
 }
@@ -101,4 +101,4 @@ public suspend fun DataSet<*>.toMeta(): Meta = Meta {
     }
 }
 
-public val <T : Any> DataSet<T>.updatesWithData: Flow<NamedData<T>> get() = updates.mapNotNull { getData(it)?.named(it) }
+public val <T : Any> DataSet<T>.updatesWithData: Flow<NamedData<T>> get() = updates.mapNotNull { get(it)?.named(it) }

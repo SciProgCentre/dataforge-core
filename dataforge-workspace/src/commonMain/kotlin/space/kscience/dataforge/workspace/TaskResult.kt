@@ -26,7 +26,7 @@ public interface TaskResult<out T : Any> : DataSet<T> {
     public val taskMeta: Meta
 
     override fun flowData(): Flow<TaskData<T>>
-    override suspend fun getData(name: Name): TaskData<T>?
+    override fun get(name: Name): TaskData<T>?
 }
 
 private class TaskResultImpl<out T : Any>(
@@ -40,7 +40,7 @@ private class TaskResultImpl<out T : Any>(
         workspace.wrapData(it, it.name, taskName, taskMeta)
     }
 
-    override suspend fun getData(name: Name): TaskData<T>? = dataSet.getData(name)?.let {
+    override fun get(name: Name): TaskData<T>? = dataSet.get(name)?.let {
         workspace.wrapData(it, name, taskName, taskMeta)
     }
 }

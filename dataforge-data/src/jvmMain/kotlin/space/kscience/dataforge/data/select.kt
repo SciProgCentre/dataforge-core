@@ -52,12 +52,12 @@ public fun <R : Any> DataSet<*>.select(
         it as NamedData<R>
     }
 
-    override suspend fun getData(name: Name): Data<R>? = this@select.getData(name)?.let { datum ->
+    override fun get(name: Name): Data<R>? = this@select.get(name)?.let { datum ->
         if (checkDatum(name, datum)) datum.castOrNull(type) else null
     }
 
     override val updates: Flow<Name> = this@select.updates.filter {
-        val datum = this@select.getData(it) ?: return@filter false
+        val datum = this@select.get(it) ?: return@filter false
         checkDatum(it, datum)
     }
 }
@@ -73,11 +73,11 @@ public inline fun <reified R : Any> DataSet<*>.select(
 /**
  * Select a single datum if it is present and of given [type]
  */
-public suspend fun <R : Any> DataSet<*>.selectOne(type: KType, name: Name): NamedData<R>? =
-    getData(name)?.castOrNull<R>(type)?.named(name)
+public fun <R : Any> DataSet<*>.selectOne(type: KType, name: Name): NamedData<R>? =
+    get(name)?.castOrNull<R>(type)?.named(name)
 
-public suspend inline fun <reified R : Any> DataSet<*>.selectOne(name: Name): NamedData<R>? =
+public inline fun <reified R : Any> DataSet<*>.selectOne(name: Name): NamedData<R>? =
     selectOne(typeOf<R>(), name)
 
-public suspend inline fun <reified R : Any> DataSet<*>.selectOne(name: String): NamedData<R>? =
+public inline fun <reified R : Any> DataSet<*>.selectOne(name: String): NamedData<R>? =
     selectOne(typeOf<R>(), Name.parse(name))

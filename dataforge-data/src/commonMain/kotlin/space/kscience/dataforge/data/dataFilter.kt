@@ -17,7 +17,7 @@ import kotlin.reflect.KType
  * A stateless filtered [DataSet]
  */
 public fun <T : Any> DataSet<T>.filter(
-    predicate: suspend (Name, Data<T>) -> Boolean,
+    predicate: (Name, Data<T>) -> Boolean,
 ): ActiveDataSet<T> = object : ActiveDataSet<T> {
 
     override val dataType: KType get() = this@filter.dataType
@@ -27,12 +27,12 @@ public fun <T : Any> DataSet<T>.filter(
     override fun flowData(): Flow<NamedData<T>> =
         this@filter.flowData().filter { predicate(it.name, it.data) }
 
-    override suspend fun getData(name: Name): Data<T>? = this@filter.getData(name)?.takeIf {
+    override fun get(name: Name): Data<T>? = this@filter.get(name)?.takeIf {
         predicate(name, it)
     }
 
     override val updates: Flow<Name> = this@filter.updates.filter flowFilter@{ name ->
-        val theData = this@filter.getData(name) ?: return@flowFilter false
+        val theData = this@filter.get(name) ?: return@flowFilter false
         predicate(name, theData)
     }
 }
@@ -50,8 +50,8 @@ else object : ActiveDataSet<T> {
 
     override fun flowData(): Flow<NamedData<T>> = this@withNamePrefix.flowData().map { it.data.named(prefix + it.name) }
 
-    override suspend fun getData(name: Name): Data<T>? =
-        name.removeHeadOrNull(name)?.let { this@withNamePrefix.getData(it) }
+    override fun get(name: Name): Data<T>? =
+        name.removeHeadOrNull(name)?.let { this@withNamePrefix.get(it) }
 
     override val updates: Flow<Name> get() = this@withNamePrefix.updates.map { prefix + it }
 }
@@ -72,7 +72,7 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
         }
     }
 
-    override suspend fun getData(name: Name): Data<T>? = this@branch.getData(branchName + name)
+    override fun get(name: Name): Data<T>? = this@branch.get(branchName + name)
 
     override val updates: Flow<Name> get() = this@branch.updates.mapNotNull { it.removeHeadOrNull(branchName) }
 }
@@ -80,5 +80,5 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
 public fun <T : Any> DataSet<T>.branch(branchName: String): DataSet<T> = this@branch.branch(Name.parse(branchName))
 
 @DFExperimental
-public suspend fun <T : Any> DataSet<T>.rootData(): Data<T>? = getData(Name.EMPTY)
+public suspend fun <T : Any> DataSet<T>.rootData(): Data<T>? = get(Name.EMPTY)
 

@@ -103,7 +103,7 @@ class SimpleWorkspaceTest {
             val squareData = from(square)
             val linearData = from(linear)
             squareData.forEach { data ->
-                val newData: Data<Int> = data.combine(linearData.getData(data.name)!!) { l, r ->
+                val newData: Data<Int> = data.combine(linearData.get(data.name)!!) { l, r ->
                     l + r
                 }
                 data(data.name, newData)

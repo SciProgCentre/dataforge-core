@@ -35,6 +35,6 @@ context(DataSetBuilder<T>) public fun <T : Any> CoroutineScope.setAndWatch(
 ): Job = launch {
     node(name, dataSet)
     dataSet.updates.collect { nameInBranch ->
-        data(name + nameInBranch, dataSet.getData(nameInBranch))
+        data(name + nameInBranch, dataSet.get(nameInBranch))
     }
 }

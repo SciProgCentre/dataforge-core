@@ -50,7 +50,7 @@ public interface GroupRule {
 
                 scope.launch {
                     set.updates.collect { name ->
-                        val data = set.getData(name)
+                        val data = set.get(name)
 
                         @Suppress("NULLABLE_EXTENSION_OPERATOR_WITH_SAFE_CALL_RECEIVER")
                         val tagValue = data?.meta?.get(key)?.string ?: defaultTagValue

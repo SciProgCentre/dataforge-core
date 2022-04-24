@@ -46,7 +46,7 @@ public interface Workspace : ContextAware, Provider {
     }
 
     public suspend fun produceData(taskName: Name, taskMeta: Meta, name: Name): TaskData<*>? =
-        produce(taskName, taskMeta).getData(name)
+        produce(taskName, taskMeta).get(name)
 
     public companion object {
         public const val TYPE: String = "workspace"

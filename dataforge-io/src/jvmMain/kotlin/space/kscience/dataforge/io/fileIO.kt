@@ -88,9 +88,8 @@ public fun EnvelopeFormat.readFile(path: Path): Envelope {
  */
 @Suppress("UNCHECKED_CAST")
 @DFExperimental
-public inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
-    return ioFormatFactories.find { it.type.isSupertypeOf(typeOf<T>()) } as IOFormat<T>?
-}
+public inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? =
+    ioFormatFactories.find { it.type.isSupertypeOf(typeOf<T>()) } as IOFormat<T>?
 
 /**
  * Read file containing meta using given [formatOverride] or file extension to infer meta type.

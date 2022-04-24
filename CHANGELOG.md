@@ -10,6 +10,7 @@
 - `Factory` is now `fun interface` and uses `build` instead of `invoke`. `invoke moved to an extension.
 - KTor 2.0
 - DataTree `items` call is blocking.
+- DataSet `getData` is no longer suspended and renamed to `get`
 
 ### Deprecated
 

@@ -48,7 +48,7 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
 
     public fun group(
         groupName: String,
-        filter: suspend (Name, Data<T>) -> Boolean,
+        filter: (Name, Data<T>) -> Boolean,
         action: JoinGroup<T, R>.() -> Unit,
     ) {
         groupRules += { source ->
