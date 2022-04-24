@@ -24,8 +24,8 @@ public fun <T : Any> DataSet<T>.filter(
 
     override val meta: Meta get() = this@filter.meta
 
-    override fun flowData(): Flow<NamedData<T>> =
-        this@filter.flowData().filter { predicate(it.name, it.data) }
+    override fun dataSequence(): Sequence<NamedData<T>> =
+        this@filter.dataSequence().filter { predicate(it.name, it.data) }
 
     override fun get(name: Name): Data<T>? = this@filter.get(name)?.takeIf {
         predicate(name, it)
@@ -48,7 +48,8 @@ else object : ActiveDataSet<T> {
     override val meta: Meta get() = this@withNamePrefix.meta
 
 
-    override fun flowData(): Flow<NamedData<T>> = this@withNamePrefix.flowData().map { it.data.named(prefix + it.name) }
+    override fun dataSequence(): Sequence<NamedData<T>> =
+        this@withNamePrefix.dataSequence().map { it.data.named(prefix + it.name) }
 
     override fun get(name: Name): Data<T>? =
         name.removeHeadOrNull(name)?.let { this@withNamePrefix.get(it) }
@@ -66,7 +67,7 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
 
     override val meta: Meta get() = this@branch.meta
 
-    override fun flowData(): Flow<NamedData<T>> = this@branch.flowData().mapNotNull {
+    override fun dataSequence(): Sequence<NamedData<T>> = this@branch.dataSequence().mapNotNull {
         it.name.removeHeadOrNull(branchName)?.let { name ->
             it.data.named(name)
         }

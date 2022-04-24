@@ -43,18 +43,18 @@ public interface DataTree<out T : Any> : DataSet<T> {
 
     override val meta: Meta get() = items[META_ITEM_NAME_TOKEN]?.meta ?: Meta.EMPTY
 
-    override fun flowData(): Flow<NamedData<T>> = flow {
+    override fun dataSequence(): Sequence<NamedData<T>> = sequence {
         items.forEach { (token, childItem: DataTreeItem<T>) ->
             if (!token.body.startsWith("@")) {
                 when (childItem) {
-                    is DataTreeItem.Leaf -> emit(childItem.data.named(token.asName()))
-                    is DataTreeItem.Node -> emitAll(childItem.tree.flowData().map { it.named(token + it.name) })
+                    is DataTreeItem.Leaf -> yield(childItem.data.named(token.asName()))
+                    is DataTreeItem.Node -> yieldAll(childItem.tree.dataSequence().map { it.named(token + it.name) })
                 }
             }
         }
     }
 
-    override suspend fun listTop(prefix: Name): List<Name> =
+    override fun listTop(prefix: Name): List<Name> =
         getItem(prefix).tree?.items?.keys?.map { prefix + it } ?: emptyList()
 
     override fun get(name: Name): Data<T>? = when (name.length) {

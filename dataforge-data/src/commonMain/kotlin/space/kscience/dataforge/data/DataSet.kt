@@ -1,7 +1,9 @@
 package space.kscience.dataforge.data
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.mapNotNull
 import space.kscience.dataforge.data.Data.Companion.TYPE_OF_NOTHING
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.set
@@ -23,7 +25,7 @@ public interface DataSet<out T : Any> {
     /**
      * Traverse this provider or its child. The order is not guaranteed.
      */
-    public fun flowData(): Flow<NamedData<T>>
+    public fun dataSequence(): Sequence<NamedData<T>>
 
     /**
      * Get data with given name.
@@ -34,8 +36,8 @@ public interface DataSet<out T : Any> {
     /**
      * Get a snapshot of names of top level children of given node. Empty if node does not exist or is a leaf.
      */
-    public suspend fun listTop(prefix: Name = Name.EMPTY): List<Name> =
-        flowData().map { it.name }.filter { it.startsWith(prefix) && (it.length == prefix.length + 1) }.toList()
+    public fun listTop(prefix: Name = Name.EMPTY): List<Name> =
+        dataSequence().map { it.name }.filter { it.startsWith(prefix) && (it.length == prefix.length + 1) }.toList()
     // By default, traverses the whole tree. Could be optimized in descendants
 
     public companion object {
@@ -50,12 +52,14 @@ public interface DataSet<out T : Any> {
 
             //private val nothing: Nothing get() = error("this is nothing")
 
-            override fun flowData(): Flow<NamedData<Nothing>> = emptyFlow()
+            override fun dataSequence(): Sequence<NamedData<Nothing>> = emptySequence()
 
             override fun get(name: Name): Data<Nothing>? = null
         }
     }
 }
+
+public operator fun <T: Any> DataSet<T>.get(name:String): Data<T>? = get(name.parseAsName())
 
 public interface ActiveDataSet<T : Any> : DataSet<T> {
     /**
@@ -72,8 +76,8 @@ public val <T : Any> DataSet<T>.updates: Flow<Name> get() = if (this is ActiveDa
 /**
  * Flow all data nodes with names starting with [branchName]
  */
-public fun <T : Any> DataSet<T>.flowChildren(branchName: Name): Flow<NamedData<T>> =
-    this@flowChildren.flowData().filter {
+public fun <T : Any> DataSet<T>.children(branchName: Name): Sequence<NamedData<T>> =
+    this@children.dataSequence().filter {
         it.name.startsWith(branchName)
     }
 
@@ -81,7 +85,7 @@ public fun <T : Any> DataSet<T>.flowChildren(branchName: Name): Flow<NamedData<T
  * Start computation for all goals in data node and return a job for the whole node
  */
 public fun <T : Any> DataSet<T>.startAll(coroutineScope: CoroutineScope): Job = coroutineScope.launch {
-    flowData().map {
+    dataSequence().map {
         it.launch(this@launch)
     }.toList().joinAll()
 }
@@ -89,7 +93,7 @@ public fun <T : Any> DataSet<T>.startAll(coroutineScope: CoroutineScope): Job = 
 public suspend fun <T : Any> DataSet<T>.join(): Unit = coroutineScope { startAll(this).join() }
 
 public suspend fun DataSet<*>.toMeta(): Meta = Meta {
-    flowData().collect {
+    dataSequence().forEach {
         if (it.name.endsWith(DataSet.META_KEY)) {
             set(it.name, it.meta)
         } else {

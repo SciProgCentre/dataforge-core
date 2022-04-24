@@ -1,7 +1,6 @@
 package space.kscience.dataforge.actions
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
@@ -50,7 +49,7 @@ internal class MapAction<in T : Any, out R : Any>(
         meta: Meta,
         scope: CoroutineScope?,
     ): DataSet<R> {
-        suspend fun mapOne(data: NamedData<T>): NamedData<R> {
+        fun mapOne(data: NamedData<T>): NamedData<R> {
             // Creating a new environment for action using **old** name, old meta and task meta
             val env = ActionEnv(data.name, data.meta, meta)
 
@@ -75,16 +74,16 @@ internal class MapAction<in T : Any, out R : Any>(
             return newData.named(newName)
         }
 
-        val flow = dataSet.flowData().map(::mapOne)
+        val sequence = dataSet.dataSequence().map(::mapOne)
 
         return ActiveDataTree(outputType) {
-            populateWith(flow)
+            populateWith(sequence)
             scope?.launch {
                 dataSet.updates.collect { name ->
                     //clear old nodes
                     remove(name)
                     //collect new items
-                    populateWith(dataSet.flowChildren(name).map(::mapOne))
+                    populateWith(dataSet.children(name).map(::mapOne))
                 }
             }
         }

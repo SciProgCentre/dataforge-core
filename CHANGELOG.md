@@ -11,6 +11,7 @@
 - KTor 2.0
 - DataTree `items` call is blocking.
 - DataSet `getData` is no longer suspended and renamed to `get`
+- DataSet operates with sequences of data instead of flows
 
 ### Deprecated
 

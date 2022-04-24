@@ -1,9 +1,7 @@
 package space.kscience.dataforge.data
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.fold
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.seal
@@ -100,11 +98,11 @@ public inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.reduceToData(
  * Transform a [Flow] of [NamedData] to a single [Data].
  */
 @DFInternal
-public suspend fun <T : Any, R : Any> Flow<NamedData<T>>.reduceToData(
+public inline fun <T : Any, R : Any> Sequence<NamedData<T>>.reduceToData(
     outputType: KType,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    transformation: suspend (Flow<NamedData<T>>) -> R,
+    crossinline transformation: suspend (Sequence<NamedData<T>>) -> R,
 ): Data<R> = Data(
     outputType,
     meta,
@@ -115,10 +113,10 @@ public suspend fun <T : Any, R : Any> Flow<NamedData<T>>.reduceToData(
 }
 
 @OptIn(DFInternal::class)
-public suspend inline fun <T : Any, reified R : Any> Flow<NamedData<T>>.reduceToData(
+public inline fun <T : Any, reified R : Any> Sequence<NamedData<T>>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    noinline transformation: suspend (Flow<NamedData<T>>) -> R,
+    crossinline transformation: suspend (Sequence<NamedData<T>>) -> R,
 ): Data<R> = reduceToData(typeOf<R>(), coroutineContext, meta) {
     transformation(it)
 }
@@ -126,15 +124,15 @@ public suspend inline fun <T : Any, reified R : Any> Flow<NamedData<T>>.reduceTo
 /**
  * Fold a flow of named data into a single [Data]
  */
-public suspend inline fun <T : Any, reified R : Any> Flow<NamedData<T>>.foldToData(
+public inline fun <T : Any, reified R : Any> Sequence<NamedData<T>>.foldToData(
     initial: R,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    noinline block: suspend (result: R, data: NamedData<T>) -> R,
+    crossinline block: suspend (result: R, data: NamedData<T>) -> R,
 ): Data<R> = reduceToData(
     coroutineContext, meta
 ) {
-    it.fold(initial, block)
+    it.fold(initial) { acc, t -> block(acc, t) }
 }
 
 //DataSet operations
@@ -147,7 +145,7 @@ public suspend fun <T : Any, R : Any> DataSet<T>.map(
     block: suspend (T) -> R,
 ): DataTree<R> = DataTree<R>(outputType) {
     populateWith(
-        flowData().map {
+        dataSequence().map {
             val newMeta = it.meta.toMutableMeta().apply(metaTransform).seal()
             Data(outputType, newMeta, coroutineContext, listOf(it)) {
                 block(it.await())
@@ -165,20 +163,20 @@ public suspend inline fun <T : Any, reified R : Any> DataSet<T>.map(
 
 public suspend fun <T : Any> DataSet<T>.forEach(block: suspend (NamedData<T>) -> Unit) {
     contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
-    flowData().collect {
+    dataSequence().forEach {
         block(it)
     }
 }
 
-public suspend inline fun <T : Any, reified R : Any> DataSet<T>.reduceToData(
+public inline fun <T : Any, reified R : Any> DataSet<T>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    noinline transformation: suspend (Flow<NamedData<T>>) -> R,
-): Data<R> = flowData().reduceToData(coroutineContext, meta, transformation)
+    crossinline transformation: suspend (Sequence<NamedData<T>>) -> R,
+): Data<R> = dataSequence().reduceToData(coroutineContext, meta, transformation)
 
-public suspend inline fun <T : Any, reified R : Any> DataSet<T>.foldToData(
+public inline fun <T : Any, reified R : Any> DataSet<T>.foldToData(
     initial: R,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    noinline block: suspend (result: R, data: NamedData<T>) -> R,
-): Data<R> = flowData().foldToData(initial, coroutineContext, meta, block)
+    crossinline block: suspend (result: R, data: NamedData<T>) -> R,
+): Data<R> = dataSequence().foldToData(initial, coroutineContext, meta, block)

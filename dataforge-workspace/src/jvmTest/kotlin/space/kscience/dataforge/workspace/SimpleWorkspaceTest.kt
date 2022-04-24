@@ -2,8 +2,6 @@
 
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Timeout
 import space.kscience.dataforge.context.*
@@ -161,7 +159,7 @@ class SimpleWorkspaceTest {
     fun testWorkspace() {
         runBlocking {
             val node = workspace.runBlocking("sum")
-            val res = node.flowData().single()
+            val res = node.dataSequence().single()
             assertEquals(328350, res.await())
         }
     }
@@ -171,7 +169,7 @@ class SimpleWorkspaceTest {
     fun testMetaPropagation() {
         runBlocking {
             val node = workspace.produce("sum") { "testFlag" put true }
-            val res = node.flowData().single().await()
+            val res = node.dataSequence().single().await()
         }
     }
 
@@ -194,7 +192,7 @@ class SimpleWorkspaceTest {
     fun testFilter() {
         runBlocking {
             val node = workspace.produce("filterOne")
-            assertEquals(12, node.flowData().first().await())
+            assertEquals(12, node.dataSequence().first().await())
         }
     }
 }

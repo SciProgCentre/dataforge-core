@@ -43,7 +43,7 @@ public interface GroupRule {
             ): Map<String, DataSet<T>> {
                 val map = HashMap<String, ActiveDataTree<T>>()
 
-                set.flowData().collect { data ->
+                set.dataSequence().forEach { data ->
                     val tagValue = data.meta[key]?.string ?: defaultTagValue
                     map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.data(data.name, data.data)
                 }

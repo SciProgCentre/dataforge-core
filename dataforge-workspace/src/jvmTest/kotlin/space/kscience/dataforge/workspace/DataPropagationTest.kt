@@ -1,6 +1,5 @@
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.runBlocking
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.PluginFactory
@@ -16,7 +15,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
 
     val allData by task<Int> {
         val selectedData = workspace.data.select<Int>()
-        val result: Data<Int> = selectedData.flowData().foldToData(0) { result, data ->
+        val result: Data<Int> = selectedData.dataSequence().foldToData(0) { result, data ->
             result + data.await()
         }
         data("result", result)
@@ -58,7 +57,7 @@ class DataPropagationTest {
     fun testAllData() {
         runBlocking {
             val node = testWorkspace.produce("Test.allData")
-            assertEquals(4950, node.flowData().single().await())
+            assertEquals(4950, node.dataSequence().single().await())
         }
     }
 
@@ -66,7 +65,7 @@ class DataPropagationTest {
     fun testSingleData() {
         runBlocking {
             val node = testWorkspace.produce("Test.singleData")
-            assertEquals(12, node.flowData().single().await())
+            assertEquals(12, node.dataSequence().single().await())
         }
     }
 }

@@ -2,10 +2,6 @@ package space.kscience.dataforge.actions
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Laminate
@@ -58,14 +54,14 @@ internal class SplitAction<T : Any, R : Any>(
         scope: CoroutineScope?,
     ): DataSet<R> {
 
-        suspend fun splitOne(data: NamedData<T>): Flow<NamedData<R>> {
+        fun splitOne(data: NamedData<T>): Sequence<NamedData<R>> {
             val laminate = Laminate(data.meta, meta)
 
             val split = SplitBuilder<T, R>(data.name, data.meta).apply(action)
 
 
             // apply individual fragment rules to result
-            return split.fragments.entries.asFlow().map { (fragmentName, rule) ->
+            return split.fragments.entries.asSequence().map { (fragmentName, rule) ->
                 val env = SplitBuilder.FragmentRule<T, R>(fragmentName, laminate.toMutableMeta()).apply(rule)
                 //data.map<R>(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
                 @OptIn(DFInternal::class) Data(outputType, meta = env.meta, dependencies = listOf(data)) {
@@ -75,13 +71,13 @@ internal class SplitAction<T : Any, R : Any>(
         }
 
         return ActiveDataTree<R>(outputType) {
-            populateWith(dataSet.flowData().flatMapConcat(transform = ::splitOne))
+            populateWith(dataSet.dataSequence().flatMap (transform = ::splitOne))
             scope?.launch {
                 dataSet.updates.collect { name ->
                     //clear old nodes
                     remove(name)
                     //collect new items
-                    populateWith(dataSet.flowChildren(name).flatMapConcat(transform = ::splitOne))
+                    populateWith(dataSet.children(name).flatMap(transform = ::splitOne))
                 }
             }
         }

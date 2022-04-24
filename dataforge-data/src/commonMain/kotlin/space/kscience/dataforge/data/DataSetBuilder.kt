@@ -30,7 +30,7 @@ public interface DataSetBuilder<in T : Any> {
         }
 
         //Set new items
-        dataSet.flowData().collect {
+        dataSet.dataSequence().forEach {
             data(name + it.name, it.data)
         }
     }
@@ -148,7 +148,7 @@ public suspend inline fun <reified T : Any> DataSetBuilder<T>.static(
  */
 @DFExperimental
 public suspend fun <T : Any> DataSetBuilder<T>.populateFrom(tree: DataSet<T>): Unit = coroutineScope {
-    tree.flowData().collect {
+    tree.dataSequence().forEach {
         //TODO check if the place is occupied
         data(it.name, it.data)
     }
@@ -156,6 +156,12 @@ public suspend fun <T : Any> DataSetBuilder<T>.populateFrom(tree: DataSet<T>): U
 
 public suspend fun <T : Any> DataSetBuilder<T>.populateWith(flow: Flow<NamedData<T>>) {
     flow.collect {
+        data(it.name, it.data)
+    }
+}
+
+public suspend fun <T : Any> DataSetBuilder<T>.populateWith(sequence: Sequence<NamedData<T>>) {
+    sequence.forEach {
         data(it.name, it.data)
     }
 }

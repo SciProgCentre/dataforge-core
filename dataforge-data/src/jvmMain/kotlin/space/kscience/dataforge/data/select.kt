@@ -2,7 +2,6 @@ package space.kscience.dataforge.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
@@ -45,19 +44,19 @@ public fun <R : Any> DataSet<*>.select(
             && (namePattern == null || name.matches(namePattern))
             && filter(name, datum.meta)
 
-    override fun flowData(): Flow<NamedData<R>> = this@select.flowData().filter {
+    override fun dataSequence(): Sequence<NamedData<R>> = this@select.dataSequence().filter {
         checkDatum(it.name, it.data)
     }.map {
         @Suppress("UNCHECKED_CAST")
         it as NamedData<R>
     }
 
-    override fun get(name: Name): Data<R>? = this@select.get(name)?.let { datum ->
+    override fun get(name: Name): Data<R>? = this@select[name]?.let { datum ->
         if (checkDatum(name, datum)) datum.castOrNull(type) else null
     }
 
     override val updates: Flow<Name> = this@select.updates.filter {
-        val datum = this@select.get(it) ?: return@filter false
+        val datum = this@select[it] ?: return@filter false
         checkDatum(it, datum)
     }
 }

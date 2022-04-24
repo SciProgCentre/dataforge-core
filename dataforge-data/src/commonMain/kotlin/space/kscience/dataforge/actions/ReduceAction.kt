@@ -3,7 +3,6 @@ package space.kscience.dataforge.actions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.fold
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
@@ -84,7 +83,7 @@ internal class ReduceAction<T : Any, R : Any>(
 
     override fun CoroutineScope.transform(set: DataSet<T>, meta: Meta, key: Name): Flow<NamedData<R>> = flow {
         ReduceGroupBuilder<T, R>(inputType, this@transform, meta).apply(action).buildGroups(set).forEach { group ->
-            val dataFlow: Map<Name, Data<T>> = group.set.flowData().fold(HashMap()) { acc, value ->
+            val dataFlow: Map<Name, Data<T>> = group.set.dataSequence().fold(HashMap()) { acc, value ->
                 acc.apply {
                     acc[value.name] = value.data
                 }

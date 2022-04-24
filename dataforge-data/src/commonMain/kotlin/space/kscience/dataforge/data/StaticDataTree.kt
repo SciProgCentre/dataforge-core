@@ -54,7 +54,7 @@ internal class StaticDataTree<T : Any>(
             set(name, DataTreeItem.Node(dataSet))
         } else {
             coroutineScope {
-                dataSet.flowData().collect {
+                dataSet.dataSequence().forEach {
                     data(name + it.name, it.data)
                 }
             }
