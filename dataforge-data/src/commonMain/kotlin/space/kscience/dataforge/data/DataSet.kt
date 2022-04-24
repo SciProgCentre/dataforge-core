@@ -10,7 +10,8 @@ import space.kscience.dataforge.meta.set
 import space.kscience.dataforge.names.*
 import kotlin.reflect.KType
 
-public interface DataSet<out T : Any> {
+public interface
+DataSet<out T : Any> {
 
     /**
      * The minimal common ancestor to all data in the node

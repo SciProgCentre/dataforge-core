@@ -18,6 +18,7 @@
 ### Removed
 
 ### Fixed
+- Meta file name in readMeta from directory
 
 ### Security
 
