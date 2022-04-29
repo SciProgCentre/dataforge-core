@@ -84,6 +84,10 @@ public class StaticData<T : Any>(
 ) : Data<T>, StaticGoal<T>(value)
 
 @Suppress("FunctionName")
+public inline fun <reified T : Any> Data(value: T, meta: Meta = Meta.EMPTY): StaticData<T> =
+    StaticData(typeOf<T>(), value, meta)
+
+@Suppress("FunctionName")
 @DFInternal
 public fun <T : Any> Data(
     type: KType,

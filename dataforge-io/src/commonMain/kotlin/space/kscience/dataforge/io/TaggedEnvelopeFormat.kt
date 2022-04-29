@@ -92,7 +92,7 @@ public class TaggedEnvelopeFormat(
         val meta: Meta = metaFormat.readObject(metaBinary)
 
 
-        return PartialEnvelope(meta, version.tagSize + tag.metaSize, tag.dataSize)
+        return PartialEnvelope(meta, (version.tagSize + tag.metaSize).toInt(), tag.dataSize)
     }
 
     private data class Tag(
@@ -117,7 +117,7 @@ public class TaggedEnvelopeFormat(
         private const val START_SEQUENCE = "#~"
         private const val END_SEQUENCE = "~#\r\n"
 
-        override val name: Name = super.name + "tagged"
+        override val name: Name = EnvelopeFormatFactory.ENVELOPE_FACTORY_NAME + "tagged"
 
         override fun build(context: Context, meta: Meta): EnvelopeFormat {
             val io = context.io

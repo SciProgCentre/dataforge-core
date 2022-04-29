@@ -12,6 +12,7 @@
 - DataTree `items` call is blocking.
 - DataSet `getData` is no longer suspended and renamed to `get`
 - DataSet operates with sequences of data instead of flows
+- PartialEnvelope uses `Int` instead `UInt`.
 
 ### Deprecated
 
@@ -19,6 +20,7 @@
 
 ### Fixed
 - Meta file name in readMeta from directory
+- Tagless and FrontMatter envelope partial readers fix.
 
 ### Security
 

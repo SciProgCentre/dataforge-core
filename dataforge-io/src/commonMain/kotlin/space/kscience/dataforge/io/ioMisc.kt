@@ -1,8 +1,10 @@
 package space.kscience.dataforge.io
 
+import io.ktor.utils.io.bits.Memory
 import io.ktor.utils.io.charsets.Charsets
 import io.ktor.utils.io.charsets.decodeExactBytes
 import io.ktor.utils.io.core.*
+import io.ktor.utils.io.core.internal.ChunkBuffer
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.math.min
@@ -86,7 +88,7 @@ public fun EnvelopeFormat.readBinary(binary: Binary): Envelope {
  * A zero-copy read from
  */
 @DFExperimental
-public fun IOPlugin.readEnvelopeBinary(
+public fun IOPlugin.readEnvelope(
     binary: Binary,
     readNonEnvelopes: Boolean = false,
     formatPicker: IOPlugin.(Binary) -> EnvelopeFormat? = IOPlugin::peekBinaryEnvelopeFormat,
@@ -94,3 +96,102 @@ public fun IOPlugin.readEnvelopeBinary(
     // if no format accepts file, read it as binary
     SimpleEnvelope(Meta.EMPTY, binary)
 } else error("Can't infer format for $binary")
+
+@DFExperimental
+public fun IOPlugin.readEnvelope(
+    string: String,
+    readNonEnvelopes: Boolean = false,
+    formatPicker: IOPlugin.(Binary) -> EnvelopeFormat? = IOPlugin::peekBinaryEnvelopeFormat,
+): Envelope = readEnvelope(string.encodeToByteArray().asBinary(), readNonEnvelopes, formatPicker)
+
+
+private class RingByteArray(
+    private val buffer: ByteArray,
+    private var startIndex: Int = 0,
+    var size: Int = 0,
+) {
+    operator fun get(index: Int): Byte {
+        require(index >= 0) { "Index must be positive" }
+        require(index < size) { "Index $index is out of circular buffer size $size" }
+        return buffer[startIndex.forward(index)]
+    }
+
+    fun isFull(): Boolean = size == buffer.size
+
+    fun push(element: Byte) {
+        buffer[startIndex.forward(size)] = element
+        if (isFull()) startIndex++ else size++
+
+    }
+
+    private fun Int.forward(n: Int): Int = (this + n) % (buffer.size)
+
+    fun compare(inputArray: ByteArray): Boolean = when {
+        inputArray.size != buffer.size -> false
+        size < buffer.size -> false
+        else -> inputArray.indices.all { inputArray[it] == get(it) }
+    }
+}
+
+/**
+ * Read [Input] into [output] until designated multy-byte [separator] and optionally continues until
+ * the end of the line after it. Throw error if [separator] not found and [atMost] bytes are read.
+ * Also fails if [separator] not found until the end of input.
+ *
+ * Separator itself is not read into Output.
+ *
+ * @return bytes actually being read, including separator
+ */
+public fun Input.readBytesWithSeparatorTo(
+    output: Output,
+    separator: ByteArray,
+    atMost: Int = Int.MAX_VALUE,
+    skipUntilEndOfLine: Boolean = false,
+): Int {
+    var counter = 0
+    val rb = RingByteArray(ByteArray(separator.size))
+    var separatorFound = false
+    takeWhile { buffer ->
+        while (buffer.canRead()) {
+            val byte = buffer.readByte()
+            counter++
+            if (counter >= atMost) error("Maximum number of bytes to be read $atMost reached.")
+            //If end-of-line-search is on, terminate
+            if (separatorFound) {
+                if (endOfInput || byte == '\n'.code.toByte()) {
+                    return counter
+                }
+            } else {
+                rb.push(byte)
+                if (rb.compare(separator)) {
+                    separatorFound = true
+                    if (!skipUntilEndOfLine) {
+                        return counter
+                    }
+                } else if (rb.isFull()) {
+                    output.writeByte(rb[0])
+                }
+            }
+        }
+        !endOfInput
+    }
+    error("Read to the end of input without encountering ${separator.decodeToString()}")
+}
+
+public fun Input.discardWithSeparator(
+    separator: ByteArray,
+    atMost: Int = Int.MAX_VALUE,
+    skipUntilEndOfLine: Boolean = false,
+): Int {
+    val dummy: Output = object :Output(ChunkBuffer.Pool){
+        override fun closeDestination() {
+            // Do nothing
+        }
+
+        override fun flush(source: Memory, offset: Int, length: Int) {
+            // Do nothing
+        }
+    }
+
+    return readBytesWithSeparatorTo(dummy, separator, atMost, skipUntilEndOfLine)
+}

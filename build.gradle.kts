@@ -4,7 +4,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.6.0-dev-2"
+    version = "0.6.0-dev-3"
     repositories{
         mavenCentral()
     }

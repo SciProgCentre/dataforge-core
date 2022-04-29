@@ -2,8 +2,8 @@ package space.kscience.dataforge.io.yaml
 
 import io.ktor.utils.io.core.Input
 import io.ktor.utils.io.core.Output
+import io.ktor.utils.io.core.buildPacket
 import io.ktor.utils.io.core.readBytes
-import io.ktor.utils.io.core.readUTF8Line
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.io.*
@@ -11,6 +11,8 @@ import space.kscience.dataforge.io.IOFormat.Companion.META_KEY
 import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.plus
 
 @DFExperimental
 public class FrontMatterEnvelopeFormat(
@@ -19,51 +21,33 @@ public class FrontMatterEnvelopeFormat(
 ) : EnvelopeFormat {
 
     override fun readPartial(input: Input): PartialEnvelope {
-        var line: String
-        var offset = 0u
-        do {
-            line = input.readUTF8Line() ?: error("Input does not contain front matter separator")
-            offset += line.encodeToByteArray().size.toUInt()
-        } while (!line.startsWith(SEPARATOR))
+        var offset = 0
 
-        val readMetaFormat =
-            metaTypeRegex.matchEntire(line)?.groupValues?.first()
-                ?.let { io.resolveMetaFormat(it) } ?: YamlMetaFormat
+        offset += input.discardWithSeparator(
+            SEPARATOR.encodeToByteArray(),
+            atMost = 1024,
+            skipUntilEndOfLine = false
+        )
+
+        val line = input.readSafeUtf8Line()
+        val readMetaFormat = line.trim().takeIf { it.isNotBlank() }?.let { io.resolveMetaFormat(it) } ?: YamlMetaFormat
 
         //TODO replace by preview
-        val meta = Binary {
-            do {
-                line = input.readSafeUtf8Line()
-                writeUtf8String(line + "\r\n")
-                offset += line.encodeToByteArray().size.toUInt()
-            } while (!line.startsWith(SEPARATOR))
-        }.read {
-            readMetaFormat.readMeta(input)
-
+        val packet =  buildPacket {
+            offset += input.readBytesWithSeparatorTo(
+                this,
+                SEPARATOR.encodeToByteArray(),
+                skipUntilEndOfLine = true
+            )
         }
+        val meta = readMetaFormat.readMeta(packet)
         return PartialEnvelope(meta, offset, null)
     }
 
     override fun readObject(input: Input): Envelope {
-        var line: String
-        do {
-            line = input.readSafeUtf8Line() //?: error("Input does not contain front matter separator")
-        } while (!line.startsWith(SEPARATOR))
-
-        val readMetaFormat =
-            metaTypeRegex.matchEntire(line)?.groupValues?.first()
-                ?.let { io.resolveMetaFormat(it) } ?: YamlMetaFormat
-
-        val meta = Binary {
-            do {
-                writeUtf8String(input.readSafeUtf8Line() + "\r\n")
-            } while (!line.startsWith(SEPARATOR))
-        }.read {
-            readMetaFormat.readMeta(input)
-        }
-        val bytes = input.readBytes()
-        val data = bytes.asBinary()
-        return SimpleEnvelope(meta, data)
+        val partial = readPartial(input)
+        val data = input.readBytes().asBinary()
+        return SimpleEnvelope(partial.meta, data)
     }
 
     override fun writeEnvelope(
@@ -91,6 +75,8 @@ public class FrontMatterEnvelopeFormat(
         public const val SEPARATOR: String = "---"
 
         private val metaTypeRegex = "---(\\w*)\\s*".toRegex()
+
+        override val name: Name = EnvelopeFormatFactory.ENVELOPE_FACTORY_NAME + "frontMatter"
 
         override fun build(context: Context, meta: Meta): EnvelopeFormat {
             return FrontMatterEnvelopeFormat(context.io, meta)
