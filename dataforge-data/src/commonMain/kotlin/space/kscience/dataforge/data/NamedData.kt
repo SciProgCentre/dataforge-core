@@ -30,3 +30,6 @@ public fun <T : Any> Data<T>.named(name: Name): NamedData<T> = if (this is Named
 } else {
     NamedDataImpl(name, this)
 }
+
+public operator fun <T : Any> NamedData<T>.component1(): Name = name
+public operator fun <T : Any> NamedData<T>.component2(): Data<T> = data

@@ -18,6 +18,11 @@ import kotlin.reflect.typeOf
 public interface Task<out T : Any> : Described {
 
     /**
+     * Type of the task result data.
+     */
+    public val resultType: KType
+
+    /**
      * Compute a [TaskResult] using given meta. In general, the result is lazy and represents both computation model
      * and a handler for actual result
      *
@@ -54,6 +59,9 @@ public fun <T : Any> Task(
     descriptor: MetaDescriptor? = null,
     builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): Task<T> = object : Task<T> {
+
+    override val resultType: KType
+        get() = resultType
 
     override val descriptor: MetaDescriptor? = descriptor
 
