@@ -1,7 +1,6 @@
 package space.kscience.dataforge.actions
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Laminate
@@ -18,10 +17,15 @@ import kotlin.reflect.typeOf
 
 public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val meta: Meta) {
 
-    public class FragmentRule<T : Any, R : Any>(public val name: Name, public var meta: MutableMeta) {
+    public class FragmentRule<T : Any, R : Any>(
+        public val name: Name,
+        public var meta: MutableMeta,
+        @PublishedApi internal var outputType: KType,
+    ) {
         public lateinit var result: suspend (T) -> R
 
-        public fun result(f: suspend (T) -> R) {
+        public inline fun <reified R1 : R> result(noinline f: suspend (T) -> R1) {
+            this.outputType = typeOf<R1>()
             result = f;
         }
     }
@@ -47,7 +51,6 @@ internal class SplitAction<T : Any, R : Any>(
     private val action: SplitBuilder<T, R>.() -> Unit,
 ) : Action<T, R> {
 
-    @OptIn(FlowPreview::class)
     override suspend fun execute(
         dataSet: DataSet<T>,
         meta: Meta,
@@ -62,7 +65,11 @@ internal class SplitAction<T : Any, R : Any>(
 
             // apply individual fragment rules to result
             return split.fragments.entries.asSequence().map { (fragmentName, rule) ->
-                val env = SplitBuilder.FragmentRule<T, R>(fragmentName, laminate.toMutableMeta()).apply(rule)
+                val env = SplitBuilder.FragmentRule<T, R>(
+                    fragmentName,
+                    laminate.toMutableMeta(),
+                    outputType
+                ).apply(rule)
                 //data.map<R>(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
                 @OptIn(DFInternal::class) Data(outputType, meta = env.meta, dependencies = listOf(data)) {
                     env.result(data.await())
@@ -71,7 +78,7 @@ internal class SplitAction<T : Any, R : Any>(
         }
 
         return ActiveDataTree<R>(outputType) {
-            populateWith(dataSet.dataSequence().flatMap (transform = ::splitOne))
+            populateWith(dataSet.dataSequence().flatMap(transform = ::splitOne))
             scope?.launch {
                 dataSet.updates.collect { name ->
                     //clear old nodes

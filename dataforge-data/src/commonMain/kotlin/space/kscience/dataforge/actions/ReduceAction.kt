@@ -14,13 +14,23 @@ import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
 
-public class JoinGroup<T : Any, R : Any>(public var name: String, internal val set: DataSet<T>) {
+public class JoinGroup<T : Any, R : Any>(
+    public var name: String,
+    internal val set: DataSet<T>,
+    @PublishedApi internal var outputType: KType,
+) {
 
     public var meta: MutableMeta = MutableMeta()
 
     public lateinit var result: suspend ActionEnv.(Map<Name, T>) -> R
 
-    public fun result(f: suspend ActionEnv.(Map<Name, T>) -> R) {
+    internal fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(Map<Name, T>) -> R1) {
+        this.outputType = outputType
+        this.result = f;
+    }
+
+    public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(Map<Name, T>) -> R1) {
+        outputType = typeOf<R1>()
         this.result = f;
     }
 
@@ -28,9 +38,9 @@ public class JoinGroup<T : Any, R : Any>(public var name: String, internal val s
 
 @DFBuilder
 public class ReduceGroupBuilder<T : Any, R : Any>(
-    private val inputType: KType,
     private val scope: CoroutineScope,
     public val actionMeta: Meta,
+    private val outputType: KType
 ) {
     private val groupRules: MutableList<suspend (DataSet<T>) -> List<JoinGroup<T, R>>> = ArrayList();
 
@@ -40,7 +50,7 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
     public fun byValue(tag: String, defaultTag: String = "@default", action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { node ->
             GroupRule.byMetaValue(scope, tag, defaultTag).gather(node).map {
-                JoinGroup<T, R>(it.key, it.value).apply(action)
+                JoinGroup<T, R>(it.key, it.value, outputType).apply(action)
             }
         }
     }
@@ -52,7 +62,7 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
     ) {
         groupRules += { source ->
             listOf(
-                JoinGroup<T, R>(groupName, source.filter(filter)).apply(action)
+                JoinGroup<T, R>(groupName, source.filter(filter), outputType).apply(action)
             )
         }
     }
@@ -62,19 +72,17 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
      */
     public fun result(resultName: String, f: suspend ActionEnv.(Map<Name, T>) -> R) {
         groupRules += { node ->
-            listOf(JoinGroup<T, R>(resultName, node).apply { result(f) })
+            listOf(JoinGroup<T, R>(resultName, node, outputType).apply { result(outputType, f) })
         }
     }
 
-    internal suspend fun buildGroups(input: DataSet<T>): List<JoinGroup<T, R>> {
-        return groupRules.flatMap { it.invoke(input) }
-    }
+    internal suspend fun buildGroups(input: DataSet<T>): List<JoinGroup<T, R>> =
+        groupRules.flatMap { it.invoke(input) }
 
 }
 
 @PublishedApi
 internal class ReduceAction<T : Any, R : Any>(
-    private val inputType: KType,
     outputType: KType,
     private val action: ReduceGroupBuilder<T, R>.() -> Unit,
 ) : CachingAction<T, R>(outputType) {
@@ -82,7 +90,7 @@ internal class ReduceAction<T : Any, R : Any>(
 
 
     override fun CoroutineScope.transform(set: DataSet<T>, meta: Meta, key: Name): Flow<NamedData<R>> = flow {
-        ReduceGroupBuilder<T, R>(inputType, this@transform, meta).apply(action).buildGroups(set).forEach { group ->
+        ReduceGroupBuilder<T, R>(this@transform, meta, outputType).apply(action).buildGroups(set).forEach { group ->
             val dataFlow: Map<Name, Data<T>> = group.set.dataSequence().fold(HashMap()) { acc, value ->
                 acc.apply {
                     acc[value.name] = value.data
@@ -95,7 +103,7 @@ internal class ReduceAction<T : Any, R : Any>(
 
             val env = ActionEnv(Name.parse(groupName), groupMeta, meta)
             @OptIn(DFInternal::class) val res: Data<R> = dataFlow.reduceToData(
-                outputType,
+                group.outputType,
                 meta = groupMeta
             ) { group.result.invoke(env, it) }
 
@@ -111,4 +119,4 @@ internal class ReduceAction<T : Any, R : Any>(
 @Suppress("FunctionName")
 public inline fun <reified T : Any, reified R : Any> Action.Companion.reduce(
     noinline builder: ReduceGroupBuilder<T, R>.() -> Unit,
-): Action<T, R> = ReduceAction(typeOf<T>(), typeOf<R>(), builder)
+): Action<T, R> = ReduceAction(typeOf<R>(), builder)

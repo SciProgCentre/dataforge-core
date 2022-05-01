@@ -31,15 +31,20 @@ public class MapActionBuilder<T, R>(
     public var name: Name,
     public var meta: MutableMeta,
     public val actionMeta: Meta,
-    public var outputType: KType
+    @PublishedApi internal var outputType: KType,
 ) {
 
     public lateinit var result: suspend ActionEnv.(T) -> R
 
+    internal fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(T) -> R1) {
+        this.outputType = outputType
+        result = f;
+    }
+
     /**
      * Calculate the result of goal
      */
-    public inline fun <reified R1: R> result(noinline f: suspend ActionEnv.(T) -> R1) {
+    public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(T) -> R1) {
         outputType = typeOf<R1>()
         result = f;
     }

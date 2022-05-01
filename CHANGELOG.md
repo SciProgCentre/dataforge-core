@@ -5,6 +5,7 @@
 - Add `specOrNull` delegate to meta and Scheme
 - Suspended read methods to the `Binary`
 - Synchronously accessed `meta` to all `DataSet`s
+- More fine-grained types in Action builders.
 
 ### Changed
 - `Factory` is now `fun interface` and uses `build` instead of `invoke`. `invoke moved to an extension.
