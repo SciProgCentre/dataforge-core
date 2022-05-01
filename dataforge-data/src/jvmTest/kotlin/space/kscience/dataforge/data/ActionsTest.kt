@@ -24,7 +24,7 @@ internal class ActionsTest {
         }
         runBlocking {
             val result = plusOne.execute(data)
-            assertEquals(2, result.getData("1")?.await())
+            assertEquals(2, result["1"]?.await())
         }
     }
 
@@ -36,7 +36,7 @@ internal class ActionsTest {
 
         val datum = runBlocking {
             val result = plusOne.execute(data, scope = this)
-            result.getData("1")?.await()
+            result["1"]?.await()
         }
         assertEquals(2, datum)
     }

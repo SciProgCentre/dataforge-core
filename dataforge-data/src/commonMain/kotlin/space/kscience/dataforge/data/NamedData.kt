@@ -9,6 +9,9 @@ public interface NamedData<out T : Any> : Named, Data<T> {
     public val data: Data<T>
 }
 
+public operator fun NamedData<*>.component1(): Name = name
+public operator fun <T: Any> NamedData<T>.component2(): Data<T> = data
+
 private class NamedDataImpl<out T : Any>(
     override val name: Name,
     override val data: Data<T>,

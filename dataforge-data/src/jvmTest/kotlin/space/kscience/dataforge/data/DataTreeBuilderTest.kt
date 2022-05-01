@@ -19,10 +19,10 @@ internal class DataTreeBuilderTest {
             static("c.f", "c.f")
         }
         runBlocking {
-            assertEquals("a", node.getData("primary.a")?.await())
-            assertEquals("b", node.getData("primary.b")?.await())
-            assertEquals("c.d", node.getData("c.d")?.await())
-            assertEquals("c.f", node.getData("c.f")?.await())
+            assertEquals("a", node["primary.a"]?.await())
+            assertEquals("b", node["primary.b"]?.await())
+            assertEquals("c.d", node["c.d"]?.await())
+            assertEquals("c.f", node["c.f"]?.await())
         }
     }
 
@@ -46,8 +46,8 @@ internal class DataTreeBuilderTest {
         }
 
         runBlocking {
-            assertEquals("a", node.getData("update.a")?.await())
-            assertEquals("a", node.getData("primary.a")?.await())
+            assertEquals("a", node.get("update.a")?.await())
+            assertEquals("a", node.get("primary.a")?.await())
         }
     }
 
@@ -80,7 +80,7 @@ internal class DataTreeBuilderTest {
                     }
                 }
                 updateJob.join()
-                assertEquals(9, rootNode.getData("sub.value")?.await())
+                assertEquals(9, rootNode["sub.value"]?.await())
                 cancel()
             }
         } catch (t: Throwable) {

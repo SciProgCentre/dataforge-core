@@ -23,7 +23,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
 
 
     val singleData by task<Int> {
-        workspace.data.select<Int>().getData("myData[12]")?.let {
+        workspace.data.select<Int>()["myData[12]"]?.let {
             data("result", it)
         }
     }

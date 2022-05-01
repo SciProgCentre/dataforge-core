@@ -134,8 +134,8 @@ class SimpleWorkspaceTest {
 
         val delta by task<Int> {
             val averaged = from(averageByGroup)
-            val even = averaged.getData("event")!!
-            val odd = averaged.getData("odd")!!
+            val even = averaged["event"]!!
+            val odd = averaged["odd"]!!
             val res = even.combine(odd) { l, r ->
                 l - r
             }

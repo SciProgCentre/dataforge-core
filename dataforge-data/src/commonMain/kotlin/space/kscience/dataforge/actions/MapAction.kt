@@ -27,13 +27,20 @@ public data class ActionEnv(
  * Action environment
  */
 @DFBuilder
-public class MapActionBuilder<T, R>(public var name: Name, public var meta: MutableMeta, public val actionMeta: Meta) {
+public class MapActionBuilder<T, R>(
+    public var name: Name,
+    public var meta: MutableMeta,
+    public val actionMeta: Meta,
+    public var outputType: KType
+) {
+
     public lateinit var result: suspend ActionEnv.(T) -> R
 
     /**
      * Calculate the result of goal
      */
-    public fun result(f: suspend ActionEnv.(T) -> R) {
+    public inline fun <reified R1: R> result(noinline f: suspend ActionEnv.(T) -> R1) {
+        outputType = typeOf<R1>()
         result = f;
     }
 }
@@ -57,7 +64,8 @@ internal class MapAction<in T : Any, out R : Any>(
             val builder = MapActionBuilder<T, R>(
                 data.name,
                 data.meta.toMutableMeta(), // using data meta
-                meta
+                meta,
+                outputType
             ).apply(block)
 
             //getting new name
@@ -67,7 +75,7 @@ internal class MapAction<in T : Any, out R : Any>(
             val newMeta = builder.meta.seal()
 
             @OptIn(DFInternal::class)
-            val newData = Data(outputType, newMeta, dependencies = listOf(data)) {
+            val newData = Data(builder.outputType, newMeta, dependencies = listOf(data)) {
                 builder.result(env, data.await())
             }
             //setting the data node

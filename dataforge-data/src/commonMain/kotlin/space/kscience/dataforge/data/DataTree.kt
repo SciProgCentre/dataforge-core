@@ -73,8 +73,6 @@ public interface DataTree<out T : Any> : DataSet<T> {
     }
 }
 
-public suspend fun <T : Any> DataSet<T>.getData(name: String): Data<T>? = get(Name.parse(name))
-
 /**
  * Get a [DataTreeItem] with given [name] or null if the item does not exist
  */
