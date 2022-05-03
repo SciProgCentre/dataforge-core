@@ -95,7 +95,6 @@ public fun YamlMap.toMeta(): Meta = YamlMeta(this)
 /**
  * Represent meta as Yaml
  */
-@DFExperimental
 public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
 
     override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?) {

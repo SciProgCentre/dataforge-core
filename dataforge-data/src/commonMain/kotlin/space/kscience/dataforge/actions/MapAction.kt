@@ -36,7 +36,10 @@ public class MapActionBuilder<T, R>(
 
     public lateinit var result: suspend ActionEnv.(T) -> R
 
-    internal fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(T) -> R1) {
+    /**
+     * Set unsafe [outputType] for the resulting data. Be sure that it is correct.
+     */
+    public fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(T) -> R1) {
         this.outputType = outputType
         result = f;
     }

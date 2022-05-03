@@ -13,7 +13,6 @@ import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import kotlin.reflect.KClass
 
-@DFExperimental
 public class YamlPlugin(meta: Meta) : AbstractPlugin(meta) {
     public val io: IOPlugin by require(IOPlugin)
 

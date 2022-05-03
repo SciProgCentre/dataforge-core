@@ -14,7 +14,6 @@ import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.plus
 
-@DFExperimental
 public class FrontMatterEnvelopeFormat(
     private val io: IOPlugin,
     private val meta: Meta = Meta.EMPTY,
@@ -101,7 +100,7 @@ public class FrontMatterEnvelopeFormat(
             envelope: Envelope,
             metaFormatFactory: MetaFormatFactory,
             formatMeta: Meta,
-        ): Unit = FrontMatterEnvelopeFormat.default.writeEnvelope(output, envelope, metaFormatFactory, formatMeta)
+        ): Unit = default.writeEnvelope(output, envelope, metaFormatFactory, formatMeta)
 
 
         override fun readObject(input: Input): Envelope = default.readObject(input)
