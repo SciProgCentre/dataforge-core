@@ -10,24 +10,24 @@ import space.kscience.dataforge.names.plus
 /**
  * Append data to node
  */
-context(DataSetBuilder<T>) public suspend infix fun <T : Any> String.put(data: Data<T>): Unit =
+context(DataSetBuilder<T>) public infix fun <T : Any> String.put(data: Data<T>): Unit =
     data(Name.parse(this), data)
 
 /**
  * Append node
  */
-context(DataSetBuilder<T>) public suspend infix fun <T : Any> String.put(dataSet: DataSet<T>): Unit =
+context(DataSetBuilder<T>) public infix fun <T : Any> String.put(dataSet: DataSet<T>): Unit =
     node(Name.parse(this), dataSet)
 
 /**
  * Build and append node
  */
-context(DataSetBuilder<T>) public suspend infix fun <T : Any> String.put(
-    block: suspend DataSetBuilder<T>.() -> Unit,
+context(DataSetBuilder<T>) public infix fun <T : Any> String.put(
+    block: DataSetBuilder<T>.() -> Unit,
 ): Unit = node(Name.parse(this), block)
 
 /**
- * Copy given data set and mirror its changes to this [ActiveDataTree] in [this@setAndObserve]. Returns an update [Job]
+ * Copy given data set and mirror its changes to this [DataSourceBuilder] in [this@setAndObserve]. Returns an update [Job]
  */
 context(DataSetBuilder<T>) public fun <T : Any> CoroutineScope.setAndWatch(
     name: Name,

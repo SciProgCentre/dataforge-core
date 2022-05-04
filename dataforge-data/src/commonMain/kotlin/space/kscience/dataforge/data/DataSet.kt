@@ -62,7 +62,11 @@ DataSet<out T : Any> {
 
 public operator fun <T: Any> DataSet<T>.get(name:String): Data<T>? = get(name.parseAsName())
 
-public interface ActiveDataSet<T : Any> : DataSet<T> {
+/**
+ * A [DataSet] with propagated updates.
+ */
+public interface DataSource<T : Any> : DataSet<T>, CoroutineScope {
+
     /**
      * A flow of updated item names. Updates are propagated in a form of [Flow] of names of updated nodes.
      * Those can include new data items and replacement of existing ones. The replaced items could update existing data content
@@ -70,9 +74,16 @@ public interface ActiveDataSet<T : Any> : DataSet<T> {
      *
      */
     public val updates: Flow<Name>
+
+    /**
+     * Stop generating updates from this [DataSource]
+     */
+    public fun close(){
+        coroutineContext[Job]?.cancel()
+    }
 }
 
-public val <T : Any> DataSet<T>.updates: Flow<Name> get() = if (this is ActiveDataSet) updates else emptyFlow()
+public val <T : Any> DataSet<T>.updates: Flow<Name> get() = if (this is DataSource) updates else emptyFlow()
 
 /**
  * Flow all data nodes with names starting with [branchName]

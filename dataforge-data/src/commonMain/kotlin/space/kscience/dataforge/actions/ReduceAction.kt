@@ -1,8 +1,5 @@
 package space.kscience.dataforge.actions
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
@@ -38,18 +35,17 @@ public class JoinGroup<T : Any, R : Any>(
 
 @DFBuilder
 public class ReduceGroupBuilder<T : Any, R : Any>(
-    private val scope: CoroutineScope,
     public val actionMeta: Meta,
-    private val outputType: KType
+    private val outputType: KType,
 ) {
-    private val groupRules: MutableList<suspend (DataSet<T>) -> List<JoinGroup<T, R>>> = ArrayList();
+    private val groupRules: MutableList<(DataSet<T>) -> List<JoinGroup<T, R>>> = ArrayList();
 
     /**
      * introduce grouping by meta value
      */
     public fun byValue(tag: String, defaultTag: String = "@default", action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { node ->
-            GroupRule.byMetaValue(scope, tag, defaultTag).gather(node).map {
+            GroupRule.byMetaValue(tag, defaultTag).gather(node).map {
                 JoinGroup<T, R>(it.key, it.value, outputType).apply(action)
             }
         }
@@ -57,12 +53,12 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
 
     public fun group(
         groupName: String,
-        filter: (Name, Data<T>) -> Boolean,
+        predicate: (Name, Meta) -> Boolean,
         action: JoinGroup<T, R>.() -> Unit,
     ) {
         groupRules += { source ->
             listOf(
-                JoinGroup<T, R>(groupName, source.filter(filter), outputType).apply(action)
+                JoinGroup<T, R>(groupName, source.filter(predicate), outputType).apply(action)
             )
         }
     }
@@ -76,7 +72,7 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
         }
     }
 
-    internal suspend fun buildGroups(input: DataSet<T>): List<JoinGroup<T, R>> =
+    internal fun buildGroups(input: DataSet<T>): List<JoinGroup<T, R>> =
         groupRules.flatMap { it.invoke(input) }
 
 }
@@ -89,8 +85,8 @@ internal class ReduceAction<T : Any, R : Any>(
     //TODO optimize reduction. Currently the whole action recalculates on push
 
 
-    override fun CoroutineScope.transform(set: DataSet<T>, meta: Meta, key: Name): Flow<NamedData<R>> = flow {
-        ReduceGroupBuilder<T, R>(this@transform, meta, outputType).apply(action).buildGroups(set).forEach { group ->
+    override fun transform(set: DataSet<T>, meta: Meta, key: Name): Sequence<NamedData<R>> = sequence {
+        ReduceGroupBuilder<T, R>(meta, outputType).apply(action).buildGroups(set).forEach { group ->
             val dataFlow: Map<Name, Data<T>> = group.set.dataSequence().fold(HashMap()) { acc, value ->
                 acc.apply {
                     acc[value.name] = value.data
@@ -107,7 +103,7 @@ internal class ReduceAction<T : Any, R : Any>(
                 meta = groupMeta
             ) { group.result.invoke(env, it) }
 
-            emit(res.named(env.name))
+            yield(res.named(env.name))
         }
     }
 }

@@ -1,6 +1,5 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.coroutineScope
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
@@ -17,7 +16,7 @@ internal class StaticDataTree<T : Any>(
     override val items: Map<NameToken, DataTreeItem<T>>
         get() = _items.filter { !it.key.body.startsWith("@") }
 
-    override suspend fun remove(name: Name) {
+    override fun remove(name: Name) {
         when (name.length) {
             0 -> error("Can't remove root tree node")
             1 -> _items.remove(name.firstOrNull()!!)
@@ -36,7 +35,7 @@ internal class StaticDataTree<T : Any>(
         else -> getOrCreateNode(name.cutLast()).getOrCreateNode(name.lastOrNull()!!.asName())
     }
 
-    private suspend fun set(name: Name, item: DataTreeItem<T>?) {
+    private fun set(name: Name, item: DataTreeItem<T>?) {
         if (name.isEmpty()) error("Can't set top level tree node")
         if (item == null) {
             remove(name)
@@ -45,41 +44,39 @@ internal class StaticDataTree<T : Any>(
         }
     }
 
-    override suspend fun data(name: Name, data: Data<T>?) {
+    override fun data(name: Name, data: Data<T>?) {
         set(name, data?.let { DataTreeItem.Leaf(it) })
     }
 
-    override suspend fun node(name: Name, dataSet: DataSet<T>) {
+    override fun node(name: Name, dataSet: DataSet<T>) {
         if (dataSet is StaticDataTree) {
             set(name, DataTreeItem.Node(dataSet))
         } else {
-            coroutineScope {
-                dataSet.dataSequence().forEach {
-                    data(name + it.name, it.data)
-                }
+            dataSet.dataSequence().forEach {
+                data(name + it.name, it.data)
             }
         }
     }
 
-    override suspend fun meta(name: Name, meta: Meta) {
+    override fun meta(name: Name, meta: Meta) {
         val item = getItem(name)
-        if(item is DataTreeItem.Leaf) TODO("Can't change meta of existing leaf item.")
+        if (item is DataTreeItem.Leaf) TODO("Can't change meta of existing leaf item.")
         data(name + DataTree.META_ITEM_NAME_TOKEN, Data.empty(meta))
     }
 }
 
 @Suppress("FunctionName")
-public suspend fun <T : Any> DataTree(
+public inline fun <T : Any> DataTree(
     dataType: KType,
-    block: suspend DataSetBuilder<T>.() -> Unit,
+    block: DataSetBuilder<T>.() -> Unit,
 ): DataTree<T> = StaticDataTree<T>(dataType).apply { block() }
 
 @Suppress("FunctionName")
-public suspend inline fun <reified T : Any> DataTree(
-    noinline block: suspend DataSetBuilder<T>.() -> Unit,
+public inline fun <reified T : Any> DataTree(
+    noinline block: DataSetBuilder<T>.() -> Unit,
 ): DataTree<T> = DataTree(typeOf<T>(), block)
 
 @OptIn(DFExperimental::class)
-public suspend fun <T : Any> DataSet<T>.seal(): DataTree<T> = DataTree(dataType) {
+public fun <T : Any> DataSet<T>.seal(): DataTree<T> = DataTree(dataType) {
     populateFrom(this@seal)
 }

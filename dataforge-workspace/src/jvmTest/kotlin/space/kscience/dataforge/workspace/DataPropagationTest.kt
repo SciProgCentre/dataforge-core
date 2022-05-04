@@ -14,7 +14,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
     override val tag: PluginTag = Companion.tag
 
     val allData by task<Int> {
-        val selectedData = workspace.data.select<Int>()
+        val selectedData = workspace.data.filterIsInstance<Int>()
         val result: Data<Int> = selectedData.dataSequence().foldToData(0) { result, data ->
             result + data.await()
         }
@@ -23,7 +23,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
 
 
     val singleData by task<Int> {
-        workspace.data.select<Int>()["myData[12]"]?.let {
+        workspace.data.filterIsInstance<Int>()["myData[12]"]?.let {
             data("result", it)
         }
     }

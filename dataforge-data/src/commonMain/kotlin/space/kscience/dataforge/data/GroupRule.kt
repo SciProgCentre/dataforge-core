@@ -15,13 +15,12 @@
  */
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
 
 public interface GroupRule {
-    public suspend fun <T : Any> gather(set: DataSet<T>): Map<String, DataSet<T>>
+    public fun <T : Any> gather(set: DataSet<T>): Map<String, DataSet<T>>
 
     public companion object {
         /**
@@ -33,30 +32,42 @@ public interface GroupRule {
          * @return
          */
         public fun byMetaValue(
-            scope: CoroutineScope,
             key: String,
             defaultTagValue: String,
         ): GroupRule = object : GroupRule {
 
-            override suspend fun <T : Any> gather(
+            override fun <T : Any> gather(
                 set: DataSet<T>,
             ): Map<String, DataSet<T>> {
-                val map = HashMap<String, ActiveDataTree<T>>()
+                val map = HashMap<String, DataSet<T>>()
 
-                set.dataSequence().forEach { data ->
-                    val tagValue = data.meta[key]?.string ?: defaultTagValue
-                    map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.data(data.name, data.data)
-                }
+                if (set is DataSource) {
+                    set.dataSequence().forEach { data ->
+                        val tagValue: String = data.meta[key]?.string ?: defaultTagValue
+                        (map.getOrPut(tagValue) { DataSourceBuilder(set.dataType, set.coroutineContext) } as DataSourceBuilder<T>)
+                            .data(data.name, data.data)
 
-                scope.launch {
-                    set.updates.collect { name ->
-                        val data = set.get(name)
+                        set.launch {
+                            set.updates.collect { name ->
+                                val dataUpdate = set[name]
 
-                        @Suppress("NULLABLE_EXTENSION_OPERATOR_WITH_SAFE_CALL_RECEIVER")
-                        val tagValue = data?.meta?.get(key)?.string ?: defaultTagValue
-                        map.getOrPut(tagValue) { ActiveDataTree(set.dataType) }.data(name, data)
+                                val updateTagValue = dataUpdate?.meta?.get(key)?.string ?: defaultTagValue
+                                map.getOrPut(updateTagValue) {
+                                    ActiveDataTree(set.dataType, this) {
+                                        data(name, dataUpdate)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    set.dataSequence().forEach { data ->
+                        val tagValue: String = data.meta[key]?.string ?: defaultTagValue
+                        (map.getOrPut(tagValue) { StaticDataTree(set.dataType) } as StaticDataTree<T>)
+                            .data(data.name, data.data)
                     }
                 }
+
 
                 return map
             }

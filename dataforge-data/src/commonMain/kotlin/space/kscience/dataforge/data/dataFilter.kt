@@ -10,6 +10,8 @@ import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.isEmpty
 import space.kscience.dataforge.names.plus
 import space.kscience.dataforge.names.removeHeadOrNull
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KType
 
 
@@ -17,33 +19,41 @@ import kotlin.reflect.KType
  * A stateless filtered [DataSet]
  */
 public fun <T : Any> DataSet<T>.filter(
-    predicate: (Name, Data<T>) -> Boolean,
-): ActiveDataSet<T> = object : ActiveDataSet<T> {
+    predicate: (Name, Meta) -> Boolean,
+): DataSource<T> = object : DataSource<T> {
 
     override val dataType: KType get() = this@filter.dataType
+
+    override val coroutineContext: CoroutineContext
+        get() = (this@filter as? DataSource)?.coroutineContext ?: EmptyCoroutineContext
+
 
     override val meta: Meta get() = this@filter.meta
 
     override fun dataSequence(): Sequence<NamedData<T>> =
-        this@filter.dataSequence().filter { predicate(it.name, it.data) }
+        this@filter.dataSequence().filter { predicate(it.name, it.meta) }
 
     override fun get(name: Name): Data<T>? = this@filter.get(name)?.takeIf {
-        predicate(name, it)
+        predicate(name, it.meta)
     }
 
     override val updates: Flow<Name> = this@filter.updates.filter flowFilter@{ name ->
-        val theData = this@filter.get(name) ?: return@flowFilter false
-        predicate(name, theData)
+        val theData = this@filter[name] ?: return@flowFilter false
+        predicate(name, theData.meta)
     }
 }
 
 /**
  * Generate a wrapper data set with a given name prefix appended to all names
  */
-public fun <T : Any> DataSet<T>.withNamePrefix(prefix: Name): DataSet<T> = if (prefix.isEmpty()) this
-else object : ActiveDataSet<T> {
+public fun <T : Any> DataSet<T>.withNamePrefix(prefix: Name): DataSet<T> = if (prefix.isEmpty()) {
+    this
+} else object : DataSource<T> {
 
     override val dataType: KType get() = this@withNamePrefix.dataType
+
+    override val coroutineContext: CoroutineContext
+        get() = (this@withNamePrefix as? DataSource)?.coroutineContext ?: EmptyCoroutineContext
 
     override val meta: Meta get() = this@withNamePrefix.meta
 
@@ -62,8 +72,11 @@ else object : ActiveDataSet<T> {
  */
 public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branchName.isEmpty()) {
     this
-} else object : ActiveDataSet<T> {
+} else object : DataSource<T> {
     override val dataType: KType get() = this@branch.dataType
+
+    override val coroutineContext: CoroutineContext
+        get() = (this@branch as? DataSource)?.coroutineContext ?: EmptyCoroutineContext
 
     override val meta: Meta get() = this@branch.meta
 

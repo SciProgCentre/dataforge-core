@@ -1,6 +1,5 @@
 package space.kscience.dataforge.actions
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Laminate
@@ -51,10 +50,9 @@ internal class SplitAction<T : Any, R : Any>(
     private val action: SplitBuilder<T, R>.() -> Unit,
 ) : Action<T, R> {
 
-    override suspend fun execute(
+    override fun execute(
         dataSet: DataSet<T>,
         meta: Meta,
-        scope: CoroutineScope?,
     ): DataSet<R> {
 
         fun splitOne(data: NamedData<T>): Sequence<NamedData<R>> {
@@ -77,15 +75,21 @@ internal class SplitAction<T : Any, R : Any>(
             }
         }
 
-        return ActiveDataTree<R>(outputType) {
-            populateWith(dataSet.dataSequence().flatMap(transform = ::splitOne))
-            scope?.launch {
-                dataSet.updates.collect { name ->
-                    //clear old nodes
-                    remove(name)
-                    //collect new items
-                    populateWith(dataSet.children(name).flatMap(transform = ::splitOne))
+        return if (dataSet is DataSource) {
+            ActiveDataTree<R>(outputType, dataSet) {
+                populateFrom(dataSet.dataSequence().flatMap(transform = ::splitOne))
+                launch {
+                    dataSet.updates.collect { name ->
+                        //clear old nodes
+                        remove(name)
+                        //collect new items
+                        populateFrom(dataSet.children(name).flatMap(transform = ::splitOne))
+                    }
                 }
+            }
+        } else {
+            DataTree<R>(outputType) {
+                populateFrom(dataSet.dataSequence().flatMap(transform = ::splitOne))
             }
         }
     }

@@ -144,7 +144,7 @@ public suspend fun <T : Any, R : Any> DataSet<T>.map(
     metaTransform: MutableMeta.() -> Unit = {},
     block: suspend (T) -> R,
 ): DataTree<R> = DataTree<R>(outputType) {
-    populateWith(
+    populateFrom(
         dataSequence().map {
             val newMeta = it.meta.toMutableMeta().apply(metaTransform).seal()
             Data(outputType, newMeta, coroutineContext, listOf(it)) {

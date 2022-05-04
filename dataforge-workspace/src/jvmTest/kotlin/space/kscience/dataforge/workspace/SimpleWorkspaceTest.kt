@@ -117,16 +117,16 @@ class SimpleWorkspaceTest {
         }
 
         val averageByGroup by task<Int> {
-            val evenSum = workspace.data.filter { name, _ ->
+            val evenSum = workspace.data.filterIsInstance<Int> { name, _ ->
                 name.toString().toInt() % 2 == 0
-            }.select<Int>().foldToData(0) { l, r ->
+            }.foldToData(0) { l, r ->
                 l + r.await()
             }
 
             data("even", evenSum)
-            val oddSum = workspace.data.filter { name, _ ->
+            val oddSum = workspace.data.filterIsInstance<Int> { name, _ ->
                 name.toString().toInt() % 2 == 1
-            }.select<Int>().foldToData(0) { l, r ->
+            }.foldToData(0) { l, r ->
                 l + r.await()
             }
             data("odd", oddSum)
@@ -143,7 +143,7 @@ class SimpleWorkspaceTest {
         }
 
         val customPipe by task<Int> {
-            workspace.data.select<Int>().forEach { data ->
+            workspace.data.filterIsInstance<Int>().forEach { data ->
                 val meta = data.meta.toMutableMeta().apply {
                     "newValue" put 22
                 }

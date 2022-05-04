@@ -20,19 +20,18 @@ import kotlin.test.assertEquals
 
 
 class FileDataTest {
-    val dataNode = runBlocking {
-        DataTree<String> {
-            node("dir") {
-                static("a", "Some string") {
-                    "content" put "Some string"
-                }
-            }
-            static("b", "root data")
-            meta {
-                "content" put "This is root meta node"
+    val dataNode = DataTree<String> {
+        node("dir") {
+            static("a", "Some string") {
+                "content" put "Some string"
             }
         }
+        static("b", "root data")
+        meta {
+            "content" put "This is root meta node"
+        }
     }
+
 
     object StringIOFormat : IOFormat<String> {
 

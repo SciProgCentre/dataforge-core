@@ -46,8 +46,8 @@ internal class DataTreeBuilderTest {
         }
 
         runBlocking {
-            assertEquals("a", node.get("update.a")?.await())
-            assertEquals("a", node.get("primary.a")?.await())
+            assertEquals("a", node["update.a"]?.await())
+            assertEquals("a", node["primary.a"]?.await())
         }
     }
 
