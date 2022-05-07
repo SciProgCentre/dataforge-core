@@ -49,13 +49,13 @@ public inline fun <T1 : Any, T2 : Any, reified R : Any> Data<T1>.combine(
 public inline fun <T : Any, reified R : Any> Collection<Data<T>>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    crossinline block: suspend (Collection<T>) -> R,
+    crossinline block: suspend (List<Pair<Meta, T>>) -> R,
 ): Data<R> = Data(
     meta,
     coroutineContext,
     this
 ) {
-    block(map { it.await() })
+    block(map { it.meta to it.await() })
 }
 
 @DFInternal
@@ -63,14 +63,14 @@ public fun <K, T : Any, R : Any> Map<K, Data<T>>.reduceToData(
     outputType: KType,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    block: suspend (Map<K, T>) -> R,
+    block: suspend (Map<K, Pair<Meta, T>>) -> R,
 ): Data<R> = Data(
     outputType,
     meta,
     coroutineContext,
     this.values
 ) {
-    block(mapValues { it.value.await() })
+    block(mapValues { it.value.meta to it.value.await() })
 }
 
 
