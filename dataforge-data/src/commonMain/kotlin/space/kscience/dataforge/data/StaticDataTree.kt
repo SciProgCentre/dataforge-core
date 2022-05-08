@@ -52,7 +52,7 @@ internal class StaticDataTree<T : Any>(
         if (dataSet is StaticDataTree) {
             set(name, DataTreeItem.Node(dataSet))
         } else {
-            dataSet.dataSequence().forEach {
+            dataSet.traverse().forEach {
                 data(name + it.name, it.data)
             }
         }

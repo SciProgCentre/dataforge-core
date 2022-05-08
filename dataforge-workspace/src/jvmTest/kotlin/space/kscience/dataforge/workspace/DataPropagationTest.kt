@@ -14,16 +14,16 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
     override val tag: PluginTag = Companion.tag
 
     val allData by task<Int> {
-        val selectedData = workspace.data.filterIsInstance<Int>()
-        val result: Data<Int> = selectedData.dataSequence().foldToData(0) { result, data ->
-            result + data.await()
+        val selectedData = workspace.data.filterByType<Int>()
+        val result: Data<Int> = selectedData.traverse().asIterable().foldToData(0) { result, data ->
+            result + data.value
         }
         data("result", result)
     }
 
 
     val singleData by task<Int> {
-        workspace.data.filterIsInstance<Int>()["myData[12]"]?.let {
+        workspace.data.filterByType<Int>()["myData[12]"]?.let {
             data("result", it)
         }
     }
@@ -57,7 +57,7 @@ class DataPropagationTest {
     fun testAllData() {
         runBlocking {
             val node = testWorkspace.produce("Test.allData")
-            assertEquals(4950, node.dataSequence().single().await())
+            assertEquals(4950, node.traverse().single().await())
         }
     }
 
@@ -65,7 +65,7 @@ class DataPropagationTest {
     fun testSingleData() {
         runBlocking {
             val node = testWorkspace.produce("Test.singleData")
-            assertEquals(12, node.dataSequence().single().await())
+            assertEquals(12, node.traverse().single().await())
         }
     }
 }

@@ -89,7 +89,7 @@ internal class MapAction<in T : Any, out R : Any>(
             return newData.named(newName)
         }
 
-        val sequence = dataSet.dataSequence().map(::mapOne)
+        val sequence = dataSet.traverse().map(::mapOne)
 
         return if (dataSet is DataSource ) {
             ActiveDataTree(outputType, dataSet) {

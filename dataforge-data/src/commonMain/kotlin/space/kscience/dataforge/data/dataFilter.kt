@@ -30,8 +30,8 @@ public fun <T : Any> DataSet<T>.filter(
 
     override val meta: Meta get() = this@filter.meta
 
-    override fun dataSequence(): Sequence<NamedData<T>> =
-        this@filter.dataSequence().filter { predicate(it.name, it.meta) }
+    override fun traverse(): Sequence<NamedData<T>> =
+        this@filter.traverse().filter { predicate(it.name, it.meta) }
 
     override fun get(name: Name): Data<T>? = this@filter.get(name)?.takeIf {
         predicate(name, it.meta)
@@ -58,8 +58,8 @@ public fun <T : Any> DataSet<T>.withNamePrefix(prefix: Name): DataSet<T> = if (p
     override val meta: Meta get() = this@withNamePrefix.meta
 
 
-    override fun dataSequence(): Sequence<NamedData<T>> =
-        this@withNamePrefix.dataSequence().map { it.data.named(prefix + it.name) }
+    override fun traverse(): Sequence<NamedData<T>> =
+        this@withNamePrefix.traverse().map { it.data.named(prefix + it.name) }
 
     override fun get(name: Name): Data<T>? =
         name.removeHeadOrNull(name)?.let { this@withNamePrefix.get(it) }
@@ -80,7 +80,7 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
 
     override val meta: Meta get() = this@branch.meta
 
-    override fun dataSequence(): Sequence<NamedData<T>> = this@branch.dataSequence().mapNotNull {
+    override fun traverse(): Sequence<NamedData<T>> = this@branch.traverse().mapNotNull {
         it.name.removeHeadOrNull(branchName)?.let { name ->
             it.data.named(name)
         }

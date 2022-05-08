@@ -42,7 +42,7 @@ public interface GroupRule {
                 val map = HashMap<String, DataSet<T>>()
 
                 if (set is DataSource) {
-                    set.dataSequence().forEach { data ->
+                    set.traverse().forEach { data ->
                         val tagValue: String = data.meta[key]?.string ?: defaultTagValue
                         (map.getOrPut(tagValue) { DataSourceBuilder(set.dataType, set.coroutineContext) } as DataSourceBuilder<T>)
                             .data(data.name, data.data)
@@ -61,7 +61,7 @@ public interface GroupRule {
                         }
                     }
                 } else {
-                    set.dataSequence().forEach { data ->
+                    set.traverse().forEach { data ->
                         val tagValue: String = data.meta[key]?.string ?: defaultTagValue
                         (map.getOrPut(tagValue) { StaticDataTree(set.dataType) } as StaticDataTree<T>)
                             .data(data.name, data.data)

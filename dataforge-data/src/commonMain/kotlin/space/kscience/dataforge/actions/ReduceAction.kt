@@ -19,14 +19,14 @@ public class JoinGroup<T : Any, R : Any>(
 
     public var meta: MutableMeta = MutableMeta()
 
-    public lateinit var result: suspend ActionEnv.(Map<Name, Pair<Meta, T>>) -> R
+    public lateinit var result: suspend ActionEnv.(Map<Name, ValueWithMeta<T>>) -> R
 
-    internal fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(Map<Name,  Pair<Meta, T>>) -> R1) {
+    internal fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(Map<Name,  ValueWithMeta<T>>) -> R1) {
         this.outputType = outputType
         this.result = f;
     }
 
-    public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(Map<Name,  Pair<Meta, T>>) -> R1) {
+    public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(Map<Name,  ValueWithMeta<T>>) -> R1) {
         outputType = typeOf<R1>()
         this.result = f;
     }
@@ -66,7 +66,7 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
     /**
      * Apply transformation to the whole node
      */
-    public fun result(resultName: String, f: suspend ActionEnv.(Map<Name,  Pair<Meta, T>>) -> R) {
+    public fun result(resultName: String, f: suspend ActionEnv.(Map<Name,  ValueWithMeta<T>>) -> R) {
         groupRules += { node ->
             listOf(JoinGroup<T, R>(resultName, node, outputType).apply { result(outputType, f) })
         }
@@ -87,7 +87,7 @@ internal class ReduceAction<T : Any, R : Any>(
 
     override fun transform(set: DataSet<T>, meta: Meta, key: Name): Sequence<NamedData<R>> = sequence {
         ReduceGroupBuilder<T, R>(meta, outputType).apply(action).buildGroups(set).forEach { group ->
-            val dataFlow: Map<Name, Data<T>> = group.set.dataSequence().fold(HashMap()) { acc, value ->
+            val dataFlow: Map<Name, Data<T>> = group.set.traverse().fold(HashMap()) { acc, value ->
                 acc.apply {
                     acc[value.name] = value.data
                 }

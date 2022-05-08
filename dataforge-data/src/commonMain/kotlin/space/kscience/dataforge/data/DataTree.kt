@@ -1,9 +1,5 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.*
@@ -43,19 +39,16 @@ public interface DataTree<out T : Any> : DataSet<T> {
 
     override val meta: Meta get() = items[META_ITEM_NAME_TOKEN]?.meta ?: Meta.EMPTY
 
-    override fun dataSequence(): Sequence<NamedData<T>> = sequence {
+    override fun traverse(): Sequence<NamedData<T>> = sequence {
         items.forEach { (token, childItem: DataTreeItem<T>) ->
             if (!token.body.startsWith("@")) {
                 when (childItem) {
                     is DataTreeItem.Leaf -> yield(childItem.data.named(token.asName()))
-                    is DataTreeItem.Node -> yieldAll(childItem.tree.dataSequence().map { it.named(token + it.name) })
+                    is DataTreeItem.Node -> yieldAll(childItem.tree.traverse().map { it.named(token + it.name) })
                 }
             }
         }
     }
-
-    override fun listTop(prefix: Name): List<Name> =
-        getItem(prefix).tree?.items?.keys?.map { prefix + it } ?: emptyList()
 
     override fun get(name: Name): Data<T>? = when (name.length) {
         0 -> null
@@ -73,6 +66,9 @@ public interface DataTree<out T : Any> : DataSet<T> {
     }
 }
 
+public fun <T : Any> DataTree<T>.listChildren(prefix: Name): List<Name> =
+    getItem(prefix).tree?.items?.keys?.map { prefix + it } ?: emptyList()
+
 /**
  * Get a [DataTreeItem] with given [name] or null if the item does not exist
  */
@@ -86,15 +82,15 @@ public val <T : Any> DataTreeItem<T>?.tree: DataTree<T>? get() = (this as? DataT
 public val <T : Any> DataTreeItem<T>?.data: Data<T>? get() = (this as? DataTreeItem.Leaf<T>)?.data
 
 /**
- * Flow of all children including nodes
+ * A [Sequence] of all children including nodes
  */
-public fun <T : Any> DataTree<T>.itemFlow(): Flow<Pair<Name, DataTreeItem<T>>> = flow {
+public fun <T : Any> DataTree<T>.traverseItems(): Sequence<Pair<Name, DataTreeItem<T>>> = sequence {
     items.forEach { (head, item) ->
-        emit(head.asName() to item)
+        yield(head.asName() to item)
         if (item is DataTreeItem.Node) {
-            val subSequence = item.tree.itemFlow()
+            val subSequence = item.tree.traverseItems()
                 .map { (name, data) -> (head.asName() + name) to data }
-            emitAll(subSequence)
+            yieldAll(subSequence)
         }
     }
 }

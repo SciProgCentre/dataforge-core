@@ -33,32 +33,32 @@ private fun <R : Any> Data<*>.castOrNull(type: KType): Data<R>? =
  * @param predicate addition filtering condition based on item name and meta. By default, accepts all
  */
 @OptIn(DFExperimental::class)
-public fun <R : Any> DataSet<*>.filterIsInstance(
+public fun <R : Any> DataSet<*>.filterByType(
     type: KType,
     predicate: (name: Name, meta: Meta) -> Boolean = { _, _ -> true },
 ): DataSource<R> = object : DataSource<R> {
     override val dataType = type
 
     override val coroutineContext: CoroutineContext
-        get() = (this@filterIsInstance as? DataSource)?.coroutineContext ?: EmptyCoroutineContext
+        get() = (this@filterByType as? DataSource)?.coroutineContext ?: EmptyCoroutineContext
 
-    override val meta: Meta get() = this@filterIsInstance.meta
+    override val meta: Meta get() = this@filterByType.meta
 
     private fun checkDatum(name: Name, datum: Data<*>): Boolean = datum.type.isSubtypeOf(type)
             && predicate(name, datum.meta)
 
-    override fun dataSequence(): Sequence<NamedData<R>> = this@filterIsInstance.dataSequence().filter {
+    override fun traverse(): Sequence<NamedData<R>> = this@filterByType.traverse().filter {
         checkDatum(it.name, it.data)
     }.map {
         @Suppress("UNCHECKED_CAST")
         it as NamedData<R>
     }
 
-    override fun get(name: Name): Data<R>? = this@filterIsInstance[name]?.let { datum ->
+    override fun get(name: Name): Data<R>? = this@filterByType[name]?.let { datum ->
         if (checkDatum(name, datum)) datum.castOrNull(type) else null
     }
 
-    override val updates: Flow<Name> = this@filterIsInstance.updates.filter { name ->
+    override val updates: Flow<Name> = this@filterByType.updates.filter { name ->
         get(name)?.let { datum ->
             checkDatum(name, datum)
         } ?: false
@@ -68,18 +68,18 @@ public fun <R : Any> DataSet<*>.filterIsInstance(
 /**
  * Select a single datum of the appropriate type
  */
-public inline fun <reified R : Any> DataSet<*>.filterIsInstance(
+public inline fun <reified R : Any> DataSet<*>.filterByType(
     noinline predicate: (name: Name, meta: Meta) -> Boolean = { _, _ -> true },
-): DataSet<R> = filterIsInstance(typeOf<R>(), predicate)
+): DataSet<R> = filterByType(typeOf<R>(), predicate)
 
 /**
  * Select a single datum if it is present and of given [type]
  */
-public fun <R : Any> DataSet<*>.selectOne(type: KType, name: Name): NamedData<R>? =
+public fun <R : Any> DataSet<*>.getByType(type: KType, name: Name): NamedData<R>? =
     get(name)?.castOrNull<R>(type)?.named(name)
 
-public inline fun <reified R : Any> DataSet<*>.selectOne(name: Name): NamedData<R>? =
-    selectOne(typeOf<R>(), name)
+public inline fun <reified R : Any> DataSet<*>.getByType(name: Name): NamedData<R>? =
+    this@getByType.getByType(typeOf<R>(), name)
 
-public inline fun <reified R : Any> DataSet<*>.selectOne(name: String): NamedData<R>? =
-    selectOne(typeOf<R>(), Name.parse(name))
+public inline fun <reified R : Any> DataSet<*>.getByType(name: String): NamedData<R>? =
+    this@getByType.getByType(typeOf<R>(), Name.parse(name))

@@ -35,7 +35,7 @@ public interface Workspace : ContextAware, Provider {
         return when (target) {
             "target", Meta.TYPE -> targets.mapKeys { Name.parse(it.key)}
             Task.TYPE -> tasks
-            Data.TYPE -> data.dataSequence().associateBy { it.name }
+            Data.TYPE -> data.traverse().associateBy { it.name }
             else -> emptyMap()
         }
     }

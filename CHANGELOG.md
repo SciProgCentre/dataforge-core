@@ -15,6 +15,7 @@
 - DataSet operates with sequences of data instead of flows
 - PartialEnvelope uses `Int` instead `UInt`.
 - `ActiveDataSet` renamed to `DataSource`
+- `selectOne`->`getByType`
 
 ### Deprecated
 

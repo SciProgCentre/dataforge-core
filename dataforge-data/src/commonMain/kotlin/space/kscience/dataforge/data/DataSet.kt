@@ -10,8 +10,7 @@ import space.kscience.dataforge.meta.set
 import space.kscience.dataforge.names.*
 import kotlin.reflect.KType
 
-public interface
-DataSet<out T : Any> {
+public interface DataSet<out T : Any> {
 
     /**
      * The minimal common ancestor to all data in the node
@@ -24,22 +23,14 @@ DataSet<out T : Any> {
     public val meta: Meta
 
     /**
-     * Traverse this provider or its child. The order is not guaranteed.
+     * Traverse this [DataSet] returning named data instances. The order is not guaranteed.
      */
-    public fun dataSequence(): Sequence<NamedData<T>>
+    public fun traverse(): Sequence<NamedData<T>>
 
     /**
      * Get data with given name.
      */
     public operator fun get(name: Name): Data<T>?
-
-
-    /**
-     * Get a snapshot of names of top level children of given node. Empty if node does not exist or is a leaf.
-     */
-    public fun listTop(prefix: Name = Name.EMPTY): List<Name> =
-        dataSequence().map { it.name }.filter { it.startsWith(prefix) && (it.length == prefix.length + 1) }.toList()
-    // By default, traverses the whole tree. Could be optimized in descendants
 
     public companion object {
         public val META_KEY: Name = "@meta".asName()
@@ -51,16 +42,14 @@ DataSet<out T : Any> {
             override val dataType: KType = TYPE_OF_NOTHING
             override val meta: Meta get() = Meta.EMPTY
 
-            //private val nothing: Nothing get() = error("this is nothing")
-
-            override fun dataSequence(): Sequence<NamedData<Nothing>> = emptySequence()
+            override fun traverse(): Sequence<NamedData<Nothing>> = emptySequence()
 
             override fun get(name: Name): Data<Nothing>? = null
         }
     }
 }
 
-public operator fun <T: Any> DataSet<T>.get(name:String): Data<T>? = get(name.parseAsName())
+public operator fun <T : Any> DataSet<T>.get(name: String): Data<T>? = get(name.parseAsName())
 
 /**
  * A [DataSet] with propagated updates.
@@ -78,7 +67,7 @@ public interface DataSource<T : Any> : DataSet<T>, CoroutineScope {
     /**
      * Stop generating updates from this [DataSource]
      */
-    public fun close(){
+    public fun close() {
         coroutineContext[Job]?.cancel()
     }
 }
@@ -89,7 +78,7 @@ public val <T : Any> DataSet<T>.updates: Flow<Name> get() = if (this is DataSour
  * Flow all data nodes with names starting with [branchName]
  */
 public fun <T : Any> DataSet<T>.children(branchName: Name): Sequence<NamedData<T>> =
-    this@children.dataSequence().filter {
+    this@children.traverse().filter {
         it.name.startsWith(branchName)
     }
 
@@ -97,7 +86,7 @@ public fun <T : Any> DataSet<T>.children(branchName: Name): Sequence<NamedData<T
  * Start computation for all goals in data node and return a job for the whole node
  */
 public fun <T : Any> DataSet<T>.startAll(coroutineScope: CoroutineScope): Job = coroutineScope.launch {
-    dataSequence().map {
+    traverse().map {
         it.launch(this@launch)
     }.toList().joinAll()
 }
@@ -105,7 +94,7 @@ public fun <T : Any> DataSet<T>.startAll(coroutineScope: CoroutineScope): Job = 
 public suspend fun <T : Any> DataSet<T>.join(): Unit = coroutineScope { startAll(this).join() }
 
 public suspend fun DataSet<*>.toMeta(): Meta = Meta {
-    dataSequence().forEach {
+    traverse().forEach {
         if (it.name.endsWith(DataSet.META_KEY)) {
             set(it.name, it.meta)
         } else {

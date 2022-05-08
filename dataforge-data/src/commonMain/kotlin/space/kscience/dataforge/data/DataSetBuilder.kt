@@ -28,7 +28,7 @@ public interface DataSetBuilder<in T : Any> {
         }
 
         //Set new items
-        dataSet.dataSequence().forEach {
+        dataSet.traverse().forEach {
             data(name + it.name, it.data)
         }
     }
@@ -146,7 +146,7 @@ public inline fun <reified T : Any> DataSetBuilder<T>.static(
  */
 @DFExperimental
 public fun <T : Any> DataSetBuilder<T>.populateFrom(tree: DataSet<T>): Unit {
-    tree.dataSequence().forEach {
+    tree.traverse().forEach {
         //TODO check if the place is occupied
         data(it.name, it.data)
     }

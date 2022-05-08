@@ -77,7 +77,7 @@ internal class SplitAction<T : Any, R : Any>(
 
         return if (dataSet is DataSource) {
             ActiveDataTree<R>(outputType, dataSet) {
-                populateFrom(dataSet.dataSequence().flatMap(transform = ::splitOne))
+                populateFrom(dataSet.traverse().flatMap(transform = ::splitOne))
                 launch {
                     dataSet.updates.collect { name ->
                         //clear old nodes
@@ -89,7 +89,7 @@ internal class SplitAction<T : Any, R : Any>(
             }
         } else {
             DataTree<R>(outputType) {
-                populateFrom(dataSet.dataSequence().flatMap(transform = ::splitOne))
+                populateFrom(dataSet.traverse().flatMap(transform = ::splitOne))
             }
         }
     }

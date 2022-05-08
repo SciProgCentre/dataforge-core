@@ -23,7 +23,7 @@ public interface TaskResult<out T : Any> : DataSet<T> {
      */
     public val taskMeta: Meta
 
-    override fun dataSequence(): Sequence<TaskData<T>>
+    override fun traverse(): Sequence<TaskData<T>>
     override fun get(name: Name): TaskData<T>?
 }
 
@@ -34,7 +34,7 @@ private class TaskResultImpl<out T : Any>(
     override val taskMeta: Meta,
 ) : TaskResult<T>, DataSet<T> by dataSet {
 
-    override fun dataSequence(): Sequence<TaskData<T>> = dataSet.dataSequence().map {
+    override fun traverse(): Sequence<TaskData<T>> = dataSet.traverse().map {
         workspace.wrapData(it, it.name, taskName, taskMeta)
     }
 
