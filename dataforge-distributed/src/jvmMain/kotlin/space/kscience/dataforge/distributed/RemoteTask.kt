@@ -1,4 +1,4 @@
-package space.kscience.dataforge.workspace.distributed
+package space.kscience.dataforge.distributed
 
 import io.lambdarpc.dsl.ServiceDispatcher
 import io.lambdarpc.utils.Endpoint

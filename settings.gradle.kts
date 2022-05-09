@@ -22,5 +22,6 @@ include(
     ":dataforge-context",
     ":dataforge-data",
     ":dataforge-workspace",
-    ":dataforge-scripting"
+    ":dataforge-scripting",
+    ":dataforge-distributed",
 )

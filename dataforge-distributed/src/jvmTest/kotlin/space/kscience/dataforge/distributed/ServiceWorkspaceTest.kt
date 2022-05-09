@@ -1,4 +1,4 @@
-package space.kscience.dataforge.workspace
+package space.kscience.dataforge.distributed
 
 import io.lambdarpc.utils.Endpoint
 import kotlinx.coroutines.runBlocking
@@ -19,9 +19,11 @@ import space.kscience.dataforge.data.static
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
-import space.kscience.dataforge.workspace.distributed.ClientWorkspacePlugin
-import space.kscience.dataforge.workspace.distributed.ServiceWorkspace
+import space.kscience.dataforge.workspace.Workspace
+import space.kscience.dataforge.workspace.WorkspacePlugin
+import space.kscience.dataforge.workspace.task
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 import kotlin.test.assertEquals
 
@@ -46,11 +48,15 @@ private class MyPlugin : WorkspacePlugin() {
     }
 }
 
-private class RemoteMyPlugin(endpoint: Endpoint) : ClientWorkspacePlugin(
-    MyPlugin.tag,
-    endpoint,
-    "task".asName() to typeOf<Int>()
-)
+private class RemoteMyPlugin(endpoint: Endpoint) : ClientWorkspacePlugin(endpoint) {
+    override val tag: PluginTag
+        get() = MyPlugin.tag
+
+    override val tasks: Map<Name, KType>
+        get() = mapOf(
+            "task".asName() to typeOf<Int>()
+        )
+}
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ServiceWorkspaceTest {
