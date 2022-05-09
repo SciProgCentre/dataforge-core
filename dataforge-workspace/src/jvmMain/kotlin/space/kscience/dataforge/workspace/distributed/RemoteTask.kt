@@ -29,7 +29,7 @@ internal class RemoteTask<T : Any>(
         taskName: Name,
         taskMeta: Meta,
     ): TaskResult<T> = withContext(dispatcher) {
-        val dataset = ServiceWorkspace.execute(taskName) as LazyDecodableDataSet
+        val dataset = ServiceWorkspace.execute(taskName)
         dataset.finishDecoding(resultType)
         workspace.wrapResult(dataset as DataSet<T>, taskName, taskMeta)
     }
