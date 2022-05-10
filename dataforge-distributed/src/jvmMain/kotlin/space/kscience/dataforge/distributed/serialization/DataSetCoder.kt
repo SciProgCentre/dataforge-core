@@ -5,6 +5,7 @@ import io.lambdarpc.coding.CodingContext
 import io.lambdarpc.transport.grpc.Entity
 import io.lambdarpc.transport.serialization.Entity
 import io.lambdarpc.transport.serialization.RawData
+import kotlinx.coroutines.runBlocking
 import java.nio.charset.Charset
 
 internal object DataSetCoder : Coder<SerializableDataSet<Any>> {
@@ -15,7 +16,7 @@ internal object DataSetCoder : Coder<SerializableDataSet<Any>> {
     }
 
     override fun encode(value: SerializableDataSet<Any>, context: CodingContext): Entity {
-        val prototype = DataSetPrototype.of(value)
+        val prototype = runBlocking { DataSetPrototype.of(value) } // TODO update LambdaRPC and remove blocking
         val string = prototype.toJson()
         return Entity(RawData.copyFrom(string, Charset.defaultCharset()))
     }

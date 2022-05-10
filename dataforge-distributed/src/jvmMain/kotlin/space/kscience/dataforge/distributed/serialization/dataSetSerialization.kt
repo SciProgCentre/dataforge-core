@@ -2,11 +2,11 @@ package space.kscience.dataforge.distributed.serialization
 
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
@@ -29,13 +29,13 @@ internal data class DataSetPrototype(val data: Map<String, DataPrototype>) {
     fun toJson(): String = Json.encodeToString(serializer(), this)
 
     companion object {
-        fun <T : Any> of(dataSet: DataSet<T>): DataSetPrototype = runBlocking {
+        suspend fun <T : Any> of(dataSet: DataSet<T>): DataSetPrototype = coroutineScope {
             val serializer = serializer(dataSet.dataType)
-            val map = mutableListOf<Pair<String, Deferred<DataPrototype>>>()
+            val flow = mutableListOf<Pair<String, Deferred<DataPrototype>>>()
             dataSet.flowData().map { (name, data) ->
                 name.toString() to async { DataPrototype.of(data, serializer) }
-            }.toList(map)
-            DataSetPrototype(map.associate { (name, deferred) -> name to deferred.await() })
+            }.toList(flow)
+            DataSetPrototype(flow.associate { (name, deferred) -> name to deferred.await() })
         }
 
         fun fromJson(string: String): DataSetPrototype = Json.decodeFromString(serializer(), string)
@@ -68,8 +68,6 @@ private class SerializableDataSetImpl(private val prototype: DataSetPrototype) :
     /**
      * Trivial named data implementation.
      */
-    private class SimpleNamedData(
-        override val name: Name,
-        override val data: Data<Any>,
-    ) : NamedData<Any>, Data<Any> by data
+    private class SimpleNamedData(override val name: Name, override val data: Data<Any>) :
+        NamedData<Any>, Data<Any> by data
 }
