@@ -1,8 +1,11 @@
 @file:Suppress("UNUSED_VARIABLE")
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
 package space.kscience.dataforge.workspace
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Timeout
 import space.kscience.dataforge.context.*
 import space.kscience.dataforge.data.*
@@ -26,7 +29,7 @@ public inline fun <reified P : Plugin> P.toFactory(): PluginFactory<P> = object 
     override val type: KClass<out P> = P::class
 }
 
-public fun Workspace.runBlocking(task: String, block: MutableMeta.() -> Unit = {}): DataSet<Any> = runBlocking {
+public fun Workspace.produceBlocking(task: String, block: MutableMeta.() -> Unit = {}): DataSet<Any> = runBlocking {
     produce(task, block)
 }
 
@@ -156,21 +159,17 @@ class SimpleWorkspaceTest {
 
     @Test
     @Timeout(1)
-    fun testWorkspace() {
-        runBlocking {
-            val node = workspace.runBlocking("sum")
-            val res = node.traverse().single()
-            assertEquals(328350, res.await())
-        }
+    fun testWorkspace() = runTest {
+        val node = workspace.produce("sum")
+        val res = node.asSequence().single()
+        assertEquals(328350, res.await())
     }
 
     @Test
     @Timeout(1)
-    fun testMetaPropagation() {
-        runBlocking {
-            val node = workspace.produce("sum") { "testFlag" put true }
-            val res = node.traverse().single().await()
-        }
+    fun testMetaPropagation() = runTest {
+        val node = workspace.produce("sum") { "testFlag" put true }
+        val res = node.asSequence().single().await()
     }
 
     @Test
@@ -192,7 +191,7 @@ class SimpleWorkspaceTest {
     fun testFilter() {
         runBlocking {
             val node = workspace.produce("filterOne")
-            assertEquals(12, node.traverse().first().await())
+            assertEquals(12, node.asSequence().first().await())
         }
     }
 }

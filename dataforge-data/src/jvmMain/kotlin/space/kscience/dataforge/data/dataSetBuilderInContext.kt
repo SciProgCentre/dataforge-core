@@ -27,7 +27,7 @@ context(DataSetBuilder<T>) public infix fun <T : Any> String.put(
 ): Unit = node(Name.parse(this), block)
 
 /**
- * Copy given data set and mirror its changes to this [DataSourceBuilder] in [this@setAndObserve]. Returns an update [Job]
+ * Copy given data set and mirror its changes to this [DataTreeBuilder] in [this@setAndObserve]. Returns an update [Job]
  */
 context(DataSetBuilder<T>) public fun <T : Any> CoroutineScope.setAndWatch(
     name: Name,

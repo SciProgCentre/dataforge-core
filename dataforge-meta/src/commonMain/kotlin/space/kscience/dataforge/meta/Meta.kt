@@ -133,6 +133,7 @@ public fun Meta.getIndexed(name: Name): Map<String?, Meta> {
     }
 }
 
+public fun Meta.getIndexed(name: String): Map<String?, Meta>  = getIndexed(name.parseAsName())
 
 /**
  * A meta node that ensures that all of its descendants has at least the same type.

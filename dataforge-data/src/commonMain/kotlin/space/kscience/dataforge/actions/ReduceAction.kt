@@ -81,13 +81,12 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
 internal class ReduceAction<T : Any, R : Any>(
     outputType: KType,
     private val action: ReduceGroupBuilder<T, R>.() -> Unit,
-) : CachingAction<T, R>(outputType) {
+) : AbstractAction<T, R>(outputType) {
     //TODO optimize reduction. Currently, the whole action recalculates on push
 
-
-    override fun transform(set: DataSet<T>, meta: Meta, key: Name): Sequence<NamedData<R>> = sequence {
-        ReduceGroupBuilder<T, R>(meta, outputType).apply(action).buildGroups(set).forEach { group ->
-            val dataFlow: Map<Name, Data<T>> = group.set.traverse().fold(HashMap()) { acc, value ->
+    override fun DataSetBuilder<R>.generate(data: DataSet<T>, meta: Meta) {
+        ReduceGroupBuilder<T, R>(meta, outputType).apply(action).buildGroups(data).forEach { group ->
+            val dataFlow: Map<Name, Data<T>> = group.set.asSequence().fold(HashMap()) { acc, value ->
                 acc.apply {
                     acc[value.name] = value.data
                 }
@@ -103,7 +102,7 @@ internal class ReduceAction<T : Any, R : Any>(
                 meta = groupMeta
             ) { group.result.invoke(env, it) }
 
-            yield(res.named(env.name))
+            data(env.name, res)
         }
     }
 }

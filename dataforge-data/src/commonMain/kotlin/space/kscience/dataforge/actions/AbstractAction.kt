@@ -3,6 +3,7 @@ package space.kscience.dataforge.actions
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.startsWith
 import kotlin.reflect.KType
@@ -18,36 +19,47 @@ internal fun MutableMap<Name, *>.removeWhatStartsWith(name: Name) {
 /**
  * An action that caches results on-demand and recalculates them on source push
  */
-public abstract class CachingAction<in T : Any, out R : Any>(
+public abstract class AbstractAction<in T : Any, R : Any>(
     public val outputType: KType,
 ) : Action<T, R> {
 
-    protected abstract fun transform(
-        set: DataSet<T>,
+    /**
+     * Generate initial content of the output
+     */
+    protected abstract fun DataSetBuilder<R>.generate(
+        data: DataSet<T>,
         meta: Meta,
-        key: Name = Name.EMPTY,
-    ): Sequence<NamedData<R>>
+    )
 
+    /**
+     * Update part of the data set when given [updateKey] is triggered by the source
+     */
+    protected open fun DataSourceBuilder<R>.update(
+        dataSet: DataSet<T>,
+        meta: Meta,
+        updateKey: Name,
+    ) {
+        // By default, recalculate the whole dataset
+        generate(dataSet, meta)
+    }
+
+    @OptIn(DFInternal::class)
     override fun execute(
         dataSet: DataSet<T>,
         meta: Meta,
     ): DataSet<R> = if (dataSet is DataSource) {
-        DataSourceBuilder<R>(outputType, dataSet.coroutineContext).apply {
-            populateFrom(transform(dataSet, meta))
+        DataSource(outputType, dataSet){
+            generate(dataSet, meta)
 
             launch {
-                dataSet.updates.collect {
-                    //clear old nodes
-                    remove(it)
-                    //collect new items
-                    populateFrom(transform(dataSet, meta, it))
-                    //FIXME if the target is data, updates are fired twice
+                dataSet.updates.collect { name ->
+                    update(dataSet, meta, name)
                 }
             }
         }
     } else {
         DataTree<R>(outputType) {
-            populateFrom(transform(dataSet, meta))
+            generate(dataSet, meta)
         }
     }
 }

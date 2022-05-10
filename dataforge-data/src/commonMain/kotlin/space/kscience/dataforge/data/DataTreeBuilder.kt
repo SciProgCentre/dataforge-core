@@ -3,9 +3,9 @@ package space.kscience.dataforge.data
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.*
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
@@ -14,13 +14,19 @@ import kotlin.jvm.Synchronized
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
+public interface DataSourceBuilder<T : Any> : DataSetBuilder<T>, DataSource<T> {
+    override val updates: MutableSharedFlow<Name>
+}
+
 /**
  * A mutable [DataTree] that propagates updates
  */
-public class DataSourceBuilder<T : Any>(
+@PublishedApi
+internal class DataTreeBuilder<T : Any>(
     override val dataType: KType,
     coroutineContext: CoroutineContext,
-) : DataTree<T>, DataSetBuilder<T>, DataSource<T> {
+) : DataTree<T>, DataSourceBuilder<T> {
+
     override val coroutineContext: CoroutineContext =
         coroutineContext + Job(coroutineContext[Job]) + GoalExecutionRestriction()
 
@@ -29,23 +35,20 @@ public class DataSourceBuilder<T : Any>(
     override val items: Map<NameToken, DataTreeItem<T>>
         get() = treeItems.filter { !it.key.body.startsWith("@") }
 
-    private val _updates = MutableSharedFlow<Name>()
-
-    override val updates: SharedFlow<Name>
-        get() = _updates
+    override val updates = MutableSharedFlow<Name>()
 
     @Synchronized
     private fun remove(token: NameToken) {
         if (treeItems.remove(token) != null) {
             launch {
-                _updates.emit(token.asName())
+                updates.emit(token.asName())
             }
         }
     }
 
     override fun remove(name: Name) {
         if (name.isEmpty()) error("Can't remove the root node")
-        (getItem(name.cutLast()).tree as? DataSourceBuilder)?.remove(name.lastOrNull()!!)
+        (getItem(name.cutLast()).tree as? DataTreeBuilder)?.remove(name.lastOrNull()!!)
     }
 
     @Synchronized
@@ -58,11 +61,11 @@ public class DataSourceBuilder<T : Any>(
         treeItems[token] = DataTreeItem.Node(node)
     }
 
-    private fun getOrCreateNode(token: NameToken): DataSourceBuilder<T> =
-        (treeItems[token] as? DataTreeItem.Node<T>)?.tree as? DataSourceBuilder<T>
-            ?: DataSourceBuilder<T>(dataType, coroutineContext).also { set(token, it) }
+    private fun getOrCreateNode(token: NameToken): DataTreeBuilder<T> =
+        (treeItems[token] as? DataTreeItem.Node<T>)?.tree as? DataTreeBuilder<T>
+            ?: DataTreeBuilder<T>(dataType, coroutineContext).also { set(token, it) }
 
-    private fun getOrCreateNode(name: Name): DataSourceBuilder<T> = when (name.length) {
+    private fun getOrCreateNode(name: Name): DataTreeBuilder<T> = when (name.length) {
         0 -> this
         1 -> getOrCreateNode(name.firstOrNull()!!)
         else -> getOrCreateNode(name.firstOrNull()!!).getOrCreateNode(name.cutFirst())
@@ -79,7 +82,7 @@ public class DataSourceBuilder<T : Any>(
             }
         }
         launch {
-            _updates.emit(name)
+            updates.emit(name)
         }
     }
 
@@ -91,32 +94,39 @@ public class DataSourceBuilder<T : Any>(
 }
 
 /**
- * Create a dynamic tree. Initial data is placed synchronously.
+ * Create a dynamic [DataSource]. Initial data is placed synchronously.
  */
+@DFInternal
 @Suppress("FunctionName")
-public fun <T : Any> ActiveDataTree(
+public fun <T : Any> DataSource(
     type: KType,
     parent: CoroutineScope,
     block: DataSourceBuilder<T>.() -> Unit,
-): DataSourceBuilder<T> {
-    val tree = DataSourceBuilder<T>(type, parent.coroutineContext)
+): DataSource<T> {
+    val tree = DataTreeBuilder<T>(type, parent.coroutineContext)
     tree.block()
     return tree
 }
 
+@Suppress("OPT_IN_USAGE","FunctionName")
+public inline fun <reified T : Any> DataSource(
+    parent: CoroutineScope,
+    crossinline block: DataSourceBuilder<T>.() -> Unit,
+): DataSource<T> = DataSource(typeOf<T>(), parent) { block() }
+
 @Suppress("FunctionName")
-public suspend inline fun <reified T : Any> ActiveDataTree(
+public suspend inline fun <reified T : Any> DataSource(
     crossinline block: DataSourceBuilder<T>.() -> Unit = {},
-): DataSourceBuilder<T> = DataSourceBuilder<T>(typeOf<T>(), coroutineContext).apply { block() }
+): DataSourceBuilder<T> = DataTreeBuilder<T>(typeOf<T>(), coroutineContext).apply { block() }
 
 public inline fun <reified T : Any> DataSourceBuilder<T>.emit(
     name: Name,
     parent: CoroutineScope,
     noinline block: DataSourceBuilder<T>.() -> Unit,
-): Unit = node(name, ActiveDataTree(typeOf<T>(), parent, block))
+): Unit = node(name, DataSource(parent, block))
 
 public inline fun <reified T : Any> DataSourceBuilder<T>.emit(
     name: String,
     parent: CoroutineScope,
     noinline block: DataSourceBuilder<T>.() -> Unit,
-): Unit = node(Name.parse(name), ActiveDataTree(typeOf<T>(), parent, block))
+): Unit = node(Name.parse(name), DataSource(parent, block))

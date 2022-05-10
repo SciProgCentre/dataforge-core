@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.PluginFactory
 import space.kscience.dataforge.context.PluginTag
@@ -15,7 +18,7 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
 
     val allData by task<Int> {
         val selectedData = workspace.data.filterByType<Int>()
-        val result: Data<Int> = selectedData.traverse().asIterable().foldToData(0) { result, data ->
+        val result: Data<Int> = selectedData.foldToData(0) { result, data ->
             result + data.value
         }
         data("result", result)
@@ -44,28 +47,22 @@ class DataPropagationTest {
         context {
             plugin(DataPropagationTestPlugin)
         }
-        runBlocking {
-            data {
-                repeat(100) {
-                    static("myData[$it]", it)
-                }
+        data {
+            repeat(100) {
+                static("myData[$it]", it)
             }
         }
     }
 
     @Test
-    fun testAllData() {
-        runBlocking {
-            val node = testWorkspace.produce("Test.allData")
-            assertEquals(4950, node.traverse().single().await())
-        }
+    fun testAllData() = runTest {
+        val node = testWorkspace.produce("Test.allData")
+        assertEquals(4950, node.asSequence().single().await())
     }
 
     @Test
-    fun testSingleData() {
-        runBlocking {
-            val node = testWorkspace.produce("Test.singleData")
-            assertEquals(12, node.traverse().single().await())
-        }
+    fun testSingleData() = runTest {
+        val node = testWorkspace.produce("Test.singleData")
+        assertEquals(12, node.asSequence().single().await())
     }
 }

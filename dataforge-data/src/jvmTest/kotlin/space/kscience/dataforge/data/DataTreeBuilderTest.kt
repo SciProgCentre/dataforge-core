@@ -56,7 +56,7 @@ internal class DataTreeBuilderTest {
         try {
             lateinit var updateJob: Job
             supervisorScope {
-                val subNode = ActiveDataTree<Int> {
+                val subNode = DataSource<Int> {
                     updateJob = launch {
                         repeat(10) {
                             delay(10)
@@ -70,7 +70,7 @@ internal class DataTreeBuilderTest {
                         println(it)
                     }
                 }
-                val rootNode = ActiveDataTree<Int> {
+                val rootNode = DataSource<Int> {
                     setAndWatch("sub".asName(), subNode)
                 }
 

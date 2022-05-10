@@ -15,11 +15,9 @@ import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
-import kotlin.collections.HashMap
 import kotlin.collections.set
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.typeOf
 
 public data class TaskReference<T : Any>(public val taskName: Name, public val task: Task<T>) : DataSelector<T> {
 
@@ -106,8 +104,8 @@ public class WorkspaceBuilder(private val parentContext: Context = Global) : Tas
     }
 
     @DFExperimental
-    public fun buildActiveData(scope: CoroutineScope, builder: DataSourceBuilder<Any>.() -> Unit) {
-        data = ActiveDataTree(typeOf<Any>(), scope, builder)
+    public fun data(scope: CoroutineScope, builder: DataSourceBuilder<Any>.() -> Unit) {
+        data = DataSource(scope, builder)
     }
 
     /**

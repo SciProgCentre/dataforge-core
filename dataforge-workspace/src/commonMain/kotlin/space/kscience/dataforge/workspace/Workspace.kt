@@ -3,6 +3,7 @@ package space.kscience.dataforge.workspace
 import space.kscience.dataforge.context.ContextAware
 import space.kscience.dataforge.data.Data
 import space.kscience.dataforge.data.DataSet
+import space.kscience.dataforge.data.asSequence
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.Type
@@ -35,7 +36,7 @@ public interface Workspace : ContextAware, Provider {
         return when (target) {
             "target", Meta.TYPE -> targets.mapKeys { Name.parse(it.key)}
             Task.TYPE -> tasks
-            Data.TYPE -> data.traverse().associateBy { it.name }
+            Data.TYPE -> data.asSequence().associateBy { it.name }
             else -> emptyMap()
         }
     }

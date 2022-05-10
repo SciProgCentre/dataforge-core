@@ -1,5 +1,6 @@
 package space.kscience.dataforge.data
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -9,7 +10,7 @@ import space.kscience.dataforge.actions.map
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.assertEquals
 
-@OptIn(DFExperimental::class)
+@OptIn(DFExperimental::class, ExperimentalCoroutinesApi::class)
 internal class ActionsTest {
     @Test
     fun testStaticMapAction() = runTest {
@@ -28,7 +29,7 @@ internal class ActionsTest {
 
     @Test
     fun testDynamicMapAction() = runTest {
-        val data: DataSourceBuilder<Int> = ActiveDataTree()
+        val data: DataSourceBuilder<Int> = DataSource()
 
         val plusOne = Action.map<Int, Int> {
             result { it + 1 }

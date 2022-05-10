@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.filter
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.matches
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KType
@@ -29,7 +28,6 @@ private fun <R : Any> Data<*>.castOrNull(type: KType): Data<R>? =
 /**
  * Select all data matching given type and filters. Does not modify paths
  *
- * @param namePattern a name match patter according to [Name.matches]
  * @param predicate addition filtering condition based on item name and meta. By default, accepts all
  */
 @OptIn(DFExperimental::class)
@@ -47,11 +45,13 @@ public fun <R : Any> DataSet<*>.filterByType(
     private fun checkDatum(name: Name, datum: Data<*>): Boolean = datum.type.isSubtypeOf(type)
             && predicate(name, datum.meta)
 
-    override fun traverse(): Sequence<NamedData<R>> = this@filterByType.traverse().filter {
-        checkDatum(it.name, it.data)
-    }.map {
-        @Suppress("UNCHECKED_CAST")
-        it as NamedData<R>
+    override fun iterator(): Iterator<NamedData<R>> = iterator {
+        for(d in this@filterByType){
+            if(checkDatum(d.name,d.data)){
+                @Suppress("UNCHECKED_CAST")
+                yield(d as NamedData<R>)
+            }
+        }
     }
 
     override fun get(name: Name): Data<R>? = this@filterByType[name]?.let { datum ->

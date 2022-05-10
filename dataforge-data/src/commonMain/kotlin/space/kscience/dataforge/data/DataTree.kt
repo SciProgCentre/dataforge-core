@@ -39,12 +39,12 @@ public interface DataTree<out T : Any> : DataSet<T> {
 
     override val meta: Meta get() = items[META_ITEM_NAME_TOKEN]?.meta ?: Meta.EMPTY
 
-    override fun traverse(): Sequence<NamedData<T>> = sequence {
+    override fun iterator(): Iterator<NamedData<T>> = iterator {
         items.forEach { (token, childItem: DataTreeItem<T>) ->
             if (!token.body.startsWith("@")) {
                 when (childItem) {
                     is DataTreeItem.Leaf -> yield(childItem.data.named(token.asName()))
-                    is DataTreeItem.Node -> yieldAll(childItem.tree.traverse().map { it.named(token + it.name) })
+                    is DataTreeItem.Node -> yieldAll(childItem.tree.asSequence().map { it.named(token + it.name) })
                 }
             }
         }

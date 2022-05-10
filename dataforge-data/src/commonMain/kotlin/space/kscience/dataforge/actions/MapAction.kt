@@ -1,6 +1,5 @@
 package space.kscience.dataforge.actions
 
-import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
@@ -53,61 +52,44 @@ public class MapActionBuilder<T, R>(
 }
 
 @PublishedApi
-internal class MapAction<in T : Any, out R : Any>(
-    private val outputType: KType,
+internal class MapAction<in T : Any, R : Any>(
+    outputType: KType,
     private val block: MapActionBuilder<T, R>.() -> Unit,
-) : Action<T, R> {
+) : AbstractAction<T, R>(outputType) {
 
-    override fun execute(
-        dataSet: DataSet<T>,
-        meta: Meta,
-    ): DataSet<R> {
+    private fun DataSetBuilder<R>.mapOne(name: Name, data: Data<T>, meta: Meta) {
+        // Creating a new environment for action using **old** name, old meta and task meta
+        val env = ActionEnv(name, data.meta, meta)
 
-        fun mapOne(data: NamedData<T>): NamedData<R> {
-            // Creating a new environment for action using **old** name, old meta and task meta
-            val env = ActionEnv(data.name, data.meta, meta)
+        //applying transformation from builder
+        val builder = MapActionBuilder<T, R>(
+            name,
+            data.meta.toMutableMeta(), // using data meta
+            meta,
+            outputType
+        ).apply(block)
 
-            //applying transformation from builder
-            val builder = MapActionBuilder<T, R>(
-                data.name,
-                data.meta.toMutableMeta(), // using data meta
-                meta,
-                outputType
-            ).apply(block)
+        //getting new name
+        val newName = builder.name
 
-            //getting new name
-            val newName = builder.name
+        //getting new meta
+        val newMeta = builder.meta.seal()
 
-            //getting new meta
-            val newMeta = builder.meta.seal()
-
-            @OptIn(DFInternal::class)
-            val newData = Data(builder.outputType, newMeta, dependencies = listOf(data)) {
-                builder.result(env, data.await())
-            }
-            //setting the data node
-            return newData.named(newName)
+        @OptIn(DFInternal::class)
+        val newData = Data(builder.outputType, newMeta, dependencies = listOf(data)) {
+            builder.result(env, data.await())
         }
+        //setting the data node
+        data(newName, newData)
+    }
 
-        val sequence = dataSet.traverse().map(::mapOne)
+    override fun DataSetBuilder<R>.generate(data: DataSet<T>, meta: Meta) {
+        data.forEach { mapOne(it.name, it.data, meta) }
+    }
 
-        return if (dataSet is DataSource ) {
-            ActiveDataTree(outputType, dataSet) {
-                populateFrom(sequence)
-                launch {
-                    dataSet.updates.collect { name ->
-                        //clear old nodes
-                        remove(name)
-                        //collect new items
-                        populateFrom(dataSet.children(name).map(::mapOne))
-                    }
-                }
-            }
-        } else {
-            DataTree(outputType) {
-                populateFrom(sequence)
-            }
-        }
+    override fun DataSourceBuilder<R>.update(dataSet: DataSet<T>, meta: Meta, updateKey: Name) {
+        remove(updateKey)
+        dataSet[updateKey]?.let { mapOne(updateKey, it, meta) }
     }
 }
 

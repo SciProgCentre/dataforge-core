@@ -1,13 +1,11 @@
 package space.kscience.dataforge.actions
 
-import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Laminate
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
 import kotlin.collections.set
 import kotlin.reflect.KType
@@ -46,52 +44,41 @@ public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val me
  */
 @PublishedApi
 internal class SplitAction<T : Any, R : Any>(
-    private val outputType: KType,
+    outputType: KType,
     private val action: SplitBuilder<T, R>.() -> Unit,
-) : Action<T, R> {
+) : AbstractAction<T, R>(outputType) {
 
-    override fun execute(
-        dataSet: DataSet<T>,
-        meta: Meta,
-    ): DataSet<R> {
+    private fun DataSetBuilder<R>.splitOne(name: Name, data: Data<T>, meta: Meta) {
+        val laminate = Laminate(data.meta, meta)
 
-        fun splitOne(data: NamedData<T>): Sequence<NamedData<R>> {
-            val laminate = Laminate(data.meta, meta)
-
-            val split = SplitBuilder<T, R>(data.name, data.meta).apply(action)
+        val split = SplitBuilder<T, R>(name, data.meta).apply(action)
 
 
-            // apply individual fragment rules to result
-            return split.fragments.entries.asSequence().map { (fragmentName, rule) ->
-                val env = SplitBuilder.FragmentRule<T, R>(
-                    fragmentName,
-                    laminate.toMutableMeta(),
-                    outputType
-                ).apply(rule)
-                //data.map<R>(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
-                @OptIn(DFInternal::class) Data(outputType, meta = env.meta, dependencies = listOf(data)) {
+        // apply individual fragment rules to result
+        split.fragments.forEach { (fragmentName, rule) ->
+            val env = SplitBuilder.FragmentRule<T, R>(
+                fragmentName,
+                laminate.toMutableMeta(),
+                outputType
+            ).apply(rule)
+            //data.map<R>(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
+
+            data(
+                fragmentName,
+                @Suppress("OPT_IN_USAGE") Data(outputType, meta = env.meta, dependencies = listOf(data)) {
                     env.result(data.await())
-                }.named(fragmentName)
-            }
-        }
-
-        return if (dataSet is DataSource) {
-            ActiveDataTree<R>(outputType, dataSet) {
-                populateFrom(dataSet.traverse().flatMap(transform = ::splitOne))
-                launch {
-                    dataSet.updates.collect { name ->
-                        //clear old nodes
-                        remove(name)
-                        //collect new items
-                        populateFrom(dataSet.children(name).flatMap(transform = ::splitOne))
-                    }
                 }
-            }
-        } else {
-            DataTree<R>(outputType) {
-                populateFrom(dataSet.traverse().flatMap(transform = ::splitOne))
-            }
+            )
         }
+    }
+
+    override fun DataSetBuilder<R>.generate(data: DataSet<T>, meta: Meta) {
+        data.forEach { splitOne(it.name, it.data, meta) }
+    }
+
+    override fun DataSourceBuilder<R>.update(dataSet: DataSet<T>, meta: Meta, updateKey: Name) {
+        remove(updateKey)
+        dataSet[updateKey]?.let { splitOne(updateKey, it, meta) }
     }
 }
 

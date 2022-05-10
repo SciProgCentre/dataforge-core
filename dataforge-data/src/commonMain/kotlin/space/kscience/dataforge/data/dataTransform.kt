@@ -7,8 +7,6 @@ import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KType
@@ -16,11 +14,12 @@ import kotlin.reflect.typeOf
 
 public data class ValueWithMeta<T>(val meta: Meta, val value: T)
 
-public suspend fun <T: Any> Data<T>.awaitWithMeta(): ValueWithMeta<T> = ValueWithMeta(meta, await())
+public suspend fun <T : Any> Data<T>.awaitWithMeta(): ValueWithMeta<T> = ValueWithMeta(meta, await())
 
 public data class NamedValueWithMeta<T>(val name: Name, val meta: Meta, val value: T)
 
-public suspend fun <T: Any> NamedData<T>.awaitWithMeta(): NamedValueWithMeta<T> = NamedValueWithMeta(name, meta, await())
+public suspend fun <T : Any> NamedData<T>.awaitWithMeta(): NamedValueWithMeta<T> =
+    NamedValueWithMeta(name, meta, await())
 
 
 /**
@@ -187,14 +186,13 @@ public suspend fun <T : Any, R : Any> DataSet<T>.map(
     metaTransform: MutableMeta.() -> Unit = {},
     block: suspend (NamedValueWithMeta<T>) -> R,
 ): DataTree<R> = DataTree<R>(outputType) {
-    populateFrom(
-        traverse().map {
-            val newMeta = it.meta.toMutableMeta().apply(metaTransform).seal()
-            Data(outputType, newMeta, coroutineContext, listOf(it)) {
-                block(it.awaitWithMeta())
-            }.named(it.name)
+    forEach {
+        val newMeta = it.meta.toMutableMeta().apply(metaTransform).seal()
+        val d = Data(outputType, newMeta, coroutineContext, listOf(it)) {
+            block(it.awaitWithMeta())
         }
-    )
+        data(it.name, d)
+    }
 }
 
 @OptIn(DFInternal::class)
@@ -204,10 +202,9 @@ public suspend inline fun <T : Any, reified R : Any> DataSet<T>.map(
     noinline block: suspend (NamedValueWithMeta<T>) -> R,
 ): DataTree<R> = map(typeOf<R>(), coroutineContext, metaTransform, block)
 
-public suspend fun <T : Any> DataSet<T>.forEach(block: suspend (NamedData<T>) -> Unit) {
-    contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
-    traverse().forEach {
-        block(it)
+public inline fun <T : Any> DataSet<T>.forEach(block: (NamedData<T>) -> Unit) {
+    for (d in this) {
+        block(d)
     }
 }
 
@@ -215,11 +212,11 @@ public inline fun <T : Any, reified R : Any> DataSet<T>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     crossinline transformation: suspend (Iterable<NamedValueWithMeta<T>>) -> R,
-): Data<R> = traverse().asIterable().reduceNamedToData(coroutineContext, meta, transformation)
+): Data<R> = asIterable().reduceNamedToData(coroutineContext, meta, transformation)
 
 public inline fun <T : Any, reified R : Any> DataSet<T>.foldToData(
     initial: R,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
     crossinline block: suspend (result: R, data: NamedValueWithMeta<T>) -> R,
-): Data<R> = traverse().asIterable().foldNamedToData(initial, coroutineContext, meta, block)
+): Data<R> = asIterable().foldNamedToData(initial, coroutineContext, meta, block)

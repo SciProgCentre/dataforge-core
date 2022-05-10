@@ -7,7 +7,10 @@ import kotlinx.coroutines.flow.mapNotNull
 import space.kscience.dataforge.data.Data.Companion.TYPE_OF_NOTHING
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.set
-import space.kscience.dataforge.names.*
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.endsWith
+import space.kscience.dataforge.names.parseAsName
 import kotlin.reflect.KType
 
 public interface DataSet<out T : Any> {
@@ -25,7 +28,7 @@ public interface DataSet<out T : Any> {
     /**
      * Traverse this [DataSet] returning named data instances. The order is not guaranteed.
      */
-    public fun traverse(): Sequence<NamedData<T>>
+    public operator fun iterator(): Iterator<NamedData<T>>
 
     /**
      * Get data with given name.
@@ -42,11 +45,19 @@ public interface DataSet<out T : Any> {
             override val dataType: KType = TYPE_OF_NOTHING
             override val meta: Meta get() = Meta.EMPTY
 
-            override fun traverse(): Sequence<NamedData<Nothing>> = emptySequence()
+            override fun iterator(): Iterator<NamedData<Nothing>> = emptySequence<NamedData<Nothing>>().iterator()
 
             override fun get(name: Name): Data<Nothing>? = null
         }
     }
+}
+
+public fun <T : Any> DataSet<T>.asSequence(): Sequence<NamedData<T>> = object : Sequence<NamedData<T>> {
+    override fun iterator(): Iterator<NamedData<T>> = this@asSequence.iterator()
+}
+
+public fun <T : Any> DataSet<T>.asIterable(): Iterable<NamedData<T>> = object : Iterable<NamedData<T>> {
+    override fun iterator(): Iterator<NamedData<T>> = this@asIterable.iterator()
 }
 
 public operator fun <T : Any> DataSet<T>.get(name: String): Data<T>? = get(name.parseAsName())
@@ -54,7 +65,7 @@ public operator fun <T : Any> DataSet<T>.get(name: String): Data<T>? = get(name.
 /**
  * A [DataSet] with propagated updates.
  */
-public interface DataSource<T : Any> : DataSet<T>, CoroutineScope {
+public interface DataSource<out T : Any> : DataSet<T>, CoroutineScope {
 
     /**
      * A flow of updated item names. Updates are propagated in a form of [Flow] of names of updated nodes.
@@ -73,28 +84,28 @@ public interface DataSource<T : Any> : DataSet<T>, CoroutineScope {
 }
 
 public val <T : Any> DataSet<T>.updates: Flow<Name> get() = if (this is DataSource) updates else emptyFlow()
-
-/**
- * Flow all data nodes with names starting with [branchName]
- */
-public fun <T : Any> DataSet<T>.children(branchName: Name): Sequence<NamedData<T>> =
-    this@children.traverse().filter {
-        it.name.startsWith(branchName)
-    }
+//
+///**
+// * Flow all data nodes with names starting with [branchName]
+// */
+//public fun <T : Any> DataSet<T>.children(branchName: Name): Sequence<NamedData<T>> =
+//    this@children.asSequence().filter {
+//        it.name.startsWith(branchName)
+//    }
 
 /**
  * Start computation for all goals in data node and return a job for the whole node
  */
 public fun <T : Any> DataSet<T>.startAll(coroutineScope: CoroutineScope): Job = coroutineScope.launch {
-    traverse().map {
+    asIterable().map {
         it.launch(this@launch)
-    }.toList().joinAll()
+    }.joinAll()
 }
 
 public suspend fun <T : Any> DataSet<T>.join(): Unit = coroutineScope { startAll(this).join() }
 
-public suspend fun DataSet<*>.toMeta(): Meta = Meta {
-    traverse().forEach {
+public fun DataSet<*>.toMeta(): Meta = Meta {
+    forEach {
         if (it.name.endsWith(DataSet.META_KEY)) {
             set(it.name, it.meta)
         } else {

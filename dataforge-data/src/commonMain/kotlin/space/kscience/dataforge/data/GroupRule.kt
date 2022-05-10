@@ -18,6 +18,7 @@ package space.kscience.dataforge.data
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
+import space.kscience.dataforge.misc.DFInternal
 
 public interface GroupRule {
     public fun <T : Any> gather(set: DataSet<T>): Map<String, DataSet<T>>
@@ -31,6 +32,7 @@ public interface GroupRule {
          * @param defaultTagValue
          * @return
          */
+        @OptIn(DFInternal::class)
         public fun byMetaValue(
             key: String,
             defaultTagValue: String,
@@ -42,9 +44,9 @@ public interface GroupRule {
                 val map = HashMap<String, DataSet<T>>()
 
                 if (set is DataSource) {
-                    set.traverse().forEach { data ->
+                    set.forEach { data ->
                         val tagValue: String = data.meta[key]?.string ?: defaultTagValue
-                        (map.getOrPut(tagValue) { DataSourceBuilder(set.dataType, set.coroutineContext) } as DataSourceBuilder<T>)
+                        (map.getOrPut(tagValue) { DataTreeBuilder(set.dataType, set.coroutineContext) } as DataTreeBuilder<T>)
                             .data(data.name, data.data)
 
                         set.launch {
@@ -53,7 +55,7 @@ public interface GroupRule {
 
                                 val updateTagValue = dataUpdate?.meta?.get(key)?.string ?: defaultTagValue
                                 map.getOrPut(updateTagValue) {
-                                    ActiveDataTree(set.dataType, this) {
+                                    DataSource(set.dataType, this) {
                                         data(name, dataUpdate)
                                     }
                                 }
@@ -61,7 +63,7 @@ public interface GroupRule {
                         }
                     }
                 } else {
-                    set.traverse().forEach { data ->
+                    set.forEach { data ->
                         val tagValue: String = data.meta[key]?.string ?: defaultTagValue
                         (map.getOrPut(tagValue) { StaticDataTree(set.dataType) } as StaticDataTree<T>)
                             .data(data.name, data.data)
