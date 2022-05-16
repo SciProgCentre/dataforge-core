@@ -4,8 +4,6 @@ import io.ktor.utils.io.core.Input
 import io.ktor.utils.io.core.Output
 import net.mamoe.yamlkt.*
 import space.kscience.dataforge.context.Context
-import space.kscience.dataforge.io.IOFormat.Companion.META_KEY
-import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.io.MetaFormat
 import space.kscience.dataforge.io.MetaFormatFactory
 import space.kscience.dataforge.io.readUtf8String
@@ -14,7 +12,6 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.get
 import space.kscience.dataforge.meta.isLeaf
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.withIndex
 import space.kscience.dataforge.values.ListValue
@@ -106,11 +103,6 @@ public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
     override fun readMeta(input: Input, descriptor: MetaDescriptor?): Meta {
         val yaml = Yaml.decodeYamlMapFromString(input.readUtf8String())
         return yaml.toMeta()
-    }
-
-    override fun toMeta(): Meta = Meta {
-        NAME_KEY put FrontMatterEnvelopeFormat.name.toString()
-        META_KEY put meta
     }
 
     public companion object : MetaFormatFactory {

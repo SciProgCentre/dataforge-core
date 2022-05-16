@@ -7,10 +7,7 @@ import io.ktor.utils.io.core.readBytes
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.io.*
-import space.kscience.dataforge.io.IOFormat.Companion.META_KEY
-import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.plus
 
@@ -63,11 +60,6 @@ public class FrontMatterEnvelopeFormat(
         envelope.data?.let { data ->
             output.writeBinary(data)
         }
-    }
-
-    override fun toMeta(): Meta = Meta {
-        NAME_KEY put name.toString()
-        META_KEY put meta
     }
 
     public companion object : EnvelopeFormatFactory {

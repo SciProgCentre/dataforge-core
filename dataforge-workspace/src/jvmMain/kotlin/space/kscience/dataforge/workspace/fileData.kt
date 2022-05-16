@@ -2,11 +2,12 @@ package space.kscience.dataforge.workspace
 
 import io.ktor.utils.io.streams.asOutput
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.io.*
-import space.kscience.dataforge.meta.*
+import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.get
+import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.FileSystem
 import java.nio.file.Files
@@ -15,27 +16,12 @@ import java.nio.file.StandardOpenOption
 import java.nio.file.spi.FileSystemProvider
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
 import kotlin.streams.toList
 
 //public typealias FileFormatResolver<T> = (Path, Meta) -> IOFormat<T>
 
-public interface FileFormatResolver<T : Any> {
-    public val type: KType
-    public operator fun invoke(path: Path, meta: Meta): IOFormat<T>
-}
+public typealias FileFormatResolver<T> = (path: Path, meta: Meta) -> IOReader<T>
 
-
-@PublishedApi
-internal inline fun <reified T : Any> IOPlugin.formatResolver(): FileFormatResolver<T> =
-    object : FileFormatResolver<T> {
-        override val type: KType = typeOf<T>()
-
-        @OptIn(DFExperimental::class)
-        override fun invoke(path: Path, meta: Meta): IOFormat<T> =
-            resolveIOFormat<T>() ?: error("Can't resolve IO format for ${T::class}")
-    }
 
 private fun newZFS(path: Path): FileSystem {
     val fsProvider = FileSystemProvider.installedProviders().find { it.scheme == "jar" }
@@ -46,14 +32,9 @@ private fun newZFS(path: Path): FileSystem {
 /**
  * Read data with supported envelope format and binary format. If envelope format is null, then read binary directly from file.
  * The operation is blocking since it must read meta header. The reading of envelope body is lazy
- * @param type explicit type of data read
- * @param dataFormat binary format
- * @param envelopeFormat the format of envelope. If null, file is read directly
- * @param metaFile the relative file for optional meta override
- * @param metaFileFormat the meta format for override
  */
 @DFExperimental
-public fun <T : Any> IOPlugin.readDataFile(
+public inline fun <reified T : Any> IOPlugin.readDataFile(
     path: Path,
     formatResolver: FileFormatResolver<T>,
 ): Data<T> {
@@ -62,34 +43,26 @@ public fun <T : Any> IOPlugin.readDataFile(
     return envelope.toData(format)
 }
 
-@DFExperimental
-public inline fun <reified T : Any> IOPlugin.readDataFile(path: Path): Data<T> = readDataFile(path, formatResolver())
-
 /**
  * Add file/directory-based data tree item
  */
-@DFExperimental
-public suspend fun <T : Any> DataSetBuilder<T>.file(
-    plugin: IOPlugin,
+context(IOPlugin) @DFExperimental
+public fun DataSetBuilder<Any>.file(
     path: Path,
-    formatResolver: FileFormatResolver<T>,
+    formatResolver: FileFormatResolver<Any>,
 ) {
     //If path is a single file or a special directory, read it as single datum
     if (!Files.isDirectory(path) || Files.list(path).allMatch { it.fileName.toString().startsWith("@") }) {
-        plugin.run {
-            val data = readDataFile(path, formatResolver)
-            val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string
-                ?: path.fileName.toString().replace(".df", "")
-            data(name, data)
-        }
+        val data = readDataFile(path, formatResolver)
+        val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string
+            ?: path.fileName.toString().replace(".df", "")
+        data(name, data)
     } else {
         //otherwise, read as directory
-        plugin.run {
-            val data = readDataDirectory(path, formatResolver)
-            val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string
-                ?: path.fileName.toString().replace(".df", "")
-            node(name, data)
-        }
+        val data = readDataDirectory(path, formatResolver)
+        val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string
+            ?: path.fileName.toString().replace(".df", "")
+        node(name, data)
     }
 }
 
@@ -97,10 +70,10 @@ public suspend fun <T : Any> DataSetBuilder<T>.file(
  * Read the directory as a data node. If [path] is a zip archive, read it as directory
  */
 @DFExperimental
-public suspend fun <T : Any> IOPlugin.readDataDirectory(
+public fun IOPlugin.readDataDirectory(
     path: Path,
-    formatResolver: FileFormatResolver<T>,
-): DataTree<T> {
+    formatResolver: FileFormatResolver<Any>,
+): DataTree<Any> {
     //read zipped data node
     if (path.fileName != null && path.fileName.toString().endsWith(".zip")) {
         //Using explicit Zip file system to avoid bizarre compatibility bugs
@@ -108,23 +81,17 @@ public suspend fun <T : Any> IOPlugin.readDataDirectory(
         return readDataDirectory(fs.rootDirectories.first(), formatResolver)
     }
     if (!Files.isDirectory(path)) error("Provided path $path is not a directory")
-    return DataTree(formatResolver.type) {
+    return DataTree<Any> {
         Files.list(path).toList().forEach { path ->
             val fileName = path.fileName.toString()
             if (fileName.startsWith(IOPlugin.META_FILE_NAME)) {
                 meta(readMetaFile(path))
             } else if (!fileName.startsWith("@")) {
-                runBlocking {
-                    file(this@readDataDirectory, path, formatResolver)
-                }
+                file(path, formatResolver)
             }
         }
     }
 }
-
-@DFExperimental
-public suspend inline fun <reified T : Any> IOPlugin.readDataDirectory(path: Path): DataTree<T> =
-    readDataDirectory(path, formatResolver())
 
 /**
  * Write data tree to existing directory or create a new one using default [java.nio.file.FileSystem] provider
@@ -133,7 +100,7 @@ public suspend inline fun <reified T : Any> IOPlugin.readDataDirectory(path: Pat
 public suspend fun <T : Any> IOPlugin.writeDataDirectory(
     path: Path,
     tree: DataTree<T>,
-    format: IOFormat<T>,
+    format: IOWriter<T>,
     envelopeFormat: EnvelopeFormat? = null,
     metaFormat: MetaFormatFactory? = null,
 ) {
@@ -179,11 +146,9 @@ private suspend fun <T : Any> ZipOutputStream.writeNode(
                 val envelope = treeItem.data.toEnvelope(dataFormat)
                 val entry = ZipEntry(name)
                 putNextEntry(entry)
-                envelopeFormat.run {
-                    asOutput().run {
-                        writeEnvelope(this, envelope)
-                        flush()
-                    }
+                asOutput().run {
+                    envelopeFormat.writeEnvelope(this, envelope)
+                    flush()
                 }
             }
             is DataTreeItem.Node -> {

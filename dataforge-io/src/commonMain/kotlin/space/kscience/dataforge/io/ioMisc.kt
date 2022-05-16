@@ -183,7 +183,7 @@ public fun Input.discardWithSeparator(
     atMost: Int = Int.MAX_VALUE,
     skipUntilEndOfLine: Boolean = false,
 ): Int {
-    val dummy: Output = object :Output(ChunkBuffer.Pool){
+    val dummy: Output = object : Output(ChunkBuffer.Pool) {
         override fun closeDestination() {
             // Do nothing
         }

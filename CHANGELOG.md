@@ -17,6 +17,8 @@
 - `ActiveDataSet` renamed to `DataSource`
 - `selectOne`->`getByType`
 - Data traversal in `DataSet` is done via iterator
+- Remove all unnecessary properties for `IOFormat`
+- Separate interfaces for `IOReader` and `IOWriter`
 
 ### Deprecated
 

@@ -9,12 +9,8 @@ import space.kscience.dataforge.io.IOFormat
 import space.kscience.dataforge.io.io
 import space.kscience.dataforge.io.readUtf8String
 import space.kscience.dataforge.io.writeUtf8String
-import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -35,8 +31,6 @@ class FileDataTest {
 
     object StringIOFormat : IOFormat<String> {
 
-        override val type: KType = typeOf<String>()
-
         override fun writeObject(output: Output, obj: String) {
             output.writeUtf8String(obj)
         }
@@ -44,17 +38,6 @@ class FileDataTest {
         override fun readObject(input: Input): String {
             return input.readUtf8String()
         }
-
-        override fun toMeta(): Meta = Meta {
-            IOFormat.NAME_KEY put "string"
-        }
-
-    }
-
-    object StringFormatResolver : FileFormatResolver<String> {
-        override val type: KType = typeOf<String>()
-
-        override fun invoke(path: Path, meta: Meta): IOFormat<String> = StringIOFormat
 
     }
 
@@ -66,7 +49,7 @@ class FileDataTest {
             runBlocking {
                 writeDataDirectory(dir, dataNode, StringIOFormat)
                 println(dir.toUri().toString())
-                val reconstructed = readDataDirectory(dir, StringFormatResolver)
+                val reconstructed = readDataDirectory(dir) { _, _ -> StringIOFormat }
                 assertEquals(dataNode["dir.a"]?.meta, reconstructed["dir.a"]?.meta)
                 assertEquals(dataNode["b"]?.await(), reconstructed["b"]?.await())
             }
@@ -82,7 +65,7 @@ class FileDataTest {
             runBlocking {
                 writeZip(zip, dataNode, StringIOFormat)
                 println(zip.toUri().toString())
-                val reconstructed = readDataDirectory(zip, StringFormatResolver)
+                val reconstructed = readDataDirectory(zip) { _, _ -> StringIOFormat }
                 assertEquals(dataNode["dir.a"]?.meta, reconstructed["dir.a"]?.meta)
                 assertEquals(dataNode["b"]?.await(), reconstructed["b"]?.await())
             }

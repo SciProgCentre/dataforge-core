@@ -17,8 +17,6 @@ import kotlin.reflect.typeOf
 public data class PartialEnvelope(val meta: Meta, val dataOffset: Int, val dataSize: ULong?)
 
 public interface EnvelopeFormat : IOFormat<Envelope> {
-    override val type: KType get() = typeOf<Envelope>()
-
     public val defaultMetaFormat: MetaFormatFactory get() = JsonMetaFormat
 
     public fun readPartial(input: Input): PartialEnvelope

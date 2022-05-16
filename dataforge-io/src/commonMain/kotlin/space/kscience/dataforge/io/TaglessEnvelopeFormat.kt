@@ -3,8 +3,6 @@ package space.kscience.dataforge.io
 import io.ktor.utils.io.core.*
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
-import space.kscience.dataforge.io.IOFormat.Companion.META_KEY
-import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.isEmpty
@@ -50,11 +48,11 @@ public class TaglessEnvelopeFormat(
 
         //Printing meta
         if (!envelope.meta.isEmpty()) {
-            val metaBytes = metaFormat.toBinary(envelope.meta)
+            val metaBinary = Binary(envelope.meta, metaFormat)
             output.writeProperty(META_LENGTH_PROPERTY,
-                metaBytes.size + 2)
+                metaBinary.size + 2)
             output.writeUtf8String(this.metaStart + "\r\n")
-            output.writeBinary(metaBytes)
+            output.writeBinary(metaBinary)
             output.writeRawString("\r\n")
         }
 
@@ -102,7 +100,7 @@ public class TaglessEnvelopeFormat(
             val metaFormat = properties[META_TYPE_PROPERTY]?.let { io.resolveMetaFormat(it) } ?: JsonMetaFormat
             val metaSize = properties[META_LENGTH_PROPERTY]?.toInt()
             meta = if (metaSize != null) {
-                metaFormat.readObject(input.readBinary(metaSize))
+                metaFormat.readObjectFrom(input.readBinary(metaSize))
             } else {
                 error("Can't partially read an envelope with undefined meta size")
             }
@@ -170,7 +168,7 @@ public class TaglessEnvelopeFormat(
             val metaSize = properties[META_LENGTH_PROPERTY]?.toInt()
             meta = if (metaSize != null) {
                 offset += metaSize
-                metaFormat.readObject(input.readBinary(metaSize))
+                metaFormat.readObjectFrom(input.readBinary(metaSize))
             } else {
                 error("Can't partially read an envelope with undefined meta size")
             }
@@ -185,11 +183,6 @@ public class TaglessEnvelopeFormat(
 
         val dataSize = properties[DATA_LENGTH_PROPERTY]?.toULong()
         return PartialEnvelope(meta, offset, dataSize)
-    }
-
-    override fun toMeta(): Meta = Meta {
-        NAME_KEY put name.toString()
-        META_KEY put meta
     }
 
     public companion object : EnvelopeFormatFactory {

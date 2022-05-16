@@ -8,28 +8,19 @@ import io.ktor.utils.io.core.Output
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import space.kscience.dataforge.context.Context
-import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.toJson
 import space.kscience.dataforge.meta.toMeta
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
 
 /**
  * A Json format for Meta representation
  */
 public class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat {
 
-    override val type: KType get() = typeOf<Meta>()
-
     override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?) {
         val jsonObject = meta.toJson(descriptor)
         output.writeUtf8String(json.encodeToString(JsonObject.serializer(), jsonObject))
-    }
-
-    override fun toMeta(): Meta = Meta {
-        NAME_KEY put name.toString()
     }
 
     override fun readMeta(input: Input, descriptor: MetaDescriptor?): Meta {

@@ -20,7 +20,6 @@ import kotlin.reflect.typeOf
  * A format for meta serialization
  */
 public interface MetaFormat : IOFormat<Meta> {
-    override val type: KType get() = typeOf<Meta>()
 
     override fun writeObject(output: Output, obj: Meta) {
         writeMeta(output, obj, null)

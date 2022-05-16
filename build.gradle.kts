@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("ru.mipt.npm.gradle.project")
 }
@@ -5,6 +7,12 @@ plugins {
 allprojects {
     group = "space.kscience"
     version = "0.6.0-dev-7"
+
+    tasks.withType<KotlinCompile>{
+        kotlinOptions{
+            freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
+        }
+    }
 }
 
 subprojects {
