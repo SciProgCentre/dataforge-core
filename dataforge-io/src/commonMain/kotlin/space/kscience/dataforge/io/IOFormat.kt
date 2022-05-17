@@ -44,7 +44,7 @@ public fun <T : Any> Binary.readWith(format: IOReader<T>): T = read {
 }
 
 public fun <T : Any> Output.writeObject(format: IOWriter<T>, obj: T): Unit =
-    format.run { writeObject(this@writeObject, obj) }
+    format.writeObject(this@writeObject, obj)
 
 
 @Type(IO_FORMAT_TYPE)

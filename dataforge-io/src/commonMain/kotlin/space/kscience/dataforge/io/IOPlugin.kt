@@ -53,13 +53,16 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     override fun content(target: String): Map<Name, Any> = when (target) {
         META_FORMAT_TYPE -> defaultMetaFormats.toMap()
         ENVELOPE_FORMAT_TYPE -> defaultEnvelopeFormats.toMap()
+        IO_FORMAT_TYPE -> content(META_FORMAT_TYPE) + content(ENVELOPE_FORMAT_TYPE)
         else -> super.content(target)
     }
 
     public companion object : PluginFactory<IOPlugin> {
         public val defaultMetaFormats: List<MetaFormatFactory> = listOf(JsonMetaFormat)
-        public val defaultEnvelopeFormats: List<EnvelopeFormatFactory> =
-            listOf(TaggedEnvelopeFormat, TaglessEnvelopeFormat)
+        public val defaultEnvelopeFormats: List<EnvelopeFormatFactory> = listOf(
+            TaggedEnvelopeFormat,
+            TaglessEnvelopeFormat
+        )
 
         override val tag: PluginTag = PluginTag("io", group = PluginTag.DATAFORGE_GROUP)
 
