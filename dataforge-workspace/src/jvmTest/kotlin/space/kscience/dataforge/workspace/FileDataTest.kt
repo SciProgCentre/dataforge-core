@@ -64,7 +64,7 @@ class FileDataTest {
         Global.io.run {
             val zip = Files.createTempFile("df_data_node", ".zip")
             runBlocking {
-                FileData.writeZip(zip, dataNode, StringIOFormat)
+                dataNode.writeZip(zip, StringIOFormat)
                 println(zip.toUri().toString())
                 val reconstructed = readDataDirectory(zip) { _, _ -> StringIOFormat }
                 assertEquals(dataNode["dir.a"]?.meta?.get("content"), reconstructed["dir.a"]?.meta?.get("content"))

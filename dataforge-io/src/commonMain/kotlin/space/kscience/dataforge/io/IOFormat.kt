@@ -27,7 +27,7 @@ public interface IOReader<out T> {
     public fun readObject(input: Input): T
 }
 
-public inline fun <reified T : Any> IOReader(crossinline read: Input.() -> T): IOReader<T> = object : IOReader<T> {
+public inline fun <reified T> IOReader(crossinline read: Input.() -> T): IOReader<T> = object : IOReader<T> {
     override val type: KType = typeOf<T>()
 
     override fun readObject(input: Input): T = input.read()
@@ -41,7 +41,7 @@ public fun interface IOWriter<in T> {
 /**
  * And interface for reading and writing objects into with IO streams
  */
-public interface IOFormat<T : Any> : IOReader<T>, IOWriter<T>
+public interface IOFormat<T> : IOReader<T>, IOWriter<T>
 
 public fun <T : Any> Input.readObject(format: IOReader<T>): T = format.readObject(this@readObject)
 
