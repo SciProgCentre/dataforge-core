@@ -1,5 +1,6 @@
 package space.kscience.dataforge.workspace
 
+import kotlinx.serialization.KSerializer
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.ContextBuilder
 import space.kscience.dataforge.context.Global
@@ -37,25 +38,34 @@ public interface TaskContainer {
 
 public inline fun <reified T : Any> TaskContainer.registerTask(
     name: String,
+    resultSerializer: KSerializer<T>? = null,
     noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
-): Unit = registerTask(Name.parse(name), Task(MetaDescriptor(descriptorBuilder), builder))
+) {
+    val descriptor = MetaDescriptor(descriptorBuilder)
+    val task = if (resultSerializer == null) Task(descriptor, builder) else
+        SerializableResultTask(resultSerializer, descriptor, builder)
+    registerTask(Name.parse(name), task)
+}
 
 public inline fun <reified T : Any> TaskContainer.task(
     descriptor: MetaDescriptor,
+    resultSerializer: KSerializer<T>? = null,
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
     val taskName = Name.parse(property.name)
-    val task = Task(descriptor, builder)
+    val task = if (resultSerializer == null) Task(descriptor, builder) else
+        SerializableResultTask(resultSerializer, descriptor, builder)
     registerTask(taskName, task)
     ReadOnlyProperty { _, _ -> TaskReference(taskName, task) }
 }
 
 public inline fun <reified T : Any> TaskContainer.task(
+    resultSerializer: KSerializer<T>? = null,
     noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> =
-    task(MetaDescriptor(descriptorBuilder), builder)
+    task(MetaDescriptor(descriptorBuilder), resultSerializer, builder)
 
 public class WorkspaceBuilder(private val parentContext: Context = Global) : TaskContainer {
     private var context: Context? = null

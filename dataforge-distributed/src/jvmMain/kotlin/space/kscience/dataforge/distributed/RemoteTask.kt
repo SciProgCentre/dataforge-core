@@ -1,13 +1,13 @@
 package space.kscience.dataforge.distributed
 
-import io.lambdarpc.dsl.ServiceDispatcher
+import io.lambdarpc.context.ServiceDispatcher
 import io.lambdarpc.utils.Endpoint
 import kotlinx.coroutines.withContext
-import space.kscience.dataforge.data.DataSet
+import kotlinx.serialization.KSerializer
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.workspace.Task
+import space.kscience.dataforge.workspace.SerializableResultTask
 import space.kscience.dataforge.workspace.TaskResult
 import space.kscience.dataforge.workspace.Workspace
 import space.kscience.dataforge.workspace.wrapResult
@@ -17,20 +17,20 @@ import kotlin.reflect.KType
  * Proxy task that communicates with the corresponding remote task.
  */
 internal class RemoteTask<T : Any>(
-    endpoint: Endpoint,
+    internal val endpoint: Endpoint,
     override val resultType: KType,
+    override val resultSerializer: KSerializer<T>,
     override val descriptor: MetaDescriptor? = null,
-) : Task<T> {
+    private val taskRegistry: TaskRegistry? = null,
+) : SerializableResultTask<T> {
     private val dispatcher = ServiceDispatcher(ServiceWorkspace.serviceId to endpoint)
 
-    @Suppress("UNCHECKED_CAST")
-    override suspend fun execute(
-        workspace: Workspace,
-        taskName: Name,
-        taskMeta: Meta,
-    ): TaskResult<T> = withContext(dispatcher) {
-        val dataset = ServiceWorkspace.execute(taskName)
-        dataset.finishDecoding(resultType)
-        workspace.wrapResult(dataset as DataSet<T>, taskName, taskMeta)
+    override suspend fun execute(workspace: Workspace, taskName: Name, taskMeta: Meta): TaskResult<T> {
+        val registry = taskRegistry ?: TaskRegistry(workspace.tasks)
+        val result = withContext(dispatcher) {
+            ServiceWorkspace.execute(taskName, taskMeta, registry)
+        }
+        val dataSet = result.toDataSet(resultType, resultSerializer)
+        return workspace.wrapResult(dataSet, taskName, taskMeta)
     }
 }

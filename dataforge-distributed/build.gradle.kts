@@ -15,7 +15,8 @@ kotlin {
         jvmMain {
             dependencies {
                 // TODO include fat jar of lambdarpc
-                api(files("lambdarpc-core-0.0.1.jar"))
+                val path = "../../../lambdarpc/LambdaRPC.kt/lambdarpc-core/build/libs"
+                api(files("$path/lambdarpc-core-0.0.1-SNAPSHOT.jar"))
                 runtimeOnly("io.grpc:grpc-netty-shaded:1.44.0")
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
                 api("io.grpc:grpc-protobuf:1.44.0")

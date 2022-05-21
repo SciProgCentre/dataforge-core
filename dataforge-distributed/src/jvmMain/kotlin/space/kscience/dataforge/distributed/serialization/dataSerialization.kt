@@ -21,11 +21,11 @@ internal data class DataPrototype(
     val meta: String,
     val data: String,
 ) {
-    fun toData(type: KType): Data<Any> =
+    fun <T : Any> toData(type: KType, serializer: KSerializer<T>): Data<T> =
         SimpleData(
             type = type,
             meta = Json.decodeFromString(MetaSerializer, meta),
-            data = Json.decodeFromString(kotlinx.serialization.serializer(type), data)!!
+            data = Json.decodeFromString(serializer, data)
         )
 
     companion object {
