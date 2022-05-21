@@ -9,8 +9,11 @@ import space.kscience.dataforge.io.IOFormat
 import space.kscience.dataforge.io.io
 import space.kscience.dataforge.io.readUtf8String
 import space.kscience.dataforge.io.writeUtf8String
+import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -30,15 +33,13 @@ class FileDataTest {
 
 
     object StringIOFormat : IOFormat<String> {
+        override val type: KType get() = typeOf<String>()
 
         override fun writeObject(output: Output, obj: String) {
             output.writeUtf8String(obj)
         }
 
-        override fun readObject(input: Input): String {
-            return input.readUtf8String()
-        }
-
+        override fun readObject(input: Input): String = input.readUtf8String()
     }
 
     @Test
@@ -50,7 +51,7 @@ class FileDataTest {
                 writeDataDirectory(dir, dataNode, StringIOFormat)
                 println(dir.toUri().toString())
                 val reconstructed = readDataDirectory(dir) { _, _ -> StringIOFormat }
-                assertEquals(dataNode["dir.a"]?.meta, reconstructed["dir.a"]?.meta)
+                assertEquals(dataNode["dir.a"]?.meta?.get("content"), reconstructed["dir.a"]?.meta?.get("content"))
                 assertEquals(dataNode["b"]?.await(), reconstructed["b"]?.await())
             }
         }
@@ -63,10 +64,10 @@ class FileDataTest {
         Global.io.run {
             val zip = Files.createTempFile("df_data_node", ".zip")
             runBlocking {
-                writeZip(zip, dataNode, StringIOFormat)
+                FileData.writeZip(zip, dataNode, StringIOFormat)
                 println(zip.toUri().toString())
                 val reconstructed = readDataDirectory(zip) { _, _ -> StringIOFormat }
-                assertEquals(dataNode["dir.a"]?.meta, reconstructed["dir.a"]?.meta)
+                assertEquals(dataNode["dir.a"]?.meta?.get("content"), reconstructed["dir.a"]?.meta?.get("content"))
                 assertEquals(dataNode["b"]?.await(), reconstructed["b"]?.await())
             }
         }

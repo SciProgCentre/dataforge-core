@@ -1,3 +1,5 @@
+@file:OptIn(DFExperimental::class)
+
 package space.kscience.dataforge.io.yaml
 
 import space.kscience.dataforge.context.Context
@@ -6,6 +8,7 @@ import space.kscience.dataforge.io.readEnvelope
 import space.kscience.dataforge.io.toByteArray
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
+import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

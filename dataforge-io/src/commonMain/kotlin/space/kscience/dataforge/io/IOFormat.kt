@@ -15,12 +15,25 @@ import space.kscience.dataforge.names.asName
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
-public fun interface IOReader<out T : Any> {
+/**
+ * Reader of a custom object from input
+ */
+public interface IOReader<out T> {
+    /**
+     * The type of object being read
+     */
+    public val type: KType
 
     public fun readObject(input: Input): T
 }
 
-public fun interface IOWriter<in T : Any> {
+public inline fun <reified T : Any> IOReader(crossinline read: Input.() -> T): IOReader<T> = object : IOReader<T> {
+    override val type: KType = typeOf<T>()
+
+    override fun readObject(input: Input): T = input.read()
+}
+
+public fun interface IOWriter<in T> {
     public fun writeObject(output: Output, obj: T)
 }
 

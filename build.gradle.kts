@@ -6,17 +6,17 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.6.0-dev-8"
+    version = "0.6.0-dev-9"
+}
+
+subprojects {
+    apply(plugin = "maven-publish")
 
     tasks.withType<KotlinCompile>{
         kotlinOptions{
             freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
         }
     }
-}
-
-subprojects {
-    apply(plugin = "maven-publish")
 }
 
 readme {
