@@ -18,7 +18,7 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":dataforge-context"))
-                api("io.ktor:ktor-io:${ru.mipt.npm.gradle.KScienceVersions.ktorVersion}")
+                api(npmlibs.ktor.io)
             }
         }
     }

@@ -18,7 +18,7 @@ public interface PluginFactory<T : Plugin> : Factory<T> {
  * Plugin factory created for the specific actual plugin
  */
 internal class DeFactoPluginFactory<T : Plugin>(val plugin: T) : PluginFactory<T> {
-    override fun invoke(meta: Meta, context: Context): T = plugin
+    override fun build(context: Context, meta: Meta): T = plugin
     override val tag: PluginTag get() = plugin.tag
     override val type: KClass<out T> get() = plugin::class
 }

@@ -154,7 +154,7 @@ public inline fun <T : Scheme> T.copy(spec: SchemeSpec<T>, block: T.() -> Unit =
  */
 public open class SchemeSpec<out T : Scheme>(
     private val builder: () -> T,
-) : Specification<T>, Described {
+) : Specification<T> {
 
     override fun read(source: Meta): T = builder().also {
         it.wrap(MutableMeta().withDefault(source))

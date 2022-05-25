@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
  * Make a fake-factory for a one single plugin. Useful for unique or test plugins
  */
 public inline fun <reified P : Plugin> P.toFactory(): PluginFactory<P> = object : PluginFactory<P> {
-    override fun invoke(meta: Meta, context: Context): P = this@toFactory
+    override fun build(context: Context, meta: Meta): P = this@toFactory
 
     override val tag: PluginTag = this@toFactory.tag
     override val type: KClass<out P> = P::class

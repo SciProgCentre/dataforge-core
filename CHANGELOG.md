@@ -2,8 +2,11 @@
 
 ## [Unreleased]
 ### Added
+- Add `specOrNull` delegate to meta and Scheme
+- Suspended read methods to the `Binary`
 
 ### Changed
+- `Factory` is now `fun interface` and uses `build` instead of `invoke`. `invoke moved to an extension.
 
 ### Deprecated
 

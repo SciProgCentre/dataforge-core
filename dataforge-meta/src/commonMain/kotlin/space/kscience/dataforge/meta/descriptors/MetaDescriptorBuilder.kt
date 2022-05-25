@@ -10,7 +10,7 @@ import space.kscience.dataforge.values.ValueType
 import space.kscience.dataforge.values.asValue
 import kotlin.collections.set
 
-public class MetaDescriptorBuilder internal constructor() {
+public class MetaDescriptorBuilder  @PublishedApi internal constructor() {
     public var info: String? = null
     public var children: MutableMap<String, MetaDescriptorBuilder> = linkedMapOf()
     public var multiple: Boolean = false
@@ -78,6 +78,7 @@ public class MetaDescriptorBuilder internal constructor() {
         allowedValues = values.map { Value.of(it) }
     }
 
+    @PublishedApi
     internal fun build(): MetaDescriptor = MetaDescriptor(
         info = info,
         children = children.mapValues { it.value.build() },
@@ -93,7 +94,7 @@ public class MetaDescriptorBuilder internal constructor() {
 public fun MetaDescriptorBuilder.item(name: String, block: MetaDescriptorBuilder.() -> Unit): MetaDescriptorBuilder =
     item(Name.parse(name), block)
 
-public fun MetaDescriptor(block: MetaDescriptorBuilder.() -> Unit): MetaDescriptor =
+public inline fun MetaDescriptor(block: MetaDescriptorBuilder.() -> Unit): MetaDescriptor =
     MetaDescriptorBuilder().apply(block).build()
 
 /**

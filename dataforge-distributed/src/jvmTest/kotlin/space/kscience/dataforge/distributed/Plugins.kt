@@ -28,13 +28,13 @@ internal class MyPlugin1 : WorkspacePlugin() {
     }
 
     companion object Factory : PluginFactory<MyPlugin1> {
-        override fun invoke(meta: Meta, context: Context): MyPlugin1 = MyPlugin1()
-
         override val tag: PluginTag
             get() = PluginTag("Plg1")
 
         override val type: KClass<out MyPlugin1>
             get() = MyPlugin1::class
+
+        override fun build(context: Context, meta: Meta): MyPlugin1 = MyPlugin1()
     }
 }
 
@@ -50,12 +50,12 @@ internal class MyPlugin2 : WorkspacePlugin() {
     }
 
     companion object Factory : PluginFactory<MyPlugin2> {
-        override fun invoke(meta: Meta, context: Context): MyPlugin2 = MyPlugin2()
-
         override val tag: PluginTag
             get() = PluginTag("Plg2")
 
         override val type: KClass<out MyPlugin2>
             get() = MyPlugin2::class
+
+        override fun build(context: Context, meta: Meta): MyPlugin2 = MyPlugin2()
     }
 }

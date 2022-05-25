@@ -2,6 +2,9 @@ package space.kscience.dataforge.data
 
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Coroutine context element that provides logging capabilities
+ */
 public interface GoalLogger : CoroutineContext.Element {
     override val key: CoroutineContext.Key<*> get() = GoalLogger
 

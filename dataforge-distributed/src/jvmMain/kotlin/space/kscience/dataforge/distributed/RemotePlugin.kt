@@ -2,9 +2,11 @@ package space.kscience.dataforge.distributed
 
 import io.lambdarpc.utils.Endpoint
 import space.kscience.dataforge.context.AbstractPlugin
+import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.context.Plugin
 import space.kscience.dataforge.context.PluginFactory
 import space.kscience.dataforge.context.PluginTag
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.workspace.SerializableResultTask
 import space.kscience.dataforge.workspace.Task
@@ -16,7 +18,8 @@ import space.kscience.dataforge.workspace.Task
  */
 public class RemotePlugin<P : Plugin>(private val plugin: P, private val endpoint: String) : AbstractPlugin() {
 
-    public constructor(factory: PluginFactory<P>, endpoint: String) : this(factory(), endpoint)
+    // TODO
+    public constructor(factory: PluginFactory<P>, endpoint: String) : this(factory.build(Global, Meta.EMPTY), endpoint)
 
     override val tag: PluginTag
         get() = plugin.tag

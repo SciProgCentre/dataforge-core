@@ -41,7 +41,7 @@ public class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat 
     public companion object : MetaFormatFactory {
         public val DEFAULT_JSON: Json = Json { prettyPrint = true }
 
-        override fun invoke(meta: Meta, context: Context): MetaFormat = default
+        override fun build(context: Context, meta: Meta): MetaFormat = default
 
         override val shortName: String = "json"
         override val key: Short = 0x4a53//"JS"

@@ -9,7 +9,9 @@ import space.kscience.dataforge.data.DataSet
 import space.kscience.dataforge.data.DataSetBuilder
 import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.MetaRepr
 import space.kscience.dataforge.meta.MutableMeta
+import space.kscience.dataforge.meta.Specification
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFBuilder
@@ -29,13 +31,16 @@ public data class TaskReference<T : Any>(public val taskName: Name, public val t
             error("Task $taskName does not belong to the workspace")
         }
     }
-
 }
 
 public interface TaskContainer {
+    /**
+     * Register task in container
+     */
     public fun registerTask(taskName: Name, task: Task<*>)
 }
 
+@Deprecated("use buildTask instead", ReplaceWith("buildTask(name, descriptorBuilder, builder)"))
 public inline fun <reified T : Any> TaskContainer.registerTask(
     name: String,
     resultSerializer: KSerializer<T>? = null,
@@ -48,6 +53,18 @@ public inline fun <reified T : Any> TaskContainer.registerTask(
     registerTask(Name.parse(name), task)
 }
 
+public inline fun <reified T : Any> TaskContainer.buildTask(
+    name: String,
+    descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
+    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+): TaskReference<T> {
+    val theName = Name.parse(name)
+    val descriptor = MetaDescriptor(descriptorBuilder)
+    val task = Task(descriptor, builder)
+    registerTask(theName, task)
+    return TaskReference(theName, task)
+}
+
 public inline fun <reified T : Any> TaskContainer.task(
     descriptor: MetaDescriptor,
     resultSerializer: KSerializer<T>? = null,
@@ -56,6 +73,16 @@ public inline fun <reified T : Any> TaskContainer.task(
     val taskName = Name.parse(property.name)
     val task = if (resultSerializer == null) Task(descriptor, builder) else
         SerializableResultTask(resultSerializer, descriptor, builder)
+    registerTask(taskName, task)
+    ReadOnlyProperty { _, _ -> TaskReference(taskName, task) }
+}
+
+public inline fun <reified T : Any, C : MetaRepr> TaskContainer.task(
+    specification: Specification<C>,
+    noinline builder: suspend TaskResultBuilder<T>.(C) -> Unit,
+): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
+    val taskName = Name.parse(property.name)
+    val task = Task(specification, builder)
     registerTask(taskName, task)
     ReadOnlyProperty { _, _ -> TaskReference(taskName, task) }
 }

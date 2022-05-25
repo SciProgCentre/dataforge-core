@@ -2,6 +2,7 @@ package space.kscience.dataforge.io
 
 import io.ktor.utils.io.core.*
 import space.kscience.dataforge.context.Context
+import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.io.IOFormat.Companion.META_KEY
 import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.meta.Meta
@@ -34,7 +35,7 @@ public class TaglessEnvelopeFormat(
         metaFormatFactory: MetaFormatFactory,
         formatMeta: Meta
     ) {
-        val metaFormat = metaFormatFactory(formatMeta, this.io.context)
+        val metaFormat = metaFormatFactory.build(this.io.context, formatMeta)
 
         //printing header
         output.writeRawString(TAGLESS_ENVELOPE_HEADER + "\r\n")
@@ -193,9 +194,9 @@ public class TaglessEnvelopeFormat(
 
         override val name: Name = TAGLESS_ENVELOPE_TYPE.asName()
 
-        override fun invoke(meta: Meta, context: Context): EnvelopeFormat = TaglessEnvelopeFormat(context.io, meta)
+        override fun build(context: Context, meta: Meta): EnvelopeFormat = TaglessEnvelopeFormat(context.io, meta)
 
-        private val default by lazy { invoke() }
+        private val default by lazy { build(Global, Meta.EMPTY) }
 
         override fun readPartial(input: Input): PartialEnvelope =
             default.run { readPartial(input) }

@@ -102,7 +102,7 @@ public interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named, MetaRep
 public fun <T : Any> IOFormat<T>.toBinary(obj: T): Binary = Binary { writeObject(this, obj) }
 
 public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
-    override fun invoke(meta: Meta, context: Context): IOFormat<Double> = this
+    override fun build(context: Context, meta: Meta): IOFormat<Double> = this
 
     override val name: Name = "double".asName()
 

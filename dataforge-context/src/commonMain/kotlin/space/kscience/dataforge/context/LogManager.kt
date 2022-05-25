@@ -63,7 +63,7 @@ public class DefaultLogManager : AbstractPlugin(), LogManager {
     override val tag: PluginTag get() = Companion.tag
 
     public companion object : PluginFactory<DefaultLogManager> {
-        override fun invoke(meta: Meta, context: Context): DefaultLogManager = DefaultLogManager()
+        override fun build(context: Context, meta: Meta): DefaultLogManager = DefaultLogManager()
 
         override val tag: PluginTag = PluginTag(group = PluginTag.DATAFORGE_GROUP, name = "log.default")
         override val type: KClass<out DefaultLogManager> = DefaultLogManager::class
@@ -75,7 +75,7 @@ public class DefaultLogManager : AbstractPlugin(), LogManager {
  */
 public val Context.logger: LogManager
     get() = plugins.find(inherit = true) { it is LogManager } as? LogManager
-        ?: getGlobalLoggerFactory()(context = Global).apply { attach(Global) }
+        ?: getGlobalLoggerFactory().build(context = Global, meta = Meta.EMPTY).apply { attach(Global) }
 
 /**
  * The named proxy logger for a context member

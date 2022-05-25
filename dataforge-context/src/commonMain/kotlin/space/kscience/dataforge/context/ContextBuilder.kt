@@ -68,7 +68,7 @@ public class ContextBuilder internal constructor(
             // Add if does not exist
             if (existing == null) {
                 //TODO bypass if parent already has plugin with given meta?
-                val plugin = factory(meta, parent)
+                val plugin = factory.build(parent, meta)
 
                 for ((depFactory, deoMeta) in plugin.dependsOn()) {
                     addPlugin(depFactory, deoMeta)

@@ -5,6 +5,7 @@ import io.ktor.utils.io.core.Input
 import io.ktor.utils.io.core.Output
 import io.ktor.utils.io.core.use
 import space.kscience.dataforge.context.Context
+import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
@@ -46,7 +47,7 @@ public interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
 
     public val key: Short get() = name.hashCode().toShort()
 
-    override operator fun invoke(meta: Meta, context: Context): MetaFormat
+    override fun build(context: Context, meta: Meta): MetaFormat
 
     public companion object {
         public const val META_FORMAT_TYPE: String = "io.format.meta"
@@ -59,12 +60,12 @@ public fun Meta.toString(format: MetaFormat): String = buildByteArray {
     }
 }.decodeToString()
 
-public fun Meta.toString(formatFactory: MetaFormatFactory): String = toString(formatFactory())
+public fun Meta.toString(formatFactory: MetaFormatFactory): String = toString(formatFactory.build(Global, Meta.EMPTY))
 
 public fun MetaFormat.parse(str: String): Meta {
     return ByteReadPacket(str.encodeToByteArray()).use { readObject(it) }
 }
 
-public fun MetaFormatFactory.parse(str: String, formatMeta: Meta): Meta = invoke(formatMeta).parse(str)
+public fun MetaFormatFactory.parse(str: String, formatMeta: Meta): Meta = build(Global, formatMeta).parse(str)
 
 

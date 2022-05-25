@@ -1,12 +1,13 @@
 package space.kscience.dataforge.meta
 
+import space.kscience.dataforge.meta.descriptors.Described
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-public interface ReadOnlySpecification<out T : Any> {
+public interface ReadOnlySpecification<out T : Any>: Described {
 
     /**
      * Read generic read-only meta with this [Specification] producing instance of desired type.
@@ -43,7 +44,7 @@ public interface Specification<out T : Any> : ReadOnlySpecification<T> {
  */
 public fun <T : Any> MutableMeta.updateWith(
     spec: Specification<T>,
-    action: T.() -> Unit
+    action: T.() -> Unit,
 ): T = spec.write(this).apply(action)
 
 
@@ -81,6 +82,31 @@ public fun <T : Scheme> Scheme.spec(
     spec: Specification<T>,
     key: Name? = null,
 ): ReadWriteProperty<Any?, T> = meta.spec(spec, key)
+
+/**
+ * A delegate that uses a [Specification] to wrap a child of this provider.
+ * Returns null if meta with given name does not exist.
+ */
+public fun <T : Scheme> MutableMeta.specOrNull(
+    spec: Specification<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, T?> = object : ReadWriteProperty<Any?, T?> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
+        val name = key ?: property.name.asName()
+        return if (get(name) == null) null else spec.write(getOrCreate(name))
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+        val name = key ?: property.name.asName()
+        if (value == null) remove(name)
+        else set(name, value.toMeta())
+    }
+}
+
+public fun <T : Scheme> Scheme.specOrNull(
+    spec: Specification<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, T?> = meta.specOrNull(spec, key)
 
 /**
  * A delegate that uses a [Specification] to wrap a list of child providers.

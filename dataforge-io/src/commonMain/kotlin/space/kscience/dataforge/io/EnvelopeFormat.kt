@@ -42,7 +42,7 @@ public interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeForm
     override val name: Name get() = "envelope".asName()
     override val type: KType get() = typeOf<Envelope>()
 
-    override fun invoke(meta: Meta, context: Context): EnvelopeFormat
+    override fun build(context: Context, meta: Meta): EnvelopeFormat
 
     /**
      * Try to infer specific format from input and return null if the attempt is failed.

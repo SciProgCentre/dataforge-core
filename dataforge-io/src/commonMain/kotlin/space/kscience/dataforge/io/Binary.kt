@@ -12,11 +12,14 @@ public interface Binary {
 
     public val size: Int
 
+
     /**
      * Read maximum of [atMost] bytes as input from the binary, starting at [offset]. The generated input is always closed
      * when leaving scope, so it could not be leaked outside of scope of [block].
      */
     public fun <R> read(offset: Int = 0, atMost: Int = size - offset, block: Input.() -> R): R
+
+    public suspend fun <R> readSuspend(offset: Int = 0, atMost: Int = size - offset, block: suspend Input.() -> R): R
 
     public companion object {
         public val EMPTY: Binary = ByteArrayBinary(ByteArray(0))
@@ -38,6 +41,21 @@ internal class ByteArrayBinary(
             min(atMost, size - offset)
         )
         return input.use(block)
+    }
+
+    override suspend fun <R> readSuspend(offset: Int, atMost: Int, block: suspend Input.() -> R): R {
+        require(offset >= 0) { "Offset must be positive" }
+        require(offset < array.size) { "Offset $offset is larger than array size" }
+        val input = ByteReadPacket(
+            array,
+            offset + start,
+            min(atMost, size - offset)
+        )
+        return try {
+            block(input)
+        } finally {
+            input.close()
+        }
     }
 }
 
