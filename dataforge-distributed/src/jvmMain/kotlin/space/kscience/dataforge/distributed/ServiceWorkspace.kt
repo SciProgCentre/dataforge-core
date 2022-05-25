@@ -1,6 +1,7 @@
 package space.kscience.dataforge.distributed
 
 import io.ktor.utils.io.core.*
+import io.lambdarpc.coding.coders.JsonCoder
 import io.lambdarpc.dsl.LibService
 import io.lambdarpc.dsl.def
 import io.lambdarpc.dsl.j
@@ -13,10 +14,8 @@ import space.kscience.dataforge.context.gather
 import space.kscience.dataforge.data.DataSet
 import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.distributed.serialization.DataSetPrototype
-import space.kscience.dataforge.distributed.serialization.MetaCoder
-import space.kscience.dataforge.distributed.serialization.NameCoder
-import space.kscience.dataforge.distributed.serialization.TaskRegistryCoder
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.MetaSerializer
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.workspace.SerializableResultTask
@@ -114,6 +113,9 @@ public class ServiceWorkspace(
 
     public companion object {
         internal val serviceId = ServiceId("d41b95b1-828b-4444-8ff0-6f9c92a79246")
-        internal val execute by serviceId.def(NameCoder, MetaCoder, TaskRegistryCoder, j<DataSetPrototype>())
+        internal val execute by serviceId.def(
+            JsonCoder(Name.serializer()), JsonCoder(MetaSerializer), j<TaskRegistry>(),
+            j<DataSetPrototype>()
+        )
     }
 }
