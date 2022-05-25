@@ -4,6 +4,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import space.kscience.dataforge.context.error
+import space.kscience.dataforge.context.logger
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.meta.Meta
@@ -48,7 +50,7 @@ public class FileData<T> internal constructor(private val data: Data<T>) : Data<
         public val META_FILE_PATH_KEY: Name = META_FILE_KEY + "path"
         public val META_FILE_EXTENSION_KEY: Name = META_FILE_KEY + "extension"
         public val META_FILE_CREATE_TIME_KEY: Name = META_FILE_KEY + "created"
-        public val META_FILE_UPDATE_TIME_KEY: Name = META_FILE_KEY + "update"
+        public val META_FILE_UPDATE_TIME_KEY: Name = META_FILE_KEY + "updated"
     }
 }
 
@@ -229,16 +231,21 @@ public fun <T : Any> DataSetBuilder<T>.file(
     path: Path,
     formatResolver: FileFormatResolver<out T>,
 ) {
-    //If path is a single file or a special directory, read it as single datum
-    if (!Files.isDirectory(path) || Files.list(path).allMatch { it.fileName.toString().startsWith("@") }) {
-        val data = readDataFile(path, formatResolver)
-        val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string ?: path.nameWithoutExtension
-        data(name, data)
-    } else {
-        //otherwise, read as directory
-        val data = readDataDirectory(dataType, path, formatResolver)
-        val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string ?: path.nameWithoutExtension
-        node(name, data)
+    try {
+
+        //If path is a single file or a special directory, read it as single datum
+        if (!Files.isDirectory(path) || Files.list(path).allMatch { it.fileName.toString().startsWith("@") }) {
+            val data = readDataFile(path, formatResolver)
+            val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string ?: path.nameWithoutExtension
+            data(name, data)
+        } else {
+            //otherwise, read as directory
+            val data = readDataDirectory(dataType, path, formatResolver)
+            val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string ?: path.nameWithoutExtension
+            node(name, data)
+        }
+    } catch (ex: Exception) {
+        logger.error { "Failed to read file or directory at $path: ${ex.message}" }
     }
 }
 

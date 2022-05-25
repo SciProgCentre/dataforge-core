@@ -37,7 +37,6 @@ public fun interface IOWriter<in T> {
     public fun writeObject(output: Output, obj: T)
 }
 
-
 /**
  * And interface for reading and writing objects into with IO streams
  */
@@ -83,7 +82,7 @@ public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
 
     override val type: KType get() = typeOf<Double>()
 
-    override fun writeObject(output: Output, obj: kotlin.Double) {
+    override fun writeObject(output: Output, obj: Double) {
         output.writeDouble(obj)
     }
 
