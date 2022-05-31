@@ -24,15 +24,13 @@ internal class RemoteCallTest {
     private lateinit var workspace: Workspace
 
     @BeforeAll
-    fun before() {
+    fun before() = runBlocking {
         worker1 = ServiceWorkspace(
             context = Global.buildContext("worker1".asName()) {
                 plugin(MyPlugin1)
             },
-            data = runBlocking {
-                DataTree<Any> {
-                    static("int", 42)
-                }
+            data = DataTree<Any> {
+                static("int", 42)
             },
         )
         worker1.start()

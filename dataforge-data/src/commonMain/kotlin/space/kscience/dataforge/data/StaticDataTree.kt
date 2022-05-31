@@ -1,9 +1,18 @@
 package space.kscience.dataforge.data
 
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.collect
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.names.*
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.NameToken
+import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.cutFirst
+import space.kscience.dataforge.names.cutLast
+import space.kscience.dataforge.names.firstOrNull
+import space.kscience.dataforge.names.isEmpty
+import space.kscience.dataforge.names.lastOrNull
+import space.kscience.dataforge.names.length
+import space.kscience.dataforge.names.plus
+import kotlin.collections.set
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -62,6 +71,12 @@ internal class StaticDataTree<T : Any>(
 }
 
 @Suppress("FunctionName")
+public fun <T : Any> DataTree(dataType: KType): DataTree<T> = StaticDataTree(dataType)
+
+@Suppress("FunctionName")
+public inline fun <reified T : Any> DataTree(): DataTree<T> = DataTree(typeOf<T>())
+
+@Suppress("FunctionName")
 public suspend fun <T : Any> DataTree(
     dataType: KType,
     block: suspend DataSetBuilder<T>.() -> Unit,
@@ -73,6 +88,6 @@ public suspend inline fun <reified T : Any> DataTree(
 ): DataTree<T> = DataTree(typeOf<T>(), block)
 
 @OptIn(DFExperimental::class)
-public suspend fun <T : Any> DataSet<T>.seal(): DataTree<T> = DataTree(dataType){
+public suspend fun <T : Any> DataSet<T>.seal(): DataTree<T> = DataTree(dataType) {
     populate(this@seal)
 }

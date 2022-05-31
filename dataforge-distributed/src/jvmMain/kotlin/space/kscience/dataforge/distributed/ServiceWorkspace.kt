@@ -1,12 +1,10 @@
 package space.kscience.dataforge.distributed
 
 import io.ktor.utils.io.core.*
-import io.lambdarpc.coding.coders.JsonCoder
 import io.lambdarpc.dsl.LibService
 import io.lambdarpc.dsl.def
 import io.lambdarpc.dsl.j
 import io.lambdarpc.utils.ServiceId
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.KSerializer
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
@@ -32,7 +30,7 @@ public class ServiceWorkspace(
     port: Int? = null,
     override val context: Context = Global.buildContext("workspace".asName()),
     private val dataSerializer: KSerializer<Any>? = null,
-    data: DataSet<*> = runBlocking { DataTree<Any> {} },
+    data: DataSet<*> = DataTree<Any>(),
     override val targets: Map<String, Meta> = mapOf(),
 ) : Workspace, Closeable {
     private val _port: Int? = port
@@ -113,9 +111,6 @@ public class ServiceWorkspace(
 
     public companion object {
         internal val serviceId = ServiceId("d41b95b1-828b-4444-8ff0-6f9c92a79246")
-        internal val execute by serviceId.def(
-            JsonCoder(Name.serializer()), JsonCoder(MetaSerializer), j<TaskRegistry>(),
-            j<DataSetPrototype>()
-        )
+        internal val execute by serviceId.def(j<Name>(), j(MetaSerializer), j<TaskRegistry>(), j<DataSetPrototype>())
     }
 }
