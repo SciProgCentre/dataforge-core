@@ -19,13 +19,13 @@ import kotlin.test.assertEquals
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RemoteCallTest {
 
-    private lateinit var worker1: ServiceWorkspace
-    private lateinit var worker2: ServiceWorkspace
+    private lateinit var worker1: NodeWorkspace
+    private lateinit var worker2: NodeWorkspace
     private lateinit var workspace: Workspace
 
     @BeforeAll
     fun before() = runBlocking {
-        worker1 = ServiceWorkspace(
+        worker1 = NodeWorkspace(
             context = Global.buildContext("worker1".asName()) {
                 plugin(MyPlugin1)
             },
@@ -35,7 +35,7 @@ internal class RemoteCallTest {
         )
         worker1.start()
 
-        worker2 = ServiceWorkspace(
+        worker2 = NodeWorkspace(
             context = Global.buildContext("worker2".asName()) {
                 plugin(MyPlugin1)
                 plugin(MyPlugin2)
@@ -43,12 +43,18 @@ internal class RemoteCallTest {
         )
         worker2.start()
 
-        workspace = Workspace {
-            context {
-                plugin(RemotePlugin(MyPlugin1, "localhost:${worker1.port}"))
-                plugin(RemotePlugin(MyPlugin2, "localhost:${worker2.port}"))
+        workspace = NodeWorkspace(
+            context = Global.buildContext {
+                plugin(MyPlugin1)
+                plugin(MyPlugin2)
+                properties {
+                    endpoints {
+                        Name.of(MyPlugin1.tag.name, "task") on "localhost:${worker1.port}"
+                        Name.of(MyPlugin2.tag.name, "task") on "localhost:${worker2.port}"
+                    }
+                }
             }
-        }
+        )
     }
 
     @AfterAll

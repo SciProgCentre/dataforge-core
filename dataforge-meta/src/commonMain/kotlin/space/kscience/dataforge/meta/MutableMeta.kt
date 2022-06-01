@@ -2,11 +2,25 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.names.*
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.NameToken
+import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.cutFirst
+import space.kscience.dataforge.names.cutLast
+import space.kscience.dataforge.names.first
+import space.kscience.dataforge.names.firstOrNull
+import space.kscience.dataforge.names.isEmpty
+import space.kscience.dataforge.names.lastOrNull
+import space.kscience.dataforge.names.length
+import space.kscience.dataforge.names.plus
+import space.kscience.dataforge.names.withIndex
 import space.kscience.dataforge.values.EnumValue
 import space.kscience.dataforge.values.MutableValueProvider
 import space.kscience.dataforge.values.Value
 import space.kscience.dataforge.values.asValue
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 
@@ -145,6 +159,14 @@ public interface MutableMeta : Meta, MutableMetaProvider {
  * Set or replace node at given [name]
  */
 public operator fun MutableMeta.set(name: Name, meta: Meta): Unit = setMeta(name, meta)
+
+public fun MutableMeta.put(other: Meta) {
+    other.items.forEach { (name, meta) ->
+        name.asName() put meta
+    }
+}
+
+public operator fun MutableMeta.plusAssign(meta: Meta): Unit = put(meta)
 
 /**
  * Set or replace value at given [name]

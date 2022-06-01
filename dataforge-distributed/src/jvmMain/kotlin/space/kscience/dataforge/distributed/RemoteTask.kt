@@ -17,18 +17,17 @@ import kotlin.reflect.KType
  * Proxy task that communicates with the corresponding remote task.
  */
 internal class RemoteTask<T : Any>(
-    internal val endpoint: Endpoint,
+    endpoint: String,
     override val resultType: KType,
     override val resultSerializer: KSerializer<T>,
     override val descriptor: MetaDescriptor? = null,
-    private val taskRegistry: TaskRegistry? = null,
+    private val executionContext: Meta = Meta.EMPTY,
 ) : SerializableResultTask<T> {
-    private val dispatcher = ServiceDispatcher(ServiceWorkspace.serviceId to endpoint)
+    private val dispatcher = ServiceDispatcher(ServiceWorkspace.serviceId to Endpoint(endpoint))
 
     override suspend fun execute(workspace: Workspace, taskName: Name, taskMeta: Meta): TaskResult<T> {
-        val registry = taskRegistry ?: TaskRegistry(workspace.tasks)
         val result = withContext(dispatcher) {
-            ServiceWorkspace.execute(taskName, taskMeta, registry)
+            ServiceWorkspace.execute(taskName, taskMeta, executionContext)
         }
         val dataSet = result.toDataSet(resultType, resultSerializer)
         return workspace.wrapResult(dataSet, taskName, taskMeta)

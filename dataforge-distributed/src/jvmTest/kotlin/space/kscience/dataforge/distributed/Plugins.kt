@@ -22,7 +22,7 @@ internal class MyPlugin1 : WorkspacePlugin() {
         get() = Factory.tag
 
     val task by task<Int>(serializer()) {
-        workspace.logger.info { "In ${tag.name}.task" }
+        workspace.logger.info { "In ${tag.name}.task on ${workspace.context.name}" }
         val myInt = workspace.data.getByType<Int>("int")!!
         data("result", myInt.data.map { it + 1 })
     }
@@ -43,7 +43,7 @@ internal class MyPlugin2 : WorkspacePlugin() {
         get() = Factory.tag
 
     val task by task<Int>(serializer()) {
-        workspace.logger.info { "In ${tag.name}.task" }
+        workspace.logger.info { "In ${tag.name}.task on ${workspace.context.name}" }
         val dataSet = fromTask<Int>(Name.of(MyPlugin1.tag.name, "task"))
         val data = dataSet["result".asName()]!!
         data("result", data.map { it + 1 })
