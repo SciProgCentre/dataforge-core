@@ -4,8 +4,23 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.misc.unsafeCast
-import space.kscience.dataforge.names.*
-import space.kscience.dataforge.values.*
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.NameToken
+import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.cutFirst
+import space.kscience.dataforge.names.cutLast
+import space.kscience.dataforge.names.firstOrNull
+import space.kscience.dataforge.names.isEmpty
+import space.kscience.dataforge.names.lastOrNull
+import space.kscience.dataforge.names.length
+import space.kscience.dataforge.names.parseAsName
+import space.kscience.dataforge.names.plus
+import space.kscience.dataforge.values.EnumValue
+import space.kscience.dataforge.values.Value
+import space.kscience.dataforge.values.ValueProvider
+import space.kscience.dataforge.values.boolean
+import space.kscience.dataforge.values.numberOrNull
+import space.kscience.dataforge.values.string
 
 
 /**
@@ -111,6 +126,11 @@ public operator fun Meta.get(name: Name): Meta? = this.getMeta(name)
  */
 public operator fun Meta.get(key: String): Meta? = this.get(Name.parse(key))
 
+public fun Meta.extract(name: Name): Meta? {
+    val value = get(name) ?: return null
+    return Meta { name put value }
+}
+
 /**
  * Get all items matching given name. The index of the last element, if present is used as a [Regex],
  * against which indexes of elements are matched.
@@ -135,7 +155,7 @@ public fun Meta.getIndexed(name: Name): Map<String?, Meta> {
     }
 }
 
-public fun Meta.getIndexed(name: String): Map<String?, Meta>  = getIndexed(name.parseAsName())
+public fun Meta.getIndexed(name: String): Map<String?, Meta> = getIndexed(name.parseAsName())
 
 /**
  * A meta node that ensures that all of its descendants has at least the same type.

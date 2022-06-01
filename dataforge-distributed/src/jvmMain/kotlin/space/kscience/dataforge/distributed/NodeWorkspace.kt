@@ -15,6 +15,7 @@ import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
 import space.kscience.dataforge.workspace.SerializableResultTask
+import space.kscience.dataforge.workspace.Workspace
 
 /**
  * Workspace that exposes its tasks for remote clients.
@@ -26,7 +27,7 @@ public class NodeWorkspace(
     private val dataSerializer: KSerializer<Any>? = null,
     data: DataSet<*> = DataTree<Any>(),
     targets: Map<String, Meta> = mapOf(),
-) : RemoteTaskWorkspace(context, data, targets), ServiceWorkspace {
+) : Workspace by RemoteTaskWorkspace(context, data, targets), ServiceWorkspace {
     private val _port: Int? = port
 
     private val service = LibService(serviceId, port) {

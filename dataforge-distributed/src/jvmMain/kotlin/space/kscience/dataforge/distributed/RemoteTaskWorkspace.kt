@@ -7,6 +7,7 @@ import space.kscience.dataforge.data.DataSet
 import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
+import space.kscience.dataforge.meta.extract
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
@@ -21,7 +22,7 @@ import space.kscience.dataforge.workspace.wrapResult
  * Workspace that returns [RemoteTask] if such task should be
  * executed remotely according to the execution context.
  */
-public open class RemoteTaskWorkspace(
+internal open class RemoteTaskWorkspace(
     final override val context: Context = Global.buildContext("workspace".asName()),
     data: DataSet<*> = DataTree<Any>(),
     override val targets: Map<String, Meta> = mapOf(),
@@ -37,8 +38,10 @@ public open class RemoteTaskWorkspace(
                 get() = _tasks.entries
 
             override fun get(key: Name): Task<*>? {
-                val executionContext = context.properties[EXECUTION_CONTEXT]
-                val endpoint = executionContext?.get(ENDPOINTS)?.toMeta()?.get(key) ?: return _tasks[key]
+                val executionContext = context.properties.extract(EXECUTION_CONTEXT)
+                val endpoint = executionContext
+                    ?.get(EXECUTION_CONTEXT)?.get(ENDPOINTS)?.get(key)
+                    ?: return _tasks[key]
                 val string = endpoint.value?.string ?: error("Endpoint is expected to be a string")
                 val local = _tasks[key] ?: error("No task with name $key")
                 require(local is SerializableResultTask) { "Task $key result is not serializable" }
@@ -46,9 +49,9 @@ public open class RemoteTaskWorkspace(
             }
         }
 
-    public companion object {
-        internal val EXECUTION_CONTEXT = "execution".asName()
-        internal val ENDPOINTS = "endpoints".asName()
+    companion object {
+        val EXECUTION_CONTEXT = "execution".asName()
+        val ENDPOINTS = "endpoints".asName()
     }
 }
 
