@@ -102,12 +102,14 @@ public operator fun Meta.get(token: NameToken): Meta? = items[token]
  *
  * If [name] is empty return current [Meta]
  */
-public operator fun Meta.get(name: Name): Meta? = getMeta(name)
+public operator fun Meta.get(name: Name): Meta? = this.getMeta(name)
+
+//TODO allow nullable receivers after Kotlin 1.7
 
 /**
  * Parse [Name] from [key] using full name notation and pass it to [Meta.get]
  */
-public operator fun Meta.get(key: String): Meta? = this[Name.parse(key)]
+public operator fun Meta.get(key: String): Meta? = this.get(Name.parse(key))
 
 /**
  * Get all items matching given name. The index of the last element, if present is used as a [Regex],
@@ -133,6 +135,7 @@ public fun Meta.getIndexed(name: Name): Map<String?, Meta> {
     }
 }
 
+public fun Meta.getIndexed(name: String): Map<String?, Meta>  = getIndexed(name.parseAsName())
 
 /**
  * A meta node that ensures that all of its descendants has at least the same type.

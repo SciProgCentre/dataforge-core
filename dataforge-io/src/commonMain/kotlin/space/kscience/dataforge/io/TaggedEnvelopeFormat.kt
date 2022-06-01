@@ -3,8 +3,6 @@ package space.kscience.dataforge.io
 import io.ktor.utils.io.core.*
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
-import space.kscience.dataforge.io.IOFormat.Companion.META_KEY
-import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.enum
 import space.kscience.dataforge.meta.get
@@ -26,7 +24,7 @@ public class TaggedEnvelopeFormat(
 //        ?: error("Meta format with key $metaFormatKey could not be resolved in $io")
 
 
-    private fun Tag.toBinary() = Binary(24) {
+    private fun Tag.toBinary() = Binary {
         writeRawString(START_SEQUENCE)
         writeRawString(version.name)
         writeShort(metaFormatKey)
@@ -49,7 +47,7 @@ public class TaggedEnvelopeFormat(
         formatMeta: Meta,
     ) {
         val metaFormat = metaFormatFactory.build(this@TaggedEnvelopeFormat.io.context, formatMeta)
-        val metaBytes = metaFormat.toBinary(envelope.meta)
+        val metaBytes = Binary(envelope.meta,metaFormat)
         val actualSize: ULong = (envelope.data?.size ?: 0).toULong()
         val tag = Tag(metaFormatFactory.key, metaBytes.size.toUInt() + 2u, actualSize)
         output.writeBinary(tag.toBinary())
@@ -74,7 +72,7 @@ public class TaggedEnvelopeFormat(
 
         val metaBinary = input.readBinary(tag.metaSize.toInt())
 
-        val meta: Meta = metaFormat.readObject(metaBinary)
+        val meta: Meta = metaFormat.readObjectFrom(metaBinary)
 
         val data = input.readBinary(tag.dataSize.toInt())
 
@@ -89,10 +87,10 @@ public class TaggedEnvelopeFormat(
 
         val metaBinary = input.readBinary(tag.metaSize.toInt())
 
-        val meta: Meta = metaFormat.readObject(metaBinary)
+        val meta: Meta = metaFormat.readObjectFrom(metaBinary)
 
 
-        return PartialEnvelope(meta, version.tagSize + tag.metaSize, tag.dataSize)
+        return PartialEnvelope(meta, (version.tagSize + tag.metaSize).toInt(), tag.dataSize)
     }
 
     private data class Tag(
@@ -106,18 +104,11 @@ public class TaggedEnvelopeFormat(
         DF03(24u)
     }
 
-    override fun toMeta(): Meta = Meta {
-        NAME_KEY put name.toString()
-        META_KEY put {
-            "version" put version
-        }
-    }
-
     public companion object : EnvelopeFormatFactory {
         private const val START_SEQUENCE = "#~"
         private const val END_SEQUENCE = "~#\r\n"
 
-        override val name: Name = super.name + "tagged"
+        override val name: Name = EnvelopeFormatFactory.ENVELOPE_FACTORY_NAME + "tagged"
 
         override fun build(context: Context, meta: Meta): EnvelopeFormat {
             val io = context.io
@@ -149,7 +140,7 @@ public class TaggedEnvelopeFormat(
 
         override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? {
             return try {
-                binary.read{
+                binary.read {
                     val header = readRawString(6)
                     return@read when (header.substring(2..5)) {
                         VERSION.DF02.name -> TaggedEnvelopeFormat(io, VERSION.DF02)

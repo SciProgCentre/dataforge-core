@@ -20,6 +20,7 @@ import kotlin.reflect.typeOf
  * A format for meta serialization
  */
 public interface MetaFormat : IOFormat<Meta> {
+
     override val type: KType get() = typeOf<Meta>()
 
     override fun writeObject(output: Output, obj: Meta) {
@@ -54,9 +55,9 @@ public interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
     }
 }
 
-public fun Meta.toString(format: MetaFormat): String = buildByteArray {
+public fun Meta.toString(format: MetaFormat): String = ByteArray {
     format.run {
-        writeObject(this@buildByteArray, this@toString)
+        writeObject(this@ByteArray, this@toString)
     }
 }.decodeToString()
 

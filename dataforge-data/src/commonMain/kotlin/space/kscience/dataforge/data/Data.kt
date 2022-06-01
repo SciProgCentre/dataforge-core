@@ -15,7 +15,7 @@ import kotlin.reflect.typeOf
  * A data element characterized by its meta
  */
 @Type(Data.TYPE)
-public interface Data<out T : Any> : Goal<T>, MetaRepr {
+public interface Data<out T> : Goal<T>, MetaRepr {
     /**
      * Type marker for the data. The type is known before the calculation takes place so it could be checked.
      */
@@ -82,6 +82,10 @@ public class StaticData<T : Any>(
     value: T,
     override val meta: Meta = Meta.EMPTY,
 ) : Data<T>, StaticGoal<T>(value)
+
+@Suppress("FunctionName")
+public inline fun <reified T : Any> Data(value: T, meta: Meta = Meta.EMPTY): StaticData<T> =
+    StaticData(typeOf<T>(), value, meta)
 
 @Suppress("FunctionName")
 @DFInternal

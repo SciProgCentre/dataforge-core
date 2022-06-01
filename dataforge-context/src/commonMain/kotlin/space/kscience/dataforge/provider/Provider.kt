@@ -75,10 +75,8 @@ public inline fun <reified T : Any> Provider.provide(path: String, targetOverrid
 /**
  *  Typed top level content
  */
-public fun <T : Any> Provider.top(target: String, type: KClass<out T>): Map<Name, T> {
-    return content(target).mapValues {
-        type.safeCast(it.value) ?: error("The type of element $it is ${it::class} but $type is expected")
-    }
+public fun <T : Any> Provider.top(target: String, type: KClass<out T>): Map<Name, T> = content(target).mapValues {
+    type.safeCast(it.value) ?: error("The type of element ${it.value} is ${it.value::class} but $type is expected")
 }
 
 /**

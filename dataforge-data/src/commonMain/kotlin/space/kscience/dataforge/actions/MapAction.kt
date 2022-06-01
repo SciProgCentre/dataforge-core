@@ -1,9 +1,5 @@
 package space.kscience.dataforge.actions
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
@@ -29,66 +25,71 @@ public data class ActionEnv(
  * Action environment
  */
 @DFBuilder
-public class MapActionBuilder<T, R>(public var name: Name, public var meta: MutableMeta, public val actionMeta: Meta) {
+public class MapActionBuilder<T, R>(
+    public var name: Name,
+    public var meta: MutableMeta,
+    public val actionMeta: Meta,
+    @PublishedApi internal var outputType: KType,
+) {
+
     public lateinit var result: suspend ActionEnv.(T) -> R
+
+    /**
+     * Set unsafe [outputType] for the resulting data. Be sure that it is correct.
+     */
+    public fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(T) -> R1) {
+        this.outputType = outputType
+        result = f;
+    }
 
     /**
      * Calculate the result of goal
      */
-    public fun result(f: suspend ActionEnv.(T) -> R) {
+    public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(T) -> R1) {
+        outputType = typeOf<R1>()
         result = f;
     }
 }
 
 @PublishedApi
-internal class MapAction<in T : Any, out R : Any>(
-    private val outputType: KType,
+internal class MapAction<in T : Any, R : Any>(
+    outputType: KType,
     private val block: MapActionBuilder<T, R>.() -> Unit,
-) : Action<T, R> {
+) : AbstractAction<T, R>(outputType) {
 
-    override suspend fun execute(
-        dataSet: DataSet<T>,
-        meta: Meta,
-        scope: CoroutineScope?,
-    ): DataSet<R> {
-        suspend fun mapOne(data: NamedData<T>): NamedData<R> {
-            // Creating a new environment for action using **old** name, old meta and task meta
-            val env = ActionEnv(data.name, data.meta, meta)
+    private fun DataSetBuilder<R>.mapOne(name: Name, data: Data<T>, meta: Meta) {
+        // Creating a new environment for action using **old** name, old meta and task meta
+        val env = ActionEnv(name, data.meta, meta)
 
-            //applying transformation from builder
-            val builder = MapActionBuilder<T, R>(
-                data.name,
-                data.meta.toMutableMeta(), // using data meta
-                meta
-            ).apply(block)
+        //applying transformation from builder
+        val builder = MapActionBuilder<T, R>(
+            name,
+            data.meta.toMutableMeta(), // using data meta
+            meta,
+            outputType
+        ).apply(block)
 
-            //getting new name
-            val newName = builder.name
+        //getting new name
+        val newName = builder.name
 
-            //getting new meta
-            val newMeta = builder.meta.seal()
+        //getting new meta
+        val newMeta = builder.meta.seal()
 
-            @OptIn(DFInternal::class)
-            val newData = Data(outputType, newMeta, dependencies = listOf(data)) {
-                builder.result(env, data.await())
-            }
-            //setting the data node
-            return newData.named(newName)
+        @OptIn(DFInternal::class)
+        val newData = Data(builder.outputType, newMeta, dependencies = listOf(data)) {
+            builder.result(env, data.await())
         }
+        //setting the data node
+        data(newName, newData)
+    }
 
-        val flow = dataSet.flowData().map(::mapOne)
+    override fun DataSetBuilder<R>.generate(data: DataSet<T>, meta: Meta) {
+        data.forEach { mapOne(it.name, it.data, meta) }
+    }
 
-        return ActiveDataTree(outputType) {
-            populate(flow)
-            scope?.launch {
-                dataSet.updates.collect { name ->
-                    //clear old nodes
-                    remove(name)
-                    //collect new items
-                    populate(dataSet.flowChildren(name).map(::mapOne))
-                }
-            }
-        }
+    override fun DataSourceBuilder<R>.update(dataSet: DataSet<T>, meta: Meta, updateKey: Name) {
+        remove(updateKey)
+        dataSet[updateKey]?.let { mapOne(updateKey, it, meta) }
     }
 }
 

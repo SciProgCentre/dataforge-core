@@ -1,17 +1,26 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.map
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFInternal
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
+import space.kscience.dataforge.names.Name
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
+
+public data class ValueWithMeta<T>(val meta: Meta, val value: T)
+
+public suspend fun <T : Any> Data<T>.awaitWithMeta(): ValueWithMeta<T> = ValueWithMeta(meta, await())
+
+public data class NamedValueWithMeta<T>(val name: Name, val meta: Meta, val value: T)
+
+public suspend fun <T : Any> NamedData<T>.awaitWithMeta(): NamedValueWithMeta<T> =
+    NamedValueWithMeta(name, meta, await())
+
 
 /**
  * Lazily transform this data to another data. By convention [block] should not use external data (be pure).
@@ -48,13 +57,13 @@ public inline fun <T1 : Any, T2 : Any, reified R : Any> Data<T1>.combine(
 public inline fun <T : Any, reified R : Any> Collection<Data<T>>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    crossinline block: suspend (Collection<T>) -> R,
+    crossinline block: suspend (List<ValueWithMeta<T>>) -> R,
 ): Data<R> = Data(
     meta,
     coroutineContext,
     this
 ) {
-    block(map { it.await() })
+    block(map { it.awaitWithMeta() })
 }
 
 @DFInternal
@@ -62,16 +71,15 @@ public fun <K, T : Any, R : Any> Map<K, Data<T>>.reduceToData(
     outputType: KType,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    block: suspend (Map<K, T>) -> R,
+    block: suspend (Map<K, ValueWithMeta<T>>) -> R,
 ): Data<R> = Data(
     outputType,
     meta,
     coroutineContext,
     this.values
 ) {
-    block(mapValues { it.value.await() })
+    block(mapValues { it.value.awaitWithMeta() })
 }
-
 
 /**
  * Lazily reduce a [Map] of [Data] with any static key.
@@ -82,56 +90,91 @@ public fun <K, T : Any, R : Any> Map<K, Data<T>>.reduceToData(
 public inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    noinline block: suspend (Map<K, T>) -> R,
+    crossinline block: suspend (Map<K, ValueWithMeta<T>>) -> R,
 ): Data<R> = Data(
     meta,
     coroutineContext,
     this.values
 ) {
-    block(mapValues { it.value.await() })
+    block(mapValues { it.value.awaitWithMeta() })
 }
 
-//flow operations
+//Iterable operations
 
-/**
- * Transform a [Flow] of [NamedData] to a single [Data].
- */
 @DFInternal
-public suspend fun <T : Any, R : Any> Flow<NamedData<T>>.reduceToData(
+public inline fun <T : Any, R : Any> Iterable<Data<T>>.reduceToData(
     outputType: KType,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    transformation: suspend (Flow<NamedData<T>>) -> R,
+    crossinline transformation: suspend (Collection<ValueWithMeta<T>>) -> R,
 ): Data<R> = Data(
     outputType,
     meta,
     coroutineContext,
     toList()
 ) {
-    transformation(this)
+    transformation(map { it.awaitWithMeta() })
 }
 
 @OptIn(DFInternal::class)
-public suspend inline fun <T : Any, reified R : Any> Flow<NamedData<T>>.reduceToData(
+public inline fun <T : Any, reified R : Any> Iterable<Data<T>>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    noinline transformation: suspend (Flow<NamedData<T>>) -> R,
+    crossinline transformation: suspend (Collection<ValueWithMeta<T>>) -> R,
 ): Data<R> = reduceToData(typeOf<R>(), coroutineContext, meta) {
     transformation(it)
 }
 
-/**
- * Fold a flow of named data into a single [Data]
- */
-public suspend inline fun <T : Any, reified R : Any> Flow<NamedData<T>>.foldToData(
+public inline fun <T : Any, reified R : Any> Iterable<Data<T>>.foldToData(
     initial: R,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    noinline block: suspend (result: R, data: NamedData<T>) -> R,
+    crossinline block: suspend (result: R, data: ValueWithMeta<T>) -> R,
 ): Data<R> = reduceToData(
     coroutineContext, meta
 ) {
-    it.fold(initial, block)
+    it.fold(initial) { acc, t -> block(acc, t) }
+}
+
+/**
+ * Transform an [Iterable] of [NamedData] to a single [Data].
+ */
+@DFInternal
+public inline fun <T : Any, R : Any> Iterable<NamedData<T>>.reduceNamedToData(
+    outputType: KType,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    meta: Meta = Meta.EMPTY,
+    crossinline transformation: suspend (Collection<NamedValueWithMeta<T>>) -> R,
+): Data<R> = Data(
+    outputType,
+    meta,
+    coroutineContext,
+    toList()
+) {
+    transformation(map { it.awaitWithMeta() })
+}
+
+@OptIn(DFInternal::class)
+public inline fun <T : Any, reified R : Any> Iterable<NamedData<T>>.reduceNamedToData(
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    meta: Meta = Meta.EMPTY,
+    crossinline transformation: suspend (Collection<NamedValueWithMeta<T>>) -> R,
+): Data<R> = reduceNamedToData(typeOf<R>(), coroutineContext, meta) {
+    transformation(it)
+}
+
+/**
+ * Fold a [Iterable] of named data into a single [Data]
+ */
+public inline fun <T : Any, reified R : Any> Iterable<NamedData<T>>.foldNamedToData(
+    initial: R,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    meta: Meta = Meta.EMPTY,
+    crossinline block: suspend (result: R, data: NamedValueWithMeta<T>) -> R,
+): Data<R> = reduceNamedToData(
+    coroutineContext, meta
+) {
+    it.fold(initial) { acc, t -> block(acc, t) }
 }
 
 //DataSet operations
@@ -141,41 +184,39 @@ public suspend fun <T : Any, R : Any> DataSet<T>.map(
     outputType: KType,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     metaTransform: MutableMeta.() -> Unit = {},
-    block: suspend (T) -> R,
+    block: suspend (NamedValueWithMeta<T>) -> R,
 ): DataTree<R> = DataTree<R>(outputType) {
-    populate(
-        flowData().map {
-            val newMeta = it.meta.toMutableMeta().apply(metaTransform).seal()
-            Data(outputType, newMeta, coroutineContext, listOf(it)) {
-                block(it.await())
-            }.named(it.name)
+    forEach {
+        val newMeta = it.meta.toMutableMeta().apply(metaTransform).seal()
+        val d = Data(outputType, newMeta, coroutineContext, listOf(it)) {
+            block(it.awaitWithMeta())
         }
-    )
+        data(it.name, d)
+    }
 }
 
 @OptIn(DFInternal::class)
 public suspend inline fun <T : Any, reified R : Any> DataSet<T>.map(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     noinline metaTransform: MutableMeta.() -> Unit = {},
-    noinline block: suspend (T) -> R,
+    noinline block: suspend (NamedValueWithMeta<T>) -> R,
 ): DataTree<R> = map(typeOf<R>(), coroutineContext, metaTransform, block)
 
-public suspend fun <T : Any> DataSet<T>.forEach(block: suspend (NamedData<T>) -> Unit) {
-    contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
-    flowData().collect {
-        block(it)
+public inline fun <T : Any> DataSet<T>.forEach(block: (NamedData<T>) -> Unit) {
+    for (d in this) {
+        block(d)
     }
 }
 
-public suspend inline fun <T : Any, reified R : Any> DataSet<T>.reduceToData(
+public inline fun <T : Any, reified R : Any> DataSet<T>.reduceToData(
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    noinline transformation: suspend (Flow<NamedData<T>>) -> R,
-): Data<R> = flowData().reduceToData(coroutineContext, meta, transformation)
+    crossinline transformation: suspend (Iterable<NamedValueWithMeta<T>>) -> R,
+): Data<R> = asIterable().reduceNamedToData(coroutineContext, meta, transformation)
 
-public suspend inline fun <T : Any, reified R : Any> DataSet<T>.foldToData(
+public inline fun <T : Any, reified R : Any> DataSet<T>.foldToData(
     initial: R,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = Meta.EMPTY,
-    noinline block: suspend (result: R, data: NamedData<T>) -> R,
-): Data<R> = flowData().foldToData(initial, coroutineContext, meta, block)
+    crossinline block: suspend (result: R, data: NamedValueWithMeta<T>) -> R,
+): Data<R> = asIterable().foldNamedToData(initial, coroutineContext, meta, block)

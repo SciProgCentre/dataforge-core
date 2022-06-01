@@ -6,8 +6,9 @@ import space.kscience.dataforge.context.PluginFactory
 import space.kscience.dataforge.context.PluginTag
 import space.kscience.dataforge.context.info
 import space.kscience.dataforge.context.logger
+import space.kscience.dataforge.data.data
+import space.kscience.dataforge.data.getByType
 import space.kscience.dataforge.data.map
-import space.kscience.dataforge.data.select
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
@@ -22,9 +23,8 @@ internal class MyPlugin1 : WorkspacePlugin() {
 
     val task by task<Int>(serializer()) {
         workspace.logger.info { "In ${tag.name}.task" }
-        val myInt = workspace.data.select<Int>()
-        val res = myInt.getData("int".asName())!!
-        emit("result".asName(), res.map { it + 1 })
+        val myInt = workspace.data.getByType<Int>("int")!!
+        data("result", myInt.data.map { it + 1 })
     }
 
     companion object Factory : PluginFactory<MyPlugin1> {
@@ -45,8 +45,8 @@ internal class MyPlugin2 : WorkspacePlugin() {
     val task by task<Int>(serializer()) {
         workspace.logger.info { "In ${tag.name}.task" }
         val dataSet = fromTask<Int>(Name.of(MyPlugin1.tag.name, "task"))
-        val data = dataSet.getData("result".asName())!!
-        emit("result".asName(), data.map { it + 1 })
+        val data = dataSet["result".asName()]!!
+        data("result", data.map { it + 1 })
     }
 
     companion object Factory : PluginFactory<MyPlugin2> {

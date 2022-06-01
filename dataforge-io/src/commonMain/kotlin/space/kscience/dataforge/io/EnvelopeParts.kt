@@ -1,5 +1,6 @@
 package space.kscience.dataforge.io
 
+import space.kscience.dataforge.context.invoke
 import space.kscience.dataforge.io.Envelope.Companion.ENVELOPE_NODE_KEY
 import space.kscience.dataforge.io.PartDescriptor.Companion.DEFAULT_MULTIPART_DATA_SEPARATOR
 import space.kscience.dataforge.io.PartDescriptor.Companion.MULTIPART_DATA_TYPE
@@ -35,7 +36,7 @@ public typealias EnvelopeParts = List<EnvelopePart>
 
 public fun EnvelopeBuilder.multipart(
     parts: EnvelopeParts,
-    separator: String = DEFAULT_MULTIPART_DATA_SEPARATOR
+    separator: String = DEFAULT_MULTIPART_DATA_SEPARATOR,
 ) {
     dataType = MULTIPART_DATA_TYPE
 
@@ -67,17 +68,25 @@ public fun EnvelopeBuilder.multipart(
     }
 }
 
+/**
+ * Put a list of envelopes as parts of given envelope
+ */
 public fun EnvelopeBuilder.envelopes(
     envelopes: List<Envelope>,
-    format: EnvelopeFormat = TaggedEnvelopeFormat,
-    separator: String = DEFAULT_MULTIPART_DATA_SEPARATOR
+    formatFactory: EnvelopeFormatFactory = TaggedEnvelopeFormat,
+    formatMeta: Meta? = null,
+    separator: String = DEFAULT_MULTIPART_DATA_SEPARATOR,
 ) {
     val parts = envelopes.map {
-        val binary = format.toBinary(it)
+        val format = formatMeta?.let { formatFactory(formatMeta) } ?: formatFactory
+        val binary = Binary(it, format)
         EnvelopePart(binary, null)
     }
-    meta{
-        set(MULTIPART_KEY + PART_FORMAT_KEY, format.toMeta())
+    meta {
+        (MULTIPART_KEY + PART_FORMAT_KEY) put {
+            IOFormatFactory.NAME_KEY put formatFactory.name.toString()
+            formatMeta?.let { IOFormatFactory.META_KEY put formatMeta }
+        }
     }
     multipart(parts, separator)
 }

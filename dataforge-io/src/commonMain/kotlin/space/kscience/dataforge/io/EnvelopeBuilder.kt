@@ -34,7 +34,7 @@ public class EnvelopeBuilder : Envelope {
      * Construct a data binary from given builder
      */
     public inline fun data(block: Output.() -> Unit) {
-        data = buildByteArray { block() }.asBinary()
+        data = ByteArray { block() }.asBinary()
     }
 
     public fun seal(): Envelope = SimpleEnvelope(metaBuilder.seal(), data)

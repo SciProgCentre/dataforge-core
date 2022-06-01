@@ -1,10 +1,11 @@
 @file:Suppress("UNUSED_VARIABLE")
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Timeout
 import space.kscience.dataforge.context.*
 import space.kscience.dataforge.data.*
@@ -28,7 +29,7 @@ public inline fun <reified P : Plugin> P.toFactory(): PluginFactory<P> = object 
     override val type: KClass<out P> = P::class
 }
 
-public fun Workspace.runBlocking(task: String, block: MutableMeta.() -> Unit = {}): DataSet<Any> = runBlocking {
+public fun Workspace.produceBlocking(task: String, block: MutableMeta.() -> Unit = {}): DataSet<Any> = runBlocking {
     produce(task, block)
 }
 
@@ -39,7 +40,7 @@ class SimpleWorkspaceTest {
         override val tag: PluginTag = PluginTag("test")
 
         val test by task<Any> {
-            populate(
+            populateFrom(
                 workspace.data.map {
                     it.also {
                         logger.info { "Test: $it" }
@@ -65,8 +66,8 @@ class SimpleWorkspaceTest {
         }
 
         val filterOne by task<Int> {
-            workspace.data.selectOne<Int>("myData[12]")?.let { source ->
-                emit(source.name, source.map { it })
+            workspace.data.getByType<Int>("myData[12]")?.let { source ->
+                data(source.name, source.map { it })
             }
         }
 
@@ -103,54 +104,53 @@ class SimpleWorkspaceTest {
             val squareData = from(square)
             val linearData = from(linear)
             squareData.forEach { data ->
-                val newData: Data<Int> = data.combine(linearData.getData(data.name)!!) { l, r ->
+                val newData: Data<Int> = data.combine(linearData.get(data.name)!!) { l, r ->
                     l + r
                 }
-                emit(data.name, newData)
+                data(data.name, newData)
             }
         }
 
         val sum by task<Int> {
             workspace.logger.info { "Starting sum" }
             val res = from(square).foldToData(0) { l, r ->
-                l + r.await()
+                l + r.value
             }
-            emit("sum", res)
+            data("sum", res)
         }
 
         val averageByGroup by task<Int> {
-            val evenSum = workspace.data.filter { name, _ ->
+            val evenSum = workspace.data.filterByType<Int> { name, _ ->
                 name.toString().toInt() % 2 == 0
-            }.select<Int>().foldToData(0) { l, r ->
-                l + r.await()
+            }.foldToData(0) { l, r ->
+                l + r.value
             }
 
-            emit("even", evenSum)
-            val oddSum = workspace.data.filter { name, _ ->
+            data("even", evenSum)
+            val oddSum = workspace.data.filterByType<Int> { name, _ ->
                 name.toString().toInt() % 2 == 1
-            }.select<Int>().foldToData(0) { l, r ->
-                l + r.await()
+            }.foldToData(0) { l, r ->
+                l + r.value
             }
-            emit("odd", oddSum)
+            data("odd", oddSum)
         }
 
         val delta by task<Int> {
             val averaged = from(averageByGroup)
-            val even = averaged.getData("event")!!
-            val odd = averaged.getData("odd")!!
+            val even = averaged["event"]!!
+            val odd = averaged["odd"]!!
             val res = even.combine(odd) { l, r ->
                 l - r
             }
-            emit("res", res)
+            data("res", res)
         }
 
         val customPipe by task<Int> {
-            workspace.data.select<Int>().forEach { data ->
+            workspace.data.filterByType<Int>().forEach { data ->
                 val meta = data.meta.toMutableMeta().apply {
                     "newValue" put 22
                 }
-                emit(data.name + "new", data.map { (data.meta["value"].int ?: 0) + it })
-
+                data(data.name + "new", data.map { (data.meta["value"].int ?: 0) + it })
             }
         }
 
@@ -159,21 +159,17 @@ class SimpleWorkspaceTest {
 
     @Test
     @Timeout(1)
-    fun testWorkspace() {
-        runBlocking {
-            val node = workspace.runBlocking("sum")
-            val res = node.flowData().single()
-            assertEquals(328350, res.await())
-        }
+    fun testWorkspace() = runTest {
+        val node = workspace.produce("sum")
+        val res = node.asSequence().single()
+        assertEquals(328350, res.await())
     }
 
     @Test
     @Timeout(1)
-    fun testMetaPropagation() {
-        runBlocking {
-            val node = workspace.produce("sum") { "testFlag" put true }
-            val res = node.flowData().single().await()
-        }
+    fun testMetaPropagation() = runTest {
+        val node = workspace.produce("sum") { "testFlag" put true }
+        val res = node.asSequence().single().await()
     }
 
     @Test
@@ -195,7 +191,7 @@ class SimpleWorkspaceTest {
     fun testFilter() {
         runBlocking {
             val node = workspace.produce("filterOne")
-            assertEquals(12, node.flowData().first().await())
+            assertEquals(12, node.asSequence().first().await())
         }
     }
 }

@@ -1,8 +1,7 @@
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import space.kscience.dataforge.data.DataSet
+import space.kscience.dataforge.data.forEach
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
 
@@ -25,8 +24,8 @@ public interface TaskResult<out T : Any> : DataSet<T> {
      */
     public val taskMeta: Meta
 
-    override fun flowData(): Flow<TaskData<T>>
-    override suspend fun getData(name: Name): TaskData<T>?
+    override fun iterator(): Iterator<TaskData<T>>
+    override fun get(name: Name): TaskData<T>?
 }
 
 private class TaskResultImpl<out T : Any>(
@@ -36,11 +35,13 @@ private class TaskResultImpl<out T : Any>(
     override val taskMeta: Meta,
 ) : TaskResult<T>, DataSet<T> by dataSet {
 
-    override fun flowData(): Flow<TaskData<T>> = dataSet.flowData().map {
-        workspace.wrapData(it, it.name, taskName, taskMeta)
+    override fun iterator(): Iterator<TaskData<T>> = iterator {
+        dataSet.forEach {
+            yield(workspace.wrapData(it, it.name, taskName, taskMeta))
+        }
     }
 
-    override suspend fun getData(name: Name): TaskData<T>? = dataSet.getData(name)?.let {
+    override fun get(name: Name): TaskData<T>? = dataSet.get(name)?.let {
         workspace.wrapData(it, name, taskName, taskMeta)
     }
 }

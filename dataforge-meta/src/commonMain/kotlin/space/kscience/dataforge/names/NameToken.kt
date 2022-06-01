@@ -1,6 +1,7 @@
 package space.kscience.dataforge.names
 
 import kotlinx.serialization.Serializable
+import space.kscience.dataforge.misc.DFExperimental
 
 /**
  * A single name token. Body is not allowed to be empty.
@@ -24,6 +25,20 @@ public data class NameToken(val body: String, val index: String? = null) {
         "${body.escape()}[$index]"
     } else {
         body.escape()
+    }
+
+    public companion object {
+
+        /**
+         * Parse name token from a string
+         */
+        @DFExperimental
+        public fun parse(string: String): NameToken {
+            val body = string.substringBefore('[')
+            val index = string.substringAfter('[', "")
+            if (index.isNotEmpty() && index.endsWith(']')) error("NameToken with index must end with ']'")
+            return NameToken(body,index.removeSuffix("]"))
+        }
     }
 }
 

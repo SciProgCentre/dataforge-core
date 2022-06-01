@@ -1,17 +1,22 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("ru.mipt.npm.gradle.project")
 }
 
 allprojects {
     group = "space.kscience"
-    version = "0.5.3-dev-4"
-    repositories{
-        mavenCentral()
-    }
+    version = "0.6.0-dev-9"
 }
 
 subprojects {
     apply(plugin = "maven-publish")
+
+    tasks.withType<KotlinCompile>{
+        kotlinOptions{
+            freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
+        }
+    }
 }
 
 readme {

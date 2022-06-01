@@ -8,7 +8,7 @@ import org.junit.jupiter.api.TestInstance
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.data.await
-import space.kscience.dataforge.data.getData
+import space.kscience.dataforge.data.get
 import space.kscience.dataforge.data.static
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
@@ -59,10 +59,9 @@ internal class RemoteCallTest {
 
     @Test
     fun `local execution`() = runBlocking {
-        assertEquals(42, worker1.data.getData("int")!!.await())
+        assertEquals(42, worker1.data["int".asName()]!!.await())
         val res = worker1
-            .produce(Name.of(MyPlugin1.tag.name, "task"), Meta.EMPTY)
-            .getData("result".asName())!!
+            .produce(Name.of(MyPlugin1.tag.name, "task"), Meta.EMPTY)["result"]!!
             .await()
         assertEquals(43, res)
     }
@@ -70,8 +69,7 @@ internal class RemoteCallTest {
     @Test
     fun `remote execution`() = runBlocking {
         val remoteRes = workspace
-            .produce(Name.of(MyPlugin1.tag.name, "task"), Meta.EMPTY)
-            .getData("result".asName())!!
+            .produce(Name.of(MyPlugin1.tag.name, "task"), Meta.EMPTY)["result"]!!
             .await()
         assertEquals(43, remoteRes)
     }
@@ -79,8 +77,7 @@ internal class RemoteCallTest {
     @Test
     fun `transitive execution`() = runBlocking {
         val remoteRes = workspace
-            .produce(Name.of(MyPlugin2.tag.name, "task"), Meta.EMPTY)
-            .getData("result".asName())!!
+            .produce(Name.of(MyPlugin2.tag.name, "task"), Meta.EMPTY)["result"]!!
             .await()
         assertEquals(44, remoteRes)
     }

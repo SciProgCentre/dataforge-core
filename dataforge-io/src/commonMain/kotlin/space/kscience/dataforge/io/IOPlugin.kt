@@ -2,8 +2,6 @@ package space.kscience.dataforge.io
 
 import space.kscience.dataforge.context.*
 import space.kscience.dataforge.io.EnvelopeFormatFactory.Companion.ENVELOPE_FORMAT_TYPE
-import space.kscience.dataforge.io.IOFormat.Companion.META_KEY
-import space.kscience.dataforge.io.IOFormat.Companion.NAME_KEY
 import space.kscience.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
 import space.kscience.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
@@ -20,12 +18,12 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     }
 
     public fun <T : Any> resolveIOFormat(item: Meta, type: KClass<out T>): IOFormat<T>? {
-        val key = item.string ?: item[NAME_KEY]?.string ?: error("Format name not defined")
+        val key = item.string ?: item[IOFormatFactory.NAME_KEY]?.string ?: error("Format name not defined")
         val name = Name.parse(key)
         return ioFormatFactories.find { it.name == name }?.let {
             @Suppress("UNCHECKED_CAST")
             if (it.type != type) error("Format type ${it.type} is not the same as requested type $type")
-            else it.build(context, item[META_KEY] ?: Meta.EMPTY) as IOFormat<T>
+            else it.build(context, item[IOFormatFactory.META_KEY] ?: Meta.EMPTY) as IOFormat<T>
         }
     }
 
@@ -47,21 +45,24 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         envelopeFormatFactories.find { it.name == name }?.build(context, meta)
 
     public fun resolveEnvelopeFormat(item: Meta): EnvelopeFormat? {
-        val name = item.string ?: item[NAME_KEY]?.string ?: error("Envelope format name not defined")
-        val meta = item[META_KEY] ?: Meta.EMPTY
+        val name = item.string ?: item[IOFormatFactory.NAME_KEY]?.string ?: error("Envelope format name not defined")
+        val meta = item[IOFormatFactory.META_KEY] ?: Meta.EMPTY
         return resolveEnvelopeFormat(Name.parse(name), meta)
     }
 
     override fun content(target: String): Map<Name, Any> = when (target) {
         META_FORMAT_TYPE -> defaultMetaFormats.toMap()
         ENVELOPE_FORMAT_TYPE -> defaultEnvelopeFormats.toMap()
+        IO_FORMAT_TYPE -> content(META_FORMAT_TYPE) + content(ENVELOPE_FORMAT_TYPE)
         else -> super.content(target)
     }
 
     public companion object : PluginFactory<IOPlugin> {
         public val defaultMetaFormats: List<MetaFormatFactory> = listOf(JsonMetaFormat)
-        public val defaultEnvelopeFormats: List<EnvelopeFormatFactory> =
-            listOf(TaggedEnvelopeFormat, TaglessEnvelopeFormat)
+        public val defaultEnvelopeFormats: List<EnvelopeFormatFactory> = listOf(
+            TaggedEnvelopeFormat,
+            TaglessEnvelopeFormat
+        )
 
         override val tag: PluginTag = PluginTag("io", group = PluginTag.DATAFORGE_GROUP)
 

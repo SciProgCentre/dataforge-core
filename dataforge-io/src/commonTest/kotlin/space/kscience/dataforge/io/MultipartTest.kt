@@ -32,18 +32,17 @@ class MultipartTest {
 
     @Test
     fun testParts() {
-        TaglessEnvelopeFormat.run {
-            val singleEnvelopeData = toBinary(envelopes[0])
-            val singleEnvelopeSize = singleEnvelopeData.size
-            val bytes = toBinary(partsEnvelope)
-            assertTrue(envelopes.size * singleEnvelopeSize < bytes.size)
-            val reconstructed = bytes.readWith(this)
-            println(reconstructed.meta)
-            val parts = reconstructed.parts()
-            val envelope = parts[2].envelope(io)
-            assertEquals(2, envelope.meta["value"].int)
-            println(reconstructed.data!!.size)
-        }
+        val format = TaglessEnvelopeFormat
+        val singleEnvelopeData = Binary(envelopes[0], format)
+        val singleEnvelopeSize = singleEnvelopeData.size
+        val bytes = Binary(partsEnvelope, format)
+        assertTrue(envelopes.size * singleEnvelopeSize < bytes.size)
+        val reconstructed = bytes.readWith(format)
+        println(reconstructed.meta)
+        val parts = reconstructed.parts()
+        val envelope = parts[2].envelope(io)
+        assertEquals(2, envelope.meta["value"].int)
+        println(reconstructed.data!!.size)
     }
 
 }

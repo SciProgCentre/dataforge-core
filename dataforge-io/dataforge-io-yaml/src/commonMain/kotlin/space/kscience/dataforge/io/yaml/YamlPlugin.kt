@@ -4,6 +4,7 @@ import space.kscience.dataforge.context.AbstractPlugin
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.PluginFactory
 import space.kscience.dataforge.context.PluginTag
+import space.kscience.dataforge.io.EnvelopeFormatFactory
 import space.kscience.dataforge.io.IOPlugin
 import space.kscience.dataforge.io.MetaFormatFactory
 import space.kscience.dataforge.meta.Meta
@@ -12,7 +13,6 @@ import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import kotlin.reflect.KClass
 
-@DFExperimental
 public class YamlPlugin(meta: Meta) : AbstractPlugin(meta) {
     public val io: IOPlugin by require(IOPlugin)
 
@@ -20,6 +20,7 @@ public class YamlPlugin(meta: Meta) : AbstractPlugin(meta) {
 
     override fun content(target: String): Map<Name, Any> = when (target) {
         MetaFormatFactory.META_FORMAT_TYPE -> mapOf("yaml".asName() to YamlMetaFormat)
+        EnvelopeFormatFactory.ENVELOPE_FORMAT_TYPE -> mapOf(FrontMatterEnvelopeFormat.name to FrontMatterEnvelopeFormat)
         else -> super.content(target)
     }
 

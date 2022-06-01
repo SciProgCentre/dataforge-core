@@ -4,15 +4,29 @@
 ### Added
 - Add `specOrNull` delegate to meta and Scheme
 - Suspended read methods to the `Binary`
+- Synchronously accessed `meta` to all `DataSet`s
+- More fine-grained types in Action builders.
 
 ### Changed
 - `Factory` is now `fun interface` and uses `build` instead of `invoke`. `invoke moved to an extension.
+- KTor 2.0
+- DataTree `items` call is blocking.
+- DataSet `getData` is no longer suspended and renamed to `get`
+- DataSet operates with sequences of data instead of flows
+- PartialEnvelope uses `Int` instead `UInt`.
+- `ActiveDataSet` renamed to `DataSource`
+- `selectOne`->`getByType`
+- Data traversal in `DataSet` is done via iterator
+- Remove all unnecessary properties for `IOFormat`
+- Separate interfaces for `IOReader` and `IOWriter`
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- Meta file name in readMeta from directory
+- Tagless and FrontMatter envelope partial readers fix.
 
 ### Security
 

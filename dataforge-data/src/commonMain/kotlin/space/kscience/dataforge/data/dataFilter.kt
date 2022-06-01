@@ -4,11 +4,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.isEmpty
 import space.kscience.dataforge.names.plus
 import space.kscience.dataforge.names.removeHeadOrNull
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KType
 
 
@@ -16,34 +19,58 @@ import kotlin.reflect.KType
  * A stateless filtered [DataSet]
  */
 public fun <T : Any> DataSet<T>.filter(
-    predicate: suspend (Name, Data<T>) -> Boolean,
-): ActiveDataSet<T> = object : ActiveDataSet<T> {
+    predicate: (Name, Meta) -> Boolean,
+): DataSource<T> = object : DataSource<T> {
+
     override val dataType: KType get() = this@filter.dataType
 
-    override fun flowData(): Flow<NamedData<T>> =
-        this@filter.flowData().filter { predicate(it.name, it.data) }
+    override val coroutineContext: CoroutineContext
+        get() = (this@filter as? DataSource)?.coroutineContext ?: EmptyCoroutineContext
 
-    override suspend fun getData(name: Name): Data<T>? = this@filter.getData(name)?.takeIf {
-        predicate(name, it)
+
+    override val meta: Meta get() = this@filter.meta
+
+    override fun iterator(): Iterator<NamedData<T>> = iterator {
+        for(d in this@filter){
+            if(predicate(d.name, d.meta)){
+                yield(d)
+            }
+        }
+    }
+
+    override fun get(name: Name): Data<T>? = this@filter.get(name)?.takeIf {
+        predicate(name, it.meta)
     }
 
     override val updates: Flow<Name> = this@filter.updates.filter flowFilter@{ name ->
-        val theData = this@filter.getData(name) ?: return@flowFilter false
-        predicate(name, theData)
+        val theData = this@filter[name] ?: return@flowFilter false
+        predicate(name, theData.meta)
     }
 }
 
 /**
  * Generate a wrapper data set with a given name prefix appended to all names
  */
-public fun <T : Any> DataSet<T>.withNamePrefix(prefix: Name): DataSet<T> = if (prefix.isEmpty()) this
-else object : ActiveDataSet<T> {
+public fun <T : Any> DataSet<T>.withNamePrefix(prefix: Name): DataSet<T> = if (prefix.isEmpty()) {
+    this
+} else object : DataSource<T> {
+
     override val dataType: KType get() = this@withNamePrefix.dataType
 
-    override fun flowData(): Flow<NamedData<T>> = this@withNamePrefix.flowData().map { it.data.named(prefix + it.name) }
+    override val coroutineContext: CoroutineContext
+        get() = (this@withNamePrefix as? DataSource)?.coroutineContext ?: EmptyCoroutineContext
 
-    override suspend fun getData(name: Name): Data<T>? =
-        name.removeHeadOrNull(name)?.let { this@withNamePrefix.getData(it) }
+    override val meta: Meta get() = this@withNamePrefix.meta
+
+
+    override fun iterator(): Iterator<NamedData<T>> = iterator {
+        for(d in this@withNamePrefix){
+            yield(d.data.named(prefix + d.name))
+        }
+    }
+
+    override fun get(name: Name): Data<T>? =
+        name.removeHeadOrNull(name)?.let { this@withNamePrefix.get(it) }
 
     override val updates: Flow<Name> get() = this@withNamePrefix.updates.map { prefix + it }
 }
@@ -53,16 +80,23 @@ else object : ActiveDataSet<T> {
  */
 public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branchName.isEmpty()) {
     this
-} else object : ActiveDataSet<T> {
+} else object : DataSource<T> {
     override val dataType: KType get() = this@branch.dataType
 
-    override fun flowData(): Flow<NamedData<T>> = this@branch.flowData().mapNotNull {
-        it.name.removeHeadOrNull(branchName)?.let { name ->
-            it.data.named(name)
+    override val coroutineContext: CoroutineContext
+        get() = (this@branch as? DataSource)?.coroutineContext ?: EmptyCoroutineContext
+
+    override val meta: Meta get() = this@branch.meta
+
+    override fun iterator(): Iterator<NamedData<T>> = iterator {
+        for(d in this@branch){
+            d.name.removeHeadOrNull(branchName)?.let { name ->
+                yield(d.data.named(name))
+            }
         }
     }
 
-    override suspend fun getData(name: Name): Data<T>? = this@branch.getData(branchName + name)
+    override fun get(name: Name): Data<T>? = this@branch.get(branchName + name)
 
     override val updates: Flow<Name> get() = this@branch.updates.mapNotNull { it.removeHeadOrNull(branchName) }
 }
@@ -70,5 +104,5 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
 public fun <T : Any> DataSet<T>.branch(branchName: String): DataSet<T> = this@branch.branch(Name.parse(branchName))
 
 @DFExperimental
-public suspend fun <T : Any> DataSet<T>.rootData(): Data<T>? = getData(Name.EMPTY)
+public suspend fun <T : Any> DataSet<T>.rootData(): Data<T>? = get(Name.EMPTY)
 

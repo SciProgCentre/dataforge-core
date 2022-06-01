@@ -1,6 +1,7 @@
 package space.kscience.dataforge.data
 
 import kotlinx.coroutines.coroutineScope
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
@@ -21,15 +22,16 @@ internal class StaticDataTree<T : Any>(
     override val dataType: KType,
 ) : DataSetBuilder<T>, DataTree<T> {
 
-    private val items: MutableMap<NameToken, DataTreeItem<T>> = HashMap()
+    private val _items: MutableMap<NameToken, DataTreeItem<T>> = HashMap()
 
-    override suspend fun items(): Map<NameToken, DataTreeItem<T>> = items.filter { !it.key.body.startsWith("@") }
+    override val items: Map<NameToken, DataTreeItem<T>>
+        get() = _items.filter { !it.key.body.startsWith("@") }
 
-    override suspend fun remove(name: Name) {
+    override fun remove(name: Name) {
         when (name.length) {
             0 -> error("Can't remove root tree node")
-            1 -> items.remove(name.firstOrNull()!!)
-            else -> (items[name.firstOrNull()!!].tree as? StaticDataTree<T>)?.remove(name.cutFirst())
+            1 -> _items.remove(name.firstOrNull()!!)
+            else -> (_items[name.firstOrNull()!!].tree as? StaticDataTree<T>)?.remove(name.cutFirst())
         }
     }
 
@@ -37,57 +39,55 @@ internal class StaticDataTree<T : Any>(
         0 -> this
         1 -> {
             val itemName = name.firstOrNull()!!
-            (items[itemName].tree as? StaticDataTree<T>) ?: StaticDataTree<T>(dataType).also {
-                items[itemName] = DataTreeItem.Node(it)
+            (_items[itemName].tree as? StaticDataTree<T>) ?: StaticDataTree<T>(dataType).also {
+                _items[itemName] = DataTreeItem.Node(it)
             }
         }
         else -> getOrCreateNode(name.cutLast()).getOrCreateNode(name.lastOrNull()!!.asName())
     }
 
-    private suspend fun set(name: Name, item: DataTreeItem<T>?) {
+    private fun set(name: Name, item: DataTreeItem<T>?) {
         if (name.isEmpty()) error("Can't set top level tree node")
         if (item == null) {
             remove(name)
         } else {
-            getOrCreateNode(name.cutLast()).items[name.lastOrNull()!!] = item
+            getOrCreateNode(name.cutLast())._items[name.lastOrNull()!!] = item
         }
     }
 
-    override suspend fun emit(name: Name, data: Data<T>?) {
+    override fun data(name: Name, data: Data<T>?) {
         set(name, data?.let { DataTreeItem.Leaf(it) })
     }
 
-    override suspend fun emit(name: Name, dataSet: DataSet<T>) {
+    override fun node(name: Name, dataSet: DataSet<T>) {
         if (dataSet is StaticDataTree) {
             set(name, DataTreeItem.Node(dataSet))
         } else {
-            coroutineScope {
-                dataSet.flowData().collect {
-                    emit(name + it.name, it.data)
-                }
+            dataSet.forEach {
+                data(name + it.name, it.data)
             }
         }
+    }
+
+    override fun meta(name: Name, meta: Meta) {
+        val item = getItem(name)
+        if (item is DataTreeItem.Leaf) TODO("Can't change meta of existing leaf item.")
+        data(name + DataTree.META_ITEM_NAME_TOKEN, Data.empty(meta))
     }
 }
 
 @Suppress("FunctionName")
-public fun <T : Any> DataTree(dataType: KType): DataTree<T> = StaticDataTree(dataType)
-
-@Suppress("FunctionName")
-public inline fun <reified T : Any> DataTree(): DataTree<T> = DataTree(typeOf<T>())
-
-@Suppress("FunctionName")
-public suspend fun <T : Any> DataTree(
+public inline fun <T : Any> DataTree(
     dataType: KType,
-    block: suspend DataSetBuilder<T>.() -> Unit,
+    block: DataSetBuilder<T>.() -> Unit,
 ): DataTree<T> = StaticDataTree<T>(dataType).apply { block() }
 
 @Suppress("FunctionName")
-public suspend inline fun <reified T : Any> DataTree(
-    noinline block: suspend DataSetBuilder<T>.() -> Unit,
+public inline fun <reified T : Any> DataTree(
+    noinline block: DataSetBuilder<T>.() -> Unit = {},
 ): DataTree<T> = DataTree(typeOf<T>(), block)
 
 @OptIn(DFExperimental::class)
-public suspend fun <T : Any> DataSet<T>.seal(): DataTree<T> = DataTree(dataType) {
-    populate(this@seal)
+public fun <T : Any> DataSet<T>.seal(): DataTree<T> = DataTree(dataType) {
+    populateFrom(this@seal)
 }

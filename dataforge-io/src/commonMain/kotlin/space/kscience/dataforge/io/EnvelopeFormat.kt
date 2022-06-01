@@ -14,11 +14,12 @@ import kotlin.reflect.typeOf
 /**
  * A partially read envelope with meta, but without data
  */
-public data class PartialEnvelope(val meta: Meta, val dataOffset: UInt, val dataSize: ULong?)
+public data class PartialEnvelope(val meta: Meta, val dataOffset: Int, val dataSize: ULong?)
 
 public interface EnvelopeFormat : IOFormat<Envelope> {
-    override val type: KType get() = typeOf<Envelope>()
 
+    override val type: KType get() = typeOf<Envelope>()
+    
     public val defaultMetaFormat: MetaFormatFactory get() = JsonMetaFormat
 
     public fun readPartial(input: Input): PartialEnvelope
@@ -39,7 +40,6 @@ public fun EnvelopeFormat.read(input: Input): Envelope = readObject(input)
 
 @Type(ENVELOPE_FORMAT_TYPE)
 public interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeFormat {
-    override val name: Name get() = "envelope".asName()
     override val type: KType get() = typeOf<Envelope>()
 
     override fun build(context: Context, meta: Meta): EnvelopeFormat
@@ -51,6 +51,7 @@ public interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeForm
     public fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat?
 
     public companion object {
+        public val ENVELOPE_FACTORY_NAME: Name = "envelope".asName()
         public const val ENVELOPE_FORMAT_TYPE: String = "io.format.envelope"
     }
 }

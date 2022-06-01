@@ -9,10 +9,9 @@ import space.kscience.dataforge.io.IOFormat
 import space.kscience.dataforge.io.io
 import space.kscience.dataforge.io.readUtf8String
 import space.kscience.dataforge.io.writeUtf8String
-import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
-import java.nio.file.Path
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 import kotlin.test.Test
@@ -20,43 +19,27 @@ import kotlin.test.assertEquals
 
 
 class FileDataTest {
-    val dataNode = runBlocking {
-        DataTree<String> {
-            emit("dir") {
-                static("a", "Some string") {
-                    "content" put "Some string"
-                }
+    val dataNode = DataTree<String> {
+        node("dir") {
+            static("a", "Some string") {
+                "content" put "Some string"
             }
-            static("b", "root data")
-            meta {
-                "content" put "This is root meta node"
-            }
+        }
+        static("b", "root data")
+        meta {
+            "content" put "This is root meta node"
         }
     }
 
-    object StringIOFormat : IOFormat<String> {
 
-        override val type: KType = typeOf<String>()
+    object StringIOFormat : IOFormat<String> {
+        override val type: KType get() = typeOf<String>()
 
         override fun writeObject(output: Output, obj: String) {
             output.writeUtf8String(obj)
         }
 
-        override fun readObject(input: Input): String {
-            return input.readUtf8String()
-        }
-
-        override fun toMeta(): Meta = Meta {
-            IOFormat.NAME_KEY put "string"
-        }
-
-    }
-
-    object StringFormatResolver : FileFormatResolver<String> {
-        override val type: KType = typeOf<String>()
-
-        override fun invoke(path: Path, meta: Meta): IOFormat<String> = StringIOFormat
-
+        override fun readObject(input: Input): String = input.readUtf8String()
     }
 
     @Test
@@ -67,9 +50,9 @@ class FileDataTest {
             runBlocking {
                 writeDataDirectory(dir, dataNode, StringIOFormat)
                 println(dir.toUri().toString())
-                val reconstructed = readDataDirectory(dir, StringFormatResolver)
-                assertEquals(dataNode.getData("dir.a")?.meta, reconstructed.getData("dir.a")?.meta)
-                assertEquals(dataNode.getData("b")?.await(), reconstructed.getData("b")?.await())
+                val reconstructed = readDataDirectory(dir) { _, _ -> StringIOFormat }
+                assertEquals(dataNode["dir.a"]?.meta?.get("content"), reconstructed["dir.a"]?.meta?.get("content"))
+                assertEquals(dataNode["b"]?.await(), reconstructed["b"]?.await())
             }
         }
     }
@@ -81,11 +64,11 @@ class FileDataTest {
         Global.io.run {
             val zip = Files.createTempFile("df_data_node", ".zip")
             runBlocking {
-                writeZip(zip, dataNode, StringIOFormat)
+                dataNode.writeZip(zip, StringIOFormat)
                 println(zip.toUri().toString())
-                val reconstructed = readDataDirectory(zip, StringFormatResolver)
-                assertEquals(dataNode.getData("dir.a")?.meta, reconstructed.getData("dir.a")?.meta)
-                assertEquals(dataNode.getData("b")?.await(), reconstructed.getData("b")?.await())
+                val reconstructed = readDataDirectory(zip) { _, _ -> StringIOFormat }
+                assertEquals(dataNode["dir.a"]?.meta?.get("content"), reconstructed["dir.a"]?.meta?.get("content"))
+                assertEquals(dataNode["b"]?.await(), reconstructed["b"]?.await())
             }
         }
     }

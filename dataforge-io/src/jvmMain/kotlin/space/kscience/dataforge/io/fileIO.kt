@@ -88,13 +88,45 @@ public fun EnvelopeFormat.readFile(path: Path): Envelope {
  */
 @Suppress("UNCHECKED_CAST")
 @DFExperimental
-public inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? {
-    return ioFormatFactories.find { it.type.isSupertypeOf(typeOf<T>()) } as IOFormat<T>?
+public inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? =
+    ioFormatFactories.find { it.type.isSupertypeOf(typeOf<T>()) } as IOFormat<T>?
+
+
+public val IOPlugin.Companion.META_FILE_NAME: String get() = "@meta"
+public val IOPlugin.Companion.DATA_FILE_NAME: String get() = "@data"
+
+/**
+ * Read file containing meta using given [formatOverride] or file extension to infer meta type.
+ * If [path] is a directory search for file starting with `meta` in it.
+ *
+ * Returns null if meta could not be resolved
+ */
+public fun IOPlugin.readMetaFileOrNull(
+    path: Path,
+    formatOverride: MetaFormat? = null,
+    descriptor: MetaDescriptor? = null,
+): Meta? {
+    if (!Files.exists(path)) return null
+
+    val actualPath: Path = if (Files.isDirectory(path)) {
+        Files.list(path).asSequence().find { it.fileName.startsWith(IOPlugin.META_FILE_NAME) }
+            ?: return null
+    } else {
+        path
+    }
+    val extension = actualPath.fileName.toString().substringAfterLast('.')
+
+    val metaFormat = formatOverride ?: resolveMetaFormat(extension) ?: return null
+    return actualPath.read {
+        metaFormat.readMeta(this, descriptor)
+    }
 }
 
 /**
  * Read file containing meta using given [formatOverride] or file extension to infer meta type.
- * If [path] is a directory search for file starting with `meta` in it
+ * If [path] is a directory search for file starting with `meta` in it.
+ *
+ * Fails if nothing works.
  */
 public fun IOPlugin.readMetaFile(
     path: Path,
@@ -104,7 +136,7 @@ public fun IOPlugin.readMetaFile(
     if (!Files.exists(path)) error("Meta file $path does not exist")
 
     val actualPath: Path = if (Files.isDirectory(path)) {
-        Files.list(path).asSequence().find { it.fileName.startsWith("meta") }
+        Files.list(path).asSequence().find { it.fileName.startsWith(IOPlugin.META_FILE_NAME) }
             ?: error("The directory $path does not contain meta file")
     } else {
         path
@@ -116,6 +148,7 @@ public fun IOPlugin.readMetaFile(
         metaFormat.readMeta(this, descriptor)
     }
 }
+
 
 /**
  * Write meta to file using [metaFormat]. If [path] is a directory, write a file with name equals name of [metaFormat].
@@ -148,8 +181,6 @@ public fun IOPlugin.peekFileEnvelopeFormat(path: Path): EnvelopeFormat? {
     return peekBinaryEnvelopeFormat(binary)
 }
 
-public val IOPlugin.Companion.META_FILE_NAME: String get() = "@meta"
-public val IOPlugin.Companion.DATA_FILE_NAME: String get() = "@data"
 
 /**
  * Read and envelope from file if the file exists, return null if file does not exist.
@@ -195,20 +226,9 @@ public fun IOPlugin.readEnvelopeFile(
         return SimpleEnvelope(meta, data)
     }
 
-    return formatPicker(path)?.let { format ->
-        format.readFile(path)
-    } ?: if (readNonEnvelopes) { // if no format accepts file, read it as binary
+    return formatPicker(path)?.readFile(path) ?: if (readNonEnvelopes) { // if no format accepts file, read it as binary
         SimpleEnvelope(Meta.EMPTY, path.asBinary())
     } else error("Can't infer format for file $path")
-}
-
-/**
- * Write a binary into file. Throws an error if file already exists
- */
-public fun <T : Any> IOFormat<T>.writeToFile(path: Path, obj: T) {
-    path.write {
-        writeObject(this, obj)
-    }
 }
 
 /**

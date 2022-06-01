@@ -1,13 +1,11 @@
 package space.kscience.dataforge.workspace
 
 import kotlinx.serialization.KSerializer
+import kotlinx.coroutines.CoroutineScope
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.ContextBuilder
 import space.kscience.dataforge.context.Global
-import space.kscience.dataforge.data.ActiveDataTree
-import space.kscience.dataforge.data.DataSet
-import space.kscience.dataforge.data.DataSetBuilder
-import space.kscience.dataforge.data.DataTree
+import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
 import space.kscience.dataforge.meta.MutableMeta
@@ -18,6 +16,7 @@ import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
+import kotlin.collections.set
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
@@ -110,13 +109,13 @@ public class WorkspaceBuilder(private val parentContext: Context = Global) : Tas
     /**
      * Define intrinsic data for the workspace
      */
-    public suspend fun buildData(builder: suspend DataSetBuilder<Any>.() -> Unit) {
+    public fun data(builder: DataSetBuilder<Any>.() -> Unit) {
         data = DataTree(builder)
     }
 
     @DFExperimental
-    public suspend fun buildActiveData(builder: suspend ActiveDataTree<Any>.() -> Unit) {
-        data = ActiveDataTree(builder)
+    public fun data(scope: CoroutineScope, builder: DataSourceBuilder<Any>.() -> Unit) {
+        data = DataSource(scope, builder)
     }
 
     /**
