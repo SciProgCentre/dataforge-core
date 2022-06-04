@@ -10,6 +10,7 @@ import space.kscience.dataforge.data.NamedData
 import space.kscience.dataforge.data.asIterable
 import space.kscience.dataforge.data.component1
 import space.kscience.dataforge.data.component2
+import space.kscience.dataforge.data.named
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KType
@@ -23,7 +24,7 @@ internal data class DataSetPrototype(val meta: Meta, val data: Map<String, DataP
         val data = data
             .mapKeys { (name, _) -> Name.of(name) }
             .mapValues { (_, dataPrototype) -> dataPrototype.toData(type, serializer) }
-        return SerializableDataSetImpl(type, data, meta)
+        return SimpleDataSet(type, data, meta)
     }
 
     companion object {
@@ -40,22 +41,16 @@ internal data class DataSetPrototype(val meta: Meta, val data: Map<String, DataP
 /**
  * Trivial [DataSet] implementation.
  */
-private class SerializableDataSetImpl<T : Any>(
+private class SimpleDataSet<T : Any>(
     override val dataType: KType,
     private val data: Map<Name, Data<T>>,
     override val meta: Meta,
 ) : DataSet<T> {
 
-    /**
-     * Trivial named data implementation.
-     */
-    private class SimpleNamedData<T : Any>(override val name: Name, override val data: Data<T>) :
-        NamedData<T>, Data<T> by data
-
     override fun iterator(): Iterator<NamedData<T>> =
         data
             .asSequence()
-            .map { (name, data) -> SimpleNamedData(name, data) }
+            .map { (name, data) -> data.named(name) }
             .iterator()
 
     override fun get(name: Name): Data<T>? = data[name]

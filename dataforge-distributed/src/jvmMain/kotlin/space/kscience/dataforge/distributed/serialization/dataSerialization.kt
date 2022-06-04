@@ -1,15 +1,11 @@
 package space.kscience.dataforge.distributed.serialization
 
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import space.kscience.dataforge.data.Data
-import space.kscience.dataforge.data.Goal
+import space.kscience.dataforge.data.StaticData
 import space.kscience.dataforge.data.await
-import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaSerializer
 import kotlin.reflect.KType
 
@@ -22,10 +18,10 @@ internal data class DataPrototype(
     val data: String,
 ) {
     fun <T : Any> toData(type: KType, serializer: KSerializer<T>): Data<T> =
-        SimpleData(
+        StaticData(
             type = type,
+            value = Json.decodeFromString(serializer, data),
             meta = Json.decodeFromString(MetaSerializer, meta),
-            data = Json.decodeFromString(serializer, data)
         )
 
     companion object {
@@ -35,22 +31,4 @@ internal data class DataPrototype(
             return DataPrototype(meta, string)
         }
     }
-}
-
-/**
- * Trivial [Data] implementation.
- */
-private class SimpleData<T : Any>(
-    override val type: KType,
-    override val meta: Meta,
-    val data: T,
-) : Data<T> {
-    override val dependencies: Collection<Goal<*>>
-        get() = emptyList()
-
-    override val deferred: Deferred<T>
-        get() = CompletableDeferred(data)
-
-    override fun async(coroutineScope: CoroutineScope): Deferred<T> = deferred
-    override fun reset() = Unit
 }
