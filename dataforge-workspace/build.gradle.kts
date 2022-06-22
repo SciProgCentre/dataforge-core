@@ -3,6 +3,10 @@ plugins {
     id("ru.mipt.npm.gradle.native")
 }
 
+kscience{
+    useCoroutines()
+}
+
 kotlin {
     sourceSets {
         commonMain{

@@ -6,6 +6,7 @@ import space.kscience.dataforge.names.*
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 public sealed class DataTreeItem<out T : Any> {
 
@@ -63,6 +64,12 @@ public interface DataTree<out T : Any> : DataSet<T> {
          * A name token used to designate tree node meta
          */
         public val META_ITEM_NAME_TOKEN: NameToken = NameToken("@meta")
+
+        public inline fun <reified T : Any> empty(meta: Meta = Meta.EMPTY): DataTree<T> = object : DataTree<T> {
+            override val items: Map<NameToken, DataTreeItem<T>> get() = emptyMap()
+            override val dataType: KType get() = typeOf<T>()
+            override val meta: Meta get() = meta
+        }
     }
 }
 

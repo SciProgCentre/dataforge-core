@@ -68,6 +68,8 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
 
         override val type: KClass<out IOPlugin> = IOPlugin::class
         override fun build(context: Context, meta: Meta): IOPlugin = IOPlugin(meta)
+
+        public val WORK_DIRECTORY_KEY: Name = Name.of("io", "workDirectory")
     }
 }
 
