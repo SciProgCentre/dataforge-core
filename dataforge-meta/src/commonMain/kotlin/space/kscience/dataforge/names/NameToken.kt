@@ -27,6 +27,16 @@ public data class NameToken(val body: String, val index: String? = null) {
         body.escape()
     }
 
+    /**
+     * Return unescaped version of the [NameToken]. Should be used only for output because it is not possible to correctly
+     * parse it back.
+     */
+    public fun toStringUnescaped(): String = if (hasIndex()) {
+        "${body}[$index]"
+    } else {
+        body
+    }
+
     public companion object {
 
         /**
