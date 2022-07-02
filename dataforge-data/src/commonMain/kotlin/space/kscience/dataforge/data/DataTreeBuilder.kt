@@ -102,7 +102,7 @@ public fun <T : Any> DataSource(
     type: KType,
     parent: CoroutineScope,
     block: DataSourceBuilder<T>.() -> Unit,
-): DataSource<T> {
+): DataSourceBuilder<T> {
     val tree = DataTreeBuilder<T>(type, parent.coroutineContext)
     tree.block()
     return tree
@@ -112,7 +112,7 @@ public fun <T : Any> DataSource(
 public inline fun <reified T : Any> DataSource(
     parent: CoroutineScope,
     crossinline block: DataSourceBuilder<T>.() -> Unit,
-): DataSource<T> = DataSource(typeOf<T>(), parent) { block() }
+): DataSourceBuilder<T> = DataSource(typeOf<T>(), parent) { block() }
 
 @Suppress("FunctionName")
 public suspend inline fun <reified T : Any> DataSource(
