@@ -21,8 +21,7 @@ public interface DataSourceBuilder<T : Any> : DataSetBuilder<T>, DataSource<T> {
 /**
  * A mutable [DataTree] that propagates updates
  */
-@PublishedApi
-internal class DataTreeBuilder<T : Any>(
+public class DataTreeBuilder<T : Any>(
     override val dataType: KType,
     coroutineContext: CoroutineContext,
 ) : DataTree<T>, DataSourceBuilder<T> {
@@ -35,7 +34,7 @@ internal class DataTreeBuilder<T : Any>(
     override val items: Map<NameToken, DataTreeItem<T>>
         get() = treeItems.filter { !it.key.body.startsWith("@") }
 
-    override val updates = MutableSharedFlow<Name>()
+    override val updates: MutableSharedFlow<Name> = MutableSharedFlow<Name>()
 
     @Synchronized
     private fun remove(token: NameToken) {
@@ -102,22 +101,18 @@ public fun <T : Any> DataSource(
     type: KType,
     parent: CoroutineScope,
     block: DataSourceBuilder<T>.() -> Unit,
-): DataSourceBuilder<T> {
-    val tree = DataTreeBuilder<T>(type, parent.coroutineContext)
-    tree.block()
-    return tree
-}
+): DataTreeBuilder<T> = DataTreeBuilder<T>(type, parent.coroutineContext).apply(block)
 
 @Suppress("OPT_IN_USAGE","FunctionName")
 public inline fun <reified T : Any> DataSource(
     parent: CoroutineScope,
     crossinline block: DataSourceBuilder<T>.() -> Unit,
-): DataSourceBuilder<T> = DataSource(typeOf<T>(), parent) { block() }
+): DataTreeBuilder<T> = DataSource(typeOf<T>(), parent) { block() }
 
 @Suppress("FunctionName")
 public suspend inline fun <reified T : Any> DataSource(
     crossinline block: DataSourceBuilder<T>.() -> Unit = {},
-): DataSourceBuilder<T> = DataTreeBuilder<T>(typeOf<T>(), coroutineContext).apply { block() }
+): DataTreeBuilder<T> = DataTreeBuilder<T>(typeOf<T>(), coroutineContext).apply { block() }
 
 public inline fun <reified T : Any> DataSourceBuilder<T>.emit(
     name: Name,
