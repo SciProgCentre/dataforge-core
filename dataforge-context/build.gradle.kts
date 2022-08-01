@@ -1,6 +1,6 @@
 plugins {
-    id("ru.mipt.npm.gradle.mpp")
-    id("ru.mipt.npm.gradle.native")
+    id("space.kscience.gradle.mpp")
+    id("space.kscience.gradle.native")
 }
 
 description = "Context and provider definitions"
@@ -31,5 +31,5 @@ kotlin {
 }
 
 readme {
-    maturity = ru.mipt.npm.gradle.Maturity.DEVELOPMENT
+    maturity = space.kscience.gradle.Maturity.DEVELOPMENT
 }

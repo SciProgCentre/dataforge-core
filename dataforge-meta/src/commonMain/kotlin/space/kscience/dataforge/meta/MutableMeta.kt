@@ -23,9 +23,7 @@ public annotation class MetaBuilder
 public interface MutableMetaProvider : MetaProvider, MutableValueProvider {
     override fun getMeta(name: Name): MutableMeta?
     public fun setMeta(name: Name, node: Meta?)
-    override fun setValue(name: Name, value: Value?) {
-        getMeta(name)?.value = value
-    }
+    override fun setValue(name: Name, value: Value?)
 }
 
 /**
@@ -144,12 +142,12 @@ public interface MutableMeta : Meta, MutableMetaProvider {
 /**
  * Set or replace node at given [name]
  */
-public operator fun MutableMeta.set(name: Name, meta: Meta): Unit = setMeta(name, meta)
+public operator fun MutableMetaProvider.set(name: Name, meta: Meta): Unit = setMeta(name, meta)
 
 /**
  * Set or replace value at given [name]
  */
-public operator fun MutableMeta.set(name: Name, value: Value?): Unit = setValue(name, value)
+public operator fun MutableValueProvider.set(name: Name, value: Value?): Unit = setValue(name, value)
 
 public fun MutableMeta.getOrCreate(key: String): MutableMeta = getOrCreate(Name.parse(key))
 
@@ -179,26 +177,6 @@ public fun MutableMetaProvider.remove(key: String) {
 public operator fun MutableMetaProvider.set(Key: NameToken, value: Meta): Unit = setMeta(Key.asName(), value)
 public operator fun MutableMetaProvider.set(key: String, value: Meta): Unit = setMeta(Name.parse(key), value)
 
-//value setters
-
-public operator fun MutableMeta.set(name: NameToken, value: Value?): Unit = set(name.asName(), value)
-public operator fun MutableMeta.set(key: String, value: Value?): Unit = set(Name.parse(key), value)
-
-public operator fun MutableMeta.set(name: Name, value: String): Unit = set(name, value.asValue())
-public operator fun MutableMeta.set(name: NameToken, value: String): Unit = set(name.asName(), value.asValue())
-public operator fun MutableMeta.set(key: String, value: String): Unit = set(Name.parse(key), value.asValue())
-
-public operator fun MutableMeta.set(name: Name, value: Boolean): Unit = set(name, value.asValue())
-public operator fun MutableMeta.set(name: NameToken, value: Boolean): Unit = set(name.asName(), value.asValue())
-public operator fun MutableMeta.set(key: String, value: Boolean): Unit = set(Name.parse(key), value.asValue())
-
-public operator fun MutableMeta.set(name: Name, value: Number): Unit = set(name, value.asValue())
-public operator fun MutableMeta.set(name: NameToken, value: Number): Unit = set(name.asName(), value.asValue())
-public operator fun MutableMeta.set(key: String, value: Number): Unit = set(Name.parse(key), value.asValue())
-
-public operator fun MutableMeta.set(name: Name, value: List<Value>): Unit = set(name, value.asValue())
-public operator fun MutableMeta.set(name: NameToken, value: List<Value>): Unit = set(name.asName(), value.asValue())
-public operator fun MutableMeta.set(key: String, value: List<Value>): Unit = set(Name.parse(key), value.asValue())
 
 //public fun MutableMeta.set(key: String, index: String, value: Value?): Unit =
 //    set(key.toName().withIndex(index), value)
@@ -207,7 +185,7 @@ public operator fun MutableMeta.set(key: String, value: List<Value>): Unit = set
 /* Same name siblings generation */
 
 
-public fun MutableMeta.setIndexed(
+public fun MutableMetaProvider.setIndexed(
     name: Name,
     metas: Iterable<Meta>,
     indexFactory: (Meta, index: Int) -> String = { _, index -> index.toString() },
@@ -221,10 +199,10 @@ public fun MutableMeta.setIndexed(
     }
 }
 
-public operator fun MutableMeta.set(name: Name, metas: Iterable<Meta>): Unit =
+public operator fun MutableMetaProvider.set(name: Name, metas: Iterable<Meta>): Unit =
     setIndexed(name, metas)
 
-public operator fun MutableMeta.set(key: String, metas: Iterable<Meta>): Unit =
+public operator fun MutableMetaProvider.set(key: String, metas: Iterable<Meta>): Unit =
     setIndexed(Name.parse(key), metas)
 
 
@@ -234,7 +212,7 @@ public operator fun MutableMeta.set(key: String, metas: Iterable<Meta>): Unit =
  *  * node updates node and replaces anything but node
  *  * node list updates node list if number of nodes in the list is the same and replaces anything otherwise
  */
-public fun MutableMeta.update(meta: Meta) {
+public fun MutableMetaProvider.update(meta: Meta) {
     meta.valueSequence().forEach { (name, value) ->
         set(name, value)
     }

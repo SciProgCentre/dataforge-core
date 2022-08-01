@@ -1,6 +1,6 @@
 plugins {
-    id("ru.mipt.npm.gradle.mpp")
-    id("ru.mipt.npm.gradle.native")
+    id("space.kscience.gradle.mpp")
+    id("space.kscience.gradle.native")
 }
 
 kscience{
@@ -20,5 +20,5 @@ kotlin {
 }
 
 readme{
-    maturity = ru.mipt.npm.gradle.Maturity.EXPERIMENTAL
+    maturity = space.kscience.gradle.Maturity.EXPERIMENTAL
 }

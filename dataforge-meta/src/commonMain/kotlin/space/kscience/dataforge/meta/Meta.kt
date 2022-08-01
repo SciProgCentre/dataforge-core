@@ -109,7 +109,7 @@ public operator fun Meta.get(name: Name): Meta? = this.getMeta(name)
 /**
  * Parse [Name] from [key] using full name notation and pass it to [Meta.get]
  */
-public operator fun Meta.get(key: String): Meta? = this.get(Name.parse(key))
+public operator fun Meta.get(key: String): Meta? = this[Name.parse(key)]
 
 /**
  * Get all items matching given name. The index of the last element, if present is used as a [Regex],

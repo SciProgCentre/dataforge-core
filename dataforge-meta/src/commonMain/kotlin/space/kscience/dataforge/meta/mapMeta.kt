@@ -6,6 +6,7 @@ import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.values.ListValue
 import space.kscience.dataforge.values.Value
+import space.kscience.dataforge.values.setValue
 
 /**
  * Convert meta to map of maps
@@ -43,7 +44,7 @@ public fun Map<String, Any?>.toMeta(@Suppress("UNUSED_PARAMETER") descriptor: Me
         if (value is List<*>) {
             val items = value.map { toMeta(it) }
             if (items.all { it.isLeaf }) {
-                set(key, ListValue(items.map { it.value!! }))
+                setValue(key, ListValue(items.map { it.value!! }))
             } else {
                 setIndexed(Name.parse(key), value.map { toMeta(it) })
             }

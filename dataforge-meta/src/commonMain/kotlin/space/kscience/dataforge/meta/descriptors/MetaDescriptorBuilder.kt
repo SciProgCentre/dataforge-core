@@ -8,6 +8,7 @@ import space.kscience.dataforge.names.length
 import space.kscience.dataforge.values.Value
 import space.kscience.dataforge.values.ValueType
 import space.kscience.dataforge.values.asValue
+import space.kscience.dataforge.values.set
 import kotlin.collections.set
 
 public class MetaDescriptorBuilder  @PublishedApi internal constructor() {

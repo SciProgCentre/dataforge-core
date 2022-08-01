@@ -2,6 +2,7 @@ package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.values.Value
 import space.kscience.dataforge.values.asValue
+import space.kscience.dataforge.values.set
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -25,9 +26,9 @@ class MetaBuilderTest {
     }
 
     @Test
-    fun testSNS(){
+    fun testSNS() {
         val meta = Meta {
-            repeat(10){
+            repeat(10) {
                 "b.a[$it]" put it
             }
         }.seal()

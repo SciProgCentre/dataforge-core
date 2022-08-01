@@ -1,14 +1,14 @@
-import ru.mipt.npm.gradle.KScienceVersions
+import space.kscience.gradle.KScienceVersions
 
 plugins {
-    id("ru.mipt.npm.gradle.mpp")
-    id("ru.mipt.npm.gradle.native")
+    id("space.kscience.gradle.mpp")
+    id("space.kscience.gradle.native")
 }
 
 description = "IO module"
 
 kscience {
-    useSerialization(sourceSet = ru.mipt.npm.gradle.DependencySourceSet.TEST) {
+    useSerialization(sourceSet = space.kscience.gradle.DependencySourceSet.TEST) {
         cbor()
     }
 }
@@ -27,5 +27,5 @@ kotlin {
 }
 
 readme{
-    maturity = ru.mipt.npm.gradle.Maturity.PROTOTYPE
+    maturity = space.kscience.gradle.Maturity.PROTOTYPE
 }
