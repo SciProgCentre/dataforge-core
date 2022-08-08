@@ -2,8 +2,6 @@ package space.kscience.dataforge.io
 
 import kotlinx.serialization.json.*
 import space.kscience.dataforge.meta.*
-import space.kscience.dataforge.values.ListValue
-import space.kscience.dataforge.values.double
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

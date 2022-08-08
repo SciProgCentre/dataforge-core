@@ -1,4 +1,4 @@
-package space.kscience.dataforge.values
+package space.kscience.dataforge.meta
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -12,7 +12,7 @@ public object ValueSerializer : KSerializer<Value> {
     private val listSerializer by lazy { ListSerializer(ValueSerializer) }
 
     override val descriptor: SerialDescriptor =
-        buildClassSerialDescriptor("space.kscience.dataforge.values.Value") {
+        buildClassSerialDescriptor("space.kscience.dataforge.meta.Value") {
             element<Boolean>("isList")
             element<ValueType>("valueType")
             element<String>("value")

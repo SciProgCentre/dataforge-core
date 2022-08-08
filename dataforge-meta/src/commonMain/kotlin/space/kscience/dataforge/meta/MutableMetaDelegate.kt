@@ -3,7 +3,6 @@ package space.kscience.dataforge.meta
 import space.kscience.dataforge.meta.transformations.MetaConverter
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
-import space.kscience.dataforge.values.*
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 

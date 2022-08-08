@@ -1,5 +1,7 @@
 package space.kscience.dataforge.values
 
+import space.kscience.dataforge.meta.asValue
+import space.kscience.dataforge.meta.number
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals

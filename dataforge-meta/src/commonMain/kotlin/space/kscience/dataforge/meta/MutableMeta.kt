@@ -3,10 +3,6 @@ package space.kscience.dataforge.meta
 import kotlinx.serialization.Serializable
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
-import space.kscience.dataforge.values.EnumValue
-import space.kscience.dataforge.values.MutableValueProvider
-import space.kscience.dataforge.values.Value
-import space.kscience.dataforge.values.asValue
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 

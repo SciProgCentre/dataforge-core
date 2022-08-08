@@ -1,10 +1,6 @@
 package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.values.NumberValue
-import space.kscience.dataforge.values.True
-import space.kscience.dataforge.values.Value
-import space.kscience.dataforge.values.set
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -6,7 +6,6 @@ import kotlinx.serialization.json.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.get
 import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.values.*
 
 private const val jsonArrayKey: String = "@jsonArray"
 

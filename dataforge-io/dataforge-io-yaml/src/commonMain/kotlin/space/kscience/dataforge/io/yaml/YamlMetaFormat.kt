@@ -8,16 +8,11 @@ import space.kscience.dataforge.io.MetaFormat
 import space.kscience.dataforge.io.MetaFormatFactory
 import space.kscience.dataforge.io.readUtf8String
 import space.kscience.dataforge.io.writeUtf8String
-import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.get
-import space.kscience.dataforge.meta.isLeaf
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.withIndex
-import space.kscience.dataforge.values.ListValue
-import space.kscience.dataforge.values.Null
-import space.kscience.dataforge.values.Value
-import space.kscience.dataforge.values.parseValue
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set

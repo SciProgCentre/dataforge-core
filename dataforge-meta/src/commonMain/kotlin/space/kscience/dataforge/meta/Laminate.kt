@@ -2,7 +2,6 @@ package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.values.Value
 
 /**
  * A meta laminate consisting of multiple immutable meta layers. For mutable front layer, use [Scheme].

@@ -1,8 +1,6 @@
 package space.kscience.dataforge.meta.transformations
 
 import space.kscience.dataforge.meta.*
-import space.kscience.dataforge.values.Value
-import space.kscience.dataforge.values.asValue
 
 /**
  * A converter of generic object to and from [Meta]

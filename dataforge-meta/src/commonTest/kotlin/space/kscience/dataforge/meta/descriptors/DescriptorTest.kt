@@ -1,8 +1,8 @@
 package space.kscience.dataforge.meta.descriptors
 
+import space.kscience.dataforge.meta.ValueType
 import space.kscience.dataforge.meta.boolean
 import space.kscience.dataforge.meta.get
-import space.kscience.dataforge.values.ValueType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

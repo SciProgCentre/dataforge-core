@@ -1,7 +1,5 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.values.ListValue
-import space.kscience.dataforge.values.int
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

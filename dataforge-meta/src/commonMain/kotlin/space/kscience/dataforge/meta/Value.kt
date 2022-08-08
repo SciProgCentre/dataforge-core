@@ -1,4 +1,4 @@
-package space.kscience.dataforge.values
+package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline

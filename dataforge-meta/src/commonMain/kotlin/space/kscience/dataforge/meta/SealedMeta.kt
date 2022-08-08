@@ -2,8 +2,6 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
 import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.values.Value
-import space.kscience.dataforge.values.asValue
 
 /**
  * The meta implementation which is guaranteed to be immutable.

@@ -2,7 +2,6 @@ package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
-import space.kscience.dataforge.values.Value
 import kotlin.jvm.Synchronized
 
 /**

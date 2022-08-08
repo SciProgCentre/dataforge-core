@@ -4,9 +4,6 @@ import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.get
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.values.ListValue
-import space.kscience.dataforge.values.Value
-import space.kscience.dataforge.values.setValue
 
 /**
  * Convert meta to map of maps

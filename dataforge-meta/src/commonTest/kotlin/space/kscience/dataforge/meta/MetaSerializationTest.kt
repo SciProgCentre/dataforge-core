@@ -1,7 +1,6 @@
 package space.kscience.dataforge.meta
 
 import kotlinx.serialization.json.Json
-import space.kscience.dataforge.values.string
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

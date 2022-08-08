@@ -6,7 +6,6 @@ import space.kscience.dataforge.meta.descriptors.get
 import space.kscience.dataforge.meta.descriptors.validate
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.*
-import space.kscience.dataforge.values.Value
 import kotlin.jvm.Synchronized
 
 /**

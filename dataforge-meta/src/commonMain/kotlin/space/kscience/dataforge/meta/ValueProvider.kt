@@ -1,6 +1,5 @@
-package space.kscience.dataforge.values
+package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.meta.set
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName

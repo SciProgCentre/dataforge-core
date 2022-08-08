@@ -1,9 +1,6 @@
 package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.values.Value
-import space.kscience.dataforge.values.asValue
-import space.kscience.dataforge.values.isList
 
 
 //TODO add Meta wrapper for dynamic

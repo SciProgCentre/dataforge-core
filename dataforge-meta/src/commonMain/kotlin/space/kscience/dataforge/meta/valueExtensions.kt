@@ -1,6 +1,4 @@
-package space.kscience.dataforge.values
-
-import space.kscience.dataforge.meta.Meta
+package space.kscience.dataforge.meta
 
 /**
  * Check if value is null

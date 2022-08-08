@@ -2,7 +2,7 @@ package space.kscience.dataforge.meta.descriptors
 
 import space.kscience.dataforge.meta.Scheme
 import space.kscience.dataforge.meta.SchemeSpec
-import space.kscience.dataforge.values.ValueType
+import space.kscience.dataforge.meta.ValueType
 import kotlin.reflect.KProperty1
 import kotlin.reflect.typeOf
 

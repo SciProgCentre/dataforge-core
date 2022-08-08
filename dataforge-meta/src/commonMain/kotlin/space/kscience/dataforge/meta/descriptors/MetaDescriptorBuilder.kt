@@ -1,14 +1,11 @@
 package space.kscience.dataforge.meta.descriptors
 
 import space.kscience.dataforge.meta.*
+import space.kscience.dataforge.meta.set
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.cutFirst
 import space.kscience.dataforge.names.first
 import space.kscience.dataforge.names.length
-import space.kscience.dataforge.values.Value
-import space.kscience.dataforge.values.ValueType
-import space.kscience.dataforge.values.asValue
-import space.kscience.dataforge.values.set
 import kotlin.collections.set
 
 public class MetaDescriptorBuilder  @PublishedApi internal constructor() {

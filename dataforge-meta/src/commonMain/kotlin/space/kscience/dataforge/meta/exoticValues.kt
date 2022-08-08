@@ -1,4 +1,4 @@
-package space.kscience.dataforge.values
+package space.kscience.dataforge.meta
 
 
 /**

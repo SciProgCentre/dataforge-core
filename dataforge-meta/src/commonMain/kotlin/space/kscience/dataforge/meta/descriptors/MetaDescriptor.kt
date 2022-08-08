@@ -1,12 +1,8 @@
 package space.kscience.dataforge.meta.descriptors
 
 import kotlinx.serialization.Serializable
-import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.get
-import space.kscience.dataforge.meta.set
+import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.names.*
-import space.kscience.dataforge.values.Value
-import space.kscience.dataforge.values.ValueType
 
 /**
  * Restrictions on value in the node
