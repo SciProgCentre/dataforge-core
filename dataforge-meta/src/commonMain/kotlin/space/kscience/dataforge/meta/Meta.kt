@@ -248,8 +248,9 @@ public val Meta.stringList: List<String>? get() = value?.list?.map { it.string }
 /**
  * Create a provider that uses given provider for default values if those are not found in this provider
  */
-public fun Meta.withDefault(default: Meta?): Meta = if (default == null) {
+public fun Meta.withDefault(default: MetaProvider?): Meta = if (default == null) {
     this
 } else {
-    Laminate(this, default)
+    //TODO optimize
+    toMutableMeta().withDefault(default)
 }

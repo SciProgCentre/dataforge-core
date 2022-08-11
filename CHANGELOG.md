@@ -8,6 +8,7 @@
 - More fine-grained types in Action builders.
 
 ### Changed
+- `withDefault` functions do not add new keys to meta children and are consistent.
 - `dataforge.meta.values` package is merged into `dataforge.meta` for better star imports
 - Kotlin 1.7.20
 - `Factory` is now `fun interface` and uses `build` instead of `invoke`. `invoke moved to an extension.

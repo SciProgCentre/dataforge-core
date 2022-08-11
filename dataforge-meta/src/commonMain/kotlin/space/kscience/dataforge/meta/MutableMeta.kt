@@ -401,12 +401,12 @@ public inline fun Meta.copy(block: MutableMeta.() -> Unit = {}): Meta =
 
 
 private class MutableMetaWithDefault(
-    val source: MutableMeta, val default: Meta, val rootName: Name
+    val source: MutableMeta, val default: MetaProvider, val rootName: Name
 ) : MutableMeta by source {
     override val items: Map<NameToken, MutableMeta>
         get() {
             val sourceKeys: Collection<NameToken> = source[rootName]?.items?.keys ?: emptyList()
-            val defaultKeys: Collection<NameToken> = default[rootName]?.items?.keys ?: emptyList()
+            val defaultKeys: Collection<NameToken> = default.getMeta(rootName)?.items?.keys ?: emptyList()
             //merging keys for primary and default node
             return (sourceKeys + defaultKeys).associateWith {
                 MutableMetaWithDefault(source, default, rootName + it)
@@ -414,7 +414,7 @@ private class MutableMetaWithDefault(
         }
 
     override var value: Value?
-        get() = source[rootName]?.value ?: default[rootName]?.value
+        get() = source[rootName]?.value ?: default.getMeta(rootName)?.value
         set(value) {
             source[rootName] = value
         }
@@ -430,7 +430,6 @@ private class MutableMetaWithDefault(
  * Create a mutable item provider that uses given provider for default values if those are not found in this provider.
  * Changes are propagated only to this provider.
  */
-public fun MutableMeta.withDefault(default: Meta?): MutableMeta = if (default == null || default.isEmpty()) {
-    //Optimize for use with empty default
+public fun MutableMeta.withDefault(default: MetaProvider?): MutableMeta = if (default == null) {
     this
 } else MutableMetaWithDefault(this, default, Name.EMPTY)
