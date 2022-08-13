@@ -13,6 +13,7 @@ public class MetaDescriptorBuilder  @PublishedApi internal constructor() {
     public var children: MutableMap<String, MetaDescriptorBuilder> = linkedMapOf()
     public var multiple: Boolean = false
     public var valueRequirement: ValueRequirement = ValueRequirement.NONE
+    public var readOnly: Boolean = false
 
     public var type: List<ValueType>? = null
 
@@ -85,6 +86,7 @@ public class MetaDescriptorBuilder  @PublishedApi internal constructor() {
         valueTypes = type,
         indexKey = indexKey,
         defaultValue = default,
+        readOnly = readOnly,
         attributes = attributes
     )
 }

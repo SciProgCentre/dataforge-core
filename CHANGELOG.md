@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Add `readOnly` property to descriptors
 - Add `specOrNull` delegate to meta and Scheme
 - Suspended read methods to the `Binary`
 - Synchronously accessed `meta` to all `DataSet`s

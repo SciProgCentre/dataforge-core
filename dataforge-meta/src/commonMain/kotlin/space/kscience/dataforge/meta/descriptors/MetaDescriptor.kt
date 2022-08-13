@@ -29,7 +29,7 @@ public enum class ValueRequirement {
  * @param info description text
  * @param children child descriptors for this node
  * @param multiple True if same name siblings with this name are allowed
- * @param required The requirements for node content
+ * @param valueRequirement The requirements for node content
  * @param valueTypes list of allowed types for [Meta.value], null if all values are allowed.
  *  Empty list means that no value should be present in this node.
  * @param indexKey An index field by which this node is identified in case of same name siblings construct
@@ -45,6 +45,7 @@ public data class MetaDescriptor(
     public val valueTypes: List<ValueType>? = null,
     public val indexKey: String = Meta.INDEX_KEY,
     public val defaultValue: Value? = null,
+    public val readOnly: Boolean = false,
     public val attributes: Meta = Meta.EMPTY,
 ) {
     /**
