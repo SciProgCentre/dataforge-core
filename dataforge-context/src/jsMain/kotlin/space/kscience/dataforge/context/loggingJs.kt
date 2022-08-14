@@ -9,6 +9,8 @@ public class ConsoleLogManager : AbstractPlugin(), LogManager {
     override fun logger(name: Name): Logger  = Logger { tag, body ->
         val message: String = body.safe
         when (tag) {
+            // TODO depends on https://youtrack.jetbrains.com/issue/KT-33595/
+            LogManager.DEBUG -> console.asDynamic().debug("[${context.name}] $name: $message")
             LogManager.INFO -> console.info("[${context.name}] $name: $message")
             LogManager.WARNING ->  console.warn("[${context.name}] $name: $message")
             LogManager.ERROR -> console.error("[${context.name}] $name: $message")
