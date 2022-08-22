@@ -2,6 +2,7 @@ package space.kscience.dataforge.names
 
 import kotlinx.serialization.Serializable
 import space.kscience.dataforge.misc.DFExperimental
+import kotlin.native.concurrent.ThreadLocal
 
 
 /**
@@ -55,15 +56,15 @@ public class Name(public val tokens: List<NameToken>) {
 
         /**
          * Convert a [String] to name parsing it and extracting name tokens and index syntax.
-         * This operation is rather heavy so it should be used with care in high performance code.
+         * This operation is rather heavy, so it should be used with care in high performance code.
          */
-        public fun parse(string: String): Name{
-            if (string.isBlank()) return Name.EMPTY
+        public fun parse(string: String): Name {
+            if (string.isBlank()) return EMPTY
             val tokens = sequence {
                 var bodyBuilder = StringBuilder()
                 var queryBuilder = StringBuilder()
-                var bracketCount: Int = 0
-                var escape: Boolean = false
+                var bracketCount = 0
+                var escape = false
                 fun queryOn() = bracketCount > 0
 
                 for (it in string) {
@@ -76,9 +77,11 @@ public class Name(public val tokens: List<NameToken>) {
                             }
                             escape = false
                         }
+
                         it == '\\' -> {
                             escape = true
                         }
+
                         queryOn() -> {
                             when (it) {
                                 '[' -> bracketCount++
@@ -86,6 +89,7 @@ public class Name(public val tokens: List<NameToken>) {
                             }
                             if (queryOn()) queryBuilder.append(it)
                         }
+
                         else -> when (it) {
                             '.' -> {
                                 val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
@@ -93,6 +97,7 @@ public class Name(public val tokens: List<NameToken>) {
                                 bodyBuilder = StringBuilder()
                                 queryBuilder = StringBuilder()
                             }
+
                             '[' -> bracketCount++
                             ']' -> error("Syntax error: closing bracket ] not have not matching open bracket")
                             else -> {
@@ -203,4 +208,14 @@ public fun Name.removeHeadOrNull(head: Name): Name? = if (startsWith(head)) {
     null
 }
 
-public fun String.parseAsName(): Name = Name.parse(this)
+@ThreadLocal
+private val nameCache = HashMap<String, Name>()
+
+/**
+ * Parse a string as name. If [cache], use global cache for parsed name to avoid multiple parsings.
+ */
+public fun String.parseAsName(cache: Boolean = false): Name = if (cache) {
+    nameCache.getOrPut(this) { Name.parse(this) }
+} else {
+    Name.parse(this)
+}

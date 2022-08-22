@@ -28,10 +28,12 @@ public fun Name.matches(pattern: Name): Boolean = when {
         length >= pattern.length
                 && Name(tokens.subList(0, pattern.length - 1)).matches(pattern.cutLast())
     }
+
     pattern.startsWith(Name.MATCH_ALL_TOKEN) -> {
         length >= pattern.length
                 && Name(tokens.subList(tokens.size - pattern.length + 1, tokens.size)).matches(pattern.cutFirst())
     }
+
     else -> {
         tokens.indices.forEach {
             val thisToken = tokens.getOrNull(it) ?: return false
@@ -44,4 +46,4 @@ public fun Name.matches(pattern: Name): Boolean = when {
 }
 
 @OptIn(DFExperimental::class)
-public fun Name.matches(pattern: String): Boolean = matches(Name.parse(pattern))
+public fun Name.matches(pattern: String): Boolean = matches(pattern.parseAsName(true))

@@ -15,16 +15,22 @@ public data class NameToken(val body: String, val index: String? = null) {
         if (body.isEmpty()) error("Syntax error: Name token body is empty")
     }
 
-    private fun String.escape() =
-        replace("\\", "\\\\")
-            .replace(".", "\\.")
-            .replace("[", "\\[")
-            .replace("]", "\\]")
+    private val bodyEscaped by lazy {
+        val escaped = buildString {
+            body.forEach {
+                if (it in escapedChars) {
+                    append('\\')
+                }
+                append(it)
+            }
+        }
+        if (escaped == body) body else escaped
+    }
 
     override fun toString(): String = if (hasIndex()) {
-        "${body.escape()}[$index]"
+        "${bodyEscaped}[$index]"
     } else {
-        body.escape()
+        bodyEscaped
     }
 
     /**
@@ -39,6 +45,8 @@ public data class NameToken(val body: String, val index: String? = null) {
 
     public companion object {
 
+        private val escapedChars = listOf('\\', '.', '[', ']')
+
         /**
          * Parse name token from a string
          */
@@ -47,7 +55,7 @@ public data class NameToken(val body: String, val index: String? = null) {
             val body = string.substringBefore('[')
             val index = string.substringAfter('[', "")
             if (index.isNotEmpty() && index.endsWith(']')) error("NameToken with index must end with ']'")
-            return NameToken(body,index.removeSuffix("]"))
+            return NameToken(body, index.removeSuffix("]"))
         }
     }
 }

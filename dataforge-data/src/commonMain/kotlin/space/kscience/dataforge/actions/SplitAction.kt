@@ -7,6 +7,7 @@ import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.parseAsName
 import kotlin.collections.set
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -35,7 +36,7 @@ public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val me
      * @param rule the rule to transform fragment name and meta using
      */
     public fun fragment(name: String, rule: FragmentRule<T, R>.() -> Unit) {
-        fragments[Name.parse(name)] = rule
+        fragments[name.parseAsName()] = rule
     }
 }
 

@@ -6,10 +6,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.isEmpty
-import space.kscience.dataforge.names.plus
-import space.kscience.dataforge.names.removeHeadOrNull
+import space.kscience.dataforge.names.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KType
@@ -31,8 +28,8 @@ public fun <T : Any> DataSet<T>.filter(
     override val meta: Meta get() = this@filter.meta
 
     override fun iterator(): Iterator<NamedData<T>> = iterator {
-        for(d in this@filter){
-            if(predicate(d.name, d.meta)){
+        for (d in this@filter) {
+            if (predicate(d.name, d.meta)) {
                 yield(d)
             }
         }
@@ -64,7 +61,7 @@ public fun <T : Any> DataSet<T>.withNamePrefix(prefix: Name): DataSet<T> = if (p
 
 
     override fun iterator(): Iterator<NamedData<T>> = iterator {
-        for(d in this@withNamePrefix){
+        for (d in this@withNamePrefix) {
             yield(d.data.named(prefix + d.name))
         }
     }
@@ -89,7 +86,7 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
     override val meta: Meta get() = this@branch.meta
 
     override fun iterator(): Iterator<NamedData<T>> = iterator {
-        for(d in this@branch){
+        for (d in this@branch) {
             d.name.removeHeadOrNull(branchName)?.let { name ->
                 yield(d.data.named(name))
             }
@@ -101,7 +98,7 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
     override val updates: Flow<Name> get() = this@branch.updates.mapNotNull { it.removeHeadOrNull(branchName) }
 }
 
-public fun <T : Any> DataSet<T>.branch(branchName: String): DataSet<T> = this@branch.branch(Name.parse(branchName))
+public fun <T : Any> DataSet<T>.branch(branchName: String): DataSet<T> = this@branch.branch(branchName.parseAsName())
 
 @DFExperimental
 public suspend fun <T : Any> DataSet<T>.rootData(): Data<T>? = get(Name.EMPTY)

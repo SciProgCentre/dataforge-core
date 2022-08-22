@@ -77,7 +77,7 @@ public operator fun MetaDescriptor.get(name: Name): MetaDescriptor? = when (name
     else -> get(name.firstOrNull()!!.asName())?.get(name.cutFirst())
 }
 
-public operator fun MetaDescriptor.get(name: String): MetaDescriptor? = get(Name.parse(name))
+public operator fun MetaDescriptor.get(name: String): MetaDescriptor? = get(name.parseAsName(true))
 
 public fun MetaDescriptor.validate(value: Value?): Boolean = if (value == null) {
     valueRequirement != ValueRequirement.REQUIRED

@@ -3,9 +3,8 @@ package space.kscience.dataforge.context
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Job
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.Name.Companion.parse
 import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.parseAsName
 import kotlin.coroutines.CoroutineContext
 import kotlin.native.concurrent.ThreadLocal
 
@@ -22,4 +21,4 @@ private object GlobalContext : Context("GLOBAL".asName(), null, emptySet(), Meta
 public val Global: Context get() = GlobalContext
 
 public fun Context(name: String? = null, block: ContextBuilder.() -> Unit = {}): Context =
-    Global.buildContext(name?.let(Name::parse), block)
+    Global.buildContext(name?.parseAsName(), block)
