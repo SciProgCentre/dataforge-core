@@ -9,7 +9,7 @@ import space.kscience.dataforge.misc.DFExperimental
  * A name token could have appendix in square brackets called *index*
  */
 @Serializable(NameTokenSerializer::class)
-public data class NameToken(val body: String, val index: String? = null) {
+public class NameToken(public val body: String, public val index: String? = null) {
 
     init {
         if (body.isEmpty()) error("Syntax error: Name token body is empty")
@@ -33,6 +33,7 @@ public data class NameToken(val body: String, val index: String? = null) {
         bodyEscaped
     }
 
+
     /**
      * Return unescaped version of the [NameToken]. Should be used only for output because it is not possible to correctly
      * parse it back.
@@ -42,6 +43,22 @@ public data class NameToken(val body: String, val index: String? = null) {
     } else {
         body
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as NameToken
+
+        if (body != other.body) return false
+        if (index != other.index) return false
+
+        return true
+    }
+
+    private val cachedHashCode = body.hashCode() * 31 + (index?.hashCode() ?: 0)
+
+    override fun hashCode(): Int = cachedHashCode
 
     public companion object {
 

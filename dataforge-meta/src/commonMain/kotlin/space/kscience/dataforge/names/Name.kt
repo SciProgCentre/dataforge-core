@@ -24,13 +24,13 @@ public class Name(public val tokens: List<NameToken>) {
         }
     }
 
-    override fun hashCode(): Int {
-        return if (tokens.size == 1) {
-            tokens.first().hashCode()
-        } else {
-            tokens.hashCode()
-        }
+    private val cachedHashCode = if (tokens.size == 1) {
+        tokens.first().hashCode()
+    } else {
+        tokens.hashCode()
     }
+
+    override fun hashCode(): Int = cachedHashCode
 
     public companion object {
         public const val NAME_SEPARATOR: String = "."

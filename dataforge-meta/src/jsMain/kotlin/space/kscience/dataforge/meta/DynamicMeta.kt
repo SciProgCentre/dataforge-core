@@ -33,7 +33,7 @@ public fun Meta.toDynamic(): dynamic {
 public class DynamicMeta(internal val obj: dynamic) : TypedMeta<DynamicMeta> {
     private fun keys(): Array<String> = js("Object").keys(obj) as Array<String>
 
-    private fun isArray(@Suppress("UNUSED_PARAMETER") obj: dynamic): Boolean =
+    private fun isArray(obj: dynamic): Boolean =
         js("Array").isArray(obj) as Boolean
 
     private fun isPrimitive(obj: dynamic): Boolean =
