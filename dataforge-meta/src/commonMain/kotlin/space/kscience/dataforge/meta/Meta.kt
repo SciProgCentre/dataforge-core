@@ -132,7 +132,9 @@ public fun Meta.getIndexed(name: Name): Map<String?, Meta> {
         else -> this[name.cutLast()] ?: return emptyMap()
     }
 
-    val (body, index) = name.lastOrNull()!!
+    val lastName = name.lastOrNull()!!
+    val body = lastName.body
+    val index = lastName.index
     return if (index == null) {
         root.items
             .filter { it.key.body == body }
