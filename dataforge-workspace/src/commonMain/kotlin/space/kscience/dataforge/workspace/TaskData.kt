@@ -17,7 +17,7 @@ public interface TaskData<out T : Any> : NamedData<T> {
     /**
      * The name of the stage that produced this data. [Name.EMPTY] if the workspace intrinsic data is used.
      */
-    public val task: Name
+    public val taskName: Name
 
     /**
      * Stage configuration used to produce this data.
@@ -34,7 +34,7 @@ private class TaskDataImpl<out T : Any>(
     override val workspace: Workspace,
     override val data: Data<T>,
     override val name: Name,
-    override val task: Name,
+    override val taskName: Name,
     override val taskMeta: Meta,
 ) : TaskData<T>, Data<T> by data {
 //    override val dependencies: Collection<TaskData<*>> = data.dependencies.map {

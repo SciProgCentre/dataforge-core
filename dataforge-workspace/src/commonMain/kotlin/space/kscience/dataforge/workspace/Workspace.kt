@@ -15,6 +15,9 @@ public interface DataSelector<T: Any>{
     public suspend fun select(workspace: Workspace, meta: Meta): DataSet<T>
 }
 
+/**
+ * An environment for pull-mode computation
+ */
 @Type(Workspace.TYPE)
 public interface Workspace : ContextAware, Provider {
     /**
@@ -28,7 +31,7 @@ public interface Workspace : ContextAware, Provider {
     public val targets: Map<String, Meta>
 
     /**
-     * All stages associated with the workspace
+     * All tasks associated with the workspace
      */
     public val tasks: Map<Name, Task<*>>
 

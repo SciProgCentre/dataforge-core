@@ -23,6 +23,11 @@ import kotlin.reflect.typeOf
 public interface Task<out T : Any> : Described {
 
     /**
+     * A task identification string used to compare tasks and check task body for change
+     */
+    public val fingerprint: String get() = hashCode().toString()
+
+    /**
      * Compute a [TaskResult] using given meta. In general, the result is lazy and represents both computation model
      * and a handler for actual result
      *

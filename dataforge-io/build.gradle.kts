@@ -2,12 +2,12 @@ import space.kscience.gradle.KScienceVersions
 
 plugins {
     id("space.kscience.gradle.mpp")
-    id("space.kscience.gradle.native")
 }
 
 description = "IO module"
 
 kscience {
+    native()
     useSerialization(sourceSet = space.kscience.gradle.DependencySourceSet.TEST) {
         cbor()
     }

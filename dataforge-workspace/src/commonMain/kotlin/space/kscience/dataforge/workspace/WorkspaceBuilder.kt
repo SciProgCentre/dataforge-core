@@ -88,6 +88,7 @@ public class WorkspaceBuilder(private val parentContext: Context = Global) : Tas
     private var data: DataSet<*>? = null
     private val targets: HashMap<String, Meta> = HashMap()
     private val tasks = HashMap<Name, Task<*>>()
+    private var cache: WorkspaceCache? = null
 
     /**
      * Define a context for the workspace
@@ -123,7 +124,16 @@ public class WorkspaceBuilder(private val parentContext: Context = Global) : Tas
         tasks[taskName] = task
     }
 
-    public fun build(): Workspace = SimpleWorkspace(context ?: parentContext, data ?: DataSet.EMPTY, targets, tasks)
+    public fun useCache() {
+        cache = InMemoryWorkspaceCache()
+    }
+
+    public fun build(): Workspace {
+        val postProcess: suspend (TaskResult<*>) -> TaskResult<*> = { result ->
+            cache?.evaluate(result) ?: result
+        }
+        return WorkspaceBase(context ?: parentContext, data ?: DataSet.EMPTY, targets, tasks, postProcess)
+    }
 }
 
 /**

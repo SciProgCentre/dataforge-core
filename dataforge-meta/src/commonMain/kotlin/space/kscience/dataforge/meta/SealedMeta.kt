@@ -14,7 +14,15 @@ public class SealedMeta internal constructor(
 ) : TypedMeta<SealedMeta> {
     override fun toString(): String = Meta.toString(this)
     override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
-    override fun hashCode(): Int = Meta.hashCode(this)
+
+    /**
+     * Compute hash code once to optimize later access
+     */
+    private val cachedHashCode by lazy {
+        Meta.hashCode(this)
+    }
+
+    override fun hashCode(): Int = cachedHashCode
 }
 
 /**

@@ -33,40 +33,44 @@ public fun Workspace.produceBlocking(task: String, block: MutableMeta.() -> Unit
     produce(task, block)
 }
 
+@OptIn(DFExperimental::class)
+internal object TestPlugin : WorkspacePlugin() {
+    override val tag: PluginTag = PluginTag("test")
 
-@DFExperimental
-class SimpleWorkspaceTest {
-    val testPlugin = object : WorkspacePlugin() {
-        override val tag: PluginTag = PluginTag("test")
-
-        val test by task<Any> {
-            populateFrom(
-                workspace.data.map {
-                    it.also {
-                        logger.info { "Test: $it" }
-                    }
-                }
-            )
+    val test by task {
+        // type is inferred
+        pipeFrom(data<Int>()) { arg, _, _ ->
+            logger.info { "Test: $arg" }
+            arg
         }
+
     }
 
+}
 
-    val testPluginFactory = testPlugin.toFactory()
+
+@DFExperimental
+internal class SimpleWorkspaceTest {
+
+    val testPluginFactory = TestPlugin.toFactory()
 
     val workspace = Workspace {
 
         context {
+            //load existing task via plugin into the workspace
             plugin(testPluginFactory)
         }
 
         data {
+            //statically initialize data
             repeat(100) {
                 static("myData[$it]", it)
             }
         }
 
         val filterOne by task<Int> {
-            workspace.data.getByType<Int>("myData[12]")?.let { source ->
+            val name by taskMeta.string { error("Name field not defined") }
+            from(testPluginFactory) { test }.getByType<Int>(name)?.let { source ->
                 data(source.name, source.map { it })
             }
         }
@@ -74,19 +78,11 @@ class SimpleWorkspaceTest {
         val square by task<Int> {
             pipeFrom(data<Int>()) { arg, name, meta ->
                 if (meta["testFlag"].boolean == true) {
-                    println("flag")
+                    println("Side effect")
                 }
                 workspace.logger.info { "Starting square on $name" }
                 arg * arg
             }
-//            workspace.data.select<Int>().forEach { data ->
-//                if (data.meta["testFlag"].boolean == true) {
-//                    println("flag")
-//                }
-//                val value = data.await()
-//                workspace.logger.info { "Starting square on $value" }
-//                emit(data.name, data.map { it * it })
-//            }
         }
 
         val linear by task<Int> {
@@ -94,17 +90,13 @@ class SimpleWorkspaceTest {
                 workspace.logger.info { "Starting linear on $name" }
                 arg * 2 + 1
             }
-//            workspace.data.select<Int>().forEach { data ->
-//                workspace.logger.info { "Starting linear on $data" }
-//                emit(data.name, data.data.map { it * 2 + 1 })
-//            }
         }
 
         val fullSquare by task<Int> {
             val squareData = from(square)
             val linearData = from(linear)
             squareData.forEach { data ->
-                val newData: Data<Int> = data.combine(linearData.get(data.name)!!) { l, r ->
+                val newData: Data<Int> = data.combine(linearData[data.name]!!) { l, r ->
                     l + r
                 }
                 data(data.name, newData)
@@ -190,8 +182,10 @@ class SimpleWorkspaceTest {
     @Test
     fun testFilter() {
         runBlocking {
-            val node = workspace.produce("filterOne")
-            assertEquals(12, node.asSequence().first().await())
+            val node = workspace.produce("filterOne") {
+                "name" put "myData[12]"
+            }
+            assertEquals(12, node.single().await())
         }
     }
 }

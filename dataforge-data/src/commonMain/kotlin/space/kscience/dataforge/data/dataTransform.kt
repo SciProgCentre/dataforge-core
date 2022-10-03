@@ -1,6 +1,5 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.flow.map
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.seal
@@ -37,7 +36,7 @@ public inline fun <T : Any, reified R : Any> Data<T>.map(
 }
 
 /**
- * Combine this data with the other data using [block]. See [map] for other details
+ * Combine this data with the other data using [block]. See [Data::map] for other details
  */
 public inline fun <T1 : Any, T2 : Any, reified R : Any> Data<T1>.combine(
     other: Data<T2>,

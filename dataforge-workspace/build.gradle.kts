@@ -1,9 +1,9 @@
 plugins {
     id("space.kscience.gradle.mpp")
-    id("space.kscience.gradle.native")
 }
 
 kscience{
+    native()
     useCoroutines()
 }
 
@@ -14,6 +14,11 @@ kotlin {
                 api(project(":dataforge-context"))
                 api(project(":dataforge-data"))
                 api(project(":dataforge-io"))
+            }
+        }
+        jvmTest{
+            dependencies{
+                implementation("ch.qos.logback:logback-classic:1.4.1")
             }
         }
     }

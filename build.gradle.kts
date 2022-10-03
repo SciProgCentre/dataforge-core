@@ -1,4 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import space.kscience.gradle.isInDevelopment
+import space.kscience.gradle.useApache2Licence
+import space.kscience.gradle.useSPCTeam
 
 plugins {
     id("space.kscience.gradle.project")
@@ -12,8 +15,8 @@ allprojects {
 subprojects {
     apply(plugin = "maven-publish")
 
-    tasks.withType<KotlinCompile>{
-        kotlinOptions{
+    tasks.withType<KotlinCompile> {
+        kotlinOptions {
             freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
         }
     }
@@ -24,8 +27,18 @@ readme {
 }
 
 ksciencePublish {
-    github("dataforge-core")
-    space("https://maven.pkg.jetbrains.space/mipt-npm/p/sci/maven")
+    pom("https://github.com/SciProgCentre/kmath") {
+        useApache2Licence()
+        useSPCTeam()
+    }
+    github("dataforge-core", "SciProgCentre")
+    space(
+        if (isInDevelopment) {
+            "https://maven.pkg.jetbrains.space/mipt-npm/p/sci/dev"
+        } else {
+            "https://maven.pkg.jetbrains.space/mipt-npm/p/sci/release"
+        }
+    )
     sonatype()
 }
 

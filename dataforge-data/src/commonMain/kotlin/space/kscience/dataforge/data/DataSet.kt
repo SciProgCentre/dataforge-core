@@ -56,6 +56,11 @@ public fun <T : Any> DataSet<T>.asSequence(): Sequence<NamedData<T>> = object : 
     override fun iterator(): Iterator<NamedData<T>> = this@asSequence.iterator()
 }
 
+/**
+ * Return a single [Data] in this [DataSet]. Throw error if it is not single.
+ */
+public fun <T : Any> DataSet<T>.single(): NamedData<T> = asSequence().single()
+
 public fun <T : Any> DataSet<T>.asIterable(): Iterable<NamedData<T>> = object : Iterable<NamedData<T>> {
     override fun iterator(): Iterator<NamedData<T>> = this@asIterable.iterator()
 }

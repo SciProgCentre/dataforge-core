@@ -1,11 +1,11 @@
 plugins {
     id("space.kscience.gradle.mpp")
-    id("space.kscience.gradle.native")
 }
 
 description = "Context and provider definitions"
 
 kscience {
+    native()
     useCoroutines()
 }
 
