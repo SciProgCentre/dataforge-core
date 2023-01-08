@@ -53,6 +53,8 @@ public interface Plugin : Named, ContextAware, Provider, MetaRepr {
      */
     public fun detach()
 
+    public val isAttached: Boolean
+
     override fun toMeta(): Meta = Meta {
         "context" put context.name.toString()
         "type" to this::class.simpleName

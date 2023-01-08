@@ -26,6 +26,7 @@
 - Separate interfaces for `IOReader` and `IOWriter`
 
 ### Deprecated
+- Context.fetch -> Context.request
 
 ### Removed
 

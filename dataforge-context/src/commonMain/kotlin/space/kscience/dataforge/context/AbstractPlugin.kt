@@ -11,6 +11,8 @@ public abstract class AbstractPlugin(override val meta: Meta = Meta.EMPTY) : Plu
     private var _context: Context? = null
     private val dependencies = HashMap<PluginFactory<*>, Meta>()
 
+    override val isAttached: Boolean = _context != null
+
     override val context: Context
         get() = _context ?: error("Plugin $tag is not attached")
 
@@ -27,7 +29,10 @@ public abstract class AbstractPlugin(override val meta: Meta = Meta.EMPTY) : Plu
     /**
      * Register plugin dependency and return a delegate which provides lazily initialized reference to dependent plugin
      */
-    protected fun <P : Plugin> require(factory: PluginFactory<P>, meta: Meta = Meta.EMPTY): ReadOnlyProperty<AbstractPlugin, P> {
+    protected fun <P : Plugin> require(
+        factory: PluginFactory<P>,
+        meta: Meta = Meta.EMPTY,
+    ): ReadOnlyProperty<AbstractPlugin, P> {
         dependencies[factory] = meta
         return PluginDependencyDelegate(factory.type)
     }
@@ -37,6 +42,7 @@ public fun <T : Named> Collection<T>.toMap(): Map<Name, T> = associate { it.name
 
 private class PluginDependencyDelegate<P : Plugin>(val type: KClass<out P>) : ReadOnlyProperty<AbstractPlugin, P> {
     override fun getValue(thisRef: AbstractPlugin, property: KProperty<*>): P {
+        if (!thisRef.isAttached) error("Plugin dependency must not be called eagerly during initialization.")
         return thisRef.context.plugins[type] ?: error("Plugin with type $type not found")
     }
 }

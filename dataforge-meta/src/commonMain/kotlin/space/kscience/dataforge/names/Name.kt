@@ -159,7 +159,13 @@ public operator fun Name.plus(other: String): Name = this + Name.parse(other)
 
 public operator fun Name.plus(other: NameToken): Name = Name(tokens + other)
 
+@Deprecated(
+    "Use appendFirst instead",
+    ReplaceWith("appendFirst(other)")
+)
 public fun Name.appendLeft(other: String): Name = NameToken(other) + this
+
+public fun Name.appendFirst(other: String): Name = NameToken(other) + this
 
 public fun NameToken.asName(): Name = Name(listOf(this))
 
@@ -202,11 +208,25 @@ public fun Name.endsWith(name: Name): Boolean =
 /**
  * if [this] starts with given [head] name, returns the reminder of the name (could be empty). Otherwise, returns null
  */
+@Deprecated(
+    "Use removeFirstOrNull instead",
+    ReplaceWith("removeFirstOrNull(head)")
+)
 public fun Name.removeHeadOrNull(head: Name): Name? = if (startsWith(head)) {
     Name(tokens.subList(head.length, length))
 } else {
     null
 }
+
+/**
+ * if [this] starts with given [first] name, returns the reminder of the name (could be empty). Otherwise, returns null
+ */
+public fun Name.removeFirstOrNull(first: Name): Name? = if (startsWith(first)) {
+    Name(tokens.subList(first.length, length))
+} else {
+    null
+}
+
 
 @ThreadLocal
 private val nameCache = HashMap<String, Name>()

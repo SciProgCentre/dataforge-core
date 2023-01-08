@@ -7,8 +7,11 @@ import space.kscience.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
+import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     override val tag: PluginTag get() = Companion.tag
@@ -17,15 +20,15 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
         context.gather<IOFormatFactory<*>>(IO_FORMAT_TYPE).values
     }
 
-    public fun <T : Any> resolveIOFormat(item: Meta, type: KClass<out T>): IOFormat<T>? {
-        val key = item.string ?: item[IOFormatFactory.NAME_KEY]?.string ?: error("Format name not defined")
-        val name = Name.parse(key)
-        return ioFormatFactories.find { it.name == name }?.let {
-            @Suppress("UNCHECKED_CAST")
-            if (it.type != type) error("Format type ${it.type} is not the same as requested type $type")
-            else it.build(context, item[IOFormatFactory.META_KEY] ?: Meta.EMPTY) as IOFormat<T>
-        }
-    }
+    @Suppress("UNCHECKED_CAST")
+    @DFInternal
+    public fun <T : Any> resolveIOFormat(type: KType, meta: Meta): IOFormat<T>? =
+        ioFormatFactories.singleOrNull { it.type == type }?.build(context, meta) as? IOFormat<T>
+
+    @OptIn(DFInternal::class)
+    public inline fun <reified T : Any> resolveIOFormat(meta: Meta = Meta.EMPTY): IOFormat<T>? =
+        resolveIOFormat(typeOf<T>(), meta)
+
 
     public val metaFormatFactories: Collection<MetaFormatFactory> by lazy {
         context.gather<MetaFormatFactory>(META_FORMAT_TYPE).values
@@ -79,7 +82,7 @@ internal val ioContext = Context("IO") {
 
 public val Context.io: IOPlugin
     get() = if (this == Global) {
-        ioContext.fetch(IOPlugin)
+        ioContext.request(IOPlugin)
     } else {
-        fetch(IOPlugin)
+        request(IOPlugin)
     }

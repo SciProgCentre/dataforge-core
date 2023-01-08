@@ -25,7 +25,7 @@ private class ObservableMetaWrapper(
         listeners.add(
             MetaListener(Pair(owner, absoluteName)) { name ->
                 if (name.startsWith(absoluteName)) {
-                    (this[absoluteName] ?: Meta.EMPTY).callback(name.removeHeadOrNull(absoluteName)!!)
+                    (this[absoluteName] ?: Meta.EMPTY).callback(name.removeFirstOrNull(absoluteName)!!)
                 }
             }
         )

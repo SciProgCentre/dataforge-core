@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
  */
 public class PluginManager internal constructor(
     override val context: Context,
-    private val plugins: Set<Plugin>
+    private val plugins: Set<Plugin>,
 ) : ContextAware, Iterable<Plugin> {
 
     init {
@@ -81,12 +81,16 @@ public class PluginManager internal constructor(
  * Fetch a plugin with given meta from the context. If the plugin (with given meta) is already registered, it is returned.
  * Otherwise, new child context with the plugin is created. In the later case the context could be retrieved from the plugin.
  */
-public inline fun <reified T : Plugin> Context.fetch(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY): T {
+public inline fun <reified T : Plugin> Context.request(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY): T {
     val existing = plugins[factory]
     return if (existing != null && existing.meta == meta) existing
     else {
-        buildContext(name = this@fetch.name + factory.tag.name) {
+        buildContext(name = this@request.name + factory.tag.name) {
             plugin(factory, meta)
         }.plugins[factory]!!
     }
 }
+
+@Deprecated("Replace with request", ReplaceWith("request(factory, meta)"))
+public inline fun <reified T : Plugin> Context.fetch(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY): T =
+    request(factory, meta)

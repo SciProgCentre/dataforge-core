@@ -25,14 +25,15 @@ public interface TaskResult<out T : Any> : DataSet<T> {
     public val taskMeta: Meta
 
     override fun iterator(): Iterator<TaskData<T>>
+
     override fun get(name: Name): TaskData<T>?
 }
 
 private class TaskResultImpl<out T : Any>(
     override val workspace: Workspace,
-    val dataSet: DataSet<T>,
     override val taskName: Name,
     override val taskMeta: Meta,
+    val dataSet: DataSet<T>,
 ) : TaskResult<T>, DataSet<T> by dataSet {
 
     override fun iterator(): Iterator<TaskData<T>> = iterator {
@@ -41,7 +42,7 @@ private class TaskResultImpl<out T : Any>(
         }
     }
 
-    override fun get(name: Name): TaskData<T>? = dataSet.get(name)?.let {
+    override fun get(name: Name): TaskData<T>? = dataSet[name]?.let {
         workspace.wrapData(it, name, taskName, taskMeta)
     }
 }
@@ -50,4 +51,4 @@ private class TaskResultImpl<out T : Any>(
  * Wrap data into [TaskResult]
  */
 public fun <T : Any> Workspace.wrapResult(dataSet: DataSet<T>, taskName: Name, taskMeta: Meta): TaskResult<T> =
-    TaskResultImpl(this, dataSet, taskName, taskMeta)
+    TaskResultImpl(this, taskName, taskMeta, dataSet)

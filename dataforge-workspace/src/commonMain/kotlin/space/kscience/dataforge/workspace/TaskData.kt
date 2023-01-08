@@ -42,6 +42,6 @@ private class TaskDataImpl<out T : Any>(
 //    }
 }
 
-public fun <T : Any> Workspace.wrapData(data: Data<T>, name: Name, taskName: Name, stageMeta: Meta): TaskData<T> =
-    TaskDataImpl(this, data, name, taskName, stageMeta)
+public fun <T : Any> Workspace.wrapData(data: Data<T>, name: Name, taskName: Name, taskMeta: Meta): TaskData<T> =
+    TaskDataImpl(this, data, name, taskName, taskMeta)
 

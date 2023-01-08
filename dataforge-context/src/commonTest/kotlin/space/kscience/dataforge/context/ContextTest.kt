@@ -1,7 +1,7 @@
 package space.kscience.dataforge.context
 
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.appendLeft
+import space.kscience.dataforge.names.appendFirst
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -26,7 +26,7 @@ class ContextTest {
         val members = context.gather<Name>("test")
         assertEquals(3, members.count())
         members.forEach {
-            assertEquals(it.key, it.value.appendLeft("test"))
+            assertEquals(it.key, it.value.appendFirst("test"))
         }
     }
 

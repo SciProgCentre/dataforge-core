@@ -73,7 +73,7 @@ private class LazyData<T : Any>(
     override val type: KType,
     override val meta: Meta = Meta.EMPTY,
     additionalContext: CoroutineContext = EmptyCoroutineContext,
-    dependencies: Collection<Data<*>> = emptyList(),
+    dependencies: Collection<Goal<*>> = emptyList(),
     block: suspend () -> T,
 ) : Data<T>, LazyGoal<T>(additionalContext, dependencies, block)
 
@@ -93,7 +93,7 @@ public fun <T : Any> Data(
     type: KType,
     meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
-    dependencies: Collection<Data<*>> = emptyList(),
+    dependencies: Collection<Goal<*>> = emptyList(),
     block: suspend () -> T,
 ): Data<T> = LazyData(type, meta, context, dependencies, block)
 
@@ -102,6 +102,6 @@ public fun <T : Any> Data(
 public inline fun <reified T : Any> Data(
     meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
-    dependencies: Collection<Data<*>> = emptyList(),
+    dependencies: Collection<Goal<*>> = emptyList(),
     noinline block: suspend () -> T,
 ): Data<T> = Data(typeOf<T>(), meta, context, dependencies, block)

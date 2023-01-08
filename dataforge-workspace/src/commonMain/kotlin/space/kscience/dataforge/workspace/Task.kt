@@ -25,7 +25,7 @@ public interface Task<out T : Any> : Described {
     /**
      * A task identification string used to compare tasks and check task body for change
      */
-    public val fingerprint: String get() = hashCode().toString()
+    public val fingerprint: String get() = hashCode().toString(radix = 16)
 
     /**
      * Compute a [TaskResult] using given meta. In general, the result is lazy and represents both computation model

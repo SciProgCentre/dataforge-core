@@ -96,7 +96,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
         override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
             listeners.add(MetaListener(owner) { changedName ->
                 if (changedName.startsWith(pathName)) {
-                    this@Scheme.meta.callback(changedName.removeHeadOrNull(pathName)!!)
+                    this@Scheme.meta.callback(changedName.removeFirstOrNull(pathName)!!)
                 }
             })
         }

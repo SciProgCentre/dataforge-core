@@ -67,7 +67,7 @@ public fun <T : Any> DataSet<T>.withNamePrefix(prefix: Name): DataSet<T> = if (p
     }
 
     override fun get(name: Name): Data<T>? =
-        name.removeHeadOrNull(name)?.let { this@withNamePrefix.get(it) }
+        name.removeFirstOrNull(name)?.let { this@withNamePrefix.get(it) }
 
     override val updates: Flow<Name> get() = this@withNamePrefix.updates.map { prefix + it }
 }
@@ -87,7 +87,7 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
 
     override fun iterator(): Iterator<NamedData<T>> = iterator {
         for (d in this@branch) {
-            d.name.removeHeadOrNull(branchName)?.let { name ->
+            d.name.removeFirstOrNull(branchName)?.let { name ->
                 yield(d.data.named(name))
             }
         }
@@ -95,7 +95,7 @@ public fun <T : Any> DataSet<T>.branch(branchName: Name): DataSet<T> = if (branc
 
     override fun get(name: Name): Data<T>? = this@branch.get(branchName + name)
 
-    override val updates: Flow<Name> get() = this@branch.updates.mapNotNull { it.removeHeadOrNull(branchName) }
+    override val updates: Flow<Name> get() = this@branch.updates.mapNotNull { it.removeFirstOrNull(branchName) }
 }
 
 public fun <T : Any> DataSet<T>.branch(branchName: String): DataSet<T> = this@branch.branch(branchName.parseAsName())
