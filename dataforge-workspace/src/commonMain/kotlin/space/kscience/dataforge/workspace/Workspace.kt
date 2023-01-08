@@ -45,7 +45,6 @@ public interface Workspace : ContextAware, Provider {
     }
 
     public suspend fun produce(taskName: Name, taskMeta: Meta): TaskResult<*> {
-        if (taskName == Name.EMPTY) return data
         val task = tasks[taskName] ?: error("Task with name $taskName not found in the workspace")
         return task.execute(this, taskName, taskMeta)
     }

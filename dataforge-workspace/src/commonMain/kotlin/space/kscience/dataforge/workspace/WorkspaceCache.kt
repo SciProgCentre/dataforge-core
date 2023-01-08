@@ -16,6 +16,7 @@ public class InMemoryWorkspaceCache : WorkspaceCache {
     private val cache = HashMap<TaskResultId, HashMap<Name, TaskData<*>>>()
 
     //TODO do actual check
+    @Suppress("UNUSED_PARAMETER")
     private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> = this as TaskData<T>
 
     override suspend fun <T : Any> evaluate(result: TaskResult<T>): TaskResult<T> {
@@ -36,3 +37,4 @@ public class InMemoryWorkspaceCache : WorkspaceCache {
         }
     }
 }
+

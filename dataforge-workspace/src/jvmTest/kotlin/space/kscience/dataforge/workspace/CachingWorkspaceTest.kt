@@ -1,5 +1,6 @@
 package space.kscience.dataforge.workspace
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import space.kscience.dataforge.data.startAll
@@ -7,9 +8,11 @@ import space.kscience.dataforge.data.static
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.boolean
 import space.kscience.dataforge.meta.get
+import space.kscience.dataforge.misc.DFExperimental
 
-class CachingWorkspaceTest {
-    val workspace = Workspace {
+@OptIn(ExperimentalCoroutinesApi::class, DFExperimental::class)
+internal class CachingWorkspaceTest {
+    private val workspace = Workspace {
         data {
             //statically initialize data
             repeat(5) {
