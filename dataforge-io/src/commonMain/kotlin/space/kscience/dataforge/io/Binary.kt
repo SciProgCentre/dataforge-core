@@ -21,6 +21,12 @@ public interface Binary {
 
     public suspend fun <R> readSuspend(offset: Int = 0, atMost: Int = size - offset, block: suspend Input.() -> R): R
 
+    /**
+     * Read a binary with given [offset] relative to this binary and given [binarySize].
+     * In general, resulting binary is of the same type as this one, but it is not guaranteed.
+     */
+    public fun view(offset: Int, binarySize: Int = size - offset): Binary
+
     public companion object {
         public val EMPTY: Binary = ByteArrayBinary(ByteArray(0))
     }
@@ -57,6 +63,9 @@ internal class ByteArrayBinary(
             input.close()
         }
     }
+
+    override fun view(offset: Int, binarySize: Int): ByteArrayBinary =
+        ByteArrayBinary(array, start + offset, binarySize)
 }
 
 public fun ByteArray.asBinary(): Binary = ByteArrayBinary(this)
@@ -65,7 +74,7 @@ public fun ByteArray.asBinary(): Binary = ByteArrayBinary(this)
  * Produce a [ByteArray] representing an exact copy of this [Binary]
  */
 public fun Binary.toByteArray(): ByteArray = if (this is ByteArrayBinary) {
-    array.copyOf() // TODO do we need to ensure data safety here?
+    array.copyOfRange(start, start + size) // TODO do we need to ensure data safety here?
 } else {
     read {
         readBytes()
@@ -73,8 +82,8 @@ public fun Binary.toByteArray(): ByteArray = if (this is ByteArrayBinary) {
 }
 
 //TODO optimize for file-based Inputs
-public fun Input.readBinary(size: Int): Binary {
-    val array = readBytes(size)
+public fun Input.readBinary(size: Int? = null): Binary {
+    val array = if (size == null) readBytes() else readBytes(size)
     return ByteArrayBinary(array)
 }
 

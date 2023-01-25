@@ -1,12 +1,10 @@
 package space.kscience.dataforge.io
 
-import space.kscience.dataforge.context.invoke
 import space.kscience.dataforge.io.Envelope.Companion.ENVELOPE_NODE_KEY
 import space.kscience.dataforge.io.PartDescriptor.Companion.DEFAULT_MULTIPART_DATA_SEPARATOR
 import space.kscience.dataforge.io.PartDescriptor.Companion.MULTIPART_DATA_TYPE
 import space.kscience.dataforge.io.PartDescriptor.Companion.MULTIPART_KEY
 import space.kscience.dataforge.io.PartDescriptor.Companion.PARTS_KEY
-import space.kscience.dataforge.io.PartDescriptor.Companion.PART_FORMAT_KEY
 import space.kscience.dataforge.io.PartDescriptor.Companion.SEPARATOR_KEY
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.names.asName
@@ -23,8 +21,6 @@ private class PartDescriptor : Scheme() {
         val SEPARATOR_KEY = MULTIPART_KEY + "separator"
 
         const val DEFAULT_MULTIPART_DATA_SEPARATOR = "\r\n#~PART~#\r\n"
-
-        val PART_FORMAT_KEY = "format".asName()
 
         const val MULTIPART_DATA_TYPE = "envelope.multipart"
     }
@@ -73,20 +69,11 @@ public fun EnvelopeBuilder.multipart(
  */
 public fun EnvelopeBuilder.envelopes(
     envelopes: List<Envelope>,
-    formatFactory: EnvelopeFormatFactory = TaggedEnvelopeFormat,
-    formatMeta: Meta? = null,
     separator: String = DEFAULT_MULTIPART_DATA_SEPARATOR,
 ) {
     val parts = envelopes.map {
-        val format = formatMeta?.let { formatFactory(formatMeta) } ?: formatFactory
-        val binary = Binary(it, format)
+        val binary = Binary(it, TaggedEnvelopeFormat)
         EnvelopePart(binary, null)
-    }
-    meta {
-        (MULTIPART_KEY + PART_FORMAT_KEY) put {
-            IOFormatFactory.NAME_KEY put formatFactory.name.toString()
-            formatMeta?.let { IOFormatFactory.META_KEY put formatMeta }
-        }
     }
     multipart(parts, separator)
 }
@@ -115,14 +102,4 @@ public val EnvelopePart.name: String? get() = description?.get("name").string
 /**
  * Represent envelope part by an envelope
  */
-public fun EnvelopePart.envelope(plugin: IOPlugin): Envelope {
-    val formatItem = description?.get(PART_FORMAT_KEY)
-    return if (formatItem != null) {
-        val format: EnvelopeFormat = plugin.resolveEnvelopeFormat(formatItem)
-            ?: error("Envelope format for $formatItem is not resolved")
-        binary.readWith(format)
-    } else {
-        error("Envelope description not found")
-        //SimpleEnvelope(description ?: Meta.EMPTY, binary)
-    }
-}
+public fun EnvelopePart.envelope(): Envelope = binary.readWith(TaggedEnvelopeFormat)

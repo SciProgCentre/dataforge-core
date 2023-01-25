@@ -36,6 +36,8 @@ internal class PathBinary(
         }
         return ByteReadPacket(array).block()
     }
+
+    override fun view(offset: Int, binarySize: Int) = PathBinary(path, fileOffset + offset, binarySize)
 }
 
 public fun Path.asBinary(): Binary = PathBinary(this)
@@ -73,15 +75,7 @@ public fun Path.rewrite(block: Output.() -> Unit): Unit {
 }
 
 @DFExperimental
-public fun EnvelopeFormat.readFile(path: Path): Envelope {
-    val partialEnvelope: PartialEnvelope = path.asBinary().read {
-        readPartial(this@read)
-    }
-    val offset: Int = partialEnvelope.dataOffset.toInt()
-    val size: Int = partialEnvelope.dataSize?.toInt() ?: (Files.size(path).toInt() - offset)
-    val binary = PathBinary(path, offset, size)
-    return SimpleEnvelope(partialEnvelope.meta, binary)
-}
+public fun EnvelopeFormat.readFile(path: Path): Envelope = readObject(path.asBinary())
 
 /**
  * Resolve IOFormat based on type
@@ -239,10 +233,9 @@ public fun IOPlugin.writeEnvelopeFile(
     path: Path,
     envelope: Envelope,
     envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat,
-    metaFormat: MetaFormatFactory? = null,
 ) {
     path.rewrite {
-        envelopeFormat.writeEnvelope(this, envelope, metaFormat ?: envelopeFormat.defaultMetaFormat)
+        envelopeFormat.writeObject(this, envelope)
     }
 }
 

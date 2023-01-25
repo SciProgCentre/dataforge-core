@@ -31,7 +31,7 @@ class IOTest {
 
         binary.read {
             val array = ByteArray {
-                val read = readBytesWithSeparatorTo(this, "---".encodeToByteArray(),  skipUntilEndOfLine = true)
+                val read = readWithSeparatorTo(this, "---".encodeToByteArray()) + discardLine()
                 assertEquals(12, read)
             }
             assertEquals("""
@@ -43,13 +43,13 @@ class IOTest {
 
         assertFails {
             binary.read {
-                discardWithSeparator("---".encodeToByteArray(), atMost = 3)
+                discardWithSeparator("---".encodeToByteArray(), atMost = 3 )
             }
         }
 
         assertFails {
             binary.read{
-                discardWithSeparator("-+-".encodeToByteArray())
+                discardWithSeparator("-+-".encodeToByteArray(), errorOnEof = true)
             }
         }
 

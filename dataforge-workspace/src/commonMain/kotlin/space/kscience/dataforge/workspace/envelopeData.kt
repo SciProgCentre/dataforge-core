@@ -17,5 +17,5 @@ public fun <T : Any> Envelope.toData(format: IOReader<T>): Data<T> = Data(format
 public suspend fun <T : Any> Data<T>.toEnvelope(format: IOWriter<T>): Envelope {
     val obj = await()
     val binary = Binary(obj, format)
-    return SimpleEnvelope(meta, binary)
+    return Envelope(meta, binary)
 }

@@ -29,7 +29,7 @@ private suspend fun <T : Any> ZipOutputStream.writeNode(
             val entry = ZipEntry(name)
             putNextEntry(entry)
             asOutput().run {
-                envelopeFormat.writeEnvelope(this, envelope)
+                envelopeFormat.writeObject(this, envelope)
                 flush()
             }
         }

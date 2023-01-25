@@ -1,13 +1,13 @@
 plugins {
     id("space.kscience.gradle.mpp")
-//    id("space.kscience.gradle.native")
 }
 
 description = "YAML meta IO"
 
 kscience {
+    native()
     useSerialization{
-        yamlKt("0.9.0-dev-1")
+        yamlKt()
     }
 }
 

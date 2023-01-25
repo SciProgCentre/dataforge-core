@@ -18,6 +18,7 @@ import space.kscience.dataforge.names.plus
 public class TaggedEnvelopeFormat(
     public val io: IOPlugin,
     public val version: VERSION = VERSION.DF02,
+    public val metaFormatFactory: MetaFormatFactory = JsonMetaFormat
 ) : EnvelopeFormat {
 
 //    private val metaFormat = io.metaFormat(metaFormatKey)
@@ -40,20 +41,18 @@ public class TaggedEnvelopeFormat(
         writeRawString(END_SEQUENCE)
     }
 
-    override fun writeEnvelope(
+    override fun writeObject(
         output: Output,
-        envelope: Envelope,
-        metaFormatFactory: MetaFormatFactory,
-        formatMeta: Meta,
+        obj: Envelope,
     ) {
-        val metaFormat = metaFormatFactory.build(this@TaggedEnvelopeFormat.io.context, formatMeta)
-        val metaBytes = Binary(envelope.meta,metaFormat)
-        val actualSize: ULong = (envelope.data?.size ?: 0).toULong()
+        val metaFormat = metaFormatFactory.build(io.context, Meta.EMPTY)
+        val metaBytes = Binary(obj.meta,metaFormat)
+        val actualSize: ULong = (obj.data?.size ?: 0).toULong()
         val tag = Tag(metaFormatFactory.key, metaBytes.size.toUInt() + 2u, actualSize)
         output.writeBinary(tag.toBinary())
         output.writeBinary(metaBytes)
         output.writeRawString("\r\n")
-        envelope.data?.let {
+        obj.data?.let {
             output.writeBinary(it)
         }
     }
@@ -79,18 +78,18 @@ public class TaggedEnvelopeFormat(
         return SimpleEnvelope(meta, data)
     }
 
-    override fun readPartial(input: Input): PartialEnvelope {
-        val tag = input.readTag(this.version)
+    override fun readObject(binary: Binary): Envelope = binary.read{
+        val tag = readTag(version)
 
         val metaFormat = io.resolveMetaFormat(tag.metaFormatKey)
             ?: error("Meta format with key ${tag.metaFormatKey} not found")
 
-        val metaBinary = input.readBinary(tag.metaSize.toInt())
+        val metaBinary = readBinary(tag.metaSize.toInt())
 
         val meta: Meta = metaFormat.readObjectFrom(metaBinary)
 
 
-        return PartialEnvelope(meta, (version.tagSize + tag.metaSize).toInt(), tag.dataSize)
+        SimpleEnvelope(meta, binary.view((version.tagSize + tag.metaSize).toInt(), tag.dataSize.toInt()))
     }
 
     private data class Tag(
@@ -155,20 +154,16 @@ public class TaggedEnvelopeFormat(
 
         private val default by lazy { build(Global, Meta.EMPTY) }
 
-        override fun readPartial(input: Input): PartialEnvelope =
-            default.run { readPartial(input) }
+        override fun readObject(binary: Binary): Envelope =
+            default.run { readObject(binary) }
 
-        override fun writeEnvelope(
+        override fun writeObject(
             output: Output,
-            envelope: Envelope,
-            metaFormatFactory: MetaFormatFactory,
-            formatMeta: Meta,
+            obj: Envelope,
         ): Unit = default.run {
-            writeEnvelope(
+            writeObject(
                 output,
-                envelope,
-                metaFormatFactory,
-                formatMeta
+                obj,
             )
         }
 

@@ -2,8 +2,6 @@ package space.kscience.dataforge.io.yaml
 
 import io.ktor.utils.io.core.Input
 import io.ktor.utils.io.core.Output
-import io.ktor.utils.io.core.buildPacket
-import io.ktor.utils.io.core.readBytes
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.io.*
@@ -14,50 +12,46 @@ import space.kscience.dataforge.names.plus
 public class FrontMatterEnvelopeFormat(
     private val io: IOPlugin,
     private val meta: Meta = Meta.EMPTY,
+    private val metaFormatFactory: MetaFormatFactory = YamlMetaFormat,
 ) : EnvelopeFormat {
 
-    override fun readPartial(input: Input): PartialEnvelope {
+    override fun readObject(binary: Binary): Envelope = binary.read {
         var offset = 0
 
-        offset += input.discardWithSeparator(
+        offset += discardWithSeparator(
             SEPARATOR.encodeToByteArray(),
             atMost = 1024,
-            skipUntilEndOfLine = false
         )
 
-        val line = input.readSafeUtf8Line()
+        val line = ByteArray {
+            offset += readWithSeparatorTo(this, "\n".encodeToByteArray())
+        }.decodeToString()
+
         val readMetaFormat = line.trim().takeIf { it.isNotBlank() }?.let { io.resolveMetaFormat(it) } ?: YamlMetaFormat
 
-        //TODO replace by preview
-        val packet =  buildPacket {
-            offset += input.readBytesWithSeparatorTo(
-                this,
-                SEPARATOR.encodeToByteArray(),
-                skipUntilEndOfLine = true
-            )
+        val packet = ByteArray {
+            offset += readWithSeparatorTo(this, SEPARATOR.encodeToByteArray())
         }
-        val meta = readMetaFormat.readMeta(packet)
-        return PartialEnvelope(meta, offset, null)
+
+        offset += discardLine()
+
+        val meta = readMetaFormat.readObject(packet.asBinary())
+        Envelope(meta, binary.view(offset))
     }
 
-    override fun readObject(input: Input): Envelope {
-        val partial = readPartial(input)
-        val data = input.readBytes().asBinary()
-        return SimpleEnvelope(partial.meta, data)
-    }
+    override fun readObject(input: Input): Envelope = readObject(input.readBinary())
 
-    override fun writeEnvelope(
+    override fun writeObject(
         output: Output,
-        envelope: Envelope,
-        metaFormatFactory: MetaFormatFactory,
-        formatMeta: Meta,
+        obj: Envelope,
     ) {
-        val metaFormat = metaFormatFactory.build(this@FrontMatterEnvelopeFormat.io.context, formatMeta)
-        output.writeRawString("$SEPARATOR\r\n")
-        metaFormat.run { this.writeObject(output, envelope.meta) }
+        val metaFormat = metaFormatFactory.build(io.context, meta)
+        val formatSuffix = if (metaFormat is YamlMetaFormat) "" else metaFormatFactory.shortName
+        output.writeRawString("$SEPARATOR${formatSuffix}\r\n")
+        metaFormat.run { metaFormat.writeObject(output, obj.meta) }
         output.writeRawString("$SEPARATOR\r\n")
         //Printing data
-        envelope.data?.let { data ->
+        obj.data?.let { data ->
             output.writeBinary(data)
         }
     }
@@ -84,15 +78,12 @@ public class FrontMatterEnvelopeFormat(
 
         private val default by lazy { build(Global, Meta.EMPTY) }
 
-        override fun readPartial(input: Input): PartialEnvelope =
-            default.readPartial(input)
+        override fun readObject(binary: Binary): Envelope = default.readObject(binary)
 
-        override fun writeEnvelope(
+        override fun writeObject(
             output: Output,
-            envelope: Envelope,
-            metaFormatFactory: MetaFormatFactory,
-            formatMeta: Meta,
-        ): Unit = default.writeEnvelope(output, envelope, metaFormatFactory, formatMeta)
+            obj: Envelope,
+        ): Unit = default.writeObject(output, obj)
 
 
         override fun readObject(input: Input): Envelope = default.readObject(input)

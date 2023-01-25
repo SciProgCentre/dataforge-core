@@ -25,6 +25,8 @@ public interface IOReader<out T> {
     public val type: KType
 
     public fun readObject(input: Input): T
+
+    public fun readObject(binary: Binary): T = binary.read { readObject(this) }
 }
 
 public inline fun <reified T> IOReader(crossinline read: Input.() -> T): IOReader<T> = object : IOReader<T> {

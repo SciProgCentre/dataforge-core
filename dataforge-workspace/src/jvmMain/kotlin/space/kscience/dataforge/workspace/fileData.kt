@@ -30,7 +30,6 @@ import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.readAttributes
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
-import kotlin.streams.toList
 
 
 //public typealias FileFormatResolver<T> = (Path, Meta) -> IOFormat<T>
@@ -193,7 +192,6 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
     tree: DataTree<T>,
     format: IOWriter<T>,
     envelopeFormat: EnvelopeFormat? = null,
-    metaFormat: MetaFormatFactory? = null,
 ) {
     withContext(Dispatchers.IO) {
         if (!Files.exists(path)) {
@@ -210,15 +208,15 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
                 is DataTreeItem.Leaf -> {
                     val envelope = item.data.toEnvelope(format)
                     if (envelopeFormat != null) {
-                        writeEnvelopeFile(childPath, envelope, envelopeFormat, metaFormat)
+                        writeEnvelopeFile(childPath, envelope, envelopeFormat)
                     } else {
-                        writeEnvelopeDirectory(childPath, envelope, metaFormat ?: JsonMetaFormat)
+                        writeEnvelopeDirectory(childPath, envelope)
                     }
                 }
             }
         }
         val treeMeta = tree.meta
-        writeMetaFile(path, treeMeta, metaFormat ?: JsonMetaFormat)
+        writeMetaFile(path, treeMeta)
     }
 }
 

@@ -9,6 +9,7 @@
 - More fine-grained types in Action builders.
 
 ### Changed
+- Simplified `DFTL` envelope format. Closing symbols are unnecessary. Properties are discontinued.
 - Meta `get` method allows nullable receiver
 - `withDefault` functions do not add new keys to meta children and are consistent.
 - `dataforge.meta.values` package is merged into `dataforge.meta` for better star imports

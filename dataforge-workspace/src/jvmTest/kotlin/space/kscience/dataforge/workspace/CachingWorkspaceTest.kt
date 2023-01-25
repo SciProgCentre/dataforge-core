@@ -23,13 +23,13 @@ internal class CachingWorkspaceTest {
         useCache()
 
         val doFirst by task<Any> {
-            pipeFrom(data()) { _, name, meta ->
+            pipeFrom(data()) { _, name, _ ->
                 println("Done first on $name with flag=${taskMeta["flag"].boolean ?: false}")
             }
         }
 
         val doSecond by task<Any>{
-            pipeFrom(doFirst) { _, name, meta ->
+            pipeFrom(doFirst) { _, name, _ ->
                 println("Done second on $name with flag=${taskMeta["flag"].boolean ?: false}")
             }
         }

@@ -34,7 +34,7 @@ public interface Envelope {
     }
 }
 
-public class SimpleEnvelope(override val meta: Meta, override val data: Binary?) : Envelope
+internal class SimpleEnvelope(override val meta: Meta, override val data: Binary?) : Envelope
 
 public fun Envelope(meta: Meta, data: Binary?): Envelope = SimpleEnvelope(meta, data)
 
