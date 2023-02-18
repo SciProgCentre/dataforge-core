@@ -3,18 +3,13 @@ plugins {
 }
 
 kscience{
+    jvm()
+    js()
     native()
     useCoroutines()
-}
-
-kotlin {
-    sourceSets {
-        commonMain{
-            dependencies {
-                api(project(":dataforge-meta"))
-                api(kotlin("reflect"))
-            }
-        }
+    dependencies {
+        api(project(":dataforge-meta"))
+        api(kotlin("reflect"))
     }
 }
 

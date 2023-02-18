@@ -4,25 +4,24 @@ plugins {
 
 description = "YAML meta IO"
 
+repositories {
+    mavenCentral()
+}
+
 kscience {
+    jvm()
+    js()
     native()
-    useSerialization{
+    dependencies {
+        api(projects.dataforgeIo)
+    }
+    useSerialization("1.4.1"){
         yamlKt()
     }
 }
 
 repositories{
     maven("https://dl.bintray.com/mamoe/yamlkt")
-}
-
-kotlin {
-    sourceSets {
-        commonMain{
-            dependencies {
-                api(project(":dataforge-io"))
-            }
-        }
-    }
 }
 
 readme{

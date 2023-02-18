@@ -3,24 +3,17 @@ plugins {
 }
 
 kscience{
+    jvm()
+    js()
     native()
     useCoroutines()
-}
-
-kotlin {
-    sourceSets {
-        commonMain{
-            dependencies {
-                api(project(":dataforge-context"))
-                api(project(":dataforge-data"))
-                api(project(":dataforge-io"))
-            }
-        }
-        jvmTest{
-            dependencies{
-                implementation("ch.qos.logback:logback-classic:1.4.1")
-            }
-        }
+    dependencies {
+        api(projects.dataforgeContext)
+        api(projects.dataforgeData)
+        api(projects.dataforgeIo)
+    }
+    dependencies(jvmTest){
+        implementation(spclibs.logback.classic)
     }
 }
 

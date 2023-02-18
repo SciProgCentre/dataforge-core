@@ -3,8 +3,10 @@ plugins {
 }
 
 kscience {
+    jvm()
+    js()
     native()
-    useSerialization{
+    useSerialization("1.4.1"){
         json()
     }
 }

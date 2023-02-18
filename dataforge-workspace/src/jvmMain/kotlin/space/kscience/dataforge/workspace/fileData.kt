@@ -82,7 +82,7 @@ public fun <T : Any> IOPlugin.readDataFile(
 
 context(IOPlugin) @DFExperimental
 private fun <T : Any> DataSetBuilder<T>.directory(path: Path, formatResolver: FileFormatResolver<T>) {
-    Files.list(path).toList().forEach { childPath ->
+    Files.list(path).forEach { childPath ->
         val fileName = childPath.fileName.toString()
         if (fileName.startsWith(IOPlugin.META_FILE_NAME)) {
             meta(readMetaFile(childPath))

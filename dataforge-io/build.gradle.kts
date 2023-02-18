@@ -7,22 +7,16 @@ plugins {
 description = "IO module"
 
 kscience {
+    jvm()
+    js()
     native()
-    useSerialization(sourceSet = space.kscience.gradle.DependencySourceSet.TEST) {
+    useSerialization("1.4.1")
+    useSerialization("1.4.1", sourceSet = space.kscience.gradle.DependencySourceSet.TEST) {
         cbor()
     }
-}
-
-//val ioVersion by rootProject.extra("0.2.0-npm-dev-11")
-
-kotlin {
-    sourceSets {
-        commonMain {
-            dependencies {
-                api(project(":dataforge-context"))
-                api("io.ktor:ktor-io:${KScienceVersions.ktorVersion}")
-            }
-        }
+    dependencies {
+        api(project(":dataforge-context"))
+        api("io.ktor:ktor-io:${KScienceVersions.ktorVersion}")
     }
 }
 

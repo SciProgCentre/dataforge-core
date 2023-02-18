@@ -5,28 +5,16 @@ plugins {
 description = "Context and provider definitions"
 
 kscience {
+    jvm()
+    js()
     native()
     useCoroutines()
-}
-
-kotlin {
-    sourceSets {
-        val commonMain by getting {
-            dependencies {
-                api(project(":dataforge-meta"))
-            }
-        }
-        jvmMain {
-            dependencies {
-                api(kotlin("reflect"))
-                api("org.slf4j:slf4j-api:1.7.30")
-            }
-        }
-        jsMain {
-            dependencies {
-
-            }
-        }
+    dependencies {
+        api(project(":dataforge-meta"))
+    }
+    dependencies(jvmMain){
+        api(kotlin("reflect"))
+        api("org.slf4j:slf4j-api:1.7.30")
     }
 }
 
