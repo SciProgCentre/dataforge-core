@@ -120,12 +120,12 @@ public operator fun Name.get(i: Int): NameToken = tokens[i]
 /**
  * The reminder of the name after last element is cut. For empty name return itself.
  */
-public fun Name.cutLast(): Name = Name(tokens.dropLast(1))
+public fun Name.cutLast(): Name = Name(tokens.subList(0, tokens.size - 1))
 
 /**
  * The reminder of the name after first element is cut. For empty name return itself.
  */
-public fun Name.cutFirst(): Name = Name(tokens.drop(1))
+public fun Name.cutFirst(): Name = Name(tokens.subList(1, tokens.size))
 
 public val Name.length: Int get() = tokens.size
 

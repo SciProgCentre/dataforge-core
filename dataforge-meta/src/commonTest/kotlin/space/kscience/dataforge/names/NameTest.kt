@@ -20,7 +20,7 @@ class NameTest {
     }
 
     @Test
-    fun comparisonTest(){
+    fun comparisonTest() {
         val name1 = Name.parse("token1.token2.token3")
         val name2 = Name.parse("token1.token2")
         val name3 = Name.parse("token3")
@@ -30,12 +30,24 @@ class NameTest {
     }
 
     @Test
-    fun escapeTest(){
+    fun escapeTest() {
         val escapedName = Name.parse("token\\.one.token2")
         val unescapedName = "token\\.one.token2".asName()
 
         assertEquals(2, escapedName.length)
         assertEquals(1, unescapedName.length)
         assertEquals(escapedName, Name.parse(escapedName.toString()))
+    }
+
+    @Test
+    fun cutFirst() {
+        val name = Name.parse("a.b.c")
+        assertEquals("b.c".parseAsName(), name.cutFirst())
+    }
+
+    @Test
+    fun cutLast() {
+        val name = Name.parse("a.b.c")
+        assertEquals("a.b".parseAsName(), name.cutLast())
     }
 }
