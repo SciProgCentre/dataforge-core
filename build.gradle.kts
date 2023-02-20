@@ -34,9 +34,9 @@ ksciencePublish {
     github("dataforge-core", "SciProgCentre")
     space(
         if (isInDevelopment) {
-            "https://maven.pkg.jetbrains.space/mipt-npm/p/sci/dev"
+            "https://maven.pkg.jetbrains.space/spc/p/sci/dev"
         } else {
-            "https://maven.pkg.jetbrains.space/mipt-npm/p/sci/release"
+            "https://maven.pkg.jetbrains.space/spc/p/sci/release"
         }
     )
     sonatype()
