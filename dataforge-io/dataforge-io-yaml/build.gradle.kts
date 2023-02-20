@@ -15,7 +15,7 @@ kscience {
     dependencies {
         api(projects.dataforgeIo)
     }
-    useSerialization("1.4.1"){
+    useSerialization{
         yamlKt()
     }
 }

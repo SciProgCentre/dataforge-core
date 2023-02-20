@@ -36,11 +36,14 @@ import kotlin.reflect.typeOf
 
 public typealias FileFormatResolver<T> = (path: Path, meta: Meta) -> IOReader<T>
 
-public class FileData<T> internal constructor(private val data: Data<T>) : Data<T> by data {
+/**
+ * A data based on a filesystem [Path]
+ */
+public class FileData<T> internal constructor(private val data: Data<T>, public val path: Path) : Data<T> by data {
 
-    public val path: String? get() = meta[META_FILE_PATH_KEY].string
-    public val extension: String? get() = meta[META_FILE_EXTENSION_KEY].string
-
+    //    public val path: String? get() = meta[META_FILE_PATH_KEY].string
+//    public val extension: String? get() = meta[META_FILE_EXTENSION_KEY].string
+//
     public val createdTime: Instant? get() = meta[META_FILE_CREATE_TIME_KEY].string?.let { Instant.parse(it) }
     public val updatedTime: Instant? get() = meta[META_FILE_UPDATE_TIME_KEY].string?.let { Instant.parse(it) }
 
@@ -74,9 +77,12 @@ public fun <T : Any> IOPlugin.readDataFile(
         FileData.META_FILE_UPDATE_TIME_KEY put attributes.lastModifiedTime().toInstant().toString()
         FileData.META_FILE_CREATE_TIME_KEY put attributes.creationTime().toInstant().toString()
     }
-    return FileData(Data(format.type, updatedMeta) {
-        envelope.data?.readWith(format) ?: error("Can't convert envelope without content to Data")
-    })
+    return FileData(
+        Data(format.type, updatedMeta) {
+            envelope.data?.readWith(format) ?: error("Can't convert envelope without content to Data")
+        },
+        path
+    )
 }
 
 
@@ -122,7 +128,15 @@ public fun <T : Any> IOPlugin.readDataDirectory(
 public inline fun <reified T : Any> IOPlugin.readDataDirectory(
     path: Path,
     noinline formatResolver: FileFormatResolver<T>,
-): DataTree<Any> = readDataDirectory(typeOf<T>(), path, formatResolver)
+): DataTree<T> = readDataDirectory(typeOf<T>(), path, formatResolver)
+
+/**
+ * Read raw binary data tree from the directory. All files are read as-is (save for meta files).
+ */
+@DFExperimental
+public fun IOPlugin.readRawDirectory(
+    path: Path,
+): DataTree<Binary> = readDataDirectory(path) { _, _ -> IOReader.binary }
 
 
 @OptIn(DFExperimental::class)
@@ -205,6 +219,7 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
                 is DataTreeItem.Node -> {
                     writeDataDirectory(childPath, item.tree, format, envelopeFormat)
                 }
+
                 is DataTreeItem.Leaf -> {
                     val envelope = item.data.toEnvelope(format)
                     if (envelopeFormat != null) {

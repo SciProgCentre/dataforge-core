@@ -90,8 +90,8 @@ public fun YamlMap.toMeta(): Meta = YamlMeta(this)
 public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
 
     override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?) {
-        val yaml = meta.toYaml()
-        val string = Yaml.encodeToString(yaml)
+        val yaml: YamlMap = meta.toYaml()
+        val string = Yaml.encodeToString(YamlMap.serializer(), yaml)
         output.writeUtf8String(string)
     }
 

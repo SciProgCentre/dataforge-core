@@ -11,7 +11,7 @@ public abstract class AbstractPlugin(override val meta: Meta = Meta.EMPTY) : Plu
     private var _context: Context? = null
     private val dependencies = HashMap<PluginFactory<*>, Meta>()
 
-    override val isAttached: Boolean = _context != null
+    override val isAttached: Boolean get() = _context != null
 
     override val context: Context
         get() = _context ?: error("Plugin $tag is not attached")

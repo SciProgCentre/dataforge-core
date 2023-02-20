@@ -1,9 +1,6 @@
 package space.kscience.dataforge.io
 
-import io.ktor.utils.io.core.Input
-import io.ktor.utils.io.core.Output
-import io.ktor.utils.io.core.readDouble
-import io.ktor.utils.io.core.writeDouble
+import io.ktor.utils.io.core.*
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Factory
 import space.kscience.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
@@ -27,6 +24,19 @@ public interface IOReader<out T> {
     public fun readObject(input: Input): T
 
     public fun readObject(binary: Binary): T = binary.read { readObject(this) }
+
+    public companion object {
+        /**
+         * no-op reader for binaries.
+         */
+        public val binary: IOReader<Binary> = object : IOReader<Binary> {
+            override val type: KType = typeOf<Binary>()
+
+            override fun readObject(input: Input): Binary = input.readBytes().asBinary()
+
+            override fun readObject(binary: Binary): Binary = binary
+        }
+    }
 }
 
 public inline fun <reified T> IOReader(crossinline read: Input.() -> T): IOReader<T> = object : IOReader<T> {
