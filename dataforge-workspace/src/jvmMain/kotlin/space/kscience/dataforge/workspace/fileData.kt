@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import space.kscience.dataforge.context.error
 import space.kscience.dataforge.context.logger
+import space.kscience.dataforge.context.warn
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.meta.Meta
@@ -34,7 +35,7 @@ import kotlin.reflect.typeOf
 
 //public typealias FileFormatResolver<T> = (Path, Meta) -> IOFormat<T>
 
-public typealias FileFormatResolver<T> = (path: Path, meta: Meta) -> IOReader<T>
+public typealias FileFormatResolver<T> = (path: Path, meta: Meta) -> IOReader<T>?
 
 /**
  * A data based on a filesystem [Path]
@@ -44,15 +45,15 @@ public class FileData<T> internal constructor(private val data: Data<T>, public 
     //    public val path: String? get() = meta[META_FILE_PATH_KEY].string
 //    public val extension: String? get() = meta[META_FILE_EXTENSION_KEY].string
 //
-    public val createdTime: Instant? get() = meta[META_FILE_CREATE_TIME_KEY].string?.let { Instant.parse(it) }
-    public val updatedTime: Instant? get() = meta[META_FILE_UPDATE_TIME_KEY].string?.let { Instant.parse(it) }
+    public val createdTime: Instant? get() = meta[FILE_CREATE_TIME_KEY].string?.let { Instant.parse(it) }
+    public val updatedTime: Instant? get() = meta[FILE_UPDATE_TIME_KEY].string?.let { Instant.parse(it) }
 
     public companion object {
-        public val META_FILE_KEY: Name = "file".asName()
-        public val META_FILE_PATH_KEY: Name = META_FILE_KEY + "path"
-        public val META_FILE_EXTENSION_KEY: Name = META_FILE_KEY + "extension"
-        public val META_FILE_CREATE_TIME_KEY: Name = META_FILE_KEY + "created"
-        public val META_FILE_UPDATE_TIME_KEY: Name = META_FILE_KEY + "updated"
+        public val FILE_KEY: Name = "file".asName()
+        public val FILE_PATH_KEY: Name = FILE_KEY + "path"
+        public val FILE_EXTENSION_KEY: Name = FILE_KEY + "extension"
+        public val FILE_CREATE_TIME_KEY: Name = FILE_KEY + "created"
+        public val FILE_UPDATE_TIME_KEY: Name = FILE_KEY + "updated"
     }
 }
 
@@ -66,20 +67,20 @@ public class FileData<T> internal constructor(private val data: Data<T>, public 
 public fun <T : Any> IOPlugin.readDataFile(
     path: Path,
     formatResolver: FileFormatResolver<T>,
-): FileData<T> {
+): FileData<T>? {
     val envelope = readEnvelopeFile(path, true)
-    val format = formatResolver(path, envelope.meta)
+    val format = formatResolver(path, envelope.meta) ?: return null
     val updatedMeta = envelope.meta.copy {
-        FileData.META_FILE_PATH_KEY put path.toString()
-        FileData.META_FILE_EXTENSION_KEY put path.extension
+        FileData.FILE_PATH_KEY put path.toString()
+        FileData.FILE_EXTENSION_KEY put path.extension
 
         val attributes = path.readAttributes<BasicFileAttributes>()
-        FileData.META_FILE_UPDATE_TIME_KEY put attributes.lastModifiedTime().toInstant().toString()
-        FileData.META_FILE_CREATE_TIME_KEY put attributes.creationTime().toInstant().toString()
+        FileData.FILE_UPDATE_TIME_KEY put attributes.lastModifiedTime().toInstant().toString()
+        FileData.FILE_CREATE_TIME_KEY put attributes.creationTime().toInstant().toString()
     }
     return FileData(
         Data(format.type, updatedMeta) {
-            envelope.data?.readWith(format) ?: error("Can't convert envelope without content to Data")
+            (envelope.data ?: Binary.EMPTY).readWith(format)
         },
         path
     )
@@ -119,6 +120,9 @@ public fun <T : Any> IOPlugin.readDataDirectory(
     }
     if (!Files.isDirectory(path)) error("Provided path $path is not a directory")
     return DataTree(type) {
+        meta {
+          FileData.FILE_PATH_KEY put path.toString()
+        }
         directory(path, formatResolver)
     }
 }
@@ -139,7 +143,6 @@ public fun IOPlugin.readRawDirectory(
 ): DataTree<Binary> = readDataDirectory(path) { _, _ -> IOReader.binary }
 
 
-@OptIn(DFExperimental::class)
 private fun Path.toName() = Name(map { NameToken.parse(it.nameWithoutExtension) })
 
 @DFInternal
@@ -198,6 +201,14 @@ public inline fun <reified T : Any> IOPlugin.monitorDataDirectory(
 ): DataSource<T> = monitorDataDirectory(typeOf<T>(), path, formatResolver)
 
 /**
+ * Read and monitor raw binary data tree from the directory. All files are read as-is (save for meta files).
+ */
+@DFExperimental
+public fun IOPlugin.monitorRawDirectory(
+    path: Path,
+): DataSource<Binary> = monitorDataDirectory(path) { _, _ -> IOReader.binary }
+
+/**
  * Write data tree to existing directory or create a new one using default [java.nio.file.FileSystem] provider
  */
 @DFExperimental
@@ -238,22 +249,26 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
 /**
  * Add file/directory-based data tree item
  */
-context(IOPlugin) @OptIn(DFInternal::class)
+context(IOPlugin)
+@OptIn(DFInternal::class)
 @DFExperimental
 public fun <T : Any> DataSetBuilder<T>.file(
     path: Path,
     formatResolver: FileFormatResolver<out T>,
 ) {
     try {
-
         //If path is a single file or a special directory, read it as single datum
         if (!Files.isDirectory(path) || Files.list(path).allMatch { it.fileName.toString().startsWith("@") }) {
             val data = readDataFile(path, formatResolver)
+            if (data == null) {
+                logger.warn { "File format is not resolved for $path. Skipping." }
+                return
+            }
             val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string ?: path.nameWithoutExtension
             data(name, data)
         } else {
             //otherwise, read as directory
-            val data = readDataDirectory(dataType, path, formatResolver)
+            val data: DataTree<T> = readDataDirectory(dataType, path, formatResolver)
             val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string ?: path.nameWithoutExtension
             node(name, data)
         }
