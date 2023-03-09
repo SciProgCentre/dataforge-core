@@ -42,6 +42,9 @@ private class TaskDataImpl<out T : Any>(
 //    }
 }
 
+/**
+ * Adopt data into this workspace
+ */
 public fun <T : Any> Workspace.wrapData(data: Data<T>, name: Name, taskName: Name, taskMeta: Meta): TaskData<T> =
     TaskDataImpl(this, data, name, taskName, taskMeta)
 

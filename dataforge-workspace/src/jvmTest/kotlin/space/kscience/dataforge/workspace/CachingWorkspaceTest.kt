@@ -28,7 +28,7 @@ internal class CachingWorkspaceTest {
             }
         }
 
-        val doSecond by task<Any>{
+        @Suppress("UNUSED_VARIABLE") val doSecond by task<Any>{
             pipeFrom(doFirst) { _, name, _ ->
                 println("Done second on $name with flag=${taskMeta["flag"].boolean ?: false}")
             }

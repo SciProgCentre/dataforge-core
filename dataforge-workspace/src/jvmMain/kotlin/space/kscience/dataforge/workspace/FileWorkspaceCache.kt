@@ -4,30 +4,36 @@ import space.kscience.dataforge.context.request
 import space.kscience.dataforge.data.Data
 import space.kscience.dataforge.data.await
 import space.kscience.dataforge.io.*
+import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.withIndex
 import java.nio.file.Path
 import kotlin.io.path.deleteIfExists
+import kotlin.io.path.div
 import kotlin.io.path.exists
 import kotlin.reflect.KType
 
-public class FileWorkspaceCache : WorkspaceCache {
+public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCache {
 
     private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> = this as TaskData<T>
 
 
+    @OptIn(DFExperimental::class, DFInternal::class)
     override suspend fun <T : Any> evaluate(result: TaskResult<T>): TaskResult<T> {
         val io = result.workspace.context.request(IOPlugin)
 
-        val format: IOFormat<T> = io.resolveIOFormat<T>(result.dataType, result.taskMeta)
+        val format: IOFormat<T> = io.resolveIOFormat(result.dataType, result.taskMeta)
             ?: error("Can't resolve IOFormat for ${result.dataType}")
 
-        fun cachedDataPath(dataName: Name): Path {
-            TODO()
-        }
+        fun cachedDataPath(dataName: Name): Path = cacheDirectory /
+                result.taskName.withIndex(result.taskMeta.hashCode().toString(16)).toString() /
+                dataName.toString()
 
-        fun cachedData(data: TaskData<T>): TaskData<T> {
+        fun evaluateDatum(data: TaskData<T>): TaskData<T> {
             val path = cachedDataPath(data.name)
-            val cachedData: Data<T> = Data<T>(data.type, meta = data.meta, dependencies = data.dependencies) {
+            val datum: Data<T> = Data<T>(data.type, meta = data.meta, dependencies = data.dependencies) {
+                // return cached data if it is present
                 if (path.exists()) {
                     try {
                         val envelope: Envelope = io.readEnvelopeFile(path)
@@ -40,28 +46,26 @@ public class FileWorkspaceCache : WorkspaceCache {
                     }
                 }
 
-                return@Data data.await().also {
+                //waiting for data in current scope because Envelope is synchronous
+                return@Data data.await().also { result ->
                     val envelope = Envelope {
                         meta = data.meta
                         data {
-                            writeObject(format, it)
+                            writeObject(format, result)
                         }
                     }
                     io.writeEnvelopeFile(path, envelope)
                 }
 
             }
-            return data.workspace.wrapData(cachedData, data.name, data.taskName, data.taskMeta)
+            return data.workspace.wrapData(datum, data.name, data.taskName, data.taskMeta)
         }
 
         return object : TaskResult<T> by result {
-            override fun iterator(): Iterator<TaskData<T>> = iterator {
-                result.iterator().forEach {
-                    yield(cachedData(it))
-                }
-            }
+            override fun iterator(): Iterator<TaskData<T>> =
+                iterator().asSequence().map { evaluateDatum(it) }.iterator()
 
-            override fun get(name: Name): TaskData<T>? = result[name]?.let { cachedData(it) }
+            override fun get(name: Name): TaskData<T>? = result[name]?.let { evaluateDatum(it) }
         }
     }
 }
