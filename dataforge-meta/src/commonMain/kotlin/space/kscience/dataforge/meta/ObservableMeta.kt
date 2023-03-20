@@ -1,7 +1,7 @@
 package space.kscience.dataforge.meta
 
+import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
-import kotlin.jvm.Synchronized
 import kotlin.reflect.KProperty1
 
 
@@ -54,12 +54,12 @@ internal abstract class AbstractObservableMeta : ObservableMeta {
         listeners.forEach { it.callback(this, name) }
     }
 
-    @Synchronized
+    @ThreadSafe
     override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
         listeners.add(MetaListener(owner, callback))
     }
 
-    @Synchronized
+    @ThreadSafe
     override fun removeListener(owner: Any?) {
         listeners.removeAll { it.owner === owner }
     }

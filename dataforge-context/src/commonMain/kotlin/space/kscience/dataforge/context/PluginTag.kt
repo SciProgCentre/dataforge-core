@@ -1,5 +1,6 @@
 package space.kscience.dataforge.context
 
+import kotlinx.serialization.Serializable
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
 
@@ -9,6 +10,7 @@ import space.kscience.dataforge.meta.MetaRepr
  *
  * @author Alexander Nozik
  */
+@Serializable
 public data class PluginTag(
     val name: String,
     val group: String = "",

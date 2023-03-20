@@ -7,6 +7,9 @@ kscience{
     js()
     native()
     useCoroutines()
+    useSerialization{
+        protobuf()
+    }
     dependencies {
         api(projects.dataforgeContext)
         api(projects.dataforgeData)

@@ -124,15 +124,15 @@ public class WorkspaceBuilder(private val parentContext: Context = Global) : Tas
         tasks[taskName] = task
     }
 
-    public fun useCache() {
-        cache = InMemoryWorkspaceCache()
+    public fun cache(cache: WorkspaceCache) {
+        this.cache = cache
     }
 
     public fun build(): Workspace {
         val postProcess: suspend (TaskResult<*>) -> TaskResult<*> = { result ->
             cache?.evaluate(result) ?: result
         }
-        return WorkspaceBase(context ?: parentContext, data ?: DataSet.EMPTY, targets, tasks, postProcess)
+        return WorkspaceImpl(context ?: parentContext, data ?: DataSet.EMPTY, targets, tasks, postProcess)
     }
 }
 

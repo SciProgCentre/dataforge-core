@@ -5,8 +5,8 @@ import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.get
 import space.kscience.dataforge.meta.descriptors.validate
 import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
-import kotlin.jvm.Synchronized
 
 /**
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
@@ -92,7 +92,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
             listeners.forEach { it.callback(this@Scheme.meta, pathName + name) }
         }
 
-        @Synchronized
+        @ThreadSafe
         override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
             listeners.add(MetaListener(owner) { changedName ->
                 if (changedName.startsWith(pathName)) {
@@ -101,7 +101,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
             })
         }
 
-        @Synchronized
+        @ThreadSafe
         override fun removeListener(owner: Any?) {
             listeners.removeAll { it.owner === owner }
         }

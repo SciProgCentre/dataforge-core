@@ -13,7 +13,6 @@ import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.get
 import space.kscience.dataforge.names.plus
-import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -22,11 +21,10 @@ import kotlin.test.assertTrue
 /**
  * Make a fake-factory for a one single plugin. Useful for unique or test plugins
  */
-public inline fun <reified P : Plugin> P.toFactory(): PluginFactory<P> = object : PluginFactory<P> {
+public fun <P : Plugin> P.toFactory(): PluginFactory<P> = object : PluginFactory<P> {
     override fun build(context: Context, meta: Meta): P = this@toFactory
 
     override val tag: PluginTag = this@toFactory.tag
-    override val type: KClass<out P> = P::class
 }
 
 public fun Workspace.produceBlocking(task: String, block: MutableMeta.() -> Unit = {}): DataSet<Any> = runBlocking {
@@ -39,7 +37,7 @@ internal object TestPlugin : WorkspacePlugin() {
 
     val test by task {
         // type is inferred
-        pipeFrom(data<Int>()) { arg, _, _ ->
+        pipeFrom(dataByType<Int>()) { arg, _, _ ->
             logger.info { "Test: $arg" }
             arg
         }
@@ -76,7 +74,7 @@ internal class SimpleWorkspaceTest {
         }
 
         val square by task<Int> {
-            pipeFrom(data<Int>()) { arg, name, meta ->
+            pipeFrom(dataByType<Int>()) { arg, name, meta ->
                 if (meta["testFlag"].boolean == true) {
                     println("Side effect")
                 }
@@ -86,7 +84,7 @@ internal class SimpleWorkspaceTest {
         }
 
         val linear by task<Int> {
-            pipeFrom(data<Int>()) { arg, name, _ ->
+            pipeFrom(dataByType<Int>()) { arg, name, _ ->
                 workspace.logger.info { "Starting linear on $name" }
                 arg * 2 + 1
             }

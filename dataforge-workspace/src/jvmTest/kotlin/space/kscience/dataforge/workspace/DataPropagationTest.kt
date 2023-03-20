@@ -9,7 +9,6 @@ import space.kscience.dataforge.context.PluginFactory
 import space.kscience.dataforge.context.PluginTag
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
-import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -34,7 +33,6 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
 
     companion object : PluginFactory<DataPropagationTestPlugin> {
 
-        override val type: KClass<out DataPropagationTestPlugin> = DataPropagationTestPlugin::class
 
         override fun build(context: Context, meta: Meta): DataPropagationTestPlugin = DataPropagationTestPlugin()
 

@@ -1,8 +1,10 @@
 package space.kscience.dataforge.context
 
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.plus
 import kotlin.reflect.KClass
+import kotlin.reflect.cast
 
 
 /**
@@ -64,15 +66,17 @@ public class PluginManager internal constructor(
      * @param <T>
      * @return
      */
-    @Suppress("UNCHECKED_CAST")
-    public operator fun <T : Any> get(type: KClass<out T>, tag: PluginTag? = null, recursive: Boolean = true): T? =
-        find(recursive) { type.isInstance(it) && (tag == null || tag.matches(it.tag)) } as T?
+    @DFInternal
+    public fun <T : Any> getByType(type: KClass<T>, tag: PluginTag? = null, inherit: Boolean = true): T? =
+        find(inherit) { type.isInstance(it) && (tag == null || tag.matches(it.tag)) }?.let { type.cast(it) }
 
+    @OptIn(DFInternal::class)
     public inline operator fun <reified T : Any> get(tag: PluginTag? = null, recursive: Boolean = true): T? =
-        get(T::class, tag, recursive)
+        getByType(T::class, tag, recursive)
 
+    @OptIn(DFInternal::class)
     public inline operator fun <reified T : Plugin> get(factory: PluginFactory<T>, recursive: Boolean = true): T? =
-        get(factory.type, factory.tag, recursive)
+        getByType(T::class, factory.tag, recursive)
 
     override fun iterator(): Iterator<Plugin> = plugins.iterator()
 }

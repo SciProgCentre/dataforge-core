@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFInternal
+import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
-import kotlin.jvm.Synchronized
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -36,7 +36,7 @@ public class DataTreeBuilder<T : Any>(
 
     override val updates: MutableSharedFlow<Name> = MutableSharedFlow<Name>()
 
-    @Synchronized
+    @ThreadSafe
     private fun remove(token: NameToken) {
         if (treeItems.remove(token) != null) {
             launch {
@@ -50,12 +50,12 @@ public class DataTreeBuilder<T : Any>(
         (getItem(name.cutLast()).tree as? DataTreeBuilder)?.remove(name.lastOrNull()!!)
     }
 
-    @Synchronized
+    @ThreadSafe
     private fun set(token: NameToken, data: Data<T>) {
         treeItems[token] = DataTreeItem.Leaf(data)
     }
 
-    @Synchronized
+    @ThreadSafe
     private fun set(token: NameToken, node: DataTree<T>) {
         treeItems[token] = DataTreeItem.Node(node)
     }
@@ -103,7 +103,7 @@ public fun <T : Any> DataSource(
     block: DataSourceBuilder<T>.() -> Unit,
 ): DataTreeBuilder<T> = DataTreeBuilder<T>(type, parent.coroutineContext).apply(block)
 
-@Suppress("OPT_IN_USAGE","FunctionName")
+@Suppress("OPT_IN_USAGE", "FunctionName")
 public inline fun <reified T : Any> DataSource(
     parent: CoroutineScope,
     crossinline block: DataSourceBuilder<T>.() -> Unit,

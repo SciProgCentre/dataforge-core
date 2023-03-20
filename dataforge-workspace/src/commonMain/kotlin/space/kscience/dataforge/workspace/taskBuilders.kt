@@ -4,34 +4,56 @@ import space.kscience.dataforge.context.PluginFactory
 import space.kscience.dataforge.data.DataSet
 import space.kscience.dataforge.data.forEach
 import space.kscience.dataforge.data.map
-import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.meta.toMutableMeta
+import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.plus
 
 /**
+ * A task meta without a node corresponding to the task itself (removing a node with name of the task).
+ */
+public val TaskResultBuilder<*>.defaultDependencyMeta: Meta
+    get() = taskMeta.copy {
+        remove(taskName)
+    }
+
+/**
  * Select data using given [selector]
+ *
+ * @param selector a workspace data selector. Could be either task selector or initial data selector.
+ * @param dependencyMeta meta used for selector. The same meta is used for caching. By default, uses [defaultDependencyMeta].
  */
 public suspend fun <T : Any> TaskResultBuilder<*>.from(
     selector: DataSelector<T>,
-    meta: Meta = taskMeta
-): DataSet<T> = selector.select(workspace, meta)
+    dependencyMeta: Meta = defaultDependencyMeta,
+): DataSet<T> = selector.select(workspace, dependencyMeta)
 
+public suspend inline fun <T : Any, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
+    plugin: P,
+    dependencyMeta: Meta = defaultDependencyMeta,
+    selectorBuilder: P.() -> TaskReference<T>,
+): DataSet<T> {
+    require(workspace.context.plugins.contains(plugin)){"Plugin $plugin is not loaded into $workspace"}
+    val taskReference: TaskReference<T> = plugin.selectorBuilder()
+    return workspace.produce(plugin.name + taskReference.taskName, dependencyMeta) as TaskResult<T>
+}
 
 /**
  * Select data from a [WorkspacePlugin] attached to this [Workspace] context.
+ *
+ * @param pluginFactory a plugin which contains the task definition. The plugin must be loaded into Workspace context.
+ * @param dependencyMeta meta used for selector. The same meta is used for caching. By default, uses [defaultDependencyMeta].
+ * @param selectorBuilder a builder of task from the plugin.
  */
 public suspend inline fun <T : Any, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
     pluginFactory: PluginFactory<P>,
-    meta: Meta = taskMeta,
+    dependencyMeta: Meta = defaultDependencyMeta,
     selectorBuilder: P.() -> TaskReference<T>,
 ): DataSet<T> {
     val plugin = workspace.context.plugins[pluginFactory]
         ?: error("Plugin ${pluginFactory.tag} not loaded into workspace context")
     val taskReference: TaskReference<T> = plugin.selectorBuilder()
-    return workspace.produce(plugin.name + taskReference.taskName, meta) as TaskResult<T>
+    return workspace.produce(plugin.name + taskReference.taskName, dependencyMeta) as TaskResult<T>
 }
 
 public val TaskResultBuilder<*>.allData: DataSelector<*>
@@ -42,18 +64,23 @@ public val TaskResultBuilder<*>.allData: DataSelector<*>
 /**
  * Perform a lazy mapping task using given [selector] and [action]. The meta of resulting
  * TODO move selector to receiver with multi-receivers
+ *
+ * @param selector a workspace data selector. Could be either task selector or initial data selector.
+ * @param dependencyMeta meta used for selector. The same meta is used for caching. By default, uses [defaultDependencyMeta].
+ * @param dataMetaTransform additional transformation of individual data meta.
+ * @param action process individual data asynchronously.
  */
 @DFExperimental
 public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.pipeFrom(
     selector: DataSelector<T>,
-    selectorMeta: Meta = taskMeta,
-    dataMetaTransform: MutableMeta.() -> Unit = {},
+    dependencyMeta: Meta = defaultDependencyMeta,
+    dataMetaTransform: MutableMeta.(name: Name) -> Unit = {},
     crossinline action: suspend (arg: T, name: Name, meta: Meta) -> R,
 ) {
-    from(selector, selectorMeta).forEach { data ->
+    from(selector, dependencyMeta).forEach { data ->
         val meta = data.meta.toMutableMeta().apply {
-            taskName put taskMeta
-            dataMetaTransform()
+            taskMeta[taskName]?.let {  taskName.put(it) }
+            dataMetaTransform(data.name)
         }
 
         val res = data.map(workspace.context.coroutineContext, meta) {

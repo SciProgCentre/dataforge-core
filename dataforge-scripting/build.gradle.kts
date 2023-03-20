@@ -4,7 +4,6 @@ plugins {
 
 kscience{
     jvm()
-    js()
     dependencies {
         api(projects.dataforgeWorkspace)
         implementation(kotlin("scripting-common"))

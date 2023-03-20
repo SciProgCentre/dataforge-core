@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 ### Added
+- File cache for workspace
+- Smart task metadata transformation for workspace
 - Add `readOnly` property to descriptors
 - Add `specOrNull` delegate to meta and Scheme
 - Suspended read methods to the `Binary`
@@ -9,11 +11,13 @@
 - More fine-grained types in Action builders.
 
 ### Changed
+- `PluginFactory` no longer requires plugin class
+- Collection<Named> toMap -> associateByName
 - Simplified `DFTL` envelope format. Closing symbols are unnecessary. Properties are discontinued.
 - Meta `get` method allows nullable receiver
 - `withDefault` functions do not add new keys to meta children and are consistent.
 - `dataforge.meta.values` package is merged into `dataforge.meta` for better star imports
-- Kotlin 1.7.20
+- Kotlin 1.8.20
 - `Factory` is now `fun interface` and uses `build` instead of `invoke`. `invoke moved to an extension.
 - KTor 2.0
 - DataTree `items` call is blocking.

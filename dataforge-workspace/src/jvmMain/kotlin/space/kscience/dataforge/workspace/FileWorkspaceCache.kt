@@ -1,5 +1,15 @@
 package space.kscience.dataforge.workspace
 
+import io.ktor.utils.io.core.Input
+import io.ktor.utils.io.core.Output
+import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.core.writeFully
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.protobuf.ProtoBuf
+import kotlinx.serialization.serializer
+import space.kscience.dataforge.context.error
+import space.kscience.dataforge.context.logger
 import space.kscience.dataforge.context.request
 import space.kscience.dataforge.data.Data
 import space.kscience.dataforge.data.await
@@ -14,9 +24,32 @@ import kotlin.io.path.div
 import kotlin.io.path.exists
 import kotlin.reflect.KType
 
+public class JsonIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
+
+    private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
+
+    override fun readObject(input: Input): T = Json.decodeFromString(serializer, input.readUtf8String())
+
+    override fun writeObject(output: Output, obj: T) {
+        output.writeUtf8String(Json.encodeToString(serializer, obj))
+    }
+}
+
+public class ProtobufIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
+
+    private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
+
+    override fun readObject(input: Input): T = ProtoBuf.decodeFromByteArray(serializer, input.readBytes())
+
+    override fun writeObject(output: Output, obj: T) {
+        output.writeFully(ProtoBuf.encodeToByteArray(serializer, obj))
+    }
+}
+
+
 public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCache {
 
-    private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> = this as TaskData<T>
+//    private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> = this as TaskData<T>
 
 
     @OptIn(DFExperimental::class, DFInternal::class)
@@ -24,23 +57,24 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
         val io = result.workspace.context.request(IOPlugin)
 
         val format: IOFormat<T> = io.resolveIOFormat(result.dataType, result.taskMeta)
+            ?: ProtobufIOFormat(result.dataType)
             ?: error("Can't resolve IOFormat for ${result.dataType}")
 
-        fun cachedDataPath(dataName: Name): Path = cacheDirectory /
-                result.taskName.withIndex(result.taskMeta.hashCode().toString(16)).toString() /
-                dataName.toString()
-
         fun evaluateDatum(data: TaskData<T>): TaskData<T> {
-            val path = cachedDataPath(data.name)
+
+            val path = cacheDirectory /
+                    result.taskName.withIndex(result.taskMeta.hashCode().toString(16)).toString() /
+                    data.name.toString()
+
             val datum: Data<T> = Data<T>(data.type, meta = data.meta, dependencies = data.dependencies) {
                 // return cached data if it is present
                 if (path.exists()) {
                     try {
                         val envelope: Envelope = io.readEnvelopeFile(path)
                         if (envelope.meta != data.meta) error("Wrong metadata in cached result file")
-                        return@Data envelope.data?.readWith(format)
-                            ?: error("Can't convert envelope without data to Data")
+                        return@Data (envelope.data ?: Binary.EMPTY).readWith(format)
                     } catch (ex: Exception) {
+                        result.workspace.logger.error { "Failed to read data from cache: ${ex.localizedMessage}" }
                         //cleanup cache file
                         path.deleteIfExists()
                     }
@@ -63,9 +97,11 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
 
         return object : TaskResult<T> by result {
             override fun iterator(): Iterator<TaskData<T>> =
-                iterator().asSequence().map { evaluateDatum(it) }.iterator()
+                result.iterator().asSequence().map { evaluateDatum(it) }.iterator()
 
             override fun get(name: Name): TaskData<T>? = result[name]?.let { evaluateDatum(it) }
         }
     }
 }
+
+public fun WorkspaceBuilder.fileCache(cacheDir: Path): Unit = cache(FileWorkspaceCache(cacheDir))

@@ -1,7 +1,7 @@
 rootProject.name = "dataforge-core"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-enableFeaturePreview("VERSION_CATALOGS")
+//enableFeaturePreview("VERSION_CATALOGS")
 
 pluginManagement {
 

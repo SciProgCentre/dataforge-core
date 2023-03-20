@@ -7,10 +7,7 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
 
 
-/**
- * A simple workspace without caching
- */
-public class WorkspaceBase internal constructor(
+internal class WorkspaceImpl internal constructor(
     override val context: Context,
     data: DataSet<*>,
     override val targets: Map<String, Meta>,

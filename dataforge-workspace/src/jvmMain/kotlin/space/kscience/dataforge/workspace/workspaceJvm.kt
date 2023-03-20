@@ -15,7 +15,7 @@ import space.kscience.dataforge.names.matches
  * Select the whole data set from the workspace filtered by type.
  */
 @OptIn(DFExperimental::class)
-public inline fun <reified T : Any> TaskResultBuilder<*>.data(namePattern: Name? = null): DataSelector<T> =
+public inline fun <reified T : Any> TaskResultBuilder<*>.dataByType(namePattern: Name? = null): DataSelector<T> =
     object : DataSelector<T> {
         override suspend fun select(workspace: Workspace, meta: Meta): DataSet<T> =
             workspace.data.filterByType { name, _ ->

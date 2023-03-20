@@ -9,6 +9,7 @@ kscience {
     js()
     native()
     useCoroutines()
+    useSerialization()
     dependencies {
         api(project(":dataforge-meta"))
     }

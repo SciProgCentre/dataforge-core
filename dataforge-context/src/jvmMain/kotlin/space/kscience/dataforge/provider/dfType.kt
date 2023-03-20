@@ -1,8 +1,10 @@
 package space.kscience.dataforge.provider
 
 import space.kscience.dataforge.context.Context
+import space.kscience.dataforge.context.PluginBuilder
 import space.kscience.dataforge.context.gather
 import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KClass
@@ -35,3 +37,13 @@ public inline fun <reified T : Any> Provider.top(): Map<Name, T> {
 public inline fun <reified T : Any> Context.gather(inherit: Boolean = true): Map<Name, T> =
     gather<T>(T::class.dfType, inherit)
 
+
+@DFExperimental
+public inline fun <reified T : Any> PluginBuilder.provides(items: Map<Name, T>) {
+    provides(T::class.dfType, items)
+}
+
+@DFExperimental
+public inline fun <reified T : Any> PluginBuilder.provides(vararg items: Named) {
+    provides(T::class.dfType, *items)
+}

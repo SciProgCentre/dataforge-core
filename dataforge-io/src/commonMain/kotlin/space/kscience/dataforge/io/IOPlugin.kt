@@ -9,7 +9,6 @@ import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
-import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -54,8 +53,8 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
     }
 
     override fun content(target: String): Map<Name, Any> = when (target) {
-        META_FORMAT_TYPE -> defaultMetaFormats.toMap()
-        ENVELOPE_FORMAT_TYPE -> defaultEnvelopeFormats.toMap()
+        META_FORMAT_TYPE -> defaultMetaFormats.associateByName()
+        ENVELOPE_FORMAT_TYPE -> defaultEnvelopeFormats.associateByName()
         IO_FORMAT_TYPE -> content(META_FORMAT_TYPE) + content(ENVELOPE_FORMAT_TYPE)
         else -> super.content(target)
     }
@@ -69,7 +68,6 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
 
         override val tag: PluginTag = PluginTag("io", group = PluginTag.DATAFORGE_GROUP)
 
-        override val type: KClass<out IOPlugin> = IOPlugin::class
         override fun build(context: Context, meta: Meta): IOPlugin = IOPlugin(meta)
 
         public val WORK_DIRECTORY_KEY: Name = Name.of("io", "workDirectory")

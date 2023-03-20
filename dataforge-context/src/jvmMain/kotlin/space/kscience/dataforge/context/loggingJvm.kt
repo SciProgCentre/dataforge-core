@@ -3,7 +3,6 @@ package space.kscience.dataforge.context
 import org.slf4j.LoggerFactory
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
-import kotlin.reflect.KClass
 
 public class SlfLogManager : AbstractPlugin(), LogManager {
 
@@ -27,7 +26,6 @@ public class SlfLogManager : AbstractPlugin(), LogManager {
         override fun build(context: Context, meta: Meta): SlfLogManager = SlfLogManager()
 
         override val tag: PluginTag = PluginTag(group = PluginTag.DATAFORGE_GROUP, name = "log.kotlinLogging")
-        override val type: KClass<out SlfLogManager> = SlfLogManager::class
     }
 }
 

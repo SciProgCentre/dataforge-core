@@ -4,7 +4,6 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.plus
-import kotlin.reflect.KClass
 
 public fun interface Logger {
     public fun log(tag: String, body: () -> String)
@@ -66,7 +65,6 @@ public class DefaultLogManager : AbstractPlugin(), LogManager {
         override fun build(context: Context, meta: Meta): DefaultLogManager = DefaultLogManager()
 
         override val tag: PluginTag = PluginTag(group = PluginTag.DATAFORGE_GROUP, name = "log.default")
-        override val type: KClass<out DefaultLogManager> = DefaultLogManager::class
     }
 }
 

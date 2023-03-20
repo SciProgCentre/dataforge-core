@@ -8,10 +8,8 @@ import space.kscience.dataforge.io.EnvelopeFormatFactory
 import space.kscience.dataforge.io.IOPlugin
 import space.kscience.dataforge.io.MetaFormatFactory
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
-import kotlin.reflect.KClass
 
 public class YamlPlugin(meta: Meta) : AbstractPlugin(meta) {
     public val io: IOPlugin by require(IOPlugin)
@@ -27,7 +25,6 @@ public class YamlPlugin(meta: Meta) : AbstractPlugin(meta) {
     public companion object : PluginFactory<YamlPlugin> {
         override val tag: PluginTag = PluginTag("io.yaml", group = PluginTag.DATAFORGE_GROUP)
 
-        override val type: KClass<out YamlPlugin> = YamlPlugin::class
         override fun build(context: Context, meta: Meta): YamlPlugin = YamlPlugin(meta)
     }
 }

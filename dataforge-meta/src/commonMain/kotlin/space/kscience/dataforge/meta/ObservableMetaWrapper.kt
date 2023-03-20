@@ -1,8 +1,8 @@
 package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
-import kotlin.jvm.Synchronized
 
 /**
  * A class that takes [MutableMeta] provider and adds obsevability on top of that
@@ -10,7 +10,7 @@ import kotlin.jvm.Synchronized
 private class ObservableMetaWrapper(
     val root: MutableMeta,
     val absoluteName: Name,
-    val listeners: MutableSet<MetaListener>
+    val listeners: MutableSet<MetaListener>,
 ) : ObservableMutableMeta {
     override val items: Map<NameToken, ObservableMutableMeta>
         get() = root.items.keys.associateWith {
@@ -20,7 +20,7 @@ private class ObservableMetaWrapper(
     override fun getMeta(name: Name): ObservableMutableMeta? =
         root.getMeta(name)?.let { ObservableMetaWrapper(root, this.absoluteName + name, listeners) }
 
-    @Synchronized
+    @ThreadSafe
     override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
         listeners.add(
             MetaListener(Pair(owner, absoluteName)) { name ->

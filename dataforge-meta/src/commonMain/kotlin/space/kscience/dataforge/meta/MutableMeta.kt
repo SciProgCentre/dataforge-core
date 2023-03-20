@@ -2,9 +2,9 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
 import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
 import kotlin.js.JsName
-import kotlin.jvm.Synchronized
 
 
 /**
@@ -248,10 +248,10 @@ private fun ObservableMeta.adoptBy(parent: MutableMetaImpl, key: NameToken) {
  */
 private class MutableMetaImpl(
     value: Value?,
-    children: Map<NameToken, Meta> = emptyMap()
+    children: Map<NameToken, Meta> = emptyMap(),
 ) : AbstractObservableMeta(), ObservableMutableMeta {
     override var value = value
-        @Synchronized set(value) {
+        @ThreadSafe set(value) {
             val oldValue = field
             field = value
             if (oldValue != value) {
@@ -292,11 +292,11 @@ private class MutableMetaImpl(
     override fun getOrCreate(name: Name): ObservableMutableMeta =
         if (name.isEmpty()) this else get(name) ?: createNode(name)
 
-    @Synchronized
+    @ThreadSafe
     private fun replaceItem(
         key: NameToken,
         oldItem: ObservableMutableMeta?,
-        newItem: ObservableMutableMeta?
+        newItem: ObservableMutableMeta?,
     ) {
         if (oldItem != newItem) {
             if (newItem == null) {
@@ -318,7 +318,7 @@ private class MutableMetaImpl(
             }
         )
 
-    @Synchronized
+    @ThreadSafe
     override fun setMeta(name: Name, node: Meta?) {
         val oldItem: ObservableMutableMeta? = get(name)
         if (oldItem != node) {
@@ -337,6 +337,7 @@ private class MutableMetaImpl(
                         children[token] = newNode
                     }
                 }
+
                 else -> {
                     val token = name.firstOrNull()!!
                     //get existing or create new node.
@@ -401,7 +402,7 @@ public inline fun Meta.copy(block: MutableMeta.() -> Unit = {}): Meta =
 
 
 private class MutableMetaWithDefault(
-    val source: MutableMeta, val default: MetaProvider, val rootName: Name
+    val source: MutableMeta, val default: MetaProvider, val rootName: Name,
 ) : MutableMeta by source {
     override val items: Map<NameToken, MutableMeta>
         get() {

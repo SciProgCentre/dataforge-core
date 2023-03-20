@@ -1,6 +1,7 @@
 package space.kscience.dataforge.context
 
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
 import kotlin.properties.ReadOnlyProperty
@@ -24,25 +25,33 @@ public abstract class AbstractPlugin(override val meta: Meta = Meta.EMPTY) : Plu
         this._context = null
     }
 
-    final override fun dependsOn(): Map<PluginFactory<*>, Meta> = dependencies
+    override fun dependsOn(): Map<PluginFactory<*>, Meta> = dependencies
+
+    protected fun <P : Plugin> require(
+        factory: PluginFactory<P>,
+        type: KClass<P>,
+        meta: Meta = Meta.EMPTY,
+    ): ReadOnlyProperty<AbstractPlugin, P> {
+        dependencies[factory] = meta
+        return PluginDependencyDelegate(factory, type)
+    }
 
     /**
      * Register plugin dependency and return a delegate which provides lazily initialized reference to dependent plugin
      */
-    protected fun <P : Plugin> require(
+    protected inline fun <reified P : Plugin> require(
         factory: PluginFactory<P>,
         meta: Meta = Meta.EMPTY,
-    ): ReadOnlyProperty<AbstractPlugin, P> {
-        dependencies[factory] = meta
-        return PluginDependencyDelegate(factory.type)
-    }
+    ): ReadOnlyProperty<AbstractPlugin, P> = require(factory, P::class, meta)
 }
 
-public fun <T : Named> Collection<T>.toMap(): Map<Name, T> = associate { it.name to it }
+public fun <T : Named> Collection<T>.associateByName(): Map<Name, T> = associate { it.name to it }
 
-private class PluginDependencyDelegate<P : Plugin>(val type: KClass<out P>) : ReadOnlyProperty<AbstractPlugin, P> {
+private class PluginDependencyDelegate<P : Plugin>(val factory: PluginFactory<P>, val type: KClass<P>) :
+    ReadOnlyProperty<AbstractPlugin, P> {
+    @OptIn(DFInternal::class)
     override fun getValue(thisRef: AbstractPlugin, property: KProperty<*>): P {
         if (!thisRef.isAttached) error("Plugin dependency must not be called eagerly during initialization.")
-        return thisRef.context.plugins[type] ?: error("Plugin with type $type not found")
+        return thisRef.context.plugins.getByType(type, factory.tag) ?: error("Plugin ${factory.tag} not found")
     }
 }
