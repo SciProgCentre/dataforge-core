@@ -4,6 +4,7 @@ import io.ktor.utils.io.core.Input
 import io.ktor.utils.io.core.Output
 import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.core.writeFully
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
@@ -26,6 +27,7 @@ import kotlin.reflect.KType
 
 public class JsonIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
 
+    @Suppress("UNCHECKED_CAST")
     private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
 
     override fun readObject(input: Input): T = Json.decodeFromString(serializer, input.readUtf8String())
@@ -35,8 +37,10 @@ public class JsonIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 public class ProtobufIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
 
+    @Suppress("UNCHECKED_CAST")
     private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
 
     override fun readObject(input: Input): T = ProtoBuf.decodeFromByteArray(serializer, input.readBytes())
@@ -49,8 +53,7 @@ public class ProtobufIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
 
 public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCache {
 
-//    private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> = this as TaskData<T>
-
+    //    private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> = this as TaskData<T>
 
     @OptIn(DFExperimental::class, DFInternal::class)
     override suspend fun <T : Any> evaluate(result: TaskResult<T>): TaskResult<T> {

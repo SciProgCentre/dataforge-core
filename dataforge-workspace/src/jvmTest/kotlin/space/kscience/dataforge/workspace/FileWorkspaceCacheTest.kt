@@ -22,7 +22,8 @@ class FileWorkspaceCacheTest {
             }
             fileCache(Files.createTempDirectory("dataforge-temporary-cache"))
 
-            task<String> {
+            @Suppress("UNUSED_VARIABLE")
+            val echo by task<String> {
                 pipeFrom(dataByType<String>()) { arg, _, _ -> arg }
             }
         }

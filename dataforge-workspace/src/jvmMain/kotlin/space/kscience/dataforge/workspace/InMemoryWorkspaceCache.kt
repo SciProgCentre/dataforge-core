@@ -3,6 +3,7 @@ package space.kscience.dataforge.workspace
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KType
+import kotlin.reflect.full.isSubtypeOf
 
 private typealias TaskResultId = Pair<Name, Meta>
 
@@ -12,9 +13,10 @@ public class InMemoryWorkspaceCache : WorkspaceCache {
     // never do that at home!
     private val cache = HashMap<TaskResultId, HashMap<Name, TaskData<*>>>()
 
-    //TODO do actual check
-    @Suppress("UNUSED_PARAMETER")
-    private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> = this as TaskData<T>
+    @Suppress("UNCHECKED_CAST")
+    private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> =
+        if (type.isSubtypeOf(taskType)) this as TaskData<T>
+        else error("Cached data type mismatch: expected $taskType but got $type")
 
     override suspend fun <T : Any> evaluate(result: TaskResult<T>): TaskResult<T> {
         for (d: TaskData<T> in result) {
