@@ -68,8 +68,9 @@ public class FrontMatterEnvelopeFormat(
         }
 
         override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? = binary.read {
-            val line = readSafeUtf8Line()
-            return@read if (line.startsWith("---")) {
+            //read raw string to avoid UTF issues
+            val line = readRawString(3)
+            return@read if (line == "---") {
                 default
             } else {
                 null

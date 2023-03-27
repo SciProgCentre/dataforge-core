@@ -11,6 +11,7 @@
 - More fine-grained types in Action builders.
 
 ### Changed
+- `Name::replaceLast` API
 - `PluginFactory` no longer requires plugin class
 - Collection<Named> toMap -> associateByName
 - Simplified `DFTL` envelope format. Closing symbols are unnecessary. Properties are discontinued.
@@ -36,6 +37,8 @@
 ### Removed
 
 ### Fixed
+- `readDataDirectory` does not split names with dots
+- Front matter reader does not crash on non-UTF files
 - Meta file name in readMeta from directory
 - Tagless and FrontMatter envelope partial readers fix.
 

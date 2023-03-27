@@ -144,6 +144,15 @@ public fun Name.firstOrNull(): NameToken? = tokens.firstOrNull()
  */
 public fun Name.first(): NameToken = tokens.first()
 
+/**
+ * Return a [Name] with its last token replaced via [replacement] rule.
+ * If initial [Name] is empty, return empty name.
+ */
+public fun Name.replaceLast(replacement: (NameToken) -> NameToken): Name {
+    if (isEmpty()) return Name.EMPTY
+    return cutLast() + replacement(lastOrNull()!!)
+}
+
 
 /**
  * Convert the [String] to a [Name] by simply wrapping it in a single name token without parsing.
@@ -226,7 +235,6 @@ public fun Name.removeFirstOrNull(first: Name): Name? = if (startsWith(first)) {
 } else {
     null
 }
-
 
 @ThreadLocal
 private val nameCache = HashMap<String, Name>()

@@ -107,7 +107,7 @@ public fun <T : Any> DataSet<T>.startAll(coroutineScope: CoroutineScope): Job = 
     }.joinAll()
 }
 
-public suspend fun <T : Any> DataSet<T>.join(): Unit = coroutineScope { startAll(this).join() }
+public suspend fun <T : Any> DataSet<T>.computeAndJoinAll(): Unit = coroutineScope { startAll(this).join() }
 
 public fun DataSet<*>.toMeta(): Meta = Meta {
     forEach {

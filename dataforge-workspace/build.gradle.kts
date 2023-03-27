@@ -17,6 +17,7 @@ kscience{
     }
     dependencies(jvmTest){
         implementation(spclibs.logback.classic)
+        implementation(projects.dataforgeIo.dataforgeIoYaml)
     }
 }
 

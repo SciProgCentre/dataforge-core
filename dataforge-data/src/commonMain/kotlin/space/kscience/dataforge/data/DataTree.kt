@@ -1,6 +1,7 @@
 package space.kscience.dataforge.data
 
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.*
 import kotlin.collections.component1
@@ -65,11 +66,16 @@ public interface DataTree<out T : Any> : DataSet<T> {
          */
         public val META_ITEM_NAME_TOKEN: NameToken = NameToken("@meta")
 
-        public inline fun <reified T : Any> empty(meta: Meta = Meta.EMPTY): DataTree<T> = object : DataTree<T> {
+        @DFInternal
+        public fun <T : Any> emptyWithType(type: KType, meta: Meta = Meta.EMPTY): DataTree<T> = object : DataTree<T> {
             override val items: Map<NameToken, DataTreeItem<T>> get() = emptyMap()
-            override val dataType: KType get() = typeOf<T>()
+            override val dataType: KType get() = type
             override val meta: Meta get() = meta
         }
+
+        @OptIn(DFInternal::class)
+        public inline fun <reified T : Any> empty(meta: Meta = Meta.EMPTY): DataTree<T> =
+            emptyWithType<T>(typeOf<T>(), meta)
     }
 }
 
@@ -106,12 +112,8 @@ public fun <T : Any> DataTree<T>.traverseItems(): Sequence<Pair<Name, DataTreeIt
  * Get a branch of this [DataTree] with a given [branchName].
  * The difference from similar method for [DataSet] is that internal logic is more simple and the return value is a [DataTree]
  */
-public fun <T : Any> DataTree<T>.branch(branchName: Name): DataTree<T> = object : DataTree<T> {
-    override val dataType: KType get() = this@branch.dataType
+@OptIn(DFInternal::class)
+public fun <T : Any> DataTree<T>.branch(branchName: Name): DataTree<T> =
+    getItem(branchName)?.tree ?: DataTree.emptyWithType(dataType)
 
-    override val meta: Meta
-        get() = getItem(branchName)?.meta ?: Meta.EMPTY
-
-    override val items: Map<NameToken, DataTreeItem<T>>
-        get() = getItem(branchName).tree?.items ?: emptyMap()
-}
+public fun <T : Any> DataTree<T>.branch(branchName: String): DataTree<T> = branch(branchName.parseAsName())

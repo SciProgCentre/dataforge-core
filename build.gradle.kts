@@ -9,7 +9,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.6.1-dev-5"
+    version = "0.6.1-dev-6"
 }
 
 subprojects {
