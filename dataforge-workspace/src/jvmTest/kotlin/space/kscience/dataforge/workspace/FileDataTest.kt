@@ -70,6 +70,7 @@ class FileDataTest {
         }
     }
 
+    @OptIn(DFExperimental::class)
     @Test
     fun testNonEnvelope() {
         val context = Context {

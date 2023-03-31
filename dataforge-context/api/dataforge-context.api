@@ -3,16 +3,17 @@ public abstract class space/kscience/dataforge/context/AbstractPlugin : space/ks
 	public fun <init> (Lspace/kscience/dataforge/meta/Meta;)V
 	public synthetic fun <init> (Lspace/kscience/dataforge/meta/Meta;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun attach (Lspace/kscience/dataforge/context/Context;)V
-	public final fun dependsOn ()Ljava/util/Map;
+	public fun dependsOn ()Ljava/util/Map;
 	public fun detach ()V
 	public fun getContext ()Lspace/kscience/dataforge/context/Context;
 	public fun getMeta ()Lspace/kscience/dataforge/meta/Meta;
-	protected final fun require (Lspace/kscience/dataforge/context/PluginFactory;Lspace/kscience/dataforge/meta/Meta;)Lkotlin/properties/ReadOnlyProperty;
-	public static synthetic fun require$default (Lspace/kscience/dataforge/context/AbstractPlugin;Lspace/kscience/dataforge/context/PluginFactory;Lspace/kscience/dataforge/meta/Meta;ILjava/lang/Object;)Lkotlin/properties/ReadOnlyProperty;
+	public fun isAttached ()Z
+	protected final fun require (Lspace/kscience/dataforge/context/PluginFactory;Lkotlin/reflect/KClass;Lspace/kscience/dataforge/meta/Meta;)Lkotlin/properties/ReadOnlyProperty;
+	public static synthetic fun require$default (Lspace/kscience/dataforge/context/AbstractPlugin;Lspace/kscience/dataforge/context/PluginFactory;Lkotlin/reflect/KClass;Lspace/kscience/dataforge/meta/Meta;ILjava/lang/Object;)Lkotlin/properties/ReadOnlyProperty;
 }
 
 public final class space/kscience/dataforge/context/AbstractPluginKt {
-	public static final fun toMap (Ljava/util/Collection;)Ljava/util/Map;
+	public static final fun associateByName (Ljava/util/Collection;)Ljava/util/Map;
 }
 
 public final class space/kscience/dataforge/context/ClassLoaderPlugin : space/kscience/dataforge/context/AbstractPlugin {
@@ -80,14 +81,17 @@ public final class space/kscience/dataforge/context/DefaultLogManager : space/ks
 }
 
 public final class space/kscience/dataforge/context/DefaultLogManager$Companion : space/kscience/dataforge/context/PluginFactory {
+	public synthetic fun build (Lspace/kscience/dataforge/context/Context;Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Object;
+	public fun build (Lspace/kscience/dataforge/context/Context;Lspace/kscience/dataforge/meta/Meta;)Lspace/kscience/dataforge/context/DefaultLogManager;
 	public fun getTag ()Lspace/kscience/dataforge/context/PluginTag;
-	public fun getType ()Lkotlin/reflect/KClass;
-	public synthetic fun invoke (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/context/Context;)Ljava/lang/Object;
-	public fun invoke (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/context/Context;)Lspace/kscience/dataforge/context/DefaultLogManager;
 }
 
 public abstract interface class space/kscience/dataforge/context/Factory {
-	public abstract fun invoke (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/context/Context;)Ljava/lang/Object;
+	public abstract fun build (Lspace/kscience/dataforge/context/Context;Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Object;
+}
+
+public final class space/kscience/dataforge/context/FactoryKt {
+	public static final fun invoke (Lspace/kscience/dataforge/context/Factory;Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/context/Context;)Ljava/lang/Object;
 	public static synthetic fun invoke$default (Lspace/kscience/dataforge/context/Factory;Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/context/Context;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
@@ -142,6 +146,7 @@ public abstract interface class space/kscience/dataforge/context/Plugin : space/
 	public abstract fun getMeta ()Lspace/kscience/dataforge/meta/Meta;
 	public fun getName ()Lspace/kscience/dataforge/names/Name;
 	public abstract fun getTag ()Lspace/kscience/dataforge/context/PluginTag;
+	public abstract fun isAttached ()Z
 	public fun toMeta ()Lspace/kscience/dataforge/meta/Meta;
 }
 
@@ -149,11 +154,26 @@ public final class space/kscience/dataforge/context/Plugin$Companion {
 	public static final field TARGET Ljava/lang/String;
 }
 
+public final class space/kscience/dataforge/context/PluginBuilder {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build ()Lspace/kscience/dataforge/context/PluginFactory;
+	public final fun getTag ()Lspace/kscience/dataforge/context/PluginTag;
+	public final fun provides (Ljava/lang/String;Ljava/util/Map;)V
+	public final fun provides (Ljava/lang/String;[Lspace/kscience/dataforge/misc/Named;)V
+	public final fun requires (Lspace/kscience/dataforge/context/PluginFactory;Lspace/kscience/dataforge/meta/Meta;)V
+	public static synthetic fun requires$default (Lspace/kscience/dataforge/context/PluginBuilder;Lspace/kscience/dataforge/context/PluginFactory;Lspace/kscience/dataforge/meta/Meta;ILjava/lang/Object;)V
+}
+
+public final class space/kscience/dataforge/context/PluginBuilderKt {
+	public static final fun PluginFactory (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/PluginFactory;
+	public static synthetic fun PluginFactory$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/context/PluginFactory;
+}
+
 public abstract interface class space/kscience/dataforge/context/PluginFactory : space/kscience/dataforge/context/Factory {
 	public static final field Companion Lspace/kscience/dataforge/context/PluginFactory$Companion;
 	public static final field TYPE Ljava/lang/String;
 	public abstract fun getTag ()Lspace/kscience/dataforge/context/PluginTag;
-	public abstract fun getType ()Lkotlin/reflect/KClass;
 }
 
 public final class space/kscience/dataforge/context/PluginFactory$Companion {
@@ -163,10 +183,10 @@ public final class space/kscience/dataforge/context/PluginFactory$Companion {
 public final class space/kscience/dataforge/context/PluginManager : java/lang/Iterable, kotlin/jvm/internal/markers/KMappedMarker, space/kscience/dataforge/context/ContextAware {
 	public final fun find (ZLkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/context/Plugin;
 	public static synthetic fun find$default (Lspace/kscience/dataforge/context/PluginManager;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/context/Plugin;
-	public final fun get (Lkotlin/reflect/KClass;Lspace/kscience/dataforge/context/PluginTag;Z)Ljava/lang/Object;
 	public final fun get (Lspace/kscience/dataforge/context/PluginTag;Z)Lspace/kscience/dataforge/context/Plugin;
-	public static synthetic fun get$default (Lspace/kscience/dataforge/context/PluginManager;Lkotlin/reflect/KClass;Lspace/kscience/dataforge/context/PluginTag;ZILjava/lang/Object;)Ljava/lang/Object;
 	public static synthetic fun get$default (Lspace/kscience/dataforge/context/PluginManager;Lspace/kscience/dataforge/context/PluginTag;ZILjava/lang/Object;)Lspace/kscience/dataforge/context/Plugin;
+	public final fun getByType (Lkotlin/reflect/KClass;Lspace/kscience/dataforge/context/PluginTag;Z)Ljava/lang/Object;
+	public static synthetic fun getByType$default (Lspace/kscience/dataforge/context/PluginManager;Lkotlin/reflect/KClass;Lspace/kscience/dataforge/context/PluginTag;ZILjava/lang/Object;)Ljava/lang/Object;
 	public fun getContext ()Lspace/kscience/dataforge/context/Context;
 	public fun iterator ()Ljava/util/Iterator;
 	public final fun list (Z)Ljava/util/Collection;
@@ -175,6 +195,7 @@ public final class space/kscience/dataforge/context/PluginManager : java/lang/It
 public final class space/kscience/dataforge/context/PluginTag : space/kscience/dataforge/meta/MetaRepr {
 	public static final field Companion Lspace/kscience/dataforge/context/PluginTag$Companion;
 	public static final field DATAFORGE_GROUP Ljava/lang/String;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -190,16 +211,28 @@ public final class space/kscience/dataforge/context/PluginTag : space/kscience/d
 	public final fun matches (Lspace/kscience/dataforge/context/PluginTag;)Z
 	public fun toMeta ()Lspace/kscience/dataforge/meta/Meta;
 	public fun toString ()Ljava/lang/String;
+	public static final synthetic fun write$Self (Lspace/kscience/dataforge/context/PluginTag;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class space/kscience/dataforge/context/PluginTag$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lspace/kscience/dataforge/context/PluginTag$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lspace/kscience/dataforge/context/PluginTag;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lspace/kscience/dataforge/context/PluginTag;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class space/kscience/dataforge/context/PluginTag$Companion {
 	public final fun fromString (Ljava/lang/String;)Lspace/kscience/dataforge/context/PluginTag;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class space/kscience/dataforge/context/ResolveKt {
 	public static final fun gather (Lspace/kscience/dataforge/context/Context;Ljava/lang/String;Lkotlin/reflect/KClass;Z)Ljava/util/Map;
 	public static synthetic fun gather$default (Lspace/kscience/dataforge/context/Context;Ljava/lang/String;Lkotlin/reflect/KClass;ZILjava/lang/Object;)Ljava/util/Map;
-	public static synthetic fun gatherInSequence$default (Lspace/kscience/dataforge/context/Context;Ljava/lang/String;Lkotlin/reflect/KClass;ZILjava/lang/Object;)Lkotlin/sequences/Sequence;
 	public static final fun getValues (Lkotlin/sequences/Sequence;)Lkotlin/sequences/Sequence;
 	public static final fun resolve (Lspace/kscience/dataforge/context/Context;Ljava/lang/String;Lspace/kscience/dataforge/names/Name;Lkotlin/reflect/KClass;)Ljava/lang/Object;
 }
@@ -213,10 +246,9 @@ public final class space/kscience/dataforge/context/SlfLogManager : space/kscien
 }
 
 public final class space/kscience/dataforge/context/SlfLogManager$Companion : space/kscience/dataforge/context/PluginFactory {
+	public synthetic fun build (Lspace/kscience/dataforge/context/Context;Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Object;
+	public fun build (Lspace/kscience/dataforge/context/Context;Lspace/kscience/dataforge/meta/Meta;)Lspace/kscience/dataforge/context/SlfLogManager;
 	public fun getTag ()Lspace/kscience/dataforge/context/PluginTag;
-	public fun getType ()Lkotlin/reflect/KClass;
-	public synthetic fun invoke (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/context/Context;)Ljava/lang/Object;
-	public fun invoke (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/context/Context;)Lspace/kscience/dataforge/context/SlfLogManager;
 }
 
 public final class space/kscience/dataforge/properties/PropertyKt {
@@ -226,7 +258,6 @@ public final class space/kscience/dataforge/properties/SchemePropertyKt {
 }
 
 public final class space/kscience/dataforge/provider/DfTypeKt {
-	public static final fun getDfType (Lkotlin/reflect/KClass;)Ljava/lang/String;
 }
 
 public final class space/kscience/dataforge/provider/Path : java/lang/Iterable, kotlin/jvm/internal/markers/KMappedMarker {
@@ -280,7 +311,8 @@ public final class space/kscience/dataforge/provider/PathToken {
 }
 
 public final class space/kscience/dataforge/provider/PathToken$Companion {
-	public final fun parse (Ljava/lang/String;)Lspace/kscience/dataforge/provider/PathToken;
+	public final fun parse (Ljava/lang/String;Z)Lspace/kscience/dataforge/provider/PathToken;
+	public static synthetic fun parse$default (Lspace/kscience/dataforge/provider/PathToken$Companion;Ljava/lang/String;ZILjava/lang/Object;)Lspace/kscience/dataforge/provider/PathToken;
 }
 
 public abstract interface class space/kscience/dataforge/provider/Provider {
