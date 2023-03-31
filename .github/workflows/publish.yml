@@ -9,6 +9,8 @@ jobs:
   publish:
     environment:
       name: publish
+    env:
+      publishing.github: false
     strategy:
       matrix:
         os: [ macOS-latest, windows-latest ]
@@ -48,6 +50,6 @@ jobs:
       - name: Publish Mac Artifacts
         if: matrix.os == 'macOS-latest'
         run: >
-          ./gradlew release --no-daemon --build-cache -Ppublishing.enabled=true -Ppublishing.platform=macosX64
+          ./gradlew release --no-daemon --build-cache -Ppublishing.enabled=true
           -Ppublishing.space.user=${{ secrets.SPACE_APP_ID }}
           -Ppublishing.space.token=${{ secrets.SPACE_APP_SECRET }}
