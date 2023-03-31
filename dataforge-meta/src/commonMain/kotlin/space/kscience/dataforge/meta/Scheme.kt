@@ -120,7 +120,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
         @DFExperimental
         override fun attach(name: Name, node: ObservableMutableMeta) {
             //TODO implement zero-copy attachment
-            setMeta(name, meta)
+            setMeta(name, node)
             node.onChange(this) { changeName ->
                 setMeta(name + changeName, this[changeName])
             }

@@ -36,7 +36,7 @@ ksciencePublish {
         if (isInDevelopment) {
             "https://maven.pkg.jetbrains.space/spc/p/sci/dev"
         } else {
-            "https://maven.pkg.jetbrains.space/spc/p/sci/release"
+            "https://maven.pkg.jetbrains.space/spc/p/sci/maven"
         }
     )
     sonatype()
