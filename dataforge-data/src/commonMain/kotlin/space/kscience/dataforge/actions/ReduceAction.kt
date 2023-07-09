@@ -112,7 +112,6 @@ internal class ReduceAction<T : Any, R : Any>(
  * A one-to-one mapping action
  */
 @DFExperimental
-@Suppress("FunctionName")
 public inline fun <reified T : Any, reified R : Any> Action.Companion.reduce(
     noinline builder: ReduceGroupBuilder<T, R>.() -> Unit,
 ): Action<T, R> = ReduceAction(typeOf<R>(), builder)
