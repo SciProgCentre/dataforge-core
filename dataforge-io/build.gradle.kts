@@ -1,22 +1,24 @@
-import space.kscience.gradle.KScienceVersions
-
 plugins {
     id("space.kscience.gradle.mpp")
 }
 
 description = "IO module"
 
+val ioVersion = "0.2.0"
+
 kscience {
     jvm()
     js()
     native()
-    useSerialization("1.4.1")
-    useSerialization("1.4.1", sourceSet = space.kscience.gradle.DependencySourceSet.TEST) {
+    useSerialization()
+    useSerialization(sourceSet = space.kscience.gradle.DependencySourceSet.TEST) {
         cbor()
     }
     dependencies {
-        api(project(":dataforge-context"))
-        api("io.ktor:ktor-io:${KScienceVersions.ktorVersion}")
+        api(projects.dataforgeContext)
+        api("org.jetbrains.kotlinx:kotlinx-io-core:$ioVersion")
+        api("org.jetbrains.kotlinx:kotlinx-io-bytestring:$ioVersion")
+        //api("io.ktor:ktor-io:${KScienceVersions.ktorVersion}")
     }
 }
 

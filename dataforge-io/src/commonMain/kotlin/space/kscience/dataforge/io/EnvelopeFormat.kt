@@ -1,6 +1,6 @@
 package space.kscience.dataforge.io
 
-import io.ktor.utils.io.core.Input
+import kotlinx.io.Source
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.io.EnvelopeFormatFactory.Companion.ENVELOPE_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
@@ -15,7 +15,7 @@ public interface EnvelopeFormat : IOFormat<Envelope> {
     override val type: KType get() = typeOf<Envelope>()
 }
 
-public fun EnvelopeFormat.read(input: Input): Envelope = readObject(input)
+public fun EnvelopeFormat.read(input: Source): Envelope = readObject(input)
 
 @Type(ENVELOPE_FORMAT_TYPE)
 public interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeFormat {

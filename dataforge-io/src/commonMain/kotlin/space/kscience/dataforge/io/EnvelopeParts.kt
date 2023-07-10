@@ -1,5 +1,8 @@
 package space.kscience.dataforge.io
 
+import kotlinx.io.bytestring.ByteString
+import kotlinx.io.bytestring.decodeToString
+import kotlinx.io.write
 import space.kscience.dataforge.io.Envelope.Companion.ENVELOPE_NODE_KEY
 import space.kscience.dataforge.io.PartDescriptor.Companion.DEFAULT_MULTIPART_DATA_SEPARATOR
 import space.kscience.dataforge.io.PartDescriptor.Companion.MULTIPART_DATA_TYPE
@@ -20,7 +23,7 @@ private class PartDescriptor : Scheme() {
         val PARTS_KEY = MULTIPART_KEY + "parts"
         val SEPARATOR_KEY = MULTIPART_KEY + "separator"
 
-        const val DEFAULT_MULTIPART_DATA_SEPARATOR = "\r\n#~PART~#\r\n"
+        val DEFAULT_MULTIPART_DATA_SEPARATOR = "\r\n#~PART~#\r\n".toACIIByteString()
 
         const val MULTIPART_DATA_TYPE = "envelope.multipart"
     }
@@ -32,12 +35,12 @@ public typealias EnvelopeParts = List<EnvelopePart>
 
 public fun EnvelopeBuilder.multipart(
     parts: EnvelopeParts,
-    separator: String = DEFAULT_MULTIPART_DATA_SEPARATOR,
+    separator: ByteString = DEFAULT_MULTIPART_DATA_SEPARATOR,
 ) {
     dataType = MULTIPART_DATA_TYPE
 
     var offsetCounter = 0
-    val separatorSize = separator.length
+    val separatorSize = separator.size
     val partDescriptors = parts.map { (binary, description) ->
         offsetCounter += separatorSize
         PartDescriptor {
@@ -51,14 +54,14 @@ public fun EnvelopeBuilder.multipart(
 
     meta {
         if (separator != DEFAULT_MULTIPART_DATA_SEPARATOR) {
-            SEPARATOR_KEY put separator
+            SEPARATOR_KEY put separator.decodeToString()
         }
         setIndexed(PARTS_KEY, partDescriptors.map { it.toMeta() })
     }
 
     data {
         parts.forEach {
-            writeRawString(separator)
+            write(separator)
             writeBinary(it.binary)
         }
     }
@@ -69,7 +72,7 @@ public fun EnvelopeBuilder.multipart(
  */
 public fun EnvelopeBuilder.envelopes(
     envelopes: List<Envelope>,
-    separator: String = DEFAULT_MULTIPART_DATA_SEPARATOR,
+    separator: ByteString = DEFAULT_MULTIPART_DATA_SEPARATOR,
 ) {
     val parts = envelopes.map {
         val binary = Binary(it, TaggedEnvelopeFormat)
