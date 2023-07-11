@@ -1,6 +1,9 @@
 package space.kscience.dataforge.io
 
-import kotlinx.io.*
+import kotlinx.io.Sink
+import kotlinx.io.Source
+import kotlinx.io.buffered
+import kotlinx.io.readByteArray
 import kotlin.math.min
 
 /**
@@ -32,22 +35,6 @@ public interface Binary {
     }
 }
 
-public class ByteArraySource(
-    public val byteArray: ByteArray,
-    public val offset: Int,
-    public val size: Int,
-) : RawSource {
-    override fun close() {
-        // Do nothing
-    }
-
-    override fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
-        val byteRead =  min(byteCount, size.toLong())
-        sink.write(byteArray, offset, offset + byteRead.toInt())
-        return byteRead
-    }
-}
-
 internal class ByteArrayBinary(
     internal val array: ByteArray,
     internal val start: Int = 0,
@@ -58,17 +45,11 @@ internal class ByteArrayBinary(
         require(offset >= 0) { "Offset must be positive" }
         require(offset < array.size) { "Offset $offset is larger than array size" }
 
-        val input = ByteArraySource(
+        return ByteArraySource(
             array,
             offset + start,
             min(atMost, size - offset)
-        ).buffered()
-
-        return try {
-            block(input)
-        } finally {
-            input.close()
-        }
+        ).buffered().use(block)
     }
 
     override suspend fun <R> readSuspend(offset: Int, atMost: Int, block: suspend Source.() -> R): R {

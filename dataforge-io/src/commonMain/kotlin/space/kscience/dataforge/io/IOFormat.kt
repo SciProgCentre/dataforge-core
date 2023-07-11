@@ -23,7 +23,7 @@ public interface IOReader<out T> {
      */
     public val type: KType
 
-    public fun readObject(input: Source): T
+    public fun readObject(source: Source): T
 
     public fun readObject(binary: Binary): T = binary.read { readObject(this) }
 
@@ -34,7 +34,7 @@ public interface IOReader<out T> {
         public val binary: IOReader<Binary> = object : IOReader<Binary> {
             override val type: KType = typeOf<Binary>()
 
-            override fun readObject(input: Source): Binary = input.readByteArray().asBinary()
+            override fun readObject(source: Source): Binary = source.readByteArray().asBinary()
 
             override fun readObject(binary: Binary): Binary = binary
         }
@@ -44,11 +44,11 @@ public interface IOReader<out T> {
 public inline fun <reified T> IOReader(crossinline read: Source.() -> T): IOReader<T> = object : IOReader<T> {
     override val type: KType = typeOf<T>()
 
-    override fun readObject(input: Source): T = input.read()
+    override fun readObject(source: Source): T = source.read()
 }
 
 public fun interface IOWriter<in T> {
-    public fun writeObject(output: Sink, obj: T)
+    public fun writeObject(sink: Sink, obj: T)
 }
 
 /**
@@ -96,9 +96,9 @@ public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
 
     override val type: KType get() = typeOf<Double>()
 
-    override fun writeObject(output: Sink, obj: Double) {
-        output.writeLong(obj.toBits())
+    override fun writeObject(sink: Sink, obj: Double) {
+        sink.writeLong(obj.toBits())
     }
 
-    override fun readObject(input: Source): Double = Double.fromBits(input.readLong())
+    override fun readObject(source: Source): Double = Double.fromBits(source.readLong())
 }

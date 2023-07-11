@@ -1,10 +1,10 @@
-@file:Suppress("UNUSED_PARAMETER")
-
 package space.kscience.dataforge.io
 
 
-import io.ktor.utils.io.core.Input
-import io.ktor.utils.io.core.Output
+import kotlinx.io.Sink
+import kotlinx.io.Source
+import kotlinx.io.readString
+import kotlinx.io.writeString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import space.kscience.dataforge.context.Context
@@ -18,13 +18,13 @@ import space.kscience.dataforge.meta.toMeta
  */
 public class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat {
 
-    override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?) {
+    override fun writeMeta(sink: Sink, meta: Meta, descriptor: MetaDescriptor?) {
         val jsonObject = meta.toJson(descriptor)
-        output.writeUtf8String(json.encodeToString(JsonObject.serializer(), jsonObject))
+        sink.writeString(json.encodeToString(JsonObject.serializer(), jsonObject))
     }
 
-    override fun readMeta(input: Input, descriptor: MetaDescriptor?): Meta {
-        val str = input.readUtf8String()//readByteArray().decodeToString()
+    override fun readMeta(source: Source, descriptor: MetaDescriptor?): Meta {
+        val str = source.readString()
         val jsonElement = json.parseToJsonElement(str)
         return jsonElement.toMeta(descriptor)
     }
@@ -39,10 +39,10 @@ public class JsonMetaFormat(private val json: Json = DEFAULT_JSON) : MetaFormat 
 
         private val default = JsonMetaFormat()
 
-        override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?): Unit =
-            default.run { writeMeta(output, meta, descriptor) }
+        override fun writeMeta(sink: Sink, meta: Meta, descriptor: MetaDescriptor?): Unit =
+            default.run { writeMeta(sink, meta, descriptor) }
 
-        override fun readMeta(input: Input, descriptor: MetaDescriptor?): Meta =
-            default.run { readMeta(input, descriptor) }
+        override fun readMeta(source: Source, descriptor: MetaDescriptor?): Meta =
+            default.run { readMeta(source, descriptor) }
     }
 }

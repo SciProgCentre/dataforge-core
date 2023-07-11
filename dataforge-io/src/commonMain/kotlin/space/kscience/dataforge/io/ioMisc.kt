@@ -2,14 +2,17 @@ package space.kscience.dataforge.io
 
 import kotlinx.io.*
 import kotlinx.io.bytestring.ByteString
+import kotlinx.io.bytestring.decodeToString
+import kotlinx.io.bytestring.encodeToByteString
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
+import kotlin.math.min
 
 /**
  * Convert a string literal, containing only ASCII characters to a [ByteString].
  * Throws an error if there are non-ASCII characters.
  */
-public fun String.toACIIByteString(): ByteString {
+public fun String.toAsciiByteString(): ByteString {
     val bytes = ByteArray(length) {
         val char = get(it)
         val code = char.code
@@ -94,24 +97,30 @@ private class RingByteArray(
         else -> inputArray.indices.all { inputArray[it] == get(it) }
     }
 
+    fun contentEquals(byteString: ByteString): Boolean = when {
+        byteString.size != buffer.size -> false
+        size < buffer.size -> false
+        else -> (0 until byteString.size).all { byteString[it] == get(it) }
+    }
+
 }
 
 private fun RingByteArray.toArray(): ByteArray = ByteArray(size) { get(it) }
 
 /**
- * Read [Input] into [output] until designated multibyte [separator] and optionally continues until
+ * Read [Source] into [output] until designated multibyte [separator] and optionally continues until
  * the end of the line after it. Throw error if [separator] not found and [atMost] bytes are read.
  * Also fails if [separator] not found until the end of input.
  *
- * Separator itself is not read into Output.
+ * The Separator itself is not read into [Sink].
  *
  * @param errorOnEof if true error is thrown if separator is never encountered
  *
  * @return bytes actually being read, including separator
  */
 public fun Source.readWithSeparatorTo(
-    output: Sink,
-    separator: ByteArray,
+    output: Sink?,
+    separator: ByteString,
     atMost: Int = Int.MAX_VALUE,
     errorOnEof: Boolean = false,
 ): Int {
@@ -126,7 +135,7 @@ public fun Source.readWithSeparatorTo(
         if (rb.contentEquals(separator)) {
             return counter
         } else if (rb.isFull()) {
-            output.writeByte(rb[0])
+            output?.writeByte(rb[0])
         }
     }
 
@@ -134,33 +143,93 @@ public fun Source.readWithSeparatorTo(
         error("Read to the end of input without encountering ${separator.decodeToString()}")
     } else {
         for (i in 1 until rb.size) {
-            output.writeByte(rb[i])
+            output?.writeByte(rb[i])
         }
         counter += (rb.size - 1)
         return counter
     }
 }
 
-public fun Source.discardLine(): Int {
-    return discardUntilDelimiter('\n'.code.toByte()).also {
-        discard(1)
-    }.toInt() + 1
-}
-
+/**
+ * Discard all bytes until [separator] is encountered. Separator is discarded sa well.
+ * Return the total number of bytes read.
+ */
 public fun Source.discardWithSeparator(
-    separator: ByteArray,
+    separator: ByteString,
     atMost: Int = Int.MAX_VALUE,
     errorOnEof: Boolean = false,
-): Int {
-    val dummy: Sink = object : Sink(ChunkBuffer.Pool) {
-        override fun closeDestination() {
-            // Do nothing
-        }
+): Int = readWithSeparatorTo(null, separator, atMost, errorOnEof)
 
-        override fun flush(source: Memory, offset: Int, length: Int) {
-            // Do nothing
-        }
+/**
+ * Discard all symbol until newline is discovered. Carriage return is not discarded.
+ */
+public fun Source.discardLine(
+    atMost: Int = Int.MAX_VALUE,
+    errorOnEof: Boolean = false,
+): Int = discardWithSeparator("\n".encodeToByteString(), atMost, errorOnEof)
+
+
+/**
+ * A [Source] based on [ByteArray]
+ */
+public class ByteArraySource(
+    private val byteArray: ByteArray,
+    private val offset: Int = 0,
+    private val size: Int = byteArray.size - offset,
+) : RawSource {
+
+    init {
+        require(offset >= 0) { "Offset must be positive" }
+        require(offset + size <= byteArray.size) { "End index is ${offset + size}, but the array size is ${byteArray.size}" }
     }
 
-    return readWithSeparatorTo(dummy, separator, atMost, errorOnEof)
+    private var pointer = offset
+
+    override fun close() {
+        // Do nothing
+    }
+
+    override fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
+        if (pointer == offset + size) return -1
+        val byteRead = min(byteCount.toInt(), (size + offset - pointer))
+        sink.write(byteArray, pointer, pointer + byteRead)
+        pointer += byteRead
+        return byteRead.toLong()
+    }
 }
+
+/**
+ * A [Source] based on [String]
+ */
+public class StringSource(
+    public val string: String,
+    public val offset: Int = 0,
+    public val size: Int = string.length - offset,
+) : RawSource {
+
+    private var pointer = offset
+
+    override fun close() {
+        // Do nothing
+    }
+
+    override fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
+        if (pointer == offset + size) return -1
+        val byteRead = min(byteCount.toInt(), (size + offset - pointer))
+        sink.writeString(string, pointer, pointer + byteRead)
+        pointer += byteRead
+        return byteRead.toLong()
+    }
+}
+
+public fun Sink.writeDouble(value: Double) {
+    writeLong(value.toBits())
+}
+
+public fun Source.readDouble(): Double = Double.fromBits(readLong())
+
+public fun Sink.writeFloat(value: Float) {
+    writeInt(value.toBits())
+}
+
+public fun Source.readFloat(): Float = Float.fromBits(readInt())

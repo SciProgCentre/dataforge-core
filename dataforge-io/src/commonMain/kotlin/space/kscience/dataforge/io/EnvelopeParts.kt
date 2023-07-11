@@ -23,7 +23,7 @@ private class PartDescriptor : Scheme() {
         val PARTS_KEY = MULTIPART_KEY + "parts"
         val SEPARATOR_KEY = MULTIPART_KEY + "separator"
 
-        val DEFAULT_MULTIPART_DATA_SEPARATOR = "\r\n#~PART~#\r\n".toACIIByteString()
+        val DEFAULT_MULTIPART_DATA_SEPARATOR = "\r\n#~PART~#\r\n".toAsciiByteString()
 
         const val MULTIPART_DATA_TYPE = "envelope.multipart"
     }

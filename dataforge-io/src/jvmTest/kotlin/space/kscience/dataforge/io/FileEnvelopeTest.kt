@@ -1,6 +1,5 @@
 package space.kscience.dataforge.io
 
-import io.ktor.utils.io.core.writeDouble
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
