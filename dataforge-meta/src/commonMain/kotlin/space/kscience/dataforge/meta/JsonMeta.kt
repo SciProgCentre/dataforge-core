@@ -23,7 +23,6 @@ public fun Value.toJson(descriptor: MetaDescriptor? = null): JsonElement = when 
 }
 
 //Use these methods to customize JSON key mapping
-@Suppress("NULLABLE_EXTENSION_OPERATOR_WITH_SAFE_CALL_RECEIVER")
 private fun String.toJsonKey(descriptor: MetaDescriptor?) = descriptor?.attributes?.get("jsonName").string ?: toString()
 
 private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): JsonElement = if (items.isEmpty()) {
@@ -35,9 +34,13 @@ private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): J
         val childDescriptor = descriptor?.children?.get(body)
         if (list.size == 1) {
             val (token, element) = list.first()
-            //do not add empty element
-            val child: JsonElement = element.toJsonWithIndex(childDescriptor, token.index)
-            body to child
+                //do not add an empty element
+                val child: JsonElement = element.toJsonWithIndex(childDescriptor, token.index)
+            if(token.index == null) {
+                body to child
+            } else {
+                body to JsonArray(listOf(child))
+            }
         } else {
             val elements: List<JsonElement> = list.sortedBy { it.key.index }.mapIndexed { index, entry ->
                 //Use index if it is not equal to the item order

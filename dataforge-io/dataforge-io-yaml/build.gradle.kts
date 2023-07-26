@@ -4,10 +4,6 @@ plugins {
 
 description = "YAML meta IO"
 
-repositories {
-    mavenCentral()
-}
-
 kscience {
     jvm()
     js()
@@ -18,10 +14,6 @@ kscience {
     useSerialization{
         yamlKt()
     }
-}
-
-repositories{
-    maven("https://dl.bintray.com/mamoe/yamlkt")
 }
 
 readme{

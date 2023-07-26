@@ -5,6 +5,7 @@
 ### Added
 
 ### Changed
+- Meta to Json serializer now serializes a single item with index as an array. It is important for plotly integration.
 
 ### Deprecated
 
