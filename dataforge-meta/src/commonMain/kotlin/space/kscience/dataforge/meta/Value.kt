@@ -226,7 +226,7 @@ public fun <E : Enum<E>> E.asValue(): Value = EnumValue(this)
 
 
 /**
- * Create Value from String using closest match conversion
+ * Create Value from String using the closest match conversion
  */
 public fun String.parseValue(): Value {
 

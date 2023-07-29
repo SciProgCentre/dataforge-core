@@ -6,7 +6,7 @@ kscience {
     jvm()
     js()
     native()
-    useSerialization("1.4.1"){
+    useSerialization{
         json()
     }
 }

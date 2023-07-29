@@ -10,8 +10,8 @@ kscience {
     jvm()
     js()
     native()
-    useSerialization("1.4.1")
-    useSerialization("1.4.1", sourceSet = space.kscience.gradle.DependencySourceSet.TEST) {
+    useSerialization()
+    useSerialization(sourceSet = space.kscience.gradle.DependencySourceSet.TEST) {
         cbor()
     }
     dependencies {
@@ -20,6 +20,6 @@ kscience {
     }
 }
 
-readme{
+readme {
     maturity = space.kscience.gradle.Maturity.PROTOTYPE
 }

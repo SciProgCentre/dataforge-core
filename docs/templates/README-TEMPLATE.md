@@ -3,4 +3,4 @@
 
 ![Gradle build](https://github.com/mipt-npm/dataforge-core/workflows/Gradle%20build/badge.svg)
 
-$modules
+${modules}

@@ -23,7 +23,6 @@ public fun Value.toJson(descriptor: MetaDescriptor? = null): JsonElement = when 
 }
 
 //Use these methods to customize JSON key mapping
-@Suppress("NULLABLE_EXTENSION_OPERATOR_WITH_SAFE_CALL_RECEIVER")
 private fun String.toJsonKey(descriptor: MetaDescriptor?) = descriptor?.attributes?.get("jsonName").string ?: toString()
 
 private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): JsonElement = if (items.isEmpty()) {
@@ -35,9 +34,13 @@ private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): J
         val childDescriptor = descriptor?.children?.get(body)
         if (list.size == 1) {
             val (token, element) = list.first()
-            //do not add empty element
-            val child: JsonElement = element.toJsonWithIndex(childDescriptor, token.index)
-            body to child
+                //do not add an empty element
+                val child: JsonElement = element.toJsonWithIndex(childDescriptor, token.index)
+            if(token.index == null) {
+                body to child
+            } else {
+                body to JsonArray(listOf(child))
+            }
         } else {
             val elements: List<JsonElement> = list.sortedBy { it.key.index }.mapIndexed { index, entry ->
                 //Use index if it is not equal to the item order
@@ -61,30 +64,24 @@ private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): J
     JsonObject(pairs.toMap())
 }
 
-public fun Meta.toJson(descriptor: MetaDescriptor? = null): JsonObject {
-    val element = toJsonWithIndex(descriptor, null)
-    return if (element is JsonObject) {
-        element
-    } else {
-        buildJsonObject {
-            put("@value", element)
-        }
-    }
-}
+/**
+ * Convert Meta to [JsonElement]. Meta with children is converted to [JsonObject].
+ * Meta without children is converted to either [JsonPrimitive] or [JsonArray] depending on the value type.
+ * An empty Meta is converted to an empty JsonObject.
+ */
+public fun Meta.toJson(descriptor: MetaDescriptor? = null): JsonElement = toJsonWithIndex(descriptor, null)
 
 /**
  * Convert a Json primitive to a [Value]
  */
-public fun JsonPrimitive.toValue(descriptor: MetaDescriptor?): Value {
-    return when (this) {
-        JsonNull -> Null
-        else -> {
-            if (isString) {
-                StringValue(content)
-            } else {
-                //consider using LazyParse
-                content.parseValue()
-            }
+public fun JsonPrimitive.toValue(descriptor: MetaDescriptor?): Value = when (this) {
+    JsonNull -> Null
+    else -> {
+        if (isString) {
+            content.asValue()
+        } else {
+            //consider using LazyParse
+            content.parseValue()
         }
     }
 }
