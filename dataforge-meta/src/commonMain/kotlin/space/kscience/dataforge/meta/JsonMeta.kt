@@ -64,17 +64,12 @@ private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): J
     JsonObject(pairs.toMap())
 }
 
-public fun Meta.toJson(descriptor: MetaDescriptor? = null): JsonElement {
-    return toJsonWithIndex(descriptor, null)
-//    val element = toJsonWithIndex(descriptor, null)
-//    return if (element is JsonObject) {
-//        element
-//    } else {
-//        buildJsonObject {
-//            put("@value", element)
-//        }
-//    }
-}
+/**
+ * Convert Meta to [JsonElement]. Meta with children is converted to [JsonObject].
+ * Meta without children is converted to either [JsonPrimitive] or [JsonArray] depending on the value type.
+ * An empty Meta is converted to an empty JsonObject.
+ */
+public fun Meta.toJson(descriptor: MetaDescriptor? = null): JsonElement = toJsonWithIndex(descriptor, null)
 
 /**
  * Convert a Json primitive to a [Value]
