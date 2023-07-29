@@ -6,6 +6,7 @@
 
 ### Changed
 - Meta to Json serializer now serializes a single item with index as an array. It is important for plotly integration.
+- Meta to Json serializes Meta without children a value as literal or array instead of an object with `@value` field.
 
 ### Deprecated
 

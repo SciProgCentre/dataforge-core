@@ -64,30 +64,29 @@ private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): J
     JsonObject(pairs.toMap())
 }
 
-public fun Meta.toJson(descriptor: MetaDescriptor? = null): JsonObject {
-    val element = toJsonWithIndex(descriptor, null)
-    return if (element is JsonObject) {
-        element
-    } else {
-        buildJsonObject {
-            put("@value", element)
-        }
-    }
+public fun Meta.toJson(descriptor: MetaDescriptor? = null): JsonElement {
+    return toJsonWithIndex(descriptor, null)
+//    val element = toJsonWithIndex(descriptor, null)
+//    return if (element is JsonObject) {
+//        element
+//    } else {
+//        buildJsonObject {
+//            put("@value", element)
+//        }
+//    }
 }
 
 /**
  * Convert a Json primitive to a [Value]
  */
-public fun JsonPrimitive.toValue(descriptor: MetaDescriptor?): Value {
-    return when (this) {
-        JsonNull -> Null
-        else -> {
-            if (isString) {
-                StringValue(content)
-            } else {
-                //consider using LazyParse
-                content.parseValue()
-            }
+public fun JsonPrimitive.toValue(descriptor: MetaDescriptor?): Value = when (this) {
+    JsonNull -> Null
+    else -> {
+        if (isString) {
+            content.asValue()
+        } else {
+            //consider using LazyParse
+            content.parseValue()
         }
     }
 }
