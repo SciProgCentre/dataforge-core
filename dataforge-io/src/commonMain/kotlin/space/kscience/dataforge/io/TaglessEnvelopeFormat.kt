@@ -1,9 +1,9 @@
 package space.kscience.dataforge.io
 
-import io.ktor.utils.io.core.ByteReadPacket
-import io.ktor.utils.io.core.Input
-import io.ktor.utils.io.core.Output
-import io.ktor.utils.io.core.readUTF8UntilDelimiterTo
+
+import kotlinx.io.*
+import kotlinx.io.bytestring.ByteString
+import kotlinx.io.bytestring.encodeToByteString
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.meta.Meta
@@ -29,34 +29,35 @@ public class TaglessEnvelopeFormat(
 //    }
 
     override fun writeObject(
-        output: Output,
+        sink: Sink,
         obj: Envelope,
     ) {
         val metaFormat = metaFormatFactory.build(this.io.context, meta)
 
         //printing header
-        output.writeRawString(TAGLESS_ENVELOPE_HEADER + "\r\n")
+        sink.write(TAGLESS_ENVELOPE_HEADER)
+        sink.writeString("\r\n")
 
         //Printing meta
         if (!obj.meta.isEmpty()) {
             val metaBinary = Binary(obj.meta, metaFormat)
-            output.writeUtf8String(META_START + "-${metaFormatFactory.shortName}\r\n")
-            output.writeBinary(metaBinary)
-            output.writeRawString("\r\n")
+            sink.writeString(META_START + "-${metaFormatFactory.shortName}\r\n")
+            sink.writeBinary(metaBinary)
+            sink.writeString("\r\n")
         }
 
         //Printing data
         obj.data?.let { data ->
             //val actualSize: Int = envelope.data?.size ?: 0
-            output.writeUtf8String(DATA_START + "\r\n")
-            output.writeBinary(data)
+            sink.writeString(DATA_START + "\r\n")
+            sink.writeBinary(data)
         }
     }
 
-    override fun readObject(input: Input): Envelope {
+    override fun readObject(source: Source): Envelope {
         //read preamble
-        input.discardWithSeparator(
-            TAGLESS_ENVELOPE_HEADER.encodeToByteArray(),
+        source.discardWithSeparator(
+            TAGLESS_ENVELOPE_HEADER,
             atMost = 1024,
         )
 
@@ -64,22 +65,22 @@ public class TaglessEnvelopeFormat(
 
         var data: Binary? = null
 
-        input.discardWithSeparator(
+        source.discardWithSeparator(
             SEPARATOR_PREFIX,
             atMost = 1024,
         )
 
         var header: String = ByteArray {
-            input.readUTF8UntilDelimiterTo(this, "\n")
+            source.readWithSeparatorTo(this, "\n".encodeToByteString())
         }.decodeToString()
 
-        while (!input.endOfInput) {
+        while (!source.exhausted()) {
             val block = ByteArray {
-                input.readWithSeparatorTo(this, SEPARATOR_PREFIX)
+                source.readWithSeparatorTo(this, SEPARATOR_PREFIX)
             }
 
             val nextHeader = ByteArray {
-                input.readWithSeparatorTo(this, "\n".encodeToByteArray())
+                source.readWithSeparatorTo(this, "\n".encodeToByteString())
             }.decodeToString()
 
             //terminate on end
@@ -89,7 +90,7 @@ public class TaglessEnvelopeFormat(
             if (header.startsWith("META")) {
                 //TODO check format
                 val metaFormat: MetaFormatFactory = JsonMetaFormat
-                meta = metaFormat.readMeta(ByteReadPacket(block))
+                meta = metaFormat.readMeta(ByteArraySource(block).buffered())
             }
 
             if (header.startsWith("DATA")) {
@@ -111,9 +112,9 @@ public class TaglessEnvelopeFormat(
 
         public const val TAGLESS_ENVELOPE_TYPE: String = "tagless"
 
-        public val SEPARATOR_PREFIX: ByteArray = "\n#~".encodeToByteArray()
+        public val SEPARATOR_PREFIX: ByteString = "\n#~".encodeToByteString()
 
-        public const val TAGLESS_ENVELOPE_HEADER: String = "#~DFTL"
+        public val TAGLESS_ENVELOPE_HEADER: ByteString = "#~DFTL".encodeToByteString()
 
         //        public const val META_START_PROPERTY: String = "metaSeparator"
         public const val META_START: String = "#~META"
@@ -134,21 +135,18 @@ public class TaglessEnvelopeFormat(
         override fun readObject(binary: Binary): Envelope = default.run { readObject(binary) }
 
         override fun writeObject(
-            output: Output,
+            sink: Sink,
             obj: Envelope,
         ): Unit = default.run {
-            writeObject(
-                output,
-                obj,
-            )
+            writeObject(sink, obj)
         }
 
-        override fun readObject(input: Input): Envelope = default.readObject(input)
+        override fun readObject(source: Source): Envelope = default.readObject(source)
 
         override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? {
             return try {
                 binary.read {
-                    val string = readRawString(TAGLESS_ENVELOPE_HEADER.length)
+                    val string = readByteString(TAGLESS_ENVELOPE_HEADER.size)
                     return@read if (string == TAGLESS_ENVELOPE_HEADER) {
                         TaglessEnvelopeFormat(io)
                     } else {

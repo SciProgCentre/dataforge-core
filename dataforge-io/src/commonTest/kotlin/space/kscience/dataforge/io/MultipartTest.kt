@@ -1,5 +1,6 @@
 package space.kscience.dataforge.io
 
+import kotlinx.io.writeString
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.int
@@ -18,9 +19,9 @@ class MultipartTest {
                 "value" put it
             }
             data {
-                writeUtf8String("Hello World $it")
+                writeString("Hello World $it")
                 repeat(300) {
-                    writeRawString("$it ")
+                    writeString("$it ")
                 }
             }
         }

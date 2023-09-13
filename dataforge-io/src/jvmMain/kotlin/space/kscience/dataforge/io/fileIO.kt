@@ -1,8 +1,11 @@
 package space.kscience.dataforge.io
 
-import io.ktor.utils.io.core.*
-import io.ktor.utils.io.streams.asOutput
+
 import kotlinx.coroutines.runBlocking
+import kotlinx.io.Sink
+import kotlinx.io.Source
+import kotlinx.io.asSink
+import kotlinx.io.buffered
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.isEmpty
@@ -23,18 +26,18 @@ internal class PathBinary(
     override val size: Int = Files.size(path).toInt() - fileOffset,
 ) : Binary {
 
-    override fun <R> read(offset: Int, atMost: Int, block: Input.() -> R): R = runBlocking {
+    override fun <R> read(offset: Int, atMost: Int, block: Source.() -> R): R = runBlocking {
         readSuspend(offset, atMost, block)
     }
 
-    override suspend fun <R> readSuspend(offset: Int, atMost: Int, block: suspend Input.() -> R): R {
+    override suspend fun <R> readSuspend(offset: Int, atMost: Int, block: suspend Source.() -> R): R {
         val actualOffset = offset + fileOffset
         val actualSize = min(atMost, size - offset)
         val array = path.inputStream().use {
             it.skip(actualOffset.toLong())
             it.readNBytes(actualSize)
         }
-        return ByteReadPacket(array).block()
+        return ByteArraySource(array).buffered().use { it.block() }
     }
 
     override fun view(offset: Int, binarySize: Int) = PathBinary(path, fileOffset + offset, binarySize)
@@ -42,36 +45,36 @@ internal class PathBinary(
 
 public fun Path.asBinary(): Binary = PathBinary(this)
 
-public fun <R> Path.read(block: Input.() -> R): R = asBinary().read(block = block)
+public fun <R> Path.read(block: Source.() -> R): R = asBinary().read(block = block)
 
 /**
  * Write a live output to a newly created file. If file does not exist, throws error
  */
-public fun Path.write(block: Output.() -> Unit): Unit {
+public fun Path.write(block: Sink.() -> Unit): Unit {
     val stream = Files.newOutputStream(this, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW)
-    stream.asOutput().use(block)
+    stream.asSink().buffered().use(block)
 }
 
 /**
  * Create a new file or append to exiting one with given output [block]
  */
-public fun Path.append(block: Output.() -> Unit): Unit {
+public fun Path.append(block: Sink.() -> Unit): Unit {
     val stream = Files.newOutputStream(
         this,
         StandardOpenOption.WRITE, StandardOpenOption.APPEND, StandardOpenOption.CREATE
     )
-    stream.asOutput().use(block)
+    stream.asSink().buffered().use(block)
 }
 
 /**
  * Create a new file or replace existing one using given output [block]
  */
-public fun Path.rewrite(block: Output.() -> Unit): Unit {
+public fun Path.rewrite(block: Sink.() -> Unit): Unit {
     val stream = Files.newOutputStream(
         this,
         StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE
     )
-    stream.asOutput().use(block)
+    stream.asSink().buffered().use(block)
 }
 
 @DFExperimental
@@ -260,7 +263,7 @@ public fun IOPlugin.writeEnvelopeDirectory(
     val dataFile = path.resolve(IOPlugin.DATA_FILE_NAME)
     dataFile.write {
         envelope.data?.read {
-            val copied = copyTo(this@write)
+            val copied = transferTo(this@write)
             if (copied != envelope.data?.size?.toLong()) {
                 error("The number of copied bytes does not equal data size")
             }

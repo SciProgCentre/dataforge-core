@@ -1,9 +1,6 @@
 package space.kscience.dataforge.workspace
 
-import io.ktor.utils.io.core.Input
-import io.ktor.utils.io.core.Output
-import io.ktor.utils.io.core.readBytes
-import io.ktor.utils.io.core.writeFully
+import kotlinx.io.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
@@ -30,10 +27,10 @@ public class JsonIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
     @Suppress("UNCHECKED_CAST")
     private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
 
-    override fun readObject(input: Input): T = Json.decodeFromString(serializer, input.readUtf8String())
+    override fun readObject(input: Source): T = Json.decodeFromString(serializer, input.readString())
 
-    override fun writeObject(output: Output, obj: T) {
-        output.writeUtf8String(Json.encodeToString(serializer, obj))
+    override fun writeObject(output: Sink, obj: T) {
+        output.writeString(Json.encodeToString(serializer, obj))
     }
 }
 
@@ -43,10 +40,10 @@ public class ProtobufIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
     @Suppress("UNCHECKED_CAST")
     private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
 
-    override fun readObject(input: Input): T = ProtoBuf.decodeFromByteArray(serializer, input.readBytes())
+    override fun readObject(input: Source): T = ProtoBuf.decodeFromByteArray(serializer, input.readByteArray())
 
-    override fun writeObject(output: Output, obj: T) {
-        output.writeFully(ProtoBuf.encodeToByteArray(serializer, obj))
+    override fun writeObject(output: Sink, obj: T) {
+        output.write(ProtoBuf.encodeToByteArray(serializer, obj))
     }
 }
 

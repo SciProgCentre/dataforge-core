@@ -5,6 +5,7 @@
 ### Added
 
 ### Changed
+- Kotlin 1.9
 
 ### Deprecated
 
