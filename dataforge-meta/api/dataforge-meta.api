@@ -45,9 +45,9 @@ public final class space/kscience/dataforge/meta/False : space/kscience/dataforg
 
 public final class space/kscience/dataforge/meta/JsonMetaKt {
 	public static final fun getJSON_ARRAY_KEY (Lspace/kscience/dataforge/meta/Meta$Companion;)Ljava/lang/String;
-	public static final fun toJson (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lkotlinx/serialization/json/JsonObject;
+	public static final fun toJson (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lkotlinx/serialization/json/JsonElement;
 	public static final fun toJson (Lspace/kscience/dataforge/meta/Value;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lkotlinx/serialization/json/JsonElement;
-	public static synthetic fun toJson$default (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonObject;
+	public static synthetic fun toJson$default (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonElement;
 	public static synthetic fun toJson$default (Lspace/kscience/dataforge/meta/Value;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonElement;
 	public static final fun toMeta (Lkotlinx/serialization/json/JsonElement;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lspace/kscience/dataforge/meta/SealedMeta;
 	public static final fun toMeta (Lkotlinx/serialization/json/JsonObject;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lspace/kscience/dataforge/meta/SealedMeta;
@@ -637,17 +637,6 @@ public final class space/kscience/dataforge/meta/ValueType : java/lang/Enum {
 	public static final field STRING Lspace/kscience/dataforge/meta/ValueType;
 	public static fun valueOf (Ljava/lang/String;)Lspace/kscience/dataforge/meta/ValueType;
 	public static fun values ()[Lspace/kscience/dataforge/meta/ValueType;
-}
-
-public final class space/kscience/dataforge/meta/ValueType$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lspace/kscience/dataforge/meta/ValueType$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lspace/kscience/dataforge/meta/ValueType;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lspace/kscience/dataforge/meta/ValueType;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class space/kscience/dataforge/meta/ValueType$Companion {

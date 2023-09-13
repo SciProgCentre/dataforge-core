@@ -5,7 +5,8 @@
 ### Added
 
 ### Changed
-- Kotlin 1.9
+- Kotlin 1.9.20.
+- Migrated from ktor-io to kotlinx-io.
 
 ### Deprecated
 

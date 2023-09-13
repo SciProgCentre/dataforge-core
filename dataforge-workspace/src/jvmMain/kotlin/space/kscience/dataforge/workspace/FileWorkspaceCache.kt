@@ -27,10 +27,10 @@ public class JsonIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
     @Suppress("UNCHECKED_CAST")
     private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
 
-    override fun readObject(input: Source): T = Json.decodeFromString(serializer, input.readString())
+    override fun readObject(source: Source): T = Json.decodeFromString(serializer, source.readString())
 
-    override fun writeObject(output: Sink, obj: T) {
-        output.writeString(Json.encodeToString(serializer, obj))
+    override fun writeObject(sink: Sink, obj: T) {
+        sink.writeString(Json.encodeToString(serializer, obj))
     }
 }
 
@@ -40,10 +40,10 @@ public class ProtobufIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
     @Suppress("UNCHECKED_CAST")
     private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
 
-    override fun readObject(input: Source): T = ProtoBuf.decodeFromByteArray(serializer, input.readByteArray())
+    override fun readObject(source: Source): T = ProtoBuf.decodeFromByteArray(serializer, source.readByteArray())
 
-    override fun writeObject(output: Sink, obj: T) {
-        output.write(ProtoBuf.encodeToByteArray(serializer, obj))
+    override fun writeObject(sink: Sink, obj: T) {
+        sink.write(ProtoBuf.encodeToByteArray(serializer, obj))
     }
 }
 
