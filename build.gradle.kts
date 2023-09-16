@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.6.3-dev-1"
+    version = "0.6.3-dev-kotlin-1.9.20"
 }
 
 subprojects {
