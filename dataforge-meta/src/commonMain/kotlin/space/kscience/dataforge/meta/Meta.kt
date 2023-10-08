@@ -50,7 +50,9 @@ public interface Meta : MetaRepr, MetaProvider {
     override fun toMeta(): Meta = this
 
     override fun toString(): String
+
     override fun equals(other: Any?): Boolean
+
     override fun hashCode(): Int
 
     public companion object {

@@ -11,7 +11,7 @@ import kotlin.js.JsName
  * Mark a meta builder
  */
 @DslMarker
-public annotation class MetaBuilder
+public annotation class MetaBuilderMarker
 
 /**
  * A generic interface that gives access to getting and setting meta notes and values
@@ -27,7 +27,7 @@ public interface MutableMetaProvider : MetaProvider, MutableValueProvider {
  * TODO documentation
  */
 @Serializable(MutableMetaSerializer::class)
-@MetaBuilder
+@MetaBuilderMarker
 public interface MutableMeta : Meta, MutableMetaProvider {
 
     override val items: Map<NameToken, MutableMeta>
@@ -90,8 +90,8 @@ public interface MutableMeta : Meta, MutableMetaProvider {
         setMeta(this, repr.toMeta())
     }
 
-    public infix fun Name.put(mutableMeta: MutableMeta.() -> Unit) {
-        setMeta(this, Meta(mutableMeta))
+    public infix fun Name.put(builder: MutableMeta.() -> Unit) {
+        getOrCreate(this).apply(builder)
     }
 
     public infix fun String.put(meta: Meta) {
@@ -131,7 +131,7 @@ public interface MutableMeta : Meta, MutableMetaProvider {
     }
 
     public infix fun String.put(builder: MutableMeta.() -> Unit) {
-        setMeta(Name.parse(this), MutableMeta(builder))
+        getOrCreate(parseAsName()).apply(builder)
     }
 }
 
@@ -381,16 +381,14 @@ public fun Meta.toMutableMeta(): ObservableMutableMeta = MutableMetaImpl(value, 
 
 public fun Meta.asMutableMeta(): MutableMeta = (this as? MutableMeta) ?: toMutableMeta()
 
-@Suppress("FunctionName")
-@JsName("newMutableMeta")
-public fun MutableMeta(): ObservableMutableMeta = MutableMetaImpl(null)
+@JsName("newObservableMutableMeta")
+public fun ObservableMutableMeta(): ObservableMutableMeta = MutableMetaImpl(null)
 
 /**
  * Build a [MutableMeta] using given transformation
  */
-@Suppress("FunctionName")
-public inline fun MutableMeta(builder: MutableMeta.() -> Unit = {}): ObservableMutableMeta =
-    MutableMeta().apply(builder)
+public inline fun ObservableMutableMeta(builder: MutableMeta.() -> Unit = {}): ObservableMutableMeta =
+    ObservableMutableMeta().apply(builder)
 
 
 /**

@@ -7,11 +7,11 @@ import kotlin.test.assertEquals
 
 
 fun Meta.toByteArray(format: MetaFormat = JsonMetaFormat) = ByteArray {
-    format.writeObject(this@ByteArray, this@toByteArray)
+    format.writeTo(this@ByteArray, this@toByteArray)
 }
 
 fun MetaFormat.fromByteArray(packet: ByteArray): Meta {
-    return packet.asBinary().read { readObject(this) }
+    return packet.asBinary().read { readFrom(this) }
 }
 
 class MetaFormatTest {

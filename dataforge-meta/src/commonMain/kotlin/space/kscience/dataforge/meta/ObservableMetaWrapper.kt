@@ -51,6 +51,8 @@ private class ObservableMetaWrapper(
 
     override fun setMeta(name: Name, node: Meta?) {
         val oldMeta = get(name)
+        //don't forget to remove listener
+        oldMeta?.removeListener(this)
         root.setMeta(absoluteName + name, node)
         if (oldMeta != node) {
             invalidate(name)
