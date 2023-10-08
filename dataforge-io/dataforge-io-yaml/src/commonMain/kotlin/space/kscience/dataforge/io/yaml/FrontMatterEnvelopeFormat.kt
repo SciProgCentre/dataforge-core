@@ -1,7 +1,11 @@
 package space.kscience.dataforge.io.yaml
 
-import io.ktor.utils.io.core.Input
-import io.ktor.utils.io.core.Output
+import kotlinx.io.Sink
+import kotlinx.io.Source
+import kotlinx.io.bytestring.ByteString
+import kotlinx.io.bytestring.encodeToByteString
+import kotlinx.io.readByteString
+import kotlinx.io.writeString
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.io.*
@@ -19,18 +23,18 @@ public class FrontMatterEnvelopeFormat(
         var offset = 0
 
         offset += discardWithSeparator(
-            SEPARATOR.encodeToByteArray(),
+            SEPARATOR,
             atMost = 1024,
         )
 
         val line = ByteArray {
-            offset += readWithSeparatorTo(this, "\n".encodeToByteArray())
+            offset += readWithSeparatorTo(this, "\n".encodeToByteString())
         }.decodeToString()
 
         val readMetaFormat = line.trim().takeIf { it.isNotBlank() }?.let { io.resolveMetaFormat(it) } ?: YamlMetaFormat
 
         val packet = ByteArray {
-            offset += readWithSeparatorTo(this, SEPARATOR.encodeToByteArray())
+            offset += readWithSeparatorTo(this, SEPARATOR)
         }
 
         offset += discardLine()
@@ -39,25 +43,25 @@ public class FrontMatterEnvelopeFormat(
         Envelope(meta, binary.view(offset))
     }
 
-    override fun readObject(input: Input): Envelope = readObject(input.readBinary())
+    override fun readObject(source: Source): Envelope = readObject(source.readBinary())
 
     override fun writeObject(
-        output: Output,
+        sink: Sink,
         obj: Envelope,
     ) {
         val metaFormat = metaFormatFactory.build(io.context, meta)
         val formatSuffix = if (metaFormat is YamlMetaFormat) "" else metaFormatFactory.shortName
-        output.writeRawString("$SEPARATOR${formatSuffix}\r\n")
-        metaFormat.run { metaFormat.writeObject(output, obj.meta) }
-        output.writeRawString("$SEPARATOR\r\n")
+        sink.writeString("$SEPARATOR${formatSuffix}\r\n")
+        metaFormat.run { metaFormat.writeObject(sink, obj.meta) }
+        sink.writeString("$SEPARATOR\r\n")
         //Printing data
         obj.data?.let { data ->
-            output.writeBinary(data)
+            sink.writeBinary(data)
         }
     }
 
     public companion object : EnvelopeFormatFactory {
-        public const val SEPARATOR: String = "---"
+        public val SEPARATOR: ByteString = "---".encodeToByteString()
 
         private val metaTypeRegex = "---(\\w*)\\s*".toRegex()
 
@@ -69,8 +73,8 @@ public class FrontMatterEnvelopeFormat(
 
         override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? = binary.read {
             //read raw string to avoid UTF issues
-            val line = readRawString(3)
-            return@read if (line == "---") {
+            val line = readByteString(3)
+            return@read if (line == "---".encodeToByteString()) {
                 default
             } else {
                 null
@@ -82,12 +86,12 @@ public class FrontMatterEnvelopeFormat(
         override fun readObject(binary: Binary): Envelope = default.readObject(binary)
 
         override fun writeObject(
-            output: Output,
+            sink: Sink,
             obj: Envelope,
-        ): Unit = default.writeObject(output, obj)
+        ): Unit = default.writeObject(sink, obj)
 
 
-        override fun readObject(input: Input): Envelope = default.readObject(input)
+        override fun readObject(source: Source): Envelope = default.readObject(source)
 
     }
 }

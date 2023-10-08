@@ -1,6 +1,6 @@
 package space.kscience.dataforge.io
 
-import io.ktor.utils.io.core.Output
+import kotlinx.io.Sink
 import space.kscience.dataforge.meta.*
 
 public class EnvelopeBuilder : Envelope {
@@ -33,7 +33,7 @@ public class EnvelopeBuilder : Envelope {
     /**
      * Construct a data binary from given builder
      */
-    public inline fun data(block: Output.() -> Unit) {
+    public inline fun data(block: Sink.() -> Unit) {
         data = ByteArray { block() }.asBinary()
     }
 

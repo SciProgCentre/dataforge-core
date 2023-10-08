@@ -1,13 +1,10 @@
 package space.kscience.dataforge.workspace
 
-import io.ktor.utils.io.streams.asOutput
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.data.DataTreeItem
-import space.kscience.dataforge.io.EnvelopeFormat
-import space.kscience.dataforge.io.IOFormat
-import space.kscience.dataforge.io.TaggedEnvelopeFormat
+import space.kscience.dataforge.io.*
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
 import java.nio.file.Path
@@ -28,11 +25,15 @@ private suspend fun <T : Any> ZipOutputStream.writeNode(
             val envelope = treeItem.data.toEnvelope(dataFormat)
             val entry = ZipEntry(name)
             putNextEntry(entry)
-            asOutput().run {
-                envelopeFormat.writeObject(this, envelope)
-                flush()
+
+            //TODO remove additional copy
+            val bytes = ByteArray {
+                writeObject(envelopeFormat, envelope)
             }
+            write(bytes)
+
         }
+
         is DataTreeItem.Node -> {
             val entry = ZipEntry("$name/")
             putNextEntry(entry)

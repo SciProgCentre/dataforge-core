@@ -1,6 +1,7 @@
 package space.kscience.dataforge.io
 
-import io.ktor.utils.io.core.readBytes
+import kotlinx.io.readByteArray
+import kotlinx.io.writeString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -12,7 +13,7 @@ class EnvelopeFormatTest {
             "d" put 22.2
         }
         data {
-            writeUtf8String("12345678")
+            writeString("12345678")
         }
     }
 
@@ -22,7 +23,7 @@ class EnvelopeFormatTest {
         val res = readFromByteArray(byteArray)
         assertEquals(envelope.meta, res.meta)
         val bytes = res.data?.read {
-            readBytes()
+            readByteArray()
         }
         assertEquals("12345678", bytes?.decodeToString())
     }
@@ -34,13 +35,13 @@ class EnvelopeFormatTest {
         val res = readFromByteArray(byteArray)
         assertEquals(envelope.meta, res.meta)
         val bytes = res.data?.read {
-            readBytes()
+            readByteArray()
         }
-        assertEquals("12345678",  bytes?.decodeToString())
+        assertEquals("12345678", bytes?.decodeToString())
     }
 
     @Test
-    fun testManualDftl(){
+    fun testManualDftl() {
         val envelopeString = """
             #~DFTL
             #~META
@@ -56,8 +57,8 @@ class EnvelopeFormatTest {
         val res = TaglessEnvelopeFormat.readFromByteArray(envelopeString.encodeToByteArray())
         assertEquals(envelope.meta, res.meta)
         val bytes = res.data?.read {
-            readBytes()
+            readByteArray()
         }
-        assertEquals("12345678",  bytes?.decodeToString())
+        assertEquals("12345678", bytes?.decodeToString())
     }
 }

@@ -1,8 +1,9 @@
 package space.kscience.dataforge.io
 
-import io.ktor.utils.io.core.ByteReadPacket
-import io.ktor.utils.io.core.readBytes
-import io.ktor.utils.io.core.readUTF8Line
+import kotlinx.io.buffered
+import kotlinx.io.bytestring.encodeToByteString
+import kotlinx.io.readByteArray
+import kotlinx.io.readLine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -11,9 +12,9 @@ class IOTest {
     @Test
     fun readBytes() {
         val bytes = ByteArray(8) { it.toByte() }
-        val input = ByteReadPacket(bytes)
-        @Suppress("UNUSED_VARIABLE") val first = input.readBytes(4)
-        val second = input.readBytes(4)
+        val input = ByteArraySource(bytes).buffered()
+        @Suppress("UNUSED_VARIABLE") val first = input.readByteArray(4)
+        val second = input.readByteArray(4)
         assertEquals(4.toByte(), second[0])
     }
 
@@ -31,25 +32,25 @@ class IOTest {
 
         binary.read {
             val array = ByteArray {
-                val read = readWithSeparatorTo(this, "---".encodeToByteArray()) + discardLine()
+                val read = readWithSeparatorTo(this, "---".encodeToByteString()) + discardLine()
                 assertEquals(12, read)
             }
             assertEquals("""
                 aaa
                 bbb
             """.trimIndent(),array.decodeToString().trim())
-            assertEquals("ccc", readUTF8Line()?.trim())
+            assertEquals("ccc", readLine()?.trim())
         }
 
         assertFails {
             binary.read {
-                discardWithSeparator("---".encodeToByteArray(), atMost = 3 )
+                discardWithSeparator("---".encodeToByteString(), atMost = 3 )
             }
         }
 
         assertFails {
             binary.read{
-                discardWithSeparator("-+-".encodeToByteArray(), errorOnEof = true)
+                discardWithSeparator("-+-".encodeToByteString(), errorOnEof = true)
             }
         }
 

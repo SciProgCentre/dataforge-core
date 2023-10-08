@@ -1,8 +1,11 @@
 package space.kscience.dataforge.workspace
 
-import io.ktor.utils.io.core.Input
-import io.ktor.utils.io.core.Output
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
+import kotlinx.io.Sink
+import kotlinx.io.Source
+import kotlinx.io.readString
+import kotlinx.io.writeString
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.data.*
@@ -36,11 +39,11 @@ class FileDataTest {
     object StringIOFormat : IOFormat<String> {
         override val type: KType get() = typeOf<String>()
 
-        override fun writeObject(output: Output, obj: String) {
-            output.writeUtf8String(obj)
+        override fun writeObject(output: Sink, obj: String) {
+            output.writeString(obj)
         }
 
-        override fun readObject(input: Input): String = input.readUtf8String()
+        override fun readObject(input: Source): String = input.readString()
     }
 
     @Test
@@ -59,9 +62,9 @@ class FileDataTest {
 
     @Test
     @DFExperimental
-    fun testZipWriteRead() = with(Global.io) {
-        val zip = Files.createTempFile("df_data_node", ".zip")
-        runBlocking {
+    fun testZipWriteRead() = runTest {
+        with(Global.io) {
+            val zip = Files.createTempFile("df_data_node", ".zip")
             dataNode.writeZip(zip, StringIOFormat)
             println(zip.toUri().toString())
             val reconstructed = readDataDirectory(zip) { _, _ -> StringIOFormat }
