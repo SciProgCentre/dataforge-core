@@ -19,7 +19,7 @@ public class FrontMatterEnvelopeFormat(
     private val metaFormatFactory: MetaFormatFactory = YamlMetaFormat,
 ) : EnvelopeFormat {
 
-    override fun readObject(binary: Binary): Envelope = binary.read {
+    override fun readFrom(binary: Binary): Envelope = binary.read {
         var offset = 0
 
         offset += discardWithSeparator(
@@ -39,20 +39,20 @@ public class FrontMatterEnvelopeFormat(
 
         offset += discardLine()
 
-        val meta = readMetaFormat.readObject(packet.asBinary())
+        val meta = readMetaFormat.readFrom(packet.asBinary())
         Envelope(meta, binary.view(offset))
     }
 
-    override fun readObject(source: Source): Envelope = readObject(source.readBinary())
+    override fun readFrom(source: Source): Envelope = readFrom(source.readBinary())
 
-    override fun writeObject(
+    override fun writeTo(
         sink: Sink,
         obj: Envelope,
     ) {
         val metaFormat = metaFormatFactory.build(io.context, meta)
         val formatSuffix = if (metaFormat is YamlMetaFormat) "" else metaFormatFactory.shortName
         sink.writeString("$SEPARATOR${formatSuffix}\r\n")
-        metaFormat.run { metaFormat.writeObject(sink, obj.meta) }
+        metaFormat.run { metaFormat.writeTo(sink, obj.meta) }
         sink.writeString("$SEPARATOR\r\n")
         //Printing data
         obj.data?.let { data ->
@@ -83,15 +83,15 @@ public class FrontMatterEnvelopeFormat(
 
         private val default by lazy { build(Global, Meta.EMPTY) }
 
-        override fun readObject(binary: Binary): Envelope = default.readObject(binary)
+        override fun readFrom(binary: Binary): Envelope = default.readFrom(binary)
 
-        override fun writeObject(
+        override fun writeTo(
             sink: Sink,
             obj: Envelope,
-        ): Unit = default.writeObject(sink, obj)
+        ): Unit = default.writeTo(sink, obj)
 
 
-        override fun readObject(source: Source): Envelope = default.readObject(source)
+        override fun readFrom(source: Source): Envelope = default.readFrom(source)
 
     }
 }

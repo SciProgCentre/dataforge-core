@@ -15,7 +15,7 @@ public interface EnvelopeFormat : IOFormat<Envelope> {
     override val type: KType get() = typeOf<Envelope>()
 }
 
-public fun EnvelopeFormat.read(input: Source): Envelope = readObject(input)
+public fun EnvelopeFormat.read(input: Source): Envelope = readFrom(input)
 
 @Type(ENVELOPE_FORMAT_TYPE)
 public interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeFormat {

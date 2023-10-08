@@ -78,7 +78,7 @@ public fun Path.rewrite(block: Sink.() -> Unit): Unit {
 }
 
 @DFExperimental
-public fun EnvelopeFormat.readFile(path: Path): Envelope = readObject(path.asBinary())
+public fun EnvelopeFormat.readFile(path: Path): Envelope = readFrom(path.asBinary())
 
 /**
  * Resolve IOFormat based on type
@@ -238,7 +238,7 @@ public fun IOPlugin.writeEnvelopeFile(
     envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat,
 ) {
     path.rewrite {
-        envelopeFormat.writeObject(this, envelope)
+        envelopeFormat.writeTo(this, envelope)
     }
 }
 

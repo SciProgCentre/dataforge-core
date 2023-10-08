@@ -43,7 +43,7 @@ public class TaggedEnvelopeFormat(
         write(END_SEQUENCE)
     }
 
-    override fun writeObject(
+    override fun writeTo(
         sink: Sink,
         obj: Envelope,
     ) {
@@ -65,7 +65,7 @@ public class TaggedEnvelopeFormat(
      * @param source an input to read from
      * @param formats a collection of meta formats to resolve
      */
-    override fun readObject(source: Source): Envelope {
+    override fun readFrom(source: Source): Envelope {
         val tag = source.readTag(this.version)
 
         val metaFormat = io.resolveMetaFormat(tag.metaFormatKey)
@@ -73,14 +73,14 @@ public class TaggedEnvelopeFormat(
 
         val metaBinary = source.readBinary(tag.metaSize.toInt())
 
-        val meta: Meta = metaFormat.readObjectFrom(metaBinary)
+        val meta: Meta = metaFormat.readFrom(metaBinary)
 
         val data = source.readBinary(tag.dataSize.toInt())
 
         return SimpleEnvelope(meta, data)
     }
 
-    override fun readObject(binary: Binary): Envelope = binary.read {
+    override fun readFrom(binary: Binary): Envelope = binary.read {
         val tag = readTag(version)
 
         val metaFormat = io.resolveMetaFormat(tag.metaFormatKey)
@@ -88,7 +88,7 @@ public class TaggedEnvelopeFormat(
 
         val metaBinary = readBinary(tag.metaSize.toInt())
 
-        val meta: Meta = metaFormat.readObjectFrom(metaBinary)
+        val meta: Meta = metaFormat.readFrom(metaBinary)
 
 
         SimpleEnvelope(meta, binary.view((version.tagSize + tag.metaSize).toInt(), tag.dataSize.toInt()))
@@ -154,17 +154,17 @@ public class TaggedEnvelopeFormat(
 
         private val default by lazy { build(Global, Meta.EMPTY) }
 
-        override fun readObject(binary: Binary): Envelope =
-            default.run { readObject(binary) }
+        override fun readFrom(binary: Binary): Envelope =
+            default.run { readFrom(binary) }
 
-        override fun writeObject(
+        override fun writeTo(
             sink: Sink,
             obj: Envelope,
         ): Unit = default.run {
-            writeObject(sink, obj)
+            writeTo(sink, obj)
         }
 
-        override fun readObject(source: Source): Envelope = default.readObject(source)
+        override fun readFrom(source: Source): Envelope = default.readFrom(source)
     }
 
 }

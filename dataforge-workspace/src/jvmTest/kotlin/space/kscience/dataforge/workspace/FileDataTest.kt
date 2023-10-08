@@ -9,7 +9,10 @@ import kotlinx.io.writeString
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.data.*
-import space.kscience.dataforge.io.*
+import space.kscience.dataforge.io.Envelope
+import space.kscience.dataforge.io.IOFormat
+import space.kscience.dataforge.io.io
+import space.kscience.dataforge.io.readEnvelopeFile
 import space.kscience.dataforge.io.yaml.YamlPlugin
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.misc.DFExperimental
@@ -39,11 +42,11 @@ class FileDataTest {
     object StringIOFormat : IOFormat<String> {
         override val type: KType get() = typeOf<String>()
 
-        override fun writeObject(output: Sink, obj: String) {
-            output.writeString(obj)
+        override fun writeTo(sink: Sink, obj: String) {
+            sink.writeString(obj)
         }
 
-        override fun readObject(input: Source): String = input.readString()
+        override fun readFrom(source: Source): String = source.readString()
     }
 
     @Test

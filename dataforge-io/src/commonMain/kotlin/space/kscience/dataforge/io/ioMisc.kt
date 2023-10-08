@@ -57,7 +57,7 @@ public fun IOPlugin.readEnvelope(
     binary: Binary,
     readNonEnvelopes: Boolean = false,
     formatPicker: IOPlugin.(Binary) -> EnvelopeFormat? = IOPlugin::peekBinaryEnvelopeFormat,
-): Envelope = formatPicker(binary)?.readObject(binary) ?: if (readNonEnvelopes) {
+): Envelope = formatPicker(binary)?.readFrom(binary) ?: if (readNonEnvelopes) {
     // if no format accepts file, read it as binary
     Envelope(Meta.EMPTY, binary)
 } else error("Can't infer format for $binary")

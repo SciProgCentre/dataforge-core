@@ -23,9 +23,9 @@ public interface IOReader<out T> {
      */
     public val type: KType
 
-    public fun readObject(source: Source): T
+    public fun readFrom(source: Source): T
 
-    public fun readObject(binary: Binary): T = binary.read { readObject(this) }
+    public fun readFrom(binary: Binary): T = binary.read { readFrom(this) }
 
     public companion object {
         /**
@@ -34,9 +34,9 @@ public interface IOReader<out T> {
         public val binary: IOReader<Binary> = object : IOReader<Binary> {
             override val type: KType = typeOf<Binary>()
 
-            override fun readObject(source: Source): Binary = source.readByteArray().asBinary()
+            override fun readFrom(source: Source): Binary = source.readByteArray().asBinary()
 
-            override fun readObject(binary: Binary): Binary = binary
+            override fun readFrom(binary: Binary): Binary = binary
         }
     }
 }
@@ -44,11 +44,11 @@ public interface IOReader<out T> {
 public inline fun <reified T> IOReader(crossinline read: Source.() -> T): IOReader<T> = object : IOReader<T> {
     override val type: KType = typeOf<T>()
 
-    override fun readObject(source: Source): T = source.read()
+    override fun readFrom(source: Source): T = source.read()
 }
 
 public fun interface IOWriter<in T> {
-    public fun writeObject(sink: Sink, obj: T)
+    public fun writeTo(sink: Sink, obj: T)
 }
 
 /**
@@ -56,21 +56,20 @@ public fun interface IOWriter<in T> {
  */
 public interface IOFormat<T> : IOReader<T>, IOWriter<T>
 
-public fun <T : Any> Source.readObject(format: IOReader<T>): T = format.readObject(this@readObject)
-
-public fun <T : Any> IOFormat<T>.readObjectFrom(binary: Binary): T = binary.read {
-    readObject(this)
-}
+public fun <T : Any> Source.readWith(format: IOReader<T>): T = format.readFrom(this)
 
 /**
  * Read given binary as an object using given format
  */
 public fun <T : Any> Binary.readWith(format: IOReader<T>): T = read {
-    readObject(format)
+    readWith(format)
 }
 
-public fun <T : Any> Sink.writeObject(format: IOWriter<T>, obj: T): Unit =
-    format.writeObject(this@writeObject, obj)
+/**
+ * Write an object to the [Sink] with given [format]
+ */
+public fun <T : Any> Sink.writeWith(format: IOWriter<T>, obj: T): Unit =
+    format.writeTo(this, obj)
 
 
 @Type(IO_FORMAT_TYPE)
@@ -87,7 +86,7 @@ public interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
     }
 }
 
-public fun <T : Any> Binary(obj: T, format: IOWriter<T>): Binary = Binary { format.writeObject(this, obj) }
+public fun <T : Any> Binary(obj: T, format: IOWriter<T>): Binary = Binary { format.writeTo(this, obj) }
 
 public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
     override fun build(context: Context, meta: Meta): IOFormat<Double> = this
@@ -96,9 +95,9 @@ public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
 
     override val type: KType get() = typeOf<Double>()
 
-    override fun writeObject(sink: Sink, obj: Double) {
+    override fun writeTo(sink: Sink, obj: Double) {
         sink.writeLong(obj.toBits())
     }
 
-    override fun readObject(source: Source): Double = Double.fromBits(source.readLong())
+    override fun readFrom(source: Source): Double = Double.fromBits(source.readLong())
 }

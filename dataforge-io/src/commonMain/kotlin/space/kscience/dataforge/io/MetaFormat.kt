@@ -23,11 +23,11 @@ public interface MetaFormat : IOFormat<Meta> {
 
     override val type: KType get() = typeOf<Meta>()
 
-    override fun writeObject(sink: Sink, obj: Meta) {
+    override fun writeTo(sink: Sink, obj: Meta) {
         writeMeta(sink, obj, null)
     }
 
-    override fun readObject(source: Source): Meta = readMeta(source)
+    override fun readFrom(source: Source): Meta = readMeta(source)
 
     public fun writeMeta(
         sink: Sink,
@@ -57,13 +57,13 @@ public interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
 
 public fun Meta.toString(format: MetaFormat): String = ByteArray {
     format.run {
-        writeObject(this@ByteArray, this@toString)
+        writeTo(this@ByteArray, this@toString)
     }
 }.decodeToString()
 
 public fun Meta.toString(formatFactory: MetaFormatFactory): String = toString(formatFactory.build(Global, Meta.EMPTY))
 
-public fun MetaFormat.parse(str: String): Meta = readObject(StringSource(str).buffered())
+public fun MetaFormat.parse(str: String): Meta = readFrom(StringSource(str).buffered())
 
 public fun MetaFormatFactory.parse(str: String, formatMeta: Meta): Meta = build(Global, formatMeta).parse(str)
 

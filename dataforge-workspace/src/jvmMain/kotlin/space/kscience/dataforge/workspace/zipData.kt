@@ -28,7 +28,7 @@ private suspend fun <T : Any> ZipOutputStream.writeNode(
 
             //TODO remove additional copy
             val bytes = ByteArray {
-                writeObject(envelopeFormat, envelope)
+                writeWith(envelopeFormat, envelope)
             }
             write(bytes)
 

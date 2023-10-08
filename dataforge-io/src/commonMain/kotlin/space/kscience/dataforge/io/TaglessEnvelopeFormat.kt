@@ -28,7 +28,7 @@ public class TaglessEnvelopeFormat(
 //        writeFully("#? $key: $value;\r\n".encodeToByteArray())
 //    }
 
-    override fun writeObject(
+    override fun writeTo(
         sink: Sink,
         obj: Envelope,
     ) {
@@ -54,7 +54,7 @@ public class TaglessEnvelopeFormat(
         }
     }
 
-    override fun readObject(source: Source): Envelope {
+    override fun readFrom(source: Source): Envelope {
         //read preamble
         source.discardWithSeparator(
             TAGLESS_ENVELOPE_HEADER,
@@ -132,16 +132,16 @@ public class TaglessEnvelopeFormat(
 
         private val default by lazy { build(Global, Meta.EMPTY) }
 
-        override fun readObject(binary: Binary): Envelope = default.run { readObject(binary) }
+        override fun readFrom(binary: Binary): Envelope = default.run { readFrom(binary) }
 
-        override fun writeObject(
+        override fun writeTo(
             sink: Sink,
             obj: Envelope,
         ): Unit = default.run {
-            writeObject(sink, obj)
+            writeTo(sink, obj)
         }
 
-        override fun readObject(source: Source): Envelope = default.readObject(source)
+        override fun readFrom(source: Source): Envelope = default.readFrom(source)
 
         override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? {
             return try {
