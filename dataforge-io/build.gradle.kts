@@ -4,7 +4,7 @@ plugins {
 
 description = "IO module"
 
-val ioVersion = "0.2.0"
+val ioVersion = "0.2.1"
 
 kscience {
     jvm()
@@ -18,7 +18,6 @@ kscience {
         api(projects.dataforgeContext)
         api("org.jetbrains.kotlinx:kotlinx-io-core:$ioVersion")
         api("org.jetbrains.kotlinx:kotlinx-io-bytestring:$ioVersion")
-        //api("io.ktor:ktor-io:${KScienceVersions.ktorVersion}")
     }
 }
 

@@ -6,7 +6,8 @@
 - Added separate `Meta`, `SealedMeta` and `ObservableMutableMeta` builders.
 
 ### Changed
-- Kotlin 1.9
+- Kotlin 1.9.20.
+- Migrated from ktor-io to kotlinx-io.
 - `MutableMeta` builder now returns a simplified version of meta that does not hold listeners. 
 - Ktor-io is replaced with kotlinx-io.
 - More concise names for read/write methods in IO.
