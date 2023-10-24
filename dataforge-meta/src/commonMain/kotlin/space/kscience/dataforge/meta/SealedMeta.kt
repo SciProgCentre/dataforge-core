@@ -50,7 +50,7 @@ public fun Meta(value: Boolean): SealedMeta = Meta(value.asValue())
 
 
 /**
- * A lightweight mutable meta used to create [SealedMeta] instances without bothering with
+ * A lightweight mutable meta without an observability
  */
 @PublishedApi
 internal class MetaBuilder(

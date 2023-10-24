@@ -172,7 +172,7 @@ public fun Source.discardLine(
 /**
  * A [Source] based on [ByteArray]
  */
-public class ByteArraySource(
+internal class ByteArraySource(
     private val byteArray: ByteArray,
     private val offset: Int = 0,
     private val size: Int = byteArray.size - offset,
