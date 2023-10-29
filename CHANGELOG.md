@@ -6,6 +6,7 @@
 - Added separate `Meta`, `SealedMeta` and `ObservableMutableMeta` builders.
 
 ### Changed
+- Meta converter `metaToObject` returns a non-nullable type. Additional method `metaToObjectOrNull` for nullable return.
 - Kotlin 1.9.20.
 - Migrated from ktor-io to kotlinx-io.
 - `MutableMeta` builder now returns a simplified version of meta that does not hold listeners. 
