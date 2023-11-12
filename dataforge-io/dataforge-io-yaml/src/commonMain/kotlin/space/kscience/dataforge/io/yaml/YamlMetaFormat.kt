@@ -32,7 +32,7 @@ public fun Meta.toYaml(): YamlMap {
 private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: MetaDescriptor? = null) : Meta {
 
     override val value: Value?
-        get() = yamlMap.getStringOrNull(null)?.parseValue()
+        get() = yamlMap.getStringOrNull(null)?.let { Value.parse(it) }
 
     private fun buildItems(): Map<NameToken, Meta> {
         val map = LinkedHashMap<NameToken, Meta>()
@@ -43,13 +43,13 @@ private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: Met
             val token = NameToken(stringKey)
             when (value) {
                 YamlNull -> Meta(Null)
-                is YamlLiteral -> map[token] = Meta(value.content.parseValue())
+                is YamlLiteral -> map[token] = Meta(Value.parse(value.content))
                 is YamlMap -> map[token] = value.toMeta()
                 is YamlList -> if (value.all { it is YamlLiteral }) {
                     val listValue = ListValue(
                         value.map {
                             //We already checked that all values are primitives
-                            (it as YamlLiteral).content.parseValue()
+                            Value.parse((it as YamlLiteral).content)
                         }
                     )
                     map[token] = Meta(listValue)
@@ -75,7 +75,7 @@ private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: Met
 
 public fun YamlElement.toMeta(descriptor: MetaDescriptor? = null): Meta = when (this) {
     YamlNull -> Meta(Null)
-    is YamlLiteral -> Meta(content.parseValue())
+    is YamlLiteral -> Meta(Value.parse(content))
     is YamlMap -> toMeta()
     //We can't return multiple items therefore we create top level node
     is YamlList -> YamlMap(mapOf("@yamlArray" to this)).toMeta(descriptor)

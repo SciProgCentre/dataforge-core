@@ -88,10 +88,25 @@ public interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
 
 public fun <T : Any> Binary(obj: T, format: IOWriter<T>): Binary = Binary { format.writeTo(this, obj) }
 
+public object FloatIOFormat : IOFormat<Float>, IOFormatFactory<Float> {
+    override fun build(context: Context, meta: Meta): IOFormat<Float> = this
+
+    override val name: Name = "float32".asName()
+
+    override val type: KType get() = typeOf<Float>()
+
+    override fun writeTo(sink: Sink, obj: Float) {
+        sink.writeFloat(obj)
+    }
+
+    override fun readFrom(source: Source): Float = source.readFloat()
+}
+
+
 public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
     override fun build(context: Context, meta: Meta): IOFormat<Double> = this
 
-    override val name: Name = "double".asName()
+    override val name: Name = "float64".asName()
 
     override val type: KType get() = typeOf<Double>()
 
@@ -99,5 +114,5 @@ public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
         sink.writeLong(obj.toBits())
     }
 
-    override fun readFrom(source: Source): Double = Double.fromBits(source.readLong())
+    override fun readFrom(source: Source): Double = source.readDouble()
 }

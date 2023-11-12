@@ -64,6 +64,7 @@ public interface Value {
                         ListValue(list)
                     }
                 }
+
                 is DoubleArray -> value.asValue()
                 is IntArray -> value.asValue()
                 is FloatArray -> value.asValue()
@@ -75,6 +76,41 @@ public interface Value {
                 is CharSequence -> StringValue(value.toString())
                 else -> throw IllegalArgumentException("Unrecognized type of the object (${value::class}) converted to Value")
             }
+        }
+
+        /**
+         * Parse value from string. Double-quoted strings are parsed literally. true/false are parsed as booleans
+         */
+        public fun parse(string: String): Value {
+
+            //Trying to get integer
+            if (string.isEmpty() || string == Null.string) {
+                return Null
+            }
+
+            //string constants
+            if (string.startsWith("\"") && string.endsWith("\"")) {
+                return StringValue(string.substring(1, string.length - 2))
+            }
+
+            string.toIntOrNull()?.let {
+                return NumberValue(it)
+            }
+
+            string.toDoubleOrNull()?.let {
+                return NumberValue(it)
+            }
+
+            if ("true" == string) {
+                return True
+            }
+
+            if ("false" == string) {
+                return False
+            }
+
+            //Give up and return a StringValue
+            return StringValue(string)
         }
     }
 }
@@ -140,7 +176,7 @@ public class NumberValue(public val number: Number) : Value {
 
         val otherNumber = other.numberOrNull ?: return false
 
-        if(number == otherNumber) return true
+        if (number == otherNumber) return true
 
         //Do not change the order of comparison. On JS number is the instance of all types
         return when (numberOrNull) {
@@ -228,34 +264,5 @@ public fun <E : Enum<E>> E.asValue(): Value = EnumValue(this)
 /**
  * Create Value from String using the closest match conversion
  */
-public fun String.parseValue(): Value {
-
-    //Trying to get integer
-    if (isEmpty() || this == Null.string) {
-        return Null
-    }
-
-    //string constants
-    if (startsWith("\"") && endsWith("\"")) {
-        return StringValue(substring(1, length - 2))
-    }
-
-    toIntOrNull()?.let {
-        return NumberValue(it)
-    }
-
-    toDoubleOrNull()?.let {
-        return NumberValue(it)
-    }
-
-    if ("true" == this) {
-        return True
-    }
-
-    if ("false" == this) {
-        return False
-    }
-
-    //Give up and return a StringValue
-    return StringValue(this)
-}
+@Deprecated("Use Value.parse(this) instead", ReplaceWith("Value.parse(this)"))
+public fun String.parseValue(): Value = Value.parse(this)
