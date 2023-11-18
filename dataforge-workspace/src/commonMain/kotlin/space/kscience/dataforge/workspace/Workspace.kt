@@ -6,7 +6,7 @@ import space.kscience.dataforge.data.DataSet
 import space.kscience.dataforge.data.asSequence
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.misc.Type
+import space.kscience.dataforge.misc.DfId
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.provider.Provider
 
@@ -18,7 +18,7 @@ public interface DataSelector<T: Any>{
 /**
  * An environment for pull-mode computation
  */
-@Type(Workspace.TYPE)
+@DfId(Workspace.TYPE)
 public interface Workspace : ContextAware, Provider {
     /**
      * The whole data node for current workspace

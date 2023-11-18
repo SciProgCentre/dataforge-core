@@ -2,7 +2,7 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import space.kscience.dataforge.misc.Type
+import space.kscience.dataforge.misc.DfId
 import space.kscience.dataforge.misc.unsafeCast
 import space.kscience.dataforge.names.*
 import kotlin.jvm.JvmName
@@ -31,7 +31,7 @@ public fun interface MetaProvider : ValueProvider {
  * TODO add documentation
  * Same name siblings are supported via elements with the same [Name] but different indices.
  */
-@Type(Meta.TYPE)
+@DfId(Meta.TYPE)
 @Serializable(MetaSerializer::class)
 public interface Meta : MetaRepr, MetaProvider {
     public val value: Value?

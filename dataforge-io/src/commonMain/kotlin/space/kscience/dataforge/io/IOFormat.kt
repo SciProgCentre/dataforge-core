@@ -7,8 +7,8 @@ import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Factory
 import space.kscience.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.misc.DfId
 import space.kscience.dataforge.misc.Named
-import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import kotlin.reflect.KType
@@ -72,7 +72,7 @@ public fun <T : Any> Sink.writeWith(format: IOWriter<T>, obj: T): Unit =
     format.writeTo(this, obj)
 
 
-@Type(IO_FORMAT_TYPE)
+@DfId(IO_FORMAT_TYPE)
 public interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
     /**
      * Explicit type for dynamic type checks

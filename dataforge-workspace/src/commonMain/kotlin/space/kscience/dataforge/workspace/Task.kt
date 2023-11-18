@@ -9,7 +9,7 @@ import space.kscience.dataforge.meta.MetaRepr
 import space.kscience.dataforge.meta.Specification
 import space.kscience.dataforge.meta.descriptors.Described
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
-import space.kscience.dataforge.misc.Type
+import space.kscience.dataforge.misc.DfId
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.workspace.Task.Companion.TYPE
 import kotlin.reflect.KType
@@ -19,7 +19,7 @@ import kotlin.reflect.typeOf
  * A configurable task that could be executed on a workspace. The [TaskResult] represents a lazy result of the task.
  * In general no computations should be made until the result is called.
  */
-@Type(TYPE)
+@DfId(TYPE)
 public interface Task<out T : Any> : Described {
 
     /**

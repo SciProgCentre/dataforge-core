@@ -7,7 +7,7 @@ import space.kscience.dataforge.names.*
 /**
  * Restrictions on value in the node
  */
-public enum class ValueRequirement {
+public enum class ValueRestriction {
     /**
      * No restrictions
      */
@@ -26,26 +26,25 @@ public enum class ValueRequirement {
 
 /**
  * The descriptor for a meta
- * @param info description text
+ * @param description description text
  * @param children child descriptors for this node
  * @param multiple True if same name siblings with this name are allowed
- * @param valueRequirement The requirements for node content
+ * @param valueRestriction The requirements for node content
  * @param valueTypes list of allowed types for [Meta.value], null if all values are allowed.
  *  Empty list means that no value should be present in this node.
  * @param indexKey An index field by which this node is identified in case of same name siblings construct
  * @param defaultValue the default [Meta.value] for the node
- * @param attributes additional attributes of this descriptor. For example validation and widget parameters
+ * @param attributes additional attributes of this descriptor. For example, validation and widget parameters
  */
 @Serializable
 public data class MetaDescriptor(
-    public val info: String? = null,
+    public val description: String? = null,
     public val children: Map<String, MetaDescriptor> = emptyMap(),
     public val multiple: Boolean = false,
-    public val valueRequirement: ValueRequirement = ValueRequirement.NONE,
+    public val valueRestriction: ValueRestriction = ValueRestriction.NONE,
     public val valueTypes: List<ValueType>? = null,
     public val indexKey: String = Meta.INDEX_KEY,
     public val defaultValue: Value? = null,
-    public val readOnly: Boolean = false,
     public val attributes: Meta = Meta.EMPTY,
 ) {
     /**
@@ -63,11 +62,12 @@ public data class MetaDescriptor(
     }
 
     public companion object {
+        public val EMPTY: MetaDescriptor = MetaDescriptor("Generic meta tree")
         internal const val ALLOWED_VALUES_KEY = "allowedValues"
     }
 }
 
-public val MetaDescriptor.required: Boolean get() = valueRequirement == ValueRequirement.REQUIRED || children.values.any { required }
+public val MetaDescriptor.required: Boolean get() = valueRestriction == ValueRestriction.REQUIRED || children.values.any { required }
 
 public val MetaDescriptor.allowedValues: List<Value>? get() = attributes[MetaDescriptor.ALLOWED_VALUES_KEY]?.value?.list
 
@@ -80,9 +80,9 @@ public operator fun MetaDescriptor.get(name: Name): MetaDescriptor? = when (name
 public operator fun MetaDescriptor.get(name: String): MetaDescriptor? = get(name.parseAsName(true))
 
 public fun MetaDescriptor.validate(value: Value?): Boolean = if (value == null) {
-    valueRequirement != ValueRequirement.REQUIRED
+    valueRestriction != ValueRestriction.REQUIRED
 } else {
-    if (valueRequirement == ValueRequirement.ABSENT) false
+    if (valueRestriction == ValueRestriction.ABSENT) false
     else {
         (valueTypes == null || value.type in valueTypes) && (allowedValues?.let { value in it } ?: true)
     }

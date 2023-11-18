@@ -2,7 +2,7 @@ package space.kscience.dataforge.data
 
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFInternal
-import space.kscience.dataforge.misc.Type
+import space.kscience.dataforge.misc.DfId
 import space.kscience.dataforge.names.*
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -31,7 +31,7 @@ public val <T : Any> DataTreeItem<T>.type: KType
 /**
  * A tree-like [DataSet] grouped into the node. All data inside the node must inherit its type
  */
-@Type(DataTree.TYPE)
+@DfId(DataTree.TYPE)
 public interface DataTree<out T : Any> : DataSet<T> {
 
     /**

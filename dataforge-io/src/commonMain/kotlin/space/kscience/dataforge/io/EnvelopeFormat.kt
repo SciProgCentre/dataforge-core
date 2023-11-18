@@ -4,7 +4,7 @@ import kotlinx.io.Source
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.io.EnvelopeFormatFactory.Companion.ENVELOPE_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.misc.Type
+import space.kscience.dataforge.misc.DfId
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import kotlin.reflect.KType
@@ -17,7 +17,7 @@ public interface EnvelopeFormat : IOFormat<Envelope> {
 
 public fun EnvelopeFormat.read(input: Source): Envelope = readFrom(input)
 
-@Type(ENVELOPE_FORMAT_TYPE)
+@DfId(ENVELOPE_FORMAT_TYPE)
 public interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeFormat {
     override val type: KType get() = typeOf<Envelope>()
 

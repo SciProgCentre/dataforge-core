@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Obligatory `type: KType` and `descriptor` property for `MetaConverters`
 - Added separate `Meta`, `SealedMeta` and `ObservableMutableMeta` builders.
 
 ### Changed
