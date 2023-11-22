@@ -12,6 +12,7 @@
 - Migrated from ktor-io to kotlinx-io.
 - `MutableMeta` builder now returns a simplified version of meta that does not hold listeners.
 - More concise names for read/write methods in IO.
+- Remove unnecessary confusion with `get`/`getMeta` by removing `getMeta` from the interface.
 
 ### Deprecated
 - `String.parseValue` is replaced with `Value.parse`

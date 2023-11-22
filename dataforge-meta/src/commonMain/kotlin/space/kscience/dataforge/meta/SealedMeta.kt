@@ -62,7 +62,7 @@ internal class MetaBuilder(
         val existing = get(name) as? MetaBuilder
         return if (existing == null) {
             val newItem = MetaBuilder()
-            setMeta(name, newItem)
+            set(name, newItem)
             newItem
         } else {
             existing
@@ -75,7 +75,7 @@ internal class MetaBuilder(
     )
 
 
-    override fun setMeta(name: Name, node: Meta?) {
+    override fun set(name: Name, node: Meta?) {
         when (name.length) {
             0 -> error("Can't set a meta with empty name")
             1 -> {
@@ -89,7 +89,7 @@ internal class MetaBuilder(
             }
 
             else -> {
-                getOrCreate(name.first().asName()).setMeta(name.cutFirst(), node)
+                getOrCreate(name.first().asName()).set(name.cutFirst(), node)
             }
         }
     }

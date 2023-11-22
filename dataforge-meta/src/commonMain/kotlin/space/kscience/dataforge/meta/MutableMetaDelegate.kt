@@ -11,31 +11,31 @@ import kotlin.reflect.KProperty
 public fun MutableMetaProvider.node(key: Name? = null): ReadWriteProperty<Any?, Meta?> =
     object : ReadWriteProperty<Any?, Meta?> {
         override fun getValue(thisRef: Any?, property: KProperty<*>): Meta? {
-            return getMeta(key ?: property.name.asName())
+            return get(key ?: property.name.asName())
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Meta?) {
             val name = key ?: property.name.asName()
-            setMeta(name, value)
+            set(name, value)
         }
     }
 
 public fun <T> MutableMetaProvider.node(key: Name? = null, converter: MetaConverter<T>): ReadWriteProperty<Any?, T?> =
     object : ReadWriteProperty<Any?, T?> {
         override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-            return getMeta(key ?: property.name.asName())?.let { converter.metaToObject(it) }
+            return get(key ?: property.name.asName())?.let { converter.metaToObject(it) }
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
             val name = key ?: property.name.asName()
-            setMeta(name, value?.let { converter.objectToMeta(it) })
+            set(name, value?.let { converter.objectToMeta(it) })
         }
     }
 
 public fun MutableMetaProvider.value(key: Name? = null): ReadWriteProperty<Any?, Value?> =
     object : ReadWriteProperty<Any?, Value?> {
         override fun getValue(thisRef: Any?, property: KProperty<*>): Value? =
-            getMeta(key ?: property.name.asName())?.value
+            get(key ?: property.name.asName())?.value
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Value?) {
             setValue(key ?: property.name.asName(), value)
@@ -48,7 +48,7 @@ public fun <T> MutableMetaProvider.value(
     reader: (Value?) -> T
 ): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T =
-        reader(getMeta(key ?: property.name.asName())?.value)
+        reader(get(key ?: property.name.asName())?.value)
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         setValue(key ?: property.name.asName(), writer(value))

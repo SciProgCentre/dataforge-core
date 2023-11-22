@@ -17,8 +17,8 @@ private class ObservableMetaWrapper(
             ObservableMetaWrapper(root, absoluteName + it, listeners)
         }
 
-    override fun getMeta(name: Name): ObservableMutableMeta? =
-        root.getMeta(name)?.let { ObservableMetaWrapper(root, this.absoluteName + name, listeners) }
+    override fun get(name: Name): ObservableMutableMeta? =
+        root.get(name)?.let { ObservableMetaWrapper(root, this.absoluteName + name, listeners) }
 
     @ThreadSafe
     override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
@@ -49,11 +49,11 @@ private class ObservableMetaWrapper(
     override fun getOrCreate(name: Name): ObservableMutableMeta =
         ObservableMetaWrapper(root, this.absoluteName + name, listeners)
 
-    override fun setMeta(name: Name, node: Meta?) {
+    override fun set(name: Name, node: Meta?) {
         val oldMeta = get(name)
         //don't forget to remove listener
         oldMeta?.removeListener(this)
-        root.setMeta(absoluteName + name, node)
+        root.set(absoluteName + name, node)
         if (oldMeta != node) {
             invalidate(name)
         }
@@ -69,7 +69,7 @@ private class ObservableMetaWrapper(
     override fun attach(name: Name, node: ObservableMutableMeta) {
         set(name, node)
         node.onChange(this) { changeName ->
-            setMeta(name + changeName, this[changeName])
+            set(name + changeName, this[changeName])
         }
     }
 }

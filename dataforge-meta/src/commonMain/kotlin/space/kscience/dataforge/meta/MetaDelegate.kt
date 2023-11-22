@@ -8,28 +8,28 @@ import kotlin.properties.ReadOnlyProperty
 /* Meta delegates */
 
 public fun MetaProvider.node(key: Name? = null): ReadOnlyProperty<Any?, Meta?> = ReadOnlyProperty { _, property ->
-    getMeta(key ?: property.name.asName())
+    get(key ?: property.name.asName())
 }
 
 public fun <T> MetaProvider.node(
     key: Name? = null,
     converter: MetaConverter<T>
 ): ReadOnlyProperty<Any?, T?> = ReadOnlyProperty { _, property ->
-    getMeta(key ?: property.name.asName())?.let { converter.metaToObject(it) }
+    get(key ?: property.name.asName())?.let { converter.metaToObject(it) }
 }
 
 /**
  * A property delegate that uses custom key
  */
 public fun MetaProvider.value(key: Name? = null): ReadOnlyProperty<Any?, Value?> = ReadOnlyProperty { _, property ->
-    getMeta(key ?: property.name.asName())?.value
+    get(key ?: property.name.asName())?.value
 }
 
 public fun <R> MetaProvider.value(
     key: Name? = null,
     reader: (Value?) -> R
 ): ReadOnlyProperty<Any?, R> = ReadOnlyProperty { _, property ->
-    reader(getMeta(key ?: property.name.asName())?.value)
+    reader(get(key ?: property.name.asName())?.value)
 }
 
 //TODO add caching for sealed nodes

@@ -36,7 +36,7 @@ public interface ObservableMeta : Meta {
 public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTypedMeta<ObservableMutableMeta> {
     override fun getOrCreate(name: Name): ObservableMutableMeta
 
-    override fun getMeta(name: Name): ObservableMutableMeta? {
+    override fun get(name: Name): ObservableMutableMeta? {
         tailrec fun ObservableMutableMeta.find(name: Name): ObservableMutableMeta? = if (name.isEmpty()) {
             this
         } else {
