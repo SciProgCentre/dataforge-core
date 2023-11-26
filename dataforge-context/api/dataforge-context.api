@@ -195,7 +195,6 @@ public final class space/kscience/dataforge/context/PluginManager : java/lang/It
 public final class space/kscience/dataforge/context/PluginTag : space/kscience/dataforge/meta/MetaRepr {
 	public static final field Companion Lspace/kscience/dataforge/context/PluginTag$Companion;
 	public static final field DATAFORGE_GROUP Ljava/lang/String;
-	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -211,7 +210,6 @@ public final class space/kscience/dataforge/context/PluginTag : space/kscience/d
 	public final fun matches (Lspace/kscience/dataforge/context/PluginTag;)Z
 	public fun toMeta ()Lspace/kscience/dataforge/meta/Meta;
 	public fun toString ()Ljava/lang/String;
-	public static final synthetic fun write$Self (Lspace/kscience/dataforge/context/PluginTag;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class space/kscience/dataforge/context/PluginTag$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
