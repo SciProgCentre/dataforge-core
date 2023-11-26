@@ -81,7 +81,7 @@ public fun JsonPrimitive.toValue(descriptor: MetaDescriptor?): Value = when (thi
             content.asValue()
         } else {
             //consider using LazyParse
-            content.parseValue()
+            Value.parse(content)
         }
     }
 }

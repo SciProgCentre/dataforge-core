@@ -1,10 +1,10 @@
-import space.kscience.gradle.KScienceVersions
-
 plugins {
     id("space.kscience.gradle.mpp")
 }
 
 description = "IO module"
+
+val ioVersion = "0.2.1"
 
 kscience {
     jvm()
@@ -15,11 +15,12 @@ kscience {
         cbor()
     }
     dependencies {
-        api(project(":dataforge-context"))
-        api("io.ktor:ktor-io:${KScienceVersions.ktorVersion}")
+        api(projects.dataforgeContext)
+        api("org.jetbrains.kotlinx:kotlinx-io-core:$ioVersion")
+        api("org.jetbrains.kotlinx:kotlinx-io-bytestring:$ioVersion")
     }
 }
 
-readme {
-    maturity = space.kscience.gradle.Maturity.PROTOTYPE
+readme{
+    maturity = space.kscience.gradle.Maturity.EXPERIMENTAL
 }

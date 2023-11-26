@@ -10,14 +10,18 @@ kscience{
     useSerialization{
         protobuf()
     }
-    dependencies {
-        api(projects.dataforgeContext)
-        api(projects.dataforgeData)
-        api(projects.dataforgeIo)
+    commonMain{
+        dependencies {
+            api(projects.dataforgeContext)
+            api(projects.dataforgeData)
+            api(projects.dataforgeIo)
+        }
     }
-    dependencies(jvmTest){
-        implementation(spclibs.logback.classic)
-        implementation(projects.dataforgeIo.dataforgeIoYaml)
+    jvmTest{
+        dependencies {
+            implementation(spclibs.logback.classic)
+            implementation(projects.dataforgeIo.dataforgeIoYaml)
+        }
     }
 }
 

@@ -1,7 +1,8 @@
 package space.kscience.dataforge.properties
 
 
-import space.kscience.dataforge.meta.*
+import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.ObservableMutableMeta
 import space.kscience.dataforge.meta.transformations.MetaConverter
 import space.kscience.dataforge.meta.transformations.nullableMetaToObject
 import space.kscience.dataforge.meta.transformations.nullableObjectToMeta
@@ -24,7 +25,7 @@ public class MetaProperty<T : Any>(
 
     override fun onChange(owner: Any?, callback: (T?) -> Unit) {
         meta.onChange(owner) { name ->
-            if (name.startsWith(this@MetaProperty.name)) callback(converter.nullableMetaToObject(get(name)))
+            if (name.startsWith(this@MetaProperty.name)) callback(converter.nullableMetaToObject(this[name]))
         }
     }
 

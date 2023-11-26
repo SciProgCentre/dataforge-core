@@ -45,9 +45,9 @@ public final class space/kscience/dataforge/meta/False : space/kscience/dataforg
 
 public final class space/kscience/dataforge/meta/JsonMetaKt {
 	public static final fun getJSON_ARRAY_KEY (Lspace/kscience/dataforge/meta/Meta$Companion;)Ljava/lang/String;
-	public static final fun toJson (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lkotlinx/serialization/json/JsonObject;
+	public static final fun toJson (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lkotlinx/serialization/json/JsonElement;
 	public static final fun toJson (Lspace/kscience/dataforge/meta/Value;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lkotlinx/serialization/json/JsonElement;
-	public static synthetic fun toJson$default (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonObject;
+	public static synthetic fun toJson$default (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonElement;
 	public static synthetic fun toJson$default (Lspace/kscience/dataforge/meta/Value;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonElement;
 	public static final fun toMeta (Lkotlinx/serialization/json/JsonElement;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lspace/kscience/dataforge/meta/SealedMeta;
 	public static final fun toMeta (Lkotlinx/serialization/json/JsonObject;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lspace/kscience/dataforge/meta/SealedMeta;
@@ -59,11 +59,11 @@ public final class space/kscience/dataforge/meta/JsonMetaKt {
 public final class space/kscience/dataforge/meta/Laminate : space/kscience/dataforge/meta/TypedMeta {
 	public static final field Companion Lspace/kscience/dataforge/meta/Laminate$Companion;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Laminate;
+	public synthetic fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
+	public synthetic fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/TypedMeta;
 	public fun getItems ()Ljava/util/Map;
 	public final fun getLayers ()Ljava/util/List;
-	public fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Laminate;
-	public synthetic fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
-	public synthetic fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/TypedMeta;
 	public fun getValue ()Lspace/kscience/dataforge/meta/Value;
 	public fun hashCode ()I
 	public final fun merge ()Lspace/kscience/dataforge/meta/SealedMeta;
@@ -122,8 +122,8 @@ public abstract interface class space/kscience/dataforge/meta/Meta : space/kscie
 	public static final field TYPE Ljava/lang/String;
 	public static final field VALUE_KEY Ljava/lang/String;
 	public abstract fun equals (Ljava/lang/Object;)Z
+	public fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
 	public abstract fun getItems ()Ljava/util/Map;
-	public fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
 	public abstract fun getValue ()Lspace/kscience/dataforge/meta/Value;
 	public abstract fun hashCode ()I
 	public fun toMeta ()Lspace/kscience/dataforge/meta/Meta;
@@ -137,10 +137,26 @@ public final class space/kscience/dataforge/meta/Meta$Companion {
 	public final fun equals (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/Meta;)Z
 	public final fun getEMPTY ()Lspace/kscience/dataforge/meta/Meta;
 	public final fun hashCode (Lspace/kscience/dataforge/meta/Meta;)I
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 	public final fun toString (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/String;
 }
 
-public abstract interface annotation class space/kscience/dataforge/meta/MetaBuilder : java/lang/annotation/Annotation {
+public final class space/kscience/dataforge/meta/MetaBuilder : space/kscience/dataforge/meta/MutableMeta {
+	public fun <init> ()V
+	public fun <init> (Lspace/kscience/dataforge/meta/Value;Ljava/util/Map;)V
+	public synthetic fun <init> (Lspace/kscience/dataforge/meta/Value;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getItems ()Ljava/util/Map;
+	public fun getOrCreate (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MetaBuilder;
+	public synthetic fun getOrCreate (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
+	public fun getValue ()Lspace/kscience/dataforge/meta/Value;
+	public fun hashCode ()I
+	public fun set (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Meta;)V
+	public fun setValue (Lspace/kscience/dataforge/meta/Value;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface annotation class space/kscience/dataforge/meta/MetaBuilderMarker : java/lang/annotation/Annotation {
 }
 
 public final class space/kscience/dataforge/meta/MetaDelegateKt {
@@ -204,11 +220,7 @@ public final class space/kscience/dataforge/meta/MetaKt {
 	public static final fun getIndexed (Lspace/kscience/dataforge/meta/TypedMeta;Lspace/kscience/dataforge/names/Name;)Ljava/util/Map;
 	public static final fun getInt (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Integer;
 	public static final fun getLong (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Long;
-	public static final synthetic fun getNonNullable (Lspace/kscience/dataforge/meta/Meta;Ljava/lang/String;)Lspace/kscience/dataforge/meta/Meta;
-	public static final synthetic fun getNonNullable (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
 	public static final synthetic fun getNonNullable (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/names/NameToken;)Lspace/kscience/dataforge/meta/Meta;
-	public static final synthetic fun getNonNullable (Lspace/kscience/dataforge/meta/TypedMeta;Ljava/lang/String;)Lspace/kscience/dataforge/meta/TypedMeta;
-	public static final synthetic fun getNonNullable (Lspace/kscience/dataforge/meta/TypedMeta;Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/TypedMeta;
 	public static final fun getNumber (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Number;
 	public static final fun getSelf (Lspace/kscience/dataforge/meta/TypedMeta;)Lspace/kscience/dataforge/meta/TypedMeta;
 	public static final fun getShort (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Short;
@@ -223,7 +235,7 @@ public final class space/kscience/dataforge/meta/MetaKt {
 }
 
 public abstract interface class space/kscience/dataforge/meta/MetaProvider : space/kscience/dataforge/meta/ValueProvider {
-	public abstract fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
+	public abstract fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
 	public fun getValue (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Value;
 }
 
@@ -241,9 +253,10 @@ public final class space/kscience/dataforge/meta/MetaSerializer : kotlinx/serial
 }
 
 public abstract interface class space/kscience/dataforge/meta/MutableMeta : space/kscience/dataforge/meta/Meta, space/kscience/dataforge/meta/MutableMetaProvider {
+	public static final field Companion Lspace/kscience/dataforge/meta/MutableMeta$Companion;
+	public synthetic fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
+	public fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
 	public abstract fun getItems ()Ljava/util/Map;
-	public synthetic fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
-	public fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
 	public abstract fun getOrCreate (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
 	public abstract fun getValue ()Lspace/kscience/dataforge/meta/Value;
 	public fun put (Ljava/lang/String;Ljava/lang/Enum;)V
@@ -267,6 +280,10 @@ public abstract interface class space/kscience/dataforge/meta/MutableMeta : spac
 	public fun putIndexed (Lspace/kscience/dataforge/names/Name;Ljava/lang/Iterable;)V
 	public abstract fun setValue (Lspace/kscience/dataforge/meta/Value;)V
 	public fun setValue (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Value;)V
+}
+
+public final class space/kscience/dataforge/meta/MutableMeta$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class space/kscience/dataforge/meta/MutableMetaDelegateKt {
@@ -325,9 +342,9 @@ public final class space/kscience/dataforge/meta/MutableMetaDelegateKt {
 }
 
 public final class space/kscience/dataforge/meta/MutableMetaKt {
-	public static final fun MutableMeta ()Lspace/kscience/dataforge/meta/ObservableMutableMeta;
-	public static final fun MutableMeta (Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/ObservableMutableMeta;
-	public static synthetic fun MutableMeta$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/ObservableMutableMeta;
+	public static final fun ObservableMutableMeta ()Lspace/kscience/dataforge/meta/ObservableMutableMeta;
+	public static final fun ObservableMutableMeta (Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/ObservableMutableMeta;
+	public static synthetic fun ObservableMutableMeta$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/ObservableMutableMeta;
 	public static final fun append (Lspace/kscience/dataforge/meta/MutableMeta;Ljava/lang/String;Lspace/kscience/dataforge/meta/Meta;)V
 	public static final fun append (Lspace/kscience/dataforge/meta/MutableMeta;Ljava/lang/String;Lspace/kscience/dataforge/meta/Value;)V
 	public static final fun append (Lspace/kscience/dataforge/meta/MutableMeta;Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Meta;)V
@@ -343,7 +360,6 @@ public final class space/kscience/dataforge/meta/MutableMetaKt {
 	public static final fun set (Lspace/kscience/dataforge/meta/MutableMetaProvider;Ljava/lang/String;Ljava/lang/Iterable;)V
 	public static final fun set (Lspace/kscience/dataforge/meta/MutableMetaProvider;Ljava/lang/String;Lspace/kscience/dataforge/meta/Meta;)V
 	public static final fun set (Lspace/kscience/dataforge/meta/MutableMetaProvider;Lspace/kscience/dataforge/names/Name;Ljava/lang/Iterable;)V
-	public static final fun set (Lspace/kscience/dataforge/meta/MutableMetaProvider;Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Meta;)V
 	public static final fun set (Lspace/kscience/dataforge/meta/MutableMetaProvider;Lspace/kscience/dataforge/names/NameToken;Lspace/kscience/dataforge/meta/Meta;)V
 	public static final fun set (Lspace/kscience/dataforge/meta/MutableTypedMeta;Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Value;)V
 	public static final fun set (Lspace/kscience/dataforge/meta/MutableValueProvider;Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Value;)V
@@ -355,8 +371,8 @@ public final class space/kscience/dataforge/meta/MutableMetaKt {
 }
 
 public abstract interface class space/kscience/dataforge/meta/MutableMetaProvider : space/kscience/dataforge/meta/MetaProvider, space/kscience/dataforge/meta/MutableValueProvider {
-	public abstract fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
-	public abstract fun setMeta (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Meta;)V
+	public abstract fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
+	public abstract fun set (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Meta;)V
 	public abstract fun setValue (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Value;)V
 }
 
@@ -370,7 +386,7 @@ public final class space/kscience/dataforge/meta/MutableMetaSerializer : kotlinx
 }
 
 public abstract interface class space/kscience/dataforge/meta/MutableTypedMeta : space/kscience/dataforge/meta/MutableMeta, space/kscience/dataforge/meta/TypedMeta {
-	public abstract fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableTypedMeta;
+	public abstract fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableTypedMeta;
 	public abstract fun getOrCreate (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableTypedMeta;
 }
 
@@ -413,11 +429,11 @@ public final class space/kscience/dataforge/meta/ObservableMetaWrapperKt {
 }
 
 public abstract interface class space/kscience/dataforge/meta/ObservableMutableMeta : space/kscience/dataforge/meta/MutableMeta, space/kscience/dataforge/meta/MutableTypedMeta, space/kscience/dataforge/meta/ObservableMeta {
-	public synthetic fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
-	public synthetic fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
-	public synthetic fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableTypedMeta;
-	public fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/ObservableMutableMeta;
-	public synthetic fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/TypedMeta;
+	public synthetic fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
+	public synthetic fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
+	public synthetic fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableTypedMeta;
+	public fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/ObservableMutableMeta;
+	public synthetic fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/TypedMeta;
 	public abstract fun getOrCreate (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/ObservableMutableMeta;
 }
 
@@ -429,12 +445,12 @@ public abstract interface class space/kscience/dataforge/meta/ReadOnlySpecificat
 
 public class space/kscience/dataforge/meta/Scheme : space/kscience/dataforge/meta/Configurable, space/kscience/dataforge/meta/MetaRepr, space/kscience/dataforge/meta/MutableMetaProvider, space/kscience/dataforge/meta/descriptors/Described {
 	public fun <init> ()V
+	public synthetic fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
+	public fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
 	public final fun getDescriptor ()Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;
 	public synthetic fun getMeta ()Lspace/kscience/dataforge/meta/MutableMeta;
 	public final fun getMeta ()Lspace/kscience/dataforge/meta/ObservableMutableMeta;
-	public synthetic fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
-	public fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
-	public fun setMeta (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Meta;)V
+	public fun set (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Meta;)V
 	public fun setValue (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/Value;)V
 	public fun toMeta ()Lspace/kscience/dataforge/meta/Laminate;
 	public synthetic fun toMeta ()Lspace/kscience/dataforge/meta/Meta;
@@ -463,13 +479,12 @@ public class space/kscience/dataforge/meta/SchemeSpec : space/kscience/dataforge
 
 public final class space/kscience/dataforge/meta/SealedMeta : space/kscience/dataforge/meta/TypedMeta {
 	public static final field Companion Lspace/kscience/dataforge/meta/SealedMeta$Companion;
-	public synthetic fun <init> (ILspace/kscience/dataforge/meta/Value;Ljava/util/Map;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Lspace/kscience/dataforge/meta/Value;Ljava/util/Map;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getItems ()Ljava/util/Map;
 	public fun getValue ()Lspace/kscience/dataforge/meta/Value;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final synthetic fun write$Self (Lspace/kscience/dataforge/meta/SealedMeta;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class space/kscience/dataforge/meta/SealedMeta$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -490,9 +505,13 @@ public final class space/kscience/dataforge/meta/SealedMeta$Companion {
 public final class space/kscience/dataforge/meta/SealedMetaKt {
 	public static final fun Meta (Ljava/lang/Number;)Lspace/kscience/dataforge/meta/SealedMeta;
 	public static final fun Meta (Ljava/lang/String;)Lspace/kscience/dataforge/meta/SealedMeta;
-	public static final fun Meta (Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/SealedMeta;
+	public static final fun Meta (Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/Meta;
 	public static final fun Meta (Lspace/kscience/dataforge/meta/Value;)Lspace/kscience/dataforge/meta/SealedMeta;
 	public static final fun Meta (Z)Lspace/kscience/dataforge/meta/SealedMeta;
+	public static final fun MutableMeta ()Lspace/kscience/dataforge/meta/MutableMeta;
+	public static final fun MutableMeta (Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/MutableMeta;
+	public static synthetic fun MutableMeta$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/MutableMeta;
+	public static final fun SealedMeta (Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/SealedMeta;
 	public static final fun seal (Lspace/kscience/dataforge/meta/Meta;)Lspace/kscience/dataforge/meta/SealedMeta;
 }
 
@@ -541,9 +560,9 @@ public final class space/kscience/dataforge/meta/True : space/kscience/dataforge
 }
 
 public abstract interface class space/kscience/dataforge/meta/TypedMeta : space/kscience/dataforge/meta/Meta {
+	public synthetic fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
+	public fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/TypedMeta;
 	public abstract fun getItems ()Ljava/util/Map;
-	public synthetic fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
-	public fun getMeta (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/TypedMeta;
 	public fun toMeta ()Lspace/kscience/dataforge/meta/Meta;
 }
 
@@ -561,6 +580,8 @@ public abstract interface class space/kscience/dataforge/meta/Value {
 public final class space/kscience/dataforge/meta/Value$Companion {
 	public static final field TYPE Ljava/lang/String;
 	public final fun of (Ljava/lang/Object;)Lspace/kscience/dataforge/meta/Value;
+	public final fun parse (Ljava/lang/String;)Lspace/kscience/dataforge/meta/Value;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class space/kscience/dataforge/meta/ValueExtensionsKt {
@@ -635,19 +656,9 @@ public final class space/kscience/dataforge/meta/ValueType : java/lang/Enum {
 	public static final field NULL Lspace/kscience/dataforge/meta/ValueType;
 	public static final field NUMBER Lspace/kscience/dataforge/meta/ValueType;
 	public static final field STRING Lspace/kscience/dataforge/meta/ValueType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lspace/kscience/dataforge/meta/ValueType;
 	public static fun values ()[Lspace/kscience/dataforge/meta/ValueType;
-}
-
-public final class space/kscience/dataforge/meta/ValueType$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lspace/kscience/dataforge/meta/ValueType$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lspace/kscience/dataforge/meta/ValueType;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lspace/kscience/dataforge/meta/ValueType;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class space/kscience/dataforge/meta/ValueType$Companion {
@@ -661,34 +672,30 @@ public abstract interface class space/kscience/dataforge/meta/descriptors/Descri
 public final class space/kscience/dataforge/meta/descriptors/MetaDescriptor {
 	public static final field Companion Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor$Companion;
 	public fun <init> ()V
-	public synthetic fun <init> (ILjava/lang/String;Ljava/util/Map;ZLspace/kscience/dataforge/meta/descriptors/ValueRequirement;Ljava/util/List;Ljava/lang/String;Lspace/kscience/dataforge/meta/Value;ZLspace/kscience/dataforge/meta/Meta;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public fun <init> (Ljava/lang/String;Ljava/util/Map;ZLspace/kscience/dataforge/meta/descriptors/ValueRequirement;Ljava/util/List;Ljava/lang/String;Lspace/kscience/dataforge/meta/Value;ZLspace/kscience/dataforge/meta/Meta;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;ZLspace/kscience/dataforge/meta/descriptors/ValueRequirement;Ljava/util/List;Ljava/lang/String;Lspace/kscience/dataforge/meta/Value;ZLspace/kscience/dataforge/meta/Meta;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;ZLspace/kscience/dataforge/meta/descriptors/ValueRestriction;Ljava/util/List;Ljava/lang/String;Lspace/kscience/dataforge/meta/Value;Lspace/kscience/dataforge/meta/Meta;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;ZLspace/kscience/dataforge/meta/descriptors/ValueRestriction;Ljava/util/List;Ljava/lang/String;Lspace/kscience/dataforge/meta/Value;Lspace/kscience/dataforge/meta/Meta;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/Map;
 	public final fun component3 ()Z
-	public final fun component4 ()Lspace/kscience/dataforge/meta/descriptors/ValueRequirement;
+	public final fun component4 ()Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
 	public final fun component5 ()Ljava/util/List;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Lspace/kscience/dataforge/meta/Value;
-	public final fun component8 ()Z
-	public final fun component9 ()Lspace/kscience/dataforge/meta/Meta;
-	public final fun copy (Ljava/lang/String;Ljava/util/Map;ZLspace/kscience/dataforge/meta/descriptors/ValueRequirement;Ljava/util/List;Ljava/lang/String;Lspace/kscience/dataforge/meta/Value;ZLspace/kscience/dataforge/meta/Meta;)Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;
-	public static synthetic fun copy$default (Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;Ljava/lang/String;Ljava/util/Map;ZLspace/kscience/dataforge/meta/descriptors/ValueRequirement;Ljava/util/List;Ljava/lang/String;Lspace/kscience/dataforge/meta/Value;ZLspace/kscience/dataforge/meta/Meta;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;
+	public final fun component8 ()Lspace/kscience/dataforge/meta/Meta;
+	public final fun copy (Ljava/lang/String;Ljava/util/Map;ZLspace/kscience/dataforge/meta/descriptors/ValueRestriction;Ljava/util/List;Ljava/lang/String;Lspace/kscience/dataforge/meta/Value;Lspace/kscience/dataforge/meta/Meta;)Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;
+	public static synthetic fun copy$default (Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;Ljava/lang/String;Ljava/util/Map;ZLspace/kscience/dataforge/meta/descriptors/ValueRestriction;Ljava/util/List;Ljava/lang/String;Lspace/kscience/dataforge/meta/Value;Lspace/kscience/dataforge/meta/Meta;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAttributes ()Lspace/kscience/dataforge/meta/Meta;
 	public final fun getChildren ()Ljava/util/Map;
 	public final fun getDefaultNode ()Lspace/kscience/dataforge/meta/Meta;
 	public final fun getDefaultValue ()Lspace/kscience/dataforge/meta/Value;
+	public final fun getDescription ()Ljava/lang/String;
 	public final fun getIndexKey ()Ljava/lang/String;
-	public final fun getInfo ()Ljava/lang/String;
 	public final fun getMultiple ()Z
-	public final fun getReadOnly ()Z
-	public final fun getValueRequirement ()Lspace/kscience/dataforge/meta/descriptors/ValueRequirement;
+	public final fun getValueRestriction ()Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
 	public final fun getValueTypes ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final synthetic fun write$Self (Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class space/kscience/dataforge/meta/descriptors/MetaDescriptor$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -703,6 +710,7 @@ public final class space/kscience/dataforge/meta/descriptors/MetaDescriptor$$ser
 }
 
 public final class space/kscience/dataforge/meta/descriptors/MetaDescriptor$Companion {
+	public final fun getEMPTY ()Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -719,9 +727,8 @@ public final class space/kscience/dataforge/meta/descriptors/MetaDescriptorBuild
 	public final fun getIndexKey ()Ljava/lang/String;
 	public final fun getInfo ()Ljava/lang/String;
 	public final fun getMultiple ()Z
-	public final fun getReadOnly ()Z
-	public final fun getType ()Ljava/util/List;
-	public final fun getValueRequirement ()Lspace/kscience/dataforge/meta/descriptors/ValueRequirement;
+	public final fun getValueRestriction ()Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
+	public final fun getValueTypes ()Ljava/util/List;
 	public final fun item (Lspace/kscience/dataforge/names/Name;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/descriptors/MetaDescriptorBuilder;
 	public static synthetic fun item$default (Lspace/kscience/dataforge/meta/descriptors/MetaDescriptorBuilder;Lspace/kscience/dataforge/names/Name;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/descriptors/MetaDescriptorBuilder;
 	public final fun node (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/descriptors/MetaDescriptorBuilder;
@@ -733,10 +740,9 @@ public final class space/kscience/dataforge/meta/descriptors/MetaDescriptorBuild
 	public final fun setIndexKey (Ljava/lang/String;)V
 	public final fun setInfo (Ljava/lang/String;)V
 	public final fun setMultiple (Z)V
-	public final fun setReadOnly (Z)V
-	public final fun setType (Ljava/util/List;)V
-	public final fun setValueRequirement (Lspace/kscience/dataforge/meta/descriptors/ValueRequirement;)V
-	public final fun type (Lspace/kscience/dataforge/meta/ValueType;[Lspace/kscience/dataforge/meta/ValueType;)V
+	public final fun setValueRestriction (Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;)V
+	public final fun setValueTypes (Ljava/util/List;)V
+	public final fun valueType (Lspace/kscience/dataforge/meta/ValueType;[Lspace/kscience/dataforge/meta/ValueType;)V
 }
 
 public final class space/kscience/dataforge/meta/descriptors/MetaDescriptorBuilderKt {
@@ -764,12 +770,13 @@ public final class space/kscience/dataforge/meta/descriptors/MetaDescriptorKt {
 	public static final fun validate (Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;Lspace/kscience/dataforge/meta/Value;)Z
 }
 
-public final class space/kscience/dataforge/meta/descriptors/ValueRequirement : java/lang/Enum {
-	public static final field ABSENT Lspace/kscience/dataforge/meta/descriptors/ValueRequirement;
-	public static final field NONE Lspace/kscience/dataforge/meta/descriptors/ValueRequirement;
-	public static final field REQUIRED Lspace/kscience/dataforge/meta/descriptors/ValueRequirement;
-	public static fun valueOf (Ljava/lang/String;)Lspace/kscience/dataforge/meta/descriptors/ValueRequirement;
-	public static fun values ()[Lspace/kscience/dataforge/meta/descriptors/ValueRequirement;
+public final class space/kscience/dataforge/meta/descriptors/ValueRestriction : java/lang/Enum {
+	public static final field ABSENT Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
+	public static final field NONE Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
+	public static final field REQUIRED Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
+	public static fun values ()[Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
 }
 
 public final class space/kscience/dataforge/meta/transformations/KeepTransformationRule : space/kscience/dataforge/meta/transformations/TransformationRule {
@@ -788,7 +795,10 @@ public final class space/kscience/dataforge/meta/transformations/KeepTransformat
 
 public abstract interface class space/kscience/dataforge/meta/transformations/MetaConverter {
 	public static final field Companion Lspace/kscience/dataforge/meta/transformations/MetaConverter$Companion;
-	public abstract fun metaToObject (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Object;
+	public fun getDescriptor ()Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;
+	public abstract fun getType ()Lkotlin/reflect/KType;
+	public fun metaToObject (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Object;
+	public abstract fun metaToObjectOrNull (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Object;
 	public abstract fun objectToMeta (Ljava/lang/Object;)Lspace/kscience/dataforge/meta/Meta;
 }
 
@@ -893,6 +903,10 @@ public abstract interface annotation class space/kscience/dataforge/misc/DFExper
 public abstract interface annotation class space/kscience/dataforge/misc/DFInternal : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class space/kscience/dataforge/misc/DfId : java/lang/annotation/Annotation {
+	public abstract fun id ()Ljava/lang/String;
+}
+
 public abstract interface class space/kscience/dataforge/misc/Named {
 	public static final field Companion Lspace/kscience/dataforge/misc/Named$Companion;
 	public abstract fun getName ()Lspace/kscience/dataforge/names/Name;
@@ -904,10 +918,6 @@ public final class space/kscience/dataforge/misc/Named$Companion {
 
 public final class space/kscience/dataforge/misc/NamedKt {
 	public static final fun isAnonymous (Lspace/kscience/dataforge/misc/Named;)Z
-}
-
-public abstract interface annotation class space/kscience/dataforge/misc/Type : java/lang/annotation/Annotation {
-	public abstract fun id ()Ljava/lang/String;
 }
 
 public final class space/kscience/dataforge/names/Name {
@@ -944,6 +954,7 @@ public final class space/kscience/dataforge/names/NameKt {
 	public static synthetic fun get$default (Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun getLength (Lspace/kscience/dataforge/names/Name;)I
 	public static final fun isEmpty (Lspace/kscience/dataforge/names/Name;)Z
+	public static final fun last (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/names/NameToken;
 	public static final fun lastOrNull (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/names/NameToken;
 	public static final fun parseAsName (Ljava/lang/String;Z)Lspace/kscience/dataforge/names/Name;
 	public static synthetic fun parseAsName$default (Ljava/lang/String;ZILjava/lang/Object;)Lspace/kscience/dataforge/names/Name;

@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.mapNotNull
 import space.kscience.dataforge.data.Data.Companion.TYPE_OF_NOTHING
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.set
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.endsWith

@@ -2,7 +2,7 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import space.kscience.dataforge.misc.Type
+import space.kscience.dataforge.misc.DfId
 import space.kscience.dataforge.misc.unsafeCast
 import space.kscience.dataforge.names.*
 import kotlin.jvm.JvmName
@@ -21,9 +21,9 @@ public interface MetaRepr {
  * A container for meta nodes
  */
 public fun interface MetaProvider : ValueProvider {
-    public fun getMeta(name: Name): Meta?
+    public operator fun get(name: Name): Meta?
 
-    override fun getValue(name: Name): Value? = getMeta(name)?.value
+    override fun getValue(name: Name): Value? = get(name)?.value
 }
 
 /**
@@ -31,13 +31,13 @@ public fun interface MetaProvider : ValueProvider {
  * TODO add documentation
  * Same name siblings are supported via elements with the same [Name] but different indices.
  */
-@Type(Meta.TYPE)
+@DfId(Meta.TYPE)
 @Serializable(MetaSerializer::class)
 public interface Meta : MetaRepr, MetaProvider {
     public val value: Value?
     public val items: Map<NameToken, Meta>
 
-    override fun getMeta(name: Name): Meta? {
+    override fun get(name: Name): Meta? {
         tailrec fun Meta.find(name: Name): Meta? = if (name.isEmpty()) {
             this
         } else {
@@ -50,7 +50,9 @@ public interface Meta : MetaRepr, MetaProvider {
     override fun toMeta(): Meta = this
 
     override fun toString(): String
+
     override fun equals(other: Any?): Boolean
+
     override fun hashCode(): Int
 
     public companion object {
@@ -106,20 +108,12 @@ public operator fun Meta.get(token: NameToken): Meta? = items[token]
  *
  * If [name] is empty return current [Meta]
  */
-public operator fun Meta?.get(name: Name): Meta? = this?.getMeta(name)
-
-@Deprecated("Use nullable receiver", level = DeprecationLevel.HIDDEN)
-@JvmName("getNonNullable")
-public operator fun Meta.get(name: Name): Meta? = getMeta(name)
+public operator fun Meta?.get(name: Name): Meta? = this?.get(name)
 
 /**
  * Parse [Name] from [key] using full name notation and pass it to [Meta.get]
  */
 public operator fun Meta?.get(key: String): Meta? = this?.get(key.parseAsName(true))
-
-@Deprecated("Use nullable receiver", level = DeprecationLevel.HIDDEN)
-@JvmName("getNonNullable")
-public operator fun Meta.get(key: String): Meta? = get(key.parseAsName(true))
 
 /**
  * Get all items matching given name. The index of the last element, if present is used as a [Regex],
@@ -157,7 +151,7 @@ public interface TypedMeta<out M : TypedMeta<M>> : Meta {
 
     override val items: Map<NameToken, M>
 
-    override fun getMeta(name: Name): M? {
+    override fun get(name: Name): M? {
         tailrec fun M.find(name: Name): M? = if (name.isEmpty()) {
             this
         } else {
@@ -180,28 +174,17 @@ public inline val <M : TypedMeta<M>> TypedMeta<M>.self: M get() = unsafeCast()
 public operator fun <M : TypedMeta<M>> TypedMeta<M>?.get(token: NameToken): M? = this?.items?.get(token)
 
 /**
- * Perform recursive item search using given [name]. Each [NameToken] is treated as a name in [TypedMeta.items] of a parent node.
+ * Retrieves a meta node with the given name from the nullable [TypedMeta] object.
  *
- * If [name] is empty return current [Meta]
+ * @param name The name of the meta node to retrieve.
+ * @return The meta node with the given name, or null if it doesn't exist.
  */
-public tailrec operator fun <M : TypedMeta<M>> TypedMeta<M>?.get(name: Name): M? = when {
-    this == null -> null
-    name.isEmpty() -> self
-    else -> get(name.firstOrNull()!!)?.get(name.cutFirst())
-}
-
-@Deprecated("Use nullable receiver", level = DeprecationLevel.HIDDEN)
-@JvmName("getNonNullable")
-public operator fun <M : TypedMeta<M>> TypedMeta<M>.get(name: Name): M? = get(name)
+public operator fun <M : TypedMeta<M>> M?.get(name: Name): M? = this?.get(name)
 
 /**
  * Parse [Name] from [key] using full name notation and pass it to [TypedMeta.get]
  */
-public operator fun <M : TypedMeta<M>> TypedMeta<M>?.get(key: String): M? = this[key.parseAsName(true)]
-
-@Deprecated("Use nullable receiver", level = DeprecationLevel.HIDDEN)
-@JvmName("getNonNullable")
-public operator fun <M : TypedMeta<M>> TypedMeta<M>.get(key: String): M? = get(key)
+public operator fun <M : TypedMeta<M>> M?.get(key: String): M? = this?.get(key.parseAsName(true))
 
 
 /**

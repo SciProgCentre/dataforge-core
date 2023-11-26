@@ -8,20 +8,26 @@ import space.kscience.dataforge.names.first
 import space.kscience.dataforge.names.length
 import kotlin.collections.set
 
-public class MetaDescriptorBuilder  @PublishedApi internal constructor() {
+public class MetaDescriptorBuilder @PublishedApi internal constructor() {
     public var info: String? = null
     public var children: MutableMap<String, MetaDescriptorBuilder> = linkedMapOf()
     public var multiple: Boolean = false
-    public var valueRequirement: ValueRequirement = ValueRequirement.NONE
-    public var readOnly: Boolean = false
+    public var valueRestriction: ValueRestriction = ValueRestriction.NONE
 
-    public var type: List<ValueType>? = null
+    public var valueTypes: List<ValueType>? = null
 
-    public fun type(primaryType: ValueType, vararg otherTypes: ValueType) {
-        type = listOf(primaryType, *otherTypes)
+    public fun valueType(primaryType: ValueType, vararg otherTypes: ValueType) {
+        valueTypes = listOf(primaryType, *otherTypes)
     }
 
+    /**
+     * A key for indexing values. Should be changed in case of the name clash.
+     */
     public var indexKey: String = Meta.INDEX_KEY
+
+    /**
+     * The default value
+     */
     public var default: Value? = null
 
     public fun default(value: Any?) {
@@ -42,6 +48,7 @@ public class MetaDescriptorBuilder  @PublishedApi internal constructor() {
                 children[name.first().body] = target
                 target
             }
+
             else -> {
                 children.getOrPut(name.first().body) { MetaDescriptorBuilder() }.item(name.cutFirst(), block)
             }
@@ -51,16 +58,17 @@ public class MetaDescriptorBuilder  @PublishedApi internal constructor() {
     public fun node(
         name: Name,
         descriptor: MetaDescriptor,
-        block: MetaDescriptorBuilder.() -> Unit = {}
+        block: MetaDescriptorBuilder.() -> Unit = {},
     ): MetaDescriptorBuilder = when (name.length) {
         0 -> error("Can't set descriptor to root")
         1 -> {
             val item = descriptor.toBuilder().apply {
-                valueRequirement = ValueRequirement.ABSENT
+                valueRestriction = ValueRestriction.ABSENT
             }.apply(block)
             children[name.first().body] = item
             item
         }
+
         else -> children.getOrPut(name.first().body) {
             MetaDescriptorBuilder()
         }.node(name.cutFirst(), descriptor, block)
@@ -79,14 +87,13 @@ public class MetaDescriptorBuilder  @PublishedApi internal constructor() {
 
     @PublishedApi
     internal fun build(): MetaDescriptor = MetaDescriptor(
-        info = info,
+        description = info,
         children = children.mapValues { it.value.build() },
         multiple = multiple,
-        valueRequirement = valueRequirement,
-        valueTypes = type,
+        valueRestriction = valueRestriction,
+        valueTypes = valueTypes,
         indexKey = indexKey,
         defaultValue = default,
-        readOnly = readOnly,
         attributes = attributes
     )
 }
@@ -104,9 +111,9 @@ public fun MetaDescriptorBuilder.value(
     name: Name,
     type: ValueType,
     vararg additionalTypes: ValueType,
-    block: MetaDescriptorBuilder.() -> Unit = {}
+    block: MetaDescriptorBuilder.() -> Unit = {},
 ): MetaDescriptorBuilder = item(name) {
-    type(type, *additionalTypes)
+    valueType(type, *additionalTypes)
     block()
 }
 
@@ -114,16 +121,16 @@ public fun MetaDescriptorBuilder.value(
     name: String,
     type: ValueType,
     vararg additionalTypes: ValueType,
-    block: MetaDescriptorBuilder.() -> Unit = {}
+    block: MetaDescriptorBuilder.() -> Unit = {},
 ): MetaDescriptorBuilder = value(Name.parse(name), type, additionalTypes = additionalTypes, block)
 
 /**
  * Create and configure child value descriptor
  */
 public fun MetaDescriptorBuilder.node(
-    name: Name, block: MetaDescriptorBuilder.() -> Unit
+    name: Name, block: MetaDescriptorBuilder.() -> Unit,
 ): MetaDescriptorBuilder = item(name) {
-    valueRequirement = ValueRequirement.ABSENT
+    valueRestriction = ValueRestriction.ABSENT
     block()
 }
 
@@ -142,7 +149,7 @@ public fun MetaDescriptorBuilder.node(
 }
 
 public fun MetaDescriptorBuilder.required() {
-    valueRequirement = ValueRequirement.REQUIRED
+    valueRestriction = ValueRestriction.REQUIRED
 }
 
 public inline fun <reified E : Enum<E>> MetaDescriptorBuilder.enum(
@@ -158,11 +165,11 @@ public inline fun <reified E : Enum<E>> MetaDescriptorBuilder.enum(
 }
 
 private fun MetaDescriptor.toBuilder(): MetaDescriptorBuilder = MetaDescriptorBuilder().apply {
-    info = this@toBuilder.info
+    info = this@toBuilder.description
     children = this@toBuilder.children.mapValuesTo(LinkedHashMap()) { it.value.toBuilder() }
     multiple = this@toBuilder.multiple
-    valueRequirement = this@toBuilder.valueRequirement
-    type = this@toBuilder.valueTypes
+    valueRestriction = this@toBuilder.valueRestriction
+    valueTypes = this@toBuilder.valueTypes
     indexKey = this@toBuilder.indexKey
     default = defaultValue
     attributes = this@toBuilder.attributes.toMutableMeta()

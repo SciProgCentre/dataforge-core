@@ -1,13 +1,13 @@
 package space.kscience.dataforge.io.yaml
 
-import io.ktor.utils.io.core.Input
-import io.ktor.utils.io.core.Output
+import kotlinx.io.Sink
+import kotlinx.io.Source
+import kotlinx.io.readString
+import kotlinx.io.writeString
 import net.mamoe.yamlkt.*
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.io.MetaFormat
 import space.kscience.dataforge.io.MetaFormatFactory
-import space.kscience.dataforge.io.readUtf8String
-import space.kscience.dataforge.io.writeUtf8String
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.get
@@ -32,7 +32,7 @@ public fun Meta.toYaml(): YamlMap {
 private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: MetaDescriptor? = null) : Meta {
 
     override val value: Value?
-        get() = yamlMap.getStringOrNull(null)?.parseValue()
+        get() = yamlMap.getStringOrNull(null)?.let { Value.parse(it) }
 
     private fun buildItems(): Map<NameToken, Meta> {
         val map = LinkedHashMap<NameToken, Meta>()
@@ -43,13 +43,13 @@ private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: Met
             val token = NameToken(stringKey)
             when (value) {
                 YamlNull -> Meta(Null)
-                is YamlLiteral -> map[token] = Meta(value.content.parseValue())
+                is YamlLiteral -> map[token] = Meta(Value.parse(value.content))
                 is YamlMap -> map[token] = value.toMeta()
                 is YamlList -> if (value.all { it is YamlLiteral }) {
                     val listValue = ListValue(
                         value.map {
                             //We already checked that all values are primitives
-                            (it as YamlLiteral).content.parseValue()
+                            Value.parse((it as YamlLiteral).content)
                         }
                     )
                     map[token] = Meta(listValue)
@@ -75,7 +75,7 @@ private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: Met
 
 public fun YamlElement.toMeta(descriptor: MetaDescriptor? = null): Meta = when (this) {
     YamlNull -> Meta(Null)
-    is YamlLiteral -> Meta(content.parseValue())
+    is YamlLiteral -> Meta(Value.parse(content))
     is YamlMap -> toMeta()
     //We can't return multiple items therefore we create top level node
     is YamlList -> YamlMap(mapOf("@yamlArray" to this)).toMeta(descriptor)
@@ -89,14 +89,14 @@ public fun YamlMap.toMeta(): Meta = YamlMeta(this)
  */
 public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
 
-    override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?) {
+    override fun writeMeta(sink: Sink, meta: Meta, descriptor: MetaDescriptor?) {
         val yaml: YamlMap = meta.toYaml()
         val string = Yaml.encodeToString(YamlMap.serializer(), yaml)
-        output.writeUtf8String(string)
+        sink.writeString(string)
     }
 
-    override fun readMeta(input: Input, descriptor: MetaDescriptor?): Meta {
-        val yaml = Yaml.decodeYamlMapFromString(input.readUtf8String())
+    override fun readMeta(source: Source, descriptor: MetaDescriptor?): Meta {
+        val yaml = Yaml.decodeYamlMapFromString(source.readString())
         return yaml.toMeta()
     }
 
@@ -109,10 +109,10 @@ public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
 
         private val default = YamlMetaFormat(Meta.EMPTY)
 
-        override fun writeMeta(output: Output, meta: Meta, descriptor: MetaDescriptor?): Unit =
-            default.writeMeta(output, meta, descriptor)
+        override fun writeMeta(sink: Sink, meta: Meta, descriptor: MetaDescriptor?): Unit =
+            default.writeMeta(sink, meta, descriptor)
 
-        override fun readMeta(input: Input, descriptor: MetaDescriptor?): Meta =
-            default.readMeta(input, descriptor)
+        override fun readMeta(source: Source, descriptor: MetaDescriptor?): Meta =
+            default.readMeta(source, descriptor)
     }
 }

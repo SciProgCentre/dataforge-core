@@ -33,9 +33,12 @@ public suspend inline fun <T : Any, reified P : WorkspacePlugin> TaskResultBuild
     dependencyMeta: Meta = defaultDependencyMeta,
     selectorBuilder: P.() -> TaskReference<T>,
 ): DataSet<T> {
-    require(workspace.context.plugins.contains(plugin)){"Plugin $plugin is not loaded into $workspace"}
+    require(workspace.context.plugins.contains(plugin)) { "Plugin $plugin is not loaded into $workspace" }
     val taskReference: TaskReference<T> = plugin.selectorBuilder()
-    return workspace.produce(plugin.name + taskReference.taskName, dependencyMeta) as TaskResult<T>
+    val res = workspace.produce(plugin.name + taskReference.taskName, dependencyMeta)
+    //TODO add explicit check after https://youtrack.jetbrains.com/issue/KT-32956
+    @Suppress("UNCHECKED_CAST")
+    return  res as TaskResult<T>
 }
 
 /**
@@ -45,7 +48,7 @@ public suspend inline fun <T : Any, reified P : WorkspacePlugin> TaskResultBuild
  * @param dependencyMeta meta used for selector. The same meta is used for caching. By default, uses [defaultDependencyMeta].
  * @param selectorBuilder a builder of task from the plugin.
  */
-public suspend inline fun <T : Any, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
+public suspend inline fun <reified T : Any, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
     pluginFactory: PluginFactory<P>,
     dependencyMeta: Meta = defaultDependencyMeta,
     selectorBuilder: P.() -> TaskReference<T>,
@@ -53,7 +56,10 @@ public suspend inline fun <T : Any, reified P : WorkspacePlugin> TaskResultBuild
     val plugin = workspace.context.plugins[pluginFactory]
         ?: error("Plugin ${pluginFactory.tag} not loaded into workspace context")
     val taskReference: TaskReference<T> = plugin.selectorBuilder()
-    return workspace.produce(plugin.name + taskReference.taskName, dependencyMeta) as TaskResult<T>
+    val res = workspace.produce(plugin.name + taskReference.taskName, dependencyMeta)
+    //TODO explicit check after https://youtrack.jetbrains.com/issue/KT-32956
+    @Suppress("UNCHECKED_CAST")
+    return res as TaskResult<T>
 }
 
 public val TaskResultBuilder<*>.allData: DataSelector<*>
@@ -79,7 +85,7 @@ public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.pipeFr
 ) {
     from(selector, dependencyMeta).forEach { data ->
         val meta = data.meta.toMutableMeta().apply {
-            taskMeta[taskName]?.let {  taskName.put(it) }
+            taskMeta[taskName]?.let { taskName.put(it) }
             dataMetaTransform(data.name)
         }
 

@@ -47,11 +47,11 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
         return descriptor?.validate(meta) ?: true
     }
 
-    override fun getMeta(name: Name): MutableMeta? = meta.getMeta(name)
+    override fun get(name: Name): MutableMeta? = meta.get(name)
 
-    override fun setMeta(name: Name, node: Meta?) {
+    override fun set(name: Name, node: Meta?) {
         if (validate(name, meta)) {
-            meta.setMeta(name, node)
+            meta.set(name, node)
         } else {
             error("Validation failed for node $node at $name")
         }
@@ -110,8 +110,8 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
         override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
         override fun hashCode(): Int = Meta.hashCode(this)
 
-        override fun setMeta(name: Name, node: Meta?) {
-            targetMeta.setMeta(name, node)
+        override fun set(name: Name, node: Meta?) {
+            targetMeta.set(name, node)
             invalidate(name)
         }
 
@@ -120,9 +120,9 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
         @DFExperimental
         override fun attach(name: Name, node: ObservableMutableMeta) {
             //TODO implement zero-copy attachment
-            setMeta(name, node)
+            set(name, node)
             node.onChange(this) { changeName ->
-                setMeta(name + changeName, this[changeName])
+                set(name + changeName, this[changeName])
             }
         }
 

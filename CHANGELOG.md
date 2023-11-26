@@ -14,15 +14,41 @@
 
 ### Security
 
+## 0.7.0 - 2023-11-26
+
+### Added
+
+- Obligatory `type: KType` and `descriptor` property for `MetaConverters`
+- Added separate `Meta`, `SealedMeta` and `ObservableMutableMeta` builders.
+
+### Changed
+
+- Meta converter `metaToObject` returns a non-nullable type. Additional method `metaToObjectOrNull` for nullable return.
+- Kotlin 1.9.20.
+- Migrated from ktor-io to kotlinx-io.
+- `MutableMeta` builder now returns a simplified version of meta that does not hold listeners.
+- More concise names for read/write methods in IO.
+- Remove unnecessary confusion with `get`/`getMeta` by removing `getMeta` from the interface.
+
+### Deprecated
+
+- `String.parseValue` is replaced with `Value.parse`
+
+### Fixed
+
+- Memory leak in SealedMeta builder
+
 ## 0.6.2 - 2023-07-29
 
 ### Changed
+
 - Meta to Json serializer now serializes a single item with index as an array. It is important for plotly integration.
 - Meta to Json serializes Meta without children a value as literal or array instead of an object with `@value` field.
 
 ## 0.6.1 - 2023-03-31
 
 ### Added
+
 - File cache for workspace
 - Smart task metadata transformation for workspace
 - Add `readOnly` property to descriptors
@@ -32,6 +58,7 @@
 - More fine-grained types in Action builders.
 
 ### Changed
+
 - `Name::replaceLast` API
 - `PluginFactory` no longer requires plugin class
 - Collection<Named> toMap -> associateByName
@@ -53,9 +80,11 @@
 - Separate interfaces for `IOReader` and `IOWriter`
 
 ### Deprecated
+
 - Context.fetch -> Context.request
 
 ### Fixed
+
 - `readDataDirectory` does not split names with dots
 - Front matter reader does not crash on non-UTF files
 - Meta file name in readMeta from directory
@@ -64,10 +93,12 @@
 ## 0.5.2
 
 ### Added
+
 - Yaml plugin
 - Partial fix to #53
 
 ### Fixed
+
 - MutableMetaImpl attachment and checks
 - Listeners in observable meta are replaced by lists
 - JS number comparison bug.
@@ -75,9 +106,11 @@
 ## 0.5.0
 
 ### Added
+
 - Experimental `listOfSpec` delegate.
 
 ### Changed
+
 - **API breaking** Config is deprecated, use `ObservableMeta` instead.
 - **API breaking** Descriptor no has a member property `defaultValue` instead of `defaultItem()` extension. It caches default value state on the first call. It is done because computing default on each call is too expensive.
 - Kotlin 1.5.10
@@ -88,24 +121,28 @@
 - **API breaking** Configurable`config` changed to `meta`
 
 ### Removed
+
 - `Config`
 - Public PluginManager mutability
 - Tables and tables-exposed moved to the separate project `tables.kt`
 - BinaryMetaFormat. Use CBOR encoding instead
 
 ### Fixed
+
 - Proper json array index treatment.
 - Proper json index for single-value array.
 
 ## 0.4.0
 
 ### Added
+
 - LogManager plugin
 - dataforge-context API dependency on SLF4j
 - Context `withEnv` and `fetch` methods to manipulate plugins without changing plugins after creation.
 - Split `ItemDescriptor` into builder and read-only part
 
 ### Changed
+
 - Kotlin-logging moved from common to JVM and JS. Replaced by console for native.
 - Package changed to `space.kscience`
 - Scheme made observable
@@ -115,18 +152,22 @@
 - Refactor loggers
 
 ### Deprecated
+
 - Direct use of PluginManager
 
 ### Removed
+
 - Common dependency on Kotlin-logging
 - Kotlinx-io fork dependency. Replaced by Ktor-io.
 
 ### Fixed
+
 - Scheme properties properly handle children property change.
 
 ## 0.3.0
 
 ### Added
+
 - Yaml meta format based on yaml.kt
 - `Path` builders
 - Special ValueType for lists
@@ -134,6 +175,7 @@
 - Multiplatform yaml meta
 
 ### Changed
+
 - `ListValue` and `DoubleArrayValue` implement `Iterable`.
 - Changed the logic of `Value::isList` to check for type instead of size
 - `Meta{}` builder made inline
@@ -150,6 +192,7 @@
 ## 0.2.0
 
 ### Changed
+
 - Context content resolution refactor
 - Kotlin 1.4.10 (build tools 0.6.0)
 - Empty query in Name is null instead of ""
@@ -159,13 +202,16 @@
 - Configurable is no longer MutableItemProvider. All functionality moved to Scheme.
 
 ### Deprecated
+
 - Context activation API
 - TextRenderer
 
 ### Removed
+
 - Functional server prototype
 - `dataforge-output` module
 
 ### Fixed
+
 - Global context CoroutineScope resolution
 - Library mode compliance

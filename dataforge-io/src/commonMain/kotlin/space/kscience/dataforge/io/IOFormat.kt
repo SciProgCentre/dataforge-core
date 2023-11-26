@@ -1,12 +1,14 @@
 package space.kscience.dataforge.io
 
-import io.ktor.utils.io.core.*
+import kotlinx.io.Sink
+import kotlinx.io.Source
+import kotlinx.io.readByteArray
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Factory
 import space.kscience.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.misc.DfId
 import space.kscience.dataforge.misc.Named
-import space.kscience.dataforge.misc.Type
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import kotlin.reflect.KType
@@ -21,9 +23,9 @@ public interface IOReader<out T> {
      */
     public val type: KType
 
-    public fun readObject(input: Input): T
+    public fun readFrom(source: Source): T
 
-    public fun readObject(binary: Binary): T = binary.read { readObject(this) }
+    public fun readFrom(binary: Binary): T = binary.read { readFrom(this) }
 
     public companion object {
         /**
@@ -32,21 +34,21 @@ public interface IOReader<out T> {
         public val binary: IOReader<Binary> = object : IOReader<Binary> {
             override val type: KType = typeOf<Binary>()
 
-            override fun readObject(input: Input): Binary = input.readBytes().asBinary()
+            override fun readFrom(source: Source): Binary = source.readByteArray().asBinary()
 
-            override fun readObject(binary: Binary): Binary = binary
+            override fun readFrom(binary: Binary): Binary = binary
         }
     }
 }
 
-public inline fun <reified T> IOReader(crossinline read: Input.() -> T): IOReader<T> = object : IOReader<T> {
+public inline fun <reified T> IOReader(crossinline read: Source.() -> T): IOReader<T> = object : IOReader<T> {
     override val type: KType = typeOf<T>()
 
-    override fun readObject(input: Input): T = input.read()
+    override fun readFrom(source: Source): T = source.read()
 }
 
 public fun interface IOWriter<in T> {
-    public fun writeObject(output: Output, obj: T)
+    public fun writeTo(sink: Sink, obj: T)
 }
 
 /**
@@ -54,24 +56,23 @@ public fun interface IOWriter<in T> {
  */
 public interface IOFormat<T> : IOReader<T>, IOWriter<T>
 
-public fun <T : Any> Input.readObject(format: IOReader<T>): T = format.readObject(this@readObject)
+public fun <T : Any> Source.readWith(format: IOReader<T>): T = format.readFrom(this)
 
-public fun <T : Any> IOFormat<T>.readObjectFrom(binary: Binary): T = binary.read {
-    readObject(this)
+/**
+ * Read given binary as an object using given format
+ */
+public fun <T : Any> Binary.readWith(format: IOReader<T>): T = read {
+    readWith(format)
 }
 
 /**
- * Read given binary as object using given format
+ * Write an object to the [Sink] with given [format]
  */
-public fun <T : Any> Binary.readWith(format: IOReader<T>): T = read {
-    readObject(format)
-}
-
-public fun <T : Any> Output.writeObject(format: IOWriter<T>, obj: T): Unit =
-    format.writeObject(this@writeObject, obj)
+public fun <T : Any> Sink.writeWith(format: IOWriter<T>, obj: T): Unit =
+    format.writeTo(this, obj)
 
 
-@Type(IO_FORMAT_TYPE)
+@DfId(IO_FORMAT_TYPE)
 public interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
     /**
      * Explicit type for dynamic type checks
@@ -85,18 +86,33 @@ public interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
     }
 }
 
-public fun <T : Any> Binary(obj: T, format: IOWriter<T>): Binary = Binary { format.writeObject(this, obj) }
+public fun <T : Any> Binary(obj: T, format: IOWriter<T>): Binary = Binary { format.writeTo(this, obj) }
+
+public object FloatIOFormat : IOFormat<Float>, IOFormatFactory<Float> {
+    override fun build(context: Context, meta: Meta): IOFormat<Float> = this
+
+    override val name: Name = "float32".asName()
+
+    override val type: KType get() = typeOf<Float>()
+
+    override fun writeTo(sink: Sink, obj: Float) {
+        sink.writeFloat(obj)
+    }
+
+    override fun readFrom(source: Source): Float = source.readFloat()
+}
+
 
 public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
     override fun build(context: Context, meta: Meta): IOFormat<Double> = this
 
-    override val name: Name = "double".asName()
+    override val name: Name = "float64".asName()
 
     override val type: KType get() = typeOf<Double>()
 
-    override fun writeObject(output: Output, obj: Double) {
-        output.writeDouble(obj)
+    override fun writeTo(sink: Sink, obj: Double) {
+        sink.writeLong(obj.toBits())
     }
 
-    override fun readObject(input: Input): Double = input.readDouble()
+    override fun readFrom(source: Source): Double = source.readDouble()
 }

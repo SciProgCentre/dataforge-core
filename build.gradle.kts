@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import space.kscience.gradle.isInDevelopment
 import space.kscience.gradle.useApache2Licence
 import space.kscience.gradle.useSPCTeam
 
@@ -9,7 +8,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.6.2"
+    version = "0.7.0"
 }
 
 subprojects {
@@ -31,14 +30,7 @@ ksciencePublish {
         useApache2Licence()
         useSPCTeam()
     }
-    github("dataforge-core", "SciProgCentre")
-    space(
-        if (isInDevelopment) {
-            "https://maven.pkg.jetbrains.space/spc/p/sci/dev"
-        } else {
-            "https://maven.pkg.jetbrains.space/spc/p/sci/maven"
-        }
-    )
+    repository("spc","https://maven.sciprog.center/kscience")
     sonatype()
 }
 

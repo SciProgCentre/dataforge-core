@@ -5,7 +5,7 @@ package space.kscience.dataforge.meta
  * A value built from string which content and type are parsed on-demand
  */
 public class LazyParsedValue(public val string: String) : Value {
-    private val parsedValue by lazy { string.parseValue() }
+    private val parsedValue by lazy { Value.parse(string) }
 
     override val value: Any? get() = parsedValue.value
     override val type: ValueType get() = parsedValue.type

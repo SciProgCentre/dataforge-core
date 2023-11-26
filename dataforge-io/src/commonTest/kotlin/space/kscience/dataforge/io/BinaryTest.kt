@@ -1,6 +1,5 @@
 package space.kscience.dataforge.io
 
-import io.ktor.utils.io.core.readInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

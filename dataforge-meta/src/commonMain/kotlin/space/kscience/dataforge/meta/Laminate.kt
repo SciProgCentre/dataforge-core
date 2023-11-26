@@ -17,8 +17,8 @@ public class Laminate internal constructor(public val layers: List<Meta>) : Type
         }
     }
 
-    override fun getMeta(name: Name): Laminate? {
-        val childLayers = layers.mapNotNull { it.getMeta(name) }
+    override fun get(name: Name): Laminate? {
+        val childLayers = layers.mapNotNull { it.get(name) }
         return if (childLayers.isEmpty()) null else Laminate(childLayers)
     }
 

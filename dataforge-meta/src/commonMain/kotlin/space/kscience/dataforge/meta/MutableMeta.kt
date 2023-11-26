@@ -11,14 +11,14 @@ import kotlin.js.JsName
  * Mark a meta builder
  */
 @DslMarker
-public annotation class MetaBuilder
+public annotation class MetaBuilderMarker
 
 /**
  * A generic interface that gives access to getting and setting meta notes and values
  */
 public interface MutableMetaProvider : MetaProvider, MutableValueProvider {
-    override fun getMeta(name: Name): MutableMeta?
-    public fun setMeta(name: Name, node: Meta?)
+    override fun get(name: Name): MutableMeta?
+    public operator fun set(name: Name, node: Meta?)
     override fun setValue(name: Name, value: Value?)
 }
 
@@ -27,7 +27,7 @@ public interface MutableMetaProvider : MetaProvider, MutableValueProvider {
  * TODO documentation
  */
 @Serializable(MutableMetaSerializer::class)
-@MetaBuilder
+@MetaBuilderMarker
 public interface MutableMeta : Meta, MutableMetaProvider {
 
     override val items: Map<NameToken, MutableMeta>
@@ -37,7 +37,7 @@ public interface MutableMeta : Meta, MutableMetaProvider {
      */
     override var value: Value?
 
-    override fun getMeta(name: Name): MutableMeta? {
+    override fun get(name: Name): MutableMeta? {
         tailrec fun MutableMeta.find(name: Name): MutableMeta? = if (name.isEmpty()) {
             this
         } else {
@@ -83,19 +83,19 @@ public interface MutableMeta : Meta, MutableMetaProvider {
     }
 
     public infix fun Name.put(meta: Meta) {
-        setMeta(this, meta)
+        set(this, meta)
     }
 
     public infix fun Name.put(repr: MetaRepr) {
-        setMeta(this, repr.toMeta())
+        set(this, repr.toMeta())
     }
 
-    public infix fun Name.put(mutableMeta: MutableMeta.() -> Unit) {
-        setMeta(this, Meta(mutableMeta))
+    public infix fun Name.put(builder: MutableMeta.() -> Unit) {
+        getOrCreate(this).apply(builder)
     }
 
     public infix fun String.put(meta: Meta) {
-        setMeta(Name.parse(this), meta)
+        set(Name.parse(this), meta)
     }
 
     public infix fun String.put(value: Value?) {
@@ -123,7 +123,7 @@ public interface MutableMeta : Meta, MutableMetaProvider {
     }
 
     public infix fun String.put(repr: MetaRepr) {
-        setMeta(Name.parse(this), repr.toMeta())
+        set(Name.parse(this), repr.toMeta())
     }
 
     public infix fun String.putIndexed(iterable: Iterable<Meta>) {
@@ -131,14 +131,9 @@ public interface MutableMeta : Meta, MutableMetaProvider {
     }
 
     public infix fun String.put(builder: MutableMeta.() -> Unit) {
-        setMeta(Name.parse(this), MutableMeta(builder))
+        getOrCreate(parseAsName()).apply(builder)
     }
 }
-
-/**
- * Set or replace node at given [name]
- */
-public operator fun MutableMetaProvider.set(name: Name, meta: Meta): Unit = setMeta(name, meta)
 
 /**
  * Set or replace value at given [name]
@@ -154,24 +149,24 @@ public interface MutableTypedMeta<M : MutableTypedMeta<M>> : TypedMeta<M>, Mutab
      */
     @DFExperimental
     public fun attach(name: Name, node: M)
-    override fun getMeta(name: Name): M?
+    override fun get(name: Name): M?
     override fun getOrCreate(name: Name): M
 }
 
 public fun <M : MutableTypedMeta<M>> M.getOrCreate(key: String): M = getOrCreate(Name.parse(key))
 
 public fun MutableMetaProvider.remove(name: Name) {
-    setMeta(name, null)
+    set(name, null)
 }
 
 public fun MutableMetaProvider.remove(key: String) {
-    setMeta(Name.parse(key), null)
+    set(Name.parse(key), null)
 }
 
 // node setters
 
-public operator fun MutableMetaProvider.set(Key: NameToken, value: Meta): Unit = setMeta(Key.asName(), value)
-public operator fun MutableMetaProvider.set(key: String, value: Meta): Unit = setMeta(Name.parse(key), value)
+public operator fun MutableMetaProvider.set(Key: NameToken, value: Meta): Unit = set(Key.asName(), value)
+public operator fun MutableMetaProvider.set(key: String, value: Meta): Unit = set(Name.parse(key), value)
 
 
 //public fun MutableMeta.set(key: String, index: String, value: Value?): Unit =
@@ -319,7 +314,7 @@ private class MutableMetaImpl(
         )
 
     @ThreadSafe
-    override fun setMeta(name: Name, node: Meta?) {
+    override fun set(name: Name, node: Meta?) {
         val oldItem: ObservableMutableMeta? = get(name)
         if (oldItem != node) {
             when (name.length) {
@@ -346,7 +341,7 @@ private class MutableMetaImpl(
                         newNode.adoptBy(this, token)
                         children[token] = newNode
                     }
-                    items[token]?.setMeta(name.cutFirst(), node)
+                    items[token]?.set(name.cutFirst(), node)
                 }
             }
             invalidate(name)
@@ -381,16 +376,14 @@ public fun Meta.toMutableMeta(): ObservableMutableMeta = MutableMetaImpl(value, 
 
 public fun Meta.asMutableMeta(): MutableMeta = (this as? MutableMeta) ?: toMutableMeta()
 
-@Suppress("FunctionName")
-@JsName("newMutableMeta")
-public fun MutableMeta(): ObservableMutableMeta = MutableMetaImpl(null)
+@JsName("newObservableMutableMeta")
+public fun ObservableMutableMeta(): ObservableMutableMeta = MutableMetaImpl(null)
 
 /**
  * Build a [MutableMeta] using given transformation
  */
-@Suppress("FunctionName")
-public inline fun MutableMeta(builder: MutableMeta.() -> Unit = {}): ObservableMutableMeta =
-    MutableMeta().apply(builder)
+public inline fun ObservableMutableMeta(builder: MutableMeta.() -> Unit = {}): ObservableMutableMeta =
+    ObservableMutableMeta().apply(builder)
 
 
 /**
@@ -407,7 +400,7 @@ private class MutableMetaWithDefault(
     override val items: Map<NameToken, MutableMeta>
         get() {
             val sourceKeys: Collection<NameToken> = source[rootName]?.items?.keys ?: emptyList()
-            val defaultKeys: Collection<NameToken> = default.getMeta(rootName)?.items?.keys ?: emptyList()
+            val defaultKeys: Collection<NameToken> = default[rootName]?.items?.keys ?: emptyList()
             //merging keys for primary and default node
             return (sourceKeys + defaultKeys).associateWith {
                 MutableMetaWithDefault(source, default, rootName + it)
@@ -415,12 +408,12 @@ private class MutableMetaWithDefault(
         }
 
     override var value: Value?
-        get() = source[rootName]?.value ?: default.getMeta(rootName)?.value
+        get() = source[rootName]?.value ?: default.get(rootName)?.value
         set(value) {
             source[rootName] = value
         }
 
-    override fun getMeta(name: Name): MutableMeta = MutableMetaWithDefault(source, default, rootName + name)
+    override fun get(name: Name): MutableMeta = MutableMetaWithDefault(source, default, rootName + name)
 
     override fun toString(): String = Meta.toString(this)
     override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)

@@ -135,6 +135,11 @@ public val Name.length: Int get() = tokens.size
 public fun Name.lastOrNull(): NameToken? = tokens.lastOrNull()
 
 /**
+ * Last token or throw exception
+ */
+public fun Name.last(): NameToken = tokens.last()
+
+/**
  * First token of the name or null if it is empty
  */
 public fun Name.firstOrNull(): NameToken? = tokens.firstOrNull()

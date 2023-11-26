@@ -1,12 +1,18 @@
 package space.kscience.dataforge.workspace
 
-import io.ktor.utils.io.core.Input
-import io.ktor.utils.io.core.Output
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
+import kotlinx.io.Sink
+import kotlinx.io.Source
+import kotlinx.io.readString
+import kotlinx.io.writeString
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.data.*
-import space.kscience.dataforge.io.*
+import space.kscience.dataforge.io.Envelope
+import space.kscience.dataforge.io.IOFormat
+import space.kscience.dataforge.io.io
+import space.kscience.dataforge.io.readEnvelopeFile
 import space.kscience.dataforge.io.yaml.YamlPlugin
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.misc.DFExperimental
@@ -36,11 +42,11 @@ class FileDataTest {
     object StringIOFormat : IOFormat<String> {
         override val type: KType get() = typeOf<String>()
 
-        override fun writeObject(output: Output, obj: String) {
-            output.writeUtf8String(obj)
+        override fun writeTo(sink: Sink, obj: String) {
+            sink.writeString(obj)
         }
 
-        override fun readObject(input: Input): String = input.readUtf8String()
+        override fun readFrom(source: Source): String = source.readString()
     }
 
     @Test
@@ -59,9 +65,9 @@ class FileDataTest {
 
     @Test
     @DFExperimental
-    fun testZipWriteRead() = with(Global.io) {
-        val zip = Files.createTempFile("df_data_node", ".zip")
-        runBlocking {
+    fun testZipWriteRead() = runTest {
+        with(Global.io) {
+            val zip = Files.createTempFile("df_data_node", ".zip")
             dataNode.writeZip(zip, StringIOFormat)
             println(zip.toUri().toString())
             val reconstructed = readDataDirectory(zip) { _, _ -> StringIOFormat }

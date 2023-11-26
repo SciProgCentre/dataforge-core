@@ -42,7 +42,7 @@ public data class KeepTransformationRule(val selector: (Name) -> Boolean) :
         meta.nodeSequence().map { it.first }.filter(selector)
 
     override fun transformItem(name: Name, item: Meta?, target: MutableMeta) {
-        if (selector(name)) target.setMeta(name, item)
+        if (selector(name)) target.set(name, item)
     }
 }
 
@@ -105,7 +105,7 @@ public value class MetaTransformation(private val transformations: Collection<Tr
      * Generate an observable configuration that contains only elements defined by transformation rules and changes with the source
      */
     @DFExperimental
-    public fun generate(source: ObservableMeta): ObservableMeta = MutableMeta().apply {
+    public fun generate(source: ObservableMeta): ObservableMeta = ObservableMutableMeta{
         transformations.forEach { rule ->
             rule.selectItems(source).forEach { name ->
                 rule.transformItem(name, source[name], this)
@@ -174,7 +174,7 @@ public class MetaTransformationBuilder {
     public fun keep(regex: String) {
         transformations.add(
             RegexItemTransformationRule(regex.toRegex()) { name, _, Meta ->
-                setMeta(name, Meta)
+                set(name, Meta)
             })
     }
 
@@ -184,7 +184,7 @@ public class MetaTransformationBuilder {
     public fun move(from: Name, to: Name, operation: (Meta?) -> Meta? = { it }) {
         transformations.add(
             SingleItemTransformationRule(from) { _, item ->
-                setMeta(to, operation(item))
+                set(to, operation(item))
             }
         )
     }

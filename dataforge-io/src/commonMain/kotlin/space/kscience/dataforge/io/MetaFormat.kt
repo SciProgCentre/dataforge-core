@@ -1,15 +1,15 @@
 package space.kscience.dataforge.io
 
-import io.ktor.utils.io.core.ByteReadPacket
-import io.ktor.utils.io.core.Input
-import io.ktor.utils.io.core.Output
-import io.ktor.utils.io.core.use
+
+import kotlinx.io.Sink
+import kotlinx.io.Source
+import kotlinx.io.buffered
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
-import space.kscience.dataforge.misc.Type
+import space.kscience.dataforge.misc.DfId
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
@@ -23,22 +23,22 @@ public interface MetaFormat : IOFormat<Meta> {
 
     override val type: KType get() = typeOf<Meta>()
 
-    override fun writeObject(output: Output, obj: Meta) {
-        writeMeta(output, obj, null)
+    override fun writeTo(sink: Sink, obj: Meta) {
+        writeMeta(sink, obj, null)
     }
 
-    override fun readObject(input: Input): Meta = readMeta(input)
+    override fun readFrom(source: Source): Meta = readMeta(source)
 
     public fun writeMeta(
-        output: Output,
+        sink: Sink,
         meta: Meta,
         descriptor: MetaDescriptor? = null,
     )
 
-    public fun readMeta(input: Input, descriptor: MetaDescriptor? = null): Meta
+    public fun readMeta(source: Source, descriptor: MetaDescriptor? = null): Meta
 }
 
-@Type(META_FORMAT_TYPE)
+@DfId(META_FORMAT_TYPE)
 public interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
     public val shortName: String
 
@@ -57,15 +57,13 @@ public interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
 
 public fun Meta.toString(format: MetaFormat): String = ByteArray {
     format.run {
-        writeObject(this@ByteArray, this@toString)
+        writeTo(this@ByteArray, this@toString)
     }
 }.decodeToString()
 
 public fun Meta.toString(formatFactory: MetaFormatFactory): String = toString(formatFactory.build(Global, Meta.EMPTY))
 
-public fun MetaFormat.parse(str: String): Meta {
-    return ByteReadPacket(str.encodeToByteArray()).use { readObject(it) }
-}
+public fun MetaFormat.parse(str: String): Meta = readFrom(StringSource(str).buffered())
 
 public fun MetaFormatFactory.parse(str: String, formatMeta: Meta): Meta = build(Global, formatMeta).parse(str)
 
