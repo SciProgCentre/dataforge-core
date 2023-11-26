@@ -5,32 +5,29 @@
 
 
 ### [dataforge-context](dataforge-context)
-> 
+> Context and provider definitions
 >
 > **Maturity**: DEVELOPMENT
 
 ### [dataforge-data](dataforge-data)
-> 
 >
 > **Maturity**: EXPERIMENTAL
 
 ### [dataforge-io](dataforge-io)
-> 
+> IO module
 >
-> **Maturity**: PROTOTYPE
+> **Maturity**: EXPERIMENTAL
 
 ### [dataforge-meta](dataforge-meta)
-> 
+> Meta definition and basic operations on meta
 >
 > **Maturity**: DEVELOPMENT
 
 ### [dataforge-scripting](dataforge-scripting)
-> 
 >
 > **Maturity**: PROTOTYPE
 
 ### [dataforge-workspace](dataforge-workspace)
-> 
 >
 > **Maturity**: EXPERIMENTAL
 
