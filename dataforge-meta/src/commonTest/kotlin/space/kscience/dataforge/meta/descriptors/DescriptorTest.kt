@@ -11,14 +11,14 @@ class DescriptorTest {
 
     val descriptor = MetaDescriptor {
         node("aNode") {
-            info = "A root demo node"
+            description = "A root demo node"
             value("b", ValueType.NUMBER) {
-                info = "b number value"
+                description = "b number value"
             }
             node("otherNode") {
                 value("otherValue", ValueType.BOOLEAN) {
                     default(false)
-                    info = "default value"
+                    description = "default value"
                 }
             }
         }

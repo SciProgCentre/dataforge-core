@@ -5,7 +5,7 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
 import space.kscience.dataforge.meta.isEmpty
 import space.kscience.dataforge.misc.DFInternal
-import space.kscience.dataforge.misc.DfId
+import space.kscience.dataforge.misc.DfType
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KType
@@ -14,7 +14,7 @@ import kotlin.reflect.typeOf
 /**
  * A data element characterized by its meta
  */
-@DfId(Data.TYPE)
+@DfType(Data.TYPE)
 public interface Data<out T> : Goal<T>, MetaRepr {
     /**
      * Type marker for the data. The type is known before the calculation takes place so it could be checked.

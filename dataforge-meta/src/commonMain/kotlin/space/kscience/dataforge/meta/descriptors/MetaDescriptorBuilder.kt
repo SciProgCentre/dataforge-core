@@ -9,7 +9,11 @@ import space.kscience.dataforge.names.length
 import kotlin.collections.set
 
 public class MetaDescriptorBuilder @PublishedApi internal constructor() {
-    public var info: String? = null
+    public var description: String? = null
+
+    @Deprecated("Replace by description", ReplaceWith("description"))
+    public var info: String? by ::description
+
     public var children: MutableMap<String, MetaDescriptorBuilder> = linkedMapOf()
     public var multiple: Boolean = false
     public var valueRestriction: ValueRestriction = ValueRestriction.NONE
@@ -87,7 +91,7 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
 
     @PublishedApi
     internal fun build(): MetaDescriptor = MetaDescriptor(
-        description = info,
+        description = description,
         children = children.mapValues { it.value.build() },
         multiple = multiple,
         valueRestriction = valueRestriction,
@@ -165,7 +169,7 @@ public inline fun <reified E : Enum<E>> MetaDescriptorBuilder.enum(
 }
 
 private fun MetaDescriptor.toBuilder(): MetaDescriptorBuilder = MetaDescriptorBuilder().apply {
-    info = this@toBuilder.description
+    description = this@toBuilder.description
     children = this@toBuilder.children.mapValuesTo(LinkedHashMap()) { it.value.toBuilder() }
     multiple = this@toBuilder.multiple
     valueRestriction = this@toBuilder.valueRestriction

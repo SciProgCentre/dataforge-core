@@ -98,8 +98,7 @@ internal class MapAction<in T : Any, R : Any>(
  * A one-to-one mapping action
  */
 @DFExperimental
-@Suppress("FunctionName")
-public inline fun <T : Any, reified R : Any> Action.Companion.map(
+public inline fun <T : Any, reified R : Any> Action.Companion.mapping(
     noinline builder: MapActionBuilder<T, R>.() -> Unit,
 ): Action<T, R> = MapAction(typeOf<R>(), builder)
 

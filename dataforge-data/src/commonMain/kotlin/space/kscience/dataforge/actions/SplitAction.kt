@@ -87,6 +87,6 @@ internal class SplitAction<T : Any, R : Any>(
  * Action that splits each incoming element into a number of fragments defined in builder
  */
 @DFExperimental
-public inline fun <T : Any, reified R : Any> Action.Companion.split(
+public inline fun <T : Any, reified R : Any> Action.Companion.splitting(
     noinline builder: SplitBuilder<T, R>.() -> Unit,
 ): Action<T, R> = SplitAction(typeOf<R>(), builder)

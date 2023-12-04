@@ -2,7 +2,7 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import space.kscience.dataforge.misc.DfId
+import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.misc.unsafeCast
 import space.kscience.dataforge.names.*
 import kotlin.jvm.JvmName
@@ -31,7 +31,7 @@ public fun interface MetaProvider : ValueProvider {
  * TODO add documentation
  * Same name siblings are supported via elements with the same [Name] but different indices.
  */
-@DfId(Meta.TYPE)
+@DfType(Meta.TYPE)
 @Serializable(MetaSerializer::class)
 public interface Meta : MetaRepr, MetaProvider {
     public val value: Value?
@@ -248,7 +248,7 @@ public inline fun <reified E : Enum<E>> Meta?.enum(): E? = this?.value?.let {
     }
 }
 
-public val Meta.stringList: List<String>? get() = value?.list?.map { it.string }
+public val Meta?.stringList: List<String>? get() = this?.value?.list?.map { it.string }
 
 /**
  * Create a provider that uses given provider for default values if those are not found in this provider
