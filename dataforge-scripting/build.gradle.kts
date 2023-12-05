@@ -4,15 +4,15 @@ plugins {
 
 kscience{
     jvm()
-    dependencies {
+    commonMain {
         api(projects.dataforgeWorkspace)
         implementation(kotlin("scripting-common"))
     }
-    dependencies(jvmMain){
+    jvmMain{
         implementation(kotlin("scripting-jvm-host"))
         implementation(kotlin("scripting-jvm"))
     }
-    dependencies(jvmTest){
+    jvmTest{
         implementation(spclibs.logback.classic)
     }
 }

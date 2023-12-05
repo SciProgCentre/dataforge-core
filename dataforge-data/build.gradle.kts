@@ -6,9 +6,11 @@ kscience{
     jvm()
     js()
     native()
+    wasm()
     useCoroutines()
     dependencies {
-        api(project(":dataforge-meta"))
+        api(spclibs.atomicfu)
+        api(projects.dataforgeMeta)
         api(kotlin("reflect"))
     }
 }

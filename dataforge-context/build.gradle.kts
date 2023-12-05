@@ -8,12 +8,14 @@ kscience {
     jvm()
     js()
     native()
+    wasm()
     useCoroutines()
     useSerialization()
-    dependencies {
+    commonMain {
         api(project(":dataforge-meta"))
+        api(spclibs.atomicfu)
     }
-    dependencies(jvmMain){
+    jvmMain{
         api(kotlin("reflect"))
         api("org.slf4j:slf4j-api:1.7.30")
     }

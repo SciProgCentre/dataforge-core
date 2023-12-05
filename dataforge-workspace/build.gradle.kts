@@ -2,29 +2,27 @@ plugins {
     id("space.kscience.gradle.mpp")
 }
 
-kscience{
+kscience {
     jvm()
     js()
     native()
+    wasm()
     useCoroutines()
-    useSerialization{
+    useSerialization {
         protobuf()
     }
-    commonMain{
-        dependencies {
-            api(projects.dataforgeContext)
-            api(projects.dataforgeData)
-            api(projects.dataforgeIo)
-        }
+    commonMain {
+        api(projects.dataforgeContext)
+        api(projects.dataforgeData)
+        api(projects.dataforgeIo)
+
     }
-    jvmTest{
-        dependencies {
-            implementation(spclibs.logback.classic)
-            implementation(projects.dataforgeIo.dataforgeIoYaml)
-        }
+    jvmTest {
+        implementation(spclibs.logback.classic)
+        implementation(projects.dataforgeIo.dataforgeIoYaml)
     }
 }
 
-readme{
+readme {
     maturity = space.kscience.gradle.Maturity.EXPERIMENTAL
 }

@@ -6,7 +6,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.actions.invoke
-import space.kscience.dataforge.actions.map
+import space.kscience.dataforge.actions.mapping
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.assertEquals
 
@@ -20,7 +20,7 @@ internal class ActionsTest {
             }
         }
 
-        val plusOne = Action.map<Int, Int> {
+        val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
         }
         val result = plusOne(data)
@@ -31,7 +31,7 @@ internal class ActionsTest {
     fun testDynamicMapAction() = runTest {
         val data: DataSourceBuilder<Int> = DataSource()
 
-        val plusOne = Action.map<Int, Int> {
+        val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
         }
 

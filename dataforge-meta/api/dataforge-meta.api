@@ -724,6 +724,7 @@ public final class space/kscience/dataforge/meta/descriptors/MetaDescriptorBuild
 	public final fun getAttributes ()Lspace/kscience/dataforge/meta/MutableMeta;
 	public final fun getChildren ()Ljava/util/Map;
 	public final fun getDefault ()Lspace/kscience/dataforge/meta/Value;
+	public final fun getDescription ()Ljava/lang/String;
 	public final fun getIndexKey ()Ljava/lang/String;
 	public final fun getInfo ()Ljava/lang/String;
 	public final fun getMultiple ()Z
@@ -737,6 +738,7 @@ public final class space/kscience/dataforge/meta/descriptors/MetaDescriptorBuild
 	public final fun setAttributes (Lspace/kscience/dataforge/meta/MutableMeta;)V
 	public final fun setChildren (Ljava/util/Map;)V
 	public final fun setDefault (Lspace/kscience/dataforge/meta/Value;)V
+	public final fun setDescription (Ljava/lang/String;)V
 	public final fun setIndexKey (Ljava/lang/String;)V
 	public final fun setInfo (Ljava/lang/String;)V
 	public final fun setMultiple (Z)V
@@ -903,7 +905,7 @@ public abstract interface annotation class space/kscience/dataforge/misc/DFExper
 public abstract interface annotation class space/kscience/dataforge/misc/DFInternal : java/lang/annotation/Annotation {
 }
 
-public abstract interface annotation class space/kscience/dataforge/misc/DfId : java/lang/annotation/Annotation {
+public abstract interface annotation class space/kscience/dataforge/misc/DfType : java/lang/annotation/Annotation {
 	public abstract fun id ()Ljava/lang/String;
 }
 
@@ -944,6 +946,7 @@ public final class space/kscience/dataforge/names/NameKt {
 	public static final fun asName (Lspace/kscience/dataforge/names/NameToken;)Lspace/kscience/dataforge/names/Name;
 	public static final fun cutFirst (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/names/Name;
 	public static final fun cutLast (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/names/Name;
+	public static final fun endsWith (Lspace/kscience/dataforge/names/Name;Ljava/lang/String;)Z
 	public static final fun endsWith (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/names/Name;)Z
 	public static final fun endsWith (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/names/NameToken;)Z
 	public static final fun first (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/names/NameToken;
@@ -966,6 +969,7 @@ public final class space/kscience/dataforge/names/NameKt {
 	public static final fun removeHeadOrNull (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/names/Name;
 	public static final fun replaceLast (Lspace/kscience/dataforge/names/Name;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/names/Name;
 	public static final fun set (Ljava/util/Map;Ljava/lang/String;Ljava/lang/Object;)V
+	public static final fun startsWith (Lspace/kscience/dataforge/names/Name;Ljava/lang/String;)Z
 	public static final fun startsWith (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/names/Name;)Z
 	public static final fun startsWith (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/names/NameToken;)Z
 	public static final fun withIndex (Lspace/kscience/dataforge/names/Name;Ljava/lang/String;)Lspace/kscience/dataforge/names/Name;
