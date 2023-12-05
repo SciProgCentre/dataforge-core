@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.7.0"
+    version = "0.7.1"
 }
 
 subprojects {
@@ -31,7 +31,7 @@ ksciencePublish {
         useSPCTeam()
     }
     repository("spc","https://maven.sciprog.center/kscience")
-    sonatype()
+    sonatype("https://oss.sonatype.org")
 }
 
 apiValidation {

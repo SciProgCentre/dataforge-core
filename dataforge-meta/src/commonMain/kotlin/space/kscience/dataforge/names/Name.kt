@@ -216,8 +216,12 @@ public fun Name.endsWith(token: NameToken): Boolean = lastOrNull() == token
 public fun Name.startsWith(name: Name): Boolean =
     this.length >= name.length && (this == name || tokens.subList(0, name.length) == name.tokens)
 
+public fun Name.startsWith(name: String): Boolean = startsWith(name.parseAsName())
+
 public fun Name.endsWith(name: Name): Boolean =
     this.length >= name.length && (this == name || tokens.subList(length - name.length, length) == name.tokens)
+
+public fun Name.endsWith(name: String): Boolean = endsWith(name.parseAsName())
 
 /**
  * if [this] starts with given [head] name, returns the reminder of the name (could be empty). Otherwise, returns null

@@ -4,12 +4,13 @@ plugins {
 
 description = "IO module"
 
-val ioVersion = "0.2.1"
+val ioVersion = "0.3.0"
 
 kscience {
     jvm()
     js()
     native()
+    wasm()
     useSerialization()
     useSerialization(sourceSet = space.kscience.gradle.DependencySourceSet.TEST) {
         cbor()

@@ -1,9 +1,9 @@
 package space.kscience.dataforge.context
 
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.misc.DfId
+import space.kscience.dataforge.misc.DfType
 
-@DfId(PluginFactory.TYPE)
+@DfType(PluginFactory.TYPE)
 public interface PluginFactory<T : Plugin> : Factory<T> {
     public val tag: PluginTag
 

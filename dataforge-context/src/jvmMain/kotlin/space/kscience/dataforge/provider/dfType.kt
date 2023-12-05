@@ -4,7 +4,7 @@ import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.PluginBuilder
 import space.kscience.dataforge.context.gather
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.misc.DfId
+import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KClass
@@ -13,10 +13,10 @@ import kotlin.reflect.full.findAnnotation
 
 @DFExperimental
 public val KClass<*>.dfId: String
-    get() = findAnnotation<DfId>()?.id ?: simpleName ?: ""
+    get() = findAnnotation<DfType>()?.id ?: simpleName ?: ""
 
 /**
- * Provide an object with given name inferring target from its type using [DfId] annotation
+ * Provide an object with given name inferring target from its type using [DfType] annotation
  */
 @DFExperimental
 public inline fun <reified T : Any> Provider.provideByType(name: String): T? {

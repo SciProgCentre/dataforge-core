@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Wasm artifacts
 
 ### Changed
 
@@ -11,6 +12,7 @@
 ### Removed
 
 ### Fixed
+- Partially fixed a bug with `MutableMeta` observable wrappers.
 
 ### Security
 

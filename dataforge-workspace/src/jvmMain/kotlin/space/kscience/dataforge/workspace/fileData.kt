@@ -11,7 +11,6 @@ import space.kscience.dataforge.data.*
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.copy
-import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.DFInternal
@@ -27,10 +26,7 @@ import java.nio.file.WatchEvent
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.spi.FileSystemProvider
 import java.time.Instant
-import kotlin.io.path.extension
-import kotlin.io.path.name
-import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.readAttributes
+import kotlin.io.path.*
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -92,7 +88,7 @@ public fun <T : Any> IOPlugin.readDataFile(
 
 
 context(IOPlugin) @DFExperimental
-private fun <T : Any> DataSetBuilder<T>.directory(
+public fun <T : Any> DataSetBuilder<T>.directory(
     path: Path,
     ignoreExtensions: Set<String>,
     formatResolver: FileFormatResolver<T>,
@@ -145,7 +141,7 @@ public inline fun <reified T : Any> IOPlugin.readDataDirectory(
 ): DataTree<T> = readDataDirectory(typeOf<T>(), path, ignoreExtensions, formatResolver)
 
 /**
- * Read raw binary data tree from the directory. All files are read as-is (save for meta files).
+ * Read a raw binary data tree from the directory. All files are read as-is (save for meta files).
  */
 @DFExperimental
 public fun IOPlugin.readRawDirectory(
@@ -257,6 +253,29 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
         }
         val treeMeta = tree.meta
         writeMetaFile(path, treeMeta)
+    }
+}
+
+/**
+ * Reads the specified resources and returns a [DataTree] containing the data.
+ *
+ * @param resources The names of the resources to read.
+ * @param classLoader The class loader to use for loading the resources. By default, it uses the current thread's context class loader.
+ * @return A DataTree containing the data read from the resources.
+ */
+@DFExperimental
+private fun IOPlugin.readResources(
+    vararg resources: String,
+    classLoader: ClassLoader = Thread.currentThread().contextClassLoader,
+): DataTree<Binary> {
+//    require(resource.isNotBlank()) {"Can't mount root resource tree as data root"}
+    return DataTree {
+        resources.forEach { resource ->
+            val path = classLoader.getResource(resource)?.toURI()?.toPath() ?: error(
+                "Resource with name $resource is not resolved"
+            )
+            node(resource, readRawDirectory(path))
+        }
     }
 }
 

@@ -3,7 +3,7 @@ package space.kscience.dataforge.context
 import space.kscience.dataforge.context.Plugin.Companion.TARGET
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
-import space.kscience.dataforge.misc.DfId
+import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.parseAsName
@@ -18,7 +18,7 @@ import space.kscience.dataforge.provider.Provider
  *
  * create - configure - attach - detach - destroy
  */
-@DfId(TARGET)
+@DfType(TARGET)
 public interface Plugin : Named, ContextAware, Provider, MetaRepr {
 
     /**
