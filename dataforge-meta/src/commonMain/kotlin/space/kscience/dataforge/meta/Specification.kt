@@ -7,7 +7,7 @@ import space.kscience.dataforge.names.asName
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-public interface ReadOnlySpecification<out T : Any>: Described {
+public interface ReadOnlySpecification<out T : Any> : Described {
 
     /**
      * Read generic read-only meta with this [Specification] producing instance of desired type.
@@ -128,3 +128,10 @@ public fun <T : Scheme> MutableMeta.listOfSpec(
         setIndexed(name, value.map { it.toMeta() })
     }
 }
+
+
+@DFExperimental
+public fun <T : Scheme> Scheme.listOfSpec(
+    spec: Specification<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, List<T>> = meta.listOfSpec(spec, key)

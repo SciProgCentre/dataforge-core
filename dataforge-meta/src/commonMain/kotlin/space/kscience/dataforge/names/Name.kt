@@ -16,12 +16,10 @@ public class Name(public val tokens: List<NameToken>) {
 
     override fun toString(): String = tokens.joinToString(separator = NAME_SEPARATOR) { it.toString() }
 
-    override fun equals(other: Any?): Boolean {
-        return when (other) {
-            is Name -> this.tokens == other.tokens
-            is NameToken -> this.length == 1 && this.tokens.first() == other
-            else -> false
-        }
+    override fun equals(other: Any?): Boolean = when (other) {
+        is Name -> this.tokens == other.tokens
+        is NameToken -> this.length == 1 && this.tokens.first() == other
+        else -> false
     }
 
     private val cachedHashCode = if (tokens.size == 1) {
