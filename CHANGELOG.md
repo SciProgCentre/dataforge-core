@@ -4,6 +4,7 @@
 
 ### Added
 - Wasm artifacts
+- Add automatic MetaConverter for serializeable objects
 
 ### Changed
 
