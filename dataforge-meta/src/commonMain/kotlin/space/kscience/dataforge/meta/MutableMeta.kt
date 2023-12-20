@@ -165,7 +165,7 @@ public fun MutableMetaProvider.remove(key: String) {
 
 // node setters
 
-public operator fun MutableMetaProvider.set(Key: NameToken, value: Meta): Unit = set(Key.asName(), value)
+public operator fun MutableMetaProvider.set(key: NameToken, value: Meta): Unit = set(key.asName(), value)
 public operator fun MutableMetaProvider.set(key: String, value: Meta): Unit = set(Name.parse(key), value)
 
 

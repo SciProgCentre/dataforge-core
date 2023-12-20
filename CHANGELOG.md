@@ -5,10 +5,12 @@
 ### Added
 - Wasm artifacts
 - Add automatic MetaConverter for serializeable objects
+- Add Meta and MutableMeta delegates for convertable and serializeable
 
 ### Changed
 
 ### Deprecated
+- `node(key,converter)` in favor of `serializable` delegate
 
 ### Removed
 

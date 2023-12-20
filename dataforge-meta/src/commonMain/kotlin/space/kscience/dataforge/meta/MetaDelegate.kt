@@ -1,6 +1,8 @@
 package space.kscience.dataforge.meta
 
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.transformations.MetaConverter
+import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import kotlin.properties.ReadOnlyProperty
@@ -11,12 +13,47 @@ public fun MetaProvider.node(key: Name? = null): ReadOnlyProperty<Any?, Meta?> =
     get(key ?: property.name.asName())
 }
 
-public fun <T> MetaProvider.node(
+/**
+ * Use [converter] to read the Meta node
+ */
+public fun <T> MetaProvider.convertable(
+    converter: MetaConverter<T>,
     key: Name? = null,
-    converter: MetaConverter<T>
 ): ReadOnlyProperty<Any?, T?> = ReadOnlyProperty { _, property ->
     get(key ?: property.name.asName())?.let { converter.metaToObject(it) }
 }
+
+/**
+ * Use object serializer to transform it to Meta and back
+ */
+@DFExperimental
+public inline fun <reified T> MetaProvider.serializable(
+    descriptor: MetaDescriptor? = null,
+    key: Name? = null,
+): ReadOnlyProperty<Any?, T?> = convertable(MetaConverter.serializable(descriptor), key)
+
+@Deprecated("Use convertable", ReplaceWith("convertable(converter, key)"))
+public fun <T> MetaProvider.node(
+    key: Name? = null,
+    converter: MetaConverter<T>,
+): ReadOnlyProperty<Any?, T?> = convertable(converter, key)
+
+/**
+ * Use [converter] to convert a list of same name siblings meta to object
+ */
+public fun <T> Meta.listOfConvertable(
+    converter: MetaConverter<T>,
+    key: Name? = null,
+): ReadOnlyProperty<Any?, List<T>> = ReadOnlyProperty{_, property ->
+    val name = key ?: property.name.asName()
+    getIndexed(name).values.map { converter.metaToObject(it) }
+}
+
+@DFExperimental
+public inline fun <reified T> Meta.listOfSerializable(
+    descriptor: MetaDescriptor? = null,
+    key: Name? = null,
+): ReadOnlyProperty<Any?, List<T>> = listOfConvertable(MetaConverter.serializable(descriptor), key)
 
 /**
  * A property delegate that uses custom key
@@ -27,7 +64,7 @@ public fun MetaProvider.value(key: Name? = null): ReadOnlyProperty<Any?, Value?>
 
 public fun <R> MetaProvider.value(
     key: Name? = null,
-    reader: (Value?) -> R
+    reader: (Value?) -> R,
 ): ReadOnlyProperty<Any?, R> = ReadOnlyProperty { _, property ->
     reader(get(key ?: property.name.asName())?.value)
 }
