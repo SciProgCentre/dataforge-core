@@ -188,10 +188,12 @@ public operator fun <M : TypedMeta<M>> M?.get(key: String): M? = this?.get(key.p
 
 
 /**
- * Get a sequence of [Name]-[Value] pairs using top-down traversal of the tree
+ * Get a sequence of [Name]-[Value] pairs using top-down traversal of the tree.
+ * The sequence includes root value with empty name
  */
 public fun Meta.valueSequence(): Sequence<Pair<Name, Value>> = sequence {
     items.forEach { (key, item) ->
+        value?.let { yield(Name.EMPTY to it) }
         item.value?.let { itemValue ->
             yield(key.asName() to itemValue)
         }

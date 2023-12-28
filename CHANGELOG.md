@@ -16,6 +16,7 @@
 
 ### Fixed
 - Partially fixed a bug with `MutableMeta` observable wrappers.
+- `valueSequence` now include root value. So `meta.update` works properly.
 
 ### Security
 
