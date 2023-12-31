@@ -324,8 +324,6 @@ private class MutableMetaImpl(
                     //remove child and invalidate if argument is null
                     if (node == null) {
                         children.remove(token)?.removeListener(this)
-                        // old item is not null otherwise we can't be here
-                        invalidate(name)
                     } else {
                         val newNode = wrapItem(node)
                         newNode.adoptBy(this, token)
@@ -335,7 +333,7 @@ private class MutableMetaImpl(
 
                 else -> {
                     val token = name.firstOrNull()!!
-                    //get existing or create new node.
+                    //get an existing node or create a new node.
                     if (items[token] == null) {
                         val newNode = MutableMetaImpl(null)
                         newNode.adoptBy(this, token)
