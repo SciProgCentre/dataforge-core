@@ -183,7 +183,6 @@ public interface MetaConverter<T>: MetaSpec<T> {
     }
 }
 
-public fun <T : Any> MetaConverter<T>.readNullable(item: Meta?): T? = item?.let { read(it) }
 public fun <T : Any> MetaConverter<T>.convertNullable(obj: T?): Meta? = obj?.let { convert(it) }
 
-public fun <T> MetaConverter<T>.readValue(value: Value): T? = read(Meta(value))
+

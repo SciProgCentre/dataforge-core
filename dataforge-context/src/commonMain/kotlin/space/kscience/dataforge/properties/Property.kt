@@ -1,6 +1,5 @@
 package space.kscience.dataforge.properties
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import space.kscience.dataforge.misc.DFExperimental
@@ -14,7 +13,6 @@ public interface Property<T> {
 }
 
 @DFExperimental
-@OptIn(ExperimentalCoroutinesApi::class)
 public fun <T> Property<T>.toFlow(): StateFlow<T> = MutableStateFlow(value).also { stateFlow ->
     onChange {
         stateFlow.value = it

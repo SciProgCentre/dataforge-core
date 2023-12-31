@@ -9,6 +9,7 @@ import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty1
 
 /**
  * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [MetaSpec].
@@ -288,3 +289,24 @@ public fun <T : Scheme> Scheme.listOfScheme(
     spec: SchemeSpec<T>,
     key: Name? = null,
 ): ReadWriteProperty<Any?, List<T>> = meta.listOfScheme(spec, key)
+
+
+/**
+ * Use the value of the property in a [callBack].
+ * The callback is called once immediately after subscription to pass the initial value.
+ *
+ * Optional [owner] property is used for
+ */
+public fun <S : Scheme, T> S.useProperty(
+    property: KProperty1<S, T>,
+    owner: Any? = null,
+    callBack: S.(T) -> Unit,
+) {
+    //Pass initial value.
+    callBack(property.get(this))
+    meta.onChange(owner) { name ->
+        if (name.startsWith(property.name.asName())) {
+            callBack(property.get(this@useProperty))
+        }
+    }
+}

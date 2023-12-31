@@ -16,3 +16,6 @@ public interface MetaSpec<out T> : Described {
     public fun read(source: Meta): T = readOrNull(source) ?: error("Meta $source could not be interpreted by $this")
 }
 
+
+public fun <T : Any> MetaSpec<T>.readNullable(item: Meta?): T? = item?.let { read(it) }
+public fun <T> MetaSpec<T>.readValue(value: Value): T? = read(Meta(value))

@@ -13,13 +13,13 @@ public fun MetaProvider.node(key: Name? = null): ReadOnlyProperty<Any?, Meta?> =
 }
 
 /**
- * Use [converter] to read the Meta node
+ * Use [metaSpec] to read the Meta node
  */
-public fun <T> MetaProvider.convertable(
-    converter: MetaConverter<T>,
+public fun <T> MetaProvider.spec(
+    metaSpec: MetaSpec<T>,
     key: Name? = null,
 ): ReadOnlyProperty<Any?, T?> = ReadOnlyProperty { _, property ->
-    get(key ?: property.name.asName())?.let { converter.read(it) }
+    get(key ?: property.name.asName())?.let { metaSpec.read(it) }
 }
 
 /**
@@ -29,19 +29,19 @@ public fun <T> MetaProvider.convertable(
 public inline fun <reified T> MetaProvider.serializable(
     descriptor: MetaDescriptor? = null,
     key: Name? = null,
-): ReadOnlyProperty<Any?, T?> = convertable(MetaConverter.serializable(descriptor), key)
+): ReadOnlyProperty<Any?, T?> = spec(MetaConverter.serializable(descriptor), key)
 
 @Deprecated("Use convertable", ReplaceWith("convertable(converter, key)"))
 public fun <T> MetaProvider.node(
     key: Name? = null,
-    converter: MetaConverter<T>,
-): ReadOnlyProperty<Any?, T?> = convertable(converter, key)
+    converter: MetaSpec<T>,
+): ReadOnlyProperty<Any?, T?> = spec(converter, key)
 
 /**
  * Use [converter] to convert a list of same name siblings meta to object
  */
-public fun <T> Meta.listOfConvertable(
-    converter: MetaConverter<T>,
+public fun <T> Meta.listOfSpec(
+    converter: MetaSpec<T>,
     key: Name? = null,
 ): ReadOnlyProperty<Any?, List<T>> = ReadOnlyProperty{_, property ->
     val name = key ?: property.name.asName()
@@ -52,7 +52,7 @@ public fun <T> Meta.listOfConvertable(
 public inline fun <reified T> Meta.listOfSerializable(
     descriptor: MetaDescriptor? = null,
     key: Name? = null,
-): ReadOnlyProperty<Any?, List<T>> = listOfConvertable(MetaConverter.serializable(descriptor), key)
+): ReadOnlyProperty<Any?, List<T>> = listOfSpec(MetaConverter.serializable(descriptor), key)
 
 /**
  * A property delegate that uses custom key

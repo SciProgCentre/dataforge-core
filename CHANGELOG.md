@@ -9,6 +9,7 @@
 
 ### Changed
 - Descriptor `children` renamed to `nodes`
+- `MetaConverter` now inherits `MetaSpec` (former `Specifiction`). So `MetaConverter` could be used more universally.
 
 ### Deprecated
 - `node(key,converter)` in favor of `serializable` delegate
