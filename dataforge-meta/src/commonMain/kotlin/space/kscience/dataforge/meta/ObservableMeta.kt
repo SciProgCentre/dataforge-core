@@ -17,12 +17,15 @@ internal data class MetaListener(
  */
 public interface ObservableMeta : Meta {
     /**
-     * Add change listener to this meta. Owner is declared to be able to remove listeners later. Listener without owner could not be removed
+     * Add change listener to this meta. The Owner is declared to be able to remove listeners later.
+     * Listeners without an owner could be only removed all together.
+     *
+     * `this` object in the listener represents the current state of this meta. The name points to a changed node
      */
     public fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit)
 
     /**
-     * Remove all listeners belonging to given owner
+     * Remove all listeners belonging to the given [owner]. Passing null removes all listeners.
      */
     public fun removeListener(owner: Any?)
 
