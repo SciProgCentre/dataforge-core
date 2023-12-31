@@ -15,28 +15,38 @@ import space.kscience.dataforge.names.*
 public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurable {
 
     /**
-     * Meta to be mutated by this schme
+     * Meta to be mutated by this scheme
      */
-    private var targetMeta: MutableMeta = MutableMeta()
+    private var target: MutableMeta? = null
+        get() {
+            // automatic initialization of target if it is missing
+            if (field == null) {
+                field = MutableMeta()
+            }
+            return field
+        }
 
     /**
      * Default values provided by this scheme
      */
-    private var defaultMeta: Meta? = null
+    private var prototype: Meta? = null
 
     final override val meta: ObservableMutableMeta = SchemeMeta(Name.EMPTY)
 
     final override var descriptor: MetaDescriptor? = null
-        internal set
+        private set
 
-    internal fun wrap(
-        newMeta: MutableMeta,
-        preserveDefault: Boolean = false,
+    /**
+     * This method must be called before the scheme could be used
+     */
+    internal fun initialize(
+        target: MutableMeta,
+        prototype: Meta,
+        descriptor: MetaDescriptor?,
     ) {
-        if (preserveDefault) {
-            defaultMeta = targetMeta.seal()
-        }
-        targetMeta = newMeta
+        this.target = target
+        this.prototype = prototype
+        this.descriptor = descriptor
     }
 
     /**
@@ -47,11 +57,11 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
         return descriptor?.validate(meta) ?: true
     }
 
-    override fun get(name: Name): MutableMeta? = meta.get(name)
+    override fun get(name: Name): MutableMeta? = meta[name]
 
     override fun set(name: Name, node: Meta?) {
         if (validate(name, meta)) {
-            meta.set(name, node)
+            meta[name] = node
         } else {
             error("Validation failed for node $node at $name")
         }
@@ -68,14 +78,16 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
     private val listeners: MutableList<MetaListener> = mutableListOf()
 
+    override fun toString(): String = meta.toString()
+
     private inner class SchemeMeta(val pathName: Name) : ObservableMutableMeta {
         override var value: Value?
-            get() = targetMeta[pathName]?.value
-                ?: defaultMeta?.get(pathName)?.value
+            get() = target[pathName]?.value
+                ?: prototype?.get(pathName)?.value
                 ?: descriptor?.get(pathName)?.defaultValue
             set(value) {
-                val oldValue = targetMeta[pathName]?.value
-                targetMeta[pathName] = value
+                val oldValue = target[pathName]?.value
+                target!![pathName] = value
                 if (oldValue != value) {
                     invalidate(Name.EMPTY)
                 }
@@ -83,8 +95,8 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
         override val items: Map<NameToken, ObservableMutableMeta>
             get() {
-                val targetKeys = targetMeta[pathName]?.items?.keys ?: emptySet()
-                val defaultKeys = defaultMeta?.get(pathName)?.items?.keys ?: emptySet()
+                val targetKeys = target[pathName]?.items?.keys ?: emptySet()
+                val defaultKeys = prototype?.get(pathName)?.items?.keys ?: emptySet()
                 return (targetKeys + defaultKeys).associateWith { SchemeMeta(pathName + it) }
             }
 
@@ -111,7 +123,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
         override fun hashCode(): Int = Meta.hashCode(this)
 
         override fun set(name: Name, node: Meta?) {
-            targetMeta.set(name, node)
+            target!![name] = node
             invalidate(name)
         }
 
@@ -119,7 +131,6 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
         @DFExperimental
         override fun attach(name: Name, node: ObservableMutableMeta) {
-            //TODO implement zero-copy attachment
             set(name, node)
             node.onChange(this) { changeName ->
                 set(name + changeName, this[changeName])
@@ -131,10 +142,11 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
 
 /**
  * Relocate scheme target onto given [MutableMeta]. Old provider does not get updates anymore.
- * Current state of the scheme used as a default.
+ * The Current state of the scheme that os used as a default.
  */
+@DFExperimental
 public fun <T : Scheme> T.retarget(provider: MutableMeta): T = apply {
-    wrap(provider, true)
+    initialize(provider, meta.seal(), descriptor)
 }
 
 /**
@@ -155,19 +167,18 @@ public open class SchemeSpec<out T : Scheme>(
     private val builder: () -> T,
 ) : Specification<T> {
 
+    override val descriptor: MetaDescriptor? get() = null
+
     override fun read(source: Meta): T = builder().also {
-        it.wrap(MutableMeta().withDefault(source))
+        it.initialize(MutableMeta(), source, descriptor)
     }
 
     override fun write(target: MutableMeta): T = empty().also {
-        it.wrap(target)
+        it.initialize(target, Meta.EMPTY, descriptor)
     }
 
-    //TODO Generate descriptor from Scheme class
-    override val descriptor: MetaDescriptor? get() = null
-
     override fun empty(): T = builder().also {
-        it.descriptor = descriptor
+        it.initialize(MutableMeta(), Meta.EMPTY, descriptor)
     }
 
     @Suppress("OVERRIDE_BY_INLINE")
