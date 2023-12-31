@@ -6,7 +6,7 @@ import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.data.GoalExecutionRestriction
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
-import space.kscience.dataforge.meta.Specification
+import space.kscience.dataforge.meta.MetaSpec
 import space.kscience.dataforge.meta.descriptors.Described
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DfType
@@ -43,10 +43,10 @@ public interface Task<out T : Any> : Described {
 }
 
 /**
- * A [Task] with [Specification] for wrapping and unwrapping task configuration
+ * A [Task] with [MetaSpec] for wrapping and unwrapping task configuration
  */
 public interface TaskWithSpec<out T : Any, C : Any> : Task<T> {
-    public val spec: Specification<C>
+    public val spec: MetaSpec<C>
     override val descriptor: MetaDescriptor? get() = spec.descriptor
 
     public suspend fun execute(workspace: Workspace, taskName: Name, configuration: C): TaskResult<T>
@@ -55,11 +55,11 @@ public interface TaskWithSpec<out T : Any, C : Any> : Task<T> {
         execute(workspace, taskName, spec.read(taskMeta))
 }
 
-public suspend fun <T : Any, C : Any> TaskWithSpec<T, C>.execute(
-    workspace: Workspace,
-    taskName: Name,
-    block: C.() -> Unit = {},
-): TaskResult<T> = execute(workspace, taskName, spec(block))
+//public suspend fun <T : Any, C : Scheme> TaskWithSpec<T, C>.execute(
+//    workspace: Workspace,
+//    taskName: Name,
+//    block: C.() -> Unit = {},
+//): TaskResult<T> = execute(workspace, taskName, spec(block))
 
 public class TaskResultBuilder<in T : Any>(
     public val workspace: Workspace,
@@ -76,7 +76,6 @@ public class TaskResultBuilder<in T : Any>(
  * @param descriptor of meta accepted by this task
  * @param builder for resulting data set
  */
-@Suppress("FunctionName")
 public fun <T : Any> Task(
     resultType: KType,
     descriptor: MetaDescriptor? = null,
@@ -98,7 +97,6 @@ public fun <T : Any> Task(
     }
 }
 
-@Suppress("FunctionName")
 public inline fun <reified T : Any> Task(
     descriptor: MetaDescriptor? = null,
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
@@ -116,10 +114,10 @@ public inline fun <reified T : Any> Task(
 @Suppress("FunctionName")
 public fun <T : Any, C : MetaRepr> Task(
     resultType: KType,
-    specification: Specification<C>,
+    specification: MetaSpec<C>,
     builder: suspend TaskResultBuilder<T>.(C) -> Unit,
 ): TaskWithSpec<T, C> = object : TaskWithSpec<T, C> {
-    override val spec: Specification<C> = specification
+    override val spec: MetaSpec<C> = specification
 
     override suspend fun execute(
         workspace: Workspace,
@@ -135,8 +133,7 @@ public fun <T : Any, C : MetaRepr> Task(
     }
 }
 
-@Suppress("FunctionName")
 public inline fun <reified T : Any, C : MetaRepr> Task(
-    specification: Specification<C>,
+    specification: MetaSpec<C>,
     noinline builder: suspend TaskResultBuilder<T>.(C) -> Unit,
 ): Task<T> = Task(typeOf<T>(), specification, builder)

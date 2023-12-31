@@ -3,9 +3,11 @@ package space.kscience.dataforge.descriptors
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
-import space.kscience.dataforge.meta.*
+import space.kscience.dataforge.meta.Scheme
+import space.kscience.dataforge.meta.SchemeSpec
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
-import space.kscience.dataforge.meta.transformations.MetaConverter
+import space.kscience.dataforge.meta.int
+import space.kscience.dataforge.meta.string
 
 private class TestScheme: Scheme(){
 

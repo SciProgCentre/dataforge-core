@@ -1,7 +1,6 @@
 package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
-import space.kscience.dataforge.meta.transformations.MetaConverter
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
@@ -33,12 +32,12 @@ public fun <T> MutableMetaProvider.convertable(
     object : ReadWriteProperty<Any?, T?> {
         override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
             val name = key ?: property.name.asName()
-            return get(name)?.let { converter.metaToObject(it) }
+            return get(name)?.let { converter.read(it) }
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
             val name = key ?: property.name.asName()
-            set(name, value?.let { converter.objectToMeta(it) })
+            set(name, value?.let { converter.convert(it) })
         }
     }
 
@@ -66,12 +65,12 @@ public fun <T> MutableMeta.listOfConvertable(
 ): ReadWriteProperty<Any?, List<T>> = object : ReadWriteProperty<Any?, List<T>> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
         val name = key ?: property.name.asName()
-        return getIndexed(name).values.map { converter.metaToObject(it) }
+        return getIndexed(name).values.map { converter.read(it) }
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<T>) {
         val name = key ?: property.name.asName()
-        setIndexed(name, value.map { converter.objectToMeta(it) })
+        setIndexed(name, value.map { converter.convert(it) })
     }
 }
 

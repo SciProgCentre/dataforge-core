@@ -7,9 +7,11 @@ import space.kscience.dataforge.meta.descriptors.validate
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 /**
- * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [Specification].
+ * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [MetaSpec].
  * Default item provider and [MetaDescriptor] are optional
  */
 public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurable {
@@ -165,23 +167,124 @@ public inline fun <T : Scheme> T.copy(spec: SchemeSpec<T>, block: T.() -> Unit =
  */
 public open class SchemeSpec<out T : Scheme>(
     private val builder: () -> T,
-) : Specification<T> {
+) : MetaSpec<T> {
 
     override val descriptor: MetaDescriptor? get() = null
 
-    override fun read(source: Meta): T = builder().also {
+    override fun readOrNull(source: Meta): T = builder().also {
         it.initialize(MutableMeta(), source, descriptor)
     }
 
-    override fun write(target: MutableMeta): T = empty().also {
+    public fun write(target: MutableMeta): T = empty().also {
         it.initialize(target, Meta.EMPTY, descriptor)
     }
 
-    override fun empty(): T = builder().also {
+    /**
+     * Generate an empty object
+     */
+    public fun empty(): T = builder().also {
         it.initialize(MutableMeta(), Meta.EMPTY, descriptor)
     }
 
-    @Suppress("OVERRIDE_BY_INLINE")
-    final override inline operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
+    /**
+     * A convenience method to use specifications in builders
+     */
+    public inline operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
 
 }
+
+
+
+/**
+ * Update a [MutableMeta] using given specification
+ */
+public fun <T : Scheme> MutableMeta.updateWith(
+    spec: SchemeSpec<T>,
+    action: T.() -> Unit,
+): T = spec.write(this).apply(action)
+
+
+/**
+ * Update configuration using given specification
+ */
+public fun <T : Scheme> Configurable.updateWith(
+    spec: SchemeSpec<T>,
+    action: T.() -> Unit,
+): T = spec.write(meta).apply(action)
+
+
+/**
+ * A delegate that uses a [MetaSpec] to wrap a child of this provider
+ */
+public fun <T : Scheme> MutableMeta.scheme(
+    spec: SchemeSpec<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        val name = key ?: property.name.asName()
+        return spec.write(getOrCreate(name))
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+        val name = key ?: property.name.asName()
+        set(name, value.toMeta())
+    }
+}
+
+public fun <T : Scheme> Scheme.scheme(
+    spec: SchemeSpec<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, T> = meta.scheme(spec, key)
+
+/**
+ * A delegate that uses a [MetaSpec] to wrap a child of this provider.
+ * Returns null if meta with given name does not exist.
+ */
+public fun <T : Scheme> MutableMeta.schemeOrNull(
+    spec: SchemeSpec<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, T?> = object : ReadWriteProperty<Any?, T?> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
+        val name = key ?: property.name.asName()
+        return if (get(name) == null) null else spec.write(getOrCreate(name))
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+        val name = key ?: property.name.asName()
+        if (value == null) remove(name)
+        else set(name, value.toMeta())
+    }
+}
+
+public fun <T : Scheme> Scheme.schemeOrNull(
+    spec: SchemeSpec<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, T?> = meta.schemeOrNull(spec, key)
+
+/**
+ * A delegate that uses a [MetaSpec] to wrap a list of child providers.
+ * If children are mutable, the changes in list elements are reflected on them.
+ * The list is a snapshot of children state, so change in structure is not reflected on its composition.
+ */
+@DFExperimental
+public fun <T : Scheme> MutableMeta.listOfScheme(
+    spec: SchemeSpec<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, List<T>> = object : ReadWriteProperty<Any?, List<T>> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
+        val name = key ?: property.name.asName()
+        return getIndexed(name).values.map { spec.write(it as MutableMeta) }
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<T>) {
+        val name = key ?: property.name.asName()
+        setIndexed(name, value.map { it.toMeta() })
+    }
+}
+
+
+@DFExperimental
+public fun <T : Scheme> Scheme.listOfScheme(
+    spec: SchemeSpec<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, List<T>> = meta.listOfScheme(spec, key)

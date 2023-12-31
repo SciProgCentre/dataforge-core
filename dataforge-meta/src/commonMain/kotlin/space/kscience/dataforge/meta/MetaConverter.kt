@@ -1,19 +1,19 @@
-package space.kscience.dataforge.meta.transformations
+package space.kscience.dataforge.meta
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.serializer
-import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
+
 /**
  * A converter of generic object to and from [Meta]
  */
-public interface MetaConverter<T> {
+public interface MetaConverter<T>: MetaSpec<T> {
 
     /**
      * Runtime type of [T]
@@ -23,32 +23,32 @@ public interface MetaConverter<T> {
     /**
      * A descriptor for resulting meta
      */
-    public val descriptor: MetaDescriptor get() = MetaDescriptor.EMPTY
+    override val descriptor: MetaDescriptor get() = MetaDescriptor.EMPTY
 
     /**
-     * Attempt conversion of [meta] to an object or return null if conversion failed
+     * Attempt conversion of [source] to an object or return null if conversion failed
      */
-    public fun metaToObjectOrNull(meta: Meta): T?
+    override fun readOrNull(source: Meta): T?
 
-    public fun metaToObject(meta: Meta): T =
-        metaToObjectOrNull(meta) ?: error("Meta $meta could not be interpreted by $this")
+    override fun read(source: Meta): T =
+        readOrNull(source) ?: error("Meta $source could not be interpreted by $this")
 
-    public fun objectToMeta(obj: T): Meta
+    public fun convert(obj: T): Meta
 
     public companion object {
 
         public val meta: MetaConverter<Meta> = object : MetaConverter<Meta> {
             override val type: KType = typeOf<Meta>()
 
-            override fun metaToObjectOrNull(meta: Meta): Meta = meta
-            override fun objectToMeta(obj: Meta): Meta = obj
+            override fun readOrNull(source: Meta): Meta = source
+            override fun convert(obj: Meta): Meta = obj
         }
 
         public val value: MetaConverter<Value> = object : MetaConverter<Value> {
             override val type: KType = typeOf<Value>()
 
-            override fun metaToObjectOrNull(meta: Meta): Value? = meta.value
-            override fun objectToMeta(obj: Value): Meta = Meta(obj)
+            override fun readOrNull(source: Meta): Value? = source.value
+            override fun convert(obj: Value): Meta = Meta(obj)
         }
 
         public val string: MetaConverter<String> = object : MetaConverter<String> {
@@ -59,8 +59,8 @@ public interface MetaConverter<T> {
             }
 
 
-            override fun metaToObjectOrNull(meta: Meta): String? = meta.string
-            override fun objectToMeta(obj: String): Meta = Meta(obj.asValue())
+            override fun readOrNull(source: Meta): String? = source.string
+            override fun convert(obj: String): Meta = Meta(obj.asValue())
         }
 
         public val boolean: MetaConverter<Boolean> = object : MetaConverter<Boolean> {
@@ -70,8 +70,8 @@ public interface MetaConverter<T> {
                 valueType(ValueType.BOOLEAN)
             }
 
-            override fun metaToObjectOrNull(meta: Meta): Boolean? = meta.boolean
-            override fun objectToMeta(obj: Boolean): Meta = Meta(obj.asValue())
+            override fun readOrNull(source: Meta): Boolean? = source.boolean
+            override fun convert(obj: Boolean): Meta = Meta(obj.asValue())
         }
 
         public val number: MetaConverter<Number> = object : MetaConverter<Number> {
@@ -81,8 +81,8 @@ public interface MetaConverter<T> {
                 valueType(ValueType.NUMBER)
             }
 
-            override fun metaToObjectOrNull(meta: Meta): Number? = meta.number
-            override fun objectToMeta(obj: Number): Meta = Meta(obj.asValue())
+            override fun readOrNull(source: Meta): Number? = source.number
+            override fun convert(obj: Number): Meta = Meta(obj.asValue())
         }
 
         public val double: MetaConverter<Double> = object : MetaConverter<Double> {
@@ -92,8 +92,8 @@ public interface MetaConverter<T> {
                 valueType(ValueType.NUMBER)
             }
 
-            override fun metaToObjectOrNull(meta: Meta): Double? = meta.double
-            override fun objectToMeta(obj: Double): Meta = Meta(obj.asValue())
+            override fun readOrNull(source: Meta): Double? = source.double
+            override fun convert(obj: Double): Meta = Meta(obj.asValue())
         }
 
         public val float: MetaConverter<Float> = object : MetaConverter<Float> {
@@ -103,8 +103,8 @@ public interface MetaConverter<T> {
                 valueType(ValueType.NUMBER)
             }
 
-            override fun metaToObjectOrNull(meta: Meta): Float? = meta.float
-            override fun objectToMeta(obj: Float): Meta = Meta(obj.asValue())
+            override fun readOrNull(source: Meta): Float? = source.float
+            override fun convert(obj: Float): Meta = Meta(obj.asValue())
         }
 
         public val int: MetaConverter<Int> = object : MetaConverter<Int> {
@@ -114,8 +114,8 @@ public interface MetaConverter<T> {
                 valueType(ValueType.NUMBER)
             }
 
-            override fun metaToObjectOrNull(meta: Meta): Int? = meta.int
-            override fun objectToMeta(obj: Int): Meta = Meta(obj.asValue())
+            override fun readOrNull(source: Meta): Int? = source.int
+            override fun convert(obj: Int): Meta = Meta(obj.asValue())
         }
 
         public val long: MetaConverter<Long> = object : MetaConverter<Long> {
@@ -125,8 +125,8 @@ public interface MetaConverter<T> {
                 valueType(ValueType.NUMBER)
             }
 
-            override fun metaToObjectOrNull(meta: Meta): Long? = meta.long
-            override fun objectToMeta(obj: Long): Meta = Meta(obj.asValue())
+            override fun readOrNull(source: Meta): Long? = source.long
+            override fun convert(obj: Long): Meta = Meta(obj.asValue())
         }
 
         public inline fun <reified E : Enum<E>> enum(): MetaConverter<E> = object : MetaConverter<E> {
@@ -138,9 +138,9 @@ public interface MetaConverter<T> {
             }
 
             @Suppress("USELESS_CAST")
-            override fun metaToObjectOrNull(meta: Meta): E = meta.enum<E>() as? E ?: error("The Item is not a Enum")
+            override fun readOrNull(source: Meta): E = source.enum<E>() as? E ?: error("The Item is not a Enum")
 
-            override fun objectToMeta(obj: E): Meta = Meta(obj.asValue())
+            override fun convert(obj: E): Meta = Meta(obj.asValue())
         }
 
         public fun <T> valueList(
@@ -153,9 +153,9 @@ public interface MetaConverter<T> {
                 valueType(ValueType.LIST)
             }
 
-            override fun metaToObjectOrNull(meta: Meta): List<T>? = meta.value?.list?.map(reader)
+            override fun readOrNull(source: Meta): List<T>? = source.value?.list?.map(reader)
 
-            override fun objectToMeta(obj: List<T>): Meta = Meta(obj.map(writer).asValue())
+            override fun convert(obj: List<T>): Meta = Meta(obj.map(writer).asValue())
         }
 
         /**
@@ -168,12 +168,12 @@ public interface MetaConverter<T> {
             override val type: KType = typeOf<T>()
             private val serializer: KSerializer<T> = serializer()
 
-            override fun metaToObjectOrNull(meta: Meta): T? {
-                val json = meta.toJson(descriptor)
+            override fun readOrNull(source: Meta): T? {
+                val json = source.toJson(descriptor)
                 return Json.decodeFromJsonElement(serializer, json)
             }
 
-            override fun objectToMeta(obj: T): Meta {
+            override fun convert(obj: T): Meta {
                 val json = Json.encodeToJsonElement(obj)
                 return json.toMeta(descriptor)
             }
@@ -183,7 +183,7 @@ public interface MetaConverter<T> {
     }
 }
 
-public fun <T : Any> MetaConverter<T>.nullableMetaToObject(item: Meta?): T? = item?.let { metaToObject(it) }
-public fun <T : Any> MetaConverter<T>.nullableObjectToMeta(obj: T?): Meta? = obj?.let { objectToMeta(it) }
+public fun <T : Any> MetaConverter<T>.readNullable(item: Meta?): T? = item?.let { read(it) }
+public fun <T : Any> MetaConverter<T>.convertNullable(obj: T?): Meta? = obj?.let { convert(it) }
 
-public fun <T> MetaConverter<T>.valueToObject(value: Value): T? = metaToObject(Meta(value))
+public fun <T> MetaConverter<T>.readValue(value: Value): T? = read(Meta(value))

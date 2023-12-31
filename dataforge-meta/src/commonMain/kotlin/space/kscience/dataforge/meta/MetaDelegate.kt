@@ -1,7 +1,6 @@
 package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
-import space.kscience.dataforge.meta.transformations.MetaConverter
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
@@ -20,7 +19,7 @@ public fun <T> MetaProvider.convertable(
     converter: MetaConverter<T>,
     key: Name? = null,
 ): ReadOnlyProperty<Any?, T?> = ReadOnlyProperty { _, property ->
-    get(key ?: property.name.asName())?.let { converter.metaToObject(it) }
+    get(key ?: property.name.asName())?.let { converter.read(it) }
 }
 
 /**
@@ -46,7 +45,7 @@ public fun <T> Meta.listOfConvertable(
     key: Name? = null,
 ): ReadOnlyProperty<Any?, List<T>> = ReadOnlyProperty{_, property ->
     val name = key ?: property.name.asName()
-    getIndexed(name).values.map { converter.metaToObject(it) }
+    getIndexed(name).values.map { converter.read(it) }
 }
 
 @DFExperimental

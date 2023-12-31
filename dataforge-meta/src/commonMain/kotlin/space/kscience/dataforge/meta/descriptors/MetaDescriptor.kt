@@ -27,7 +27,7 @@ public enum class ValueRestriction {
 /**
  * The descriptor for a meta
  * @param description description text
- * @param children child descriptors for this node
+ * @param nodes child descriptors for this node
  * @param multiple True if same name siblings with this name are allowed
  * @param valueRestriction The requirements for node content
  * @param valueTypes list of allowed types for [Meta.value], null if all values are allowed.
@@ -39,7 +39,7 @@ public enum class ValueRestriction {
 @Serializable
 public data class MetaDescriptor(
     public val description: String? = null,
-    public val children: Map<String, MetaDescriptor> = emptyMap(),
+    public val nodes: Map<String, MetaDescriptor> = emptyMap(),
     public val multiple: Boolean = false,
     public val valueRestriction: ValueRestriction = ValueRestriction.NONE,
     public val valueTypes: List<ValueType>? = null,
@@ -47,6 +47,9 @@ public data class MetaDescriptor(
     public val defaultValue: Value? = null,
     public val attributes: Meta = Meta.EMPTY,
 ) {
+    @Deprecated("Replace by nodes", ReplaceWith("nodes"))
+    public val children: Map<String, MetaDescriptor> get() = nodes
+
     /**
      * A node constructed of default values for this descriptor and its children
      */
@@ -55,7 +58,7 @@ public data class MetaDescriptor(
             defaultValue?.let { defaultValue ->
                 this.value = defaultValue
             }
-            children.forEach { (key, descriptor) ->
+            nodes.forEach { (key, descriptor) ->
                 set(key, descriptor.defaultNode)
             }
         }
@@ -67,13 +70,13 @@ public data class MetaDescriptor(
     }
 }
 
-public val MetaDescriptor.required: Boolean get() = valueRestriction == ValueRestriction.REQUIRED || children.values.any { required }
+public val MetaDescriptor.required: Boolean get() = valueRestriction == ValueRestriction.REQUIRED || nodes.values.any { required }
 
 public val MetaDescriptor.allowedValues: List<Value>? get() = attributes[MetaDescriptor.ALLOWED_VALUES_KEY]?.value?.list
 
 public operator fun MetaDescriptor.get(name: Name): MetaDescriptor? = when (name.length) {
     0 -> this
-    1 -> children[name.firstOrNull()!!.toString()]
+    1 -> nodes[name.firstOrNull()!!.toString()]
     else -> get(name.firstOrNull()!!.asName())?.get(name.cutFirst())
 }
 
@@ -95,7 +98,7 @@ public fun MetaDescriptor.validate(item: Meta?): Boolean {
     if (item == null) return !required
     if (!validate(item.value)) return false
 
-    children.forEach { (key, childDescriptor) ->
+    nodes.forEach { (key, childDescriptor) ->
         if (!childDescriptor.validate(item[key])) return false
     }
     return true

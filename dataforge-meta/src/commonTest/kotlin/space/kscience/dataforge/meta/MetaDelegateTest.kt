@@ -20,7 +20,7 @@ class MetaDelegateTest {
         var myValue by string()
         var safeValue by double(2.2)
         var enumValue by enum(TestEnum.YES)
-        var inner by spec(InnerScheme)
+        var inner by scheme(InnerScheme)
 
         companion object : SchemeSpec<TestScheme>(::TestScheme)
     }

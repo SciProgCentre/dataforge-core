@@ -80,7 +80,7 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
 
     public fun from(descriptor: MetaDescriptor) {
         description = descriptor.description
-        children.putAll(descriptor.children.mapValues { it.value.toBuilder() })
+        children.putAll(descriptor.nodes.mapValues { it.value.toBuilder() })
         multiple = descriptor.multiple
         valueRestriction = descriptor.valueRestriction
         valueTypes = descriptor.valueTypes
@@ -92,7 +92,7 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
     @PublishedApi
     internal fun build(): MetaDescriptor = MetaDescriptor(
         description = description,
-        children = children.mapValues { it.value.build() },
+        nodes = children.mapValues { it.value.build() },
         multiple = multiple,
         valueRestriction = valueRestriction,
         valueTypes = valueTypes,
@@ -143,7 +143,7 @@ public fun MetaDescriptorBuilder.required() {
 
 private fun MetaDescriptor.toBuilder(): MetaDescriptorBuilder = MetaDescriptorBuilder().apply {
     description = this@toBuilder.description
-    children = this@toBuilder.children.mapValuesTo(LinkedHashMap()) { it.value.toBuilder() }
+    children = this@toBuilder.nodes.mapValuesTo(LinkedHashMap()) { it.value.toBuilder() }
     multiple = this@toBuilder.multiple
     valueRestriction = this@toBuilder.valueRestriction
     valueTypes = this@toBuilder.valueTypes

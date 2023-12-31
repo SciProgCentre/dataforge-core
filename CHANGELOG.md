@@ -8,6 +8,7 @@
 - Add Meta and MutableMeta delegates for convertable and serializeable
 
 ### Changed
+- Descriptor `children` renamed to `nodes`
 
 ### Deprecated
 - `node(key,converter)` in favor of `serializable` delegate

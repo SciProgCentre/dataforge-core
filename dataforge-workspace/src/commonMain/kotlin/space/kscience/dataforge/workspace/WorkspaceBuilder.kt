@@ -7,8 +7,8 @@ import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
+import space.kscience.dataforge.meta.MetaSpec
 import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.meta.Specification
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFBuilder
@@ -68,7 +68,7 @@ public inline fun <reified T : Any> TaskContainer.task(
 }
 
 public inline fun <reified T : Any, C : MetaRepr> TaskContainer.task(
-    specification: Specification<C>,
+    specification: MetaSpec<C>,
     noinline builder: suspend TaskResultBuilder<T>.(C) -> Unit,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
     val taskName = Name.parse(property.name)
