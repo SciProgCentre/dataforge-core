@@ -370,7 +370,8 @@ public fun MutableMeta.append(key: String, value: Value): Unit = append(Name.par
 /**
  * Create a mutable copy of this meta. The copy is created even if the Meta is already mutable
  */
-public fun Meta.toMutableMeta(): ObservableMutableMeta = MutableMetaImpl(value, items)
+public fun Meta.toMutableMeta(): MutableMeta =
+    MutableMeta { update(this@toMutableMeta) } //MutableMetaImpl(value, items)
 
 public fun Meta.asMutableMeta(): MutableMeta = (this as? MutableMeta) ?: toMutableMeta()
 
@@ -385,12 +386,14 @@ public inline fun ObservableMutableMeta(builder: MutableMeta.() -> Unit = {}): O
 
 
 /**
- * Create a copy of this [Meta], optionally applying the given [block].
- * The listeners of the original Config are not retained.
+ * Create a read-only copy of this [Meta]. [modification] is an optional modification applied to [Meta] on copy.
+ *
+ *  The copy does not reflect changes of the initial Meta.
  */
-public inline fun Meta.copy(block: MutableMeta.() -> Unit = {}): Meta =
-    toMutableMeta().apply(block)
-
+public inline fun Meta.copy(modification: MutableMeta.() -> Unit = {}): Meta = Meta {
+    update(this@copy)
+    modification()
+}
 
 private class MutableMetaWithDefault(
     val source: MutableMeta, val default: MetaProvider, val rootName: Name,

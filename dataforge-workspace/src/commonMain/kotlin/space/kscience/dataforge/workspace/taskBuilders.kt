@@ -1,5 +1,6 @@
 package space.kscience.dataforge.workspace
 
+import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.context.PluginFactory
 import space.kscience.dataforge.data.DataSet
 import space.kscience.dataforge.data.forEach
@@ -68,7 +69,7 @@ public val TaskResultBuilder<*>.allData: DataSelector<*>
     }
 
 /**
- * Perform a lazy mapping task using given [selector] and [action]. The meta of resulting
+ * Perform a lazy mapping task using given [selector] and one-to-one [action].
  * TODO move selector to receiver with multi-receivers
  *
  * @param selector a workspace data selector. Could be either task selector or initial data selector.
@@ -77,7 +78,7 @@ public val TaskResultBuilder<*>.allData: DataSelector<*>
  * @param action process individual data asynchronously.
  */
 @DFExperimental
-public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.pipeFrom(
+public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.transformEach(
     selector: DataSelector<T>,
     dependencyMeta: Meta = defaultDependencyMeta,
     dataMetaTransform: MutableMeta.(name: Name) -> Unit = {},
@@ -89,12 +90,31 @@ public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.pipeFr
             dataMetaTransform(data.name)
         }
 
-        val res = data.map(workspace.context.coroutineContext, meta) {
+        val res = data.map(meta, workspace.context.coroutineContext) {
             action(it, data.name, meta)
         }
 
         data(data.name, res)
     }
+}
+
+/**
+ * Set given [dataSet] as a task result.
+ */
+public fun <T : Any> TaskResultBuilder<T>.result(dataSet: DataSet<T>) {
+    node(Name.EMPTY, dataSet)
+}
+
+/**
+ * Use provided [action] to fill the result
+ */
+@DFExperimental
+public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.actionFrom(
+    selector: DataSelector<T>,
+    action: Action<T,R>,
+    dependencyMeta: Meta = defaultDependencyMeta,
+) {
+    node(Name.EMPTY, action.execute(from(selector,dependencyMeta), dependencyMeta))
 }
 
 

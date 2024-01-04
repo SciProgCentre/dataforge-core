@@ -24,7 +24,7 @@ class FileWorkspaceCacheTest {
 
             @Suppress("UNUSED_VARIABLE")
             val echo by task<String> {
-                pipeFrom(dataByType<String>()) { arg, _, _ -> arg }
+                transformEach(dataByType<String>()) { arg, _, _ -> arg }
             }
         }
 

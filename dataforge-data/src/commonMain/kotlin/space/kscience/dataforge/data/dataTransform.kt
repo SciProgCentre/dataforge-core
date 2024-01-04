@@ -1,11 +1,9 @@
 package space.kscience.dataforge.data
 
-import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.meta.seal
-import space.kscience.dataforge.meta.toMutableMeta
+import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.NameToken
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KType
@@ -28,8 +26,8 @@ public suspend fun <T : Any> NamedData<T>.awaitWithMeta(): NamedValueWithMeta<T>
  * @param block the transformation itself
  */
 public inline fun <T : Any, reified R : Any> Data<T>.map(
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = this.meta,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     crossinline block: suspend (T) -> R,
 ): Data<R> = Data(meta, coroutineContext, listOf(this)) {
     block(await())
@@ -40,8 +38,8 @@ public inline fun <T : Any, reified R : Any> Data<T>.map(
  */
 public inline fun <T1 : Any, T2 : Any, reified R : Any> Data<T1>.combine(
     other: Data<T2>,
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     meta: Meta = this.meta,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     crossinline block: suspend (left: T1, right: T2) -> R,
 ): Data<R> = Data(meta, coroutineContext, listOf(this, other)) {
     block(await(), other.await())
@@ -50,12 +48,22 @@ public inline fun <T1 : Any, T2 : Any, reified R : Any> Data<T1>.combine(
 
 //data collection operations
 
+@PublishedApi
+internal fun Iterable<Data<*>>.joinMeta(): Meta = Meta {
+    var counter = 0
+    forEach { data ->
+        val inputIndex = (data as? NamedData)?.name?.toString() ?: (counter++).toString()
+        val token = NameToken("data", inputIndex)
+        set(token, data.meta)
+    }
+}
+
 /**
  * Lazily reduce a collection of [Data] to a single data.
  */
 public inline fun <T : Any, reified R : Any> Collection<Data<T>>.reduceToData(
+    meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = Meta.EMPTY,
     crossinline block: suspend (List<ValueWithMeta<T>>) -> R,
 ): Data<R> = Data(
     meta,
@@ -65,11 +73,19 @@ public inline fun <T : Any, reified R : Any> Collection<Data<T>>.reduceToData(
     block(map { it.awaitWithMeta() })
 }
 
+@PublishedApi
+internal fun Map<*, Data<*>>.joinMeta(): Meta = Meta {
+    forEach { (key, data) ->
+        val token = NameToken("data", key.toString())
+        set(token, data.meta)
+    }
+}
+
 @DFInternal
 public fun <K, T : Any, R : Any> Map<K, Data<T>>.reduceToData(
     outputType: KType,
+    meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = Meta.EMPTY,
     block: suspend (Map<K, ValueWithMeta<T>>) -> R,
 ): Data<R> = Data(
     outputType,
@@ -87,8 +103,8 @@ public fun <K, T : Any, R : Any> Map<K, Data<T>>.reduceToData(
  * @param R type of the result goal
  */
 public inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.reduceToData(
+    meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = Meta.EMPTY,
     crossinline block: suspend (Map<K, ValueWithMeta<T>>) -> R,
 ): Data<R> = Data(
     meta,
@@ -103,8 +119,8 @@ public inline fun <K, T : Any, reified R : Any> Map<K, Data<T>>.reduceToData(
 @DFInternal
 public inline fun <T : Any, R : Any> Iterable<Data<T>>.reduceToData(
     outputType: KType,
+    meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = Meta.EMPTY,
     crossinline transformation: suspend (Collection<ValueWithMeta<T>>) -> R,
 ): Data<R> = Data(
     outputType,
@@ -117,20 +133,20 @@ public inline fun <T : Any, R : Any> Iterable<Data<T>>.reduceToData(
 
 @OptIn(DFInternal::class)
 public inline fun <T : Any, reified R : Any> Iterable<Data<T>>.reduceToData(
+    meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = Meta.EMPTY,
     crossinline transformation: suspend (Collection<ValueWithMeta<T>>) -> R,
-): Data<R> = reduceToData(typeOf<R>(), coroutineContext, meta) {
+): Data<R> = reduceToData(typeOf<R>(), meta, coroutineContext) {
     transformation(it)
 }
 
 public inline fun <T : Any, reified R : Any> Iterable<Data<T>>.foldToData(
     initial: R,
+    meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = Meta.EMPTY,
     crossinline block: suspend (result: R, data: ValueWithMeta<T>) -> R,
 ): Data<R> = reduceToData(
-    coroutineContext, meta
+    meta, coroutineContext
 ) {
     it.fold(initial) { acc, t -> block(acc, t) }
 }
@@ -141,8 +157,8 @@ public inline fun <T : Any, reified R : Any> Iterable<Data<T>>.foldToData(
 @DFInternal
 public inline fun <T : Any, R : Any> Iterable<NamedData<T>>.reduceNamedToData(
     outputType: KType,
+    meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = Meta.EMPTY,
     crossinline transformation: suspend (Collection<NamedValueWithMeta<T>>) -> R,
 ): Data<R> = Data(
     outputType,
@@ -155,10 +171,10 @@ public inline fun <T : Any, R : Any> Iterable<NamedData<T>>.reduceNamedToData(
 
 @OptIn(DFInternal::class)
 public inline fun <T : Any, reified R : Any> Iterable<NamedData<T>>.reduceNamedToData(
+    meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = Meta.EMPTY,
     crossinline transformation: suspend (Collection<NamedValueWithMeta<T>>) -> R,
-): Data<R> = reduceNamedToData(typeOf<R>(), coroutineContext, meta) {
+): Data<R> = reduceNamedToData(typeOf<R>(), meta, coroutineContext) {
     transformation(it)
 }
 
@@ -167,11 +183,11 @@ public inline fun <T : Any, reified R : Any> Iterable<NamedData<T>>.reduceNamedT
  */
 public inline fun <T : Any, reified R : Any> Iterable<NamedData<T>>.foldNamedToData(
     initial: R,
+    meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = Meta.EMPTY,
     crossinline block: suspend (result: R, data: NamedValueWithMeta<T>) -> R,
 ): Data<R> = reduceNamedToData(
-    coroutineContext, meta
+    meta, coroutineContext
 ) {
     it.fold(initial) { acc, t -> block(acc, t) }
 }
@@ -181,8 +197,8 @@ public inline fun <T : Any, reified R : Any> Iterable<NamedData<T>>.foldNamedToD
 @DFInternal
 public suspend fun <T : Any, R : Any> DataSet<T>.map(
     outputType: KType,
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     metaTransform: MutableMeta.() -> Unit = {},
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     block: suspend (NamedValueWithMeta<T>) -> R,
 ): DataTree<R> = DataTree<R>(outputType) {
     forEach {
@@ -196,10 +212,10 @@ public suspend fun <T : Any, R : Any> DataSet<T>.map(
 
 @OptIn(DFInternal::class)
 public suspend inline fun <T : Any, reified R : Any> DataSet<T>.map(
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     noinline metaTransform: MutableMeta.() -> Unit = {},
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     noinline block: suspend (NamedValueWithMeta<T>) -> R,
-): DataTree<R> = map(typeOf<R>(), coroutineContext, metaTransform, block)
+): DataTree<R> = map(typeOf<R>(), metaTransform, coroutineContext, block)
 
 public inline fun <T : Any> DataSet<T>.forEach(block: (NamedData<T>) -> Unit) {
     for (d in this) {
@@ -207,15 +223,25 @@ public inline fun <T : Any> DataSet<T>.forEach(block: (NamedData<T>) -> Unit) {
     }
 }
 
+// DataSet reduction
+
+@PublishedApi
+internal fun DataSet<*>.joinMeta(): Meta = Meta {
+    forEach { (key, data) ->
+        val token = NameToken("data", key.toString())
+        set(token, data.meta)
+    }
+}
+
 public inline fun <T : Any, reified R : Any> DataSet<T>.reduceToData(
+    meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = Meta.EMPTY,
     crossinline transformation: suspend (Iterable<NamedValueWithMeta<T>>) -> R,
-): Data<R> = asIterable().reduceNamedToData(coroutineContext, meta, transformation)
+): Data<R> = asIterable().reduceNamedToData(meta, coroutineContext, transformation)
 
 public inline fun <T : Any, reified R : Any> DataSet<T>.foldToData(
     initial: R,
+    meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    meta: Meta = Meta.EMPTY,
     crossinline block: suspend (result: R, data: NamedValueWithMeta<T>) -> R,
-): Data<R> = asIterable().foldNamedToData(initial, coroutineContext, meta, block)
+): Data<R> = asIterable().foldNamedToData(initial, meta, coroutineContext, block)

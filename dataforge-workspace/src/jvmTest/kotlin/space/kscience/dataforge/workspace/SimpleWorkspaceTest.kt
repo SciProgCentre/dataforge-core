@@ -37,7 +37,7 @@ internal object TestPlugin : WorkspacePlugin() {
 
     val test by task {
         // type is inferred
-        pipeFrom(dataByType<Int>()) { arg, _, _ ->
+        transformEach(dataByType<Int>()) { arg, _, _ ->
             logger.info { "Test: $arg" }
             arg
         }
@@ -74,7 +74,7 @@ internal class SimpleWorkspaceTest {
         }
 
         val square by task<Int> {
-            pipeFrom(dataByType<Int>()) { arg, name, meta ->
+            transformEach(dataByType<Int>()) { arg, name, meta ->
                 if (meta["testFlag"].boolean == true) {
                     println("Side effect")
                 }
@@ -84,7 +84,7 @@ internal class SimpleWorkspaceTest {
         }
 
         val linear by task<Int> {
-            pipeFrom(dataByType<Int>()) { arg, name, _ ->
+            transformEach(dataByType<Int>()) { arg, name, _ ->
                 workspace.logger.info { "Starting linear on $name" }
                 arg * 2 + 1
             }

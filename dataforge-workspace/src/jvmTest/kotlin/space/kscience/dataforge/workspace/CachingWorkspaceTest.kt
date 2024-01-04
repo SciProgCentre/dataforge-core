@@ -31,7 +31,7 @@ internal class CachingWorkspaceTest {
             inMemoryCache()
 
             val doFirst by task<Any> {
-                pipeFrom(allData) { _, name, _ ->
+                transformEach(allData) { _, name, _ ->
                     firstCounter++
                     println("Done first on $name with flag=${taskMeta["flag"].boolean}")
                 }
@@ -39,7 +39,7 @@ internal class CachingWorkspaceTest {
 
             @Suppress("UNUSED_VARIABLE")
             val doSecond by task<Any> {
-                pipeFrom(
+                transformEach(
                     doFirst,
                     dependencyMeta = if(taskMeta["flag"].boolean == true) taskMeta else Meta.EMPTY
                 ) { _, name, _ ->

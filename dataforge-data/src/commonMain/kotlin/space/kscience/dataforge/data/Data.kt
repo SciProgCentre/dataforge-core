@@ -87,7 +87,6 @@ public class StaticData<T : Any>(
 public inline fun <reified T : Any> Data(value: T, meta: Meta = Meta.EMPTY): StaticData<T> =
     StaticData(typeOf<T>(), value, meta)
 
-@Suppress("FunctionName")
 @DFInternal
 public fun <T : Any> Data(
     type: KType,
@@ -98,7 +97,6 @@ public fun <T : Any> Data(
 ): Data<T> = LazyData(type, meta, context, dependencies, block)
 
 @OptIn(DFInternal::class)
-@Suppress("FunctionName")
 public inline fun <reified T : Any> Data(
     meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,

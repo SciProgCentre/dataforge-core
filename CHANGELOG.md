@@ -6,10 +6,12 @@
 - Wasm artifacts
 - Add automatic MetaConverter for serializeable objects
 - Add Meta and MutableMeta delegates for convertable and serializeable
+- Meta mapping for data.
 
 ### Changed
 - Descriptor `children` renamed to `nodes`
 - `MetaConverter` now inherits `MetaSpec` (former `Specifiction`). So `MetaConverter` could be used more universally.
+- Meta copy and modification now use lightweight non-observable meta builders.
 
 ### Deprecated
 - `node(key,converter)` in favor of `serializable` delegate

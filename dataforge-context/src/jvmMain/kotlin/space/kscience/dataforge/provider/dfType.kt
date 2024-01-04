@@ -12,7 +12,7 @@ import kotlin.reflect.full.findAnnotation
 
 
 @DFExperimental
-public val KClass<*>.dfId: String
+public val KClass<*>.dfType: String
     get() = findAnnotation<DfType>()?.id ?: simpleName ?: ""
 
 /**
@@ -20,13 +20,13 @@ public val KClass<*>.dfId: String
  */
 @DFExperimental
 public inline fun <reified T : Any> Provider.provideByType(name: String): T? {
-    val target = T::class.dfId
+    val target = T::class.dfType
     return provide(target, name)
 }
 
 @DFExperimental
 public inline fun <reified T : Any> Provider.top(): Map<Name, T> {
-    val target = T::class.dfId
+    val target = T::class.dfType
     return top(target)
 }
 
@@ -35,15 +35,15 @@ public inline fun <reified T : Any> Provider.top(): Map<Name, T> {
  */
 @DFExperimental
 public inline fun <reified T : Any> Context.gather(inherit: Boolean = true): Map<Name, T> =
-    gather<T>(T::class.dfId, inherit)
+    gather<T>(T::class.dfType, inherit)
 
 
 @DFExperimental
 public inline fun <reified T : Any> PluginBuilder.provides(items: Map<Name, T>) {
-    provides(T::class.dfId, items)
+    provides(T::class.dfType, items)
 }
 
 @DFExperimental
 public inline fun <reified T : Any> PluginBuilder.provides(vararg items: Named) {
-    provides(T::class.dfId, *items)
+    provides(T::class.dfType, *items)
 }
