@@ -10,7 +10,6 @@ import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.coroutineContext
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -21,7 +20,7 @@ public interface DataSourceBuilder<T : Any> : DataSetBuilder<T>, DataSource<T> {
 /**
  * A mutable [DataTree] that propagates updates
  */
-public class DataTreeBuilder<T : Any>(
+public class DataTreeBuilder<T : Any> internal constructor(
     override val dataType: KType,
     coroutineContext: CoroutineContext,
 ) : DataTree<T>, DataSourceBuilder<T> {
@@ -100,19 +99,14 @@ public class DataTreeBuilder<T : Any>(
 public fun <T : Any> DataSource(
     type: KType,
     parent: CoroutineScope,
-    block: DataSourceBuilder<T>.() -> Unit,
+    block: DataSourceBuilder<T>.() -> Unit = {},
 ): DataTreeBuilder<T> = DataTreeBuilder<T>(type, parent.coroutineContext).apply(block)
 
 @Suppress("OPT_IN_USAGE", "FunctionName")
 public inline fun <reified T : Any> DataSource(
     parent: CoroutineScope,
-    crossinline block: DataSourceBuilder<T>.() -> Unit,
-): DataTreeBuilder<T> = DataSource(typeOf<T>(), parent) { block() }
-
-@Suppress("FunctionName")
-public suspend inline fun <reified T : Any> DataSource(
     crossinline block: DataSourceBuilder<T>.() -> Unit = {},
-): DataTreeBuilder<T> = DataTreeBuilder<T>(typeOf<T>(), coroutineContext).apply { block() }
+): DataTreeBuilder<T> = DataSource(typeOf<T>(), parent) { block() }
 
 public inline fun <reified T : Any> DataSourceBuilder<T>.emit(
     name: Name,

@@ -29,7 +29,7 @@ internal class ActionsTest {
 
     @Test
     fun testDynamicMapAction() = runTest {
-        val data: DataSourceBuilder<Int> = DataSource()
+        val data: DataSourceBuilder<Int> = DataSource(this)
 
         val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }

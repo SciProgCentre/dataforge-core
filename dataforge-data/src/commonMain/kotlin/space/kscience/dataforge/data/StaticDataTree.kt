@@ -65,13 +65,11 @@ internal class StaticDataTree<T : Any>(
     }
 }
 
-@Suppress("FunctionName")
 public inline fun <T : Any> DataTree(
     dataType: KType,
     block: DataSetBuilder<T>.() -> Unit,
 ): DataTree<T> = StaticDataTree<T>(dataType).apply { block() }
 
-@Suppress("FunctionName")
 public inline fun <reified T : Any> DataTree(
     noinline block: DataSetBuilder<T>.() -> Unit,
 ): DataTree<T> = DataTree(typeOf<T>(), block)
