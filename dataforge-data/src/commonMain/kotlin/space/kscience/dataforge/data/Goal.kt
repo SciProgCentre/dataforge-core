@@ -9,7 +9,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  * Lazy computation result with its dependencies to allowing to stat computing dependencies ahead of time
  */
 public interface Goal<out T> {
-    public val dependencies: Collection<Goal<*>>
+    public val dependencies: Iterable<Goal<*>>
 
     /**
      * Returns current running coroutine if the goal is started. Null if the computation is not started.
@@ -54,7 +54,7 @@ public open class StaticGoal<T>(public val value: T) : Goal<T> {
  */
 public open class LazyGoal<T>(
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    override val dependencies: Collection<Goal<*>> = emptyList(),
+    override val dependencies: Iterable<Goal<*>> = emptyList(),
     public val block: suspend () -> T,
 ) : Goal<T> {
 
@@ -82,8 +82,8 @@ public open class LazyGoal<T>(
         }
 
         log?.emit { "Starting dependencies computation for ${this@LazyGoal}" }
-        val startedDependencies = this.dependencies.map { goal ->
-            goal.run { async(coroutineScope) }
+        val startedDependencies = dependencies.map { goal ->
+            goal.async(coroutineScope)
         }
         return deferred ?: coroutineScope.async(
             coroutineContext

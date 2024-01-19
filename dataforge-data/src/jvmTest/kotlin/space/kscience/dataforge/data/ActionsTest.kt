@@ -29,7 +29,7 @@ internal class ActionsTest {
 
     @Test
     fun testDynamicMapAction() = runTest {
-        val data: DataSourceBuilder<Int> = DataSource(this)
+        val data: MutableDataTree<Int> = MutableDataTree(this)
 
         val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
@@ -44,7 +44,6 @@ internal class ActionsTest {
         delay(20)
 
         assertEquals(2, result["1"]?.await())
-        data.close()
     }
 
 }

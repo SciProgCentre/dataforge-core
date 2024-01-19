@@ -1,9 +1,9 @@
 package space.kscience.dataforge.workspace
 
 import kotlinx.coroutines.withContext
-import space.kscience.dataforge.data.DataSetBuilder
-import space.kscience.dataforge.data.DataTree
+import space.kscience.dataforge.data.DataSink
 import space.kscience.dataforge.data.GoalExecutionRestriction
+import space.kscience.dataforge.data.MutableDataTree
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
 import space.kscience.dataforge.meta.MetaSpec
@@ -20,7 +20,7 @@ import kotlin.reflect.typeOf
  * In general no computations should be made until the result is called.
  */
 @DfType(TYPE)
-public interface Task<out T : Any> : Described {
+public interface Task<T> : Described {
 
     /**
      * A task identification string used to compare tasks and check task body for change
@@ -45,7 +45,7 @@ public interface Task<out T : Any> : Described {
 /**
  * A [Task] with [MetaSpec] for wrapping and unwrapping task configuration
  */
-public interface TaskWithSpec<out T : Any, C : Any> : Task<T> {
+public interface TaskWithSpec<T, C : Any> : Task<T> {
     public val spec: MetaSpec<C>
     override val descriptor: MetaDescriptor? get() = spec.descriptor
 
@@ -61,12 +61,12 @@ public interface TaskWithSpec<out T : Any, C : Any> : Task<T> {
 //    block: C.() -> Unit = {},
 //): TaskResult<T> = execute(workspace, taskName, spec(block))
 
-public class TaskResultBuilder<in T : Any>(
+public class TaskResultBuilder<T>(
     public val workspace: Workspace,
     public val taskName: Name,
     public val taskMeta: Meta,
-    private val dataDrop: DataSetBuilder<T>,
-) : DataSetBuilder<T> by dataDrop
+    private val dataSink: DataSink<T>,
+) : DataSink<T> by dataSink
 
 /**
  * Create a [Task] that composes a result using [builder]. Only data from the workspace could be used.
@@ -90,7 +90,7 @@ public fun <T : Any> Task(
         taskMeta: Meta,
     ): TaskResult<T> = withContext(GoalExecutionRestriction() + workspace.goalLogger) {
         //TODO use safe builder and check for external data on add and detects cycles
-        val dataset = DataTree<T>(resultType) {
+        val dataset = MutableDataTree<T>(resultType, this).apply {
             TaskResultBuilder(workspace, taskName, taskMeta, this).apply { builder() }
         }
         workspace.wrapResult(dataset, taskName, taskMeta)
@@ -111,6 +111,7 @@ public inline fun <reified T : Any> Task(
  * @param specification a specification for task configuration
  * @param builder for resulting data set
  */
+
 @Suppress("FunctionName")
 public fun <T : Any, C : MetaRepr> Task(
     resultType: KType,
@@ -126,7 +127,7 @@ public fun <T : Any, C : MetaRepr> Task(
     ): TaskResult<T> = withContext(GoalExecutionRestriction() + workspace.goalLogger) {
         //TODO use safe builder and check for external data on add and detects cycles
         val taskMeta = configuration.toMeta()
-        val dataset = DataTree<T>(resultType) {
+        val dataset = MutableDataTree<T>(resultType, this).apply {
             TaskResultBuilder(workspace, taskName, taskMeta, this).apply { builder(configuration) }
         }
         workspace.wrapResult(dataset, taskName, taskMeta)

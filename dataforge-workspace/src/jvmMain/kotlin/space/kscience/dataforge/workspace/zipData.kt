@@ -2,8 +2,8 @@ package space.kscience.dataforge.workspace
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.data.DataTreeItem
+import space.kscience.dataforge.data.LegacyDataTree
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
@@ -47,10 +47,10 @@ private suspend fun <T : Any> ZipOutputStream.writeNode(
 }
 
 /**
- * Write this [DataTree] as a zip archive
+ * Write this [LegacyDataTree] as a zip archive
  */
 @DFExperimental
-public suspend fun <T : Any> DataTree<T>.writeZip(
+public suspend fun <T : Any> LegacyDataTree<T>.writeZip(
     path: Path,
     format: IOFormat<T>,
     envelopeFormat: EnvelopeFormat = TaggedEnvelopeFormat,

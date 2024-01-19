@@ -113,6 +113,13 @@ public class Name(public val tokens: List<NameToken>) {
     }
 }
 
+/**
+ * Transform this [Name] to a string without escaping special characters in tokens.
+ *
+ * Parsing it back will produce a valid, but different name
+ */
+public fun Name.toStringUnescaped(): String = tokens.joinToString(separator = Name.NAME_SEPARATOR) { it.toStringUnescaped() }
+
 public operator fun Name.get(i: Int): NameToken = tokens[i]
 
 /**

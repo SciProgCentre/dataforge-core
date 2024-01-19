@@ -7,7 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-internal class DataTreeBuilderTest {
+internal class LegacyGenericDataTreeBuilderTest {
     @Test
     fun testTreeBuild() = runBlocking {
         val node = DataTree<Any> {
@@ -29,7 +29,7 @@ internal class DataTreeBuilderTest {
     @OptIn(DFExperimental::class)
     @Test
     fun testDataUpdate() = runBlocking {
-        val updateData: DataTree<Any> = DataTree {
+        val updateData = DataTree<Any> {
             "update" put {
                 "a" put Data.static("a")
                 "b" put Data.static("b")
@@ -56,7 +56,7 @@ internal class DataTreeBuilderTest {
         try {
             lateinit var updateJob: Job
             supervisorScope {
-                val subNode = DataSource<Int>(this) {
+                val subNode = ObservableDataTree<Int>(this) {
                     updateJob = launch {
                         repeat(10) {
                             delay(10)
@@ -66,16 +66,16 @@ internal class DataTreeBuilderTest {
                     }
                 }
                 launch {
-                    subNode.updatesWithData.collect {
+                    subNode.updates().collect {
                         println(it)
                     }
                 }
-                val rootNode = DataSource<Int>(this) {
+                val rootNode = ObservableDataTree<Int>(this) {
                     setAndWatch("sub".asName(), subNode)
                 }
 
                 launch {
-                    rootNode.updatesWithData.collect {
+                    rootNode.updates().collect {
                         println(it)
                     }
                 }

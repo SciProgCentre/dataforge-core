@@ -1,9 +1,9 @@
 package space.kscience.dataforge.actions
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.startsWith
 import kotlin.reflect.KType
@@ -19,47 +19,40 @@ internal fun MutableMap<Name, *>.removeWhatStartsWith(name: Name) {
 /**
  * An action that caches results on-demand and recalculates them on source push
  */
-public abstract class AbstractAction<in T : Any, R : Any>(
+public abstract class AbstractAction<T : Any, R : Any>(
     public val outputType: KType,
 ) : Action<T, R> {
 
     /**
      * Generate initial content of the output
      */
-    protected abstract fun DataSetBuilder<R>.generate(
-        data: DataSet<T>,
+    protected abstract fun DataSink<R>.generate(
+        data: DataTree<T>,
         meta: Meta,
     )
 
     /**
-     * Update part of the data set when given [updateKey] is triggered by the source
+     * Update part of the data set using provided data
      */
-    protected open fun DataSourceBuilder<R>.update(
-        dataSet: DataSet<T>,
+    protected open fun DataSink<R>.update(
+        allData: DataTree<T>,
         meta: Meta,
-        updateKey: Name,
-    ) {
-        // By default, recalculate the whole dataset
-        generate(dataSet, meta)
+        namedData: NamedData<T>,
+    ){
+        //by default regenerate the whole data set
+        generate(allData,meta)
     }
 
-    @OptIn(DFInternal::class)
     override fun execute(
-        dataSet: DataSet<T>,
+        scope: CoroutineScope,
+        dataSet: DataTree<T>,
         meta: Meta,
-    ): DataSet<R> = if (dataSet is DataSource) {
-        DataSource(outputType, dataSet){
-            generate(dataSet, meta)
-
-            launch {
-                dataSet.updates.collect { name ->
-                    update(dataSet, meta, name)
-                }
+    ): ObservableDataTree<R> = MutableDataTree<R>(outputType, scope).apply {
+        generate(dataSet, meta)
+        scope.launch {
+            dataSet.updates().collect {
+                update(dataSet, meta, it)
             }
-        }
-    } else {
-        DataTree<R>(outputType) {
-            generate(dataSet, meta)
         }
     }
 }

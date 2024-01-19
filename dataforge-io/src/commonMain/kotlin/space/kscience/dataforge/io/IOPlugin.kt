@@ -5,7 +5,6 @@ import space.kscience.dataforge.io.EnvelopeFormatFactory.Companion.ENVELOPE_FORM
 import space.kscience.dataforge.io.IOFormatFactory.Companion.IO_FORMAT_TYPE
 import space.kscience.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
@@ -21,11 +20,11 @@ public class IOPlugin(meta: Meta) : AbstractPlugin(meta) {
 
     @Suppress("UNCHECKED_CAST")
     @DFInternal
-    public fun <T : Any> resolveIOFormat(type: KType, meta: Meta): IOFormat<T>? =
+    public fun <T> resolveIOFormat(type: KType, meta: Meta): IOFormat<T>? =
         ioFormatFactories.singleOrNull { it.type == type }?.build(context, meta) as? IOFormat<T>
 
     @OptIn(DFInternal::class)
-    public inline fun <reified T : Any> resolveIOFormat(meta: Meta = Meta.EMPTY): IOFormat<T>? =
+    public inline fun <reified T> resolveIOFormat(meta: Meta = Meta.EMPTY): IOFormat<T>? =
         resolveIOFormat(typeOf<T>(), meta)
 
 

@@ -26,7 +26,7 @@ import kotlin.test.assertEquals
 
 
 class FileDataTest {
-    val dataNode = DataTree<String> {
+    val dataNode = GenericDataTree<String> {
         node("dir") {
             static("a", "Some string") {
                 "content" put "Some string"

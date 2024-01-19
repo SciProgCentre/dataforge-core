@@ -18,7 +18,7 @@ public class InMemoryWorkspaceCache : WorkspaceCache {
         if (type.isSubtypeOf(taskType)) this as TaskData<T>
         else error("Cached data type mismatch: expected $taskType but got $type")
 
-    override suspend fun <T : Any> evaluate(result: TaskResult<T>): TaskResult<T> {
+    override suspend fun <T : Any> cache(result: TaskResult<T>): TaskResult<T> {
         for (d: TaskData<T> in result) {
             cache.getOrPut(result.taskName to result.taskMeta) { HashMap() }.getOrPut(d.name) { d }
         }

@@ -14,11 +14,8 @@ import space.kscience.dataforge.meta.copy
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.DFInternal
-import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.names.asName
-import space.kscience.dataforge.names.plus
-import space.kscience.dataforge.workspace.FileData.Companion.DEFAULT_IGNORE_EXTENSIONS
+import space.kscience.dataforge.names.*
+import space.kscience.dataforge.workspace.FileData.Companion.defaultPathToName
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
@@ -34,6 +31,7 @@ import kotlin.reflect.typeOf
 //public typealias FileFormatResolver<T> = (Path, Meta) -> IOFormat<T>
 
 public typealias FileFormatResolver<T> = (path: Path, meta: Meta) -> IOReader<T>?
+
 
 /**
  * A data based on a filesystem [Path]
@@ -54,13 +52,28 @@ public class FileData<T> internal constructor(private val data: Data<T>, public 
         public val FILE_UPDATE_TIME_KEY: Name = FILE_KEY + "updated"
         public const val DF_FILE_EXTENSION: String = "df"
         public val DEFAULT_IGNORE_EXTENSIONS: Set<String> = setOf(DF_FILE_EXTENSION)
+
+        /**
+         * Transform file name into DataForg name. Ignores DataForge file extensions.
+         */
+        public val defaultPathToName: (Path) -> Name = { path ->
+            Name(
+                path.map { segment ->
+                    if (segment.isRegularFile() && segment.extension in DEFAULT_IGNORE_EXTENSIONS) {
+                        NameToken(path.nameWithoutExtension)
+                    } else {
+                        NameToken(path.name)
+                    }
+                }
+            )
+        }
     }
 }
 
 
 /**
- * Read data with supported envelope format and binary format. If envelope format is null, then read binary directly from file.
- * The operation is blocking since it must read meta header. The reading of envelope body is lazy
+ * Read data with supported envelope format and binary format. If the envelope format is null, then read binary directly from file.
+ * The operation is blocking since it must read the meta header. The reading of envelope body is lazy
  */
 @OptIn(DFInternal::class)
 @DFExperimental
@@ -90,7 +103,7 @@ public fun <T : Any> IOPlugin.readDataFile(
 context(IOPlugin) @DFExperimental
 public fun <T : Any> DataSetBuilder<T>.directory(
     path: Path,
-    ignoreExtensions: Set<String>,
+    pathToName: (Path) -> Name = defaultPathToName,
     formatResolver: FileFormatResolver<T>,
 ) {
     Files.list(path).forEach { childPath ->
@@ -98,7 +111,7 @@ public fun <T : Any> DataSetBuilder<T>.directory(
         if (fileName.startsWith(IOPlugin.META_FILE_NAME)) {
             meta(readMetaFile(childPath))
         } else if (!fileName.startsWith("@")) {
-            file(childPath, ignoreExtensions, formatResolver)
+            file(childPath, pathToName, formatResolver)
         }
     }
 }
@@ -111,9 +124,9 @@ public fun <T : Any> DataSetBuilder<T>.directory(
 public fun <T : Any> IOPlugin.readDataDirectory(
     type: KType,
     path: Path,
-    ignoreExtensions: Set<String> = DEFAULT_IGNORE_EXTENSIONS,
+    pathToName: (Path) -> Name = defaultPathToName,
     formatResolver: FileFormatResolver<T>,
-): DataTree<T> {
+): LegacyDataTree<T> {
     //read zipped data node
     if (path.fileName != null && path.fileName.toString().endsWith(".zip")) {
         //Using explicit Zip file system to avoid bizarre compatibility bugs
@@ -121,14 +134,14 @@ public fun <T : Any> IOPlugin.readDataDirectory(
             ?: error("Zip file system provider not found")
         val fs = fsProvider.newFileSystem(path, mapOf("create" to "true"))
 
-        return readDataDirectory(type, fs.rootDirectories.first(), ignoreExtensions, formatResolver)
+        return readDataDirectory(type, fs.rootDirectories.first(), pathToName, formatResolver)
     }
     if (!Files.isDirectory(path)) error("Provided path $path is not a directory")
     return DataTree(type) {
         meta {
             FileData.FILE_PATH_KEY put path.toString()
         }
-        directory(path, ignoreExtensions, formatResolver)
+        directory(path, pathToName, formatResolver)
     }
 }
 
@@ -136,9 +149,9 @@ public fun <T : Any> IOPlugin.readDataDirectory(
 @DFExperimental
 public inline fun <reified T : Any> IOPlugin.readDataDirectory(
     path: Path,
-    ignoreExtensions: Set<String> = DEFAULT_IGNORE_EXTENSIONS,
+    noinline pathToName: (Path) -> Name = defaultPathToName,
     noinline formatResolver: FileFormatResolver<T>,
-): DataTree<T> = readDataDirectory(typeOf<T>(), path, ignoreExtensions, formatResolver)
+): LegacyDataTree<T> = readDataDirectory(typeOf<T>(), path, pathToName, formatResolver)
 
 /**
  * Read a raw binary data tree from the directory. All files are read as-is (save for meta files).
@@ -146,8 +159,8 @@ public inline fun <reified T : Any> IOPlugin.readDataDirectory(
 @DFExperimental
 public fun IOPlugin.readRawDirectory(
     path: Path,
-    ignoreExtensions: Set<String> = emptySet(),
-): DataTree<Binary> = readDataDirectory(path, ignoreExtensions) { _, _ -> IOReader.binary }
+    pathToName: (Path) -> Name = defaultPathToName,
+): LegacyDataTree<Binary> = readDataDirectory(path, pathToName) { _, _ -> IOReader.binary }
 
 
 private fun Path.toName() = Name(map { NameToken.parse(it.nameWithoutExtension) })
@@ -157,13 +170,13 @@ private fun Path.toName() = Name(map { NameToken.parse(it.nameWithoutExtension) 
 public fun <T : Any> IOPlugin.monitorDataDirectory(
     type: KType,
     path: Path,
-    ignoreExtensions: Set<String> = DEFAULT_IGNORE_EXTENSIONS,
+    pathToName: (Path) -> Name = defaultPathToName,
     formatResolver: FileFormatResolver<T>,
 ): DataSource<T> {
     if (path.fileName.toString().endsWith(".zip")) error("Monitoring not supported for ZipFS")
     if (!Files.isDirectory(path)) error("Provided path $path is not a directory")
     return DataSource(type, context) {
-        directory(path, ignoreExtensions, formatResolver)
+        directory(path, pathToName, formatResolver)
         launch(Dispatchers.IO) {
             val watchService = path.fileSystem.newWatchService()
 
@@ -186,7 +199,7 @@ public fun <T : Any> IOPlugin.monitorDataDirectory(
                             if (fileName.startsWith(IOPlugin.META_FILE_NAME)) {
                                 meta(readMetaFile(eventPath))
                             } else if (!fileName.startsWith("@")) {
-                                file(eventPath, ignoreExtensions, formatResolver)
+                                file(eventPath, pathToName, formatResolver)
                             }
                         }
                     }
@@ -205,9 +218,9 @@ public fun <T : Any> IOPlugin.monitorDataDirectory(
 @DFExperimental
 public inline fun <reified T : Any> IOPlugin.monitorDataDirectory(
     path: Path,
-    ignoreExtensions: Set<String> = DEFAULT_IGNORE_EXTENSIONS,
+    noinline pathToName: (Path) -> Name = defaultPathToName,
     noinline formatResolver: FileFormatResolver<T>,
-): DataSource<T> = monitorDataDirectory(typeOf<T>(), path, ignoreExtensions, formatResolver)
+): DataSource<T> = monitorDataDirectory(typeOf<T>(), path, pathToName, formatResolver)
 
 /**
  * Read and monitor raw binary data tree from the directory. All files are read as-is (save for meta files).
@@ -215,18 +228,23 @@ public inline fun <reified T : Any> IOPlugin.monitorDataDirectory(
 @DFExperimental
 public fun IOPlugin.monitorRawDirectory(
     path: Path,
-    ignoreExtensions: Set<String> = DEFAULT_IGNORE_EXTENSIONS,
-): DataSource<Binary> = monitorDataDirectory(path, ignoreExtensions) { _, _ -> IOReader.binary }
+    pathToName: (Path) -> Name = defaultPathToName,
+): DataSource<Binary> = monitorDataDirectory(path, pathToName) { _, _ -> IOReader.binary }
 
 /**
- * Write data tree to existing directory or create a new one using default [java.nio.file.FileSystem] provider
+ * Write the data tree to existing directory or create a new one using default [java.nio.file.FileSystem] provider
+ *
+ * @param nameToPath a [Name] to [Path] converter used to create
  */
 @DFExperimental
 public suspend fun <T : Any> IOPlugin.writeDataDirectory(
     path: Path,
-    tree: DataTree<T>,
+    dataSet: DataSet<T>,
     format: IOWriter<T>,
     envelopeFormat: EnvelopeFormat? = null,
+    nameToPath: (name: Name, data: Data<T>) -> Path = { name, _ ->
+        Path(name.tokens.joinToString("/") { token -> token.toStringUnescaped() })
+    },
 ) {
     withContext(Dispatchers.IO) {
         if (!Files.exists(path)) {
@@ -234,66 +252,53 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
         } else if (!Files.isDirectory(path)) {
             error("Can't write a node into file")
         }
-        tree.items.forEach { (token, item) ->
-            val childPath = path.resolve(token.toString())
-            when (item) {
-                is DataTreeItem.Node -> {
-                    writeDataDirectory(childPath, item.tree, format, envelopeFormat)
-                }
-
-                is DataTreeItem.Leaf -> {
-                    val envelope = item.data.toEnvelope(format)
-                    if (envelopeFormat != null) {
-                        writeEnvelopeFile(childPath, envelope, envelopeFormat)
-                    } else {
-                        writeEnvelopeDirectory(childPath, envelope)
-                    }
-                }
+        dataSet.forEach { (name, data) ->
+            val childPath = path.resolve(nameToPath(name, data))
+            childPath.parent.createDirectories()
+            val envelope = data.toEnvelope(format)
+            if (envelopeFormat != null) {
+                writeEnvelopeFile(childPath, envelope, envelopeFormat)
+            } else {
+                writeEnvelopeDirectory(childPath, envelope)
             }
         }
-        val treeMeta = tree.meta
-        writeMetaFile(path, treeMeta)
+        val directoryMeta = dataSet.meta
+        writeMetaFile(path, directoryMeta)
     }
 }
 
 /**
- * Reads the specified resources and returns a [DataTree] containing the data.
+ * Reads the specified resources and returns a [LegacyDataTree] containing the data.
  *
  * @param resources The names of the resources to read.
  * @param classLoader The class loader to use for loading the resources. By default, it uses the current thread's context class loader.
  * @return A DataTree containing the data read from the resources.
  */
 @DFExperimental
-private fun IOPlugin.readResources(
+public fun IOPlugin.readResources(
     vararg resources: String,
+    pathToName: (Path) -> Name = defaultPathToName,
     classLoader: ClassLoader = Thread.currentThread().contextClassLoader,
-): DataTree<Binary> {
-//    require(resource.isNotBlank()) {"Can't mount root resource tree as data root"}
-    return DataTree {
-        resources.forEach { resource ->
-            val path = classLoader.getResource(resource)?.toURI()?.toPath() ?: error(
-                "Resource with name $resource is not resolved"
-            )
-            node(resource, readRawDirectory(path))
-        }
+): LegacyDataTree<Binary> = GenericDataTree {
+    resources.forEach { resource ->
+        val path = classLoader.getResource(resource)?.toURI()?.toPath() ?: error(
+            "Resource with name $resource is not resolved"
+        )
+        node(resource, readRawDirectory(path, pathToName))
     }
 }
 
 /**
  * Add file/directory-based data tree item
- *
- * @param ignoreExtensions a list of file extensions for which extension should be cut from the resulting item name
  */
 context(IOPlugin)
 @OptIn(DFInternal::class)
 @DFExperimental
 public fun <T : Any> DataSetBuilder<T>.file(
     path: Path,
-    ignoreExtensions: Set<String> = DEFAULT_IGNORE_EXTENSIONS,
+    pathToName: (Path) -> Name = defaultPathToName,
     formatResolver: FileFormatResolver<out T>,
 ) {
-
-    fun defaultPath() = if (path.extension in ignoreExtensions) path.nameWithoutExtension else path.name
 
     try {
         //If path is a single file or a special directory, read it as single datum
@@ -303,16 +308,16 @@ public fun <T : Any> DataSetBuilder<T>.file(
                 logger.warn { "File format is not resolved for $path. Skipping." }
                 return
             }
-            val name: String = data.meta[Envelope.ENVELOPE_NAME_KEY].string ?: defaultPath()
-            data(name.asName(), data)
+            val name: Name = data.meta[Envelope.ENVELOPE_NAME_KEY].string?.parseAsName() ?: pathToName(path.last())
+            data(name, data)
         } else {
             //otherwise, read as directory
-            val data: DataTree<T> = readDataDirectory(dataType, path, ignoreExtensions, formatResolver)
-            val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string ?: defaultPath()
-            node(name.asName(), data)
+            val data: LegacyDataTree<T> = readDataDirectory(dataType, path, pathToName, formatResolver)
+            val name = data.meta[Envelope.ENVELOPE_NAME_KEY].string?.parseAsName() ?: pathToName(path.last())
+            node(name, data)
         }
     } catch (ex: Exception) {
-        logger.error { "Failed to read file or directory at $path: ${ex.message}" }
+        logger.error(ex) { "Failed to read file or directory at $path: ${ex.message}" }
     }
 }
 

@@ -6,8 +6,6 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.serializer
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFExperimental
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
 
 
 /**
@@ -16,14 +14,9 @@ import kotlin.reflect.typeOf
 public interface MetaConverter<T>: MetaSpec<T> {
 
     /**
-     * Runtime type of [T]
-     */
-    public val type: KType
-
-    /**
      * A descriptor for resulting meta
      */
-    override val descriptor: MetaDescriptor get() = MetaDescriptor.EMPTY
+    override val descriptor: MetaDescriptor? get() = null
 
     /**
      * Attempt conversion of [source] to an object or return null if conversion failed
@@ -38,22 +31,16 @@ public interface MetaConverter<T>: MetaSpec<T> {
     public companion object {
 
         public val meta: MetaConverter<Meta> = object : MetaConverter<Meta> {
-            override val type: KType = typeOf<Meta>()
-
             override fun readOrNull(source: Meta): Meta = source
             override fun convert(obj: Meta): Meta = obj
         }
 
         public val value: MetaConverter<Value> = object : MetaConverter<Value> {
-            override val type: KType = typeOf<Value>()
-
             override fun readOrNull(source: Meta): Value? = source.value
             override fun convert(obj: Value): Meta = Meta(obj)
         }
 
         public val string: MetaConverter<String> = object : MetaConverter<String> {
-            override val type: KType = typeOf<String>()
-
             override val descriptor: MetaDescriptor = MetaDescriptor {
                 valueType(ValueType.STRING)
             }
@@ -64,8 +51,6 @@ public interface MetaConverter<T>: MetaSpec<T> {
         }
 
         public val boolean: MetaConverter<Boolean> = object : MetaConverter<Boolean> {
-            override val type: KType = typeOf<Boolean>()
-
             override val descriptor: MetaDescriptor = MetaDescriptor {
                 valueType(ValueType.BOOLEAN)
             }
@@ -75,8 +60,6 @@ public interface MetaConverter<T>: MetaSpec<T> {
         }
 
         public val number: MetaConverter<Number> = object : MetaConverter<Number> {
-            override val type: KType = typeOf<Number>()
-
             override val descriptor: MetaDescriptor = MetaDescriptor {
                 valueType(ValueType.NUMBER)
             }
@@ -86,8 +69,6 @@ public interface MetaConverter<T>: MetaSpec<T> {
         }
 
         public val double: MetaConverter<Double> = object : MetaConverter<Double> {
-            override val type: KType = typeOf<Double>()
-
             override val descriptor: MetaDescriptor = MetaDescriptor {
                 valueType(ValueType.NUMBER)
             }
@@ -97,8 +78,6 @@ public interface MetaConverter<T>: MetaSpec<T> {
         }
 
         public val float: MetaConverter<Float> = object : MetaConverter<Float> {
-            override val type: KType = typeOf<Float>()
-
             override val descriptor: MetaDescriptor = MetaDescriptor {
                 valueType(ValueType.NUMBER)
             }
@@ -108,8 +87,6 @@ public interface MetaConverter<T>: MetaSpec<T> {
         }
 
         public val int: MetaConverter<Int> = object : MetaConverter<Int> {
-            override val type: KType = typeOf<Int>()
-
             override val descriptor: MetaDescriptor = MetaDescriptor {
                 valueType(ValueType.NUMBER)
             }
@@ -119,8 +96,6 @@ public interface MetaConverter<T>: MetaSpec<T> {
         }
 
         public val long: MetaConverter<Long> = object : MetaConverter<Long> {
-            override val type: KType = typeOf<Long>()
-
             override val descriptor: MetaDescriptor = MetaDescriptor {
                 valueType(ValueType.NUMBER)
             }
@@ -130,8 +105,6 @@ public interface MetaConverter<T>: MetaSpec<T> {
         }
 
         public inline fun <reified E : Enum<E>> enum(): MetaConverter<E> = object : MetaConverter<E> {
-            override val type: KType = typeOf<E>()
-
             override val descriptor: MetaDescriptor = MetaDescriptor {
                 valueType(ValueType.STRING)
                 allowedValues(enumValues<E>())
@@ -147,8 +120,6 @@ public interface MetaConverter<T>: MetaSpec<T> {
             writer: (T) -> Value = { Value.of(it) },
             reader: (Value) -> T,
         ): MetaConverter<List<T>> = object : MetaConverter<List<T>> {
-            override val type: KType = typeOf<List<T>>()
-
             override val descriptor: MetaDescriptor = MetaDescriptor {
                 valueType(ValueType.LIST)
             }
@@ -165,7 +136,6 @@ public interface MetaConverter<T>: MetaSpec<T> {
         public inline fun <reified T> serializable(
             descriptor: MetaDescriptor? = null,
         ): MetaConverter<T> = object : MetaConverter<T> {
-            override val type: KType = typeOf<T>()
             private val serializer: KSerializer<T> = serializer()
 
             override fun readOrNull(source: Meta): T? {

@@ -17,11 +17,7 @@ import kotlin.reflect.typeOf
 /**
  * Reader of a custom object from input
  */
-public interface IOReader<out T> {
-    /**
-     * The type of object being read
-     */
-    public val type: KType
+public fun interface IOReader<out T> {
 
     public fun readFrom(source: Source): T
 
@@ -32,7 +28,6 @@ public interface IOReader<out T> {
          * no-op reader for binaries.
          */
         public val binary: IOReader<Binary> = object : IOReader<Binary> {
-            override val type: KType = typeOf<Binary>()
 
             override fun readFrom(source: Source): Binary = source.readByteArray().asBinary()
 
@@ -42,8 +37,6 @@ public interface IOReader<out T> {
 }
 
 public inline fun <reified T> IOReader(crossinline read: Source.() -> T): IOReader<T> = object : IOReader<T> {
-    override val type: KType = typeOf<T>()
-
     override fun readFrom(source: Source): T = source.read()
 }
 
@@ -61,19 +54,19 @@ public fun <T : Any> Source.readWith(format: IOReader<T>): T = format.readFrom(t
 /**
  * Read given binary as an object using given format
  */
-public fun <T : Any> Binary.readWith(format: IOReader<T>): T = read {
+public fun <T> Binary.readWith(format: IOReader<T>): T = read {
     readWith(format)
 }
 
 /**
  * Write an object to the [Sink] with given [format]
  */
-public fun <T : Any> Sink.writeWith(format: IOWriter<T>, obj: T): Unit =
+public fun <T> Sink.writeWith(format: IOWriter<T>, obj: T): Unit =
     format.writeTo(this, obj)
 
 
 @DfType(IO_FORMAT_TYPE)
-public interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
+public interface IOFormatFactory<T> : Factory<IOFormat<T>>, Named {
     /**
      * Explicit type for dynamic type checks
      */
@@ -86,7 +79,7 @@ public interface IOFormatFactory<T : Any> : Factory<IOFormat<T>>, Named {
     }
 }
 
-public fun <T : Any> Binary(obj: T, format: IOWriter<T>): Binary = Binary { format.writeTo(this, obj) }
+public fun <T> Binary(obj: T, format: IOWriter<T>): Binary = Binary { format.writeTo(this, obj) }
 
 public object FloatIOFormat : IOFormat<Float>, IOFormatFactory<Float> {
     override fun build(context: Context, meta: Meta): IOFormat<Float> = this

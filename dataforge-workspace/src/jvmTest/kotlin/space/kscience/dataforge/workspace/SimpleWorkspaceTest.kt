@@ -140,7 +140,7 @@ internal class SimpleWorkspaceTest {
                 val meta = data.meta.toMutableMeta().apply {
                     "newValue" put 22
                 }
-                data(data.name + "new", data.map { (data.meta["value"].int ?: 0) + it })
+                data(data.name + "new", data.transform { (data.meta["value"].int ?: 0) + it })
             }
         }
 

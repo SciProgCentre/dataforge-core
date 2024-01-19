@@ -1,54 +1,27 @@
 package space.kscience.dataforge.workspace
 
-import space.kscience.dataforge.data.DataSet
-import space.kscience.dataforge.data.forEach
+import space.kscience.dataforge.data.ObservableDataTree
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
+import kotlin.reflect.KType
 
 /**
  * A result of a [Task]
+ * @param workspace the [Workspace] that produced the result
+ * @param taskName the name of the task that produced the result
+ * @param taskMeta The configuration of the task that produced the result
  */
-public interface TaskResult<out T : Any> : DataSet<T> {
-    /**
-     * The [Workspace] this [DataSet] belongs to
-     */
-    public val workspace: Workspace
-
-    /**
-     * The [Name] of the stage that produced this [DataSet]
-     */
-    public val taskName: Name
-
-    /**
-     * The configuration of the stage that produced this [DataSet]
-     */
-    public val taskMeta: Meta
-
-    override fun iterator(): Iterator<TaskData<T>>
-
-    override fun get(name: Name): TaskData<T>?
-}
-
-private class TaskResultImpl<out T : Any>(
-    override val workspace: Workspace,
-    override val taskName: Name,
-    override val taskMeta: Meta,
-    val dataSet: DataSet<T>,
-) : TaskResult<T>, DataSet<T> by dataSet {
-
-    override fun iterator(): Iterator<TaskData<T>> = iterator {
-        dataSet.forEach {
-            yield(workspace.wrapData(it, it.name, taskName, taskMeta))
-        }
-    }
-
-    override fun get(name: Name): TaskData<T>? = dataSet[name]?.let {
-        workspace.wrapData(it, name, taskName, taskMeta)
-    }
+public data class TaskResult<T>(
+    public val data: ObservableDataTree<T>,
+    public val workspace: Workspace,
+    public val taskName: Name,
+    public val taskMeta: Meta,
+) {
+    val dataType: KType get() = data.dataType
 }
 
 /**
  * Wrap data into [TaskResult]
  */
-public fun <T : Any> Workspace.wrapResult(dataSet: DataSet<T>, taskName: Name, taskMeta: Meta): TaskResult<T> =
-    TaskResultImpl(this, taskName, taskMeta, dataSet)
+public fun <T> Workspace.wrapResult(data: ObservableDataTree<T>, taskName: Name, taskMeta: Meta): TaskResult<T> =
+    TaskResult(data, this, taskName, taskMeta)

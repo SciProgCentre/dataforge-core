@@ -15,13 +15,11 @@
  */
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.launch
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
-import space.kscience.dataforge.misc.DFInternal
 
 public interface GroupRule {
-    public fun <T : Any> gather(set: DataSet<T>): Map<String, DataSet<T>>
+    public fun <T : Any> gather(set: DataTree<T>): Map<String, DataTree<T>>
 
     public companion object {
         /**
@@ -32,46 +30,23 @@ public interface GroupRule {
          * @param defaultTagValue
          * @return
          */
-        @OptIn(DFInternal::class)
         public fun byMetaValue(
             key: String,
             defaultTagValue: String,
         ): GroupRule = object : GroupRule {
 
             override fun <T : Any> gather(
-                set: DataSet<T>,
-            ): Map<String, DataSet<T>> {
-                val map = HashMap<String, DataSet<T>>()
+                set: DataTree<T>,
+            ): Map<String, DataTree<T>> {
+                val map = HashMap<String, DataTreeBuilder<T>>()
 
-                if (set is DataSource) {
-                    set.forEach { data ->
-                        val tagValue: String = data.meta[key]?.string ?: defaultTagValue
-                        (map.getOrPut(tagValue) { DataTreeBuilder(set.dataType, set.coroutineContext) } as DataTreeBuilder<T>)
-                            .data(data.name, data.data)
-
-                        set.launch {
-                            set.updates.collect { name ->
-                                val dataUpdate = set[name]
-
-                                val updateTagValue = dataUpdate?.meta?.get(key)?.string ?: defaultTagValue
-                                map.getOrPut(updateTagValue) {
-                                    DataSource(set.dataType, this) {
-                                        data(name, dataUpdate)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    set.forEach { data ->
-                        val tagValue: String = data.meta[key]?.string ?: defaultTagValue
-                        (map.getOrPut(tagValue) { StaticDataTree(set.dataType) } as StaticDataTree<T>)
-                            .data(data.name, data.data)
-                    }
+                set.forEach { data ->
+                    val tagValue: String = data.meta[key]?.string ?: defaultTagValue
+                    map.getOrPut(tagValue) { DataTreeBuilder(set.dataType) }.emit(data.name,data.data)
                 }
 
 
-                return map
+                return map.mapValues { it.value.build() }
             }
         }
     }

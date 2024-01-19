@@ -166,9 +166,9 @@ public inline fun <T : Scheme> T.copy(spec: SchemeSpec<T>, block: T.() -> Unit =
 /**
  * A specification for simplified generation of wrappers
  */
-public open class SchemeSpec<out T : Scheme>(
+public open class SchemeSpec<T : Scheme>(
     private val builder: () -> T,
-) : MetaSpec<T> {
+) : MetaConverter<T> {
 
     override val descriptor: MetaDescriptor? get() = null
 
@@ -186,6 +186,8 @@ public open class SchemeSpec<out T : Scheme>(
     public fun empty(): T = builder().also {
         it.initialize(MutableMeta(), Meta.EMPTY, descriptor)
     }
+
+    override fun convert(obj: T): Meta  = obj.meta
 
     /**
      * A convenience method to use specifications in builders
