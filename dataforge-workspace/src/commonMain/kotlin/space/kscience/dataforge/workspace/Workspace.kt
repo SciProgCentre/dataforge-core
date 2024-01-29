@@ -53,7 +53,7 @@ public interface Workspace : ContextAware, Provider, CoroutineScope {
     }
 
     public suspend fun produceData(taskName: Name, taskMeta: Meta, name: Name): Data<*>? =
-        produce(taskName, taskMeta).data[name]
+        produce(taskName, taskMeta)[name]
 
     public companion object {
         public const val TYPE: String = "workspace"

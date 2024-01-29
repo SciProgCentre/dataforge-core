@@ -42,7 +42,7 @@ public interface GroupRule {
 
                 set.forEach { data ->
                     val tagValue: String = data.meta[key]?.string ?: defaultTagValue
-                    map.getOrPut(tagValue) { DataTreeBuilder(set.dataType) }.emit(data.name,data.data)
+                    map.getOrPut(tagValue) { DataTreeBuilder(set.dataType) }.data(data.name,data.data)
                 }
 
 

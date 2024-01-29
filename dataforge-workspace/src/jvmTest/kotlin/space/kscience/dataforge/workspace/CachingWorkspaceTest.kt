@@ -4,7 +4,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
-import space.kscience.dataforge.data.startAll
 import space.kscience.dataforge.data.static
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.boolean
@@ -37,7 +36,6 @@ internal class CachingWorkspaceTest {
                 }
             }
 
-            @Suppress("UNUSED_VARIABLE")
             val doSecond by task<Any> {
                 transformEach(
                     doFirst,
@@ -54,11 +52,11 @@ internal class CachingWorkspaceTest {
         val secondB = workspace.produce("doSecond", Meta { "flag" put true })
         val secondC = workspace.produce("doSecond")
         coroutineScope {
-            first.startAll(this)
-            secondA.startAll(this)
-            secondB.startAll(this)
+            first.compute(this)
+            secondA.compute(this)
+            secondB.compute(this)
             //repeat to check caching
-            secondC.startAll(this)
+            secondC.compute(this)
         }
         assertEquals(10, firstCounter)
         assertEquals(10, secondCounter)

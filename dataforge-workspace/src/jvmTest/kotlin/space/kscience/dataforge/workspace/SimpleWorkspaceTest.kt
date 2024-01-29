@@ -27,8 +27,8 @@ public fun <P : Plugin> P.toFactory(): PluginFactory<P> = object : PluginFactory
     override val tag: PluginTag = this@toFactory.tag
 }
 
-public fun Workspace.produceBlocking(task: String, block: MutableMeta.() -> Unit = {}): DataSet<Any> = runBlocking {
-    produce(task, block)
+public fun Workspace.produceBlocking(task: String, block: MutableMeta.() -> Unit = {}): DataTree<*> = runBlocking {
+    produce(task, block).content
 }
 
 @OptIn(DFExperimental::class)
@@ -68,8 +68,8 @@ internal class SimpleWorkspaceTest {
 
         val filterOne by task<Int> {
             val name by taskMeta.string { error("Name field not defined") }
-            from(testPluginFactory) { test }.getByType<Int>(name)?.let { source ->
-                data(source.name, source.map { it })
+            from(testPluginFactory) { test }[name]?.let { source: Data<Int> ->
+                data(name, source)
             }
         }
 
@@ -110,14 +110,14 @@ internal class SimpleWorkspaceTest {
         }
 
         val averageByGroup by task<Int> {
-            val evenSum = workspace.data.filterByType<Int> { name, _ ->
+            val evenSum = workspace.data.filterByType<Int> { name, _, _ ->
                 name.toString().toInt() % 2 == 0
             }.foldToData(0) { l, r ->
                 l + r.value
             }
 
             data("even", evenSum)
-            val oddSum = workspace.data.filterByType<Int> { name, _ ->
+            val oddSum = workspace.data.filterByType<Int> { name, _, _ ->
                 name.toString().toInt() % 2 == 1
             }.foldToData(0) { l, r ->
                 l + r.value
@@ -159,7 +159,7 @@ internal class SimpleWorkspaceTest {
     @Timeout(1)
     fun testMetaPropagation() = runTest {
         val node = workspace.produce("sum") { "testFlag" put true }
-        val res = node.asSequence().single().await()
+        val res = node.single().await()
     }
 
     @Test
@@ -170,20 +170,25 @@ internal class SimpleWorkspaceTest {
     }
 
     @Test
-    fun testFullSquare() {
-        runBlocking {
-            val node = workspace.produce("fullSquare")
-            println(node.toMeta())
+    fun testFullSquare() = runTest {
+        val result = workspace.produce("fullSquare")
+        result.forEach {
+            println(
+                """
+                Name: ${it.name}
+                Meta: ${it.meta}
+                Data: ${it.data.await()}
+            """.trimIndent()
+            )
         }
     }
 
     @Test
-    fun testFilter() {
-        runBlocking {
-            val node = workspace.produce("filterOne") {
-                "name" put "myData[12]"
-            }
-            assertEquals(12, node.single().await())
+    fun testFilter() = runTest {
+        val node = workspace.produce("filterOne") {
+            "name" put "myData[12]"
         }
+        assertEquals(12, node.single().await())
     }
+
 }

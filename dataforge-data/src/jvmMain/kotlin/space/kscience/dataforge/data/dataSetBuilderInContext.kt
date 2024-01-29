@@ -12,14 +12,14 @@ import space.kscience.dataforge.names.plus
  */
 context(DataSink<T>)
 public infix fun <T : Any> String.put(data: Data<T>): Unit =
-    emit(Name.parse(this), data)
+    data(Name.parse(this), data)
 
 /**
  * Append node
  */
 context(DataSink<T>)
 public infix fun <T : Any> String.put(dataSet: DataTree<T>): Unit =
-    emitAll(this, dataSet)
+    branch(this, dataSet)
 
 /**
  * Build and append node
@@ -27,7 +27,7 @@ public infix fun <T : Any> String.put(dataSet: DataTree<T>): Unit =
 context(DataSink<T>)
 public infix fun <T : Any> String.put(
     block: DataSink<T>.() -> Unit,
-): Unit = emitAll(Name.parse(this), block)
+): Unit = branch(Name.parse(this), block)
 
 /**
  * Copy given data set and mirror its changes to this [LegacyDataTreeBuilder] in [this@setAndObserve]. Returns an update [Job]
@@ -37,8 +37,8 @@ public fun <T : Any> CoroutineScope.setAndWatch(
     name: Name,
     dataSet: DataTree<T>,
 ): Job = launch {
-    emitAll(name, dataSet)
+    branch(name, dataSet)
     dataSet.updates().collect {
-        emit(name + it.name, it.data)
+        data(name + it.name, it.data)
     }
 }

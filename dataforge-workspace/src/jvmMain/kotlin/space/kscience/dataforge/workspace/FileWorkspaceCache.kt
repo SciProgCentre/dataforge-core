@@ -95,8 +95,8 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
         }
 
 
-        val cachedTree = result.data.asSequence().map { cacheOne(it) }
-            .toObservableTree(result.dataType, result.workspace, result.data.updates().map { cacheOne(it) })
+        val cachedTree = result.asSequence().map { cacheOne(it) }
+            .toObservableTree(result.dataType, result.workspace, result.updates().map { cacheOne(it) })
 
         return result.workspace.wrapResult(cachedTree, result.taskName, result.taskMeta)
     }

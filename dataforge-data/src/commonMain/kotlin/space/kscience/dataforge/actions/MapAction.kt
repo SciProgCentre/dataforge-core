@@ -79,7 +79,7 @@ internal class MapAction<T : Any, R : Any>(
             builder.result(env, data.await())
         }
         //setting the data node
-        emit(newName, newData)
+        data(newName, newData)
     }
 
     override fun DataSink<R>.generate(data: DataTree<T>, meta: Meta) {

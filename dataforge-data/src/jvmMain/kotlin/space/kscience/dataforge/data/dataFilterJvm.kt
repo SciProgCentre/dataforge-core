@@ -14,7 +14,7 @@ import kotlin.reflect.typeOf
  * Cast the node to given type if the cast is possible or return null
  */
 @Suppress("UNCHECKED_CAST")
-private fun <R : Any> Data<*>.castOrNull(type: KType): Data<R>? =
+private fun <R> Data<*>.castOrNull(type: KType): Data<R>? =
     if (!this.type.isSubtypeOf(type)) {
         null
     } else {
@@ -55,7 +55,7 @@ public inline fun <reified R : Any> DataTree<*>.filterByType(
 /**
  * Select a single datum if it is present and of given [type]
  */
-public fun <R : Any> DataTree<*>.getByType(type: KType, name: Name): NamedData<R>? =
+public fun <R> DataTree<*>.getByType(type: KType, name: Name): NamedData<R>? =
     get(name)?.castOrNull<R>(type)?.named(name)
 
 public inline fun <reified R : Any> DataTree<*>.getByType(name: Name): NamedData<R>? =

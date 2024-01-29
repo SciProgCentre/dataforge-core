@@ -12,7 +12,7 @@ import kotlin.reflect.typeOf
 /**
  * A generic data provider
  */
-public interface DataSource<T> {
+public interface DataSource<out T> {
 
     /**
      * The minimal common ancestor to all data in the node
@@ -28,7 +28,7 @@ public interface DataSource<T> {
 /**
  * A data provider with possible dynamic updates
  */
-public interface ObservableDataSource<T> : DataSource<T> {
+public interface ObservableDataSource<out T> : DataSource<T> {
 
     /**
      * Flow updates made to the data
@@ -39,7 +39,7 @@ public interface ObservableDataSource<T> : DataSource<T> {
 /**
  * A tree like structure for data holding
  */
-public interface GenericDataTree<T, out TR : GenericDataTree<T, TR>> : DataSource<T> {
+public interface GenericDataTree<out T, out TR : GenericDataTree<T, TR>> : DataSource<T> {
     public val self: TR
 
     public val data: Data<T>?
@@ -66,7 +66,12 @@ public interface GenericDataTree<T, out TR : GenericDataTree<T, TR>> : DataSourc
     }
 }
 
-public typealias DataTree<T> = GenericDataTree<T, *>
+public typealias DataTree<T> = GenericDataTree<T, GenericDataTree<T,*>>
+
+/**
+ * Return a single data in this tree. Throw error if it is not single.
+ */
+public fun <T> DataTree<T>.single(): NamedData<T> = asSequence().single()
 
 /**
  * An alias for easier access to tree values
@@ -79,7 +84,7 @@ public operator fun <T> DataTree<T>.get(name: String): Data<T>? = read(name.pars
  * Return a sequence of all data items in this tree.
  * This method does not take updates into account.
  */
-public fun <T> GenericDataTree<T, DataTree<T>>.asSequence(
+public fun <T> DataTree<T>.asSequence(
     namePrefix: Name = Name.EMPTY,
 ): Sequence<NamedData<T>> = sequence {
     data?.let { yield(it.named(Name.EMPTY)) }
@@ -100,6 +105,9 @@ public tailrec fun <T, TR : GenericDataTree<T, TR>> GenericDataTree<T, TR>.branc
         else -> items[name.first()]?.branch(name.cutFirst())
     }
 
+public fun <T, TR : GenericDataTree<T, TR>> GenericDataTree<T, TR>.branch(name: String): TR? =
+    branch(name.parseAsName())
+
 public fun GenericDataTree<*, *>.isEmpty(): Boolean = data == null && items.isEmpty()
 
 @PublishedApi
@@ -113,7 +121,7 @@ internal class FlatDataTree<T>(
     override val items: Map<NameToken, FlatDataTree<T>>
         get() = dataSet.keys
             .filter { it.startsWith(prefix) && it.length > prefix.length }
-            .map { it.tokens[prefix.length + 1] }
+            .map { it.tokens[prefix.length] }
             .associateWith { FlatDataTree(dataType, dataSet, prefix + it) }
 
     override fun read(name: Name): Data<T>? = dataSet[prefix + name]
@@ -133,20 +141,20 @@ internal fun <T> Sequence<NamedData<T>>.toTree(type: KType): DataTree<T> =
 public inline fun <reified T> Sequence<NamedData<T>>.toTree(): DataTree<T> =
     FlatDataTree(typeOf<T>(), associate { it.name to it.data }, Name.EMPTY)
 
-public interface GenericObservableDataTree<T, TR : GenericObservableDataTree<T, TR>> : GenericDataTree<T, TR>,
+public interface GenericObservableDataTree<out T, out TR : GenericObservableDataTree<T, TR>> : GenericDataTree<T, TR>,
     ObservableDataSource<T>
 
-public typealias ObservableDataTree<T> = GenericObservableDataTree<T, *>
+public typealias ObservableDataTree<T> = GenericObservableDataTree<T, GenericObservableDataTree<T, *>>
 
-public fun <T> DataTree<T>.updates(): Flow<NamedData<T>> = if (this is ObservableDataTree<T>) updates() else emptyFlow()
+public fun <T> DataTree<T>.updates(): Flow<NamedData<T>> = if (this is GenericObservableDataTree<T,*>) updates() else emptyFlow()
 
-public fun interface DataSink<T> {
-    public fun emit(name: Name, data: Data<T>?)
+public fun interface DataSink<in T> {
+    public fun data(name: Name, data: Data<T>?)
 }
 
 public class DataTreeBuilder<T>(private val type: KType) : DataSink<T> {
     private val map = HashMap<Name, Data<T>>()
-    override fun emit(name: Name, data: Data<T>?) {
+    override fun data(name: Name, data: Data<T>?) {
         if (data == null) {
             map.remove(name)
         } else {
@@ -182,7 +190,7 @@ public interface MutableDataTree<T> : GenericObservableDataTree<T, MutableDataTr
 
     public operator fun set(token: NameToken, data: Data<T>?)
 
-    override fun emit(name: Name, data: Data<T>?): Unit = set(name, data)
+    override fun data(name: Name, data: Data<T>?): Unit = set(name, data)
 }
 
 public tailrec operator fun <T> MutableDataTree<T>.set(name: Name, data: Data<T>?): Unit {
@@ -266,6 +274,6 @@ public fun <T> Sequence<NamedData<T>>.toObservableTree(dataType: KType, scope: C
     MutableDataTree<T>(dataType, scope).apply {
         emitAll(this@toObservableTree)
         updates.onEach {
-            emit(it.name, it.data)
+            data(it.name, it.data)
         }.launchIn(scope)
     }

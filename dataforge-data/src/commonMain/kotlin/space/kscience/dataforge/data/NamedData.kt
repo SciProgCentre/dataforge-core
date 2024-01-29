@@ -4,7 +4,7 @@ import space.kscience.dataforge.meta.isEmpty
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
 
-public interface NamedData<T> : Named, Data<T> {
+public interface NamedData<out T> : Named, Data<T> {
     override val name: Name
     public val data: Data<T>
 }

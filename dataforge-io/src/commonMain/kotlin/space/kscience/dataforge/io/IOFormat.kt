@@ -49,13 +49,13 @@ public fun interface IOWriter<in T> {
  */
 public interface IOFormat<T> : IOReader<T>, IOWriter<T>
 
-public fun <T : Any> Source.readWith(format: IOReader<T>): T = format.readFrom(this)
+public fun <T> Source.readWith(format: IOReader<T>): T = format.readFrom(this)
 
 /**
  * Read given binary as an object using given format
  */
 public fun <T> Binary.readWith(format: IOReader<T>): T = read {
-    readWith(format)
+    this.readWith(format)
 }
 
 /**

@@ -16,8 +16,8 @@ import space.kscience.dataforge.names.matches
  */
 @OptIn(DFExperimental::class)
 public inline fun <reified T : Any> TaskResultBuilder<*>.dataByType(namePattern: Name? = null): DataSelector<T> =
-    DataSelector<T> { workspace, meta ->
-        workspace.data.filterByType { name, _ ->
+    DataSelector<T> { workspace, _ ->
+        workspace.data.filterByType { name, _, _ ->
             namePattern == null || name.matches(namePattern)
         }
     }
@@ -25,4 +25,4 @@ public inline fun <reified T : Any> TaskResultBuilder<*>.dataByType(namePattern:
 public suspend inline fun <reified T : Any> TaskResultBuilder<*>.fromTask(
     task: Name,
     taskMeta: Meta = Meta.EMPTY,
-): DataTree<T> = workspace.produce(task, taskMeta).data.filterByType()
+): DataTree<T> = workspace.produce(task, taskMeta).filterByType()

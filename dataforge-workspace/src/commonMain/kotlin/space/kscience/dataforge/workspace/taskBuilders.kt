@@ -3,7 +3,7 @@ package space.kscience.dataforge.workspace
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.context.PluginFactory
 import space.kscience.dataforge.data.DataTree
-import space.kscience.dataforge.data.emitAll
+import space.kscience.dataforge.data.branch
 import space.kscience.dataforge.data.forEach
 import space.kscience.dataforge.data.transform
 import space.kscience.dataforge.meta.*
@@ -25,12 +25,12 @@ public val TaskResultBuilder<*>.defaultDependencyMeta: Meta
  * @param selector a workspace data selector. Could be either task selector or initial data selector.
  * @param dependencyMeta meta used for selector. The same meta is used for caching. By default, uses [defaultDependencyMeta].
  */
-public suspend fun <T : Any> TaskResultBuilder<*>.from(
+public suspend fun <T> TaskResultBuilder<*>.from(
     selector: DataSelector<T>,
     dependencyMeta: Meta = defaultDependencyMeta,
 ): DataTree<T> = selector.select(workspace, dependencyMeta)
 
-public suspend inline fun <T : Any, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
+public suspend inline fun <T, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
     plugin: P,
     dependencyMeta: Meta = defaultDependencyMeta,
     selectorBuilder: P.() -> TaskReference<T>,
@@ -50,7 +50,7 @@ public suspend inline fun <T : Any, reified P : WorkspacePlugin> TaskResultBuild
  * @param dependencyMeta meta used for selector. The same meta is used for caching. By default, uses [defaultDependencyMeta].
  * @param selectorBuilder a builder of task from the plugin.
  */
-public suspend inline fun <reified T : Any, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
+public suspend inline fun <reified T, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
     pluginFactory: PluginFactory<P>,
     dependencyMeta: Meta = defaultDependencyMeta,
     selectorBuilder: P.() -> TaskReference<T>,
@@ -77,7 +77,7 @@ public val TaskResultBuilder<*>.allData: DataSelector<*>
  * @param action process individual data asynchronously.
  */
 @DFExperimental
-public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.transformEach(
+public suspend inline fun <T, reified R> TaskResultBuilder<R>.transformEach(
     selector: DataSelector<T>,
     dependencyMeta: Meta = defaultDependencyMeta,
     dataMetaTransform: MutableMeta.(name: Name) -> Unit = {},
@@ -93,27 +93,27 @@ public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.transf
             action(it, data.name, meta)
         }
 
-        emit(data.name, res)
+        data(data.name, res)
     }
 }
 
 /**
  * Set given [dataSet] as a task result.
  */
-public fun <T : Any> TaskResultBuilder<T>.result(dataSet: DataTree<T>) {
-    emitAll(dataSet)
+public fun <T> TaskResultBuilder<T>.result(dataSet: DataTree<T>) {
+    branch(dataSet)
 }
 
 /**
  * Use provided [action] to fill the result
  */
 @DFExperimental
-public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.actionFrom(
+public suspend inline fun <T, reified R> TaskResultBuilder<R>.actionFrom(
     selector: DataSelector<T>,
     action: Action<T, R>,
     dependencyMeta: Meta = defaultDependencyMeta,
 ) {
-    emitAll(action.execute(workspace.context, from(selector, dependencyMeta), dependencyMeta))
+    branch(action.execute(workspace.context, from(selector, dependencyMeta), dependencyMeta))
 }
 
 

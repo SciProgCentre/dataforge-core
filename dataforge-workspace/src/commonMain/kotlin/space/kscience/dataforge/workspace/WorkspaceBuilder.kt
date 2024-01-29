@@ -19,12 +19,12 @@ import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.typeOf
 
-public data class TaskReference<T : Any>(public val taskName: Name, public val task: Task<T>) : DataSelector<T> {
+public data class TaskReference<T>(public val taskName: Name, public val task: Task<T>) : DataSelector<T> {
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun select(workspace: Workspace, meta: Meta): DataTree<T> {
         if (workspace.tasks[taskName] == task) {
-            return workspace.produce(taskName, meta).data as DataTree<T>
+            return workspace.produce(taskName, meta) as DataTree<T>
         } else {
             error("Task $taskName does not belong to the workspace")
         }
@@ -125,7 +125,7 @@ public class WorkspaceBuilder(
     /**
      * Define intrinsic data for the workspace
      */
-    public fun data(builder: DataSink<*>.() -> Unit) {
+    public fun data(builder: DataSink<Any?>.() -> Unit) {
         data.apply(builder)
     }
 

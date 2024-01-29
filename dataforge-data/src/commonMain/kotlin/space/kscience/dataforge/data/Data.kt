@@ -15,7 +15,7 @@ import kotlin.reflect.typeOf
  * A data element characterized by its meta
  */
 @DfType(Data.TYPE)
-public interface Data<T> : Goal<T>, MetaRepr {
+public interface Data<out T> : Goal<T>, MetaRepr {
     /**
      * Type marker for the data. The type is known before the calculation takes place so it could be checked.
      */

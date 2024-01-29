@@ -7,7 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-internal class LegacyGenericDataTreeBuilderTest {
+internal class DataTreeBuilderTest {
     @Test
     fun testTreeBuild() = runBlocking {
         val node = DataTree<Any> {

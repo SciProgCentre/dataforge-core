@@ -64,7 +64,7 @@ internal class SplitAction<T : Any, R : Any>(
             ).apply(rule)
             //data.map<R>(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
 
-            emit(
+            data(
                 fragmentName,
                 @Suppress("OPT_IN_USAGE") Data(outputType, meta = env.meta, dependencies = listOf(data)) {
                     env.result(data.await())
