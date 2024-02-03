@@ -4,7 +4,7 @@ plugins {
 
 description = "IO module"
 
-val ioVersion = "0.3.0"
+val ioVersion = "0.3.1"
 
 kscience {
     jvm()

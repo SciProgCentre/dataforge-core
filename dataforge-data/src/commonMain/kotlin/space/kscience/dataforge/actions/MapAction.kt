@@ -29,6 +29,7 @@ public class MapActionBuilder<T, R>(
     public var name: Name,
     public var meta: MutableMeta,
     public val actionMeta: Meta,
+    public val dataType: KType,
     @PublishedApi internal var outputType: KType,
 ) {
 
@@ -45,19 +46,16 @@ public class MapActionBuilder<T, R>(
     /**
      * Calculate the result of goal
      */
-    public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(T) -> R1) {
-        outputType = typeOf<R1>()
-        result = f;
-    }
+    public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(T) -> R1): Unit = result(typeOf<R1>(), f)
 }
 
 @PublishedApi
-internal class MapAction<in T : Any, R : Any>(
+internal class MapAction<T : Any, R : Any>(
     outputType: KType,
     private val block: MapActionBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {
 
-    private fun DataSetBuilder<R>.mapOne(name: Name, data: Data<T>, meta: Meta) {
+    private fun DataSink<R>.mapOne(name: Name, data: Data<T>, meta: Meta) {
         // Creating a new environment for action using **old** name, old meta and task meta
         val env = ActionEnv(name, data.meta, meta)
 
@@ -66,6 +64,7 @@ internal class MapAction<in T : Any, R : Any>(
             name,
             data.meta.toMutableMeta(), // using data meta
             meta,
+            data.type,
             outputType
         ).apply(block)
 
@@ -80,16 +79,15 @@ internal class MapAction<in T : Any, R : Any>(
             builder.result(env, data.await())
         }
         //setting the data node
-        data(newName, newData)
+        put(newName, newData)
     }
 
-    override fun DataSetBuilder<R>.generate(data: DataSet<T>, meta: Meta) {
+    override fun DataSink<R>.generate(data: DataTree<T>, meta: Meta) {
         data.forEach { mapOne(it.name, it.data, meta) }
     }
 
-    override fun DataSourceBuilder<R>.update(dataSet: DataSet<T>, meta: Meta, updateKey: Name) {
-        remove(updateKey)
-        dataSet[updateKey]?.let { mapOne(updateKey, it, meta) }
+    override fun DataSink<R>.update(source: DataTree<T>, meta: Meta, namedData: NamedData<T>) {
+        mapOne(namedData.name, namedData.data, namedData.meta)
     }
 }
 

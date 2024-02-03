@@ -44,38 +44,27 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
         attributes.apply(block)
     }
 
-    public fun item(name: Name, block: MetaDescriptorBuilder.() -> Unit = {}): MetaDescriptorBuilder {
-        return when (name.length) {
-            0 -> apply(block)
+    internal fun node(
+        name: Name,
+        descriptorBuilder: MetaDescriptorBuilder,
+    ): Unit {
+        when (name.length) {
+            0 -> error("Can't set descriptor to root")
             1 -> {
-                val target = MetaDescriptorBuilder().apply(block)
-                children[name.first().body] = target
-                target
+                children[name.first().body] = descriptorBuilder
             }
 
-            else -> {
-                children.getOrPut(name.first().body) { MetaDescriptorBuilder() }.item(name.cutFirst(), block)
-            }
+            else -> children.getOrPut(name.first().body) {
+                MetaDescriptorBuilder()
+            }.node(name.cutFirst(), descriptorBuilder)
         }
     }
 
-    public fun node(
+    internal fun node(
         name: Name,
-        descriptor: MetaDescriptor,
-        block: MetaDescriptorBuilder.() -> Unit = {},
-    ): MetaDescriptorBuilder = when (name.length) {
-        0 -> error("Can't set descriptor to root")
-        1 -> {
-            val item = descriptor.toBuilder().apply {
-                valueRestriction = ValueRestriction.ABSENT
-            }.apply(block)
-            children[name.first().body] = item
-            item
-        }
-
-        else -> children.getOrPut(name.first().body) {
-            MetaDescriptorBuilder()
-        }.node(name.cutFirst(), descriptor, block)
+        descriptorBuilder: MetaDescriptor,
+    ): Unit {
+        node(name, descriptorBuilder.toBuilder())
     }
 
     public var allowedValues: List<Value>
@@ -89,10 +78,21 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
         allowedValues = values.map { Value.of(it) }
     }
 
+    public fun from(descriptor: MetaDescriptor) {
+        description = descriptor.description
+        children.putAll(descriptor.nodes.mapValues { it.value.toBuilder() })
+        multiple = descriptor.multiple
+        valueRestriction = descriptor.valueRestriction
+        valueTypes = descriptor.valueTypes
+        indexKey = descriptor.indexKey
+        default = descriptor.defaultValue
+        attributes.update(descriptor.attributes)
+    }
+
     @PublishedApi
     internal fun build(): MetaDescriptor = MetaDescriptor(
         description = description,
-        children = children.mapValues { it.value.build() },
+        nodes = children.mapValues { it.value.build() },
         multiple = multiple,
         valueRestriction = valueRestriction,
         valueTypes = valueTypes,
@@ -102,11 +102,56 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
     )
 }
 
-public fun MetaDescriptorBuilder.item(name: String, block: MetaDescriptorBuilder.() -> Unit): MetaDescriptorBuilder =
-    item(Name.parse(name), block)
+//public fun MetaDescriptorBuilder.item(name: String, block: MetaDescriptorBuilder.() -> Unit): MetaDescriptorBuilder =
+//    item(Name.parse(name), block)
 
 public inline fun MetaDescriptor(block: MetaDescriptorBuilder.() -> Unit): MetaDescriptor =
     MetaDescriptorBuilder().apply(block).build()
+
+/**
+ * Create and configure child node descriptor
+ */
+public fun MetaDescriptorBuilder.node(
+    name: Name,
+    block: MetaDescriptorBuilder.() -> Unit,
+) {
+    node(
+        name,
+        MetaDescriptorBuilder().apply(block)
+    )
+}
+
+public fun MetaDescriptorBuilder.node(name: String, descriptor: MetaDescriptor) {
+    node(Name.parse(name), descriptor)
+}
+
+public fun MetaDescriptorBuilder.node(name: String, block: MetaDescriptorBuilder.() -> Unit) {
+    node(Name.parse(name), block)
+}
+
+public fun MetaDescriptorBuilder.node(
+    key: String,
+    base: Described,
+    block: MetaDescriptorBuilder.() -> Unit = {},
+) {
+    node(Name.parse(key), base.descriptor?.toBuilder()?.apply(block) ?: MetaDescriptorBuilder())
+}
+
+public fun MetaDescriptorBuilder.required() {
+    valueRestriction = ValueRestriction.REQUIRED
+}
+
+private fun MetaDescriptor.toBuilder(): MetaDescriptorBuilder = MetaDescriptorBuilder().apply {
+    description = this@toBuilder.description
+    children = this@toBuilder.nodes.mapValuesTo(LinkedHashMap()) { it.value.toBuilder() }
+    multiple = this@toBuilder.multiple
+    valueRestriction = this@toBuilder.valueRestriction
+    valueTypes = this@toBuilder.valueTypes
+    indexKey = this@toBuilder.indexKey
+    default = defaultValue
+    attributes = this@toBuilder.attributes.toMutableMeta()
+}
+
 
 /**
  * Create and configure child value descriptor
@@ -116,7 +161,7 @@ public fun MetaDescriptorBuilder.value(
     type: ValueType,
     vararg additionalTypes: ValueType,
     block: MetaDescriptorBuilder.() -> Unit = {},
-): MetaDescriptorBuilder = item(name) {
+): Unit = node(name) {
     valueType(type, *additionalTypes)
     block()
 }
@@ -126,57 +171,19 @@ public fun MetaDescriptorBuilder.value(
     type: ValueType,
     vararg additionalTypes: ValueType,
     block: MetaDescriptorBuilder.() -> Unit = {},
-): MetaDescriptorBuilder = value(Name.parse(name), type, additionalTypes = additionalTypes, block)
+): Unit = value(Name.parse(name), type, additionalTypes = additionalTypes, block)
 
-/**
- * Create and configure child value descriptor
- */
-public fun MetaDescriptorBuilder.node(
-    name: Name, block: MetaDescriptorBuilder.() -> Unit,
-): MetaDescriptorBuilder = item(name) {
-    valueRestriction = ValueRestriction.ABSENT
-    block()
-}
-
-public fun MetaDescriptorBuilder.node(name: String, block: MetaDescriptorBuilder.() -> Unit) {
-    node(Name.parse(name), block)
-}
-
-public fun MetaDescriptorBuilder.node(
-    key: String,
-    described: Described,
-    block: MetaDescriptorBuilder.() -> Unit = {},
-) {
-    described.descriptor?.let {
-        node(Name.parse(key), it, block)
-    }
-}
-
-public fun MetaDescriptorBuilder.required() {
-    valueRestriction = ValueRestriction.REQUIRED
-}
 
 public inline fun <reified E : Enum<E>> MetaDescriptorBuilder.enum(
     key: Name,
     default: E?,
     crossinline modifier: MetaDescriptorBuilder.() -> Unit = {},
-): MetaDescriptorBuilder = value(key, ValueType.STRING) {
+): Unit = value(key, ValueType.STRING) {
     default?.let {
         this.default = default.asValue()
     }
     allowedValues = enumValues<E>().map { it.asValue() }
     modifier()
-}
-
-private fun MetaDescriptor.toBuilder(): MetaDescriptorBuilder = MetaDescriptorBuilder().apply {
-    description = this@toBuilder.description
-    children = this@toBuilder.children.mapValuesTo(LinkedHashMap()) { it.value.toBuilder() }
-    multiple = this@toBuilder.multiple
-    valueRestriction = this@toBuilder.valueRestriction
-    valueTypes = this@toBuilder.valueTypes
-    indexKey = this@toBuilder.indexKey
-    default = defaultValue
-    attributes = this@toBuilder.attributes.toMutableMeta()
 }
 
 /**

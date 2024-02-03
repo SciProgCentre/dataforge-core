@@ -1,9 +1,11 @@
 package space.kscience.dataforge.workspace
 
+import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.context.PluginFactory
-import space.kscience.dataforge.data.DataSet
+import space.kscience.dataforge.data.DataTree
+import space.kscience.dataforge.data.branch
 import space.kscience.dataforge.data.forEach
-import space.kscience.dataforge.data.map
+import space.kscience.dataforge.data.transform
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
@@ -23,22 +25,22 @@ public val TaskResultBuilder<*>.defaultDependencyMeta: Meta
  * @param selector a workspace data selector. Could be either task selector or initial data selector.
  * @param dependencyMeta meta used for selector. The same meta is used for caching. By default, uses [defaultDependencyMeta].
  */
-public suspend fun <T : Any> TaskResultBuilder<*>.from(
+public suspend fun <T> TaskResultBuilder<*>.from(
     selector: DataSelector<T>,
     dependencyMeta: Meta = defaultDependencyMeta,
-): DataSet<T> = selector.select(workspace, dependencyMeta)
+): DataTree<T> = selector.select(workspace, dependencyMeta)
 
-public suspend inline fun <T : Any, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
+public suspend inline fun <T, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
     plugin: P,
     dependencyMeta: Meta = defaultDependencyMeta,
     selectorBuilder: P.() -> TaskReference<T>,
-): DataSet<T> {
+): TaskResult<T> {
     require(workspace.context.plugins.contains(plugin)) { "Plugin $plugin is not loaded into $workspace" }
     val taskReference: TaskReference<T> = plugin.selectorBuilder()
     val res = workspace.produce(plugin.name + taskReference.taskName, dependencyMeta)
     //TODO add explicit check after https://youtrack.jetbrains.com/issue/KT-32956
     @Suppress("UNCHECKED_CAST")
-    return  res as TaskResult<T>
+    return res as TaskResult<T>
 }
 
 /**
@@ -48,11 +50,11 @@ public suspend inline fun <T : Any, reified P : WorkspacePlugin> TaskResultBuild
  * @param dependencyMeta meta used for selector. The same meta is used for caching. By default, uses [defaultDependencyMeta].
  * @param selectorBuilder a builder of task from the plugin.
  */
-public suspend inline fun <reified T : Any, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
+public suspend inline fun <reified T, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
     pluginFactory: PluginFactory<P>,
     dependencyMeta: Meta = defaultDependencyMeta,
     selectorBuilder: P.() -> TaskReference<T>,
-): DataSet<T> {
+): TaskResult<T> {
     val plugin = workspace.context.plugins[pluginFactory]
         ?: error("Plugin ${pluginFactory.tag} not loaded into workspace context")
     val taskReference: TaskReference<T> = plugin.selectorBuilder()
@@ -63,12 +65,10 @@ public suspend inline fun <reified T : Any, reified P : WorkspacePlugin> TaskRes
 }
 
 public val TaskResultBuilder<*>.allData: DataSelector<*>
-    get() = object : DataSelector<Any> {
-        override suspend fun select(workspace: Workspace, meta: Meta): DataSet<Any> = workspace.data
-    }
+    get() = DataSelector { workspace, _ -> workspace.data }
 
 /**
- * Perform a lazy mapping task using given [selector] and [action]. The meta of resulting
+ * Perform a lazy mapping task using given [selector] and one-to-one [action].
  * TODO move selector to receiver with multi-receivers
  *
  * @param selector a workspace data selector. Could be either task selector or initial data selector.
@@ -77,7 +77,7 @@ public val TaskResultBuilder<*>.allData: DataSelector<*>
  * @param action process individual data asynchronously.
  */
 @DFExperimental
-public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.pipeFrom(
+public suspend inline fun <T, reified R> TaskResultBuilder<R>.transformEach(
     selector: DataSelector<T>,
     dependencyMeta: Meta = defaultDependencyMeta,
     dataMetaTransform: MutableMeta.(name: Name) -> Unit = {},
@@ -89,12 +89,31 @@ public suspend inline fun <T : Any, reified R : Any> TaskResultBuilder<R>.pipeFr
             dataMetaTransform(data.name)
         }
 
-        val res = data.map(workspace.context.coroutineContext, meta) {
+        val res = data.transform(meta, workspace.context.coroutineContext) {
             action(it, data.name, meta)
         }
 
-        data(data.name, res)
+        put(data.name, res)
     }
+}
+
+/**
+ * Set given [dataSet] as a task result.
+ */
+public fun <T> TaskResultBuilder<T>.result(dataSet: DataTree<T>) {
+    branch(dataSet)
+}
+
+/**
+ * Use provided [action] to fill the result
+ */
+@DFExperimental
+public suspend inline fun <T, reified R> TaskResultBuilder<R>.actionFrom(
+    selector: DataSelector<T>,
+    action: Action<T, R>,
+    dependencyMeta: Meta = defaultDependencyMeta,
+) {
+    branch(action.execute(from(selector, dependencyMeta), dependencyMeta))
 }
 
 

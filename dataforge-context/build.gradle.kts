@@ -12,7 +12,7 @@ kscience {
     useCoroutines()
     useSerialization()
     commonMain {
-        api(project(":dataforge-meta"))
+        api(projects.dataforgeMeta)
         api(spclibs.atomicfu)
     }
     jvmMain{

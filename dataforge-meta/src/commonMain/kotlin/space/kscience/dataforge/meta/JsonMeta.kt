@@ -31,7 +31,7 @@ private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): J
     val pairs: MutableList<Pair<String, JsonElement>> = items.entries.groupBy {
         it.key.body
     }.mapTo(ArrayList()) { (body, list) ->
-        val childDescriptor = descriptor?.children?.get(body)
+        val childDescriptor = descriptor?.nodes?.get(body)
         if (list.size == 1) {
             val (token, element) = list.first()
                 //do not add an empty element

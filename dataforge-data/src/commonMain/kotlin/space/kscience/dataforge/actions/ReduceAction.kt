@@ -14,7 +14,7 @@ import kotlin.reflect.typeOf
 
 public class JoinGroup<T : Any, R : Any>(
     public var name: String,
-    internal val set: DataSet<T>,
+    internal val set: DataTree<T>,
     @PublishedApi internal var outputType: KType,
 ) {
 
@@ -39,7 +39,7 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
     public val actionMeta: Meta,
     private val outputType: KType,
 ) {
-    private val groupRules: MutableList<(DataSet<T>) -> List<JoinGroup<T, R>>> = ArrayList();
+    private val groupRules: MutableList<(DataTree<T>) -> List<JoinGroup<T, R>>> = ArrayList();
 
     /**
      * introduce grouping by meta value
@@ -54,12 +54,12 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
 
     public fun group(
         groupName: String,
-        predicate: (Name, Meta) -> Boolean,
+        predicate: DataFilter,
         action: JoinGroup<T, R>.() -> Unit,
     ) {
         groupRules += { source ->
             listOf(
-                JoinGroup<T, R>(groupName, source.filter(predicate), outputType).apply(action)
+                JoinGroup<T, R>(groupName, source.filterData(predicate), outputType).apply(action)
             )
         }
     }
@@ -73,7 +73,7 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
         }
     }
 
-    internal fun buildGroups(input: DataSet<T>): List<JoinGroup<T, R>> =
+    internal fun buildGroups(input: DataTree<T>): List<JoinGroup<T, R>> =
         groupRules.flatMap { it.invoke(input) }
 
 }
@@ -85,7 +85,7 @@ internal class ReduceAction<T : Any, R : Any>(
 ) : AbstractAction<T, R>(outputType) {
     //TODO optimize reduction. Currently, the whole action recalculates on push
 
-    override fun DataSetBuilder<R>.generate(data: DataSet<T>, meta: Meta) {
+    override fun DataSink<R>.generate(data: DataTree<T>, meta: Meta) {
         ReduceGroupBuilder<T, R>(meta, outputType).apply(action).buildGroups(data).forEach { group ->
             val dataFlow: Map<Name, Data<T>> = group.set.asSequence().fold(HashMap()) { acc, value ->
                 acc.apply {
@@ -103,7 +103,7 @@ internal class ReduceAction<T : Any, R : Any>(
                 meta = groupMeta
             ) { group.result.invoke(env, it) }
 
-            data(env.name, res)
+            put(env.name, res)
         }
     }
 }

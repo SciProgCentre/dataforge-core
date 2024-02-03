@@ -1,6 +1,7 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.meta.transformations.MetaConverter
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
+import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import kotlin.properties.ReadWriteProperty
@@ -20,17 +21,65 @@ public fun MutableMetaProvider.node(key: Name? = null): ReadWriteProperty<Any?, 
         }
     }
 
-public fun <T> MutableMetaProvider.node(key: Name? = null, converter: MetaConverter<T>): ReadWriteProperty<Any?, T?> =
+/**
+ * Use [converter] to transform an object to Meta and back.
+ * Note that mutation of the object does not change Meta.
+ */
+public fun <T> MutableMetaProvider.convertable(
+    converter: MetaConverter<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, T?> =
     object : ReadWriteProperty<Any?, T?> {
         override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-            return get(key ?: property.name.asName())?.let { converter.metaToObject(it) }
+            val name = key ?: property.name.asName()
+            return get(name)?.let { converter.read(it) }
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
             val name = key ?: property.name.asName()
-            set(name, value?.let { converter.objectToMeta(it) })
+            set(name, value?.let { converter.convert(it) })
         }
     }
+
+@Deprecated("Use convertable", ReplaceWith("convertable(converter, key)"))
+public fun <T> MutableMetaProvider.node(key: Name? = null, converter: MetaConverter<T>): ReadWriteProperty<Any?, T?> =
+    convertable(converter, key)
+
+/**
+ * Use object serializer to transform it to Meta and back.
+ * Note that mutation of the object does not change Meta.
+ */
+@DFExperimental
+public inline fun <reified T> MutableMetaProvider.serializable(
+    descriptor: MetaDescriptor? = null,
+    key: Name? = null,
+): ReadWriteProperty<Any?, T?> = convertable(MetaConverter.serializable(descriptor), key)
+
+/**
+ * Use [converter] to convert a list of same name siblings meta to object and back.
+ * Note that mutation of the object does not change Meta.
+ */
+public fun <T> MutableMeta.listOfConvertable(
+    converter: MetaConverter<T>,
+    key: Name? = null,
+): ReadWriteProperty<Any?, List<T>> = object : ReadWriteProperty<Any?, List<T>> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
+        val name = key ?: property.name.asName()
+        return getIndexed(name).values.map { converter.read(it) }
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<T>) {
+        val name = key ?: property.name.asName()
+        setIndexed(name, value.map { converter.convert(it) })
+    }
+}
+
+@DFExperimental
+public inline fun <reified T> MutableMeta.listOfSerializable(
+    descriptor: MetaDescriptor? = null,
+    key: Name? = null,
+): ReadWriteProperty<Any?, List<T>> = listOfConvertable(MetaConverter.serializable(descriptor), key)
+
 
 public fun MutableMetaProvider.value(key: Name? = null): ReadWriteProperty<Any?, Value?> =
     object : ReadWriteProperty<Any?, Value?> {
@@ -45,7 +94,7 @@ public fun MutableMetaProvider.value(key: Name? = null): ReadWriteProperty<Any?,
 public fun <T> MutableMetaProvider.value(
     key: Name? = null,
     writer: (T) -> Value? = { Value.of(it) },
-    reader: (Value?) -> T
+    reader: (Value?) -> T,
 ): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T =
         reader(get(key ?: property.name.asName())?.value)

@@ -10,10 +10,7 @@ import space.kscience.dataforge.names.asName
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
-public interface EnvelopeFormat : IOFormat<Envelope> {
-
-    override val type: KType get() = typeOf<Envelope>()
-}
+public interface EnvelopeFormat : IOFormat<Envelope>
 
 public fun EnvelopeFormat.read(input: Source): Envelope = readFrom(input)
 

@@ -1,12 +1,12 @@
 package space.kscience.dataforge.workspace
 
 import kotlinx.coroutines.withContext
-import space.kscience.dataforge.data.DataSetBuilder
-import space.kscience.dataforge.data.DataTree
+import space.kscience.dataforge.data.DataSink
 import space.kscience.dataforge.data.GoalExecutionRestriction
+import space.kscience.dataforge.data.MutableDataTree
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
-import space.kscience.dataforge.meta.Specification
+import space.kscience.dataforge.meta.MetaSpec
 import space.kscience.dataforge.meta.descriptors.Described
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DfType
@@ -20,7 +20,7 @@ import kotlin.reflect.typeOf
  * In general no computations should be made until the result is called.
  */
 @DfType(TYPE)
-public interface Task<out T : Any> : Described {
+public interface Task<T> : Described {
 
     /**
      * A task identification string used to compare tasks and check task body for change
@@ -43,10 +43,10 @@ public interface Task<out T : Any> : Described {
 }
 
 /**
- * A [Task] with [Specification] for wrapping and unwrapping task configuration
+ * A [Task] with [MetaSpec] for wrapping and unwrapping task configuration
  */
-public interface TaskWithSpec<out T : Any, C : Any> : Task<T> {
-    public val spec: Specification<C>
+public interface TaskWithSpec<T, C : Any> : Task<T> {
+    public val spec: MetaSpec<C>
     override val descriptor: MetaDescriptor? get() = spec.descriptor
 
     public suspend fun execute(workspace: Workspace, taskName: Name, configuration: C): TaskResult<T>
@@ -55,18 +55,18 @@ public interface TaskWithSpec<out T : Any, C : Any> : Task<T> {
         execute(workspace, taskName, spec.read(taskMeta))
 }
 
-public suspend fun <T : Any, C : Any> TaskWithSpec<T, C>.execute(
-    workspace: Workspace,
-    taskName: Name,
-    block: C.() -> Unit = {},
-): TaskResult<T> = execute(workspace, taskName, spec(block))
+//public suspend fun <T : Any, C : Scheme> TaskWithSpec<T, C>.execute(
+//    workspace: Workspace,
+//    taskName: Name,
+//    block: C.() -> Unit = {},
+//): TaskResult<T> = execute(workspace, taskName, spec(block))
 
-public class TaskResultBuilder<in T : Any>(
+public class TaskResultBuilder<T>(
     public val workspace: Workspace,
     public val taskName: Name,
     public val taskMeta: Meta,
-    private val dataDrop: DataSetBuilder<T>,
-) : DataSetBuilder<T> by dataDrop
+    private val dataSink: DataSink<T>,
+) : DataSink<T> by dataSink
 
 /**
  * Create a [Task] that composes a result using [builder]. Only data from the workspace could be used.
@@ -76,7 +76,6 @@ public class TaskResultBuilder<in T : Any>(
  * @param descriptor of meta accepted by this task
  * @param builder for resulting data set
  */
-@Suppress("FunctionName")
 public fun <T : Any> Task(
     resultType: KType,
     descriptor: MetaDescriptor? = null,
@@ -89,16 +88,20 @@ public fun <T : Any> Task(
         workspace: Workspace,
         taskName: Name,
         taskMeta: Meta,
-    ): TaskResult<T> = withContext(GoalExecutionRestriction() + workspace.goalLogger) {
+    ): TaskResult<T> {
         //TODO use safe builder and check for external data on add and detects cycles
-        val dataset = DataTree<T>(resultType) {
-            TaskResultBuilder(workspace, taskName, taskMeta, this).apply { builder() }
+        val dataset = MutableDataTree<T>(resultType, workspace.context).apply {
+            TaskResultBuilder(workspace, taskName, taskMeta, this).apply {
+                withContext(GoalExecutionRestriction() + workspace.goalLogger) {
+                    builder()
+                }
+            }
         }
-        workspace.wrapResult(dataset, taskName, taskMeta)
+        return workspace.wrapResult(dataset, taskName, taskMeta)
+
     }
 }
 
-@Suppress("FunctionName")
 public inline fun <reified T : Any> Task(
     descriptor: MetaDescriptor? = null,
     noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
@@ -113,13 +116,14 @@ public inline fun <reified T : Any> Task(
  * @param specification a specification for task configuration
  * @param builder for resulting data set
  */
+
 @Suppress("FunctionName")
 public fun <T : Any, C : MetaRepr> Task(
     resultType: KType,
-    specification: Specification<C>,
+    specification: MetaSpec<C>,
     builder: suspend TaskResultBuilder<T>.(C) -> Unit,
 ): TaskWithSpec<T, C> = object : TaskWithSpec<T, C> {
-    override val spec: Specification<C> = specification
+    override val spec: MetaSpec<C> = specification
 
     override suspend fun execute(
         workspace: Workspace,
@@ -128,15 +132,14 @@ public fun <T : Any, C : MetaRepr> Task(
     ): TaskResult<T> = withContext(GoalExecutionRestriction() + workspace.goalLogger) {
         //TODO use safe builder and check for external data on add and detects cycles
         val taskMeta = configuration.toMeta()
-        val dataset = DataTree<T>(resultType) {
+        val dataset = MutableDataTree<T>(resultType, this).apply {
             TaskResultBuilder(workspace, taskName, taskMeta, this).apply { builder(configuration) }
         }
         workspace.wrapResult(dataset, taskName, taskMeta)
     }
 }
 
-@Suppress("FunctionName")
 public inline fun <reified T : Any, C : MetaRepr> Task(
-    specification: Specification<C>,
+    specification: MetaSpec<C>,
     noinline builder: suspend TaskResultBuilder<T>.(C) -> Unit,
 ): Task<T> = Task(typeOf<T>(), specification, builder)

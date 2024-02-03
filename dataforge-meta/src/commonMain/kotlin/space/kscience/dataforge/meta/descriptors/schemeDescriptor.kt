@@ -3,13 +3,15 @@ package space.kscience.dataforge.meta.descriptors
 import space.kscience.dataforge.meta.Scheme
 import space.kscience.dataforge.meta.SchemeSpec
 import space.kscience.dataforge.meta.ValueType
+import space.kscience.dataforge.misc.DFExperimental
 import kotlin.reflect.KProperty1
 import kotlin.reflect.typeOf
 
+@DFExperimental
 public inline fun <S : Scheme, reified T> MetaDescriptorBuilder.value(
     property: KProperty1<S, T>,
     noinline block: MetaDescriptorBuilder.() -> Unit = {},
-): MetaDescriptorBuilder = when (typeOf<T>()) {
+): Unit = when (typeOf<T>()) {
     typeOf<Number>(), typeOf<Int>(), typeOf<Double>(), typeOf<Short>(), typeOf<Long>(), typeOf<Float>() ->
         value(property.name, ValueType.NUMBER) {
             block()
@@ -34,9 +36,10 @@ public inline fun <S : Scheme, reified T> MetaDescriptorBuilder.value(
         multiple = true
         block()
     }
-    else -> item(property.name, block)
+    else -> node(property.name, block)
 }
 
+@DFExperimental
 public inline fun <S : Scheme, reified T : Scheme> MetaDescriptorBuilder.scheme(
     property: KProperty1<S, T>,
     spec: SchemeSpec<T>,

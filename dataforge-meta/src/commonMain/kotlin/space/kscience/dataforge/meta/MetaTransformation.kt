@@ -1,6 +1,5 @@
-package space.kscience.dataforge.meta.transformations
+package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import kotlin.jvm.JvmInline

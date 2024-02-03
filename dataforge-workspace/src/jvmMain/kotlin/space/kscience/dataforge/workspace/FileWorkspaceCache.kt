@@ -1,5 +1,6 @@
 package space.kscience.dataforge.workspace
 
+import kotlinx.coroutines.flow.map
 import kotlinx.io.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -9,12 +10,10 @@ import kotlinx.serialization.serializer
 import space.kscience.dataforge.context.error
 import space.kscience.dataforge.context.logger
 import space.kscience.dataforge.context.request
-import space.kscience.dataforge.data.Data
-import space.kscience.dataforge.data.await
+import space.kscience.dataforge.data.*
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.DFInternal
-import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.withIndex
 import java.nio.file.Path
 import kotlin.io.path.deleteIfExists
@@ -22,7 +21,7 @@ import kotlin.io.path.div
 import kotlin.io.path.exists
 import kotlin.reflect.KType
 
-public class JsonIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
+public class JsonIOFormat<T>(private val type: KType) : IOFormat<T> {
 
     @Suppress("UNCHECKED_CAST")
     private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
@@ -35,7 +34,7 @@ public class JsonIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-public class ProtobufIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
+public class ProtobufIOFormat<T>(private val type: KType) : IOFormat<T> {
 
     @Suppress("UNCHECKED_CAST")
     private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
@@ -53,14 +52,14 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
     //    private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> = this as TaskData<T>
 
     @OptIn(DFExperimental::class, DFInternal::class)
-    override suspend fun <T : Any> evaluate(result: TaskResult<T>): TaskResult<T> {
+    override suspend fun <T> cache(result: TaskResult<T>): TaskResult<T> {
         val io = result.workspace.context.request(IOPlugin)
 
         val format: IOFormat<T> = io.resolveIOFormat(result.dataType, result.taskMeta)
             ?: ProtobufIOFormat(result.dataType)
             ?: error("Can't resolve IOFormat for ${result.dataType}")
 
-        fun evaluateDatum(data: TaskData<T>): TaskData<T> {
+        fun cacheOne(data: NamedData<T>): NamedData<T> {
 
             val path = cacheDirectory /
                     result.taskName.withIndex(result.taskMeta.hashCode().toString(16)).toString() /
@@ -92,15 +91,14 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
                 }
 
             }
-            return data.workspace.wrapData(datum, data.name, data.taskName, data.taskMeta)
+            return datum.named(data.name)
         }
 
-        return object : TaskResult<T> by result {
-            override fun iterator(): Iterator<TaskData<T>> =
-                result.iterator().asSequence().map { evaluateDatum(it) }.iterator()
 
-            override fun get(name: Name): TaskData<T>? = result[name]?.let { evaluateDatum(it) }
-        }
+        val cachedTree = result.asSequence().map { cacheOne(it) }
+            .toObservableTree(result.dataType, result.workspace, result.updates().map { cacheOne(it) })
+
+        return result.workspace.wrapResult(cachedTree, result.taskName, result.taskMeta)
     }
 }
 

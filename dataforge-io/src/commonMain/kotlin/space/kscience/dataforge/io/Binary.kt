@@ -71,6 +71,11 @@ internal class ByteArrayBinary(
 
     override fun view(offset: Int, binarySize: Int): ByteArrayBinary =
         ByteArrayBinary(array, start + offset, binarySize)
+
+    override fun toString(): String =
+        "ByteArrayBinary(array=$array, start=$start, size=$size)"
+
+
 }
 
 public fun ByteArray.asBinary(): Binary = ByteArrayBinary(this)

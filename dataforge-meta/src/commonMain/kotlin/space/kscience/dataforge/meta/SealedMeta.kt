@@ -101,17 +101,17 @@ internal class MetaBuilder(
     override fun hashCode(): Int = Meta.hashCode(this)
 }
 
-/**
- * Create a read-only meta.
- */
-public inline fun Meta(builder: MutableMeta.() -> Unit): Meta =
-    MetaBuilder().apply(builder).seal()
 
 /**
  * Create an immutable meta.
  */
 public inline fun SealedMeta(builder: MutableMeta.() -> Unit): SealedMeta =
     MetaBuilder().apply(builder).seal()
+
+/**
+ * Create a read-only meta.
+ */
+public inline fun Meta(builder: MutableMeta.() -> Unit): Meta = SealedMeta(builder)
 
 /**
  * Create an empty meta mutable meta.

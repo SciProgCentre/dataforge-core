@@ -1,7 +1,7 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import space.kscience.dataforge.actions.Action
@@ -10,13 +10,13 @@ import space.kscience.dataforge.actions.mapping
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.assertEquals
 
-@OptIn(DFExperimental::class, ExperimentalCoroutinesApi::class)
+@OptIn(DFExperimental::class)
 internal class ActionsTest {
     @Test
     fun testStaticMapAction() = runTest {
         val data: DataTree<Int> = DataTree {
             repeat(10) {
-                static(it.toString(), it)
+                wrap(it.toString(), it)
             }
         }
 
@@ -28,23 +28,26 @@ internal class ActionsTest {
     }
 
     @Test
-    fun testDynamicMapAction() = runTest {
-        val data: DataSourceBuilder<Int> = DataSource()
+    fun testDynamicMapAction() = runBlocking {
+        val source: MutableDataTree<Int> = MutableDataTree()
 
         val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
         }
 
-        val result = plusOne(data)
+        val result = plusOne(source)
+
 
         repeat(10) {
-            data.static(it.toString(), it)
+            source.wrap(it.toString(), it)
         }
 
-        delay(20)
+        delay(10)
+
+        source.close()
+        result.awaitClose()
 
         assertEquals(2, result["1"]?.await())
-        data.close()
     }
 
 }

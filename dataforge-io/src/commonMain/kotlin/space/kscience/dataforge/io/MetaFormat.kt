@@ -21,8 +21,6 @@ import kotlin.reflect.typeOf
  */
 public interface MetaFormat : IOFormat<Meta> {
 
-    override val type: KType get() = typeOf<Meta>()
-
     override fun writeTo(sink: Sink, obj: Meta) {
         writeMeta(sink, obj, null)
     }

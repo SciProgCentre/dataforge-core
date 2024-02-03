@@ -41,7 +41,7 @@ public interface Data<out T> : Goal<T>, MetaRepr {
          */
         internal val TYPE_OF_NOTHING: KType = typeOf<Unit>()
 
-        public inline fun <reified T : Any> static(
+        public inline fun <reified T> static(
             value: T,
             meta: Meta = Meta.EMPTY,
         ): Data<T> = StaticData(typeOf<T>(), value, meta)
@@ -69,39 +69,37 @@ public interface Data<out T> : Goal<T>, MetaRepr {
  * A lazily computed variant of [Data] based on [LazyGoal]
  * One must ensure that proper [type] is used so this method should not be used
  */
-private class LazyData<T : Any>(
+private class LazyData<T>(
     override val type: KType,
     override val meta: Meta = Meta.EMPTY,
     additionalContext: CoroutineContext = EmptyCoroutineContext,
-    dependencies: Collection<Goal<*>> = emptyList(),
+    dependencies: Iterable<Goal<*>> = emptyList(),
     block: suspend () -> T,
 ) : Data<T>, LazyGoal<T>(additionalContext, dependencies, block)
 
-public class StaticData<T : Any>(
+public class StaticData<T>(
     override val type: KType,
     value: T,
     override val meta: Meta = Meta.EMPTY,
 ) : Data<T>, StaticGoal<T>(value)
 
 @Suppress("FunctionName")
-public inline fun <reified T : Any> Data(value: T, meta: Meta = Meta.EMPTY): StaticData<T> =
+public inline fun <reified T> Data(value: T, meta: Meta = Meta.EMPTY): StaticData<T> =
     StaticData(typeOf<T>(), value, meta)
 
-@Suppress("FunctionName")
 @DFInternal
-public fun <T : Any> Data(
+public fun <T> Data(
     type: KType,
     meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
-    dependencies: Collection<Goal<*>> = emptyList(),
+    dependencies: Iterable<Goal<*>> = emptyList(),
     block: suspend () -> T,
 ): Data<T> = LazyData(type, meta, context, dependencies, block)
 
 @OptIn(DFInternal::class)
-@Suppress("FunctionName")
-public inline fun <reified T : Any> Data(
+public inline fun <reified T> Data(
     meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
-    dependencies: Collection<Goal<*>> = emptyList(),
+    dependencies: Iterable<Goal<*>> = emptyList(),
     noinline block: suspend () -> T,
 ): Data<T> = Data(typeOf<T>(), meta, context, dependencies, block)

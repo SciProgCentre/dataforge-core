@@ -1,18 +1,16 @@
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
-import space.kscience.dataforge.data.startAll
-import space.kscience.dataforge.data.static
+import space.kscience.dataforge.data.wrap
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.boolean
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalCoroutinesApi::class, DFExperimental::class)
+@OptIn(DFExperimental::class)
 internal class CachingWorkspaceTest {
 
     @Test
@@ -24,24 +22,23 @@ internal class CachingWorkspaceTest {
             data {
                 //statically initialize data
                 repeat(5) {
-                    static("myData[$it]", it)
+                    wrap("myData[$it]", it)
                 }
             }
 
             inMemoryCache()
 
             val doFirst by task<Any> {
-                pipeFrom(allData) { _, name, _ ->
+                transformEach(allData) { _, name, _ ->
                     firstCounter++
                     println("Done first on $name with flag=${taskMeta["flag"].boolean}")
                 }
             }
 
-            @Suppress("UNUSED_VARIABLE")
             val doSecond by task<Any> {
-                pipeFrom(
+                transformEach(
                     doFirst,
-                    dependencyMeta = if(taskMeta["flag"].boolean == true) taskMeta else Meta.EMPTY
+                    dependencyMeta = if (taskMeta["flag"].boolean == true) taskMeta else Meta.EMPTY
                 ) { _, name, _ ->
                     secondCounter++
                     println("Done second on $name with flag=${taskMeta["flag"].boolean ?: false}")
@@ -53,13 +50,15 @@ internal class CachingWorkspaceTest {
         val secondA = workspace.produce("doSecond")
         val secondB = workspace.produce("doSecond", Meta { "flag" put true })
         val secondC = workspace.produce("doSecond")
+        //use coroutineScope to wait for the result
         coroutineScope {
-            first.startAll(this)
-            secondA.startAll(this)
-            secondB.startAll(this)
+            first.launch(this)
+            secondA.launch(this)
+            secondB.launch(this)
             //repeat to check caching
-            secondC.startAll(this)
+            secondC.launch(this)
         }
+
         assertEquals(10, firstCounter)
         assertEquals(10, secondCounter)
     }

@@ -6,6 +6,3 @@ package space.kscience.dataforge.misc
 @MustBeDocumented
 @Target(AnnotationTarget.CLASS)
 public annotation class DfType(val id: String)
-
-@Deprecated("Replace with DfType", replaceWith = ReplaceWith("DfType"))
-public typealias DfId = DfType

@@ -1,5 +1,7 @@
 package space.kscience.dataforge.actions
 
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
@@ -19,46 +21,51 @@ internal fun MutableMap<Name, *>.removeWhatStartsWith(name: Name) {
 /**
  * An action that caches results on-demand and recalculates them on source push
  */
-public abstract class AbstractAction<in T : Any, R : Any>(
+public abstract class AbstractAction<T : Any, R : Any>(
     public val outputType: KType,
 ) : Action<T, R> {
 
     /**
      * Generate initial content of the output
      */
-    protected abstract fun DataSetBuilder<R>.generate(
-        data: DataSet<T>,
+    protected abstract fun DataSink<R>.generate(
+        data: DataTree<T>,
         meta: Meta,
     )
 
     /**
-     * Update part of the data set when given [updateKey] is triggered by the source
+     * Update part of the data set using provided data
+     *
+     * @param source the source data tree in case we need several data items to update
      */
-    protected open fun DataSourceBuilder<R>.update(
-        dataSet: DataSet<T>,
+    protected open fun DataSink<R>.update(
+        source: DataTree<T>,
         meta: Meta,
-        updateKey: Name,
-    ) {
-        // By default, recalculate the whole dataset
-        generate(dataSet, meta)
+        namedData: NamedData<T>,
+    ){
+        //by default regenerate the whole data set
+        generate(source,meta)
     }
 
     @OptIn(DFInternal::class)
     override fun execute(
-        dataSet: DataSet<T>,
+        dataSet: DataTree<T>,
         meta: Meta,
-    ): DataSet<R> = if (dataSet is DataSource) {
-        DataSource(outputType, dataSet){
+    ): DataTree<R> = if(dataSet.isObservable()) {
+        MutableDataTree<R>(outputType, dataSet.updatesScope).apply {
             generate(dataSet, meta)
+            dataSet.updates().onEach {
+                update(dataSet, meta, it)
+            }.launchIn(updatesScope)
 
-            launch {
-                dataSet.updates.collect { name ->
-                    update(dataSet, meta, name)
-                }
+            //close updates when the source is closed
+            updatesScope.launch {
+                dataSet.awaitClose()
+                close()
             }
         }
-    } else {
-        DataTree<R>(outputType) {
+    } else{
+        DataTree(outputType){
             generate(dataSet, meta)
         }
     }

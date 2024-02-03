@@ -49,7 +49,7 @@ internal class SplitAction<T : Any, R : Any>(
     private val action: SplitBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {
 
-    private fun DataSetBuilder<R>.splitOne(name: Name, data: Data<T>, meta: Meta) {
+    private fun DataSink<R>.splitOne(name: Name, data: Data<T>, meta: Meta) {
         val laminate = Laminate(data.meta, meta)
 
         val split = SplitBuilder<T, R>(name, data.meta).apply(action)
@@ -64,7 +64,7 @@ internal class SplitAction<T : Any, R : Any>(
             ).apply(rule)
             //data.map<R>(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
 
-            data(
+            put(
                 fragmentName,
                 @Suppress("OPT_IN_USAGE") Data(outputType, meta = env.meta, dependencies = listOf(data)) {
                     env.result(data.await())
@@ -73,13 +73,12 @@ internal class SplitAction<T : Any, R : Any>(
         }
     }
 
-    override fun DataSetBuilder<R>.generate(data: DataSet<T>, meta: Meta) {
+    override fun DataSink<R>.generate(data: DataTree<T>, meta: Meta) {
         data.forEach { splitOne(it.name, it.data, meta) }
     }
 
-    override fun DataSourceBuilder<R>.update(dataSet: DataSet<T>, meta: Meta, updateKey: Name) {
-        remove(updateKey)
-        dataSet[updateKey]?.let { splitOne(updateKey, it, meta) }
+    override fun DataSink<R>.update(source: DataTree<T>, meta: Meta, namedData: NamedData<T>) {
+        splitOne(namedData.name, namedData.data, namedData.meta)
     }
 }
 
