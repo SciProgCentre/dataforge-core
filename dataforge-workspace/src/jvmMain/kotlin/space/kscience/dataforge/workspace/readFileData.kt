@@ -1,7 +1,9 @@
 package space.kscience.dataforge.workspace
 
 import kotlinx.coroutines.*
-import space.kscience.dataforge.data.*
+import space.kscience.dataforge.data.Data
+import space.kscience.dataforge.data.DataSink
+import space.kscience.dataforge.data.StaticData
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.copy
@@ -19,11 +21,6 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.spi.FileSystemProvider
 import kotlin.io.path.*
 import kotlin.reflect.typeOf
-
-
-//public typealias FileFormatResolver<T> = (Path, Meta) -> IOFormat<T>
-
-public typealias FileFormatResolver<T> = (path: Path, meta: Meta) -> IOReader<T>?
 
 
 public object FileData {
@@ -116,7 +113,7 @@ public fun DataSink<Binary>.files(
         //Using explicit Zip file system to avoid bizarre compatibility bugs
         val fsProvider = FileSystemProvider.installedProviders().find { it.scheme == "jar" }
             ?: error("Zip file system provider not found")
-        val fs = fsProvider.newFileSystem(path, mapOf("create" to "true"))
+        val fs = fsProvider.newFileSystem(path, emptyMap<String, Any>())
 
         files(io, name, fs.rootDirectories.first())
     }
@@ -167,37 +164,6 @@ public fun DataSink<Binary>.monitorFiles(
             }
         } while (isActive && key != null)
     }
-
-}
-
-/**
- * Write the data tree to existing directory or create a new one using default [java.nio.file.FileSystem] provider
- *
- * @param nameToPath a [Name] to [Path] converter used to create
- */
-@DFExperimental
-public suspend fun <T : Any> IOPlugin.writeDataDirectory(
-    path: Path,
-    dataSet: DataTree<T>,
-    format: IOWriter<T>,
-    envelopeFormat: EnvelopeFormat? = null,
-): Unit = withContext(Dispatchers.IO) {
-    if (!Files.exists(path)) {
-        Files.createDirectories(path)
-    } else if (!Files.isDirectory(path)) {
-        error("Can't write a node into file")
-    }
-    dataSet.forEach { (name, data) ->
-        val childPath = path.resolve(name.tokens.joinToString("/") { token -> token.toStringUnescaped() })
-        childPath.parent.createDirectories()
-        val envelope = data.toEnvelope(format)
-        if (envelopeFormat != null) {
-            writeEnvelopeFile(childPath, envelope, envelopeFormat)
-        } else {
-            writeEnvelopeDirectory(childPath, envelope)
-        }
-    }
-    dataSet.meta?.let { writeMetaFile(path, it) }
 
 }
 
