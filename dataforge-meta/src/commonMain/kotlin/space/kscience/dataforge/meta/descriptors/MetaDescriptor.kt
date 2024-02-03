@@ -7,6 +7,7 @@ import space.kscience.dataforge.names.*
 /**
  * Restrictions on value in the node
  */
+@Serializable
 public enum class ValueRestriction {
     /**
      * No restrictions

@@ -11,6 +11,7 @@ kscience{
     dependencies {
         api(spclibs.atomicfu)
         api(projects.dataforgeMeta)
+        //Remove after subtype moved to stdlib
         api(kotlin("reflect"))
     }
 }

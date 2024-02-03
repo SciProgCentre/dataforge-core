@@ -249,10 +249,27 @@ public final class space/kscience/dataforge/context/SlfLogManager$Companion : sp
 	public fun getTag ()Lspace/kscience/dataforge/context/PluginTag;
 }
 
-public final class space/kscience/dataforge/properties/PropertyKt {
+public abstract interface annotation class space/kscience/dataforge/descriptors/Description : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
 }
 
-public final class space/kscience/dataforge/properties/SchemePropertyKt {
+public abstract interface annotation class space/kscience/dataforge/descriptors/DescriptorResource : java/lang/annotation/Annotation {
+	public abstract fun resourceName ()Ljava/lang/String;
+}
+
+public abstract interface annotation class space/kscience/dataforge/descriptors/DescriptorUrl : java/lang/annotation/Annotation {
+	public abstract fun url ()Ljava/lang/String;
+}
+
+public abstract interface annotation class space/kscience/dataforge/descriptors/Multiple : java/lang/annotation/Annotation {
+}
+
+public final class space/kscience/dataforge/descriptors/ReflectiveDescriptorsKt {
+	public static final fun forClass (Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor$Companion;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;
+	public static synthetic fun forClass$default (Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor$Companion;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;
+}
+
+public final class space/kscience/dataforge/properties/MetaAsFlowKt {
 }
 
 public final class space/kscience/dataforge/provider/DfTypeKt {

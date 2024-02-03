@@ -3,26 +3,41 @@
 ## Unreleased
 
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## 0.8.0 - 2024-02-03
+
+### Added
+
 - Wasm artifacts
 - Add automatic MetaConverter for serializeable objects
 - Add Meta and MutableMeta delegates for convertable and serializeable
 - Meta mapping for data.
 
 ### Changed
+
 - Descriptor `children` renamed to `nodes`
 - `MetaConverter` now inherits `MetaSpec` (former `Specifiction`). So `MetaConverter` could be used more universally.
 - Meta copy and modification now use lightweight non-observable meta builders.
+- Full refactor of Data API. DataTree now works similar to Meta: contains optional anonymous root element and data items. Updates are available for `ObservaleDataSource` and `ObservableDataTree` variants.
 
 ### Deprecated
+
 - `node(key,converter)` in favor of `serializable` delegate
 
-### Removed
-
 ### Fixed
+
 - Partially fixed a bug with `MutableMeta` observable wrappers.
 - `valueSequence` now include root value. So `meta.update` works properly.
-
-### Security
 
 ## 0.7.0 - 2023-11-26
 
