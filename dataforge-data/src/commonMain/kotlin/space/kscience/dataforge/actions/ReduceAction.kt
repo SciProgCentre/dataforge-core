@@ -103,7 +103,7 @@ internal class ReduceAction<T : Any, R : Any>(
                 meta = groupMeta
             ) { group.result.invoke(env, it) }
 
-            data(env.name, res)
+            put(env.name, res)
         }
     }
 }

@@ -3,7 +3,7 @@ package space.kscience.dataforge.workspace
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
-import space.kscience.dataforge.data.static
+import space.kscience.dataforge.data.wrap
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
 
@@ -16,7 +16,7 @@ class FileWorkspaceCacheTest {
             data {
                 //statically initialize data
                 repeat(5) {
-                    static("myData[$it]", it)
+                    wrap("myData[$it]", it)
                 }
             }
             fileCache(Files.createTempDirectory("dataforge-temporary-cache"))
@@ -26,7 +26,7 @@ class FileWorkspaceCacheTest {
             }
         }
 
-        workspace.produce("echo").compute(this)
+        workspace.produce("echo").launch(this)
 
     }
 }

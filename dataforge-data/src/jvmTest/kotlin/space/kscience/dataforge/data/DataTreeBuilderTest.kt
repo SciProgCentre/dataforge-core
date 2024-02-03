@@ -1,6 +1,8 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.asName
 import kotlin.test.Test
@@ -9,26 +11,25 @@ import kotlin.test.assertEquals
 
 internal class DataTreeBuilderTest {
     @Test
-    fun testTreeBuild() = runBlocking {
+    fun testTreeBuild() = runTest {
         val node = DataTree<Any> {
             "primary" put {
-                static("a", "a")
-                static("b", "b")
+                wrap("a", "a")
+                wrap("b", "b")
             }
-            static("c.d", "c.d")
-            static("c.f", "c.f")
+            wrap("c.d", "c.d")
+            wrap("c.f", "c.f")
         }
-        runBlocking {
-            assertEquals("a", node["primary.a"]?.await())
-            assertEquals("b", node["primary.b"]?.await())
-            assertEquals("c.d", node["c.d"]?.await())
-            assertEquals("c.f", node["c.f"]?.await())
-        }
+        assertEquals("a", node["primary.a"]?.await())
+        assertEquals("b", node["primary.b"]?.await())
+        assertEquals("c.d", node["c.d"]?.await())
+        assertEquals("c.f", node["c.f"]?.await())
+
     }
 
     @OptIn(DFExperimental::class)
     @Test
-    fun testDataUpdate() = runBlocking {
+    fun testDataUpdate() = runTest {
         val updateData = DataTree<Any> {
             "update" put {
                 "a" put Data.static("a")
@@ -38,54 +39,30 @@ internal class DataTreeBuilderTest {
 
         val node = DataTree<Any> {
             "primary" put {
-                static("a", "a")
-                static("b", "b")
+                wrap("a", "a")
+                wrap("b", "b")
             }
-            static("root", "root")
-            populateFrom(updateData)
+            wrap("root", "root")
+            putAll(updateData)
         }
 
-        runBlocking {
-            assertEquals("a", node["update.a"]?.await())
-            assertEquals("a", node["primary.a"]?.await())
-        }
+        assertEquals("a", node["update.a"]?.await())
+        assertEquals("a", node["primary.a"]?.await())
     }
 
     @Test
     fun testDynamicUpdates() = runBlocking {
-        try {
-            lateinit var updateJob: Job
-            supervisorScope {
-                val subNode = ObservableDataTree<Int>(this) {
-                    updateJob = launch {
-                        repeat(10) {
-                            delay(10)
-                            static("value", it)
-                        }
-                        delay(10)
-                    }
-                }
-                launch {
-                    subNode.updates().collect {
-                        println(it)
-                    }
-                }
-                val rootNode = ObservableDataTree<Int>(this) {
-                    setAndWatch("sub".asName(), subNode)
-                }
+        val subNode = MutableDataTree<Int>()
 
-                launch {
-                    rootNode.updates().collect {
-                        println(it)
-                    }
-                }
-                updateJob.join()
-                assertEquals(9, rootNode["sub.value"]?.await())
-                cancel()
-            }
-        } catch (t: Throwable) {
-            if (t !is CancellationException) throw t
+        val rootNode = MutableDataTree<Int> {
+            watchBranch("sub".asName(), subNode)
         }
 
+        repeat(10) {
+            subNode.wrap("value[$it]", it)
+        }
+
+        delay(20)
+        assertEquals(9, rootNode["sub.value[9]"]?.await())
     }
 }

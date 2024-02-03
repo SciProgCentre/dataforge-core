@@ -62,14 +62,14 @@ internal class SimpleWorkspaceTest {
         data {
             //statically initialize data
             repeat(100) {
-                static("myData[$it]", it)
+                wrap("myData[$it]", it)
             }
         }
 
         val filterOne by task<Int> {
             val name by taskMeta.string { error("Name field not defined") }
             from(testPluginFactory) { test }[name]?.let { source: Data<Int> ->
-                data(name, source)
+                put(name, source)
             }
         }
 
@@ -97,7 +97,7 @@ internal class SimpleWorkspaceTest {
                 val newData: Data<Int> = data.combine(linearData[data.name]!!) { l, r ->
                     l + r
                 }
-                data(data.name, newData)
+                put(data.name, newData)
             }
         }
 
@@ -106,7 +106,7 @@ internal class SimpleWorkspaceTest {
             val res = from(square).foldToData(0) { l, r ->
                 l + r.value
             }
-            data("sum", res)
+            put("sum", res)
         }
 
         val averageByGroup by task<Int> {
@@ -116,13 +116,13 @@ internal class SimpleWorkspaceTest {
                 l + r.value
             }
 
-            data("even", evenSum)
+            put("even", evenSum)
             val oddSum = workspace.data.filterByType<Int> { name, _, _ ->
                 name.toString().toInt() % 2 == 1
             }.foldToData(0) { l, r ->
                 l + r.value
             }
-            data("odd", oddSum)
+            put("odd", oddSum)
         }
 
         val delta by task<Int> {
@@ -132,7 +132,7 @@ internal class SimpleWorkspaceTest {
             val res = even.combine(odd) { l, r ->
                 l - r
             }
-            data("res", res)
+            put("res", res)
         }
 
         val customPipe by task<Int> {
@@ -140,7 +140,7 @@ internal class SimpleWorkspaceTest {
                 val meta = data.meta.toMutableMeta().apply {
                     "newValue" put 22
                 }
-                data(data.name + "new", data.transform { (data.meta["value"].int ?: 0) + it })
+                put(data.name + "new", data.transform { (data.meta["value"].int ?: 0) + it })
             }
         }
 

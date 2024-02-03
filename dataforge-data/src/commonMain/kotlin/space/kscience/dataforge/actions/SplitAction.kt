@@ -64,7 +64,7 @@ internal class SplitAction<T : Any, R : Any>(
             ).apply(rule)
             //data.map<R>(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
 
-            data(
+            put(
                 fragmentName,
                 @Suppress("OPT_IN_USAGE") Data(outputType, meta = env.meta, dependencies = listOf(data)) {
                     env.result(data.await())
@@ -77,7 +77,7 @@ internal class SplitAction<T : Any, R : Any>(
         data.forEach { splitOne(it.name, it.data, meta) }
     }
 
-    override fun DataSink<R>.update(allData: DataTree<T>, meta: Meta, namedData: NamedData<T>) {
+    override fun DataSink<R>.update(source: DataTree<T>, meta: Meta, namedData: NamedData<T>) {
         splitOne(namedData.name, namedData.data, namedData.meta)
     }
 }

@@ -12,16 +12,12 @@ import space.kscience.dataforge.names.isEmpty
 import space.kscience.dataforge.names.plus
 
 
-public fun <T> DataSink<T>.data(value: NamedData<T>) {
-    data(value.name, value.data)
-}
-
-public fun <T> DataSink<T>.emitAll(sequence: Sequence<NamedData<T>>) {
-    sequence.forEach { data(it) }
+public fun <T> DataSink<T>.put(value: NamedData<T>) {
+    put(value.name, value.data)
 }
 
 public fun <T> DataSink<T>.branch(dataTree: DataTree<T>) {
-    emitAll(dataTree.asSequence())
+    putAll(dataTree.asSequence())
 }
 
 public inline fun <T> DataSink<T>.branch(
@@ -32,7 +28,7 @@ public inline fun <T> DataSink<T>.branch(
         apply(block)
     } else {
         val proxyDataSink = DataSink { nameWithoutPrefix, data ->
-            this.data(prefix + nameWithoutPrefix, data)
+            this.put(prefix + nameWithoutPrefix, data)
         }
 
         proxyDataSink.apply(block)
@@ -45,69 +41,69 @@ public inline fun <T> DataSink<T>.branch(
 ): Unit = branch(prefix.asName(), block)
 
 
-public fun <T> DataSink<T>.data(name: String, value: Data<T>) {
-    data(Name.parse(name), value)
+public fun <T> DataSink<T>.put(name: String, value: Data<T>) {
+    put(Name.parse(name), value)
 }
 
 public fun <T> DataSink<T>.branch(name: Name, set: DataTree<T>) {
-    branch(name) { emitAll(set.asSequence()) }
+    branch(name) { putAll(set.asSequence()) }
 }
 
 public fun <T> DataSink<T>.branch(name: String, set: DataTree<T>) {
-    branch(Name.parse(name)) { emitAll(set.asSequence()) }
+    branch(Name.parse(name)) { putAll(set.asSequence()) }
 }
 
 /**
  * Produce lazy [Data] and emit it into the [MutableDataTree]
  */
-public inline fun <reified T> DataSink<T>.data(
+public inline fun <reified T> DataSink<T>.put(
     name: String,
     meta: Meta = Meta.EMPTY,
     noinline producer: suspend () -> T,
 ) {
     val data = Data(meta, block = producer)
-    data(name, data)
+    put(name, data)
 }
 
-public inline fun <reified T> DataSink<T>.data(
+public inline fun <reified T> DataSink<T>.put(
     name: Name,
     meta: Meta = Meta.EMPTY,
     noinline producer: suspend () -> T,
 ) {
     val data = Data(meta, block = producer)
-    data(name, data)
+    put(name, data)
 }
 
 /**
  * Emit static data with the fixed value
  */
-public inline fun <reified T> DataSink<T>.static(
+public inline fun <reified T> DataSink<T>.wrap(
     name: String,
     data: T,
     meta: Meta = Meta.EMPTY,
-): Unit = data(name, Data.static(data, meta))
+): Unit = put(name, Data.static(data, meta))
 
-public inline fun <reified T> DataSink<T>.static(
+public inline fun <reified T> DataSink<T>.wrap(
     name: Name,
     data: T,
     meta: Meta = Meta.EMPTY,
-): Unit = data(name, Data.static(data, meta))
+): Unit = put(name, Data.static(data, meta))
 
-public inline fun <reified T> DataSink<T>.static(
+public inline fun <reified T> DataSink<T>.wrap(
     name: String,
     data: T,
     mutableMeta: MutableMeta.() -> Unit,
-): Unit = data(Name.parse(name), Data.static(data, Meta(mutableMeta)))
+): Unit = put(Name.parse(name), Data.static(data, Meta(mutableMeta)))
 
 
-public fun <T> DataSink<T>.populateFrom(sequence: Sequence<NamedData<T>>) {
+public fun <T> DataSink<T>.putAll(sequence: Sequence<NamedData<T>>) {
     sequence.forEach {
-        data(it.name, it.data)
+        put(it.name, it.data)
     }
 }
 
-public fun <T> DataSink<T>.populateFrom(tree: DataTree<T>) {
-    populateFrom(tree.asSequence())
+public fun <T> DataSink<T>.putAll(tree: DataTree<T>) {
+    this.putAll(tree.asSequence())
 }
 
 
@@ -115,13 +111,22 @@ public fun <T> DataSink<T>.populateFrom(tree: DataTree<T>) {
  * Update data with given node data and meta with node meta.
  */
 @DFExperimental
-public fun <T> MutableDataTree<T>.populateFrom(flow: ObservableDataSource<T>): Job = flow.updates().onEach {
-    //TODO check if the place is occupied
-    data(it.name, it.data)
-}.launchIn(scope)
+public fun <T> MutableDataTree<T>.putAll(source: DataTree<T>) {
+    source.forEach {
+        put(it.name, it.data)
+    }
+}
 
-//public fun <T > DataSetBuilder<T>.populateFrom(flow: Flow<NamedData<T>>) {
-//    flow.collect {
-//        data(it.name, it.data)
-//    }
-//}
+/**
+ * Copy given data set and mirror its changes to this [DataSink] in [this@setAndObserve]. Returns an update [Job]
+ */
+public fun <T : Any> DataSink<T>.watchBranch(
+    name: Name,
+    dataSet: ObservableDataTree<T>,
+): Job {
+    branch(name, dataSet)
+    return dataSet.updates().onEach {
+        put(name + it.name, it.data)
+    }.launchIn(dataSet.updatesScope)
+
+}

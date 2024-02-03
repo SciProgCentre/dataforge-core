@@ -88,12 +88,17 @@ public fun <T : Any> Task(
         workspace: Workspace,
         taskName: Name,
         taskMeta: Meta,
-    ): TaskResult<T> = withContext(GoalExecutionRestriction() + workspace.goalLogger) {
+    ): TaskResult<T> {
         //TODO use safe builder and check for external data on add and detects cycles
-        val dataset = MutableDataTree<T>(resultType, this).apply {
-            TaskResultBuilder(workspace, taskName, taskMeta, this).apply { builder() }
+        val dataset = MutableDataTree<T>(resultType, workspace.context).apply {
+            TaskResultBuilder(workspace, taskName, taskMeta, this).apply {
+                withContext(GoalExecutionRestriction() + workspace.goalLogger) {
+                    builder()
+                }
+            }
         }
-        workspace.wrapResult(dataset, taskName, taskMeta)
+        return workspace.wrapResult(dataset, taskName, taskMeta)
+
     }
 }
 

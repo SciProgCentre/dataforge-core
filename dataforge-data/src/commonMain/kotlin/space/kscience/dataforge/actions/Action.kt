@@ -1,9 +1,6 @@
 package space.kscience.dataforge.actions
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 import space.kscience.dataforge.data.DataTree
-import space.kscience.dataforge.data.ObservableDataTree
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
 
@@ -16,7 +13,7 @@ public fun interface Action<T, R> {
      * Transform the data in the node, producing a new node. By default, it is assumed that all calculations are lazy
      * so not actual computation is started at this moment.
      */
-    public fun execute(scope: CoroutineScope, dataSet: DataTree<T>, meta: Meta): ObservableDataTree<R>
+    public fun execute(dataSet: DataTree<T>, meta: Meta): DataTree<R>
 
     public companion object
 }
@@ -26,20 +23,21 @@ public fun interface Action<T, R> {
  */
 public fun <T, R> DataTree<T>.transform(
     action: Action<T, R>,
-    scope: CoroutineScope,
     meta: Meta = Meta.EMPTY,
-): DataTree<R> = action.execute(scope, this, meta)
+): DataTree<R> = action.execute(this, meta)
 
 /**
  * Action composition. The result is terminal if one of its parts is terminal
  */
-public infix fun <T , I, R> Action<T, I>.then(action: Action<I, R>): Action<T, R> =
-    Action { scope, dataSet, meta -> action.execute(scope, this@then.execute(scope, dataSet, meta), meta) }
+public infix fun <T, I, R> Action<T, I>.then(action: Action<I, R>): Action<T, R> = Action { dataSet, meta ->
+    action.execute(this@then.execute(dataSet, meta), meta)
+}
 
 @DFExperimental
-public suspend operator fun <T, R> Action<T, R>.invoke(
+public operator fun <T, R> Action<T, R>.invoke(
     dataSet: DataTree<T>,
     meta: Meta = Meta.EMPTY,
-): DataTree<R> = coroutineScope { execute(this, dataSet, meta) }
+): DataTree<R> = execute(dataSet, meta)
+
 
 

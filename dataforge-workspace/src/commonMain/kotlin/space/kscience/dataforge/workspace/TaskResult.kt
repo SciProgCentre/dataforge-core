@@ -2,6 +2,7 @@ package space.kscience.dataforge.workspace
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.ObservableDataTree
 import space.kscience.dataforge.data.asSequence
@@ -20,7 +21,7 @@ public data class TaskResult<T>(
     public val workspace: Workspace,
     public val taskName: Name,
     public val taskMeta: Meta,
-): ObservableDataTree<T> by content
+) : ObservableDataTree<T> by content
 
 /**
  * Wrap data into [TaskResult]
@@ -32,8 +33,9 @@ public fun <T> Workspace.wrapResult(data: ObservableDataTree<T>, taskName: Name,
  * Start computation for all data elements of this node.
  * The resulting [Job] is completed only when all of them are completed.
  */
-public fun TaskResult<*>.compute(scope: CoroutineScope): Job = scope.launch {
-    asSequence().forEach {
+public fun TaskResult<*>.launch(scope: CoroutineScope): Job {
+    val jobs = asSequence().map {
         it.data.launch(scope)
-    }
+    }.toList()
+    return scope.launch { jobs.joinAll() }
 }

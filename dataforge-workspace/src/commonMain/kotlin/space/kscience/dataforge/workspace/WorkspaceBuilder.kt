@@ -102,7 +102,7 @@ public inline fun <T : Any, reified R : Any> TaskContainer.action(
     noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<R>>> =
     task(MetaDescriptor(descriptorBuilder)) {
-        result(action.execute(workspace.context, from(selector), taskMeta.copy(metaTransform)))
+        result(action.execute(from(selector), taskMeta.copy(metaTransform)))
     }
 
 public class WorkspaceBuilder(

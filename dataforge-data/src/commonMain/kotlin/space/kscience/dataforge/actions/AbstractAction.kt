@@ -1,9 +1,11 @@
 package space.kscience.dataforge.actions
 
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.startsWith
 import kotlin.reflect.KType
@@ -33,26 +35,38 @@ public abstract class AbstractAction<T : Any, R : Any>(
 
     /**
      * Update part of the data set using provided data
+     *
+     * @param source the source data tree in case we need several data items to update
      */
     protected open fun DataSink<R>.update(
-        allData: DataTree<T>,
+        source: DataTree<T>,
         meta: Meta,
         namedData: NamedData<T>,
     ){
         //by default regenerate the whole data set
-        generate(allData,meta)
+        generate(source,meta)
     }
 
+    @OptIn(DFInternal::class)
     override fun execute(
-        scope: CoroutineScope,
         dataSet: DataTree<T>,
         meta: Meta,
-    ): ObservableDataTree<R> = MutableDataTree<R>(outputType, scope).apply {
-        generate(dataSet, meta)
-        scope.launch {
-            dataSet.updates().collect {
+    ): DataTree<R> = if(dataSet.isObservable()) {
+        MutableDataTree<R>(outputType, dataSet.updatesScope).apply {
+            generate(dataSet, meta)
+            dataSet.updates().onEach {
                 update(dataSet, meta, it)
+            }.launchIn(updatesScope)
+
+            //close updates when the source is closed
+            updatesScope.launch {
+                dataSet.awaitClose()
+                close()
             }
+        }
+    } else{
+        DataTree(outputType){
+            generate(dataSet, meta)
         }
     }
 }

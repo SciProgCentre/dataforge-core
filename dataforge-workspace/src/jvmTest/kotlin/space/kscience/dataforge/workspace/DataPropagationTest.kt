@@ -20,13 +20,13 @@ class DataPropagationTestPlugin : WorkspacePlugin() {
         val result: Data<Int> = selectedData.foldToData(0) { result, data ->
             result + data.value
         }
-        data("result", result)
+        put("result", result)
     }
 
 
     val singleData by task<Int> {
         workspace.data.filterByType<Int>()["myData[12]"]?.let {
-            data("result", it)
+            put("result", it)
         }
     }
 
@@ -47,7 +47,7 @@ class DataPropagationTest {
         }
         data {
             repeat(100) {
-                static("myData[$it]", it)
+                wrap("myData[$it]", it)
             }
         }
     }

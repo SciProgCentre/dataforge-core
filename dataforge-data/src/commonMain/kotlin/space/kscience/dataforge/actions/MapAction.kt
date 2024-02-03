@@ -79,14 +79,14 @@ internal class MapAction<T : Any, R : Any>(
             builder.result(env, data.await())
         }
         //setting the data node
-        data(newName, newData)
+        put(newName, newData)
     }
 
     override fun DataSink<R>.generate(data: DataTree<T>, meta: Meta) {
         data.forEach { mapOne(it.name, it.data, meta) }
     }
 
-    override fun DataSink<R>.update(allData: DataTree<T>, meta: Meta, namedData: NamedData<T>) {
+    override fun DataSink<R>.update(source: DataTree<T>, meta: Meta, namedData: NamedData<T>) {
         mapOne(namedData.name, namedData.data, namedData.meta)
     }
 }

@@ -11,7 +11,6 @@ import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
-import space.kscience.dataforge.workspace.FileData.defaultPathToName
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
@@ -36,20 +35,6 @@ public object FileData {
     public const val DF_FILE_EXTENSION: String = "df"
     public val DEFAULT_IGNORE_EXTENSIONS: Set<String> = setOf(DF_FILE_EXTENSION)
 
-    /**
-     * Transform file name into DataForg name. Ignores DataForge file extensions.
-     */
-    public val defaultPathToName: (Path) -> Name = { path ->
-        Name(
-            path.map { segment ->
-                if (segment.isRegularFile() && segment.extension in DEFAULT_IGNORE_EXTENSIONS) {
-                    NameToken(path.nameWithoutExtension)
-                } else {
-                    NameToken(path.name)
-                }
-            }
-        )
-    }
 }
 
 
@@ -77,51 +62,68 @@ public fun IOPlugin.readFileData(
     )
 }
 
-public fun DataSink<Binary>.file(io: IOPlugin, path: Path, name: Name) {
+public fun DataSink<Binary>.file(io: IOPlugin, name: Name, path: Path) {
     if (!path.isRegularFile()) error("Only regular files could be handled by this function")
-    data(name, io.readFileData(path))
+    put(name, io.readFileData(path))
 }
 
 public fun DataSink<Binary>.directory(
     io: IOPlugin,
+    name: Name,
     path: Path,
-    pathToName: (Path) -> Name = defaultPathToName,
 ) {
     if (!path.isDirectory()) error("Only directories could be handled by this function")
-    val metaFile = path.resolve(IOPlugin.META_FILE_NAME)
-    val dataFile = path.resolve(IOPlugin.DATA_FILE_NAME)
     //process root data
-    if (metaFile.exists() || dataFile.exists()) {
-        data(
-            Name.EMPTY,
+
+    var dataBinary: Binary? = null
+    var meta: Meta? = null
+    Files.list(path).forEach { childPath ->
+        val fileName = childPath.fileName.toString()
+        if (fileName == IOPlugin.DATA_FILE_NAME) {
+            dataBinary = childPath.asBinary()
+        } else if (fileName.startsWith(IOPlugin.META_FILE_NAME)) {
+            meta = io.readMetaFileOrNull(childPath)
+        } else if (!fileName.startsWith("@")) {
+            val token = if (childPath.isRegularFile() && childPath.extension in FileData.DEFAULT_IGNORE_EXTENSIONS) {
+                NameToken(childPath.nameWithoutExtension)
+            } else {
+                NameToken(childPath.name)
+            }
+
+            files(io, name + token, childPath)
+        }
+    }
+
+    //set data if it is relevant
+    if (dataBinary != null || meta != null) {
+        put(
+            name,
             StaticData(
                 typeOf<Binary>(),
-                dataFile.takeIf { it.exists() }?.asBinary() ?: Binary.EMPTY,
-                io.readMetaFileOrNull(metaFile) ?: Meta.EMPTY
+                dataBinary ?: Binary.EMPTY,
+                meta ?: Meta.EMPTY
             )
         )
     }
-    Files.list(path).forEach { childPath ->
-        val fileName = childPath.fileName.toString()
-        if (!fileName.startsWith("@")) {
-            files(io, childPath, pathToName)
-        }
-    }
 }
 
-public fun DataSink<Binary>.files(io: IOPlugin, path: Path, pathToName: (Path) -> Name = defaultPathToName) {
+public fun DataSink<Binary>.files(
+    io: IOPlugin,
+    name: Name,
+    path: Path,
+) {
     if (path.isRegularFile() && path.extension == "zip") {
         //Using explicit Zip file system to avoid bizarre compatibility bugs
         val fsProvider = FileSystemProvider.installedProviders().find { it.scheme == "jar" }
             ?: error("Zip file system provider not found")
         val fs = fsProvider.newFileSystem(path, mapOf("create" to "true"))
 
-        return files(io, fs.rootDirectories.first(), pathToName)
+        files(io, name, fs.rootDirectories.first())
     }
     if (path.isRegularFile()) {
-        file(io, path, pathToName(path))
+        file(io, name, path)
     } else {
-        directory(io, path, pathToName)
+        directory(io, name, path)
     }
 }
 
@@ -132,11 +134,11 @@ private fun Path.toName() = Name(map { NameToken.parse(it.nameWithoutExtension) 
 @DFExperimental
 public fun DataSink<Binary>.monitorFiles(
     io: IOPlugin,
+    name: Name,
     path: Path,
-    pathToName: (Path) -> Name = defaultPathToName,
     scope: CoroutineScope = io.context,
 ): Job {
-    files(io, path, pathToName)
+    files(io, name, path)
     return scope.launch(Dispatchers.IO) {
         val watchService = path.fileSystem.newWatchService()
 
@@ -153,11 +155,11 @@ public fun DataSink<Binary>.monitorFiles(
                 for (event: WatchEvent<*> in key.pollEvents()) {
                     val eventPath = event.context() as Path
                     if (event.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
-                        data(eventPath.toName(), null)
+                        put(eventPath.toName(), null)
                     } else {
                         val fileName = eventPath.fileName.toString()
                         if (!fileName.startsWith("@")) {
-                            files(io, eventPath, pathToName)
+                            files(io, name, eventPath)
                         }
                     }
                 }
@@ -179,29 +181,24 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
     dataSet: DataTree<T>,
     format: IOWriter<T>,
     envelopeFormat: EnvelopeFormat? = null,
-    nameToPath: (name: Name, data: Data<T>) -> Path = { name, _ ->
-        Path(name.tokens.joinToString("/") { token -> token.toStringUnescaped() })
-    },
-) {
-    withContext(Dispatchers.IO) {
-        if (!Files.exists(path)) {
-            Files.createDirectories(path)
-        } else if (!Files.isDirectory(path)) {
-            error("Can't write a node into file")
-        }
-        dataSet.forEach { (name, data) ->
-            val childPath = path.resolve(nameToPath(name, data))
-            childPath.parent.createDirectories()
-            val envelope = data.toEnvelope(format)
-            if (envelopeFormat != null) {
-                writeEnvelopeFile(childPath, envelope, envelopeFormat)
-            } else {
-                writeEnvelopeDirectory(childPath, envelope)
-            }
-        }
-        dataSet.meta?.let { writeMetaFile(path, it) }
-
+): Unit = withContext(Dispatchers.IO) {
+    if (!Files.exists(path)) {
+        Files.createDirectories(path)
+    } else if (!Files.isDirectory(path)) {
+        error("Can't write a node into file")
     }
+    dataSet.forEach { (name, data) ->
+        val childPath = path.resolve(name.tokens.joinToString("/") { token -> token.toStringUnescaped() })
+        childPath.parent.createDirectories()
+        val envelope = data.toEnvelope(format)
+        if (envelopeFormat != null) {
+            writeEnvelopeFile(childPath, envelope, envelopeFormat)
+        } else {
+            writeEnvelopeDirectory(childPath, envelope)
+        }
+    }
+    dataSet.meta?.let { writeMetaFile(path, it) }
+
 }
 
 /**
@@ -212,15 +209,12 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
 public fun DataSink<Binary>.resources(
     io: IOPlugin,
     vararg resources: String,
-    pathToName: (Path) -> Name = defaultPathToName,
     classLoader: ClassLoader = Thread.currentThread().contextClassLoader,
 ) {
     resources.forEach { resource ->
         val path = classLoader.getResource(resource)?.toURI()?.toPath() ?: error(
             "Resource with name $resource is not resolved"
         )
-        branch(resource.asName()) {
-            files(io, path, pathToName)
-        }
+        files(io, resource.asName(), path)
     }
 }

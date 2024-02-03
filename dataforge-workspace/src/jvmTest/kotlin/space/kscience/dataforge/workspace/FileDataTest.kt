@@ -1,6 +1,5 @@
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.Sink
 import kotlinx.io.Source
@@ -13,7 +12,9 @@ import space.kscience.dataforge.io.*
 import space.kscience.dataforge.io.yaml.YamlPlugin
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.names.Name
 import java.nio.file.Files
+import kotlin.io.path.deleteExisting
 import kotlin.io.path.fileSize
 import kotlin.io.path.toPath
 import kotlin.test.Test
@@ -23,11 +24,11 @@ import kotlin.test.assertEquals
 class FileDataTest {
     val dataNode = DataTree<String> {
         branch("dir") {
-            static("a", "Some string") {
+            wrap("a", "Some string") {
                 "content" put "Some string"
             }
         }
-        static("b", "root data")
+        wrap("b", "root data")
 //        meta {
 //            "content" put "This is root meta node"
 //        }
@@ -45,17 +46,17 @@ class FileDataTest {
 
     @Test
     @DFExperimental
-    fun testDataWriteRead() = with(Global.io) {
+    fun testDataWriteRead() = runTest {
         val io = Global.io
         val dir = Files.createTempDirectory("df_data_node")
-        runBlocking {
-            writeDataDirectory(dir, dataNode, StringIOFormat)
-            println(dir.toUri().toString())
-            val reconstructed = DataTree { files(io, dir) }
-                .transform { (_, value) -> value.toByteArray().decodeToString() }
-            assertEquals(dataNode["dir.a"]?.meta?.get("content"), reconstructed["dir.a"]?.meta?.get("content"))
-            assertEquals(dataNode["b"]?.await(), reconstructed["b"]?.await())
+        io.writeDataDirectory(dir, dataNode, StringIOFormat)
+        println(dir.toUri().toString())
+        val data = DataTree {
+            files(io, Name.EMPTY, dir)
         }
+        val reconstructed = data.transform { (_, value) -> value.toByteArray().decodeToString() }
+        assertEquals(dataNode["dir.a"]?.meta?.get("content"), reconstructed["dir.a"]?.meta?.get("content"))
+        assertEquals(dataNode["b"]?.await(), reconstructed["b"]?.await())
     }
 
 
@@ -64,9 +65,10 @@ class FileDataTest {
     fun testZipWriteRead() = runTest {
         val io = Global.io
         val zip = Files.createTempFile("df_data_node", ".zip")
-        dataNode.writeZip(zip, StringIOFormat)
+        zip.deleteExisting()
+        io.writeZip(zip, dataNode, StringIOFormat)
         println(zip.toUri().toString())
-        val reconstructed = DataTree { files(io, zip) }
+        val reconstructed = DataTree { files(io, Name.EMPTY, zip) }
             .transform { (_, value) -> value.toByteArray().decodeToString() }
         assertEquals(dataNode["dir.a"]?.meta?.get("content"), reconstructed["dir.a"]?.meta?.get("content"))
         assertEquals(dataNode["b"]?.await(), reconstructed["b"]?.await())

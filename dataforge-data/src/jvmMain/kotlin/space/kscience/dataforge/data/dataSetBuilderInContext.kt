@@ -1,10 +1,6 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.plus
 
 
 /**
@@ -12,7 +8,7 @@ import space.kscience.dataforge.names.plus
  */
 context(DataSink<T>)
 public infix fun <T : Any> String.put(data: Data<T>): Unit =
-    data(Name.parse(this), data)
+    put(Name.parse(this), data)
 
 /**
  * Append node
@@ -29,16 +25,3 @@ public infix fun <T : Any> String.put(
     block: DataSink<T>.() -> Unit,
 ): Unit = branch(Name.parse(this), block)
 
-/**
- * Copy given data set and mirror its changes to this [LegacyDataTreeBuilder] in [this@setAndObserve]. Returns an update [Job]
- */
-context(DataSink<T>)
-public fun <T : Any> CoroutineScope.setAndWatch(
-    name: Name,
-    dataSet: DataTree<T>,
-): Job = launch {
-    branch(name, dataSet)
-    dataSet.updates().collect {
-        data(name + it.name, it.data)
-    }
-}

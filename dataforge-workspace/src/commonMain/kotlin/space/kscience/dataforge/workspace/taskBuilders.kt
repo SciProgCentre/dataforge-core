@@ -93,7 +93,7 @@ public suspend inline fun <T, reified R> TaskResultBuilder<R>.transformEach(
             action(it, data.name, meta)
         }
 
-        data(data.name, res)
+        put(data.name, res)
     }
 }
 
@@ -113,7 +113,7 @@ public suspend inline fun <T, reified R> TaskResultBuilder<R>.actionFrom(
     action: Action<T, R>,
     dependencyMeta: Meta = defaultDependencyMeta,
 ) {
-    branch(action.execute(workspace.context, from(selector, dependencyMeta), dependencyMeta))
+    branch(action.execute(from(selector, dependencyMeta), dependencyMeta))
 }
 
 

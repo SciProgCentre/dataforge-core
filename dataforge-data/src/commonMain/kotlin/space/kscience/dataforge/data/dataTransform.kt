@@ -194,7 +194,7 @@ public suspend fun <T, R> DataTree<T>.transform(
         val d = Data(outputType, newMeta, coroutineContext, listOf(namedData)) {
             block(namedData.awaitWithMeta())
         }
-        data(namedData.name, d)
+        put(namedData.name, d)
     }
 }
 

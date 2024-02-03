@@ -17,6 +17,7 @@ package space.kscience.dataforge.data
 
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
+import space.kscience.dataforge.misc.DFInternal
 
 public interface GroupRule {
     public fun <T : Any> gather(set: DataTree<T>): Map<String, DataTree<T>>
@@ -30,6 +31,7 @@ public interface GroupRule {
          * @param defaultTagValue
          * @return
          */
+        @OptIn(DFInternal::class)
         public fun byMetaValue(
             key: String,
             defaultTagValue: String,
@@ -42,7 +44,7 @@ public interface GroupRule {
 
                 set.forEach { data ->
                     val tagValue: String = data.meta[key]?.string ?: defaultTagValue
-                    map.getOrPut(tagValue) { DataTreeBuilder(set.dataType) }.data(data.name,data.data)
+                    map.getOrPut(tagValue) { DataTreeBuilder(set.dataType) }.put(data.name, data.data)
                 }
 
 
