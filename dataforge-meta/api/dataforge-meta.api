@@ -881,11 +881,16 @@ public final class space/kscience/dataforge/meta/descriptors/MetaDescriptorKt {
 
 public final class space/kscience/dataforge/meta/descriptors/ValueRestriction : java/lang/Enum {
 	public static final field ABSENT Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
+	public static final field Companion Lspace/kscience/dataforge/meta/descriptors/ValueRestriction$Companion;
 	public static final field NONE Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
 	public static final field REQUIRED Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
 	public static fun values ()[Lspace/kscience/dataforge/meta/descriptors/ValueRestriction;
+}
+
+public final class space/kscience/dataforge/meta/descriptors/ValueRestriction$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class space/kscience/dataforge/misc/CastJvmKt {
