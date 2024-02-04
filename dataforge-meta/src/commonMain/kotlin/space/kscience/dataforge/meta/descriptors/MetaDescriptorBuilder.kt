@@ -11,9 +11,6 @@ import kotlin.collections.set
 public class MetaDescriptorBuilder @PublishedApi internal constructor() {
     public var description: String? = null
 
-    @Deprecated("Replace by description", ReplaceWith("description"))
-    public var info: String? by ::description
-
     public var children: MutableMap<String, MetaDescriptorBuilder> = linkedMapOf()
     public var multiple: Boolean = false
     public var valueRestriction: ValueRestriction = ValueRestriction.NONE

@@ -5,7 +5,18 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-@DFExperimental
+
+private class SchemeWithInit: Scheme(){
+    init {
+        set("initial", "initialValue")
+    }
+
+    var initial by string()
+    companion object: SchemeSpec<SchemeWithInit>(::SchemeWithInit)
+}
+
+
+
 class SchemeTest {
     @Test
     fun testSchemeWrappingBeforeEdit() {
@@ -15,6 +26,7 @@ class SchemeTest {
         assertEquals(29, config["a"].int)
     }
 
+    @OptIn(DFExperimental::class)
     @Test
     fun testSchemeWrappingAfterEdit() {
         val scheme = TestScheme.empty()
@@ -45,5 +57,14 @@ class SchemeTest {
         }
         scheme.v = ListValue(1.0, 2.0, 3.0)
         assertNotNull(value)
+    }
+
+
+    @Test
+    fun testSchemeWithInit(){
+        val scheme = SchemeWithInit()
+        assertEquals("initialValue", scheme.initial)
+        scheme.initial = "none"
+        assertEquals("none", scheme.initial)
     }
 }

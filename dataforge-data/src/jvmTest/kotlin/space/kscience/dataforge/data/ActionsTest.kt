@@ -42,7 +42,7 @@ internal class ActionsTest {
             source.wrap(it.toString(), it)
         }
 
-        delay(10)
+        delay(20)
 
         source.close()
         result.awaitClose()

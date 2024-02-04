@@ -379,6 +379,11 @@ public fun Meta.asMutableMeta(): MutableMeta = (this as? MutableMeta) ?: toMutab
 public fun ObservableMutableMeta(): ObservableMutableMeta = MutableMetaImpl(null)
 
 /**
+ * Create a pre-filled [ObservableMutableMeta]
+ */
+public fun ObservableMutableMeta(content: Meta): ObservableMutableMeta = ObservableMutableMeta { update(content) }
+
+/**
  * Build a [MutableMeta] using given transformation
  */
 public inline fun ObservableMutableMeta(builder: MutableMeta.() -> Unit = {}): ObservableMutableMeta =
