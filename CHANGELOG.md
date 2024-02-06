@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Name index comparator
 
 ### Changed
 
@@ -11,6 +12,7 @@
 ### Removed
 
 ### Fixed
+- `listOfScheme` and `listOfConvertable` delegates provides correct items order
 
 ### Security
 

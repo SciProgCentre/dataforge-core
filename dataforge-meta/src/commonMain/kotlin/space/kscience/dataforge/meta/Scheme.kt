@@ -18,7 +18,7 @@ import kotlin.reflect.KProperty1
  */
 public open class Scheme(
     private var prototype: Meta? = null,
-    descriptor: MetaDescriptor? = null
+    descriptor: MetaDescriptor? = null,
 ) : Described, MetaRepr, MutableMetaProvider, Configurable {
 
     /**
@@ -187,7 +187,7 @@ public open class SchemeSpec<T : Scheme>(
         it.initialize(MutableMeta(), it.target, descriptor)
     }
 
-    override fun convert(obj: T): Meta  = obj.meta
+    override fun convert(obj: T): Meta = obj.meta
 
     /**
      * A convenience method to use specifications in builders
@@ -195,7 +195,6 @@ public open class SchemeSpec<T : Scheme>(
     public inline operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
 
 }
-
 
 
 /**
@@ -275,7 +274,7 @@ public fun <T : Scheme> MutableMeta.listOfScheme(
 ): ReadWriteProperty<Any?, List<T>> = object : ReadWriteProperty<Any?, List<T>> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
         val name = key ?: property.name.asName()
-        return getIndexed(name).values.map { spec.write(it as MutableMeta) }
+        return getIndexedList(name).map { spec.write(it as MutableMeta) }
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<T>) {

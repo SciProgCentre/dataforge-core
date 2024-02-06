@@ -4,6 +4,7 @@ import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.getIndexedList
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -65,7 +66,7 @@ public fun <T> MutableMeta.listOfConvertable(
 ): ReadWriteProperty<Any?, List<T>> = object : ReadWriteProperty<Any?, List<T>> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
         val name = key ?: property.name.asName()
-        return getIndexed(name).values.map { converter.read(it) }
+        return getIndexedList(name).map { converter.read(it) }
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<T>) {
