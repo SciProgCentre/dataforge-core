@@ -17,6 +17,8 @@ class ObservableMetaTest {
             }
         }.asObservable()
 
+        println(meta)
+
         assertEquals("scatter", meta["data.type"].string)
     }
 

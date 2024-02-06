@@ -15,9 +15,9 @@ private class ObservableMetaWrapper(
     val listeners: MutableSet<MetaListener>,
 ) : ObservableMutableMeta {
     override val items: Map<NameToken, ObservableMutableMeta>
-        get() = root.items.keys.associateWith {
+        get() = root[nodeName]?.items?.keys?.associateWith {
             ObservableMetaWrapper(root, nodeName + it, listeners)
-        }
+        } ?: emptyMap()
 
     override fun get(name: Name): ObservableMutableMeta? = if (root[nodeName + name] == null) {
         null
