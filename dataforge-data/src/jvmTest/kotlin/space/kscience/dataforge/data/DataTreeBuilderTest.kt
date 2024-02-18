@@ -43,7 +43,7 @@ internal class DataTreeBuilderTest {
                 wrap("b", "b")
             }
             wrap("root", "root")
-            putAll(updateData)
+            this.putAll(updateData)
         }
 
         assertEquals("a", node["update.a"]?.await())

@@ -11,7 +11,7 @@ import space.kscience.dataforge.provider.Provider
 import kotlin.coroutines.CoroutineContext
 
 
-public fun interface DataSelector<T> {
+public fun interface DataSelector<out T> {
     public suspend fun select(workspace: Workspace, meta: Meta): DataTree<T>
 }
 

@@ -16,11 +16,7 @@ public fun <T> DataSink<T>.put(value: NamedData<T>) {
     put(value.name, value.data)
 }
 
-public fun <T> DataSink<T>.branch(dataTree: DataTree<T>) {
-    putAll(dataTree.asSequence())
-}
-
-public inline fun <T> DataSink<T>.branch(
+public inline fun <T> DataSink<T>.putAll(
     prefix: Name,
     block: DataSink<T>.() -> Unit,
 ) {
@@ -35,23 +31,41 @@ public inline fun <T> DataSink<T>.branch(
     }
 }
 
+@Deprecated("Use putAll", ReplaceWith("putAll(prefix, block)"))
+public inline fun <T> DataSink<T>.branch(
+    prefix: Name,
+    block: DataSink<T>.() -> Unit,
+): Unit = putAll(prefix, block)
+
+
+public inline fun <T> DataSink<T>.putAll(
+    prefix: String,
+    block: DataSink<T>.() -> Unit,
+): Unit = putAll(prefix.asName(), block)
+
+@Deprecated("Use putAll", ReplaceWith("putAll(prefix, block)"))
 public inline fun <T> DataSink<T>.branch(
     prefix: String,
     block: DataSink<T>.() -> Unit,
-): Unit = branch(prefix.asName(), block)
-
+): Unit = putAll(prefix, block)
 
 public fun <T> DataSink<T>.put(name: String, value: Data<T>) {
     put(Name.parse(name), value)
 }
 
-public fun <T> DataSink<T>.branch(name: Name, set: DataTree<T>) {
-    branch(name) { putAll(set.asSequence()) }
+public fun <T> DataSink<T>.putAll(name: Name, tree: DataTree<T>) {
+    putAll(name) { putAll(tree.asSequence()) }
 }
 
-public fun <T> DataSink<T>.branch(name: String, set: DataTree<T>) {
-    branch(Name.parse(name)) { putAll(set.asSequence()) }
+@Deprecated("Use putAll", ReplaceWith("putAll(name, tree)"))
+public fun <T> DataSink<T>.branch(name: Name, tree: DataTree<T>): Unit = putAll(name,tree)
+
+public fun <T> DataSink<T>.putAll(name: String, tree: DataTree<T>) {
+    putAll(Name.parse(name)) { putAll(tree.asSequence()) }
 }
+
+@Deprecated("Use putAll", ReplaceWith("putAll(name, tree)"))
+public fun <T> DataSink<T>.branch(name: String, tree: DataTree<T>): Unit = putAll(name,tree)
 
 /**
  * Produce lazy [Data] and emit it into the [MutableDataTree]
@@ -124,7 +138,7 @@ public fun <T : Any> DataSink<T>.watchBranch(
     name: Name,
     dataSet: ObservableDataTree<T>,
 ): Job {
-    branch(name, dataSet)
+    putAll(name, dataSet)
     return dataSet.updates().onEach {
         put(name + it.name, it.data)
     }.launchIn(dataSet.updatesScope)

@@ -6,6 +6,7 @@
 - Name index comparator
 
 ### Changed
+- DataSink `branch` is replaced with `putAll` to avoid confusion with DataTree methods
 
 ### Deprecated
 

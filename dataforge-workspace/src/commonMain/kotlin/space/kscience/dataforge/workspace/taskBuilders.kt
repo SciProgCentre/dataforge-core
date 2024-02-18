@@ -3,8 +3,8 @@ package space.kscience.dataforge.workspace
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.context.PluginFactory
 import space.kscience.dataforge.data.DataTree
-import space.kscience.dataforge.data.branch
 import space.kscience.dataforge.data.forEach
+import space.kscience.dataforge.data.putAll
 import space.kscience.dataforge.data.transform
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.DFExperimental
@@ -101,7 +101,7 @@ public suspend inline fun <T, reified R> TaskResultBuilder<R>.transformEach(
  * Set given [dataSet] as a task result.
  */
 public fun <T> TaskResultBuilder<T>.result(dataSet: DataTree<T>) {
-    branch(dataSet)
+    this.putAll(dataSet)
 }
 
 /**
@@ -113,7 +113,7 @@ public suspend inline fun <T, reified R> TaskResultBuilder<R>.actionFrom(
     action: Action<T, R>,
     dependencyMeta: Meta = defaultDependencyMeta,
 ) {
-    branch(action.execute(from(selector, dependencyMeta), dependencyMeta))
+    this.putAll(action.execute(from(selector, dependencyMeta), dependencyMeta))
 }
 
 
