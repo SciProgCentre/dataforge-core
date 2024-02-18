@@ -19,6 +19,10 @@ public annotation class MetaBuilderMarker
 public interface MutableMetaProvider : MetaProvider, MutableValueProvider {
     override fun get(name: Name): MutableMeta?
     public operator fun set(name: Name, node: Meta?)
+
+    /**
+     * Set value with the given name. Does nothing if value is not changed.
+     */
     override fun setValue(name: Name, value: Value?)
 }
 
@@ -48,11 +52,13 @@ public interface MutableMeta : Meta, MutableMetaProvider {
     }
 
     override fun setValue(name: Name, value: Value?) {
-        getOrCreate(name).value = value
+        if (value != getValue(name)) {
+            getOrCreate(name).value = value
+        }
     }
 
     /**
-     * Get existing node or create a new one
+     * Get an existing node or create a new one
      */
     public fun getOrCreate(name: Name): MutableMeta
 
@@ -198,10 +204,8 @@ public operator fun MutableMetaProvider.set(key: String, metas: Iterable<Meta>):
 
 
 /**
- * Update existing mutable node with another node. The rules are following:
- *  * value replaces anything
- *  * node updates node and replaces anything but node
- *  * node list updates node list if number of nodes in the list is the same and replaces anything otherwise
+ * Update the existing mutable node with another node.
+ * Values that are present in the current provider and are missing in [meta] are kept.
  */
 public fun MutableMetaProvider.update(meta: Meta) {
     meta.valueSequence().forEach { (name, value) ->
@@ -222,7 +226,7 @@ public fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.edit(name: Name, builde
     getOrCreate(name).apply(builder)
 
 /**
- * Set a value at a given [name]. If node does not exist, create it.
+ * Set a value at a given [name]. If a node does not exist, create it.
  */
 public operator fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.set(name: Name, value: Value?) {
     edit(name) {
@@ -366,6 +370,21 @@ public fun MutableMeta.append(key: String, meta: Meta): Unit = append(Name.parse
 public fun MutableMeta.append(name: Name, value: Value): Unit = append(name, Meta(value))
 
 public fun MutableMeta.append(key: String, value: Value): Unit = append(Name.parse(key), value)
+
+/**
+ * Update all items that exist in the [newMeta] and remove existing items that are missing in [newMeta].
+ * This produces the same result as clearing all items and updating blank meta with a [newMeta], but does not
+ * produce unnecessary invalidation events (if they are supported).
+ */
+public fun MutableMeta.reset(newMeta: Meta) {
+    //remove old items
+    (items.keys - newMeta.items.keys).forEach {
+        remove(it.asName())
+    }
+    newMeta.items.forEach { (token, item)->
+        set(token, item)
+    }
+}
 
 /**
  * Create a mutable copy of this meta. The copy is created even if the Meta is already mutable

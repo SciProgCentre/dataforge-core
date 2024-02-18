@@ -77,8 +77,8 @@ internal class SplitAction<T : Any, R : Any>(
         data.forEach { splitOne(it.name, it.data, meta) }
     }
 
-    override fun DataSink<R>.update(source: DataTree<T>, meta: Meta, namedData: NamedData<T>) {
-        splitOne(namedData.name, namedData.data, namedData.meta)
+    override fun DataSink<R>.update(source: DataTree<T>, meta: Meta, updatedData: NamedData<T>) {
+        splitOne(updatedData.name, updatedData.data, updatedData.meta)
     }
 }
 

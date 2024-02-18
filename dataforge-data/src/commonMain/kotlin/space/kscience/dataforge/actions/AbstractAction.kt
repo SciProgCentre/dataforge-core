@@ -37,21 +37,23 @@ public abstract class AbstractAction<T : Any, R : Any>(
      * Update part of the data set using provided data
      *
      * @param source the source data tree in case we need several data items to update
+     * @param meta the metadata used for the whole data tree
+     * @param updatedData an updated item
      */
     protected open fun DataSink<R>.update(
         source: DataTree<T>,
         meta: Meta,
-        namedData: NamedData<T>,
-    ){
+        updatedData: NamedData<T>,
+    ) {
         //by default regenerate the whole data set
-        generate(source,meta)
+        generate(source, meta)
     }
 
     @OptIn(DFInternal::class)
     override fun execute(
         dataSet: DataTree<T>,
         meta: Meta,
-    ): DataTree<R> = if(dataSet.isObservable()) {
+    ): DataTree<R> = if (dataSet.isObservable()) {
         MutableDataTree<R>(outputType, dataSet.updatesScope).apply {
             generate(dataSet, meta)
             dataSet.updates().onEach {
@@ -64,8 +66,8 @@ public abstract class AbstractAction<T : Any, R : Any>(
                 close()
             }
         }
-    } else{
-        DataTree(outputType){
+    } else {
+        DataTree(outputType) {
             generate(dataSet, meta)
         }
     }

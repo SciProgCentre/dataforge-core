@@ -86,8 +86,8 @@ internal class MapAction<T : Any, R : Any>(
         data.forEach { mapOne(it.name, it.data, meta) }
     }
 
-    override fun DataSink<R>.update(source: DataTree<T>, meta: Meta, namedData: NamedData<T>) {
-        mapOne(namedData.name, namedData.data, namedData.meta)
+    override fun DataSink<R>.update(source: DataTree<T>, meta: Meta, updatedData: NamedData<T>) {
+        mapOne(updatedData.name, updatedData.data, updatedData.meta)
     }
 }
 

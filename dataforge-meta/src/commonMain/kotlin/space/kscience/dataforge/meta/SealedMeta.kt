@@ -76,6 +76,8 @@ internal class MetaBuilder(
 
 
     override fun set(name: Name, node: Meta?) {
+        //skip setting if value has not changed
+        if(node == get(name)) return
         when (name.length) {
             0 -> error("Can't set a meta with empty name")
             1 -> {
@@ -89,7 +91,7 @@ internal class MetaBuilder(
             }
 
             else -> {
-                getOrCreate(name.first().asName()).set(name.cutFirst(), node)
+                getOrCreate(name.first().asName())[name.cutFirst()] = node
             }
         }
     }
