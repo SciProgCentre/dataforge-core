@@ -21,7 +21,7 @@ internal fun MutableMap<Name, *>.removeWhatStartsWith(name: Name) {
 /**
  * An action that caches results on-demand and recalculates them on source push
  */
-public abstract class AbstractAction<T : Any, R : Any>(
+public abstract class AbstractAction<T, R>(
     public val outputType: KType,
 ) : Action<T, R> {
 

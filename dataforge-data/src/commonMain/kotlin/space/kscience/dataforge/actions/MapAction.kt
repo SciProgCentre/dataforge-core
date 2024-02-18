@@ -50,7 +50,7 @@ public class MapActionBuilder<T, R>(
 }
 
 @PublishedApi
-internal class MapAction<T : Any, R : Any>(
+internal class MapAction<T, R>(
     outputType: KType,
     private val block: MapActionBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {
@@ -96,7 +96,7 @@ internal class MapAction<T : Any, R : Any>(
  * A one-to-one mapping action
  */
 @DFExperimental
-public inline fun <T : Any, reified R : Any> Action.Companion.mapping(
+public inline fun <T, reified R> Action.Companion.mapping(
     noinline builder: MapActionBuilder<T, R>.() -> Unit,
 ): Action<T, R> = MapAction(typeOf<R>(), builder)
 

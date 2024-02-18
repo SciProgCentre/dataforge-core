@@ -20,7 +20,7 @@ import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.misc.DFInternal
 
 public interface GroupRule {
-    public fun <T : Any> gather(set: DataTree<T>): Map<String, DataTree<T>>
+    public fun <T> gather(set: DataTree<T>): Map<String, DataTree<T>>
 
     public companion object {
         /**
@@ -37,7 +37,7 @@ public interface GroupRule {
             defaultTagValue: String,
         ): GroupRule = object : GroupRule {
 
-            override fun <T : Any> gather(
+            override fun <T> gather(
                 set: DataTree<T>,
             ): Map<String, DataTree<T>> {
                 val map = HashMap<String, DataTreeBuilder<T>>()

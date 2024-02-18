@@ -12,7 +12,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
 
-public class JoinGroup<T : Any, R : Any>(
+public class JoinGroup<T, R>(
     public var name: String,
     internal val set: DataTree<T>,
     @PublishedApi internal var outputType: KType,
@@ -35,7 +35,7 @@ public class JoinGroup<T : Any, R : Any>(
 }
 
 @DFBuilder
-public class ReduceGroupBuilder<T : Any, R : Any>(
+public class ReduceGroupBuilder<T, R>(
     public val actionMeta: Meta,
     private val outputType: KType,
 ) {
@@ -79,7 +79,7 @@ public class ReduceGroupBuilder<T : Any, R : Any>(
 }
 
 @PublishedApi
-internal class ReduceAction<T : Any, R : Any>(
+internal class ReduceAction<T, R>(
     outputType: KType,
     private val action: ReduceGroupBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {

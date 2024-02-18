@@ -13,9 +13,9 @@ import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
 
-public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val meta: Meta) {
+public class SplitBuilder<T, R>(public val name: Name, public val meta: Meta) {
 
-    public class FragmentRule<T : Any, R : Any>(
+    public class FragmentRule<T, R>(
         public val name: Name,
         public var meta: MutableMeta,
         @PublishedApi internal var outputType: KType,
@@ -44,7 +44,7 @@ public class SplitBuilder<T : Any, R : Any>(public val name: Name, public val me
  * Action that splits each incoming element into a number of fragments defined in builder
  */
 @PublishedApi
-internal class SplitAction<T : Any, R : Any>(
+internal class SplitAction<T, R>(
     outputType: KType,
     private val action: SplitBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {
