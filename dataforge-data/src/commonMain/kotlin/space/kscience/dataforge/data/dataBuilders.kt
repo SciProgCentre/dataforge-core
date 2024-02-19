@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.isEmpty
@@ -58,14 +57,14 @@ public fun <T> DataSink<T>.putAll(name: Name, tree: DataTree<T>) {
 }
 
 @Deprecated("Use putAll", ReplaceWith("putAll(name, tree)"))
-public fun <T> DataSink<T>.branch(name: Name, tree: DataTree<T>): Unit = putAll(name,tree)
+public fun <T> DataSink<T>.branch(name: Name, tree: DataTree<T>): Unit = putAll(name, tree)
 
 public fun <T> DataSink<T>.putAll(name: String, tree: DataTree<T>) {
     putAll(Name.parse(name)) { putAll(tree.asSequence()) }
 }
 
 @Deprecated("Use putAll", ReplaceWith("putAll(name, tree)"))
-public fun <T> DataSink<T>.branch(name: String, tree: DataTree<T>): Unit = putAll(name,tree)
+public fun <T> DataSink<T>.branch(name: String, tree: DataTree<T>): Unit = putAll(name, tree)
 
 /**
  * Produce lazy [Data] and emit it into the [MutableDataTree]
@@ -117,30 +116,25 @@ public fun <T> DataSink<T>.putAll(sequence: Sequence<NamedData<T>>) {
 }
 
 public fun <T> DataSink<T>.putAll(tree: DataTree<T>) {
-    this.putAll(tree.asSequence())
-}
-
-
-/**
- * Update data with given node data and meta with node meta.
- */
-@DFExperimental
-public fun <T> MutableDataTree<T>.putAll(source: DataTree<T>) {
-    source.forEach {
-        put(it.name, it.data)
-    }
+    putAll(tree.asSequence())
 }
 
 /**
  * Copy given data set and mirror its changes to this [DataSink] in [this@setAndObserve]. Returns an update [Job]
  */
+public fun <T : Any> DataSink<T>.putAllAndWatch(
+    branchName: Name = Name.EMPTY,
+    dataSet: ObservableDataTree<T>,
+): Job {
+    putAll(branchName, dataSet)
+    return dataSet.updates().onEach {
+        put(branchName + it.name, it.data)
+    }.launchIn(dataSet.updatesScope)
+}
+
+
+@Deprecated("Use putAllAndWatch", ReplaceWith("putAllAndWatch(name, dataSet)"))
 public fun <T : Any> DataSink<T>.watchBranch(
     name: Name,
     dataSet: ObservableDataTree<T>,
-): Job {
-    putAll(name, dataSet)
-    return dataSet.updates().onEach {
-        put(name + it.name, it.data)
-    }.launchIn(dataSet.updatesScope)
-
-}
+): Job = putAllAndWatch(name, dataSet)

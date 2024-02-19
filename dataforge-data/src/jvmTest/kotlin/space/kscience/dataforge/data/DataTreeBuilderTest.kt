@@ -43,7 +43,7 @@ internal class DataTreeBuilderTest {
                 wrap("b", "b")
             }
             wrap("root", "root")
-            this.putAll(updateData)
+            putAll(updateData)
         }
 
         assertEquals("a", node["update.a"]?.await())
@@ -55,7 +55,7 @@ internal class DataTreeBuilderTest {
         val subNode = MutableDataTree<Int>()
 
         val rootNode = MutableDataTree<Int> {
-            watchBranch("sub".asName(), subNode)
+            putAllAndWatch("sub".asName(), subNode)
         }
 
         repeat(10) {
