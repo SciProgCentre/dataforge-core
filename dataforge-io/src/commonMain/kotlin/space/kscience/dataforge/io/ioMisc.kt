@@ -5,7 +5,6 @@ import kotlinx.io.bytestring.ByteString
 import kotlinx.io.bytestring.decodeToString
 import kotlinx.io.bytestring.encodeToByteString
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.misc.DFExperimental
 import kotlin.math.min
 
 /**
@@ -52,7 +51,6 @@ public fun IOPlugin.peekBinaryEnvelopeFormat(binary: Binary): EnvelopeFormat? {
 /**
  * A zero-copy read from
  */
-@DFExperimental
 public fun IOPlugin.readEnvelope(
     binary: Binary,
     readNonEnvelopes: Boolean = false,
@@ -62,7 +60,6 @@ public fun IOPlugin.readEnvelope(
     Envelope(Meta.EMPTY, binary)
 } else error("Can't infer format for $binary")
 
-@DFExperimental
 public fun IOPlugin.readEnvelope(
     string: String,
     readNonEnvelopes: Boolean = false,

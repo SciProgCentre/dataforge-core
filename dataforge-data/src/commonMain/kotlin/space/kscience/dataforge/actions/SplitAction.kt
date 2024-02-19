@@ -5,7 +5,6 @@ import space.kscience.dataforge.meta.Laminate
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.toMutableMeta
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.parseAsName
 import kotlin.collections.set
@@ -85,7 +84,7 @@ internal class SplitAction<T, R>(
 /**
  * Action that splits each incoming element into a number of fragments defined in builder
  */
-@DFExperimental
-public inline fun <T : Any, reified R : Any> Action.Companion.splitting(
+
+public inline fun <T, reified R> Action.Companion.splitting(
     noinline builder: SplitBuilder<T, R>.() -> Unit,
 ): Action<T, R> = SplitAction(typeOf<R>(), builder)

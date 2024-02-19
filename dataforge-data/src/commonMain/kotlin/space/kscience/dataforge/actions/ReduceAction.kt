@@ -4,7 +4,6 @@ import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.DFBuilder
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.parseAsName
@@ -22,12 +21,12 @@ public class JoinGroup<T, R>(
 
     public lateinit var result: suspend ActionEnv.(Map<Name, ValueWithMeta<T>>) -> R
 
-    internal fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(Map<Name,  ValueWithMeta<T>>) -> R1) {
+    internal fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(Map<Name, ValueWithMeta<T>>) -> R1) {
         this.outputType = outputType
         this.result = f;
     }
 
-    public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(Map<Name,  ValueWithMeta<T>>) -> R1) {
+    public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(Map<Name, ValueWithMeta<T>>) -> R1) {
         outputType = typeOf<R1>()
         this.result = f;
     }
@@ -67,7 +66,7 @@ public class ReduceGroupBuilder<T, R>(
     /**
      * Apply transformation to the whole node
      */
-    public fun result(resultName: String, f: suspend ActionEnv.(Map<Name,  ValueWithMeta<T>>) -> R) {
+    public fun result(resultName: String, f: suspend ActionEnv.(Map<Name, ValueWithMeta<T>>) -> R) {
         groupRules += { node ->
             listOf(JoinGroup<T, R>(resultName, node, outputType).apply { result(outputType, f) })
         }
@@ -111,7 +110,6 @@ internal class ReduceAction<T, R>(
 /**
  * A one-to-one mapping action
  */
-@DFExperimental
-public inline fun <reified T : Any, reified R : Any> Action.Companion.reducing(
+public inline fun <reified T, reified R> Action.Companion.reducing(
     noinline builder: ReduceGroupBuilder<T, R>.() -> Unit,
 ): Action<T, R> = ReduceAction(typeOf<R>(), builder)

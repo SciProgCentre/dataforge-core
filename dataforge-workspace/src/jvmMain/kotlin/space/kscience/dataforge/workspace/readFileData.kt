@@ -7,8 +7,6 @@ import space.kscience.dataforge.data.StaticData
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.copy
-import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName
@@ -39,7 +37,6 @@ public object FileData {
  * Read data with supported envelope format and binary format. If the envelope format is null, then read binary directly from file.
  * The operation is blocking since it must read the meta header. The reading of envelope body is lazy
  */
-@OptIn(DFExperimental::class)
 public fun IOPlugin.readFileData(
     path: Path,
 ): Data<Binary> {
@@ -127,8 +124,6 @@ public fun DataSink<Binary>.files(
 
 private fun Path.toName() = Name(map { NameToken.parse(it.nameWithoutExtension) })
 
-@DFInternal
-@DFExperimental
 public fun DataSink<Binary>.monitorFiles(
     io: IOPlugin,
     name: Name,
@@ -171,7 +166,6 @@ public fun DataSink<Binary>.monitorFiles(
  * @param resources The names of the resources to read.
  * @param classLoader The class loader to use for loading the resources. By default, it uses the current thread's context class loader.
  */
-@DFExperimental
 public fun DataSink<Binary>.resources(
     io: IOPlugin,
     vararg resources: String,

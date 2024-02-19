@@ -84,4 +84,4 @@ public fun <R> ObservableDataTree<*>.filterByType(
 public inline fun <reified R> ObservableDataTree<*>.filterByType(
     scope: CoroutineScope,
     predicate: DataFilter = DataFilter.EMPTY,
-): ObservableDataTree<R> = filterByType(typeOf<R>(),scope,predicate)
+): ObservableDataTree<R> = filterByType(typeOf<R>(), scope, predicate)

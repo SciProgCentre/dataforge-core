@@ -77,14 +77,12 @@ public fun Path.rewrite(block: Sink.() -> Unit): Unit {
     stream.asSink().buffered().use(block)
 }
 
-@DFExperimental
 public fun EnvelopeFormat.readFile(path: Path): Envelope = readFrom(path.asBinary())
 
 /**
  * Resolve IOFormat based on type
  */
 @Suppress("UNCHECKED_CAST")
-@DFExperimental
 public inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? =
     ioFormatFactories.find { it.type.isSupertypeOf(typeOf<T>()) } as IOFormat<T>?
 
@@ -192,7 +190,6 @@ public fun IOPlugin.peekFileEnvelopeFormat(path: Path): EnvelopeFormat? {
  *
  * Return null otherwise.
  */
-@DFExperimental
 public fun IOPlugin.readEnvelopeFile(
     path: Path,
     readNonEnvelopes: Boolean = false,

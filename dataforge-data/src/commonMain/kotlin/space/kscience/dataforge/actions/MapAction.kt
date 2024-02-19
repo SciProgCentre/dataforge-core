@@ -6,7 +6,6 @@ import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFBuilder
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KType
@@ -95,7 +94,7 @@ internal class MapAction<T, R>(
 /**
  * A one-to-one mapping action
  */
-@DFExperimental
+
 public inline fun <T, reified R> Action.Companion.mapping(
     noinline builder: MapActionBuilder<T, R>.() -> Unit,
 ): Action<T, R> = MapAction(typeOf<R>(), builder)
