@@ -98,15 +98,15 @@ public val DataTree<*>.meta: Meta? get() = data?.meta
 /**
  * Provide subtree if it exists
  */
-public tailrec fun <T, TR : GenericDataTree<T, TR>> GenericDataTree<T, TR>.putAll(name: Name): TR? =
+public tailrec fun <T, TR : GenericDataTree<T, TR>> GenericDataTree<T, TR>.branch(name: Name): TR? =
     when (name.length) {
         0 -> self
         1 -> items[name.first()]
-        else -> items[name.first()]?.putAll(name.cutFirst())
+        else -> items[name.first()]?.branch(name.cutFirst())
     }
 
-public fun <T, TR : GenericDataTree<T, TR>> GenericDataTree<T, TR>.putAll(name: String): TR? =
-    this@branch.putAll(name.parseAsName())
+public fun <T, TR : GenericDataTree<T, TR>> GenericDataTree<T, TR>.branch(name: String): TR? =
+    branch(name.parseAsName())
 
 public fun GenericDataTree<*, *>.isEmpty(): Boolean = data == null && items.isEmpty()
 
