@@ -15,7 +15,7 @@ public infix fun <T : Any> String.put(data: Data<T>): Unit =
  */
 context(DataSink<T>)
 public infix fun <T : Any> String.put(dataSet: DataTree<T>): Unit =
-    this.putAll(this, dataSet)
+    putAll(this, dataSet)
 
 /**
  * Build and append node
@@ -23,5 +23,5 @@ public infix fun <T : Any> String.put(dataSet: DataTree<T>): Unit =
 context(DataSink<T>)
 public infix fun <T : Any> String.put(
     block: DataSink<T>.() -> Unit,
-): Unit = this.putAll(Name.parse(this), block)
+): Unit = putAll(Name.parse(this), block)
 
