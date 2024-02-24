@@ -93,6 +93,18 @@ public fun <T> DataTree<T>.asSequence(
     }
 }
 
+/**
+ * Walk the data tree depth-first
+ */
+public fun <T, TR: GenericDataTree<T,TR>> TR.walk(
+    namePrefix: Name = Name.EMPTY,
+): Sequence<TR> = sequence {
+    yield(this@walk)
+    items.forEach { (token, tree) ->
+        yieldAll(tree.walk(namePrefix + token))
+    }
+}
+
 public val DataTree<*>.meta: Meta? get() = data?.meta
 
 /**
