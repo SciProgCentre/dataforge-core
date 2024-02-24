@@ -96,10 +96,10 @@ public fun <T> DataTree<T>.asSequence(
 /**
  * Walk the data tree depth-first
  */
-public fun <T, TR: GenericDataTree<T,TR>> TR.walk(
+private fun <T, TR: GenericDataTree<T,TR>> TR.walk(
     namePrefix: Name = Name.EMPTY,
-): Sequence<TR> = sequence {
-    yield(this@walk)
+): Sequence<Pair<Name,TR>> = sequence {
+    yield(namePrefix to this@walk)
     items.forEach { (token, tree) ->
         yieldAll(tree.walk(namePrefix + token))
     }
