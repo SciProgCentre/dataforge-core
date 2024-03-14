@@ -135,16 +135,17 @@ public interface MetaConverter<T>: MetaSpec<T> {
         @DFExperimental
         public inline fun <reified T> serializable(
             descriptor: MetaDescriptor? = null,
+            jsonEncoder: Json = Json { ignoreUnknownKeys = true },
         ): MetaConverter<T> = object : MetaConverter<T> {
             private val serializer: KSerializer<T> = serializer()
 
             override fun readOrNull(source: Meta): T? {
                 val json = source.toJson(descriptor)
-                return Json.decodeFromJsonElement(serializer, json)
+                return jsonEncoder.decodeFromJsonElement(serializer, json)
             }
 
             override fun convert(obj: T): Meta {
-                val json = Json.encodeToJsonElement(obj)
+                val json = jsonEncoder.encodeToJsonElement(obj)
                 return json.toMeta(descriptor)
             }
 
