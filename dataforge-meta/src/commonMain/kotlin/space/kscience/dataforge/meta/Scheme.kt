@@ -122,7 +122,7 @@ public open class Scheme(
         override fun hashCode(): Int = Meta.hashCode(this)
 
         override fun set(name: Name, node: Meta?) {
-            target[name] = node
+            target[pathName + name] = node
             invalidate(name)
         }
 
