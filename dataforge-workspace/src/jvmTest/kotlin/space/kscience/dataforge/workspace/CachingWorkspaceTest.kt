@@ -3,7 +3,7 @@ package space.kscience.dataforge.workspace
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
-import space.kscience.dataforge.data.wrap
+import space.kscience.dataforge.data.putValue
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.boolean
 import space.kscience.dataforge.meta.get
@@ -22,7 +22,7 @@ internal class CachingWorkspaceTest {
             data {
                 //statically initialize data
                 repeat(5) {
-                    wrap("myData[$it]", it)
+                    putValue("myData[$it]", it)
                 }
             }
 

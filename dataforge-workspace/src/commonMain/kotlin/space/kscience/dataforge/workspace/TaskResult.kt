@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import space.kscience.dataforge.data.ObservableDataTree
+import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.data.asSequence
 import space.kscience.dataforge.data.launch
 import space.kscience.dataforge.meta.Meta
@@ -17,16 +17,16 @@ import space.kscience.dataforge.names.Name
  * @param taskMeta The configuration of the task that produced the result
  */
 public data class TaskResult<T>(
-    public val content: ObservableDataTree<T>,
+    public val content: DataTree<T>,
     public val workspace: Workspace,
     public val taskName: Name,
     public val taskMeta: Meta,
-) : ObservableDataTree<T> by content
+) : DataTree<T> by content
 
 /**
  * Wrap data into [TaskResult]
  */
-public fun <T> Workspace.wrapResult(data: ObservableDataTree<T>, taskName: Name, taskMeta: Meta): TaskResult<T> =
+public fun <T> Workspace.wrapResult(data: DataTree<T>, taskName: Name, taskMeta: Meta): TaskResult<T> =
     TaskResult(data, this, taskName, taskMeta)
 
 /**

@@ -3,10 +3,30 @@ package space.kscience.dataforge.data
 import space.kscience.dataforge.meta.isEmpty
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
+import kotlin.reflect.KType
 
-public interface NamedData<out T> : Named, Data<T> {
+/**
+ * An interface implementing a data update event.
+ *
+ * If [data] is null, then corresponding element should be removed.
+ */
+public interface DataUpdate<out T> : Named {
+    public val type: KType
     override val name: Name
-    public val data: Data<T>
+    public val data: Data<T>?
+}
+
+public fun <T> DataUpdate(type: KType, name: Name, data: Data<T>?): DataUpdate<T> = object : DataUpdate<T> {
+    override val type: KType = type
+    override val name: Name = name
+    override val data: Data<T>? = data
+}
+
+/**
+ * A data coupled to a name.
+ */
+public interface NamedData<out T> : DataUpdate<T>, Data<T> {
+    override val data: Data<T>
 }
 
 public operator fun NamedData<*>.component1(): Name = name
@@ -33,3 +53,5 @@ public fun <T> Data<T>.named(name: Name): NamedData<T> = if (this is NamedData) 
 } else {
     NamedDataImpl(name, this)
 }
+
+public fun <T> NamedData(name: Name, data: Data<T>): NamedData<T> = data.named(name)

@@ -48,10 +48,10 @@ internal class SplitAction<T, R>(
     private val action: SplitBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {
 
-    private fun DataSink<R>.splitOne(name: Name, data: Data<T>, meta: Meta) {
-        val laminate = Laminate(data.meta, meta)
+    private fun DataSink<R>.splitOne(name: Name, data: Data<T>?, meta: Meta) {
+        val laminate = Laminate(data?.meta, meta)
 
-        val split = SplitBuilder<T, R>(name, data.meta).apply(action)
+        val split = SplitBuilder<T, R>(name, data?.meta ?: Meta.EMPTY).apply(action)
 
 
         // apply individual fragment rules to result
@@ -63,21 +63,29 @@ internal class SplitAction<T, R>(
             ).apply(rule)
             //data.map<R>(outputType, meta = env.meta) { env.result(it) }.named(fragmentName)
 
-            put(
-                fragmentName,
-                @Suppress("OPT_IN_USAGE") Data(outputType, meta = env.meta, dependencies = listOf(data)) {
-                    env.result(data.await())
-                }
-            )
+            if (data == null) {
+                put(fragmentName, null)
+            } else {
+                put(
+                    fragmentName,
+                    @Suppress("OPT_IN_USAGE") Data(outputType, meta = env.meta, dependencies = listOf(data)) {
+                        env.result(data.await())
+                    }
+                )
+            }
         }
     }
 
-    override fun DataSink<R>.generate(data: DataTree<T>, meta: Meta) {
-        data.forEach { splitOne(it.name, it.data, meta) }
+    override fun DataSink<R>.generate(source: DataTree<T>, meta: Meta) {
+        source.forEach { splitOne(it.name, it.data, meta) }
     }
 
-    override fun DataSink<R>.update(source: DataTree<T>, meta: Meta, updatedData: NamedData<T>) {
-        splitOne(updatedData.name, updatedData.data, updatedData.meta)
+    override suspend fun DataSink<R>.update(
+        source: DataTree<T>,
+        meta: Meta,
+        updatedData: DataUpdate<T>,
+    )  {
+        splitOne(updatedData.name, updatedData.data, meta)
     }
 }
 

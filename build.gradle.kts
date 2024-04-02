@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.8.1-dev-1"
+    version = "0.8.1"
 }
 
 subprojects {
@@ -30,7 +30,7 @@ ksciencePublish {
         useApache2Licence()
         useSPCTeam()
     }
-    repository("spc","https://maven.sciprog.center/kscience")
+    repository("spc", "https://maven.sciprog.center/kscience")
     sonatype("https://oss.sonatype.org")
 }
 

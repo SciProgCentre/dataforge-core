@@ -1,28 +1,30 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.NameToken
+import space.kscience.dataforge.names.plus
 import kotlin.reflect.KType
 
 public fun interface DataFilter {
 
-    public fun accepts(name: Name, meta: Meta, type: KType): Boolean
+    public fun accepts(name: Name, meta: Meta?, type: KType): Boolean
 
     public companion object {
         public val EMPTY: DataFilter = DataFilter { _, _, _ -> true }
     }
 }
 
-public fun DataFilter.accepts(data: NamedData<*>): Boolean = accepts(data.name, data.meta, data.type)
 
-public fun <T> Sequence<NamedData<T>>.filterData(predicate: DataFilter): Sequence<NamedData<T>> = filter { data ->
+public fun DataFilter.accepts(update: DataUpdate<*>): Boolean = accepts(update.name, update.data?.meta, update.type)
+
+public fun <T, DU : DataUpdate<T>> Sequence<DU>.filterData(predicate: DataFilter): Sequence<DU> = filter { data ->
     predicate.accepts(data)
 }
 
-public fun <T> Flow<NamedData<T>>.filterData(predicate: DataFilter): Flow<NamedData<T>> = filter { data ->
+public fun <T, DU : DataUpdate<T>> Flow<DU>.filterData(predicate: DataFilter): Flow<DU> = filter { data ->
     predicate.accepts(data)
 }
 
@@ -41,7 +43,8 @@ public fun <T> DataSource<T>.filterData(
 public fun <T> ObservableDataSource<T>.filterData(
     predicate: DataFilter,
 ): ObservableDataSource<T> = object : ObservableDataSource<T> {
-    override fun updates(): Flow<NamedData<T>> = this@filterData.updates().filter { predicate.accepts(it) }
+    override val updates: Flow<DataUpdate<T>>
+        get() = this@filterData.updates.filter { predicate.accepts(it) }
 
     override val dataType: KType get() = this@filterData.dataType
 
@@ -49,14 +52,32 @@ public fun <T> ObservableDataSource<T>.filterData(
         this@filterData.read(name)?.takeIf { predicate.accepts(name, it.meta, it.type) }
 }
 
-public fun <T> GenericDataTree<T, *>.filterData(
-    predicate: DataFilter,
-): DataTree<T> = asSequence().filterData(predicate).toTree(dataType)
+internal class FilteredDataTree<T>(
+    val source: DataTree<T>,
+    val filter: DataFilter,
+    val branch: Name,
+    override val dataType: KType = source.dataType,
+) : DataTree<T> {
 
-public fun <T> GenericObservableDataTree<T, *>.filterData(
-    scope: CoroutineScope,
+    override val data: Data<T>?
+        get() = source[branch].takeIf {
+            filter.accepts(Name.EMPTY, data?.meta, data?.type ?: dataType)
+        }
+
+    override val items: Map<NameToken, DataTree<T>>
+        get() = source.branch(branch)?.items
+            ?.mapValues { FilteredDataTree(source, filter, branch + it.key) }
+            ?.filter { !it.value.isEmpty() }
+            ?: emptyMap()
+
+    override val updates: Flow<DataUpdate<T>>
+        get() = source.updates.filter { filter.accepts(it) }
+}
+
+
+public fun <T> DataTree<T>.filterData(
     predicate: DataFilter,
-): ObservableDataTree<T> = asSequence().filterData(predicate).toObservableTree(dataType, scope, updates().filterData(predicate))
+): DataTree<T> = FilteredDataTree(this, predicate, Name.EMPTY)
 
 
 ///**

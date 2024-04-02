@@ -13,7 +13,9 @@
 ### Removed
 
 ### Fixed
-- `listOfScheme` and `listOfConvertable` delegates provides correct items order
+- `listOfScheme` and `listOfConvertable` delegates provides correct items order.
+- Scheme meta setter works with proper sub-branch.
+- 
 
 ### Security
 

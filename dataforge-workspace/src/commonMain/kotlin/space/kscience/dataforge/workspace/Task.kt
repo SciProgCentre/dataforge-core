@@ -10,6 +10,7 @@ import space.kscience.dataforge.meta.MetaSpec
 import space.kscience.dataforge.meta.descriptors.Described
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DfType
+import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.workspace.Task.Companion.TYPE
 import kotlin.reflect.KType
@@ -90,7 +91,8 @@ public fun <T : Any> Task(
         taskMeta: Meta,
     ): TaskResult<T> {
         //TODO use safe builder and check for external data on add and detects cycles
-        val dataset = MutableDataTree<T>(resultType, workspace.context).apply {
+        @OptIn(UnsafeKType::class)
+        val dataset = MutableDataTree<T>(resultType).apply {
             TaskResultBuilder(workspace, taskName, taskMeta, this).apply {
                 withContext(GoalExecutionRestriction() + workspace.goalLogger) {
                     builder()
@@ -98,7 +100,6 @@ public fun <T : Any> Task(
             }
         }
         return workspace.wrapResult(dataset, taskName, taskMeta)
-
     }
 }
 
@@ -117,6 +118,7 @@ public inline fun <reified T : Any> Task(
  * @param builder for resulting data set
  */
 
+
 @Suppress("FunctionName")
 public fun <T : Any, C : MetaRepr> Task(
     resultType: KType,
@@ -132,7 +134,8 @@ public fun <T : Any, C : MetaRepr> Task(
     ): TaskResult<T> = withContext(GoalExecutionRestriction() + workspace.goalLogger) {
         //TODO use safe builder and check for external data on add and detects cycles
         val taskMeta = configuration.toMeta()
-        val dataset = MutableDataTree<T>(resultType, this).apply {
+        @OptIn(UnsafeKType::class)
+        val dataset = MutableDataTree<T>(resultType).apply {
             TaskResultBuilder(workspace, taskName, taskMeta, this).apply { builder(configuration) }
         }
         workspace.wrapResult(dataset, taskName, taskMeta)

@@ -24,11 +24,11 @@ import kotlin.test.assertEquals
 class FileDataTest {
     val dataNode = DataTree<String> {
         putAll("dir") {
-            wrap("a", "Some string") {
+            putValue("a", "Some string") {
                 "content" put "Some string"
             }
         }
-        wrap("b", "root data")
+        putValue("b", "root data")
 //        meta {
 //            "content" put "This is root meta node"
 //        }

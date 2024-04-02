@@ -7,14 +7,12 @@ import space.kscience.dataforge.data.StaticData
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.copy
+import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardWatchEventKinds
-import java.nio.file.WatchEvent
+import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.spi.FileSystemProvider
 import kotlin.io.path.*
@@ -166,15 +164,25 @@ public fun DataSink<Binary>.monitorFiles(
  * @param resources The names of the resources to read.
  * @param classLoader The class loader to use for loading the resources. By default, it uses the current thread's context class loader.
  */
+@DFExperimental
 public fun DataSink<Binary>.resources(
     io: IOPlugin,
-    vararg resources: String,
+    resource: String,
+    vararg otherResources: String,
     classLoader: ClassLoader = Thread.currentThread().contextClassLoader,
 ) {
-    resources.forEach { resource ->
-        val path = classLoader.getResource(resource)?.toURI()?.toPath() ?: error(
-            "Resource with name $resource is not resolved"
+    //create a file system if necessary
+    val uri = Thread.currentThread().contextClassLoader.getResource("common")!!.toURI()
+    try {
+        uri.toPath()
+    } catch (e: FileSystemNotFoundException) {
+        FileSystems.newFileSystem(uri, mapOf("create" to "true"))
+    }
+
+    listOf(resource,*otherResources).forEach { r ->
+        val path = classLoader.getResource(r)?.toURI()?.toPath() ?: error(
+            "Resource with name $r is not resolved"
         )
-        files(io, resource.asName(), path)
+        files(io, r.asName(), path)
     }
 }

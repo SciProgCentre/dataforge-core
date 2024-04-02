@@ -4,7 +4,7 @@ import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.DFBuilder
-import space.kscience.dataforge.misc.DFInternal
+import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.parseAsName
 import kotlin.reflect.KType
@@ -84,8 +84,8 @@ internal class ReduceAction<T, R>(
 ) : AbstractAction<T, R>(outputType) {
     //TODO optimize reduction. Currently, the whole action recalculates on push
 
-    override fun DataSink<R>.generate(data: DataTree<T>, meta: Meta) {
-        ReduceGroupBuilder<T, R>(meta, outputType).apply(action).buildGroups(data).forEach { group ->
+    override fun DataSink<R>.generate(source: DataTree<T>, meta: Meta) {
+        ReduceGroupBuilder<T, R>(meta, outputType).apply(action).buildGroups(source).forEach { group ->
             val dataFlow: Map<Name, Data<T>> = group.set.asSequence().fold(HashMap()) { acc, value ->
                 acc.apply {
                     acc[value.name] = value.data
@@ -97,7 +97,7 @@ internal class ReduceAction<T, R>(
             val groupMeta = group.meta
 
             val env = ActionEnv(groupName.parseAsName(), groupMeta, meta)
-            @OptIn(DFInternal::class) val res: Data<R> = dataFlow.reduceToData(
+            @OptIn(UnsafeKType::class) val res: Data<R> = dataFlow.reduceToData(
                 group.outputType,
                 meta = groupMeta
             ) { group.result.invoke(env, it) }

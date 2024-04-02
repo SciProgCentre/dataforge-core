@@ -1,6 +1,5 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import space.kscience.dataforge.misc.DFInternal
@@ -25,32 +24,40 @@ private fun <R> Data<*>.castOrNull(type: KType): Data<R>? =
 
 @Suppress("UNCHECKED_CAST")
 @DFInternal
-public fun <R> Sequence<NamedData<*>>.filterByDataType(type: KType): Sequence<NamedData<R>> =
+public fun <R> Sequence<DataUpdate<*>>.filterByDataType(type: KType): Sequence<NamedData<R>> =
     filter { it.type.isSubtypeOf(type) } as Sequence<NamedData<R>>
 
 @Suppress("UNCHECKED_CAST")
 @DFInternal
-public fun <R> Flow<NamedData<*>>.filterByDataType(type: KType): Flow<NamedData<R>> =
+public fun <R> Flow<DataUpdate<*>>.filterByDataType(type: KType): Flow<NamedData<R>> =
     filter { it.type.isSubtypeOf(type) } as Flow<NamedData<R>>
 
 /**
  * Select all data matching given type and filters. Does not modify paths
  *
- * @param predicate additional filtering condition based on item name and meta. By default, accepts all
+ * @param filter additional filtering condition based on item name and meta. By default, accepts all
  */
+@Suppress("UNCHECKED_CAST")
 @DFInternal
 public fun <R> DataTree<*>.filterByType(
     type: KType,
-    predicate: DataFilter = DataFilter.EMPTY,
-): DataTree<R> = asSequence().filterByDataType<R>(type).filterData(predicate).toTree(type)
+    branch: Name = Name.EMPTY,
+    filter: DataFilter = DataFilter.EMPTY,
+): DataTree<R> {
+    val filterWithType = DataFilter { name, meta, dataType ->
+        filter.accepts(name, meta, dataType) && dataType.isSubtypeOf(type)
+    }
+    return FilteredDataTree(this, filterWithType, branch, type) as DataTree<R>
+}
 
 /**
  * Select a single datum of the appropriate type
  */
 @OptIn(DFInternal::class)
 public inline fun <reified R : Any> DataTree<*>.filterByType(
-    predicate: DataFilter = DataFilter.EMPTY,
-): DataTree<R> = filterByType(typeOf<R>(), predicate)
+    branch: Name = Name.EMPTY,
+    filter: DataFilter = DataFilter.EMPTY,
+): DataTree<R> = filterByType(typeOf<R>(), branch, filter = filter)
 
 /**
  * Select a single datum if it is present and of given [type]
@@ -63,25 +70,3 @@ public inline fun <reified R : Any> DataTree<*>.getByType(name: Name): NamedData
 
 public inline fun <reified R : Any> DataTree<*>.getByType(name: String): NamedData<R>? =
     this@getByType.getByType(typeOf<R>(), Name.parse(name))
-
-/**
- * Select all data matching given type and filters. Does not modify paths
- *
- * @param predicate additional filtering condition based on item name and meta. By default, accepts all
- */
-@DFInternal
-public fun <R> ObservableDataTree<*>.filterByType(
-    type: KType,
-    scope: CoroutineScope,
-    predicate: DataFilter = DataFilter.EMPTY,
-): ObservableDataTree<R> = asSequence()
-    .filterByDataType<R>(type)
-    .filterData(predicate)
-    .toObservableTree(type, scope, updates().filterByDataType<R>(type).filterData(predicate))
-
-
-@OptIn(DFInternal::class)
-public inline fun <reified R> ObservableDataTree<*>.filterByType(
-    scope: CoroutineScope,
-    predicate: DataFilter = DataFilter.EMPTY,
-): ObservableDataTree<R> = filterByType(typeOf<R>(), scope, predicate)

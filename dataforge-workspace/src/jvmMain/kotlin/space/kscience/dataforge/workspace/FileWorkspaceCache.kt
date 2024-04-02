@@ -1,5 +1,6 @@
 package space.kscience.dataforge.workspace
 
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.io.*
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -96,7 +97,7 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
 
 
         val cachedTree = result.asSequence().map { cacheOne(it) }
-            .toObservableTree(result.dataType, result.workspace, result.updates().map { cacheOne(it) })
+            .toTree(result.dataType, result.updates.filterIsInstance<NamedData<T>>().map { cacheOne(it) })
 
         return result.workspace.wrapResult(cachedTree, result.taskName, result.taskMeta)
     }

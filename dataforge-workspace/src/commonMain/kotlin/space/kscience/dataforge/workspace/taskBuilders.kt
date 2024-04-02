@@ -113,7 +113,7 @@ public suspend inline fun <T, reified R> TaskResultBuilder<R>.actionFrom(
     action: Action<T, R>,
     dependencyMeta: Meta = defaultDependencyMeta,
 ) {
-    this.putAll(action.execute(from(selector, dependencyMeta), dependencyMeta))
+    putAll(action.execute(from(selector, dependencyMeta), dependencyMeta, workspace))
 }
 
 

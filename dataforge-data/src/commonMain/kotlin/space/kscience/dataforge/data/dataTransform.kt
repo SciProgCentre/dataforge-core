@@ -1,7 +1,7 @@
 package space.kscience.dataforge.data
 
 import space.kscience.dataforge.meta.*
-import space.kscience.dataforge.misc.DFInternal
+import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import kotlin.coroutines.CoroutineContext
@@ -68,7 +68,7 @@ internal fun Map<*, Data<*>>.joinMeta(): Meta = Meta {
     }
 }
 
-@DFInternal
+@UnsafeKType
 public fun <K, T, R> Map<K, Data<T>>.reduceToData(
     outputType: KType,
     meta: Meta = joinMeta(),
@@ -103,7 +103,7 @@ public inline fun <K, T, reified R> Map<K, Data<T>>.reduceToData(
 
 //Iterable operations
 
-@DFInternal
+@UnsafeKType
 public inline fun <T, R> Iterable<Data<T>>.reduceToData(
     outputType: KType,
     meta: Meta = joinMeta(),
@@ -118,7 +118,7 @@ public inline fun <T, R> Iterable<Data<T>>.reduceToData(
     transformation(map { it.awaitWithMeta() })
 }
 
-@OptIn(DFInternal::class)
+@OptIn(UnsafeKType::class)
 public inline fun <T, reified R> Iterable<Data<T>>.reduceToData(
     meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
@@ -141,7 +141,7 @@ public inline fun <T, reified R> Iterable<Data<T>>.foldToData(
 /**
  * Transform an [Iterable] of [NamedData] to a single [Data].
  */
-@DFInternal
+@UnsafeKType
 public inline fun <T, R> Iterable<NamedData<T>>.reduceNamedToData(
     outputType: KType,
     meta: Meta = joinMeta(),
@@ -156,7 +156,7 @@ public inline fun <T, R> Iterable<NamedData<T>>.reduceNamedToData(
     transformation(map { it.awaitWithMeta() })
 }
 
-@OptIn(DFInternal::class)
+@OptIn(UnsafeKType::class)
 public inline fun <T, reified R> Iterable<NamedData<T>>.reduceNamedToData(
     meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
@@ -181,7 +181,8 @@ public inline fun <T, reified R> Iterable<NamedData<T>>.foldNamedToData(
 
 //DataSet operations
 
-@DFInternal
+
+@UnsafeKType
 public suspend fun <T, R> DataTree<T>.transform(
     outputType: KType,
     metaTransform: MutableMeta.() -> Unit = {},
@@ -198,7 +199,7 @@ public suspend fun <T, R> DataTree<T>.transform(
     }
 }
 
-@OptIn(DFInternal::class)
+@OptIn(UnsafeKType::class)
 public suspend inline fun <T, reified R> DataTree<T>.transform(
     noinline metaTransform: MutableMeta.() -> Unit = {},
     coroutineContext: CoroutineContext = EmptyCoroutineContext,

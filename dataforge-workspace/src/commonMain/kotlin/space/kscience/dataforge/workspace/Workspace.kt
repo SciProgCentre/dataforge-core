@@ -2,7 +2,10 @@ package space.kscience.dataforge.workspace
 
 import kotlinx.coroutines.CoroutineScope
 import space.kscience.dataforge.context.ContextAware
-import space.kscience.dataforge.data.*
+import space.kscience.dataforge.data.Data
+import space.kscience.dataforge.data.DataTree
+import space.kscience.dataforge.data.asSequence
+import space.kscience.dataforge.data.get
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.DfType
@@ -26,7 +29,7 @@ public interface Workspace : ContextAware, Provider, CoroutineScope {
     /**
      * The whole data node for current workspace
      */
-    public val data: ObservableDataTree<*>
+    public val data: DataTree<*>
 
     /**
      * All targets associated with the workspace
