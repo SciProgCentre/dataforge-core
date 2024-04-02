@@ -256,8 +256,6 @@ public fun ShortArray.asValue(): Value = if (isEmpty()) Null else ListValue(map 
 
 public fun FloatArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
 
-public fun ByteArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
-
 public fun <E : Enum<E>> E.asValue(): Value = EnumValue(this)
 
 

@@ -19,3 +19,10 @@ public annotation class DFExperimental
 @RequiresOptIn(level = RequiresOptIn.Level.WARNING)
 @Retention(AnnotationRetention.BINARY)
 public annotation class DFInternal
+
+/**
+ * Annotation marks methods that explicitly use KType without checking that it corresponds to the type parameter
+ */
+@RequiresOptIn(level = RequiresOptIn.Level.WARNING)
+@Retention(AnnotationRetention.BINARY)
+public annotation class UnsafeKType

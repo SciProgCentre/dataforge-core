@@ -135,7 +135,7 @@ public interface MetaConverter<T>: MetaSpec<T> {
         @DFExperimental
         public inline fun <reified T> serializable(
             descriptor: MetaDescriptor? = null,
-            jsonEncoder: Json = Json { ignoreUnknownKeys = true },
+            jsonEncoder: Json = Json,
         ): MetaConverter<T> = object : MetaConverter<T> {
             private val serializer: KSerializer<T> = serializer()
 

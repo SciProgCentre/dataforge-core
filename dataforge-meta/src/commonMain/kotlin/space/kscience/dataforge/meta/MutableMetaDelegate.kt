@@ -197,17 +197,6 @@ public fun MutableMetaProvider.numberList(
     reader = { it?.list?.map { value -> value.numberOrNull ?: Double.NaN } ?: listOf(*default) },
 )
 
-/* A special delegate for double arrays */
-
-
-public fun MutableMetaProvider.doubleArray(
-    vararg default: Double,
-    key: Name? = null,
-): ReadWriteProperty<Any?, DoubleArray> = value(
-    key,
-    writer = { DoubleArrayValue(it) },
-    reader = { it?.doubleArray ?: doubleArrayOf(*default) },
-)
 
 public fun <T> MutableMetaProvider.listValue(
     key: Name? = null,
