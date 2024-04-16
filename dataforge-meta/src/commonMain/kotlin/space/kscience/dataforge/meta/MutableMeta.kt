@@ -128,6 +128,10 @@ public interface MutableMeta : Meta, MutableMetaProvider {
         setValue(Name.parse(this), array.asValue())
     }
 
+    public infix fun String.put(array: ByteArray) {
+        setValue(Name.parse(this), array.asValue())
+    }
+
     public infix fun String.put(repr: MetaRepr) {
         set(Name.parse(this), repr.toMeta())
     }
