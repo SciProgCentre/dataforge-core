@@ -69,7 +69,7 @@ public class NameToken(public val body: String, public val index: String? = null
         public fun parse(string: String): NameToken {
             val body = string.substringBefore('[')
             val index = string.substringAfter('[', "")
-            if (index.isNotEmpty() && index.endsWith(']')) error("NameToken with index must end with ']'")
+            if (index.isNotEmpty() && !index.endsWith(']')) error("NameToken with index must end with ']'")
             return NameToken(body, index.removeSuffix("]"))
         }
     }

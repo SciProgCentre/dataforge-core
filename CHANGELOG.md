@@ -4,6 +4,7 @@
 
 ### Added
 - Name index comparator
+- Specialized ByteArrayValue
 
 ### Changed
 - DataSink `branch` is replaced with `putAll` to avoid confusion with DataTree methods
@@ -15,7 +16,8 @@
 ### Fixed
 - `listOfScheme` and `listOfConvertable` delegates provides correct items order.
 - Scheme meta setter works with proper sub-branch.
-- 
+- NameToken.parse improper work with indices
+
 
 ### Security
 
