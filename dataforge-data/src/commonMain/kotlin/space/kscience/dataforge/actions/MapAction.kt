@@ -48,8 +48,8 @@ public class MapActionBuilder<T, R>(
     public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(T) -> R1): Unit = result(typeOf<R1>(), f)
 }
 
-@PublishedApi
-internal class MapAction<T, R>(
+@UnsafeKType
+public class MapAction<T, R>(
     outputType: KType,
     private val block: MapActionBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {
@@ -78,7 +78,6 @@ internal class MapAction<T, R>(
         //getting new meta
         val newMeta = builder.meta.seal()
 
-        @OptIn(UnsafeKType::class)
         val newData = Data(builder.outputType, newMeta, dependencies = listOf(data)) {
             builder.result(env, data.await())
         }
@@ -106,6 +105,7 @@ internal class MapAction<T, R>(
  * A one-to-one mapping action
  */
 
+@OptIn(UnsafeKType::class)
 public inline fun <T, reified R> Action.Companion.mapping(
     noinline builder: MapActionBuilder<T, R>.() -> Unit,
 ): Action<T, R> = MapAction(typeOf<R>(), builder)

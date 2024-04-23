@@ -10,11 +10,11 @@ import space.kscience.dataforge.meta.ValueType
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.meta.descriptors.node
+import space.kscience.dataforge.misc.DFExperimental
 import java.net.URL
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.typeOf
 
 
 /**
@@ -58,9 +58,9 @@ private fun MetaDescriptorBuilder.loadDescriptorFromResource(resource: Descripto
     }
 }
 
-
-public fun <T : Any> MetaDescriptor.Companion.forClass(
-    kClass: KClass<T>,
+@DFExperimental
+public fun MetaDescriptor.Companion.forClass(
+    kClass: KClass<out Any>,
     mod: MetaDescriptorBuilder.() -> Unit = {},
 ): MetaDescriptor = MetaDescriptor {
     when {
@@ -79,7 +79,7 @@ public fun <T : Any> MetaDescriptor.Companion.forClass(
             is DescriptorUrl -> loadDescriptorFromUrl(URL(it.url))
         }
     }
-    kClass.memberProperties.forEach { property ->
+    kClass.memberProperties.forEach { property->
 
         var flag = false
 
@@ -88,6 +88,12 @@ public fun <T : Any> MetaDescriptor.Companion.forClass(
             (property.returnType.classifier as? KClass<*>)?.let {
                 from(forClass(it))
             }
+//
+//            (property.getDelegate(Unit) as? MetaDelegate<*>)?.descriptor?.let {
+//                from(it)
+//                flag = true
+//            }
+
             property.annotations.forEach {
                 when (it) {
                     is Description -> {
@@ -119,6 +125,6 @@ public fun <T : Any> MetaDescriptor.Companion.forClass(
     mod()
 }
 
-@Suppress("UNCHECKED_CAST")
-public inline fun <reified T : Scheme> SchemeSpec<T>.autoDescriptor( noinline mod: MetaDescriptorBuilder.() -> Unit = {}): MetaDescriptor =
-    MetaDescriptor.forClass(typeOf<T>().classifier as KClass<T>, mod)
+@DFExperimental
+public inline fun <reified T : Scheme> SchemeSpec<T>.autoDescriptor(noinline mod: MetaDescriptorBuilder.() -> Unit = {}): MetaDescriptor =
+    MetaDescriptor.forClass(T::class, mod)

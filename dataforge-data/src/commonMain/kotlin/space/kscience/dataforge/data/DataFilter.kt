@@ -61,7 +61,7 @@ internal class FilteredDataTree<T>(
 
     override val data: Data<T>?
         get() = source[branch].takeIf {
-            filter.accepts(Name.EMPTY, data?.meta, data?.type ?: dataType)
+            filter.accepts(Name.EMPTY, it?.meta, it?.type ?: dataType)
         }
 
     override val items: Map<NameToken, DataTree<T>>

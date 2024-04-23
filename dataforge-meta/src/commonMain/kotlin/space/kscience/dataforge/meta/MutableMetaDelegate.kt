@@ -1,5 +1,6 @@
 package space.kscience.dataforge.meta
 
+import space.kscience.dataforge.meta.descriptors.Described
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
@@ -8,19 +9,27 @@ import space.kscience.dataforge.names.getIndexedList
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
+
 /* Read-write delegates */
 
-public fun MutableMetaProvider.node(key: Name? = null): ReadWriteProperty<Any?, Meta?> =
-    object : ReadWriteProperty<Any?, Meta?> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Meta? {
-            return get(key ?: property.name.asName())
-        }
+public interface MutableMetaDelegate<T> : ReadWriteProperty<Any?, T>, Described
 
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: Meta?) {
-            val name = key ?: property.name.asName()
-            set(name, value)
-        }
+public fun MutableMetaProvider.node(
+    key: Name? = null,
+    descriptor: MetaDescriptor? = null,
+): MutableMetaDelegate<Meta?> = object : MutableMetaDelegate<Meta?> {
+
+    override val descriptor: MetaDescriptor? = descriptor
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): Meta? {
+        return get(key ?: property.name.asName())
     }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Meta?) {
+        val name = key ?: property.name.asName()
+        set(name, value)
+    }
+}
 
 /**
  * Use [converter] to transform an object to Meta and back.
@@ -29,21 +38,24 @@ public fun MutableMetaProvider.node(key: Name? = null): ReadWriteProperty<Any?, 
 public fun <T> MutableMetaProvider.convertable(
     converter: MetaConverter<T>,
     key: Name? = null,
-): ReadWriteProperty<Any?, T?> =
-    object : ReadWriteProperty<Any?, T?> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-            val name = key ?: property.name.asName()
-            return get(name)?.let { converter.read(it) }
-        }
+): MutableMetaDelegate<T?> = object : MutableMetaDelegate<T?> {
 
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
-            val name = key ?: property.name.asName()
-            set(name, value?.let { converter.convert(it) })
-        }
+    override val descriptor: MetaDescriptor? get() = converter.descriptor
+
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
+        val name = key ?: property.name.asName()
+        return get(name)?.let { converter.read(it) }
     }
 
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+        val name = key ?: property.name.asName()
+        set(name, value?.let { converter.convert(it) })
+    }
+}
+
 @Deprecated("Use convertable", ReplaceWith("convertable(converter, key)"))
-public fun <T> MutableMetaProvider.node(key: Name? = null, converter: MetaConverter<T>): ReadWriteProperty<Any?, T?> =
+public fun <T> MutableMetaProvider.node(key: Name? = null, converter: MetaConverter<T>): MutableMetaDelegate<T?> =
     convertable(converter, key)
 
 /**
@@ -54,7 +66,7 @@ public fun <T> MutableMetaProvider.node(key: Name? = null, converter: MetaConver
 public inline fun <reified T> MutableMetaProvider.serializable(
     descriptor: MetaDescriptor? = null,
     key: Name? = null,
-): ReadWriteProperty<Any?, T?> = convertable(MetaConverter.serializable(descriptor), key)
+): MutableMetaDelegate<T?> = convertable(MetaConverter.serializable(descriptor), key)
 
 /**
  * Use [converter] to convert a list of same name siblings meta to object and back.
@@ -63,7 +75,9 @@ public inline fun <reified T> MutableMetaProvider.serializable(
 public fun <T> MutableMeta.listOfConvertable(
     converter: MetaConverter<T>,
     key: Name? = null,
-): ReadWriteProperty<Any?, List<T>> = object : ReadWriteProperty<Any?, List<T>> {
+): MutableMetaDelegate<List<T>> = object : MutableMetaDelegate<List<T>> {
+    override val descriptor: MetaDescriptor? = converter.descriptor?.copy(multiple = true)
+
     override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
         val name = key ?: property.name.asName()
         return getIndexedList(name).map { converter.read(it) }
@@ -77,26 +91,33 @@ public fun <T> MutableMeta.listOfConvertable(
 
 @DFExperimental
 public inline fun <reified T> MutableMeta.listOfSerializable(
-    descriptor: MetaDescriptor? = null,
     key: Name? = null,
-): ReadWriteProperty<Any?, List<T>> = listOfConvertable(MetaConverter.serializable(descriptor), key)
+    descriptor: MetaDescriptor? = null,
+): MutableMetaDelegate<List<T>> = listOfConvertable(MetaConverter.serializable(descriptor), key)
 
 
-public fun MutableMetaProvider.value(key: Name? = null): ReadWriteProperty<Any?, Value?> =
-    object : ReadWriteProperty<Any?, Value?> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Value? =
-            get(key ?: property.name.asName())?.value
+public fun MutableMetaProvider.value(
+    key: Name? = null,
+    descriptor: MetaDescriptor? = null,
+): MutableMetaDelegate<Value?> = object : MutableMetaDelegate<Value?> {
+    override val descriptor: MetaDescriptor? = descriptor
 
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: Value?) {
-            setValue(key ?: property.name.asName(), value)
-        }
+    override fun getValue(thisRef: Any?, property: KProperty<*>): Value? =
+        get(key ?: property.name.asName())?.value
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Value?) {
+        setValue(key ?: property.name.asName(), value)
     }
+}
 
 public fun <T> MutableMetaProvider.value(
     key: Name? = null,
     writer: (T) -> Value? = { Value.of(it) },
+    descriptor: MetaDescriptor? = null,
     reader: (Value?) -> T,
-): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
+): MutableMetaDelegate<T> = object : MutableMetaDelegate<T> {
+    override val descriptor: MetaDescriptor? = descriptor
+
     override fun getValue(thisRef: Any?, property: KProperty<*>): T =
         reader(get(key ?: property.name.asName())?.value)
 
@@ -107,65 +128,65 @@ public fun <T> MutableMetaProvider.value(
 
 /* Read-write delegates for [MutableItemProvider] */
 
-public fun MutableMetaProvider.string(key: Name? = null): ReadWriteProperty<Any?, String?> =
+public fun MutableMetaProvider.string(key: Name? = null): MutableMetaDelegate<String?> =
     value(key) { it?.string }
 
-public fun MutableMetaProvider.boolean(key: Name? = null): ReadWriteProperty<Any?, Boolean?> =
+public fun MutableMetaProvider.boolean(key: Name? = null): MutableMetaDelegate<Boolean?> =
     value(key) { it?.boolean }
 
-public fun MutableMetaProvider.number(key: Name? = null): ReadWriteProperty<Any?, Number?> =
+public fun MutableMetaProvider.number(key: Name? = null): MutableMetaDelegate<Number?> =
     value(key) { it?.number }
 
-public fun MutableMetaProvider.string(default: String, key: Name? = null): ReadWriteProperty<Any?, String> =
+public fun MutableMetaProvider.string(default: String, key: Name? = null): MutableMetaDelegate<String> =
     value(key) { it?.string ?: default }
 
-public fun MutableMetaProvider.boolean(default: Boolean, key: Name? = null): ReadWriteProperty<Any?, Boolean> =
+public fun MutableMetaProvider.boolean(default: Boolean, key: Name? = null): MutableMetaDelegate<Boolean> =
     value(key) { it?.boolean ?: default }
 
-public fun MutableMetaProvider.number(default: Number, key: Name? = null): ReadWriteProperty<Any?, Number> =
+public fun MutableMetaProvider.number(default: Number, key: Name? = null): MutableMetaDelegate<Number> =
     value(key) { it?.number ?: default }
 
-public fun MutableMetaProvider.string(key: Name? = null, default: () -> String): ReadWriteProperty<Any?, String> =
+public fun MutableMetaProvider.string(key: Name? = null, default: () -> String): MutableMetaDelegate<String> =
     value(key) { it?.string ?: default() }
 
-public fun MutableMetaProvider.boolean(key: Name? = null, default: () -> Boolean): ReadWriteProperty<Any?, Boolean> =
+public fun MutableMetaProvider.boolean(key: Name? = null, default: () -> Boolean): MutableMetaDelegate<Boolean> =
     value(key) { it?.boolean ?: default() }
 
-public fun MutableMetaProvider.number(key: Name? = null, default: () -> Number): ReadWriteProperty<Any?, Number> =
+public fun MutableMetaProvider.number(key: Name? = null, default: () -> Number): MutableMetaDelegate<Number> =
     value(key) { it?.number ?: default() }
 
 public inline fun <reified E : Enum<E>> MutableMetaProvider.enum(
     default: E,
     key: Name? = null,
-): ReadWriteProperty<Any?, E> = value(key) { value -> value?.string?.let { enumValueOf<E>(it) } ?: default }
+): MutableMetaDelegate<E> = value(key) { value -> value?.string?.let { enumValueOf<E>(it) } ?: default }
 
 /* Number delegates */
 
-public fun MutableMetaProvider.int(key: Name? = null): ReadWriteProperty<Any?, Int?> =
+public fun MutableMetaProvider.int(key: Name? = null): MutableMetaDelegate<Int?> =
     value(key) { it?.int }
 
-public fun MutableMetaProvider.double(key: Name? = null): ReadWriteProperty<Any?, Double?> =
+public fun MutableMetaProvider.double(key: Name? = null): MutableMetaDelegate<Double?> =
     value(key) { it?.double }
 
-public fun MutableMetaProvider.long(key: Name? = null): ReadWriteProperty<Any?, Long?> =
+public fun MutableMetaProvider.long(key: Name? = null): MutableMetaDelegate<Long?> =
     value(key) { it?.long }
 
-public fun MutableMetaProvider.float(key: Name? = null): ReadWriteProperty<Any?, Float?> =
+public fun MutableMetaProvider.float(key: Name? = null): MutableMetaDelegate<Float?> =
     value(key) { it?.float }
 
 
 /* Safe number delegates*/
 
-public fun MutableMetaProvider.int(default: Int, key: Name? = null): ReadWriteProperty<Any?, Int> =
+public fun MutableMetaProvider.int(default: Int, key: Name? = null): MutableMetaDelegate<Int> =
     value(key) { it?.int ?: default }
 
-public fun MutableMetaProvider.double(default: Double, key: Name? = null): ReadWriteProperty<Any?, Double> =
+public fun MutableMetaProvider.double(default: Double, key: Name? = null): MutableMetaDelegate<Double> =
     value(key) { it?.double ?: default }
 
-public fun MutableMetaProvider.long(default: Long, key: Name? = null): ReadWriteProperty<Any?, Long> =
+public fun MutableMetaProvider.long(default: Long, key: Name? = null): MutableMetaDelegate<Long> =
     value(key) { it?.long ?: default }
 
-public fun MutableMetaProvider.float(default: Float, key: Name? = null): ReadWriteProperty<Any?, Float> =
+public fun MutableMetaProvider.float(default: Float, key: Name? = null): MutableMetaDelegate<Float> =
     value(key) { it?.float ?: default }
 
 
@@ -174,7 +195,7 @@ public fun MutableMetaProvider.float(default: Float, key: Name? = null): ReadWri
 public fun MutableMetaProvider.stringList(
     vararg default: String,
     key: Name? = null,
-): ReadWriteProperty<Any?, List<String>> = value(
+): MutableMetaDelegate<List<String>> = value(
     key,
     writer = { list -> list.map { str -> str.asValue() }.asValue() },
     reader = { it?.stringList ?: listOf(*default) },
@@ -182,7 +203,7 @@ public fun MutableMetaProvider.stringList(
 
 public fun MutableMetaProvider.stringList(
     key: Name? = null,
-): ReadWriteProperty<Any?, List<String>?> = value(
+): MutableMetaDelegate<List<String>?> = value(
     key,
     writer = { it -> it?.map { str -> str.asValue() }?.asValue() },
     reader = { it?.stringList },
@@ -191,7 +212,7 @@ public fun MutableMetaProvider.stringList(
 public fun MutableMetaProvider.numberList(
     vararg default: Number,
     key: Name? = null,
-): ReadWriteProperty<Any?, List<Number>> = value(
+): MutableMetaDelegate<List<Number>> = value(
     key,
     writer = { it.map { num -> num.asValue() }.asValue() },
     reader = { it?.list?.map { value -> value.numberOrNull ?: Double.NaN } ?: listOf(*default) },
@@ -202,7 +223,7 @@ public fun <T> MutableMetaProvider.listValue(
     key: Name? = null,
     writer: (T) -> Value = { Value.of(it) },
     reader: (Value) -> T,
-): ReadWriteProperty<Any?, List<T>?> = value(
+): MutableMetaDelegate<List<T>?> = value(
     key,
     writer = { it?.map(writer)?.asValue() },
     reader = { it?.list?.map(reader) }

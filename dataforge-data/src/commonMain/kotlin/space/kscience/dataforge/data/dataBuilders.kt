@@ -6,10 +6,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
-import space.kscience.dataforge.names.isEmpty
-import space.kscience.dataforge.names.plus
+import space.kscience.dataforge.names.*
 
 
 public fun <T> DataSink<T>.put(value: NamedData<T>) {
@@ -83,13 +80,13 @@ public inline fun <reified T> DataSink<T>.putValue(
  * Emit static data with the fixed value
  */
 public inline fun <reified T> DataSink<T>.putValue(
-    name: String,
+    name: Name,
     value: T,
     meta: Meta = Meta.EMPTY,
 ): Unit = put(name, Data.wrapValue(value, meta))
 
 public inline fun <reified T> DataSink<T>.putValue(
-    name: Name,
+    name: String,
     value: T,
     meta: Meta = Meta.EMPTY,
 ): Unit = put(name, Data.wrapValue(value, meta))
@@ -99,6 +96,18 @@ public inline fun <reified T> DataSink<T>.putValue(
     value: T,
     metaBuilder: MutableMeta.() -> Unit,
 ): Unit = put(Name.parse(name), Data.wrapValue(value, Meta(metaBuilder)))
+
+public suspend inline fun <reified T> DataSink<T>.updateValue(
+    name: Name,
+    value: T,
+    meta: Meta = Meta.EMPTY,
+): Unit = update(name, Data.wrapValue(value, meta))
+
+public suspend inline fun <reified T> DataSink<T>.updateValue(
+    name: String,
+    value: T,
+    meta: Meta = Meta.EMPTY,
+): Unit = update(name.parseAsName(), Data.wrapValue(value, meta))
 
 public fun <T> DataSink<T>.putAll(sequence: Sequence<NamedData<T>>) {
     sequence.forEach {
@@ -120,6 +129,6 @@ public fun <T : Any> DataSink<T>.putAllAndWatch(
 ): Job {
     putAll(branchName, source)
     return source.updates.onEach {
-        put(branchName + it.name, it.data)
+        update(branchName + it.name, it.data)
     }.launchIn(scope)
 }

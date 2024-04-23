@@ -265,8 +265,6 @@ public abstract interface annotation class space/kscience/dataforge/descriptors/
 }
 
 public final class space/kscience/dataforge/descriptors/ReflectiveDescriptorsKt {
-	public static final fun forClass (Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor$Companion;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;)Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;
-	public static synthetic fun forClass$default (Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor$Companion;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;
 }
 
 public final class space/kscience/dataforge/properties/MetaAsFlowKt {

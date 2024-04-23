@@ -1,20 +1,22 @@
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.map
 import kotlinx.io.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
+import space.kscience.dataforge.actions.Action
+import space.kscience.dataforge.actions.invoke
 import space.kscience.dataforge.context.error
 import space.kscience.dataforge.context.logger
 import space.kscience.dataforge.context.request
-import space.kscience.dataforge.data.*
+import space.kscience.dataforge.data.Data
+import space.kscience.dataforge.data.await
+import space.kscience.dataforge.data.named
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.misc.DFInternal
+import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.withIndex
 import java.nio.file.Path
 import kotlin.io.path.deleteIfExists
@@ -52,7 +54,8 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
 
     //    private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> = this as TaskData<T>
 
-    @OptIn(DFExperimental::class, DFInternal::class)
+
+    @OptIn(DFExperimental::class, UnsafeKType::class)
     override suspend fun <T> cache(result: TaskResult<T>): TaskResult<T> {
         val io = result.workspace.context.request(IOPlugin)
 
@@ -60,8 +63,8 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
             ?: ProtobufIOFormat(result.dataType)
             ?: error("Can't resolve IOFormat for ${result.dataType}")
 
-        fun cacheOne(data: NamedData<T>): NamedData<T> {
 
+        val cachingAction: Action<T, T> = CachingAction(result.dataType) { data ->
             val path = cacheDirectory /
                     result.taskName.withIndex(result.taskMeta.hashCode().toString(16)).toString() /
                     data.name.toString()
@@ -80,7 +83,7 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
                     }
                 }
 
-                //waiting for data in current scope because Envelope is synchronous
+                //waiting for data in the current scope because Envelope is synchronous
                 return@Data data.await().also { result ->
                     val envelope = Envelope {
                         meta = data.meta
@@ -92,12 +95,10 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
                 }
 
             }
-            return datum.named(data.name)
+            datum.named(data.name)
         }
 
-
-        val cachedTree = result.asSequence().map { cacheOne(it) }
-            .toTree(result.dataType, result.updates.filterIsInstance<NamedData<T>>().map { cacheOne(it) })
+        val cachedTree = cachingAction(result)
 
         return result.workspace.wrapResult(cachedTree, result.taskName, result.taskMeta)
     }

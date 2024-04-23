@@ -1,9 +1,8 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import space.kscience.dataforge.names.asName
 import kotlin.test.Test
@@ -15,7 +14,7 @@ internal class DataTreeBuilderTest {
     @Test
     fun testTreeBuild() = runTest(timeout = 500.milliseconds) {
         val node = DataTree<Any> {
-            putAll("primary"){
+            putAll("primary") {
                 putValue("a", "a")
                 putValue("b", "b")
             }
@@ -53,19 +52,22 @@ internal class DataTreeBuilderTest {
 
     @Test
     fun testDynamicUpdates() = runTest(timeout = 500.milliseconds) {
-        launch {
-            val subNode = MutableDataTree<Int>()
+        var job: Job? = null
 
-            val rootNode = MutableDataTree<Int>() {
-                putAllAndWatch(this@launch, "sub".asName(), subNode)
-            }
+        val subNode = MutableDataTree<Int>()
 
-            repeat(10) {
-                subNode.putValue("value[$it]", it)
-            }
-            subNode.updates.take(10).collect()
-            assertEquals(9, rootNode["sub.value[9]"]?.await())
-            cancel()
-        }.join()
+        val rootNode = MutableDataTree<Int>() {
+            job = putAllAndWatch(this@runTest, "sub".asName(), subNode)
+        }
+
+        repeat(10) {
+            subNode.updateValue("value[$it]", it)
+        }
+
+        rootNode.updates.take(10).collect()
+        assertEquals(9, rootNode["sub.value[9]"]?.await())
+        assertEquals(8, rootNode["sub.value[8]"]?.await())
+
+        job?.cancel()
     }
 }

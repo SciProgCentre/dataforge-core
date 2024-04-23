@@ -8,6 +8,7 @@
 
 ### Changed
 - DataSink `branch` is replaced with `putAll` to avoid confusion with DataTree methods
+- Meta delegate now uses a specific class that has a descriptor
 
 ### Deprecated
 
@@ -16,7 +17,8 @@
 ### Fixed
 - `listOfScheme` and `listOfConvertable` delegates provides correct items order.
 - Scheme meta setter works with proper sub-branch.
-- NameToken.parse improper work with indices
+- NameToken.parse improper work with indices.
+- Proper data handling for cache.
 
 
 ### Security

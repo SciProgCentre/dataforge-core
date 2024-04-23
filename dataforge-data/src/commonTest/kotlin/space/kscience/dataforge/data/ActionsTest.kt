@@ -41,7 +41,7 @@ internal class ActionsTest {
 
 
         repeat(10) {
-            source.putValue(it.toString(), it)
+            source.updateValue(it.toString(), it)
         }
         result.updates.take(10).onEach { println(it.name) }.collect()
 

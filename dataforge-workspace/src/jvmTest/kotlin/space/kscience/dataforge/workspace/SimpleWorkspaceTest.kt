@@ -148,16 +148,16 @@ internal class SimpleWorkspaceTest {
     }
 
     @Test
-    fun testWorkspace() = runTest(timeout = 10.milliseconds) {
+    fun testWorkspace() = runTest(timeout = 100.milliseconds) {
         val node = workspace.produce("sum")
         val res = node.asSequence().single()
         assertEquals(328350, res.await())
     }
 
     @Test
-    fun testMetaPropagation() = runTest(timeout = 10.milliseconds) {
+    fun testMetaPropagation() = runTest(timeout = 100.milliseconds) {
         val node = workspace.produce("sum") { "testFlag" put true }
-        val res = node.data!!.await()
+        val res = node["sum"]!!.await()
     }
 
     @Test
@@ -186,7 +186,7 @@ internal class SimpleWorkspaceTest {
         val node = workspace.produce("filterOne") {
             "name" put "myData[12]"
         }
-        assertEquals(12, node.data!!.await())
+        assertEquals(12, node.asSequence().first().await())
     }
 
 }

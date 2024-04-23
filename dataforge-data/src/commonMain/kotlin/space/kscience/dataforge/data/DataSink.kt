@@ -2,6 +2,7 @@ package space.kscience.dataforge.data
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.mapNotNull
@@ -80,7 +81,8 @@ private class MutableDataTreeRoot<T>(
     override val dataType: KType,
 ) : MutableDataTree<T> {
 
-    override val updates = MutableSharedFlow<DataUpdate<T>>()
+    override val updates = MutableSharedFlow<DataUpdate<T>>(100, onBufferOverflow = BufferOverflow.DROP_LATEST)
+
 
     inner class MutableDataTreeBranch(val branchName: Name) : MutableDataTree<T> {
 
@@ -108,10 +110,10 @@ private class MutableDataTreeRoot<T>(
         override suspend fun update(name: Name, data: Data<T>?) {
             if (name.isEmpty()) {
                 this.data = data
+                this@MutableDataTreeRoot.updates.emit(DataUpdate(data?.type ?: dataType, branchName + name, data))
             } else {
                 getOrCreateItem(name.first()).update(name.cutFirst(), data)
             }
-            this@MutableDataTreeRoot.updates.emit(DataUpdate(data?.type ?: dataType, branchName + name, data))
         }
 
     }
@@ -122,7 +124,7 @@ private class MutableDataTreeRoot<T>(
     override val items = HashMap<NameToken, MutableDataTree<T>>()
 
     override fun getOrCreateItem(token: NameToken): MutableDataTree<T> = items.getOrPut(token) {
-        MutableDataTreeRoot(dataType)
+        MutableDataTreeBranch(token.asName())
     }
 
     override fun set(token: NameToken, data: Data<T>?) {
@@ -133,10 +135,10 @@ private class MutableDataTreeRoot<T>(
     override suspend fun update(name: Name, data: Data<T>?) {
         if (name.isEmpty()) {
             this.data = data
+            updates.emit(DataUpdate(data?.type ?: dataType, name, data))
         } else {
             getOrCreateItem(name.first()).update(name.cutFirst(), data)
         }
-        updates.emit(DataUpdate(data?.type ?: dataType, name, data))
     }
 }
 
