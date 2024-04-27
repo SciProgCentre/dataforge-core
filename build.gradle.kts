@@ -4,11 +4,12 @@ import space.kscience.gradle.useSPCTeam
 
 plugins {
     id("space.kscience.gradle.project")
+    id("org.jetbrains.kotlinx.kover") version "0.7.6"
 }
 
 allprojects {
     group = "space.kscience"
-    version = "0.8.2-dev-1"
+    version = "0.8.2"
 }
 
 subprojects {

@@ -3,25 +3,35 @@
 ## Unreleased
 
 ### Added
-- Name index comparator
-- Specialized ByteArrayValue
 
 ### Changed
-- DataSink `branch` is replaced with `putAll` to avoid confusion with DataTree methods
-- Meta delegate now uses a specific class that has a descriptor
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+### Security
+
+## 0.8.2 - 2024-04-27
+
+### Added
+
+- Name index comparator
+- Specialized ByteArrayValue
+
+### Changed
+
+- DataSink `branch` is replaced with `putAll` to avoid confusion with DataTree methods
+- Meta delegate now uses a specific class that has a descriptor
+
+### Fixed
+
 - `listOfScheme` and `listOfConvertable` delegates provides correct items order.
 - Scheme meta setter works with proper sub-branch.
 - NameToken.parse improper work with indices.
 - Proper data handling for cache.
-
-
-### Security
 
 ## 0.8.0 - 2024-02-03
 
