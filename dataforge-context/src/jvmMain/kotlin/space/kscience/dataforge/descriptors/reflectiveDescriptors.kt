@@ -79,7 +79,7 @@ public fun MetaDescriptor.Companion.forClass(
             is DescriptorUrl -> loadDescriptorFromUrl(URL(it.url))
         }
     }
-    kClass.memberProperties.forEach { property->
+    kClass.memberProperties.forEach { property ->
 
         var flag = false
 
@@ -88,11 +88,6 @@ public fun MetaDescriptor.Companion.forClass(
             (property.returnType.classifier as? KClass<*>)?.let {
                 from(forClass(it))
             }
-//
-//            (property.getDelegate(Unit) as? MetaDelegate<*>)?.descriptor?.let {
-//                from(it)
-//                flag = true
-//            }
 
             property.annotations.forEach {
                 when (it) {

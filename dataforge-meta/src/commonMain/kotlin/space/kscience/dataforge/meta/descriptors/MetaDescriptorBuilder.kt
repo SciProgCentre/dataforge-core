@@ -47,6 +47,7 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
     ): Unit {
         when (name.length) {
             0 -> error("Can't set descriptor to root")
+
             1 -> {
                 children[name.first().body] = descriptorBuilder
             }
