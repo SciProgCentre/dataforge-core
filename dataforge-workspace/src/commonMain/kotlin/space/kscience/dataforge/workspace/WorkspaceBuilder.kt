@@ -71,10 +71,10 @@ public inline fun <reified T : Any> TaskContainer.task(
 }
 
 /**
- * Create a task based on [MetaSpec]
+ * Create a task based on [MetaReader]
  */
 public inline fun <reified T : Any, C : MetaRepr> TaskContainer.task(
-    specification: MetaSpec<C>,
+    specification: MetaReader<C>,
     noinline builder: suspend TaskResultBuilder<T>.(C) -> Unit,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
     val taskName = Name.parse(property.name)

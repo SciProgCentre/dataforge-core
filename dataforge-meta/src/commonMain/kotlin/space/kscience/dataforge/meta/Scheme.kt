@@ -12,7 +12,7 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 
 /**
- * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [MetaSpec].
+ * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [MetaReader].
  *
  * @param prototype default values provided by this scheme
  */
@@ -80,6 +80,9 @@ public open class Scheme(
     override fun toString(): String = meta.toString()
 
     private inner class SchemeMeta(val pathName: Name) : ObservableMutableMeta {
+
+        override val self get() = this
+
         override var value: Value?
             get() = target[pathName]?.value
                 ?: prototype?.get(pathName)?.value
@@ -216,7 +219,7 @@ public fun <T : Scheme> Configurable.updateWith(
 
 
 /**
- * A delegate that uses a [MetaSpec] to wrap a child of this provider
+ * A delegate that uses a [MetaReader] to wrap a child of this provider
  */
 public fun <T : Scheme> MutableMeta.scheme(
     spec: SchemeSpec<T>,
@@ -239,7 +242,7 @@ public fun <T : Scheme> Scheme.scheme(
 ): ReadWriteProperty<Any?, T> = meta.scheme(spec, key)
 
 /**
- * A delegate that uses a [MetaSpec] to wrap a child of this provider.
+ * A delegate that uses a [MetaReader] to wrap a child of this provider.
  * Returns null if meta with given name does not exist.
  */
 public fun <T : Scheme> MutableMeta.schemeOrNull(
@@ -264,7 +267,7 @@ public fun <T : Scheme> Scheme.schemeOrNull(
 ): ReadWriteProperty<Any?, T?> = meta.schemeOrNull(spec, key)
 
 /**
- * A delegate that uses a [MetaSpec] to wrap a list of child providers.
+ * A delegate that uses a [MetaReader] to wrap a list of child providers.
  * If children are mutable, the changes in list elements are reflected on them.
  * The list is a snapshot of children state, so change in structure is not reflected on its composition.
  */

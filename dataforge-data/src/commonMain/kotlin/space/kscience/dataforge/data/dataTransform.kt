@@ -18,6 +18,24 @@ public data class NamedValueWithMeta<T>(val name: Name, val value: T, val meta: 
 public suspend fun <T> NamedData<T>.awaitWithMeta(): NamedValueWithMeta<T> =
     NamedValueWithMeta(name, await(), meta)
 
+/**
+ * Lazily transform this data to another data. By convention [block] should not use external data (be pure).
+ * @param type explicit type of the resulting [Data]
+ * @param coroutineContext additional [CoroutineContext] elements used for data computation.
+ * @param meta for the resulting data. By default equals input data.
+ * @param block the transformation itself
+ */
+@UnsafeKType
+public fun <T, R> Data<T>.transform(
+    type: KType,
+    meta: Meta = this.meta,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    block: suspend (T) -> R,
+): Data<R> = Data(type, meta, coroutineContext, listOf(this)) {
+    block(await())
+}
+
+
 
 /**
  * Lazily transform this data to another data. By convention [block] should not use external data (be pure).

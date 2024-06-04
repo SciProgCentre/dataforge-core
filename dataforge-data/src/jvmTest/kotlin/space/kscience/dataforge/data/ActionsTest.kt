@@ -43,6 +43,7 @@ internal class ActionsTest {
         repeat(10) {
             source.updateValue(it.toString(), it)
         }
+
         result.updates.take(10).onEach { println(it.name) }.collect()
 
         assertEquals(2, result["1"]?.await())

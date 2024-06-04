@@ -13,6 +13,9 @@ public class SealedMeta(
     override val value: Value?,
     override val items: Map<NameToken, SealedMeta>,
 ) : TypedMeta<SealedMeta> {
+
+    override val self: SealedMeta get() = this
+
     override fun toString(): String = Meta.toString(this)
     override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
 

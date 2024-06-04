@@ -25,16 +25,16 @@ public fun MetaProvider.node(
 }
 
 /**
- * Use [metaSpec] to read the Meta node
+ * Use [metaReader] to read the Meta node
  */
 public fun <T> MetaProvider.spec(
-    metaSpec: MetaSpec<T>,
+    metaReader: MetaReader<T>,
     key: Name? = null,
 ): MetaDelegate<T?> = object : MetaDelegate<T?> {
-    override val descriptor: MetaDescriptor? get() = metaSpec.descriptor
+    override val descriptor: MetaDescriptor? get() = metaReader.descriptor
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-        return get(key ?: property.name.asName())?.let { metaSpec.read(it) }
+        return get(key ?: property.name.asName())?.let { metaReader.read(it) }
     }
 }
 
@@ -50,14 +50,14 @@ public inline fun <reified T> MetaProvider.serializable(
 @Deprecated("Use convertable", ReplaceWith("convertable(converter, key)"))
 public fun <T> MetaProvider.node(
     key: Name? = null,
-    converter: MetaSpec<T>,
+    converter: MetaReader<T>,
 ): ReadOnlyProperty<Any?, T?> = spec(converter, key)
 
 /**
  * Use [converter] to convert a list of same name siblings meta to object
  */
 public fun <T> Meta.listOfSpec(
-    converter: MetaSpec<T>,
+    converter: MetaReader<T>,
     key: Name? = null,
 ): MetaDelegate<List<T>> = object : MetaDelegate<List<T>> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {

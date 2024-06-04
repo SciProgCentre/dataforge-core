@@ -58,7 +58,7 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
         }
     }
 
-    internal fun node(
+    public fun node(
         name: Name,
         descriptorBuilder: MetaDescriptor,
     ): Unit {

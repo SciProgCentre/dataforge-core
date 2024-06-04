@@ -3,7 +3,6 @@ package space.kscience.dataforge.meta
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import space.kscience.dataforge.misc.DfType
-import space.kscience.dataforge.misc.unsafeCast
 import space.kscience.dataforge.names.*
 import kotlin.jvm.JvmName
 
@@ -151,6 +150,8 @@ public interface TypedMeta<out M : TypedMeta<M>> : Meta {
 
     override val items: Map<NameToken, M>
 
+    public val self: M
+
     override fun get(name: Name): M? {
         tailrec fun M.find(name: Name): M? = if (name.isEmpty()) {
             this
@@ -163,11 +164,6 @@ public interface TypedMeta<out M : TypedMeta<M>> : Meta {
 
     override fun toMeta(): Meta = this
 }
-
-/**
- * Access self as a recursive type instance
- */
-public inline val <M : TypedMeta<M>> TypedMeta<M>.self: M get() = unsafeCast()
 
 //public typealias Meta = TypedMeta<*>
 

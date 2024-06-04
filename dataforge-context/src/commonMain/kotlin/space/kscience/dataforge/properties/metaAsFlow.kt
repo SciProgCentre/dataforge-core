@@ -10,7 +10,7 @@ import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.DFExperimental
 
 @DFExperimental
-public fun <T> ObservableMeta.asFlow(converter: MetaSpec<T>): Flow<T> = callbackFlow {
+public fun <T> ObservableMeta.asFlow(converter: MetaReader<T>): Flow<T> = callbackFlow {
     onChange(this){
         trySend(converter.read(this))
     }

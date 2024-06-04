@@ -3,12 +3,17 @@
 ## Unreleased
 
 ### Added
+- Custom CoroutineContext during `Context` creation.
 
 ### Changed
+- Kotlin 2.0
+- `MetaSpec` renamed to `MetaReader`. MetaSpec is now reserved for builder-based generation of meta descriptors.
+- Add self-type for Meta. Remove unsafe cast method for meta instances.
 
 ### Deprecated
 
 ### Removed
+- Automatic descriptors for schema. It is not possible to implement them without heavy reflection.
 
 ### Fixed
 

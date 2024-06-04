@@ -3,21 +3,21 @@ import space.kscience.gradle.useApache2Licence
 import space.kscience.gradle.useSPCTeam
 
 plugins {
-    id("space.kscience.gradle.project")
-    id("org.jetbrains.kotlinx.kover") version "0.7.6"
+    alias(spclibs.plugins.kscience.project)
+    alias(spclibs.plugins.kotlinx.kover)
 }
 
 allprojects {
     group = "space.kscience"
-    version = "0.8.2"
+    version = "0.9.0-dev-1"
 }
 
 subprojects {
     apply(plugin = "maven-publish")
 
     tasks.withType<KotlinCompile> {
-        kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
+        compilerOptions {
+            freeCompilerArgs.add("-Xcontext-receivers")
         }
     }
 }

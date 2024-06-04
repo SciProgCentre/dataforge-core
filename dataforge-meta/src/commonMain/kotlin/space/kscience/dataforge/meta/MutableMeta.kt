@@ -253,6 +253,9 @@ private class MutableMetaImpl(
     value: Value?,
     children: Map<NameToken, Meta> = emptyMap(),
 ) : AbstractObservableMeta(), ObservableMutableMeta {
+
+    override val self get() = this
+
     override var value = value
         @ThreadSafe set(value) {
             val oldValue = field

@@ -9,6 +9,8 @@ import space.kscience.dataforge.names.NameToken
  */
 public class Laminate internal constructor(public val layers: List<Meta>) : TypedMeta<Laminate> {
 
+    override val self: Laminate get() = this
+
     override val value: Value? = layers.firstNotNullOfOrNull { it.value }
 
     override val items: Map<NameToken, Laminate> by lazy {

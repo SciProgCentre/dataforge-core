@@ -11,7 +11,7 @@ import space.kscience.dataforge.misc.DFExperimental
 /**
  * A converter of generic object to and from [Meta]
  */
-public interface MetaConverter<T>: MetaSpec<T> {
+public interface MetaConverter<T>: MetaReader<T> {
 
     /**
      * A descriptor for resulting meta
