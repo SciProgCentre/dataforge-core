@@ -57,6 +57,7 @@ public abstract interface class space/kscience/dataforge/context/ContextAware {
 
 public final class space/kscience/dataforge/context/ContextBuilder {
 	public final fun build ()Lspace/kscience/dataforge/context/Context;
+	public final fun coroutineContext (Lkotlin/coroutines/CoroutineContext;)V
 	public final fun getName ()Lspace/kscience/dataforge/names/Name;
 	public final fun plugin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun plugin (Lspace/kscience/dataforge/context/Plugin;)V
@@ -67,9 +68,6 @@ public final class space/kscience/dataforge/context/ContextBuilder {
 	public static synthetic fun plugin$default (Lspace/kscience/dataforge/context/ContextBuilder;Lspace/kscience/dataforge/context/PluginFactory;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun plugin$default (Lspace/kscience/dataforge/context/ContextBuilder;Lspace/kscience/dataforge/context/PluginTag;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun properties (Lkotlin/jvm/functions/Function1;)V
-}
-
-public final class space/kscience/dataforge/context/ContextBuilderKt {
 }
 
 public final class space/kscience/dataforge/context/DefaultLogManager : space/kscience/dataforge/context/AbstractPlugin, space/kscience/dataforge/context/LogManager {
@@ -212,14 +210,14 @@ public final class space/kscience/dataforge/context/PluginTag : space/kscience/d
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class space/kscience/dataforge/context/PluginTag$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public synthetic class space/kscience/dataforge/context/PluginTag$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lspace/kscience/dataforge/context/PluginTag$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lspace/kscience/dataforge/context/PluginTag;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lspace/kscience/dataforge/context/PluginTag;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lspace/kscience/dataforge/context/PluginTag;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lspace/kscience/dataforge/context/PluginTag;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
@@ -262,15 +260,6 @@ public abstract interface annotation class space/kscience/dataforge/descriptors/
 }
 
 public abstract interface annotation class space/kscience/dataforge/descriptors/Multiple : java/lang/annotation/Annotation {
-}
-
-public final class space/kscience/dataforge/descriptors/ReflectiveDescriptorsKt {
-}
-
-public final class space/kscience/dataforge/properties/MetaAsFlowKt {
-}
-
-public final class space/kscience/dataforge/provider/DfTypeKt {
 }
 
 public final class space/kscience/dataforge/provider/Path : java/lang/Iterable, kotlin/jvm/internal/markers/KMappedMarker {

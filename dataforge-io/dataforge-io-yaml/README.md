@@ -6,7 +6,7 @@ YAML meta IO
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:dataforge-io-yaml:0.8.2`.
+The Maven coordinates of this project are `space.kscience:dataforge-io-yaml:0.9.0-dev-1`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -16,6 +16,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:dataforge-io-yaml:0.8.2")
+    implementation("space.kscience:dataforge-io-yaml:0.9.0-dev-1")
 }
 ```
