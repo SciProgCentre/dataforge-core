@@ -58,7 +58,7 @@ public class Name(public val tokens: List<NameToken>) {
          */
         public fun parse(string: String): Name {
             if (string.isBlank()) return EMPTY
-            val tokens = sequence {
+            val tokens = buildList<NameToken> {
                 var bodyBuilder = StringBuilder()
                 var queryBuilder = StringBuilder()
                 var bracketCount = 0
@@ -91,7 +91,7 @@ public class Name(public val tokens: List<NameToken>) {
                         else -> when (it) {
                             '.' -> {
                                 val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
-                                yield(NameToken(bodyBuilder.toString(), query))
+                                add(NameToken(bodyBuilder.toString(), query))
                                 bodyBuilder = StringBuilder()
                                 queryBuilder = StringBuilder()
                             }
@@ -106,9 +106,9 @@ public class Name(public val tokens: List<NameToken>) {
                     }
                 }
                 val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
-                yield(NameToken(bodyBuilder.toString(), query))
+                add(NameToken(bodyBuilder.toString(), query))
             }
-            return Name(tokens.toList())
+            return Name(tokens)
         }
     }
 }
