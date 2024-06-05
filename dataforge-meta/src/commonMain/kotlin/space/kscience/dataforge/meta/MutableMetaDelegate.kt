@@ -54,9 +54,25 @@ public fun <T> MutableMetaProvider.convertable(
     }
 }
 
-@Deprecated("Use convertable", ReplaceWith("convertable(converter, key)"))
-public fun <T> MutableMetaProvider.node(key: Name? = null, converter: MetaConverter<T>): MutableMetaDelegate<T?> =
-    convertable(converter, key)
+public fun <T> MutableMetaProvider.convertable(
+    converter: MetaConverter<T>,
+    default: T,
+    key: Name? = null,
+): MutableMetaDelegate<T> = object : MutableMetaDelegate<T> {
+
+    override val descriptor: MetaDescriptor? get() = converter.descriptor
+
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        val name = key ?: property.name.asName()
+        return get(name)?.let { converter.read(it) } ?: default
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+        val name = key ?: property.name.asName()
+        set(name, value?.let { converter.convert(it) })
+    }
+}
 
 /**
  * Use object serializer to transform it to Meta and back.
@@ -66,7 +82,14 @@ public fun <T> MutableMetaProvider.node(key: Name? = null, converter: MetaConver
 public inline fun <reified T> MutableMetaProvider.serializable(
     descriptor: MetaDescriptor? = null,
     key: Name? = null,
-): MutableMetaDelegate<T?> = convertable(MetaConverter.serializable(descriptor), key)
+): MutableMetaDelegate<T?> = convertable<T>(MetaConverter.serializable(descriptor), key)
+
+@DFExperimental
+public inline fun <reified T> MutableMetaProvider.serializable(
+    descriptor: MetaDescriptor? = null,
+    default: T,
+    key: Name? = null,
+): MutableMetaDelegate<T> = convertable(MetaConverter.serializable(descriptor), default, key)
 
 /**
  * Use [converter] to convert a list of same name siblings meta to object and back.

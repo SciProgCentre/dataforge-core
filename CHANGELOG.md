@@ -7,6 +7,7 @@
 ### Changed
 
 ### Deprecated
+- MetaProvider `spec` is replaced by `readable`. `listOfSpec` replaced with `listOfReadable`
 
 ### Removed
 
