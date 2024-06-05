@@ -159,7 +159,17 @@ public interface MutableTypedMeta<M : MutableTypedMeta<M>> : TypedMeta<M>, Mutab
      */
     @DFExperimental
     public fun attach(name: Name, node: M)
-    override fun get(name: Name): M?
+
+    override fun get(name: Name): M? {
+        tailrec fun M.find(name: Name): M? = if (name.isEmpty()) {
+            self
+        } else {
+            items[name.firstOrNull()!!]?.find(name.cutFirst())
+        }
+
+        return self.find(name)
+    }
+
     override fun getOrCreate(name: Name): M
 }
 
@@ -388,7 +398,7 @@ public fun MutableMeta.reset(newMeta: Meta) {
     (items.keys - newMeta.items.keys).forEach {
         remove(it.asName())
     }
-    newMeta.items.forEach { (token, item)->
+    newMeta.items.forEach { (token, item) ->
         set(token, item)
     }
 }

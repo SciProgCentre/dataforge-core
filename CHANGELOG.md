@@ -5,6 +5,7 @@
 ### Added
 
 ### Changed
+- Simplify inheritance logic in `MutableTypedMeta`
 
 ### Deprecated
 - MetaProvider `spec` is replaced by `readable`. `listOfSpec` replaced with `listOfReadable`
