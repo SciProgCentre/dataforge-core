@@ -1,6 +1,5 @@
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.CoroutineScope
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.ContextBuilder
@@ -12,6 +11,7 @@ import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFBuilder
+import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import kotlin.collections.set
@@ -71,10 +71,10 @@ public inline fun <reified T : Any> TaskContainer.task(
 }
 
 /**
- * Create a task based on [MetaSpec]
+ * Create a task based on [MetaReader]
  */
 public inline fun <reified T : Any, C : MetaRepr> TaskContainer.task(
-    specification: MetaSpec<C>,
+    specification: MetaReader<C>,
     noinline builder: suspend TaskResultBuilder<T>.(C) -> Unit,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
     val taskName = Name.parse(property.name)
@@ -98,19 +98,19 @@ public inline fun <reified T : Any> TaskContainer.task(
 public inline fun <T : Any, reified R : Any> TaskContainer.action(
     selector: DataSelector<T>,
     action: Action<T, R>,
-    noinline metaTransform: MutableMeta.()-> Unit = {},
+    noinline metaTransform: MutableMeta.() -> Unit = {},
     noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<R>>> =
     task(MetaDescriptor(descriptorBuilder)) {
-        result(action.execute(from(selector), taskMeta.copy(metaTransform)))
+        result(action.execute(from(selector), taskMeta.copy(metaTransform), workspace))
     }
 
 public class WorkspaceBuilder(
     private val parentContext: Context = Global,
-    private val coroutineScope: CoroutineScope = parentContext,
 ) : TaskContainer {
     private var context: Context? = null
-    private val data = MutableDataTree<Any?>(typeOf<Any?>(), coroutineScope)
+    @OptIn(UnsafeKType::class)
+    private val data = MutableDataTree<Any?>(typeOf<Any?>())
     private val targets: HashMap<String, Meta> = HashMap()
     private val tasks = HashMap<Name, Task<*>>()
     private var cache: WorkspaceCache? = null

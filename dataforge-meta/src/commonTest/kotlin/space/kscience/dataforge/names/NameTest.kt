@@ -1,9 +1,6 @@
 package space.kscience.dataforge.names
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class NameTest {
     @Test
@@ -49,5 +46,20 @@ class NameTest {
     fun cutLast() {
         val name = Name.parse("a.b.c")
         assertEquals("a.b".parseAsName(), name.cutLast())
+    }
+
+    @Test
+    fun tokenParseTest(){
+        val token1 = NameToken.parse("token[index]")
+        assertEquals("token", token1.body)
+        assertEquals("index", token1.index)
+
+        val token2 = NameToken.parse("token-body")
+        assertEquals("token-body", token2.body)
+        assertEquals("", token2.index)
+
+        assertFails {
+            NameToken.parse("token[22")
+        }
     }
 }

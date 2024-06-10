@@ -12,32 +12,28 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 
 /**
- * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [MetaSpec].
- * Default item provider and [MetaDescriptor] are optional
+ * A base for delegate-based or descriptor-based scheme. [Scheme] has an empty constructor to simplify usage from [MetaReader].
+ *
+ * @param prototype default values provided by this scheme
  */
-public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurable {
+public open class Scheme(
+    private var prototype: Meta? = null,
+    descriptor: MetaDescriptor? = null,
+) : Described, MetaRepr, MutableMetaProvider, Configurable {
 
     /**
      * Meta to be mutated by this scheme
      */
-    private var target: MutableMeta? = null
-        get() {
-            // automatic initialization of target if it is missing
-            if (field == null) {
-                field = MutableMeta()
-            }
-            return field
-        }
+    internal var target: MutableMeta = MutableMeta()
 
     /**
-     * Default values provided by this scheme
+     * A descriptor of this scheme
      */
-    private var prototype: Meta? = null
+    final override var descriptor: MetaDescriptor? = descriptor
+        private set
+
 
     final override val meta: ObservableMutableMeta = SchemeMeta(Name.EMPTY)
-
-    final override var descriptor: MetaDescriptor? = null
-        private set
 
     /**
      * This method must be called before the scheme could be used
@@ -84,13 +80,16 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
     override fun toString(): String = meta.toString()
 
     private inner class SchemeMeta(val pathName: Name) : ObservableMutableMeta {
+
+        override val self get() = this
+
         override var value: Value?
             get() = target[pathName]?.value
                 ?: prototype?.get(pathName)?.value
                 ?: descriptor?.get(pathName)?.defaultValue
             set(value) {
                 val oldValue = target[pathName]?.value
-                target!![pathName] = value
+                target[pathName] = value
                 if (oldValue != value) {
                     invalidate(Name.EMPTY)
                 }
@@ -126,7 +125,7 @@ public open class Scheme : Described, MetaRepr, MutableMetaProvider, Configurabl
         override fun hashCode(): Int = Meta.hashCode(this)
 
         override fun set(name: Name, node: Meta?) {
-            target!![name] = node
+            target[pathName + name] = node
             invalidate(name)
         }
 
@@ -176,18 +175,22 @@ public open class SchemeSpec<T : Scheme>(
         it.initialize(MutableMeta(), source, descriptor)
     }
 
+    /**
+     * Write changes made to the [Scheme] to target [MutableMeta]. If the empty [Scheme] contains any data it is copied to the target.
+     */
     public fun write(target: MutableMeta): T = empty().also {
+        target.update(it.meta)
         it.initialize(target, Meta.EMPTY, descriptor)
     }
 
     /**
-     * Generate an empty object
+     * Generate a blank object. The object could contain some elements if they are defined in a constructor
      */
     public fun empty(): T = builder().also {
-        it.initialize(MutableMeta(), Meta.EMPTY, descriptor)
+        it.initialize(MutableMeta(), it.target, descriptor)
     }
 
-    override fun convert(obj: T): Meta  = obj.meta
+    override fun convert(obj: T): Meta = obj.meta
 
     /**
      * A convenience method to use specifications in builders
@@ -195,7 +198,6 @@ public open class SchemeSpec<T : Scheme>(
     public inline operator fun invoke(action: T.() -> Unit): T = empty().apply(action)
 
 }
-
 
 
 /**
@@ -217,7 +219,7 @@ public fun <T : Scheme> Configurable.updateWith(
 
 
 /**
- * A delegate that uses a [MetaSpec] to wrap a child of this provider
+ * A delegate that uses a [MetaReader] to wrap a child of this provider
  */
 public fun <T : Scheme> MutableMeta.scheme(
     spec: SchemeSpec<T>,
@@ -240,7 +242,7 @@ public fun <T : Scheme> Scheme.scheme(
 ): ReadWriteProperty<Any?, T> = meta.scheme(spec, key)
 
 /**
- * A delegate that uses a [MetaSpec] to wrap a child of this provider.
+ * A delegate that uses a [MetaReader] to wrap a child of this provider.
  * Returns null if meta with given name does not exist.
  */
 public fun <T : Scheme> MutableMeta.schemeOrNull(
@@ -265,18 +267,17 @@ public fun <T : Scheme> Scheme.schemeOrNull(
 ): ReadWriteProperty<Any?, T?> = meta.schemeOrNull(spec, key)
 
 /**
- * A delegate that uses a [MetaSpec] to wrap a list of child providers.
+ * A delegate that uses a [MetaReader] to wrap a list of child providers.
  * If children are mutable, the changes in list elements are reflected on them.
  * The list is a snapshot of children state, so change in structure is not reflected on its composition.
  */
-@DFExperimental
 public fun <T : Scheme> MutableMeta.listOfScheme(
     spec: SchemeSpec<T>,
     key: Name? = null,
 ): ReadWriteProperty<Any?, List<T>> = object : ReadWriteProperty<Any?, List<T>> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
         val name = key ?: property.name.asName()
-        return getIndexed(name).values.map { spec.write(it as MutableMeta) }
+        return getIndexedList(name).map { spec.write(it as MutableMeta) }
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<T>) {
@@ -286,7 +287,6 @@ public fun <T : Scheme> MutableMeta.listOfScheme(
 }
 
 
-@DFExperimental
 public fun <T : Scheme> Scheme.listOfScheme(
     spec: SchemeSpec<T>,
     key: Name? = null,

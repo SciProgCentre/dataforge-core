@@ -3,11 +3,12 @@ package space.kscience.dataforge.meta.descriptors
 import space.kscience.dataforge.meta.Scheme
 import space.kscience.dataforge.meta.SchemeSpec
 import space.kscience.dataforge.meta.ValueType
-import space.kscience.dataforge.misc.DFExperimental
 import kotlin.reflect.KProperty1
 import kotlin.reflect.typeOf
 
-@DFExperimental
+/**
+ * Add a value item to a [MetaDescriptor] inferring some of its properties from the type
+ */
 public inline fun <S : Scheme, reified T> MetaDescriptorBuilder.value(
     property: KProperty1<S, T>,
     noinline block: MetaDescriptorBuilder.() -> Unit = {},
@@ -39,7 +40,9 @@ public inline fun <S : Scheme, reified T> MetaDescriptorBuilder.value(
     else -> node(property.name, block)
 }
 
-@DFExperimental
+/**
+ * Add a schem-based branch to a [MetaDescriptor]
+ */
 public inline fun <S : Scheme, reified T : Scheme> MetaDescriptorBuilder.scheme(
     property: KProperty1<S, T>,
     spec: SchemeSpec<T>,

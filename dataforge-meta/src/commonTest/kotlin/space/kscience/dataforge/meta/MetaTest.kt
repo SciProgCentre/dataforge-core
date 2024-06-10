@@ -61,4 +61,33 @@ class MetaTest {
         assertEquals(null, indexed["8"])
         assertEquals(12, indexed["12"].int)
     }
+
+    @Test
+    fun reset() {
+        val oldMeta = MutableMeta {
+            "a" put {
+                "value" put "aValue"
+            }
+            "b" put {
+                "value" put "bValue"
+            }
+            "c" put {
+                "value" put "cValue"
+            }
+        }
+        val newMeta = Meta {
+            "a" put {
+                "value" put "aValue"
+            }
+            "b" put {
+                "value" put "bValue"
+            }
+            "d" put {
+                "value" put "dValue"
+            }
+        }
+        oldMeta.reset(newMeta)
+        println(oldMeta)
+        assertEquals(setOf("a", "b", "d"), oldMeta.items.keys.map { it.toString() }.toSet())
+    }
 }

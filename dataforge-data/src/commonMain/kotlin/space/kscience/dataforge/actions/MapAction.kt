@@ -6,8 +6,7 @@ import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFBuilder
-import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.misc.DFInternal
+import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -49,13 +48,18 @@ public class MapActionBuilder<T, R>(
     public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(T) -> R1): Unit = result(typeOf<R1>(), f)
 }
 
-@PublishedApi
-internal class MapAction<T : Any, R : Any>(
+@UnsafeKType
+public class MapAction<T, R>(
     outputType: KType,
     private val block: MapActionBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {
 
-    private fun DataSink<R>.mapOne(name: Name, data: Data<T>, meta: Meta) {
+    private fun DataSink<R>.mapOne(name: Name, data: Data<T>?, meta: Meta) {
+        //fast return for null data
+        if (data == null) {
+            put(name, null)
+            return
+        }
         // Creating a new environment for action using **old** name, old meta and task meta
         val env = ActionEnv(name, data.meta, meta)
 
@@ -74,7 +78,6 @@ internal class MapAction<T : Any, R : Any>(
         //getting new meta
         val newMeta = builder.meta.seal()
 
-        @OptIn(DFInternal::class)
         val newData = Data(builder.outputType, newMeta, dependencies = listOf(data)) {
             builder.result(env, data.await())
         }
@@ -82,12 +85,18 @@ internal class MapAction<T : Any, R : Any>(
         put(newName, newData)
     }
 
-    override fun DataSink<R>.generate(data: DataTree<T>, meta: Meta) {
-        data.forEach { mapOne(it.name, it.data, meta) }
+    override fun DataSink<R>.generate(source: DataTree<T>, meta: Meta) {
+        source.forEach { mapOne(it.name, it.data, meta) }
     }
 
-    override fun DataSink<R>.update(source: DataTree<T>, meta: Meta, namedData: NamedData<T>) {
-        mapOne(namedData.name, namedData.data, namedData.meta)
+
+
+    override suspend fun DataSink<R>.update(
+        source: DataTree<T>,
+        meta: Meta,
+        updatedData: DataUpdate<T>,
+    )  {
+        mapOne(updatedData.name, updatedData.data, meta)
     }
 }
 
@@ -95,8 +104,9 @@ internal class MapAction<T : Any, R : Any>(
 /**
  * A one-to-one mapping action
  */
-@DFExperimental
-public inline fun <T : Any, reified R : Any> Action.Companion.mapping(
+
+@OptIn(UnsafeKType::class)
+public inline fun <T, reified R> Action.Companion.mapping(
     noinline builder: MapActionBuilder<T, R>.() -> Unit,
 ): Action<T, R> = MapAction(typeOf<R>(), builder)
 

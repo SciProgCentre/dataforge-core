@@ -6,7 +6,6 @@ package space.kscience.dataforge.workspace
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Timeout
 import space.kscience.dataforge.context.*
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.*
@@ -16,6 +15,7 @@ import space.kscience.dataforge.names.plus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 
 
 /**
@@ -62,7 +62,7 @@ internal class SimpleWorkspaceTest {
         data {
             //statically initialize data
             repeat(100) {
-                wrap("myData[$it]", it)
+                putValue("myData[$it]", it)
             }
         }
 
@@ -148,18 +148,16 @@ internal class SimpleWorkspaceTest {
     }
 
     @Test
-    @Timeout(1)
-    fun testWorkspace() = runTest {
+    fun testWorkspace() = runTest(timeout = 100.milliseconds) {
         val node = workspace.produce("sum")
         val res = node.asSequence().single()
         assertEquals(328350, res.await())
     }
 
     @Test
-    @Timeout(1)
-    fun testMetaPropagation() = runTest {
+    fun testMetaPropagation() = runTest(timeout = 100.milliseconds) {
         val node = workspace.produce("sum") { "testFlag" put true }
-        val res = node.single().await()
+        val res = node["sum"]!!.await()
     }
 
     @Test
@@ -188,7 +186,7 @@ internal class SimpleWorkspaceTest {
         val node = workspace.produce("filterOne") {
             "name" put "myData[12]"
         }
-        assertEquals(12, node.single().await())
+        assertEquals(12, node.asSequence().first().await())
     }
 
 }

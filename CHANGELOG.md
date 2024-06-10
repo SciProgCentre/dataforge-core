@@ -14,6 +14,41 @@
 
 ### Security
 
+## 0.9.0 - 2024-06-04
+
+### Added
+
+- Custom CoroutineContext during `Context` creation.
+
+### Changed
+
+- Kotlin 2.0
+- `MetaSpec` renamed to `MetaReader`. MetaSpec is now reserved for builder-based generation of meta descriptors.
+- Add self-type for Meta. Remove unsafe cast method for meta instances.
+
+### Removed
+
+- Automatic descriptors for schema. It is not possible to implement them without heavy reflection.
+
+## 0.8.2 - 2024-04-27
+
+### Added
+
+- Name index comparator
+- Specialized ByteArrayValue
+
+### Changed
+
+- DataSink `branch` is replaced with `putAll` to avoid confusion with DataTree methods
+- Meta delegate now uses a specific class that has a descriptor
+
+### Fixed
+
+- `listOfScheme` and `listOfConvertable` delegates provides correct items order.
+- Scheme meta setter works with proper sub-branch.
+- NameToken.parse improper work with indices.
+- Proper data handling for cache.
+
 ## 0.8.0 - 2024-02-03
 
 ### Added

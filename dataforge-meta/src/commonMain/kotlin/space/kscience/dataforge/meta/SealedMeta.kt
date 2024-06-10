@@ -13,6 +13,9 @@ public class SealedMeta(
     override val value: Value?,
     override val items: Map<NameToken, SealedMeta>,
 ) : TypedMeta<SealedMeta> {
+
+    override val self: SealedMeta get() = this
+
     override fun toString(): String = Meta.toString(this)
     override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
 
@@ -76,6 +79,8 @@ internal class MetaBuilder(
 
 
     override fun set(name: Name, node: Meta?) {
+        //skip setting if value has not changed
+        if(node == get(name)) return
         when (name.length) {
             0 -> error("Can't set a meta with empty name")
             1 -> {
@@ -89,7 +94,7 @@ internal class MetaBuilder(
             }
 
             else -> {
-                getOrCreate(name.first().asName()).set(name.cutFirst(), node)
+                getOrCreate(name.first().asName())[name.cutFirst()] = node
             }
         }
     }

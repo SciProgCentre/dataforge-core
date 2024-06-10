@@ -4,18 +4,12 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.slf4j.LoggerFactory
-import space.kscience.dataforge.meta.Scheme
-import space.kscience.dataforge.meta.SchemeSpec
-import space.kscience.dataforge.meta.ValueType
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
-import space.kscience.dataforge.meta.descriptors.node
+import space.kscience.dataforge.misc.DFExperimental
 import java.net.URL
-import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.typeOf
-
+import kotlin.reflect.KAnnotatedElement
+import kotlin.reflect.KProperty
 
 /**
  * Description text for meta property, node or whole object
@@ -58,19 +52,9 @@ private fun MetaDescriptorBuilder.loadDescriptorFromResource(resource: Descripto
     }
 }
 
-
-public fun <T : Any> MetaDescriptor.Companion.forClass(
-    kClass: KClass<T>,
-    mod: MetaDescriptorBuilder.() -> Unit = {},
-): MetaDescriptor = MetaDescriptor {
-    when {
-        kClass.isSubclassOf(Number::class) -> valueType(ValueType.NUMBER)
-        kClass == String::class -> ValueType.STRING
-        kClass == Boolean::class -> ValueType.BOOLEAN
-        kClass == DoubleArray::class -> ValueType.LIST
-    }
-
-    kClass.annotations.forEach {
+@DFExperimental
+public fun MetaDescriptorBuilder.forAnnotatedElement(element: KAnnotatedElement) {
+    element.annotations.forEach {
         when (it) {
             is Description -> description = it.value
 
@@ -79,46 +63,70 @@ public fun <T : Any> MetaDescriptor.Companion.forClass(
             is DescriptorUrl -> loadDescriptorFromUrl(URL(it.url))
         }
     }
-    kClass.memberProperties.forEach { property ->
-
-        var flag = false
-
-        val descriptor = MetaDescriptor {
-            //use base type descriptor as a base
-            (property.returnType.classifier as? KClass<*>)?.let {
-                from(forClass(it))
-            }
-            property.annotations.forEach {
-                when (it) {
-                    is Description -> {
-                        description = it.value
-                        flag = true
-                    }
-
-                    is Multiple -> {
-                        multiple = true
-                        flag = true
-                    }
-
-                    is DescriptorResource -> {
-                        loadDescriptorFromResource(it)
-                        flag = true
-                    }
-
-                    is DescriptorUrl -> {
-                        loadDescriptorFromUrl(URL(it.url))
-                        flag = true
-                    }
-                }
-            }
-        }
-        if (flag) {
-            node(property.name, descriptor)
-        }
-    }
-    mod()
 }
 
-@Suppress("UNCHECKED_CAST")
-public inline fun <reified T : Scheme> SchemeSpec<T>.autoDescriptor( noinline mod: MetaDescriptorBuilder.() -> Unit = {}): MetaDescriptor =
-    MetaDescriptor.forClass(typeOf<T>().classifier as KClass<T>, mod)
+@DFExperimental
+public fun MetaDescriptorBuilder.forProperty(property: KProperty<*>) {
+    property.annotations.forEach {
+        when (it) {
+            is Description -> description = it.value
+
+            is DescriptorResource -> loadDescriptorFromResource(it)
+
+            is DescriptorUrl -> loadDescriptorFromUrl(URL(it.url))
+        }
+    }
+}
+//
+//@DFExperimental
+//public fun <T : Scheme> MetaDescriptor.Companion.forScheme(
+//    spec: SchemeSpec<T>,
+//    mod: MetaDescriptorBuilder.() -> Unit = {},
+//): MetaDescriptor = MetaDescriptor {
+//    val scheme = spec.empty()
+//    val kClass: KClass<T> = scheme::class as KClass<T>
+//    when {
+//        kClass.isSubclassOf(Number::class) -> valueType(ValueType.NUMBER)
+//        kClass == String::class -> ValueType.STRING
+//        kClass == Boolean::class -> ValueType.BOOLEAN
+//        kClass == DoubleArray::class -> ValueType.LIST
+//        kClass == ByteArray::class -> ValueType.LIST
+//    }
+//
+//    forAnnotatedElement(kClass)
+//    kClass.memberProperties.forEach { property ->
+//        node(property.name) {
+//
+//            (property.getDelegate(scheme) as? MetaDelegate<*>)?.descriptor?.let {
+//                from(it)
+//            }
+//
+//            property.annotations.forEach {
+//                when (it) {
+//                    is Description -> {
+//                        description = it.value
+//                    }
+//
+//                    is Multiple -> {
+//                        multiple = true
+//                    }
+//
+//                    is DescriptorResource -> {
+//                        loadDescriptorFromResource(it)
+//                    }
+//
+//                    is DescriptorUrl -> {
+//                        loadDescriptorFromUrl(URL(it.url))
+//                    }
+//                }
+//            }
+//        }
+//
+//    }
+//    mod()
+//}
+//
+//@DFExperimental
+//public inline fun <reified T : Scheme> SchemeSpec<T>.autoDescriptor(
+//    noinline mod: MetaDescriptorBuilder.() -> Unit = {},
+//): MetaDescriptor = MetaDescriptor.forScheme(this, mod)

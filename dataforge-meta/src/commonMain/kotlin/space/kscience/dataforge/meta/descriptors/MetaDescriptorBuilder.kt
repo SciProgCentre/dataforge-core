@@ -11,9 +11,6 @@ import kotlin.collections.set
 public class MetaDescriptorBuilder @PublishedApi internal constructor() {
     public var description: String? = null
 
-    @Deprecated("Replace by description", ReplaceWith("description"))
-    public var info: String? by ::description
-
     public var children: MutableMap<String, MetaDescriptorBuilder> = linkedMapOf()
     public var multiple: Boolean = false
     public var valueRestriction: ValueRestriction = ValueRestriction.NONE
@@ -50,6 +47,7 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
     ): Unit {
         when (name.length) {
             0 -> error("Can't set descriptor to root")
+
             1 -> {
                 children[name.first().body] = descriptorBuilder
             }
@@ -60,7 +58,7 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
         }
     }
 
-    internal fun node(
+    public fun node(
         name: Name,
         descriptorBuilder: MetaDescriptor,
     ): Unit {

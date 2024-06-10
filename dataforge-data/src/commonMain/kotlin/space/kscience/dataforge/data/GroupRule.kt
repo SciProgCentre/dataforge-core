@@ -17,10 +17,10 @@ package space.kscience.dataforge.data
 
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
-import space.kscience.dataforge.misc.DFInternal
+import space.kscience.dataforge.misc.UnsafeKType
 
 public interface GroupRule {
-    public fun <T : Any> gather(set: DataTree<T>): Map<String, DataTree<T>>
+    public fun <T> gather(set: DataTree<T>): Map<String, DataTree<T>>
 
     public companion object {
         /**
@@ -31,24 +31,24 @@ public interface GroupRule {
          * @param defaultTagValue
          * @return
          */
-        @OptIn(DFInternal::class)
+        @OptIn(UnsafeKType::class)
         public fun byMetaValue(
             key: String,
             defaultTagValue: String,
         ): GroupRule = object : GroupRule {
 
-            override fun <T : Any> gather(
+            override fun <T> gather(
                 set: DataTree<T>,
             ): Map<String, DataTree<T>> {
-                val map = HashMap<String, DataTreeBuilder<T>>()
+                val map = HashMap<String, MutableDataTree<T>>()
 
                 set.forEach { data ->
                     val tagValue: String = data.meta[key]?.string ?: defaultTagValue
-                    map.getOrPut(tagValue) { DataTreeBuilder(set.dataType) }.put(data.name, data.data)
+                    map.getOrPut(tagValue) { MutableDataTree(set.dataType) }.put(data.name, data.data)
                 }
 
 
-                return map.mapValues { it.value.build() }
+                return map
             }
         }
     }

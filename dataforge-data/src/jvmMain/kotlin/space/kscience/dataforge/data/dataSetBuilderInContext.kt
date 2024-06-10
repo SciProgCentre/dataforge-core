@@ -14,14 +14,14 @@ public infix fun <T : Any> String.put(data: Data<T>): Unit =
  * Append node
  */
 context(DataSink<T>)
-public infix fun <T : Any> String.put(dataSet: DataTree<T>): Unit =
-    branch(this, dataSet)
+public infix fun <T : Any> String.putAll(dataSet: DataTree<T>): Unit =
+    putAll(this, dataSet)
 
 /**
  * Build and append node
  */
 context(DataSink<T>)
-public infix fun <T : Any> String.put(
+public infix fun <T : Any> String.putAll(
     block: DataSink<T>.() -> Unit,
-): Unit = branch(Name.parse(this), block)
+): Unit = putAll(Name.parse(this), block)
 

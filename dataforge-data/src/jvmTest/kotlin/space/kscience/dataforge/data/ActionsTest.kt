@@ -1,22 +1,24 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.actions.invoke
 import space.kscience.dataforge.actions.mapping
 import space.kscience.dataforge.misc.DFExperimental
+import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(DFExperimental::class)
 internal class ActionsTest {
     @Test
-    fun testStaticMapAction() = runTest {
+    fun testStaticMapAction() = runTest(timeout = 500.milliseconds) {
         val data: DataTree<Int> = DataTree {
             repeat(10) {
-                wrap(it.toString(), it)
+                putValue(it.toString(), it)
             }
         }
 
@@ -28,7 +30,7 @@ internal class ActionsTest {
     }
 
     @Test
-    fun testDynamicMapAction() = runBlocking {
+    fun testDynamicMapAction() = runTest(timeout = 500.milliseconds) {
         val source: MutableDataTree<Int> = MutableDataTree()
 
         val plusOne = Action.mapping<Int, Int> {
@@ -39,13 +41,10 @@ internal class ActionsTest {
 
 
         repeat(10) {
-            source.wrap(it.toString(), it)
+            source.updateValue(it.toString(), it)
         }
 
-        delay(10)
-
-        source.close()
-        result.awaitClose()
+        result.updates.take(10).onEach { println(it.name) }.collect()
 
         assertEquals(2, result["1"]?.await())
     }

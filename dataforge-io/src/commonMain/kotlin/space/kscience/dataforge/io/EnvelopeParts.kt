@@ -11,6 +11,7 @@ import space.kscience.dataforge.io.PartDescriptor.Companion.PARTS_KEY
 import space.kscience.dataforge.io.PartDescriptor.Companion.SEPARATOR_KEY
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.getIndexedList
 import space.kscience.dataforge.names.plus
 
 private class PartDescriptor : Scheme() {
@@ -84,7 +85,7 @@ public fun EnvelopeBuilder.envelopes(
 public fun Envelope.parts(): EnvelopeParts {
     if (data == null) return emptyList()
     //TODO add zip folder reader
-    val parts = meta.getIndexed(PARTS_KEY).values.map {
+    val parts = meta.getIndexedList(PARTS_KEY).map {
         PartDescriptor.read(it)
     }
     return if (parts.isEmpty()) {

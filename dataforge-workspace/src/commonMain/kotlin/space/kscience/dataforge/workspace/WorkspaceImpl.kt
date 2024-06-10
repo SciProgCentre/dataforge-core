@@ -2,14 +2,14 @@ package space.kscience.dataforge.workspace
 
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.gather
-import space.kscience.dataforge.data.ObservableDataTree
+import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
 
 
 internal class WorkspaceImpl internal constructor(
     override val context: Context,
-    override val data: ObservableDataTree<*>,
+    override val data: DataTree<*>,
     override val targets: Map<String, Meta>,
     tasks: Map<Name, Task<*>>,
     private val postProcess: suspend (TaskResult<*>) -> TaskResult<*>,

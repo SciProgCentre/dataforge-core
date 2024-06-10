@@ -20,4 +20,4 @@ public fun <T> Data<T>.withMeta(newMeta: Meta): Data<T> = if (this is MetaMaskDa
  * Create a new [Data] with the same computation, but different meta. The meta is created by applying [block] to
  * the existing data meta.
  */
-public inline fun <T> Data<T>.mapMeta(block: MutableMeta.() -> Unit): Data<T> = withMeta(meta.copy(block))
+public inline fun <T> Data<T>.withMeta(block: MutableMeta.() -> Unit): Data<T> = withMeta(meta.copy(block))

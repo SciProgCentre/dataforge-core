@@ -31,12 +31,5 @@ public inline fun <reified E : Enum<E>> Value.enum(): E = if (this is EnumValue<
 
 public val Value.stringList: List<String> get() = list.map { it.string }
 
-public val Value.doubleArray: DoubleArray
-    get() = if (this is DoubleArrayValue) {
-        value
-    } else {
-        DoubleArray(list.size) { list[it].double }
-    }
-
 
 public fun Value.toMeta(): Meta = Meta(this)

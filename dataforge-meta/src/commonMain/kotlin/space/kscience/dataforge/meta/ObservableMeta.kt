@@ -39,6 +39,9 @@ public interface ObservableMeta : Meta {
  * A [Meta] which is both observable and mutable
  */
 public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTypedMeta<ObservableMutableMeta> {
+
+    override val self: ObservableMutableMeta get() = this
+
     override fun getOrCreate(name: Name): ObservableMutableMeta
 
     override fun get(name: Name): ObservableMutableMeta? {

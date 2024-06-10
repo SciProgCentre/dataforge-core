@@ -47,7 +47,7 @@ class DataPropagationTest {
         }
         data {
             repeat(100) {
-                wrap("myData[$it]", it)
+                putValue("myData[$it]", it)
             }
         }
     }
