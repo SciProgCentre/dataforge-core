@@ -13,6 +13,8 @@
 ### Removed
 
 ### Fixed
+- Fixed NameToken parsing.
+- Top level string list meta conversion.
 
 ### Security
 

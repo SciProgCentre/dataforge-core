@@ -163,11 +163,15 @@ public fun JsonObject.toMeta(descriptor: MetaDescriptor? = null): SealedMeta {
 public fun JsonElement.toMeta(descriptor: MetaDescriptor? = null): SealedMeta = when (this) {
     is JsonPrimitive -> Meta(toValue(descriptor))
     is JsonObject -> toMeta(descriptor)
-    is JsonArray -> SealedMeta(null,
-        linkedMapOf<NameToken, SealedMeta>().apply {
-            addJsonElement(Meta.JSON_ARRAY_KEY, this@toMeta, null)
-        }
-    )
+    is JsonArray -> if (any { it is JsonObject }) {
+        SealedMeta(null,
+            linkedMapOf<NameToken, SealedMeta>().apply {
+                addJsonElement(Meta.JSON_ARRAY_KEY, this@toMeta, null)
+            }
+        )
+    } else{
+        Meta(map { it.toValueOrNull(descriptor) ?: kotlin.error("Unreachable: should not contain objects") }.asValue())
+    }
 }
 
 //
