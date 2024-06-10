@@ -67,10 +67,29 @@ public class NameToken(public val body: String, public val index: String? = null
          * Parse name token from a string
          */
         public fun parse(string: String): NameToken {
-            val body = string.substringBefore('[')
-            val index = string.substringAfter('[', "")
-            if (index.isNotEmpty() && !index.endsWith(']')) error("NameToken with index must end with ']'")
-            return NameToken(body, index.removeSuffix("]"))
+            var indexStart = -1
+            var indexEnd = -1
+            string.forEachIndexed { index, c ->
+                when (c) {
+                    '[' -> when {
+                        indexStart >= 0 -> error("Second opening bracket not allowed in NameToken: $string")
+                        else -> indexStart = index
+                    }
+
+                    ']' -> when {
+                        indexStart < 0 -> error("Closing index bracket could not be used before opening bracket in NameToken: $string")
+                        indexEnd >= 0 -> error("Second closing bracket not allowed in NameToken: $string")
+                        else -> indexEnd = index
+                    }
+
+                    else -> if(indexEnd>=0) error("Symbols not allowed after index in NameToken: $string")
+                }
+            }
+            if(indexStart>=0 && indexEnd<0) error("Opening bracket without closing bracket not allowed in NameToken: $string")
+            return NameToken(
+                if(indexStart>=0) string.substring(0, indexStart) else string,
+                if(indexStart>=0) string.substring(indexStart + 1, indexEnd) else null
+            )
         }
     }
 }

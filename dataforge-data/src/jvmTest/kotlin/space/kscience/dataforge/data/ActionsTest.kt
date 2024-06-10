@@ -1,8 +1,5 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.test.runTest
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.actions.invoke
@@ -16,26 +13,27 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class ActionsTest {
     @Test
     fun testStaticMapAction() = runTest(timeout = 500.milliseconds) {
+        val plusOne = Action.mapping<Int, Int> {
+            result { it + 1 }
+        }
+
         val data: DataTree<Int> = DataTree {
             repeat(10) {
                 putValue(it.toString(), it)
             }
         }
 
-        val plusOne = Action.mapping<Int, Int> {
-            result { it + 1 }
-        }
         val result = plusOne(data)
         assertEquals(2, result["1"]?.await())
     }
 
     @Test
     fun testDynamicMapAction() = runTest(timeout = 500.milliseconds) {
-        val source: MutableDataTree<Int> = MutableDataTree()
-
         val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
         }
+
+        val source: MutableDataTree<Int> = MutableDataTree()
 
         val result = plusOne(source)
 
@@ -44,7 +42,7 @@ internal class ActionsTest {
             source.updateValue(it.toString(), it)
         }
 
-        result.updates.take(10).onEach { println(it.name) }.collect()
+//        result.updates.take(10).onEach { println(it.name) }.collect()
 
         assertEquals(2, result["1"]?.await())
     }

@@ -43,6 +43,7 @@ include(
     ":dataforge-meta",
     ":dataforge-io",
     ":dataforge-io:dataforge-io-yaml",
+    ":dataforge-io:dataforge-io-proto",
     ":dataforge-context",
     ":dataforge-data",
     ":dataforge-workspace",

@@ -117,8 +117,11 @@ private fun MutableMap<NameToken, SealedMeta>.addJsonElement(
             } else {
                 val indexKey = descriptor?.indexKey ?: Meta.INDEX_KEY
                 element.forEachIndexed { serial, childElement ->
-                    val index = (childElement as? JsonObject)?.get(indexKey)?.jsonPrimitive?.content
+
+                    val index = (childElement as? JsonObject)
+                        ?.get(indexKey)?.jsonPrimitive?.content
                         ?: serial.toString()
+
                     val child: SealedMeta = when (childElement) {
                         is JsonObject -> childElement.toMeta(descriptor)
                         is JsonArray -> {

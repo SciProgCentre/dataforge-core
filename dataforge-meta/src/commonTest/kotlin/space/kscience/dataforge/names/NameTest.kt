@@ -56,10 +56,22 @@ class NameTest {
 
         val token2 = NameToken.parse("token-body")
         assertEquals("token-body", token2.body)
-        assertEquals("", token2.index)
+        assertEquals(null, token2.index)
+
+//        val token3 = NameToken.parse("[token-index]")
+//        assertEquals("", token3.body)
+//        assertEquals("token-index", token3.index)
+
+        assertFails{
+            NameToken.parse("[token-index]")
+        }
 
         assertFails {
             NameToken.parse("token[22")
+        }
+
+        assertFails {
+            NameToken.parse("token[22]ddd")
         }
     }
 }

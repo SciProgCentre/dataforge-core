@@ -221,13 +221,14 @@ public fun <T : Scheme> Configurable.updateWith(
 /**
  * A delegate that uses a [MetaReader] to wrap a child of this provider
  */
-public fun <T : Scheme> MutableMeta.scheme(
+public fun <T : Scheme> MutableMetaProvider.scheme(
     spec: SchemeSpec<T>,
     key: Name? = null,
 ): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
         val name = key ?: property.name.asName()
-        return spec.write(getOrCreate(name))
+        val node = get(name)?: MutableMeta().also { set(name,it) }
+        return spec.write(node)
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
