@@ -11,9 +11,20 @@ message ProtoMeta {
       int32 int32Value = 6;
       int64 int64Value = 7;
       bytes bytesValue = 8;
+      ProtoValueList listValue = 9;
+      Float64List float64ListValue = 10;
     }
   }
-  repeated ProtoValue value = 1;
+
+  message ProtoValueList{
+    repeated ProtoValue values = 1;
+  }
+
+  message Float64List{
+    repeated double values = 1 [packed=true];
+  }
+
+  ProtoValue protoValue = 1;
 
   map<string, ProtoMeta> items = 2;
 }

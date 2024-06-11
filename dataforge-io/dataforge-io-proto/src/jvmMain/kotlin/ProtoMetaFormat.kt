@@ -12,7 +12,7 @@ import space.kscience.dataforge.names.NameToken
 
 internal class ProtoMetaWrapper(private val proto: ProtoMeta) : Meta {
 
-    private fun ProtoMeta.ProtoValue.toValue(): Value = when {
+    private fun ProtoMeta.ProtoValue.toValue(): Value? = when {
         stringValue != null -> stringValue.asValue()
         booleanValue != null -> booleanValue.asValue()
         doubleValue != null -> doubleValue.asValue()
@@ -20,15 +20,13 @@ internal class ProtoMetaWrapper(private val proto: ProtoMeta) : Meta {
         int32Value != null -> int32Value.asValue()
         int64Value != null -> int64Value.asValue()
         bytesValue != null -> bytesValue.toByteArray().asValue()
-        else -> Null
+        listValue != null -> listValue.values.mapNotNull { it.toValue() }.asValue()
+        float64ListValue != null -> float64ListValue.values.map { it.asValue() }.asValue()
+        else -> null
     }
 
     override val value: Value?
-        get() = when (proto.value_.size) {
-            0 -> null
-            1 -> proto.value_[0].toValue()
-            else -> proto.value_.map { it.toValue() }.asValue()
-        }
+        get() = proto.protoValue?.toValue()
 
 
     override val items: Map<NameToken, Meta>
@@ -44,39 +42,27 @@ internal class ProtoMetaWrapper(private val proto: ProtoMeta) : Meta {
 internal fun Meta.toProto(): ProtoMeta {
 
 
-    fun MutableList<ProtoMeta.ProtoValue>.appendProtoValues(value: Value): Unit {
-        when (value.type) {
-            ValueType.NULL -> {
-                //do nothing
-            }
+    fun Value.toProto(): ProtoMeta.ProtoValue = when (type) {
+        ValueType.NULL -> ProtoMeta.ProtoValue()
 
-            ValueType.NUMBER -> when (value.value) {
-                is Int, is Short, is Byte -> add(ProtoMeta.ProtoValue(int32Value = value.int))
-                is Long -> add(ProtoMeta.ProtoValue(int64Value = value.long))
-                is Float -> add(ProtoMeta.ProtoValue(floatValue = value.float))
-                else -> {
-                    LoggerFactory.getLogger(ProtoMeta::class.java)
-                        .warn("Unknown number type ${value.value} encoded as Double")
-                    add(ProtoMeta.ProtoValue(doubleValue = value.double))
-                }
-            }
-
-            ValueType.STRING -> add(ProtoMeta.ProtoValue(stringValue = value.string))
-            ValueType.BOOLEAN -> add(ProtoMeta.ProtoValue(booleanValue = value.boolean))
-            ValueType.LIST -> {
-                value.list.forEach {
-                    if (it.type == ValueType.LIST) {
-                        error("Nested lists are not supported")
-                    } else {
-                        appendProtoValues(it)
-                    }
-                }
+        ValueType.NUMBER -> when (value) {
+            is Int, is Short, is Byte -> ProtoMeta.ProtoValue(int32Value = int)
+            is Long -> ProtoMeta.ProtoValue(int64Value = long)
+            is Float -> ProtoMeta.ProtoValue(floatValue = float)
+            else -> {
+                LoggerFactory.getLogger(ProtoMeta::class.java)
+                    .warn("Unknown number type ${value} encoded as Double")
+                ProtoMeta.ProtoValue(doubleValue = double)
             }
         }
+
+        ValueType.STRING -> ProtoMeta.ProtoValue(stringValue = string)
+        ValueType.BOOLEAN -> ProtoMeta.ProtoValue(booleanValue = boolean)
+        ValueType.LIST -> ProtoMeta.ProtoValue(listValue = ProtoMeta.ProtoValueList(list.map { it.toProto() }))
     }
 
     return ProtoMeta(
-        value_ = buildList { value?.let { appendProtoValues(it) } },
+        protoValue = value?.toProto(),
         items.entries.associate { it.key.toString() to it.value.toProto() }
     )
 }

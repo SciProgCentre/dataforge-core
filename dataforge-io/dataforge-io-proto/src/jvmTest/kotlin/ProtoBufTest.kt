@@ -1,6 +1,7 @@
 package space.kscience.dataforge.io.proto
 
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.asValue
 import space.kscience.dataforge.meta.get
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,13 +23,17 @@ class ProtoBufTest {
                     "d2" put 2
                 }
                 "array" put doubleArrayOf(1.0, 2.0, 3.0)
+                "array2d" put listOf(
+                    doubleArrayOf(1.0, 2.0, 3.0).asValue(),
+                    doubleArrayOf(1.0, 2.0, 3.0).asValue()
+                ).asValue()
             }
         }
         val buffer = kotlinx.io.Buffer()
         ProtoMetaFormat.writeTo(buffer,meta)
         val result = ProtoMetaFormat.readFrom(buffer)
 
-        println(result["a"]?.value)
+//        println(result["a"]?.value)
 
         meta.items.keys.forEach {
             assertEquals(meta[it],result[it],"${meta[it]} != ${result[it]}")
