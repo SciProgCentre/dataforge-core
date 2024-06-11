@@ -1,11 +1,10 @@
-package space.kscience.dataforge.io.proto
+package pace.kscience.dataforge.io.proto
 
 import kotlinx.io.Sink
 import kotlinx.io.Source
-import kotlinx.io.asInputStream
-import kotlinx.io.asOutputStream
-import org.slf4j.LoggerFactory
+import kotlinx.io.readByteArray
 import space.kscience.dataforge.io.MetaFormat
+import space.kscience.dataforge.io.proto.ProtoMeta
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.names.NameToken
@@ -50,8 +49,8 @@ internal fun Meta.toProto(): ProtoMeta {
             is Long -> ProtoMeta.ProtoValue(int64Value = long)
             is Float -> ProtoMeta.ProtoValue(floatValue = float)
             else -> {
-                LoggerFactory.getLogger(ProtoMeta::class.java)
-                    .warn("Unknown number type ${value} encoded as Double")
+//                LoggerFactory.getLogger(ProtoMeta::class.java)
+//                    .warn("Unknown number type ${value} encoded as Double")
                 ProtoMeta.ProtoValue(doubleValue = double)
             }
         }
@@ -67,12 +66,11 @@ internal fun Meta.toProto(): ProtoMeta {
     )
 }
 
-
 public object ProtoMetaFormat : MetaFormat {
     override fun writeMeta(sink: Sink, meta: Meta, descriptor: MetaDescriptor?) {
-        ProtoMeta.ADAPTER.encode(sink.asOutputStream(), meta.toProto())
+        sink.write(ProtoMeta.ADAPTER.encode(meta.toProto()))
     }
 
     override fun readMeta(source: Source, descriptor: MetaDescriptor?): Meta =
-        ProtoMetaWrapper(ProtoMeta.ADAPTER.decode(source.asInputStream()))
+        ProtoMetaWrapper(ProtoMeta.ADAPTER.decode(source.readByteArray()))
 }

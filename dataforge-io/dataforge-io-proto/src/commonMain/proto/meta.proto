@@ -28,3 +28,8 @@ message ProtoMeta {
 
   map<string, ProtoMeta> items = 2;
 }
+
+message ProtoEnvelope{
+  ProtoMeta meta = 1;
+  bytes dataBytes = 2;
+}

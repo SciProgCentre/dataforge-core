@@ -7,6 +7,7 @@ description = "ProtoBuf meta IO"
 
 kscience {
     jvm()
+//    js()
     dependencies {
         api(projects.dataforgeIo)
         api("com.squareup.wire:wire-runtime:4.9.9")

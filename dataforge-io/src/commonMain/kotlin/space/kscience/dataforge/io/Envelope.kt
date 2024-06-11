@@ -2,7 +2,6 @@ package space.kscience.dataforge.io
 
 import space.kscience.dataforge.meta.Laminate
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
@@ -34,7 +33,9 @@ public interface Envelope {
     }
 }
 
-internal class SimpleEnvelope(override val meta: Meta, override val data: Binary?) : Envelope
+internal class SimpleEnvelope(override val meta: Meta, override val data: Binary?) : Envelope{
+    override fun toString(): String  = "Envelope(meta=$meta, data=$data)"
+}
 
 public fun Envelope(meta: Meta, data: Binary?): Envelope = SimpleEnvelope(meta, data)
 
