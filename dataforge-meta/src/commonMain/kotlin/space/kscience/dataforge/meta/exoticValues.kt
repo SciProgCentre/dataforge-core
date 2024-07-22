@@ -21,6 +21,9 @@ public class LazyParsedValue(public val string: String) : Value {
     override fun hashCode(): Int = string.hashCode()
 }
 
+/**
+ * Read this string as lazily parsed value
+ */
 public fun String.lazyParseValue(): LazyParsedValue = LazyParsedValue(this)
 
 /**
@@ -47,6 +50,9 @@ public class DoubleArrayValue(override val value: DoubleArray) : Value, Iterable
     override fun iterator(): Iterator<Double> = value.iterator()
 }
 
+/**
+ * A zero-copy wrapping of this [DoubleArray] in a [Value]
+ */
 public fun DoubleArray.asValue(): Value = if (isEmpty()) Null else DoubleArrayValue(this)
 
 public val Value.doubleArray: DoubleArray
@@ -75,7 +81,9 @@ public fun MutableMetaProvider.doubleArray(
     reader = { it?.doubleArray ?: doubleArrayOf(*default) },
 )
 
-
+/**
+ * A [Value] wrapping a [ByteArray]
+ */
 public class ByteArrayValue(override val value: ByteArray) : Value, Iterable<Byte> {
     override val type: ValueType get() = ValueType.LIST
     override val list: List<Value> get() = value.map { NumberValue(it) }

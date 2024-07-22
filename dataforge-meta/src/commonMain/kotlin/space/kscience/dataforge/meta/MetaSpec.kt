@@ -11,7 +11,7 @@ import kotlin.properties.ReadOnlyProperty
 
 
 /**
- * A reference to a read-only value of type [T] inside [MetaProvider]
+ * A reference to a read-only value of type [T] inside [MetaProvider] or writable value in [MutableMetaProvider]
  */
 @DFExperimental
 public data class MetaRef<T>(
@@ -20,21 +20,36 @@ public data class MetaRef<T>(
     override val descriptor: MetaDescriptor? = converter.descriptor,
 ) : Described
 
+/**
+ * Get a value from provider by [ref] or return null if node with given name is missing
+ */
 @DFExperimental
 public operator fun <T> MetaProvider.get(ref: MetaRef<T>): T? = get(ref.name)?.let { ref.converter.readOrNull(it) }
 
+/**
+ * Set a value in a mutable provider by [ref]
+ */
 @DFExperimental
 public operator fun <T> MutableMetaProvider.set(ref: MetaRef<T>, value: T) {
     set(ref.name, ref.converter.convert(value))
 }
 
+/**
+ * Remove a node corresponding to [ref] from a mutable provider if it exists
+ */
 @DFExperimental
-public class MetaSpec(
-    private val configuration: MetaDescriptorBuilder.() -> Unit = {},
-) : Described {
+public fun MutableMetaProvider.remove(ref: MetaRef<*>) {
+    remove(ref.name)
+}
+
+/**
+ * A base class for [Meta] specification that stores references to meta nodes
+ */
+@DFExperimental
+public abstract class MetaSpec : Described {
     private val refs: MutableList<MetaRef<*>> = mutableListOf()
 
-    private fun registerRef(ref: MetaRef<*>) {
+    protected fun registerRef(ref: MetaRef<*>) {
         refs.add(ref)
     }
 
@@ -51,6 +66,8 @@ public class MetaSpec(
             }
         }
 
+    protected open fun MetaDescriptorBuilder.buildDescriptor(): Unit = Unit
+
     override val descriptor: MetaDescriptor by lazy {
         MetaDescriptor {
             refs.forEach { ref ->
@@ -58,7 +75,7 @@ public class MetaSpec(
                     node(ref.name, ref.descriptor)
                 }
             }
-            configuration()
+            buildDescriptor()
         }
     }
 }
