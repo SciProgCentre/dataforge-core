@@ -50,6 +50,7 @@ public class DoubleArrayValue(override val value: DoubleArray) : Value, Iterable
     override fun iterator(): Iterator<Double> = value.iterator()
 }
 
+
 /**
  * A zero-copy wrapping of this [DoubleArray] in a [Value]
  */
@@ -80,6 +81,14 @@ public fun MutableMetaProvider.doubleArray(
     writer = { DoubleArrayValue(it) },
     reader = { it?.doubleArray ?: doubleArrayOf(*default) },
 )
+
+private object DoubleArrayMetaConverter : MetaConverter<DoubleArray> {
+    override fun readOrNull(source: Meta): DoubleArray? = source.doubleArray
+
+    override fun convert(obj: DoubleArray): Meta = Meta(obj.asValue())
+}
+
+public val MetaConverter.Companion.doubleArray: MetaConverter<DoubleArray> get() = DoubleArrayMetaConverter
 
 /**
  * A [Value] wrapping a [ByteArray]
@@ -132,3 +141,11 @@ public fun MutableMetaProvider.byteArray(
     writer = { ByteArrayValue(it) },
     reader = { it?.byteArray ?: byteArrayOf(*default) },
 )
+
+private object ByteArrayMetaConverter : MetaConverter<ByteArray> {
+    override fun readOrNull(source: Meta): ByteArray? = source.byteArray
+
+    override fun convert(obj: ByteArray): Meta = Meta(obj.asValue())
+}
+
+public val MetaConverter.Companion.byteArray: MetaConverter<ByteArray> get() = ByteArrayMetaConverter
