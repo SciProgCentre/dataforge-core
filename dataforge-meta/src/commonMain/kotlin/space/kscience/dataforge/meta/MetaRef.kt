@@ -7,6 +7,7 @@ import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.startsWith
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
@@ -33,6 +34,24 @@ public operator fun <T> MetaProvider.get(ref: MetaRef<T>): T? = get(ref.name)?.l
 @DFExperimental
 public operator fun <T> MutableMetaProvider.set(ref: MetaRef<T>, value: T) {
     set(ref.name, ref.converter.convert(value))
+}
+
+/**
+ * Observe changes to specific property via given [ref].
+ *
+ * This listener should be removed in a same way as [ObservableMeta.onChange].
+ *
+ * @param callback an action to be performed on each change of item. Null means that the item is not present or malformed.
+ */
+@DFExperimental
+public fun <T: Any> ObservableMeta.onValueChange(owner: Any?, ref: MetaRef<T>, callback: (T?) -> Unit) {
+    onChange(owner) { name ->
+        if (name.startsWith(ref.name)) {
+            get(name)?.let { value ->
+                callback(ref.converter.readOrNull(value))
+            }
+        }
+    }
 }
 
 /**
