@@ -1,6 +1,11 @@
 package space.kscience.dataforge.data
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.actions.invoke
 import space.kscience.dataforge.actions.mapping
@@ -9,7 +14,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(DFExperimental::class)
+@OptIn(DFExperimental::class, ExperimentalCoroutinesApi::class)
 internal class ActionsTest {
     @Test
     fun testStaticMapAction() = runTest(timeout = 500.milliseconds) {
@@ -24,6 +29,8 @@ internal class ActionsTest {
         }
 
         val result = plusOne(data)
+
+        advanceUntilIdle()
         assertEquals(2, result["1"]?.await())
     }
 
@@ -38,8 +45,12 @@ internal class ActionsTest {
         val result = plusOne(source)
 
 
-        repeat(10) {
-            source.updateValue(it.toString(), it)
+        withContext(Dispatchers.Default) {
+            repeat(10) {
+                source.updateValue(it.toString(), it)
+            }
+
+            delay(50)
         }
 
 //        result.updates.take(10).onEach { println(it.name) }.collect()
