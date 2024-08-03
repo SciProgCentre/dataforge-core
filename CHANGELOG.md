@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Coroutine exception logging in context
 
 ### Changed
 - Simplify inheritance logic in `MutableTypedMeta`
