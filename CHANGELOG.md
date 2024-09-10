@@ -4,6 +4,7 @@
 
 ### Added
 - Coroutine exception logging in context
+- ObservableMutableMetaSerializer
 
 ### Changed
 - Simplify inheritance logic in `MutableTypedMeta`
