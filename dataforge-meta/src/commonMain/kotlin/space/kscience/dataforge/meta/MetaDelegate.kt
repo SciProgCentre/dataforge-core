@@ -57,7 +57,7 @@ public fun <T> MetaProvider.readable(
 /**
  * Use [reader] to read the Meta node
  */
-@Deprecated("Replace with reading", ReplaceWith("reading(metaReader, key)"))
+@Deprecated("Replace with readable", ReplaceWith("readable(metaReader, key)"))
 public fun <T> MetaProvider.spec(
     reader: MetaReader<T>,
     key: Name? = null,
