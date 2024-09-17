@@ -1,5 +1,6 @@
 package space.kscience.dataforge.meta
 
+import kotlinx.serialization.Serializable
 import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.Name
 
@@ -35,6 +36,8 @@ public interface ObservableMeta : Meta {
 /**
  * A [Meta] which is both observable and mutable
  */
+@Serializable(ObservableMutableMetaSerializer::class)
+@MetaBuilderMarker
 public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTypedMeta<ObservableMutableMeta> {
     override val self: ObservableMutableMeta get() = this
 }

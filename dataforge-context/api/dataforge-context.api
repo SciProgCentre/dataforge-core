@@ -282,6 +282,7 @@ public final class space/kscience/dataforge/provider/Path : java/lang/Iterable, 
 
 public final class space/kscience/dataforge/provider/Path$Companion {
 	public final fun parse-X5wN5Vs (Ljava/lang/String;)Ljava/util/List;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class space/kscience/dataforge/provider/PathKt {

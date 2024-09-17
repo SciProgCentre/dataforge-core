@@ -18,20 +18,22 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class ActionsTest {
     @Test
     fun testStaticMapAction() = runTest(timeout = 500.milliseconds) {
-        val plusOne = Action.mapping<Int, Int> {
-            result { it + 1 }
-        }
-
-        val data: DataTree<Int> = DataTree {
-            repeat(10) {
-                putValue(it.toString(), it)
+        withContext(Dispatchers.Default) {
+            val plusOne = Action.mapping<Int, Int> {
+                result { it + 1 }
             }
+
+            val data: DataTree<Int> = DataTree {
+                repeat(10) {
+                    putValue(it.toString(), it)
+                }
+            }
+
+            val result = plusOne(data)
+
+            advanceUntilIdle()
+            assertEquals(2, result["1"]?.await())
         }
-
-        val result = plusOne(data)
-
-        advanceUntilIdle()
-        assertEquals(2, result["1"]?.await())
     }
 
     @Test
@@ -45,13 +47,12 @@ internal class ActionsTest {
         val result = plusOne(source)
 
 
-        withContext(Dispatchers.Default) {
-            repeat(10) {
-                source.updateValue(it.toString(), it)
-            }
 
-            delay(50)
+        repeat(10) {
+            source.updateValue(it.toString(), it)
         }
+
+        delay(10)
 
 //        result.updates.take(10).onEach { println(it.name) }.collect()
 

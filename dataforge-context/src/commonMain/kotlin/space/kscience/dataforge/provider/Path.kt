@@ -15,15 +15,37 @@
  */
 package space.kscience.dataforge.provider
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.parseAsName
 import kotlin.jvm.JvmInline
+
+private object PathSerializer : KSerializer<Path> {
+
+    override val descriptor: SerialDescriptor
+        get() = String.serializer().descriptor
+
+    override fun serialize(encoder: Encoder, value: Path) {
+        encoder.encodeString(value.toString())
+    }
+
+    override fun deserialize(decoder: Decoder): Path {
+        return Path.parse(decoder.decodeString())
+    }
+}
+
 
 /**
  * Path interface.
  *
  */
 @JvmInline
+@Serializable(PathSerializer::class)
 public value class Path(public val tokens: List<PathToken>) : Iterable<PathToken> {
 
     override fun iterator(): Iterator<PathToken> = tokens.iterator()
@@ -32,6 +54,7 @@ public value class Path(public val tokens: List<PathToken>) : Iterable<PathToken
 
     public companion object {
         public const val PATH_SEGMENT_SEPARATOR: String = "/"
+
 
         public fun parse(path: String): Path = Path(path.split(PATH_SEGMENT_SEPARATOR).map { PathToken.parse(it) })
     }
