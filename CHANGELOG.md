@@ -8,6 +8,7 @@
 
 ### Changed
 - Simplify inheritance logic in `MutableTypedMeta`
+- API of DataSink.
 
 ### Deprecated
 - MetaProvider `spec` is replaced by `readable`. `listOfSpec` replaced with `listOfReadable`

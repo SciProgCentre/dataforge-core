@@ -7,7 +7,6 @@ import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.parseAsName
-import kotlin.collections.set
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -48,7 +47,7 @@ internal class SplitAction<T, R>(
     private val action: SplitBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {
 
-    private fun DataSink<R>.splitOne(name: Name, data: Data<T>?, meta: Meta) {
+    private fun splitOne(name: Name, data: Data<T>?, meta: Meta): Map<Name, Data<R>?> = buildMap {
         val laminate = Laminate(data?.meta, meta)
 
         val split = SplitBuilder<T, R>(name, data?.meta ?: Meta.EMPTY).apply(action)
@@ -76,16 +75,26 @@ internal class SplitAction<T, R>(
         }
     }
 
-    override fun DataSink<R>.generate(source: DataTree<T>, meta: Meta) {
-        source.forEach { splitOne(it.name, it.data, meta) }
+    override fun DataBuilderScope<R>.generate(
+        source: DataTree<T>,
+        meta: Meta
+    ): Map<Name, Data<R>> = buildMap {
+        source.forEach {
+            splitOne(it.name, it.data, meta).forEach { (name, data) ->
+                check(name !in keys) { "Data with key $name already exist in the result" }
+                if (data != null) {
+                    put(name, data)
+                }
+            }
+        }
     }
 
     override suspend fun DataSink<R>.update(
         source: DataTree<T>,
         meta: Meta,
         updatedData: DataUpdate<T>,
-    )  {
-        splitOne(updatedData.name, updatedData.data, meta)
+    ) {
+        putAll(splitOne(updatedData.name, updatedData.data, meta))
     }
 }
 

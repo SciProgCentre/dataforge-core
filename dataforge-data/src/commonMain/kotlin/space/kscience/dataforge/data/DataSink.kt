@@ -1,48 +1,27 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.launch
 import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.*
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
-public interface DataSink<in T> {
-    /**
-     * Put data without notification
-     */
-    public fun put(name: Name, data: Data<T>?)
-
-    /**
-     * Put data and propagate changes downstream
-     */
-    public suspend fun update(name: Name, data: Data<T>?)
+public interface DataBuilderScope<in T>{
+    public companion object: DataBuilderScope<Nothing>
 }
 
-/**
- * Launch continuous update using
- */
-public fun <T> DataSink<T>.launchUpdate(
-    scope: CoroutineScope,
-    updater: suspend DataSink<T>.() -> Unit,
-): Job = scope.launch {
-    object : DataSink<T> {
-        override fun put(name: Name, data: Data<T>?) {
-            launch {
-                this@launchUpdate.update(name, data)
-            }
-        }
+@Suppress("UNCHECKED_CAST")
+public fun <T> DataBuilderScope(): DataBuilderScope<T> = DataBuilderScope as DataBuilderScope<T>
 
-        override suspend fun update(name: Name, data: Data<T>?) {
-            this@launchUpdate.update(name, data)
-        }
-    }.updater()
+public fun interface DataSink<in T>: DataBuilderScope<T> {
+    /**
+     * Put data and notify listeners if needed
+     */
+    public suspend fun put(name: Name, data: Data<T>?)
 }
+
 
 /**
  * A mutable version of [DataTree]
@@ -54,16 +33,14 @@ public interface MutableDataTree<T> : DataTree<T>, DataSink<T> {
 
     public fun getOrCreateItem(token: NameToken): MutableDataTree<T>
 
-    public operator fun set(token: NameToken, data: Data<T>?)
+    public suspend fun put(token: NameToken, data: Data<T>?)
 
-    override fun put(name: Name, data: Data<T>?): Unit = set(name, data)
-}
-
-public tailrec operator fun <T> MutableDataTree<T>.set(name: Name, data: Data<T>?): Unit {
-    when (name.length) {
-        0 -> this.data = data
-        1 -> set(name.first(), data)
-        else -> getOrCreateItem(name.first())[name.cutFirst()] = data
+    override suspend fun put(name: Name, data: Data<T>?): Unit {
+        when (name.length) {
+            0 -> this.data = data
+            1 -> put(name.first(), data)
+            else -> getOrCreateItem(name.first()).put(name.cutFirst(), data)
+        }
     }
 }
 
@@ -81,8 +58,8 @@ private class MutableDataTreeRoot<T>(
     override val dataType: KType,
 ) : MutableDataTree<T> {
 
-    override val updates = MutableSharedFlow<DataUpdate<T>>(100, onBufferOverflow = BufferOverflow.DROP_LATEST)
-
+    override val items = HashMap<NameToken, MutableDataTree<T>>()
+    override val updates = MutableSharedFlow<DataUpdate<T>>(extraBufferCapacity = 100)
 
     inner class MutableDataTreeBranch(val branchName: Name) : MutableDataTree<T> {
 
@@ -101,44 +78,21 @@ private class MutableDataTreeRoot<T>(
         override fun getOrCreateItem(token: NameToken): MutableDataTree<T> =
             items.getOrPut(token) { MutableDataTreeBranch(branchName + token) }
 
-
-        override fun set(token: NameToken, data: Data<T>?) {
-            val subTree = getOrCreateItem(token)
-            subTree.data = data
+        override suspend fun put(token: NameToken, data: Data<T>?) {
+            this.data = data
+            this@MutableDataTreeRoot.updates.emit(DataUpdate(data?.type ?: dataType, branchName + token, data))
         }
-
-        override suspend fun update(name: Name, data: Data<T>?) {
-            if (name.isEmpty()) {
-                this.data = data
-                this@MutableDataTreeRoot.updates.emit(DataUpdate(data?.type ?: dataType, branchName + name, data))
-            } else {
-                getOrCreateItem(name.first()).update(name.cutFirst(), data)
-            }
-        }
-
     }
 
-
     override var data: Data<T>? = null
-
-    override val items = HashMap<NameToken, MutableDataTree<T>>()
 
     override fun getOrCreateItem(token: NameToken): MutableDataTree<T> = items.getOrPut(token) {
         MutableDataTreeBranch(token.asName())
     }
 
-    override fun set(token: NameToken, data: Data<T>?) {
-        val subTree = getOrCreateItem(token)
-        subTree.data = data
-    }
-
-    override suspend fun update(name: Name, data: Data<T>?) {
-        if (name.isEmpty()) {
-            this.data = data
-            updates.emit(DataUpdate(data?.type ?: dataType, name, data))
-        } else {
-            getOrCreateItem(name.first()).update(name.cutFirst(), data)
-        }
+    override suspend fun put(token: NameToken, data: Data<T>?) {
+        this.data = data
+        updates.emit(DataUpdate(data?.type ?: dataType, token.asName(), data))
     }
 }
 

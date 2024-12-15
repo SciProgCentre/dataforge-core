@@ -1,12 +1,7 @@
 package space.kscience.dataforge.actions
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
-import space.kscience.dataforge.data.DataSink
-import space.kscience.dataforge.data.DataTree
-import space.kscience.dataforge.data.DataUpdate
-import space.kscience.dataforge.data.launchUpdate
+import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
@@ -31,10 +26,10 @@ public abstract class AbstractAction<T, R>(
     /**
      * Generate initial content of the output
      */
-    protected abstract fun DataSink<R>.generate(
+    protected abstract fun DataBuilderScope<R>.generate(
         source: DataTree<T>,
         meta: Meta,
-    )
+    ): Map<Name, Data<R>>
 
     /**
      * Update part of the data set using provided data
@@ -49,7 +44,7 @@ public abstract class AbstractAction<T, R>(
         updatedData: DataUpdate<T>,
     ) {
         //by default regenerate the whole data set
-        generate(source, meta)
+        putAll(generate(source, meta))
     }
 
     @OptIn(UnsafeKType::class)
@@ -57,13 +52,21 @@ public abstract class AbstractAction<T, R>(
         source: DataTree<T>,
         meta: Meta,
         updatesScope: CoroutineScope
-    ): DataTree<R> = DataTree(outputType) {
-        generate(source, meta)
+    ): DataTree<R> = DataTree(
+        dataType = outputType,
+        scope = updatesScope,
+        initialData = DataBuilderScope<R>().generate(source, meta)
+    ) {
+
         //propagate updates
-        launchUpdate(updatesScope) {
-            source.updates.onEach { update ->
-                update(source, meta, update)
-            }.collect()
+        val updateSink = DataSink<R> { name, data ->
+            put(name, data)
+        }
+
+        with(updateSink) {
+            source.updates.collect { du: DataUpdate<T> ->
+                update(source, meta, du)
+            }
         }
     }
 }

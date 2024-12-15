@@ -54,22 +54,21 @@ public class MapAction<T, R>(
     private val block: MapActionBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {
 
-    private fun DataSink<R>.mapOne(name: Name, data: Data<T>?, meta: Meta) {
+    private fun mapOne(name: Name, data: Data<T>?, meta: Meta): Pair<Name, Data<R>?> {
         //fast return for null data
         if (data == null) {
-            put(name, null)
-            return
+            return name to null
         }
         // Creating a new environment for action using **old** name, old meta and task meta
         val env = ActionEnv(name, data.meta, meta)
 
         //applying transformation from builder
         val builder = MapActionBuilder<T, R>(
-            name,
-            data.meta.toMutableMeta(), // using data meta
-            meta,
-            data.type,
-            outputType
+            name = name,
+            meta = data.meta.toMutableMeta(), // using data meta
+            actionMeta = meta,
+            dataType = data.type,
+            outputType = outputType
         ).apply(block)
 
         //getting new name
@@ -82,21 +81,26 @@ public class MapAction<T, R>(
             builder.result(env, data.await())
         }
         //setting the data node
-        put(newName, newData)
+        return newName to newData
     }
 
-    override fun DataSink<R>.generate(source: DataTree<T>, meta: Meta) {
-        source.forEach { mapOne(it.name, it.data, meta) }
+    override fun DataBuilderScope<R>.generate(source: DataTree<T>, meta: Meta): Map<Name, Data<R>> = buildMap {
+        source.forEach {
+            val (name, data) = mapOne(it.name, it.data, meta)
+            if (data != null) {
+                check(name !in keys) { "Data with key $name already exist in the result" }
+                put(name, data)
+            }
+        }
     }
-
-
 
     override suspend fun DataSink<R>.update(
         source: DataTree<T>,
         meta: Meta,
         updatedData: DataUpdate<T>,
-    )  {
-        mapOne(updatedData.name, updatedData.data, meta)
+    ) {
+        val (name, data) = mapOne(updatedData.name, updatedData.data, meta)
+        put(name, data)
     }
 }
 

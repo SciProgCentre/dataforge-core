@@ -2,6 +2,7 @@ package space.kscience.dataforge.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.*
 import kotlin.contracts.contract
@@ -30,10 +31,17 @@ public interface DataSource<out T> {
 public interface ObservableDataSource<out T> : DataSource<T> {
 
     /**
-     * Flow updates made to the data
+     * Flow updates made to the data. Updates are considered critical. The producer will suspend unless all updates are consumed.
      */
     public val updates: Flow<DataUpdate<T>>
 }
+
+public suspend fun <T> ObservableDataSource<T>.awaitData(name: Name): Data<T> {
+    return read(name) ?: updates.first { it.name == name && it.data != null }.data!!
+}
+
+public suspend fun <T> ObservableDataSource<T>.awaitData(name: String): Data<T> =
+    awaitData(name.parseAsName())
 
 /**
  * A tree like structure for data holding
@@ -54,8 +62,7 @@ public interface DataTree<out T> : ObservableDataSource<T> {
     override val updates: Flow<DataUpdate<T>>
 
     public companion object {
-        private object EmptyDataTree :
-            DataTree<Nothing> {
+        private object EmptyDataTree : DataTree<Nothing> {
             override val data: Data<Nothing>? = null
             override val items: Map<NameToken, EmptyDataTree> = emptyMap()
             override val dataType: KType = typeOf<Unit>()

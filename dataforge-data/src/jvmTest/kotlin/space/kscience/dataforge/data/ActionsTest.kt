@@ -1,11 +1,8 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.actions.invoke
 import space.kscience.dataforge.actions.mapping
@@ -18,22 +15,20 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class ActionsTest {
     @Test
     fun testStaticMapAction() = runTest(timeout = 500.milliseconds) {
-        withContext(Dispatchers.Default) {
-            val plusOne = Action.mapping<Int, Int> {
-                result { it + 1 }
-            }
-
-            val data: DataTree<Int> = DataTree {
-                repeat(10) {
-                    putValue(it.toString(), it)
-                }
-            }
-
-            val result = plusOne(data)
-
-            advanceUntilIdle()
-            assertEquals(2, result["1"]?.await())
+        val plusOne = Action.mapping<Int, Int> {
+            result { it + 1 }
         }
+
+        val data: DataTree<Int> = DataTree {
+            repeat(10) {
+                putValue(it.toString(), it)
+            }
+        }
+
+        val result = plusOne(data)
+
+        advanceUntilIdle()
+        assertEquals(2, result["1"]?.await())
     }
 
     @Test
@@ -44,19 +39,13 @@ internal class ActionsTest {
 
         val source: MutableDataTree<Int> = MutableDataTree()
 
-        val result = plusOne(source)
-
-
+        val result: DataTree<Int> = plusOne(source)
 
         repeat(10) {
             source.updateValue(it.toString(), it)
         }
 
-        delay(10)
-
-//        result.updates.take(10).onEach { println(it.name) }.collect()
-
-        assertEquals(2, result["1"]?.await())
+        assertEquals(2, result.awaitData("1").await())
     }
 
 }

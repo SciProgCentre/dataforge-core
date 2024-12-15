@@ -1,8 +1,11 @@
 package space.kscience.dataforge.data
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import space.kscience.dataforge.misc.UnsafeKType
@@ -14,7 +17,7 @@ import kotlin.reflect.typeOf
 private class FlatDataTree<T>(
     override val dataType: KType,
     private val dataSet: Map<Name, Data<T>>,
-    private val sourceUpdates: Flow<DataUpdate<T>>,
+    private val sourceUpdates: SharedFlow<DataUpdate<T>>,
     private val prefix: Name,
 ) : DataTree<T> {
     override val data: Data<T>? get() = dataSet[prefix]
@@ -33,7 +36,7 @@ private class FlatDataTree<T>(
 }
 
 /**
- * A builder for static [DataTree].
+ * A builder for [DataTree].
  */
 private class DataTreeBuilder<T>(
     private val type: KType,
@@ -46,20 +49,13 @@ private class DataTreeBuilder<T>(
 
     private val updatesFlow = MutableSharedFlow<DataUpdate<T>>()
 
-    override fun put(name: Name, data: Data<T>?) {
-        if (data == null) {
-            map.remove(name)
-        } else {
-            map[name] = data
-        }
-    }
 
-    override suspend fun update(name: Name, data: Data<T>?) {
+    override suspend fun put(name: Name, data: Data<T>?) {
         mutex.withLock {
             if (data == null) {
                 map.remove(name)
             } else {
-                map.put(name, data)
+                map[name] = data
             }
         }
         updatesFlow.emit(DataUpdate(data?.type ?: type, name, data))
@@ -74,16 +70,24 @@ private class DataTreeBuilder<T>(
 @UnsafeKType
 public fun <T> DataTree(
     dataType: KType,
-    generator: DataSink<T>.() -> Unit,
-): DataTree<T> = DataTreeBuilder<T>(dataType).apply(generator).build()
+    scope: CoroutineScope,
+    initialData: Map<Name, Data<T>> = emptyMap(),
+    updater: suspend DataSink<T>.() -> Unit,
+): DataTree<T> = DataTreeBuilder<T>(dataType, initialData).apply {
+    scope.launch{
+        updater()
+    }
+}.build()
 
 /**
  * Create and a data tree.
  */
 @OptIn(UnsafeKType::class)
 public inline fun <reified T> DataTree(
-    noinline generator: DataSink<T>.() -> Unit,
-): DataTree<T> = DataTree(typeOf<T>(), generator)
+    scope: CoroutineScope,
+    initialData: Map<Name, Data<T>> = emptyMap(),
+    noinline updater: suspend DataSink<T>.() -> Unit,
+): DataTree<T> = DataTree(typeOf<T>(), scope, initialData, updater)
 
 
 /**

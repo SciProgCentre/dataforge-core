@@ -1,5 +1,6 @@
 package space.kscience.dataforge.data
 
+import kotlinx.coroutines.CoroutineScope
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
@@ -34,7 +35,6 @@ public fun <T, R> Data<T>.transform(
 ): Data<R> = Data(type, meta, coroutineContext, listOf(this)) {
     block(await())
 }
-
 
 
 /**
@@ -75,7 +75,6 @@ internal fun Iterable<Data<*>>.joinMeta(): Meta = Meta {
         set(token, data.meta)
     }
 }
-
 
 
 @PublishedApi
@@ -201,34 +200,46 @@ public inline fun <T, reified R> Iterable<NamedData<T>>.foldNamedToData(
 
 
 @UnsafeKType
-public suspend fun <T, R> DataTree<T>.transform(
+public fun <T, R> DataTree<T>.map(
     outputType: KType,
+    scope: CoroutineScope,
     metaTransform: MutableMeta.() -> Unit = {},
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    block: suspend (NamedValueWithMeta<T>) -> R,
-): DataTree<R> = DataTree<R>(outputType){
-    //quasi-synchronous processing of elements in the tree
-    asSequence().forEach { namedData: NamedData<T> ->
+    compute: suspend (NamedValueWithMeta<T>) -> R,
+): DataTree<R> = DataTree<R>(
+    outputType,
+    scope,
+    initialData = asSequence().associate { namedData: NamedData<T> ->
         val newMeta = namedData.meta.toMutableMeta().apply(metaTransform).seal()
-        val d = Data(outputType, newMeta, coroutineContext, listOf(namedData)) {
-            block(namedData.awaitWithMeta())
+        val newData = Data(outputType, newMeta, scope.coroutineContext, listOf(namedData)) {
+            compute(namedData.awaitWithMeta())
         }
-        put(namedData.name, d)
+        namedData.name to newData
+    }
+) {
+    updates.collect { update ->
+        val data: Data<T>? = update.data
+        if (data == null) put(update.name, null) else {
+            val newMeta = data.meta.toMutableMeta().apply(metaTransform).seal()
+            val d = Data(outputType, newMeta, scope.coroutineContext, listOf(data)) {
+                compute(NamedValueWithMeta(update.name, data.await(), data.meta))
+            }
+            put(update.name, d)
+        }
     }
 }
 
 @OptIn(UnsafeKType::class)
-public suspend inline fun <T, reified R> DataTree<T>.transform(
+public inline fun <T, reified R> DataTree<T>.map(
+    scope: CoroutineScope,
     noinline metaTransform: MutableMeta.() -> Unit = {},
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     noinline block: suspend (NamedValueWithMeta<T>) -> R,
-): DataTree<R> = this@transform.transform(typeOf<R>(), metaTransform, coroutineContext, block)
+): DataTree<R> = map(typeOf<R>(), scope, metaTransform, block)
 
 public inline fun <T> DataTree<T>.forEach(block: (NamedData<T>) -> Unit) {
     asSequence().forEach(block)
 }
 
-// DataSet reduction
+// DataSet snapshot reduction
 
 @PublishedApi
 internal fun DataTree<*>.joinMeta(): Meta = Meta {
@@ -238,6 +249,10 @@ internal fun DataTree<*>.joinMeta(): Meta = Meta {
     }
 }
 
+/**
+ * Reduce current snapshot of the [DataTree] to a single [Data].
+ * Even if a tree is changed in the future, only current data set is taken.
+ */
 public inline fun <T, reified R> DataTree<T>.reduceToData(
     meta: Meta = joinMeta(),
     coroutineContext: CoroutineContext = EmptyCoroutineContext,

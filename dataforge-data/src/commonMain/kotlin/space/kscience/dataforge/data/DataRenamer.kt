@@ -15,40 +15,41 @@
  */
 package space.kscience.dataforge.data
 
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
+import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.UnsafeKType
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.NameToken
+import space.kscience.dataforge.names.plus
+import kotlin.reflect.KType
 
-public interface GroupRule {
-    public fun <T> gather(set: DataTree<T>): Map<String, DataTree<T>>
+/**
+ * Interface that define rename rule for [Data]
+ */
+@DFExperimental
+public fun interface DataRenamer {
+    public fun rename(name: Name, meta: Meta, type: KType): Name
 
     public companion object {
+
         /**
-         * Create grouping rule that creates groups for different values of value
-         * field with name [key]
-         *
-         * @param key
-         * @param defaultTagValue
-         * @return
+         * Prepend name token `key\[tagValue\]` to data name
          */
         @OptIn(UnsafeKType::class)
-        public fun byMetaValue(
+        public fun groupByMetaValue(
             key: String,
             defaultTagValue: String,
-        ): GroupRule = object : GroupRule {
+        ): DataRenamer = object : DataRenamer {
 
-            override fun <T> gather(
-                set: DataTree<T>,
-            ): Map<String, DataTree<T>> {
-                val map = HashMap<String, MutableDataTree<T>>()
-
-                set.forEach { data ->
-                    val tagValue: String = data.meta[key]?.string ?: defaultTagValue
-                    map.getOrPut(tagValue) { MutableDataTree(set.dataType) }.put(data.name, data.data)
-                }
-
-
-                return map
+            override fun rename(
+                name: Name,
+                meta: Meta,
+                type: KType
+            ): Name {
+                val tagValue: String = meta[key]?.string ?: defaultTagValue
+                return NameToken(key,tagValue).plus(name)
             }
         }
     }

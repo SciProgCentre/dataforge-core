@@ -1,15 +1,14 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.names.*
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.isEmpty
+import space.kscience.dataforge.names.plus
 
 
-public fun <T> DataSink<T>.put(value: NamedData<T>) {
+public suspend fun <T> DataSink<T>.put(value: NamedData<T>) {
     put(value.name, value.data)
 }
 
@@ -20,16 +19,7 @@ public inline fun <T> DataSink<T>.putAll(
     if (prefix.isEmpty()) {
         apply(block)
     } else {
-        val proxyDataSink = object :DataSink<T>{
-            override fun put(name: Name, data: Data<T>?) {
-                this@putAll.put(prefix + name, data)
-            }
-
-            override suspend fun update(name: Name, data: Data<T>?) {
-                this@putAll.update(prefix + name, data)
-            }
-
-        }
+        val proxyDataSink = DataSink<T> { name, data -> this@putAll.put(prefix + name, data) }
 
         proxyDataSink.apply(block)
     }
@@ -42,23 +32,23 @@ public inline fun <T> DataSink<T>.putAll(
 ): Unit = putAll(prefix.asName(), block)
 
 
-public fun <T> DataSink<T>.put(name: String, value: Data<T>) {
+public suspend fun <T> DataSink<T>.put(name: String, value: Data<T>) {
     put(Name.parse(name), value)
 }
 
-public fun <T> DataSink<T>.putAll(name: Name, tree: DataTree<T>) {
+public suspend fun <T> DataSink<T>.putAll(name: Name, tree: DataTree<T>) {
     putAll(name) { putAll(tree.asSequence()) }
 }
 
 
-public fun <T> DataSink<T>.putAll(name: String, tree: DataTree<T>) {
+public suspend fun <T> DataSink<T>.putAll(name: String, tree: DataTree<T>) {
     putAll(Name.parse(name)) { putAll(tree.asSequence()) }
 }
 
 /**
  * Produce lazy [Data] and emit it into the [MutableDataTree]
  */
-public inline fun <reified T> DataSink<T>.putValue(
+public suspend inline fun <reified T> DataSink<T>.putValue(
     name: String,
     meta: Meta = Meta.EMPTY,
     noinline producer: suspend () -> T,
@@ -67,7 +57,7 @@ public inline fun <reified T> DataSink<T>.putValue(
     put(name, data)
 }
 
-public inline fun <reified T> DataSink<T>.putValue(
+public suspend inline fun <reified T> DataSink<T>.putValue(
     name: Name,
     meta: Meta = Meta.EMPTY,
     noinline producer: suspend () -> T,
@@ -79,56 +69,49 @@ public inline fun <reified T> DataSink<T>.putValue(
 /**
  * Emit static data with the fixed value
  */
-public inline fun <reified T> DataSink<T>.putValue(
+public suspend inline fun <reified T> DataSink<T>.putValue(
     name: Name,
     value: T,
     meta: Meta = Meta.EMPTY,
 ): Unit = put(name, Data.wrapValue(value, meta))
 
-public inline fun <reified T> DataSink<T>.putValue(
+public suspend inline fun <reified T> DataSink<T>.putValue(
     name: String,
     value: T,
     meta: Meta = Meta.EMPTY,
 ): Unit = put(name, Data.wrapValue(value, meta))
 
-public inline fun <reified T> DataSink<T>.putValue(
+public suspend inline fun <reified T> DataSink<T>.putValue(
     name: String,
     value: T,
     metaBuilder: MutableMeta.() -> Unit,
 ): Unit = put(Name.parse(name), Data.wrapValue(value, Meta(metaBuilder)))
 
-public suspend inline fun <reified T> DataSink<T>.updateValue(
-    name: Name,
-    value: T,
-    meta: Meta = Meta.EMPTY,
-): Unit = update(name, Data.wrapValue(value, meta))
-
-public suspend inline fun <reified T> DataSink<T>.updateValue(
-    name: String,
-    value: T,
-    meta: Meta = Meta.EMPTY,
-): Unit = update(name.parseAsName(), Data.wrapValue(value, meta))
-
-public fun <T> DataSink<T>.putAll(sequence: Sequence<NamedData<T>>) {
+public suspend fun <T> DataSink<T>.putAll(sequence: Sequence<NamedData<T>>) {
     sequence.forEach {
         put(it.name, it.data)
     }
 }
 
-public fun <T> DataSink<T>.putAll(tree: DataTree<T>) {
+public suspend fun <T> DataSink<T>.putAll(map: Map<Name, Data<T>?>) {
+    map.forEach { (name, data) ->
+        put(name, data)
+    }
+}
+
+public suspend fun <T> DataSink<T>.putAll(tree: DataTree<T>) {
     putAll(tree.asSequence())
 }
 
 /**
- * Copy given data set and mirror its changes to this [DataSink] in [this@setAndObserve]. Returns an update [Job]
+ * Copy given data set and mirror its changes to this [DataSink]. Suspends indefinitely.
  */
-public fun <T : Any> DataSink<T>.putAllAndWatch(
-    scope: CoroutineScope,
-    branchName: Name = Name.EMPTY,
+public suspend fun <T : Any> DataSink<T>.putAllAndWatch(
     source: DataTree<T>,
-): Job {
+    branchName: Name = Name.EMPTY,
+) {
     putAll(branchName, source)
-    return source.updates.onEach {
-        update(branchName + it.name, it.data)
-    }.launchIn(scope)
+    source.updates.collect {
+        put(branchName + it.name, it.data)
+    }
 }

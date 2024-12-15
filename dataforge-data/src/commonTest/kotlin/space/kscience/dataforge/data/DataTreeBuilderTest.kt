@@ -1,8 +1,7 @@
 package space.kscience.dataforge.data
 
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import space.kscience.dataforge.names.asName
 import kotlin.test.Test
@@ -57,17 +56,18 @@ internal class DataTreeBuilderTest {
         val subNode = MutableDataTree<Int>()
 
         val rootNode = MutableDataTree<Int>() {
-            job = putAllAndWatch(this@runTest, "sub".asName(), subNode)
+            job = launch {  putAllAndWatch(subNode,"sub".asName())}
         }
 
         repeat(10) {
             subNode.updateValue("value[$it]", it)
         }
 
-        rootNode.updates.take(10).collect()
-        assertEquals(9, rootNode["sub.value[9]"]?.await())
-        assertEquals(8, rootNode["sub.value[8]"]?.await())
-
+        assertEquals(9, subNode.awaitData("value[9]").await())
+        assertEquals(8, subNode.awaitData("value[8]").await())
+        assertEquals(9, rootNode.awaitData("sub.value[9]").await())
+        assertEquals(8, rootNode.awaitData("sub.value[8]").await())
+        println("finished")
         job?.cancel()
     }
 }

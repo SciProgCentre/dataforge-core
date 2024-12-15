@@ -54,7 +54,7 @@ class FileDataTest {
         val data = DataTree {
             files(io, Name.EMPTY, dir)
         }
-        val reconstructed = data.transform { (_, value) -> value.toByteArray().decodeToString() }
+        val reconstructed = data.map { (_, value) -> value.toByteArray().decodeToString() }
         assertEquals(dataNode["dir.a"]?.meta?.get("content"), reconstructed["dir.a"]?.meta?.get("content"))
         assertEquals(dataNode["b"]?.await(), reconstructed["b"]?.await())
     }
@@ -69,7 +69,7 @@ class FileDataTest {
         io.writeZip(zip, dataNode, StringIOFormat)
         println(zip.toUri().toString())
         val reconstructed = DataTree { files(io, Name.EMPTY, zip) }
-            .transform { (_, value) -> value.toByteArray().decodeToString() }
+            .map { (_, value) -> value.toByteArray().decodeToString() }
         assertEquals(dataNode["dir.a"]?.meta?.get("content"), reconstructed["dir.a"]?.meta?.get("content"))
         assertEquals(dataNode["b"]?.await(), reconstructed["b"]?.await())
 

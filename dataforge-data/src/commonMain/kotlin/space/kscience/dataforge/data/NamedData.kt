@@ -20,6 +20,11 @@ public fun <T> DataUpdate(type: KType, name: Name, data: Data<T>?): DataUpdate<T
     override val type: KType = type
     override val name: Name = name
     override val data: Data<T>? = data
+
+    override fun toString(): String {
+        return "DataUpdate(type=$type, name=$name, data=$data)"
+    }
+
 }
 
 /**
