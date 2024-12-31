@@ -80,7 +80,7 @@ internal class SplitAction<T, R>(
         meta: Meta
     ): Map<Name, Data<R>> = buildMap {
         source.forEach {
-            splitOne(it.name, it.data, meta).forEach { (name, data) ->
+            splitOne(it.name, it, meta).forEach { (name, data) ->
                 check(name !in keys) { "Data with key $name already exist in the result" }
                 if (data != null) {
                     put(name, data)
@@ -91,10 +91,10 @@ internal class SplitAction<T, R>(
 
     override suspend fun DataSink<R>.update(
         source: DataTree<T>,
-        meta: Meta,
-        updatedData: DataUpdate<T>,
+        actionMeta: Meta,
+        updateName: Name,
     ) {
-        putAll(splitOne(updatedData.name, updatedData.data, meta))
+        putAll(splitOne(updateName, source.read(updateName), actionMeta))
     }
 }
 

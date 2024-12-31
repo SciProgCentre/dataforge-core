@@ -17,7 +17,7 @@ import kotlin.reflect.typeOf
 private class FlatDataTree<T>(
     override val dataType: KType,
     private val dataSet: Map<Name, Data<T>>,
-    private val sourceUpdates: SharedFlow<DataUpdate<T>>,
+    private val sourceUpdates: SharedFlow<Name>,
     private val prefix: Name,
 ) : DataTree<T> {
     override val data: Data<T>? get() = dataSet[prefix]
@@ -29,10 +29,9 @@ private class FlatDataTree<T>(
 
     override fun read(name: Name): Data<T>? = dataSet[prefix + name]
 
-    override val updates: Flow<DataUpdate<T>> =
-        sourceUpdates.mapNotNull { update ->
-            update.name.removeFirstOrNull(prefix)?.let { DataUpdate(dataType, it, update.data) }
-        }
+    override val updates: Flow<Name> = sourceUpdates.mapNotNull { update ->
+        update.removeFirstOrNull(prefix)
+    }
 }
 
 /**
@@ -47,7 +46,7 @@ private class DataTreeBuilder<T>(
 
     private val mutex = Mutex()
 
-    private val updatesFlow = MutableSharedFlow<DataUpdate<T>>()
+    private val updatesFlow = MutableSharedFlow<Name>()
 
 
     override suspend fun put(name: Name, data: Data<T>?) {
@@ -58,7 +57,7 @@ private class DataTreeBuilder<T>(
                 map[name] = data
             }
         }
-        updatesFlow.emit(DataUpdate(data?.type ?: type, name, data))
+        updatesFlow.emit(name)
     }
 
     public fun build(): DataTree<T> = FlatDataTree(type, map, updatesFlow, Name.EMPTY)
@@ -74,7 +73,7 @@ public fun <T> DataTree(
     initialData: Map<Name, Data<T>> = emptyMap(),
     updater: suspend DataSink<T>.() -> Unit,
 ): DataTree<T> = DataTreeBuilder<T>(dataType, initialData).apply {
-    scope.launch{
+    scope.launch {
         updater()
     }
 }.build()
@@ -89,6 +88,13 @@ public inline fun <reified T> DataTree(
     noinline updater: suspend DataSink<T>.() -> Unit,
 ): DataTree<T> = DataTree(typeOf<T>(), scope, initialData, updater)
 
+@UnsafeKType
+public fun <T> DataTree(type: KType, data: Map<Name, Data<T>>): DataTree<T> =
+    DataTreeBuilder(type, data).build()
+
+@OptIn(UnsafeKType::class)
+public inline fun <reified T> DataTree(data: Map<Name, Data<T>>): DataTree<T> =
+    DataTree(typeOf<T>(), data)
 
 /**
  * Represent this flat data map as a [DataTree] without copying it
@@ -106,7 +112,7 @@ public inline fun <reified T> Map<Name, Data<T>>.asTree(): DataTree<T> = asTree(
 
 @UnsafeKType
 public fun <T> Sequence<NamedData<T>>.toTree(type: KType): DataTree<T> =
-    DataTreeBuilder(type, associate { it.name to it.data }).build()
+    DataTreeBuilder(type, associate { it.name to it }).build()
 
 
 /**

@@ -15,14 +15,14 @@ import space.kscience.dataforge.names.matches
  * Select the whole data set from the workspace filtered by type.
  */
 @OptIn(DFExperimental::class)
-public inline fun <reified T : Any> TaskResultBuilder<*>.dataByType(namePattern: Name? = null): DataSelector<T> =
+public inline fun <reified T : Any> TaskResultScope<*>.dataByType(namePattern: Name? = null): DataSelector<T> =
     DataSelector<T> { workspace, _ ->
         workspace.data.filterByType { name, _, _ ->
             namePattern == null || name.matches(namePattern)
         }
     }
 
-public suspend inline fun <reified T : Any> TaskResultBuilder<*>.fromTask(
+public suspend inline fun <reified T : Any> TaskResultScope<*>.fromTask(
     task: Name,
     taskMeta: Meta = Meta.EMPTY,
 ): DataTree<T> = workspace.produce(task, taskMeta).filterByType()

@@ -8,14 +8,17 @@ import space.kscience.dataforge.names.*
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
-public interface DataBuilderScope<in T>{
-    public companion object: DataBuilderScope<Nothing>
+public interface DataBuilderScope<in T> {
+    public companion object : DataBuilderScope<Nothing>
 }
 
 @Suppress("UNCHECKED_CAST")
 public fun <T> DataBuilderScope(): DataBuilderScope<T> = DataBuilderScope as DataBuilderScope<T>
 
-public fun interface DataSink<in T>: DataBuilderScope<T> {
+/**
+ * Asynchronous data sink
+ */
+public fun interface DataSink<in T> : DataBuilderScope<T> {
     /**
      * Put data and notify listeners if needed
      */
@@ -59,7 +62,7 @@ private class MutableDataTreeRoot<T>(
 ) : MutableDataTree<T> {
 
     override val items = HashMap<NameToken, MutableDataTree<T>>()
-    override val updates = MutableSharedFlow<DataUpdate<T>>(extraBufferCapacity = 100)
+    override val updates = MutableSharedFlow<Name>(extraBufferCapacity = 100)
 
     inner class MutableDataTreeBranch(val branchName: Name) : MutableDataTree<T> {
 
@@ -67,10 +70,8 @@ private class MutableDataTreeRoot<T>(
 
         override val items = HashMap<NameToken, MutableDataTree<T>>()
 
-        override val updates: Flow<DataUpdate<T>> = this@MutableDataTreeRoot.updates.mapNotNull { update ->
-            update.name.removeFirstOrNull(branchName)?.let {
-                DataUpdate(update.data?.type ?: dataType, it, update.data)
-            }
+        override val updates: Flow<Name> = this@MutableDataTreeRoot.updates.mapNotNull { update ->
+            update.removeFirstOrNull(branchName)
         }
         override val dataType: KType get() = this@MutableDataTreeRoot.dataType
 
@@ -80,7 +81,7 @@ private class MutableDataTreeRoot<T>(
 
         override suspend fun put(token: NameToken, data: Data<T>?) {
             this.data = data
-            this@MutableDataTreeRoot.updates.emit(DataUpdate(data?.type ?: dataType, branchName + token, data))
+            this@MutableDataTreeRoot.updates.emit(branchName + token)
         }
     }
 
@@ -92,7 +93,7 @@ private class MutableDataTreeRoot<T>(
 
     override suspend fun put(token: NameToken, data: Data<T>?) {
         this.data = data
-        updates.emit(DataUpdate(data?.type ?: dataType, token.asName(), data))
+        updates.emit(token.asName())
     }
 }
 

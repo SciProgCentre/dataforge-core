@@ -200,40 +200,44 @@ public inline fun <T, reified R> Iterable<NamedData<T>>.foldNamedToData(
 
 
 @UnsafeKType
-public fun <T, R> DataTree<T>.map(
+public fun <T, R> DataTree<T>.transformEach(
     outputType: KType,
     scope: CoroutineScope,
-    metaTransform: MutableMeta.() -> Unit = {},
+    metaTransform: MutableMeta.(name: Name) -> Unit = {},
     compute: suspend (NamedValueWithMeta<T>) -> R,
 ): DataTree<R> = DataTree<R>(
     outputType,
     scope,
     initialData = asSequence().associate { namedData: NamedData<T> ->
-        val newMeta = namedData.meta.toMutableMeta().apply(metaTransform).seal()
+        val newMeta = namedData.meta.toMutableMeta().apply {
+            metaTransform(namedData.name)
+        }.seal()
         val newData = Data(outputType, newMeta, scope.coroutineContext, listOf(namedData)) {
             compute(namedData.awaitWithMeta())
         }
         namedData.name to newData
     }
 ) {
-    updates.collect { update ->
-        val data: Data<T>? = update.data
-        if (data == null) put(update.name, null) else {
-            val newMeta = data.meta.toMutableMeta().apply(metaTransform).seal()
+    updates.collect { name ->
+        val data: Data<T>? = read(name)
+        if (data == null) put(name, null) else {
+            val newMeta = data.meta.toMutableMeta().apply {
+                metaTransform(name)
+            }.seal()
             val d = Data(outputType, newMeta, scope.coroutineContext, listOf(data)) {
-                compute(NamedValueWithMeta(update.name, data.await(), data.meta))
+                compute(NamedValueWithMeta(name, data.await(), data.meta))
             }
-            put(update.name, d)
+            put(name, d)
         }
     }
 }
 
 @OptIn(UnsafeKType::class)
-public inline fun <T, reified R> DataTree<T>.map(
+public inline fun <T, reified R> DataTree<T>.transformEach(
     scope: CoroutineScope,
-    noinline metaTransform: MutableMeta.() -> Unit = {},
+    noinline metaTransform: MutableMeta.(name: Name) -> Unit = {},
     noinline block: suspend (NamedValueWithMeta<T>) -> R,
-): DataTree<R> = map(typeOf<R>(), scope, metaTransform, block)
+): DataTree<R> = transformEach(typeOf<R>(), scope, metaTransform, block)
 
 public inline fun <T> DataTree<T>.forEach(block: (NamedData<T>) -> Unit) {
     asSequence().forEach(block)

@@ -26,7 +26,7 @@ class FileWorkspaceCacheTest {
             }
         }
 
-        workspace.produce("echo").launch(this)
+        workspace.produce("echo").launchIn(this)
 
     }
 }

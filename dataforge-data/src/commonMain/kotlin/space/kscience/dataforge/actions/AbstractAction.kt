@@ -35,16 +35,16 @@ public abstract class AbstractAction<T, R>(
      * Update part of the data set using provided data
      *
      * @param source the source data tree in case we need several data items to update
-     * @param meta the metadata used for the whole data tree
+     * @param actionMeta the metadata used for the whole data tree
      * @param updatedData an updated item
      */
     protected open suspend fun DataSink<R>.update(
         source: DataTree<T>,
-        meta: Meta,
-        updatedData: DataUpdate<T>,
+        actionMeta: Meta,
+        updateName: Name,
     ) {
         //by default regenerate the whole data set
-        putAll(generate(source, meta))
+        putAll(generate(source, actionMeta))
     }
 
     @OptIn(UnsafeKType::class)
@@ -64,8 +64,8 @@ public abstract class AbstractAction<T, R>(
         }
 
         with(updateSink) {
-            source.updates.collect { du: DataUpdate<T> ->
-                update(source, meta, du)
+            source.updates.collect {
+                update(source, meta, it)
             }
         }
     }

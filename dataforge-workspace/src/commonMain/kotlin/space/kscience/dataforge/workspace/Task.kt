@@ -1,9 +1,9 @@
 package space.kscience.dataforge.workspace
 
 import kotlinx.coroutines.withContext
-import space.kscience.dataforge.data.DataSink
+import space.kscience.dataforge.data.DataBuilderScope
+import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.data.GoalExecutionRestriction
-import space.kscience.dataforge.data.MutableDataTree
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaReader
 import space.kscience.dataforge.meta.MetaRepr
@@ -62,12 +62,12 @@ public interface TaskWithSpec<T, C : Any> : Task<T> {
 //    block: C.() -> Unit = {},
 //): TaskResult<T> = execute(workspace, taskName, spec(block))
 
-public class TaskResultBuilder<T>(
+public class TaskResultScope<T>(
+    public val resultType: KType,
     public val workspace: Workspace,
     public val taskName: Name,
     public val taskMeta: Meta,
-    private val dataSink: DataSink<T>,
-) : DataSink<T> by dataSink
+) : DataBuilderScope<T>
 
 /**
  * Create a [Task] that composes a result using [builder]. Only data from the workspace could be used.
@@ -77,10 +77,11 @@ public class TaskResultBuilder<T>(
  * @param descriptor of meta accepted by this task
  * @param builder for resulting data set
  */
+@UnsafeKType
 public fun <T : Any> Task(
     resultType: KType,
     descriptor: MetaDescriptor? = null,
-    builder: suspend TaskResultBuilder<T>.() -> Unit,
+    builder: suspend TaskResultScope<T>.() -> DataTree<T>,
 ): Task<T> = object : Task<T> {
 
     override val descriptor: MetaDescriptor? = descriptor
@@ -89,23 +90,19 @@ public fun <T : Any> Task(
         workspace: Workspace,
         taskName: Name,
         taskMeta: Meta,
-    ): TaskResult<T> {
+    ): TaskResult<T> = withContext(GoalExecutionRestriction() + workspace.goalLogger) {
         //TODO use safe builder and check for external data on add and detects cycles
-        @OptIn(UnsafeKType::class)
-        val dataset = MutableDataTree<T>(resultType).apply {
-            TaskResultBuilder(workspace, taskName, taskMeta, this).apply {
-                withContext(GoalExecutionRestriction() + workspace.goalLogger) {
-                    builder()
-                }
-            }
-        }
-        return workspace.wrapResult(dataset, taskName, taskMeta)
+        val dataset = TaskResultScope<T>(resultType, workspace, taskName, taskMeta).builder()
+
+
+        workspace.wrapResult(dataset, taskName, taskMeta)
     }
 }
 
+@OptIn(UnsafeKType::class)
 public inline fun <reified T : Any> Task(
     descriptor: MetaDescriptor? = null,
-    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+    noinline builder: suspend TaskResultScope<T>.() -> DataTree<T>,
 ): Task<T> = Task(typeOf<T>(), descriptor, builder)
 
 
@@ -117,13 +114,11 @@ public inline fun <reified T : Any> Task(
  * @param specification a specification for task configuration
  * @param builder for resulting data set
  */
-
-
 @Suppress("FunctionName")
 public fun <T : Any, C : MetaRepr> Task(
     resultType: KType,
     specification: MetaReader<C>,
-    builder: suspend TaskResultBuilder<T>.(C) -> Unit,
+    builder: suspend TaskResultScope<T>.(C) -> DataTree<T>,
 ): TaskWithSpec<T, C> = object : TaskWithSpec<T, C> {
     override val spec: MetaReader<C> = specification
 
@@ -134,15 +129,15 @@ public fun <T : Any, C : MetaRepr> Task(
     ): TaskResult<T> = withContext(GoalExecutionRestriction() + workspace.goalLogger) {
         //TODO use safe builder and check for external data on add and detects cycles
         val taskMeta = configuration.toMeta()
+
         @OptIn(UnsafeKType::class)
-        val dataset = MutableDataTree<T>(resultType).apply {
-            TaskResultBuilder(workspace, taskName, taskMeta, this).apply { builder(configuration) }
-        }
+        val dataset = TaskResultScope<T>(resultType, workspace, taskName, taskMeta).builder(configuration)
+
         workspace.wrapResult(dataset, taskName, taskMeta)
     }
 }
 
 public inline fun <reified T : Any, C : MetaRepr> Task(
     specification: MetaReader<C>,
-    noinline builder: suspend TaskResultBuilder<T>.(C) -> Unit,
+    noinline builder: suspend TaskResultScope<T>.(C) -> DataTree<T>,
 ): Task<T> = Task(typeOf<T>(), specification, builder)

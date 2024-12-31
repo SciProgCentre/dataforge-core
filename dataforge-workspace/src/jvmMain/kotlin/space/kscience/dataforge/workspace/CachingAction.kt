@@ -3,17 +3,25 @@ package space.kscience.dataforge.workspace
 import space.kscience.dataforge.actions.AbstractAction
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.names.Name
 import kotlin.reflect.KType
 
-internal class CachingAction<T>(type: KType, private val caching: (NamedData<T>) -> NamedData<T>) :
-    AbstractAction<T, T>(type) {
-    override fun DataSink<T>.generate(source: DataTree<T>, meta: Meta) {
+internal class CachingAction<T>(
+    type: KType, private val caching: (NamedData<T>) -> NamedData<T>
+) : AbstractAction<T, T>(type) {
+
+    override fun DataBuilderScope<T>.generate(
+        source: DataTree<T>,
+        meta: Meta
+    ): Map<Name, Data<T>> = buildMap {
         source.forEach {
-            put(caching(it))
+            val cached = caching(it)
+            put(cached.name, cached)
         }
     }
 
-    override suspend fun DataSink<T>.update(source: DataTree<T>, meta: Meta, updatedData: DataUpdate<T>) {
-        put(updatedData.name, updatedData.data?.named(updatedData.name)?.let(caching))
+    override suspend fun DataSink<T>.update(source: DataTree<T>, actionMeta: Meta, updateName: Name) {
+        val updatedData = source.read(updateName)
+        put(updateName, updatedData?.named(updateName)?.let(caching))
     }
 }

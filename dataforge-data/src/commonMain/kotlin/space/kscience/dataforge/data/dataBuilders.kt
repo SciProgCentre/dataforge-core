@@ -9,7 +9,7 @@ import space.kscience.dataforge.names.plus
 
 
 public suspend fun <T> DataSink<T>.put(value: NamedData<T>) {
-    put(value.name, value.data)
+    put(value.name, value)
 }
 
 public inline fun <T> DataSink<T>.putAll(
@@ -89,7 +89,7 @@ public suspend inline fun <reified T> DataSink<T>.putValue(
 
 public suspend fun <T> DataSink<T>.putAll(sequence: Sequence<NamedData<T>>) {
     sequence.forEach {
-        put(it.name, it.data)
+        put(it)
     }
 }
 
@@ -99,19 +99,27 @@ public suspend fun <T> DataSink<T>.putAll(map: Map<Name, Data<T>?>) {
     }
 }
 
-public suspend fun <T> DataSink<T>.putAll(tree: DataTree<T>) {
-    putAll(tree.asSequence())
-}
+//public suspend fun <T> DataSink<T>.putAll(tree: DataTree<T>) {
+//    putAll(tree.asSequence())
+//}
 
 /**
- * Copy given data set and mirror its changes to this [DataSink]. Suspends indefinitely.
+ * Suspends indefinitely.
  */
-public suspend fun <T : Any> DataSink<T>.putAllAndWatch(
-    source: DataTree<T>,
-    branchName: Name = Name.EMPTY,
+public suspend fun <T : Any> DataSink<T>.watch(
+    source: ObservableDataSource<T>,
+    prefix: Name = Name.EMPTY,
 ) {
-    putAll(branchName, source)
+//    putAll(branchName, source)
     source.updates.collect {
-        put(branchName + it.name, it.data)
+        put(prefix + it, source.read(it))
     }
+}
+
+public suspend fun <T : Any> MutableDataTree<T>.putAllAndWatch(
+    source: DataTree<T>,
+    prefix: Name = Name.EMPTY,
+) {
+    putAll(prefix, source)
+    watch(source,prefix)
 }

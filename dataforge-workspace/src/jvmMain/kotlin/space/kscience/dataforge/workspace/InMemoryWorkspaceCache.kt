@@ -28,7 +28,7 @@ public class InMemoryWorkspaceCache : WorkspaceCache {
             val cachedData =  cache.getOrPut(TaskResultId(result.taskName, result.taskMeta)){
                 HashMap()
             }.getOrPut(data.name){
-                data.data
+                data
             }
             cachedData.checkType<T>(result.dataType).named(data.name)
         }

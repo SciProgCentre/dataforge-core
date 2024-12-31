@@ -85,8 +85,8 @@ public class MapAction<T, R>(
     }
 
     override fun DataBuilderScope<R>.generate(source: DataTree<T>, meta: Meta): Map<Name, Data<R>> = buildMap {
-        source.forEach {
-            val (name, data) = mapOne(it.name, it.data, meta)
+        source.forEach { data ->
+            val (name, data) = mapOne(data.name, data, meta)
             if (data != null) {
                 check(name !in keys) { "Data with key $name already exist in the result" }
                 put(name, data)
@@ -96,10 +96,10 @@ public class MapAction<T, R>(
 
     override suspend fun DataSink<R>.update(
         source: DataTree<T>,
-        meta: Meta,
-        updatedData: DataUpdate<T>,
+        actionMeta: Meta,
+        updateName: Name,
     ) {
-        val (name, data) = mapOne(updatedData.name, updatedData.data, meta)
+        val (name, data) = mapOne(updateName, source.read(updateName), actionMeta)
         put(name, data)
     }
 }

@@ -95,7 +95,7 @@ internal class ReduceAction<T, R>(
         ReduceGroupBuilder<T, R>(meta, outputType).apply(action).buildGroups(source).forEach { group ->
             val dataFlow: Map<Name, Data<T>> = group.data.asSequence().fold(HashMap()) { acc, value ->
                 acc.apply {
-                    acc[value.name] = value.data
+                    acc[value.name] = value
                 }
             }
 

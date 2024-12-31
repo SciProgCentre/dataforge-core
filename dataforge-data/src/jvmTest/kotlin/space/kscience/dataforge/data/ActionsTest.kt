@@ -19,7 +19,7 @@ internal class ActionsTest {
             result { it + 1 }
         }
 
-        val data: DataTree<Int> = DataTree {
+        val data: DataTree<Int> = DataTree.static {
             repeat(10) {
                 putValue(it.toString(), it)
             }
@@ -42,7 +42,7 @@ internal class ActionsTest {
         val result: DataTree<Int> = plusOne(source)
 
         repeat(10) {
-            source.updateValue(it.toString(), it)
+            source.putValue(it.toString(), it)
         }
 
         assertEquals(2, result.awaitData("1").await())

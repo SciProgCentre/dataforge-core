@@ -29,7 +29,7 @@ internal class CachingWorkspaceTest {
             inMemoryCache()
 
             val doFirst by task<Any> {
-                transformEach(allData) { _, name, _ ->
+                transformEach(allData) { (name, _, _) ->
                     firstCounter++
                     println("Done first on $name with flag=${taskMeta["flag"].boolean}")
                 }
@@ -39,7 +39,7 @@ internal class CachingWorkspaceTest {
                 transformEach(
                     doFirst,
                     dependencyMeta = if (taskMeta["flag"].boolean == true) taskMeta else Meta.EMPTY
-                ) { _, name, _ ->
+                ) { (name, _, _) ->
                     secondCounter++
                     println("Done second on $name with flag=${taskMeta["flag"].boolean ?: false}")
                 }
@@ -52,11 +52,11 @@ internal class CachingWorkspaceTest {
         val secondC = workspace.produce("doSecond")
         //use coroutineScope to wait for the result
         coroutineScope {
-            first.launch(this)
-            secondA.launch(this)
-            secondB.launch(this)
+            first.launchIn(this)
+            secondA.launchIn(this)
+            secondB.launchIn(this)
             //repeat to check caching
-            secondC.launch(this)
+            secondC.launchIn(this)
         }
 
         assertEquals(10, firstCounter)

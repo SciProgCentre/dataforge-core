@@ -18,23 +18,25 @@ public fun interface DataFilter {
 }
 
 
-public fun DataFilter.accepts(update: DataUpdate<*>): Boolean = accepts(update.name, update.data?.meta, update.type)
+//public fun DataFilter.accepts(update: DataUpdate<*>): Boolean = accepts(update.name, update.data?.meta, update.type)
 
-public fun <T, DU : DataUpdate<T>> Sequence<DU>.filterData(predicate: DataFilter): Sequence<DU> = filter { data ->
-    predicate.accepts(data)
-}
-
-public fun <T, DU : DataUpdate<T>> Flow<DU>.filterData(predicate: DataFilter): Flow<DU> = filter { data ->
-    predicate.accepts(data)
-}
+//public fun <T, DU : DataUpdate<T>> Sequence<DU>.filterData(predicate: DataFilter): Sequence<DU> = filter { data ->
+//    predicate.accepts(data)
+//}
+//
+//public fun <T, DU : DataUpdate<T>> Flow<DU>.filterData(predicate: DataFilter): Flow<DU> = filter { data ->
+//    predicate.accepts(data)
+//}
 
 public fun <T> DataSource<T>.filterData(
-    predicate: DataFilter,
+    dataFilter: DataFilter,
 ): DataSource<T> = object : DataSource<T> {
     override val dataType: KType get() = this@filterData.dataType
 
     override fun read(name: Name): Data<T>? =
-        this@filterData.read(name)?.takeIf { predicate.accepts(name, it.meta, it.type) }
+        this@filterData.read(name)?.takeIf {
+            dataFilter.accepts(name, it.meta, it.type)
+        }
 }
 
 /**
@@ -43,8 +45,12 @@ public fun <T> DataSource<T>.filterData(
 public fun <T> ObservableDataSource<T>.filterData(
     predicate: DataFilter,
 ): ObservableDataSource<T> = object : ObservableDataSource<T> {
-    override val updates: Flow<DataUpdate<T>>
-        get() = this@filterData.updates.filter { predicate.accepts(it) }
+
+    override val updates: Flow<Name>
+        get() = this@filterData.updates.filter {
+            val data = read(it)
+            predicate.accepts(it, data?.meta, data?.type ?: dataType)
+        }
 
     override val dataType: KType get() = this@filterData.dataType
 
@@ -70,8 +76,11 @@ internal class FilteredDataTree<T>(
             ?.filter { !it.value.isEmpty() }
             ?: emptyMap()
 
-    override val updates: Flow<DataUpdate<T>>
-        get() = source.updates.filter { filter.accepts(it) }
+    override val updates: Flow<Name>
+        get() = source.updates.filter {
+            val data = read(it)
+            filter.accepts(it, data?.meta, data?.type ?: dataType)
+        }
 }
 
 

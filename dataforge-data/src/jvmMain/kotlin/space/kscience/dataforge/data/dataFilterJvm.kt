@@ -1,7 +1,5 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KType
@@ -22,15 +20,15 @@ private fun <R> Data<*>.castOrNull(type: KType): Data<R>? =
         }
     }
 
-@Suppress("UNCHECKED_CAST")
-@DFInternal
-public fun <R> Sequence<DataUpdate<*>>.filterByDataType(type: KType): Sequence<NamedData<R>> =
-    filter { it.type.isSubtypeOf(type) } as Sequence<NamedData<R>>
-
-@Suppress("UNCHECKED_CAST")
-@DFInternal
-public fun <R> Flow<DataUpdate<*>>.filterByDataType(type: KType): Flow<NamedData<R>> =
-    filter { it.type.isSubtypeOf(type) } as Flow<NamedData<R>>
+//@Suppress("UNCHECKED_CAST")
+//@DFInternal
+//public fun <R> Sequence<DataUpdate<*>>.filterByDataType(type: KType): Sequence<NamedData<R>> =
+//    filter { it.type.isSubtypeOf(type) } as Sequence<NamedData<R>>
+//
+//@Suppress("UNCHECKED_CAST")
+//@DFInternal
+//public fun <R> Flow<DataUpdate<*>>.filterByDataType(type: KType): Flow<NamedData<R>> =
+//    filter { it.type.isSubtypeOf(type) } as Flow<NamedData<R>>
 
 /**
  * Select all data matching given type and filters. Does not modify paths

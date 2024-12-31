@@ -32,7 +32,7 @@ public interface Goal<out T> {
     public companion object
 }
 
-public fun Goal<*>.launch(coroutineScope: CoroutineScope): Job = async(coroutineScope)
+public fun Goal<*>.launchIn(coroutineScope: CoroutineScope): Job = async(coroutineScope)
 
 public suspend fun <T> Goal<T>.await(): T = coroutineScope { async(this).await() }
 
