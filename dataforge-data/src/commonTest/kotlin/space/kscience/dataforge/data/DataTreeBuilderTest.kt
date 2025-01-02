@@ -13,12 +13,12 @@ internal class DataTreeBuilderTest {
     @Test
     fun testTreeBuild() = runTest(timeout = 500.milliseconds) {
         val node = DataTree.static<Any> {
-            putAll("primary") {
-                putValue("a", "a")
-                putValue("b", "b")
+            node("primary") {
+                value("a", "a")
+                value("b", "b")
             }
-            putValue("c.d", "c.d")
-            putValue("c.f", "c.f")
+            value("c.d", "c.d")
+            value("c.f", "c.f")
         }
         assertEquals("a", node["primary.a"]?.await())
         assertEquals("b", node["primary.b"]?.await())
@@ -30,17 +30,17 @@ internal class DataTreeBuilderTest {
     @Test
     fun testDataUpdate() = runTest(timeout = 500.milliseconds) {
         val updateData = DataTree.static<Any> {
-            put("a", Data.wrapValue("a"))
-            put("b", Data.wrapValue("b"))
+            data("a", Data.wrapValue("a"))
+            data("b", Data.wrapValue("b"))
         }
 
         val node = DataTree.static<Any> {
-            putAll("primary") {
-                putValue("a", "a")
-                putValue("b", "b")
+            node("primary") {
+                value("a", "a")
+                value("b", "b")
             }
-            putValue("root", "root")
-            putAll("update", updateData)
+            value("root", "root")
+            node("update", updateData)
         }
 
         assertEquals("a", node["update.a"]?.await())
@@ -54,7 +54,9 @@ internal class DataTreeBuilderTest {
         val subNode = MutableDataTree<Int>()
 
         val rootNode = MutableDataTree<Int>() {
-            job = launch { putAllAndWatch(subNode, "sub".asName()) }
+            job = launch {
+                putAllAndWatch(subNode, "sub".asName())
+            }
         }
 
         repeat(10) {

@@ -1,7 +1,6 @@
 package space.kscience.dataforge.data
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.actions.invoke
@@ -21,14 +20,13 @@ internal class ActionsTest {
 
         val data: DataTree<Int> = DataTree.static {
             repeat(10) {
-                putValue(it.toString(), it)
+                value(it.toString(), it)
             }
         }
 
         val result = plusOne(data)
 
-        advanceUntilIdle()
-        assertEquals(2, result["1"]?.await())
+        assertEquals(2, result.awaitData("1").await())
     }
 
     @Test

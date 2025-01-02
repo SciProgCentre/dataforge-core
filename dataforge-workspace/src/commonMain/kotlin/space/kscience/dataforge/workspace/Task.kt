@@ -62,7 +62,7 @@ public interface TaskWithSpec<T, C : Any> : Task<T> {
 //    block: C.() -> Unit = {},
 //): TaskResult<T> = execute(workspace, taskName, spec(block))
 
-public class TaskResultScope<T>(
+public class TaskResultScope<in T>(
     public val resultType: KType,
     public val workspace: Workspace,
     public val taskName: Name,

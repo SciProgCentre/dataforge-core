@@ -38,9 +38,8 @@ public interface ObservableDataSource<out T> : DataSource<T> {
     public val updates: Flow<Name>
 }
 
-public suspend fun <T> ObservableDataSource<T>.awaitData(name: Name): Data<T> {
-    return read(name) ?: updates.filter { it == name }.map { read(name) }.filterNotNull().first()
-}
+public suspend fun <T> ObservableDataSource<T>.awaitData(name: Name): Data<T> =
+    read(name) ?: updates.filter { it == name }.mapNotNull { read(name) }.first()
 
 public suspend fun <T> ObservableDataSource<T>.awaitData(name: String): Data<T> =
     awaitData(name.parseAsName())

@@ -1,14 +1,13 @@
 package space.kscience.dataforge.workspace
 
 import space.kscience.dataforge.context.PluginFactory
-import space.kscience.dataforge.data.DataTree
-import space.kscience.dataforge.data.NamedValueWithMeta
-import space.kscience.dataforge.data.transformEach
+import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.copy
 import space.kscience.dataforge.meta.remove
 import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.plus
 
@@ -77,13 +76,15 @@ public val TaskResultScope<*>.allData: DataSelector<*>
  * @param dataMetaTransform additional transformation of individual data meta.
  * @param action process individual data asynchronously.
  */
+@OptIn(UnsafeKType::class)
 @DFExperimental
-public suspend inline fun <T, reified R> TaskResultScope<R>.transformEach(
+public suspend fun <T, R> TaskResultScope<R>.transformEach(
     selector: DataSelector<T>,
     dependencyMeta: Meta = defaultDependencyMeta,
-    crossinline dataMetaTransform: MutableMeta.(name: Name) -> Unit = {},
-    crossinline action: suspend (NamedValueWithMeta<T>) -> R,
+    dataMetaTransform: MutableMeta.(name: Name) -> Unit = {},
+    action: suspend NamedValueWithMeta<T>.() -> R,
 ): DataTree<R> = from(selector, dependencyMeta).transformEach<T, R>(
+    resultType,
     workspace.context,
     metaTransform = { name ->
         taskMeta[taskName]?.let { taskName put it }
@@ -92,6 +93,15 @@ public suspend inline fun <T, reified R> TaskResultScope<R>.transformEach(
 ) {
     action(it)
 }
+
+@OptIn(UnsafeKType::class)
+public fun <R> TaskResultScope<R>.result(data: Data<R>): DataTree<R> = DataTree.static(resultType) {
+    data(Name.EMPTY, data)
+}
+
+@OptIn(UnsafeKType::class)
+public fun <R> TaskResultScope<R>.result(builder: StaticDataBuilder<R>.() -> Unit): DataTree<R> =
+    DataTree.static(resultType, builder)
 
 ///**
 // * Set given [dataSet] as a task result.

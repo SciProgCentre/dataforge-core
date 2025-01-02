@@ -8,6 +8,9 @@ import space.kscience.dataforge.names.*
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
+/**
+ * A marker scope for data builders
+ */
 public interface DataBuilderScope<in T> {
     public companion object : DataBuilderScope<Nothing>
 }
@@ -30,21 +33,19 @@ public fun interface DataSink<in T> : DataBuilderScope<T> {
  * A mutable version of [DataTree]
  */
 public interface MutableDataTree<T> : DataTree<T>, DataSink<T> {
-    override var data: Data<T>?
-
     override val items: Map<NameToken, MutableDataTree<T>>
-
-    public fun getOrCreateItem(token: NameToken): MutableDataTree<T>
-
-    public suspend fun put(token: NameToken, data: Data<T>?)
-
-    override suspend fun put(name: Name, data: Data<T>?): Unit {
-        when (name.length) {
-            0 -> this.data = data
-            1 -> put(name.first(), data)
-            else -> getOrCreateItem(name.first()).put(name.cutFirst(), data)
-        }
-    }
+//
+//    public fun getOrCreateItem(token: NameToken): MutableDataTree<T>
+//
+//    public suspend fun put(token: NameToken, data: Data<T>?)
+//
+//    override suspend fun put(name: Name, data: Data<T>?): Unit {
+//        when (name.length) {
+//            0 -> this.data = data
+//            1 -> put(name.first(), data)
+//            else -> getOrCreateItem(name.first()).put(name.cutFirst(), data)
+//        }
+//    }
 }
 
 /**
@@ -62,11 +63,12 @@ private class MutableDataTreeRoot<T>(
 ) : MutableDataTree<T> {
 
     override val items = HashMap<NameToken, MutableDataTree<T>>()
-    override val updates = MutableSharedFlow<Name>(extraBufferCapacity = 100)
+    override val updates = MutableSharedFlow<Name>()
 
     inner class MutableDataTreeBranch(val branchName: Name) : MutableDataTree<T> {
 
         override var data: Data<T>? = null
+            private set
 
         override val items = HashMap<NameToken, MutableDataTree<T>>()
 
@@ -75,26 +77,43 @@ private class MutableDataTreeRoot<T>(
         }
         override val dataType: KType get() = this@MutableDataTreeRoot.dataType
 
+        override suspend fun put(
+            name: Name,
+            data: Data<T>?
+        ) {
+            when (name.length) {
+                0 -> {
+                    this.data = data
+                    this@MutableDataTreeRoot.updates.emit(branchName)
+                }
 
-        override fun getOrCreateItem(token: NameToken): MutableDataTree<T> =
-            items.getOrPut(token) { MutableDataTreeBranch(branchName + token) }
+                else -> {
+                    val token = name.first()
+                    items.getOrPut(token) { MutableDataTreeBranch(branchName + token) }.put(name.cutFirst(), data)
+                }
+            }
+        }
+    }
+    override var data: Data<T>? = null
+        private set
 
-        override suspend fun put(token: NameToken, data: Data<T>?) {
-            this.data = data
-            this@MutableDataTreeRoot.updates.emit(branchName + token)
+    override suspend fun put(
+        name: Name,
+        data: Data<T>?
+    ) {
+        when (name.length) {
+            0 -> {
+                this.data = data
+                this@MutableDataTreeRoot.updates.emit(Name.EMPTY)
+            }
+
+            else -> {
+                val token = name.first()
+                items.getOrPut(token) { MutableDataTreeBranch(token.asName()) }.put(name.cutFirst(), data)
+            }
         }
     }
 
-    override var data: Data<T>? = null
-
-    override fun getOrCreateItem(token: NameToken): MutableDataTree<T> = items.getOrPut(token) {
-        MutableDataTreeBranch(token.asName())
-    }
-
-    override suspend fun put(token: NameToken, data: Data<T>?) {
-        this.data = data
-        updates.emit(token.asName())
-    }
 }
 
 /**
@@ -106,7 +125,7 @@ public fun <T> MutableDataTree(
 ): MutableDataTree<T> = MutableDataTreeRoot<T>(type)
 
 /**
- * Create and initialize a observable mutable data tree.
+ * Create and initialize an observable mutable data tree.
  */
 @OptIn(UnsafeKType::class)
 public inline fun <reified T> MutableDataTree(

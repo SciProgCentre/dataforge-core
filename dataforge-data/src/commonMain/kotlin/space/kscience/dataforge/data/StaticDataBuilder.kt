@@ -11,13 +11,13 @@ import kotlin.reflect.typeOf
 
 
 public fun interface StaticDataBuilder<T> : DataBuilderScope<T> {
-    public fun put(name: Name, data: Data<T>)
+    public fun data(name: Name, data: Data<T>)
 }
 
 private class DataMapBuilder<T> : StaticDataBuilder<T> {
     val map = mutableMapOf<Name, Data<T>>()
 
-    override fun put(name: Name, data: Data<T>) {
+    override fun data(name: Name, data: Data<T>) {
         if (map.containsKey(name)) {
             error("Duplicate key '$name'")
         } else {
@@ -26,31 +26,31 @@ private class DataMapBuilder<T> : StaticDataBuilder<T> {
     }
 }
 
-public fun <T> StaticDataBuilder<T>.put(name: String, data: Data<T>) {
-    put(name.parseAsName(), data)
+public fun <T> StaticDataBuilder<T>.data(name: String, data: Data<T>) {
+    data(name.parseAsName(), data)
 }
 
-public inline fun <T, reified T1 : T> StaticDataBuilder<T>.putValue(
+public inline fun <T, reified T1 : T> StaticDataBuilder<T>.value(
     name: String,
     value: T1,
     metaBuilder: MutableMeta.() -> Unit = {}
 ) {
-    put(name, Data(value, Meta(metaBuilder)))
+    data(name, Data(value, Meta(metaBuilder)))
 }
 
-public fun <T> StaticDataBuilder<T>.putAll(prefix: Name, block: StaticDataBuilder<T>.() -> Unit) {
+public fun <T> StaticDataBuilder<T>.node(prefix: Name, block: StaticDataBuilder<T>.() -> Unit) {
     val map = DataMapBuilder<T>().apply(block).map
     map.forEach { (name, data) ->
-        put(prefix + name, data)
+        data(prefix + name, data)
     }
 }
 
-public fun <T> StaticDataBuilder<T>.putAll(prefix: String, block: StaticDataBuilder<T>.() -> Unit) =
-    putAll(prefix.parseAsName(), block)
+public fun <T> StaticDataBuilder<T>.node(prefix: String, block: StaticDataBuilder<T>.() -> Unit) =
+    node(prefix.parseAsName(), block)
 
-public fun <T> StaticDataBuilder<T>.putAll(prefix: String, tree: DataTree<T>) {
+public fun <T> StaticDataBuilder<T>.node(prefix: String, tree: DataTree<T>) {
     tree.forEach { data ->
-        put(prefix + data.name, data)
+        data(prefix.parseAsName() + data.name, data)
     }
 }
 

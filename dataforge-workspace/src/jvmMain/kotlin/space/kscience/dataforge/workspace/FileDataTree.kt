@@ -68,10 +68,18 @@ public class FileDataTree(
             }
 
             path.isDirectory() -> {
-                val dataBinary: Binary? = path.resolve(IOPlugin.DATA_FILE_NAME)?.asBinary()
-                val meta: Meta? = path.find { it.fileName.startsWith(IOPlugin.META_FILE_NAME) }?.let {
+                //FIXME find data and meta in a single pass instead of two
+
+                val dataBinary: Binary? = path.listDirectoryEntries().find {
+                    it.fileName.nameWithoutExtension == IOPlugin.DATA_FILE_NAME
+                }?.asBinary()
+
+                val meta: Meta? = path.listDirectoryEntries().find {
+                    it.fileName.nameWithoutExtension == IOPlugin.META_FILE_NAME
+                }?.let {
                     io.readMetaFileOrNull(it)
                 }
+
                 if (dataBinary != null || meta != null) {
                     StaticData(
                         typeOf<Binary>(),
@@ -155,6 +163,9 @@ public class FileDataTree(
         public val DEFAULT_IGNORE_EXTENSIONS: Set<String> = setOf(DF_FILE_EXTENSION)
     }
 }
+
+public fun IOPlugin.readDirectory(path: Path, monitor: Boolean = false): FileDataTree =
+    FileDataTree(this, path, monitor)
 
 
 ///**

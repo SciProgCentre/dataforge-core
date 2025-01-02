@@ -3,7 +3,7 @@ package space.kscience.dataforge.workspace
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
-import space.kscience.dataforge.data.putValue
+import space.kscience.dataforge.data.value
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.boolean
 import space.kscience.dataforge.meta.get
@@ -22,14 +22,14 @@ internal class CachingWorkspaceTest {
             data {
                 //statically initialize data
                 repeat(5) {
-                    putValue("myData[$it]", it)
+                    value("myData[$it]", it)
                 }
             }
 
             inMemoryCache()
 
             val doFirst by task<Any> {
-                transformEach(allData) { (name, _, _) ->
+                transformEach(allData) {
                     firstCounter++
                     println("Done first on $name with flag=${taskMeta["flag"].boolean}")
                 }
@@ -39,7 +39,7 @@ internal class CachingWorkspaceTest {
                 transformEach(
                     doFirst,
                     dependencyMeta = if (taskMeta["flag"].boolean == true) taskMeta else Meta.EMPTY
-                ) { (name, _, _) ->
+                ) {
                     secondCounter++
                     println("Done second on $name with flag=${taskMeta["flag"].boolean ?: false}")
                 }
