@@ -227,7 +227,7 @@ public fun <T : Scheme> MutableMetaProvider.scheme(
 ): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
         val name = key ?: property.name.asName()
-        val node = get(name)?: MutableMeta().also { set(name,it) }
+        val node = get(name) ?: MutableMeta().also { set(name, it) }
         return spec.write(node)
     }
 

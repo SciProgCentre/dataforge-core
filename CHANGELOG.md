@@ -8,12 +8,13 @@
 
 ### Changed
 - Simplify inheritance logic in `MutableTypedMeta`
-- Full rework of `DataTree` and associated interfaces (`DataSource`, `DataSink`, etc).
+- Full rework of `DataTree` and associated interfaces (`DataSource`, `DataSink`, etc.).
 
 ### Deprecated
 - MetaProvider `spec` is replaced by `readable`. `listOfSpec` replaced with `listOfReadable`
 
 ### Removed
+- Remove implicit io format resolver in `IOPlugin` and `FileWorkspaceCache`. There are no guarantees that only one format is present in the contrxt for each type.
 
 ### Fixed
 - Fixed NameToken parsing.

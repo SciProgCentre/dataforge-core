@@ -29,10 +29,10 @@ public interface Task<T> : Described {
     public val fingerprint: String get() = hashCode().toString(radix = 16)
 
     /**
-     * Compute a [TaskResult] using given meta. In general, the result is lazy and represents both computation model
-     * and a handler for actual result
+     * Compute a [TaskResult] using given meta. In general, the result is lazy and represents both the computation model
+     * and a handler for the actual result
      *
-     * @param workspace a workspace to run task in
+     * @param workspace a workspace to run the task in
      * @param taskName the name of the task in this workspace
      * @param taskMeta configuration for current stage computation
      */

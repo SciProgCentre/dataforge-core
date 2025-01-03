@@ -82,13 +82,13 @@ public class NameToken(public val body: String, public val index: String? = null
                         else -> indexEnd = index
                     }
 
-                    else -> if(indexEnd>=0) error("Symbols not allowed after index in NameToken: $string")
+                    else -> if (indexEnd >= 0) error("Symbols not allowed after index in NameToken: $string")
                 }
             }
-            if(indexStart>=0 && indexEnd<0) error("Opening bracket without closing bracket not allowed in NameToken: $string")
+            if (indexStart >= 0 && indexEnd < 0) error("Opening bracket without closing bracket not allowed in NameToken: $string")
             return NameToken(
-                if(indexStart>=0) string.substring(0, indexStart) else string,
-                if(indexStart>=0) string.substring(indexStart + 1, indexEnd) else null
+                if (indexStart >= 0) string.substring(0, indexStart) else string,
+                if (indexStart >= 0) string.substring(indexStart + 1, indexEnd) else null
             )
         }
     }

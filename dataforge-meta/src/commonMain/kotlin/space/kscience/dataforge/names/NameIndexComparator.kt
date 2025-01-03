@@ -27,4 +27,4 @@ public object NameIndexComparator : Comparator<String?> {
 public fun Meta.getIndexedList(name: Name): List<Meta> = getIndexed(name).entries.sortedWith(
     //sort by index
     compareBy(space.kscience.dataforge.names.NameIndexComparator) { it.key }
-).map{it.value}
+).map { it.value }
