@@ -22,6 +22,6 @@ internal class CachingAction<T>(
 
     override suspend fun DataSink<T>.update(source: DataTree<T>, actionMeta: Meta, updateName: Name) {
         val updatedData = source.read(updateName)
-        put(updateName, updatedData?.named(updateName)?.let(caching))
+        write(updateName, updatedData?.named(updateName)?.let(caching))
     }
 }

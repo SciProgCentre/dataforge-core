@@ -55,12 +55,12 @@ internal class DataTreeBuilderTest {
 
         val rootNode = MutableDataTree<Int>() {
             job = launch {
-                putAllAndWatch(subNode, "sub".asName())
+                writeAllAndWatch(subNode, "sub".asName())
             }
         }
 
         repeat(10) {
-            subNode.putValue("value[$it]", it)
+            subNode.writeValue("value[$it]", it)
         }
 
         assertEquals(9, subNode.awaitData("value[9]").await())

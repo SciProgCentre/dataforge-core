@@ -25,7 +25,7 @@ public fun interface DataSink<in T> : DataBuilderScope<T> {
     /**
      * Put data and notify listeners if needed
      */
-    public suspend fun put(name: Name, data: Data<T>?)
+    public suspend fun write(name: Name, data: Data<T>?)
 }
 
 
@@ -77,7 +77,7 @@ private class MutableDataTreeRoot<T>(
         }
         override val dataType: KType get() = this@MutableDataTreeRoot.dataType
 
-        override suspend fun put(
+        override suspend fun write(
             name: Name,
             data: Data<T>?
         ) {
@@ -89,7 +89,7 @@ private class MutableDataTreeRoot<T>(
 
                 else -> {
                     val token = name.first()
-                    items.getOrPut(token) { MutableDataTreeBranch(branchName + token) }.put(name.cutFirst(), data)
+                    items.getOrPut(token) { MutableDataTreeBranch(branchName + token) }.write(name.cutFirst(), data)
                 }
             }
         }
@@ -97,7 +97,7 @@ private class MutableDataTreeRoot<T>(
     override var data: Data<T>? = null
         private set
 
-    override suspend fun put(
+    override suspend fun write(
         name: Name,
         data: Data<T>?
     ) {
@@ -109,7 +109,7 @@ private class MutableDataTreeRoot<T>(
 
             else -> {
                 val token = name.first()
-                items.getOrPut(token) { MutableDataTreeBranch(token.asName()) }.put(name.cutFirst(), data)
+                items.getOrPut(token) { MutableDataTreeBranch(token.asName()) }.write(name.cutFirst(), data)
             }
         }
     }

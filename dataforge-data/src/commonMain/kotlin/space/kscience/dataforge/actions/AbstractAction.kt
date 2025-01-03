@@ -44,7 +44,7 @@ public abstract class AbstractAction<T, R>(
         updateName: Name,
     ) {
         //by default regenerate the whole data set
-        putAll(generate(source, actionMeta))
+        writeAll(generate(source, actionMeta))
     }
 
     @OptIn(UnsafeKType::class)
@@ -60,7 +60,7 @@ public abstract class AbstractAction<T, R>(
 
         //propagate updates
         val updateSink = DataSink<R> { name, data ->
-            put(name, data)
+            write(name, data)
         }
 
         with(updateSink) {

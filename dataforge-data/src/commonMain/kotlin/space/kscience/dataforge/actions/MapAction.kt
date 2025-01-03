@@ -100,7 +100,7 @@ public class MapAction<T, R>(
         updateName: Name,
     ) {
         val (name, data) = mapOne(updateName, source.read(updateName), actionMeta)
-        put(name, data)
+        write(name, data)
     }
 }
 

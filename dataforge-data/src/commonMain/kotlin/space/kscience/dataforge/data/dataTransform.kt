@@ -220,14 +220,14 @@ public fun <T, R> DataTree<T>.transformEach(
 ) {
     updates.collect { name ->
         val data: Data<T>? = read(name)
-        if (data == null) put(name, null) else {
+        if (data == null) write(name, null) else {
             val newMeta = data.meta.toMutableMeta().apply {
                 metaTransform(name)
             }.seal()
             val d = Data(outputType, newMeta, scope.coroutineContext, listOf(data)) {
                 compute(NamedValueWithMeta(name, data.await(), data.meta))
             }
-            put(name, d)
+            write(name, d)
         }
     }
 }

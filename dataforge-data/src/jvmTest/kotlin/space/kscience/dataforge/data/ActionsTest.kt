@@ -40,7 +40,7 @@ internal class ActionsTest {
         val result: DataTree<Int> = plusOne(source)
 
         repeat(10) {
-            source.putValue(it.toString(), it)
+            source.writeValue(it.toString(), it)
         }
 
         assertEquals(2, result.awaitData("1").await())

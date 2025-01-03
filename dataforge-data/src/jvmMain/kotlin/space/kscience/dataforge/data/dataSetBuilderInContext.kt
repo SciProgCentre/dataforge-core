@@ -10,14 +10,14 @@ import space.kscience.dataforge.names.Name
  */
 context(DataSink<T>)
 public suspend infix fun <T : Any> String.put(data: Data<T>): Unit =
-    put(Name.parse(this), data)
+    write(Name.parse(this), data)
 
 /**
  * Append node
  */
 context(DataSink<T>)
 public suspend infix fun <T : Any> String.putAll(dataSet: DataTree<T>): Unit =
-    putAll(this, dataSet)
+    writeAll(this, dataSet)
 
 /**
  * Build and append node
@@ -25,5 +25,5 @@ public suspend infix fun <T : Any> String.putAll(dataSet: DataTree<T>): Unit =
 context(DataSink<T>)
 public infix fun <T : Any> String.putAll(
     block: DataSink<T>.() -> Unit,
-): Unit = putAll(Name.parse(this), block)
+): Unit = writeAll(Name.parse(this), block)
 

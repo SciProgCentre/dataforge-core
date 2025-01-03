@@ -94,7 +94,7 @@ internal class SplitAction<T, R>(
         actionMeta: Meta,
         updateName: Name,
     ) {
-        putAll(splitOne(updateName, source.read(updateName), actionMeta))
+        writeAll(splitOne(updateName, source.read(updateName), actionMeta))
     }
 }
 

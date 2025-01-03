@@ -49,7 +49,7 @@ private class DataTreeBuilder<T>(
     private val updatesFlow = MutableSharedFlow<Name>()
 
 
-    override suspend fun put(name: Name, data: Data<T>?) {
+    override suspend fun write(name: Name, data: Data<T>?) {
         mutex.withLock {
             if (data == null) {
                 map.remove(name)
@@ -60,7 +60,7 @@ private class DataTreeBuilder<T>(
         updatesFlow.emit(name)
     }
 
-    public fun build(): DataTree<T> = FlatDataTree(type, map, updatesFlow, Name.EMPTY)
+    fun build(): DataTree<T> = FlatDataTree(type, map, updatesFlow, Name.EMPTY)
 }
 
 /**
@@ -73,7 +73,7 @@ public fun <T> DataTree(
     initialData: Map<Name, Data<T>> = emptyMap(),
     updater: suspend DataSink<T>.() -> Unit,
 ): DataTree<T> = DataTreeBuilder<T>(dataType, initialData).apply {
-    scope.launch {
+    scope.launch(GoalExecutionRestriction(GoalExecutionRestrictionPolicy.ERROR)) {
         updater()
     }
 }.build()
