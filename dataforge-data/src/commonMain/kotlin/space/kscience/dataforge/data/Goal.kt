@@ -64,11 +64,14 @@ public open class LazyGoal<T>(
     /**
      * Get ongoing computation or start a new one.
      * Does not guarantee thread safety. In case of multi-thread access, could create orphan computations.
-     * If [GoalExecutionRestriction] is present in the [coroutineScope] context, the call could produce a error a warning
+     * If [GoalExecutionRestriction] is present in the [coroutineScope] context, the call could produce an error or a warning
      * depending on the settings.
+     *
+     * If [Goal] is already started on a different scope, it is not restarted.
      */
     @OptIn(DFExperimental::class)
-    override fun async(coroutineScope: CoroutineScope): Deferred<T> {
+    override fun async(coroutineScope: CoroutineScope): Deferred<T> = deferred ?: run {
+
         val log = coroutineScope.coroutineContext[GoalLogger]
         // Check if context restricts goal computation
         coroutineScope.coroutineContext[GoalExecutionRestriction]?.let { restriction ->
@@ -85,13 +88,14 @@ public open class LazyGoal<T>(
         val startedDependencies = dependencies.map { goal ->
             goal.async(coroutineScope)
         }
-        return deferred ?: coroutineScope.async(
+
+        coroutineScope.async(
             coroutineContext
                     + CoroutineMonitor()
                     + Dependencies(startedDependencies)
                     + GoalExecutionRestriction(GoalExecutionRestrictionPolicy.NONE) // Remove restrictions on goal execution
         ) {
-            //cancel execution if error encountered in one of dependencies
+            //cancel execution if error encountered in one of the dependencies
             startedDependencies.forEach { deferred ->
                 deferred.invokeOnCompletion { error ->
                     if (error != null) this.cancel(CancellationException("Dependency $deferred failed with error: ${error.message}"))

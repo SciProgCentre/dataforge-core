@@ -4,7 +4,8 @@
 
 ### Added
 - Coroutine exception logging in context
-- ObservableMutableMetaSerializer
+- `ObservableMutableMetaSerializer`
+- `MutableMetaView` - a Meta wrapper that creates nodes only when its or its children are changed. 
 
 ### Changed
 - Simplify inheritance logic in `MutableTypedMeta`

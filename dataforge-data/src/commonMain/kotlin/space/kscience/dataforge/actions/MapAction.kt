@@ -37,6 +37,7 @@ public class MapActionBuilder<T, R>(
     /**
      * Set unsafe [outputType] for the resulting data. Be sure that it is correct.
      */
+    @UnsafeKType
     public fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(T) -> R1) {
         this.outputType = outputType
         result = f;
@@ -45,6 +46,7 @@ public class MapActionBuilder<T, R>(
     /**
      * Calculate the result of goal
      */
+    @OptIn(UnsafeKType::class)
     public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(T) -> R1): Unit = result(typeOf<R1>(), f)
 }
 
