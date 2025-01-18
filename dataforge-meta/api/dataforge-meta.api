@@ -520,6 +520,11 @@ public final class space/kscience/dataforge/meta/MutableMetaSerializer : kotlinx
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lspace/kscience/dataforge/meta/MutableMeta;)V
 }
 
+public final class space/kscience/dataforge/meta/MutableMetaViewKt {
+	public static final fun view (Lspace/kscience/dataforge/meta/MutableMeta;Ljava/lang/String;)Lspace/kscience/dataforge/meta/MutableMeta;
+	public static final fun view (Lspace/kscience/dataforge/meta/MutableMeta;Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
+}
+
 public abstract interface class space/kscience/dataforge/meta/MutableTypedMeta : space/kscience/dataforge/meta/MutableMeta, space/kscience/dataforge/meta/TypedMeta {
 	public synthetic fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
 	public synthetic fun get (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/MutableMeta;
