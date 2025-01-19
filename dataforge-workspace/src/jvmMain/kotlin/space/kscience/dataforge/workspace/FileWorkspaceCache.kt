@@ -6,15 +6,18 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
+import space.kscience.dataforge.actions.Action
+import space.kscience.dataforge.actions.invoke
 import space.kscience.dataforge.context.error
 import space.kscience.dataforge.context.logger
 import space.kscience.dataforge.context.request
 import space.kscience.dataforge.data.Data
 import space.kscience.dataforge.data.await
+import space.kscience.dataforge.data.named
 import space.kscience.dataforge.io.*
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.misc.DFInternal
-import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.withIndex
 import java.nio.file.Path
 import kotlin.io.path.deleteIfExists
@@ -22,11 +25,7 @@ import kotlin.io.path.div
 import kotlin.io.path.exists
 import kotlin.reflect.KType
 
-public class JsonIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
-
-    @Suppress("UNCHECKED_CAST")
-    private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
-
+public class JsonIOFormat<T>(public val serializer: KSerializer<T>) : IOFormat<T> {
     override fun readFrom(source: Source): T = Json.decodeFromString(serializer, source.readString())
 
     override fun writeTo(sink: Sink, obj: T) {
@@ -34,12 +33,11 @@ public class JsonIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
     }
 }
 
+/**
+ * An [IOFormat] based on Protobuf representation of the serializeable object.
+ */
 @OptIn(ExperimentalSerializationApi::class)
-public class ProtobufIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
-
-    @Suppress("UNCHECKED_CAST")
-    private val serializer: KSerializer<T> = serializer(type) as KSerializer<T>
-
+public class ProtobufIOFormat<T>(public val serializer: KSerializer<T>) : IOFormat<T> {
     override fun readFrom(source: Source): T = ProtoBuf.decodeFromByteArray(serializer, source.readByteArray())
 
     override fun writeTo(sink: Sink, obj: T) {
@@ -47,21 +45,42 @@ public class ProtobufIOFormat<T : Any>(override val type: KType) : IOFormat<T> {
     }
 }
 
+public interface IOFormatResolveStrategy {
+    public fun <T> resolve(type: KType, meta: Meta): IOFormat<T>
 
-public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCache {
+    public companion object {
+        public val PROTOBUF: IOFormatResolveStrategy = object : IOFormatResolveStrategy {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T> resolve(
+                type: KType,
+                meta: Meta
+            ): IOFormat<T> = ProtobufIOFormat(serializer(type) as KSerializer<T>)
+        }
 
-    //    private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> = this as TaskData<T>
+        public val JSON: IOFormatResolveStrategy = object : IOFormatResolveStrategy {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T> resolve(
+                type: KType,
+                meta: Meta
+            ): IOFormat<T> = JsonIOFormat(serializer(type) as KSerializer<T>)
+        }
+    }
+}
 
-    @OptIn(DFExperimental::class, DFInternal::class)
-    override suspend fun <T : Any> evaluate(result: TaskResult<T>): TaskResult<T> {
+public class FileWorkspaceCache(
+    public val cacheDirectory: Path,
+    private val ioFormatResolveStrategy: IOFormatResolveStrategy,
+) : WorkspaceCache {
+
+
+    @OptIn(DFExperimental::class, UnsafeKType::class)
+    override suspend fun <T> cache(result: TaskResult<T>): TaskResult<T> {
         val io = result.workspace.context.request(IOPlugin)
 
-        val format: IOFormat<T> = io.resolveIOFormat(result.dataType, result.taskMeta)
-            ?: ProtobufIOFormat(result.dataType)
-            ?: error("Can't resolve IOFormat for ${result.dataType}")
+        val format: IOFormat<T> = ioFormatResolveStrategy.resolve<T>(result.dataType, result.taskMeta)
 
-        fun evaluateDatum(data: TaskData<T>): TaskData<T> {
 
+        val cachingAction: Action<T, T> = CachingAction(result.dataType) { data ->
             val path = cacheDirectory /
                     result.taskName.withIndex(result.taskMeta.hashCode().toString(16)).toString() /
                     data.name.toString()
@@ -80,7 +99,7 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
                     }
                 }
 
-                //waiting for data in current scope because Envelope is synchronous
+                //waiting for data in the current scope because Envelope is synchronous
                 return@Data data.await().also { result ->
                     val envelope = Envelope {
                         meta = data.meta
@@ -92,16 +111,16 @@ public class FileWorkspaceCache(public val cacheDirectory: Path) : WorkspaceCach
                 }
 
             }
-            return data.workspace.wrapData(datum, data.name, data.taskName, data.taskMeta)
+            datum.named(data.name)
         }
 
-        return object : TaskResult<T> by result {
-            override fun iterator(): Iterator<TaskData<T>> =
-                result.iterator().asSequence().map { evaluateDatum(it) }.iterator()
+        val cachedTree = cachingAction(result)
 
-            override fun get(name: Name): TaskData<T>? = result[name]?.let { evaluateDatum(it) }
-        }
+        return result.workspace.wrapResult(cachedTree, result.taskName, result.taskMeta)
     }
 }
 
-public fun WorkspaceBuilder.fileCache(cacheDir: Path): Unit = cache(FileWorkspaceCache(cacheDir))
+public fun WorkspaceBuilder.fileCache(
+    cacheDir: Path,
+    ioFormatResolveStrategy: IOFormatResolveStrategy = IOFormatResolveStrategy.PROTOBUF
+): Unit = cache(FileWorkspaceCache(cacheDir, ioFormatResolveStrategy))

@@ -11,9 +11,18 @@ public fun Value.isNull(): Boolean = this == Null
 public fun Value.isList(): Boolean = this.type == ValueType.LIST
 
 public val Value.boolean: Boolean
-    get() = this == True
-            || this.list.firstOrNull() == True
-            || (type == ValueType.STRING && string.toBoolean())
+    get() = when (type) {
+        ValueType.NUMBER -> int > 0
+        ValueType.STRING -> string.toBoolean()
+        ValueType.BOOLEAN -> this === True
+        ValueType.LIST -> list.singleOrNull()?.boolean == true
+        ValueType.NULL -> false
+    }
+
+//        this == True
+//            || this.list.firstOrNull() == True
+//            || (type == ValueType.STRING && string.toBoolean())
+//            || (type == ValueType.)
 
 
 public val Value.int: Int get() = number.toInt()
@@ -30,13 +39,6 @@ public inline fun <reified E : Enum<E>> Value.enum(): E = if (this is EnumValue<
 
 
 public val Value.stringList: List<String> get() = list.map { it.string }
-
-public val Value.doubleArray: DoubleArray
-    get() = if (this is DoubleArrayValue) {
-        value
-    } else {
-        DoubleArray(list.size) { list[it].double }
-    }
 
 
 public fun Value.toMeta(): Meta = Meta(this)

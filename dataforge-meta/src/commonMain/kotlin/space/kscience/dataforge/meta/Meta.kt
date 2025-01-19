@@ -2,8 +2,7 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import space.kscience.dataforge.misc.DfId
-import space.kscience.dataforge.misc.unsafeCast
+import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.names.*
 import kotlin.jvm.JvmName
 
@@ -31,7 +30,7 @@ public fun interface MetaProvider : ValueProvider {
  * TODO add documentation
  * Same name siblings are supported via elements with the same [Name] but different indices.
  */
-@DfId(Meta.TYPE)
+@DfType(Meta.TYPE)
 @Serializable(MetaSerializer::class)
 public interface Meta : MetaRepr, MetaProvider {
     public val value: Value?
@@ -151,6 +150,8 @@ public interface TypedMeta<out M : TypedMeta<M>> : Meta {
 
     override val items: Map<NameToken, M>
 
+    public val self: M
+
     override fun get(name: Name): M? {
         tailrec fun M.find(name: Name): M? = if (name.isEmpty()) {
             this
@@ -163,11 +164,6 @@ public interface TypedMeta<out M : TypedMeta<M>> : Meta {
 
     override fun toMeta(): Meta = this
 }
-
-/**
- * Access self as a recursive type instance
- */
-public inline val <M : TypedMeta<M>> TypedMeta<M>.self: M get() = unsafeCast()
 
 //public typealias Meta = TypedMeta<*>
 
@@ -188,10 +184,12 @@ public operator fun <M : TypedMeta<M>> M?.get(key: String): M? = this?.get(key.p
 
 
 /**
- * Get a sequence of [Name]-[Value] pairs using top-down traversal of the tree
+ * Get a sequence of [Name]-[Value] pairs using top-down traversal of the tree.
+ * The sequence includes root value with empty name
  */
 public fun Meta.valueSequence(): Sequence<Pair<Name, Value>> = sequence {
     items.forEach { (key, item) ->
+        value?.let { yield(Name.EMPTY to it) }
         item.value?.let { itemValue ->
             yield(key.asName() to itemValue)
         }
@@ -248,7 +246,7 @@ public inline fun <reified E : Enum<E>> Meta?.enum(): E? = this?.value?.let {
     }
 }
 
-public val Meta.stringList: List<String>? get() = value?.list?.map { it.string }
+public val Meta?.stringList: List<String>? get() = this?.value?.list?.map { it.string }
 
 /**
  * Create a provider that uses given provider for default values if those are not found in this provider

@@ -1,39 +1,41 @@
 package space.kscience.dataforge.workspace
 
+import space.kscience.dataforge.actions.Action
+import space.kscience.dataforge.actions.invoke
+import space.kscience.dataforge.data.Data
+import space.kscience.dataforge.data.named
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
 
-private typealias TaskResultId = Pair<Name, Meta>
+private data class TaskResultId(val name: Name, val meta: Meta)
 
 
 public class InMemoryWorkspaceCache : WorkspaceCache {
 
-    // never do that at home!
-    private val cache = HashMap<TaskResultId, HashMap<Name, TaskData<*>>>()
+    private val cache = HashMap<TaskResultId, HashMap<Name, Data<*>>>()
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T : Any> TaskData<*>.checkType(taskType: KType): TaskData<T> =
-        if (type.isSubtypeOf(taskType)) this as TaskData<T>
+    private fun <T> Data<*>.checkType(taskType: KType): Data<T> =
+        if (type.isSubtypeOf(taskType)) this as Data<T>
         else error("Cached data type mismatch: expected $taskType but got $type")
 
-    override suspend fun <T : Any> evaluate(result: TaskResult<T>): TaskResult<T> {
-        for (d: TaskData<T> in result) {
-            cache.getOrPut(result.taskName to result.taskMeta) { HashMap() }.getOrPut(d.name) { d }
-        }
-
-        return object : TaskResult<T> by result {
-            override fun iterator(): Iterator<TaskData<T>> = (cache[result.taskName to result.taskMeta]
-                ?.values?.map { it.checkType<T>(result.dataType) }
-                ?: emptyList()).iterator()
-
-            override fun get(name: Name): TaskData<T>? {
-                val cached: TaskData<*> = cache[result.taskName to result.taskMeta]?.get(name) ?: return null
-                //TODO check types
-                return cached.checkType(result.dataType)
+    @OptIn(DFExperimental::class)
+    override suspend fun <T> cache(result: TaskResult<T>): TaskResult<T> {
+        val cachingAction: Action<T, T> = CachingAction(result.dataType) { data ->
+            val cachedData =  cache.getOrPut(TaskResultId(result.taskName, result.taskMeta)){
+                HashMap()
+            }.getOrPut(data.name){
+                data
             }
+            cachedData.checkType<T>(result.dataType).named(data.name)
         }
+
+        val cachedTree = cachingAction(result)
+
+        return result.workspace.wrapResult(cachedTree, result.taskName, result.taskMeta)
     }
 }
 

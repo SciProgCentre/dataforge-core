@@ -1,5 +1,6 @@
 package space.kscience.dataforge.context
 
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -10,6 +11,7 @@ import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.provider.Provider
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * The local environment for anything being done in DataForge framework. Contexts are organized into tree structure with [Global] at the top.
@@ -26,6 +28,7 @@ public open class Context internal constructor(
     public val parent: Context?,
     plugins: Set<Plugin>, // set of unattached plugins
     meta: Meta,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
 ) : Named, MetaRepr, Provider, CoroutineScope {
 
     /**
@@ -65,7 +68,9 @@ public open class Context internal constructor(
 
     override val coroutineContext: CoroutineContext by lazy {
         (parent ?: Global).coroutineContext.let { parenContext ->
-            parenContext + SupervisorJob(parenContext[Job])
+            parenContext + coroutineContext + SupervisorJob(parenContext[Job]) + CoroutineExceptionHandler { _, throwable ->
+                logger.error(throwable) { "Exception in context $name" }
+            }
         }
     }
 

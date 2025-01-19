@@ -16,12 +16,10 @@ public class Name(public val tokens: List<NameToken>) {
 
     override fun toString(): String = tokens.joinToString(separator = NAME_SEPARATOR) { it.toString() }
 
-    override fun equals(other: Any?): Boolean {
-        return when (other) {
-            is Name -> this.tokens == other.tokens
-            is NameToken -> this.length == 1 && this.tokens.first() == other
-            else -> false
-        }
+    override fun equals(other: Any?): Boolean = when (other) {
+        is Name -> this.tokens == other.tokens
+        is NameToken -> this.length == 1 && this.tokens.first() == other
+        else -> false
     }
 
     private val cachedHashCode = if (tokens.size == 1) {
@@ -60,7 +58,7 @@ public class Name(public val tokens: List<NameToken>) {
          */
         public fun parse(string: String): Name {
             if (string.isBlank()) return EMPTY
-            val tokens = sequence {
+            val tokens = buildList<NameToken> {
                 var bodyBuilder = StringBuilder()
                 var queryBuilder = StringBuilder()
                 var bracketCount = 0
@@ -93,7 +91,7 @@ public class Name(public val tokens: List<NameToken>) {
                         else -> when (it) {
                             '.' -> {
                                 val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
-                                yield(NameToken(bodyBuilder.toString(), query))
+                                add(NameToken(bodyBuilder.toString(), query))
                                 bodyBuilder = StringBuilder()
                                 queryBuilder = StringBuilder()
                             }
@@ -108,12 +106,19 @@ public class Name(public val tokens: List<NameToken>) {
                     }
                 }
                 val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
-                yield(NameToken(bodyBuilder.toString(), query))
+                add(NameToken(bodyBuilder.toString(), query))
             }
-            return Name(tokens.toList())
+            return Name(tokens)
         }
     }
 }
+
+/**
+ * Transform this [Name] to a string without escaping special characters in tokens.
+ *
+ * Parsing it back will produce a valid, but different name
+ */
+public fun Name.toStringUnescaped(): String = tokens.joinToString(separator = Name.NAME_SEPARATOR) { it.toStringUnescaped() }
 
 public operator fun Name.get(i: Int): NameToken = tokens[i]
 
@@ -216,8 +221,12 @@ public fun Name.endsWith(token: NameToken): Boolean = lastOrNull() == token
 public fun Name.startsWith(name: Name): Boolean =
     this.length >= name.length && (this == name || tokens.subList(0, name.length) == name.tokens)
 
+public fun Name.startsWith(name: String): Boolean = startsWith(name.parseAsName())
+
 public fun Name.endsWith(name: Name): Boolean =
     this.length >= name.length && (this == name || tokens.subList(length - name.length, length) == name.tokens)
+
+public fun Name.endsWith(name: String): Boolean = endsWith(name.parseAsName())
 
 /**
  * if [this] starts with given [head] name, returns the reminder of the name (could be empty). Otherwise, returns null

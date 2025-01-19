@@ -17,7 +17,7 @@ package space.kscience.dataforge.context
 
 import java.util.*
 import kotlin.reflect.KClass
-import kotlin.reflect.full.cast
+import kotlin.reflect.cast
 
 public class ClassLoaderPlugin(private val classLoader: ClassLoader) : AbstractPlugin() {
     override val tag: PluginTag = PluginTag("classLoader", PluginTag.DATAFORGE_GROUP)

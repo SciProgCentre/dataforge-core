@@ -11,14 +11,14 @@ kscience {
     dependencies {
         api(projects.dataforgeIo)
     }
-    useSerialization{
+    useSerialization {
         yamlKt()
     }
 }
 
-readme{
+readme {
     maturity = space.kscience.gradle.Maturity.PROTOTYPE
-    description ="""
+    description = """
         YAML meta converters and Front Matter envelope format
     """.trimIndent()
 }

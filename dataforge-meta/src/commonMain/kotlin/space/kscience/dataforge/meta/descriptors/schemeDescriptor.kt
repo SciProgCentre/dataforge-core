@@ -6,10 +6,13 @@ import space.kscience.dataforge.meta.ValueType
 import kotlin.reflect.KProperty1
 import kotlin.reflect.typeOf
 
+/**
+ * Add a value item to a [MetaDescriptor] inferring some of its properties from the type
+ */
 public inline fun <S : Scheme, reified T> MetaDescriptorBuilder.value(
     property: KProperty1<S, T>,
     noinline block: MetaDescriptorBuilder.() -> Unit = {},
-): MetaDescriptorBuilder = when (typeOf<T>()) {
+): Unit = when (typeOf<T>()) {
     typeOf<Number>(), typeOf<Int>(), typeOf<Double>(), typeOf<Short>(), typeOf<Long>(), typeOf<Float>() ->
         value(property.name, ValueType.NUMBER) {
             block()
@@ -34,9 +37,12 @@ public inline fun <S : Scheme, reified T> MetaDescriptorBuilder.value(
         multiple = true
         block()
     }
-    else -> item(property.name, block)
+    else -> node(property.name, block)
 }
 
+/**
+ * Add a schem-based branch to a [MetaDescriptor]
+ */
 public inline fun <S : Scheme, reified T : Scheme> MetaDescriptorBuilder.scheme(
     property: KProperty1<S, T>,
     spec: SchemeSpec<T>,

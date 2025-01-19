@@ -4,17 +4,15 @@ import space.kscience.dataforge.meta.isEmpty
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
 
-public interface NamedData<out T : Any> : Named, Data<T> {
-    override val name: Name
-    public val data: Data<T>
-}
+/**
+ * A data coupled to a name.
+ */
+public interface NamedData<out T> : Data<T>, Named
 
-public operator fun NamedData<*>.component1(): Name = name
-public operator fun <T: Any> NamedData<T>.component2(): Data<T> = data
 
-private class NamedDataImpl<out T : Any>(
+private class NamedDataImpl<T>(
     override val name: Name,
-    override val data: Data<T>,
+    val data: Data<T>,
 ) : Data<T> by data, NamedData<T> {
     override fun toString(): String = buildString {
         append("NamedData(name=\"$name\"")
@@ -28,8 +26,10 @@ private class NamedDataImpl<out T : Any>(
     }
 }
 
-public fun <T : Any> Data<T>.named(name: Name): NamedData<T> = if (this is NamedData) {
-    NamedDataImpl(name, this.data)
+public fun <T> Data<T>.named(name: Name): NamedData<T> = if (this is NamedData) {
+    NamedDataImpl(name, this)
 } else {
     NamedDataImpl(name, this)
 }
+
+public fun <T> NamedData(name: Name, data: Data<T>): NamedData<T> = data.named(name)

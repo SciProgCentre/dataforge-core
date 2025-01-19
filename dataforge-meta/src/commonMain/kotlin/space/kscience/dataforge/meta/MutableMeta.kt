@@ -19,6 +19,10 @@ public annotation class MetaBuilderMarker
 public interface MutableMetaProvider : MetaProvider, MutableValueProvider {
     override fun get(name: Name): MutableMeta?
     public operator fun set(name: Name, node: Meta?)
+
+    /**
+     * Set value with the given name. Does nothing if value is not changed.
+     */
     override fun setValue(name: Name, value: Value?)
 }
 
@@ -48,11 +52,13 @@ public interface MutableMeta : Meta, MutableMetaProvider {
     }
 
     override fun setValue(name: Name, value: Value?) {
-        getOrCreate(name).value = value
+        if (value != getValue(name)) {
+            getOrCreate(name).value = value
+        }
     }
 
     /**
-     * Get existing node or create a new one
+     * Get an existing node or create a new one
      */
     public fun getOrCreate(name: Name): MutableMeta
 
@@ -122,6 +128,10 @@ public interface MutableMeta : Meta, MutableMetaProvider {
         setValue(Name.parse(this), array.asValue())
     }
 
+    public infix fun String.put(array: ByteArray) {
+        setValue(Name.parse(this), array.asValue())
+    }
+
     public infix fun String.put(repr: MetaRepr) {
         set(Name.parse(this), repr.toMeta())
     }
@@ -149,7 +159,17 @@ public interface MutableTypedMeta<M : MutableTypedMeta<M>> : TypedMeta<M>, Mutab
      */
     @DFExperimental
     public fun attach(name: Name, node: M)
-    override fun get(name: Name): M?
+
+    override fun get(name: Name): M? {
+        tailrec fun M.find(name: Name): M? = if (name.isEmpty()) {
+            self
+        } else {
+            items[name.firstOrNull()!!]?.find(name.cutFirst())
+        }
+
+        return self.find(name)
+    }
+
     override fun getOrCreate(name: Name): M
 }
 
@@ -165,7 +185,7 @@ public fun MutableMetaProvider.remove(key: String) {
 
 // node setters
 
-public operator fun MutableMetaProvider.set(Key: NameToken, value: Meta): Unit = set(Key.asName(), value)
+public operator fun MutableMetaProvider.set(key: NameToken, value: Meta): Unit = set(key.asName(), value)
 public operator fun MutableMetaProvider.set(key: String, value: Meta): Unit = set(Name.parse(key), value)
 
 
@@ -198,10 +218,8 @@ public operator fun MutableMetaProvider.set(key: String, metas: Iterable<Meta>):
 
 
 /**
- * Update existing mutable node with another node. The rules are following:
- *  * value replaces anything
- *  * node updates node and replaces anything but node
- *  * node list updates node list if number of nodes in the list is the same and replaces anything otherwise
+ * Update the existing mutable node with another node.
+ * Values that are present in the current provider and are missing in [meta] are kept.
  */
 public fun MutableMetaProvider.update(meta: Meta) {
     meta.valueSequence().forEach { (name, value) ->
@@ -222,7 +240,7 @@ public fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.edit(name: Name, builde
     getOrCreate(name).apply(builder)
 
 /**
- * Set a value at a given [name]. If node does not exist, create it.
+ * Set a value at a given [name]. If a node does not exist, create it.
  */
 public operator fun <M : MutableTypedMeta<M>> MutableTypedMeta<M>.set(name: Name, value: Value?) {
     edit(name) {
@@ -245,6 +263,9 @@ private class MutableMetaImpl(
     value: Value?,
     children: Map<NameToken, Meta> = emptyMap(),
 ) : AbstractObservableMeta(), ObservableMutableMeta {
+
+    override val self get() = this
+
     override var value = value
         @ThreadSafe set(value) {
             val oldValue = field
@@ -324,8 +345,6 @@ private class MutableMetaImpl(
                     //remove child and invalidate if argument is null
                     if (node == null) {
                         children.remove(token)?.removeListener(this)
-                        // old item is not null otherwise we can't be here
-                        invalidate(name)
                     } else {
                         val newNode = wrapItem(node)
                         newNode.adoptBy(this, token)
@@ -335,7 +354,7 @@ private class MutableMetaImpl(
 
                 else -> {
                     val token = name.firstOrNull()!!
-                    //get existing or create new node.
+                    //get an existing node or create a new node.
                     if (items[token] == null) {
                         val newNode = MutableMetaImpl(null)
                         newNode.adoptBy(this, token)
@@ -370,14 +389,35 @@ public fun MutableMeta.append(name: Name, value: Value): Unit = append(name, Met
 public fun MutableMeta.append(key: String, value: Value): Unit = append(Name.parse(key), value)
 
 /**
+ * Update all items that exist in the [newMeta] and remove existing items that are missing in [newMeta].
+ * This produces the same result as clearing all items and updating blank meta with a [newMeta], but does not
+ * produce unnecessary invalidation events (if they are supported).
+ */
+public fun MutableMeta.reset(newMeta: Meta) {
+    //remove old items
+    (items.keys - newMeta.items.keys).forEach {
+        remove(it.asName())
+    }
+    newMeta.items.forEach { (token, item) ->
+        set(token, item)
+    }
+}
+
+/**
  * Create a mutable copy of this meta. The copy is created even if the Meta is already mutable
  */
-public fun Meta.toMutableMeta(): ObservableMutableMeta = MutableMetaImpl(value, items)
+public fun Meta.toMutableMeta(): MutableMeta =
+    MutableMeta { update(this@toMutableMeta) } //MutableMetaImpl(value, items)
 
 public fun Meta.asMutableMeta(): MutableMeta = (this as? MutableMeta) ?: toMutableMeta()
 
 @JsName("newObservableMutableMeta")
 public fun ObservableMutableMeta(): ObservableMutableMeta = MutableMetaImpl(null)
+
+/**
+ * Create a pre-filled [ObservableMutableMeta]
+ */
+public fun ObservableMutableMeta(content: Meta): ObservableMutableMeta = ObservableMutableMeta { update(content) }
 
 /**
  * Build a [MutableMeta] using given transformation
@@ -387,12 +427,14 @@ public inline fun ObservableMutableMeta(builder: MutableMeta.() -> Unit = {}): O
 
 
 /**
- * Create a copy of this [Meta], optionally applying the given [block].
- * The listeners of the original Config are not retained.
+ * Create a read-only copy of this [Meta]. [modification] is an optional modification applied to [Meta] on copy.
+ *
+ *  The copy does not reflect changes of the initial Meta.
  */
-public inline fun Meta.copy(block: MutableMeta.() -> Unit = {}): Meta =
-    toMutableMeta().apply(block)
-
+public inline fun Meta.copy(modification: MutableMeta.() -> Unit = {}): Meta = Meta {
+    update(this@copy)
+    modification()
+}
 
 private class MutableMetaWithDefault(
     val source: MutableMeta, val default: MetaProvider, val rootName: Name,

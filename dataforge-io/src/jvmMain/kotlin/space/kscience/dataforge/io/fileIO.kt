@@ -15,8 +15,6 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.inputStream
 import kotlin.math.min
-import kotlin.reflect.full.isSupertypeOf
-import kotlin.reflect.typeOf
 import kotlin.streams.asSequence
 
 
@@ -77,17 +75,7 @@ public fun Path.rewrite(block: Sink.() -> Unit): Unit {
     stream.asSink().buffered().use(block)
 }
 
-@DFExperimental
 public fun EnvelopeFormat.readFile(path: Path): Envelope = readFrom(path.asBinary())
-
-/**
- * Resolve IOFormat based on type
- */
-@Suppress("UNCHECKED_CAST")
-@DFExperimental
-public inline fun <reified T : Any> IOPlugin.resolveIOFormat(): IOFormat<T>? =
-    ioFormatFactories.find { it.type.isSupertypeOf(typeOf<T>()) } as IOFormat<T>?
-
 
 public val IOPlugin.Companion.META_FILE_NAME: String get() = "@meta"
 public val IOPlugin.Companion.DATA_FILE_NAME: String get() = "@data"
@@ -192,7 +180,6 @@ public fun IOPlugin.peekFileEnvelopeFormat(path: Path): EnvelopeFormat? {
  *
  * Return null otherwise.
  */
-@DFExperimental
 public fun IOPlugin.readEnvelopeFile(
     path: Path,
     readNonEnvelopes: Boolean = false,

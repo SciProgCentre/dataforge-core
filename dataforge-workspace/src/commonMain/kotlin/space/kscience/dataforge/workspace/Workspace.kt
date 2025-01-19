@@ -1,29 +1,35 @@
 package space.kscience.dataforge.workspace
 
+import kotlinx.coroutines.CoroutineScope
 import space.kscience.dataforge.context.ContextAware
 import space.kscience.dataforge.data.Data
-import space.kscience.dataforge.data.DataSet
+import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.data.asSequence
+import space.kscience.dataforge.data.get
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.misc.DfId
+import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.provider.Provider
+import kotlin.coroutines.CoroutineContext
 
 
-public interface DataSelector<T: Any>{
-    public suspend fun select(workspace: Workspace, meta: Meta): DataSet<T>
+public fun interface DataSelector<out T> {
+    public suspend fun select(workspace: Workspace, meta: Meta): DataTree<T>
 }
 
 /**
  * An environment for pull-mode computation
  */
-@DfId(Workspace.TYPE)
-public interface Workspace : ContextAware, Provider {
+@DfType(Workspace.TYPE)
+public interface Workspace : ContextAware, Provider, CoroutineScope {
+
+    override val coroutineContext: CoroutineContext get() = context.coroutineContext
+
     /**
      * The whole data node for current workspace
      */
-    public val data: TaskResult<*>
+    public val data: DataTree<*>
 
     /**
      * All targets associated with the workspace
@@ -37,7 +43,7 @@ public interface Workspace : ContextAware, Provider {
 
     override fun content(target: String): Map<Name, Any> {
         return when (target) {
-            "target", Meta.TYPE -> targets.mapKeys { Name.parse(it.key)}
+            "target", Meta.TYPE -> targets.mapKeys { Name.parse(it.key) }
             Task.TYPE -> tasks
             Data.TYPE -> data.asSequence().associateBy { it.name }
             else -> emptyMap()
@@ -49,7 +55,7 @@ public interface Workspace : ContextAware, Provider {
         return task.execute(this, taskName, taskMeta)
     }
 
-    public suspend fun produceData(taskName: Name, taskMeta: Meta, name: Name): TaskData<*>? =
+    public suspend fun produceData(taskName: Name, taskMeta: Meta, name: Name): Data<*>? =
         produce(taskName, taskMeta)[name]
 
     public companion object {

@@ -3,21 +3,28 @@ import space.kscience.gradle.useApache2Licence
 import space.kscience.gradle.useSPCTeam
 
 plugins {
-    id("space.kscience.gradle.project")
+    alias(spclibs.plugins.kscience.project)
+    alias(spclibs.plugins.kotlinx.kover)
 }
 
 allprojects {
     group = "space.kscience"
-    version = "0.7.0"
+    version = "0.10.0"
 }
 
 subprojects {
     apply(plugin = "maven-publish")
 
     tasks.withType<KotlinCompile> {
-        kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
+        compilerOptions {
+            freeCompilerArgs.add("-Xcontext-receivers")
         }
+    }
+}
+
+dependencies{
+    subprojects.forEach {
+        dokka(it)
     }
 }
 
@@ -30,8 +37,8 @@ ksciencePublish {
         useApache2Licence()
         useSPCTeam()
     }
-    repository("spc","https://maven.sciprog.center/kscience")
-    sonatype()
+    repository("spc", "https://maven.sciprog.center/kscience")
+    central()
 }
 
 apiValidation {

@@ -1,8 +1,8 @@
 package space.kscience.dataforge.meta
 
+import kotlinx.serialization.Serializable
 import space.kscience.dataforge.misc.ThreadSafe
-import space.kscience.dataforge.names.*
-import kotlin.reflect.KProperty1
+import space.kscience.dataforge.names.Name
 
 
 internal data class MetaListener(
@@ -15,12 +15,15 @@ internal data class MetaListener(
  */
 public interface ObservableMeta : Meta {
     /**
-     * Add change listener to this meta. Owner is declared to be able to remove listeners later. Listener without owner could not be removed
+     * Add change listener to this meta. The Owner is declared to be able to remove listeners later.
+     * Listeners without an owner could be only removed all together.
+     *
+     * `this` object in the listener represents the current state of this meta. The name points to a changed node
      */
     public fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit)
 
     /**
-     * Remove all listeners belonging to given owner
+     * Remove all listeners belonging to the given [owner]. Passing null removes all listeners.
      */
     public fun removeListener(owner: Any?)
 
@@ -33,18 +36,10 @@ public interface ObservableMeta : Meta {
 /**
  * A [Meta] which is both observable and mutable
  */
+@Serializable(ObservableMutableMetaSerializer::class)
+@MetaBuilderMarker
 public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTypedMeta<ObservableMutableMeta> {
-    override fun getOrCreate(name: Name): ObservableMutableMeta
-
-    override fun get(name: Name): ObservableMutableMeta? {
-        tailrec fun ObservableMutableMeta.find(name: Name): ObservableMutableMeta? = if (name.isEmpty()) {
-            this
-        } else {
-            items[name.firstOrNull()!!]?.find(name.cutFirst())
-        }
-
-        return find(name)
-    }
+    override val self: ObservableMutableMeta get() = this
 }
 
 internal abstract class AbstractObservableMeta : ObservableMeta {
@@ -67,24 +62,4 @@ internal abstract class AbstractObservableMeta : ObservableMeta {
     override fun toString(): String = Meta.toString(this)
     override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
     override fun hashCode(): Int = Meta.hashCode(this)
-}
-
-/**
- * Use the value of the property in a [callBack].
- * The callback is called once immediately after subscription to pass the initial value.
- *
- * Optional [owner] property is used for
- */
-public fun <S : Scheme, T> S.useProperty(
-    property: KProperty1<S, T>,
-    owner: Any? = null,
-    callBack: S.(T) -> Unit,
-) {
-    //Pass initial value.
-    callBack(property.get(this))
-    meta.onChange(owner) { name ->
-        if (name.startsWith(property.name.asName())) {
-            callBack(property.get(this@useProperty))
-        }
-    }
 }

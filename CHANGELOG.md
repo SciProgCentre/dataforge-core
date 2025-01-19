@@ -14,6 +14,94 @@
 
 ### Security
 
+## 0.10.0 - 2025-01-19
+
+### Added
+
+- Coroutine exception logging in context
+- `ObservableMutableMetaSerializer`
+- `MutableMetaView` - a Meta wrapper that creates nodes only when its or its children are changed. 
+
+### Changed
+
+- Simplify inheritance logic in `MutableTypedMeta`
+- Full rework of `DataTree` and associated interfaces (`DataSource`, `DataSink`, etc.).
+- Filter data by type is moved from `dataforge-data` to `dataforge-workspace` to avoid reflection dependency.
+
+### Deprecated
+
+- MetaProvider `spec` is replaced by `readable`. `listOfSpec` replaced with `listOfReadable`
+
+### Removed
+
+- Remove implicit io format resolver in `IOPlugin` and `FileWorkspaceCache`. There are no guarantees that only one format is present in the contrxt for each type.
+- Dependencies on `atomicfu` and `kotlin.reflect` from dataforge-data to improve performance.
+
+### Fixed
+
+- Fixed NameToken parsing.
+- Top level string list meta conversion.
+
+## 0.9.0 - 2024-06-04
+
+### Added
+
+- Custom CoroutineContext during `Context` creation.
+
+### Changed
+
+- Kotlin 2.0
+- `MetaSpec` renamed to `MetaReader`. MetaSpec is now reserved for builder-based generation of meta descriptors.
+- Add self-type for Meta. Remove unsafe cast method for meta instances.
+
+### Removed
+
+- Automatic descriptors for schema. It is not possible to implement them without heavy reflection.
+
+## 0.8.2 - 2024-04-27
+
+### Added
+
+- Name index comparator
+- Specialized ByteArrayValue
+
+### Changed
+
+- DataSink `branch` is replaced with `putAll` to avoid confusion with DataTree methods
+- Meta delegate now uses a specific class that has a descriptor
+
+### Fixed
+
+- `listOfScheme` and `listOfConvertable` delegates provides correct items order.
+- Scheme meta setter works with proper sub-branch.
+- NameToken.parse improper work with indices.
+- Proper data handling for cache.
+
+## 0.8.0 - 2024-02-03
+
+### Added
+
+- Wasm artifacts
+- Add automatic MetaConverter for serializeable objects
+- Add Meta and MutableMeta delegates for convertable and serializeable
+- Meta mapping for data.
+
+### Changed
+
+- Descriptor `children` renamed to `nodes`
+- `MetaConverter` now inherits `MetaSpec` (former `Specifiction`). So `MetaConverter` could be used more universally.
+- Meta copy and modification now use lightweight non-observable meta builders.
+- Full refactor of Data API. DataTree now works similar to Meta: contains optional anonymous root element and data items. Updates are available for `ObservaleDataSource` and `ObservableDataTree` variants.
+
+### Deprecated
+
+- `node(key,converter)` in favor of `serializable` delegate
+
+### Fixed
+
+- Partially fixed a bug with `MutableMeta` observable wrappers.
+- `valueSequence` now include root value. So `meta.update` works properly.
+
 ## 0.7.0 - 2023-11-26
 
 ### Added

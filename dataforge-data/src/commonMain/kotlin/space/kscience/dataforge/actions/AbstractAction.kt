@@ -1,9 +1,9 @@
 package space.kscience.dataforge.actions
 
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineScope
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.misc.DFInternal
+import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.startsWith
 import kotlin.reflect.KType
@@ -19,47 +19,55 @@ internal fun MutableMap<Name, *>.removeWhatStartsWith(name: Name) {
 /**
  * An action that caches results on-demand and recalculates them on source push
  */
-public abstract class AbstractAction<in T : Any, R : Any>(
+public abstract class AbstractAction<T, R>(
     public val outputType: KType,
 ) : Action<T, R> {
 
     /**
      * Generate initial content of the output
      */
-    protected abstract fun DataSetBuilder<R>.generate(
-        data: DataSet<T>,
+    protected abstract fun DataBuilderScope<R>.generate(
+        source: DataTree<T>,
         meta: Meta,
-    )
+    ): Map<Name, Data<R>>
 
     /**
-     * Update part of the data set when given [updateKey] is triggered by the source
+     * Update part of the data set using provided data
+     *
+     * @param source the source data tree in case we need several data items to update
+     * @param actionMeta the metadata used for the whole data tree
+     * @param updatedData an updated item
      */
-    protected open fun DataSourceBuilder<R>.update(
-        dataSet: DataSet<T>,
-        meta: Meta,
-        updateKey: Name,
+    protected open suspend fun DataSink<R>.update(
+        source: DataTree<T>,
+        actionMeta: Meta,
+        updateName: Name,
     ) {
-        // By default, recalculate the whole dataset
-        generate(dataSet, meta)
+        //by default regenerate the whole data set
+        writeAll(generate(source, actionMeta))
     }
 
-    @OptIn(DFInternal::class)
+    @OptIn(UnsafeKType::class)
     override fun execute(
-        dataSet: DataSet<T>,
+        source: DataTree<T>,
         meta: Meta,
-    ): DataSet<R> = if (dataSet is DataSource) {
-        DataSource(outputType, dataSet){
-            generate(dataSet, meta)
+        updatesScope: CoroutineScope
+    ): DataTree<R> = DataTree(
+        dataType = outputType,
+        scope = updatesScope,
+        initialData = DataBuilderScope<R>().generate(source, meta)
+    ) {
 
-            launch {
-                dataSet.updates.collect { name ->
-                    update(dataSet, meta, name)
-                }
-            }
+        //propagate updates
+        val updateSink = DataSink<R> { name, data ->
+            write(name, data)
         }
-    } else {
-        DataTree<R>(outputType) {
-            generate(dataSet, meta)
+
+        with(updateSink) {
+            source.updates.collect {
+                update(source, meta, it)
+            }
         }
     }
 }
+

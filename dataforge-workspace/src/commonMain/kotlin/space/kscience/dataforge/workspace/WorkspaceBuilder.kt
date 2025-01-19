@@ -1,30 +1,27 @@
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.CoroutineScope
+import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.ContextBuilder
 import space.kscience.dataforge.context.Global
-import space.kscience.dataforge.data.*
-import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MetaRepr
-import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.meta.Specification
+import space.kscience.dataforge.data.DataTree
+import space.kscience.dataforge.data.StaticDataBuilder
+import space.kscience.dataforge.data.static
+import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFBuilder
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
-import kotlin.collections.set
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
-public data class TaskReference<T : Any>(public val taskName: Name, public val task: Task<T>) : DataSelector<T> {
+public data class TaskReference<T>(public val taskName: Name, public val task: Task<T>) : DataSelector<T> {
 
     @Suppress("UNCHECKED_CAST")
-    override suspend fun select(workspace: Workspace, meta: Meta): DataSet<T> {
+    override suspend fun select(workspace: Workspace, meta: Meta): DataTree<T> {
         if (workspace.tasks[taskName] == task) {
-            return workspace.produce(taskName, meta) as TaskResult<T>
+            return workspace.produce(taskName, meta) as DataTree<T>
         } else {
             error("Task $taskName does not belong to the workspace")
         }
@@ -42,13 +39,16 @@ public interface TaskContainer {
 public inline fun <reified T : Any> TaskContainer.registerTask(
     name: String,
     descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
-    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+    noinline builder: suspend TaskResultScope<T>.() -> DataTree<T>,
 ): Unit = registerTask(Name.parse(name), Task(MetaDescriptor(descriptorBuilder), builder))
 
+/**
+ * Create and register a new task
+ */
 public inline fun <reified T : Any> TaskContainer.buildTask(
     name: String,
     descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
-    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+    noinline builder: suspend TaskResultScope<T>.() -> DataTree<T>,
 ): TaskReference<T> {
     val theName = Name.parse(name)
     val descriptor = MetaDescriptor(descriptorBuilder)
@@ -59,7 +59,7 @@ public inline fun <reified T : Any> TaskContainer.buildTask(
 
 public inline fun <reified T : Any> TaskContainer.task(
     descriptor: MetaDescriptor,
-    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+    noinline builder: suspend TaskResultScope<T>.() -> DataTree<T>,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
     val taskName = Name.parse(property.name)
     val task = Task(descriptor, builder)
@@ -67,9 +67,12 @@ public inline fun <reified T : Any> TaskContainer.task(
     ReadOnlyProperty { _, _ -> TaskReference(taskName, task) }
 }
 
+/**
+ * Create a task based on [MetaReader]
+ */
 public inline fun <reified T : Any, C : MetaRepr> TaskContainer.task(
-    specification: Specification<C>,
-    noinline builder: suspend TaskResultBuilder<T>.(C) -> Unit,
+    specification: MetaReader<C>,
+    noinline builder: suspend TaskResultScope<T>.(C) -> DataTree<T>,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
     val taskName = Name.parse(property.name)
     val task = Task(specification, builder)
@@ -77,15 +80,34 @@ public inline fun <reified T : Any, C : MetaRepr> TaskContainer.task(
     ReadOnlyProperty { _, _ -> TaskReference(taskName, task) }
 }
 
+/**
+ * A delegate to create a custom task
+ */
 public inline fun <reified T : Any> TaskContainer.task(
     noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
-    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+    noinline builder: suspend TaskResultScope<T>.() -> DataTree<T>,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> =
     task(MetaDescriptor(descriptorBuilder), builder)
 
-public class WorkspaceBuilder(private val parentContext: Context = Global) : TaskContainer {
+/**
+ * A delegate for creating a task based on [action]
+ */
+public inline fun <T : Any, reified R : Any> TaskContainer.action(
+    selector: DataSelector<T>,
+    action: Action<T, R>,
+    noinline metaTransform: MutableMeta.() -> Unit = {},
+    noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
+): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<R>>> =
+    task(MetaDescriptor(descriptorBuilder)) {
+        action.execute(from(selector), taskMeta.copy(metaTransform), workspace)
+    }
+
+public class WorkspaceBuilder(
+    private val parentContext: Context = Global,
+) : TaskContainer {
     private var context: Context? = null
-    private var data: DataSet<*>? = null
+
+    private var data: DataTree<Any?>? = null
     private val targets: HashMap<String, Meta> = HashMap()
     private val tasks = HashMap<Name, Task<*>>()
     private var cache: WorkspaceCache? = null
@@ -100,13 +122,8 @@ public class WorkspaceBuilder(private val parentContext: Context = Global) : Tas
     /**
      * Define intrinsic data for the workspace
      */
-    public fun data(builder: DataSetBuilder<Any>.() -> Unit) {
-        data = DataTree(builder)
-    }
-
-    @DFExperimental
-    public fun data(scope: CoroutineScope, builder: DataSourceBuilder<Any>.() -> Unit) {
-        data = DataSource(scope, builder)
+    public fun data(builder: StaticDataBuilder<Any?>.() -> Unit) {
+        data = DataTree.static(builder)
     }
 
     /**
@@ -130,9 +147,9 @@ public class WorkspaceBuilder(private val parentContext: Context = Global) : Tas
 
     public fun build(): Workspace {
         val postProcess: suspend (TaskResult<*>) -> TaskResult<*> = { result ->
-            cache?.evaluate(result) ?: result
+            cache?.cache(result) ?: result
         }
-        return WorkspaceImpl(context ?: parentContext, data ?: DataSet.EMPTY, targets, tasks, postProcess)
+        return WorkspaceImpl(context ?: parentContext, data ?: DataTree.EMPTY, targets, tasks, postProcess)
     }
 }
 

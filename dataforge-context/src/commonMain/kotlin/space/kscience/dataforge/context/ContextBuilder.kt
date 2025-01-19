@@ -13,6 +13,8 @@ import space.kscience.dataforge.names.plus
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * A convenience builder for context
@@ -59,8 +61,15 @@ public class ContextBuilder internal constructor(
         plugin(DeFactoPluginFactory(plugin))
     }
 
+    private var coroutineContext: CoroutineContext = EmptyCoroutineContext
+
+    public fun coroutineContext(coroutineContext: CoroutineContext) {
+        this.coroutineContext = coroutineContext
+    }
+
+
     public fun build(): Context {
-        val contextName = name ?: NameToken("@auto",hashCode().toUInt().toString(16)).asName()
+        val contextName = name ?: NameToken("@auto", hashCode().toUInt().toString(16)).asName()
         val plugins = HashMap<PluginTag, Plugin>()
 
         fun addPlugin(factory: PluginFactory<*>, meta: Meta) {
@@ -86,7 +95,7 @@ public class ContextBuilder internal constructor(
             addPlugin(factory, meta)
         }
 
-        return Context(contextName, parent, plugins.values.toSet(), meta.seal())
+        return Context(contextName, parent, plugins.values.toSet(), meta.seal(), coroutineContext)
     }
 }
 

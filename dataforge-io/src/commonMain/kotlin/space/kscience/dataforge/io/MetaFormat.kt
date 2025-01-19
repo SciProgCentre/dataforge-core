@@ -9,7 +9,7 @@ import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.io.MetaFormatFactory.Companion.META_FORMAT_TYPE
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
-import space.kscience.dataforge.misc.DfId
+import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
@@ -20,8 +20,6 @@ import kotlin.reflect.typeOf
  * A format for meta serialization
  */
 public interface MetaFormat : IOFormat<Meta> {
-
-    override val type: KType get() = typeOf<Meta>()
 
     override fun writeTo(sink: Sink, obj: Meta) {
         writeMeta(sink, obj, null)
@@ -38,7 +36,7 @@ public interface MetaFormat : IOFormat<Meta> {
     public fun readMeta(source: Source, descriptor: MetaDescriptor? = null): Meta
 }
 
-@DfId(META_FORMAT_TYPE)
+@DfType(META_FORMAT_TYPE)
 public interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
     public val shortName: String
 

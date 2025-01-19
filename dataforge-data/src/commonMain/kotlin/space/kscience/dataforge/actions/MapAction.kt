@@ -6,8 +6,7 @@ import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.meta.toMutableMeta
 import space.kscience.dataforge.misc.DFBuilder
-import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.misc.DFInternal
+import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -29,6 +28,7 @@ public class MapActionBuilder<T, R>(
     public var name: Name,
     public var meta: MutableMeta,
     public val actionMeta: Meta,
+    public val dataType: KType,
     @PublishedApi internal var outputType: KType,
 ) {
 
@@ -37,6 +37,7 @@ public class MapActionBuilder<T, R>(
     /**
      * Set unsafe [outputType] for the resulting data. Be sure that it is correct.
      */
+    @UnsafeKType
     public fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(T) -> R1) {
         this.outputType = outputType
         result = f;
@@ -45,28 +46,31 @@ public class MapActionBuilder<T, R>(
     /**
      * Calculate the result of goal
      */
-    public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(T) -> R1) {
-        outputType = typeOf<R1>()
-        result = f;
-    }
+    @OptIn(UnsafeKType::class)
+    public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(T) -> R1): Unit = result(typeOf<R1>(), f)
 }
 
-@PublishedApi
-internal class MapAction<in T : Any, R : Any>(
+@UnsafeKType
+public class MapAction<T, R>(
     outputType: KType,
     private val block: MapActionBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {
 
-    private fun DataSetBuilder<R>.mapOne(name: Name, data: Data<T>, meta: Meta) {
+    private fun mapOne(name: Name, data: Data<T>?, meta: Meta): Pair<Name, Data<R>?> {
+        //fast return for null data
+        if (data == null) {
+            return name to null
+        }
         // Creating a new environment for action using **old** name, old meta and task meta
         val env = ActionEnv(name, data.meta, meta)
 
         //applying transformation from builder
         val builder = MapActionBuilder<T, R>(
-            name,
-            data.meta.toMutableMeta(), // using data meta
-            meta,
-            outputType
+            name = name,
+            meta = data.meta.toMutableMeta(), // using data meta
+            actionMeta = meta,
+            dataType = data.type,
+            outputType = outputType
         ).apply(block)
 
         //getting new name
@@ -75,21 +79,30 @@ internal class MapAction<in T : Any, R : Any>(
         //getting new meta
         val newMeta = builder.meta.seal()
 
-        @OptIn(DFInternal::class)
         val newData = Data(builder.outputType, newMeta, dependencies = listOf(data)) {
             builder.result(env, data.await())
         }
         //setting the data node
-        data(newName, newData)
+        return newName to newData
     }
 
-    override fun DataSetBuilder<R>.generate(data: DataSet<T>, meta: Meta) {
-        data.forEach { mapOne(it.name, it.data, meta) }
+    override fun DataBuilderScope<R>.generate(source: DataTree<T>, meta: Meta): Map<Name, Data<R>> = buildMap {
+        source.forEach { data ->
+            val (name, data) = mapOne(data.name, data, meta)
+            if (data != null) {
+                check(name !in keys) { "Data with key $name already exist in the result" }
+                put(name, data)
+            }
+        }
     }
 
-    override fun DataSourceBuilder<R>.update(dataSet: DataSet<T>, meta: Meta, updateKey: Name) {
-        remove(updateKey)
-        dataSet[updateKey]?.let { mapOne(updateKey, it, meta) }
+    override suspend fun DataSink<R>.update(
+        source: DataTree<T>,
+        actionMeta: Meta,
+        updateName: Name,
+    ) {
+        val (name, data) = mapOne(updateName, source.read(updateName), actionMeta)
+        write(name, data)
     }
 }
 
@@ -97,9 +110,9 @@ internal class MapAction<in T : Any, R : Any>(
 /**
  * A one-to-one mapping action
  */
-@DFExperimental
-@Suppress("FunctionName")
-public inline fun <T : Any, reified R : Any> Action.Companion.map(
+
+@OptIn(UnsafeKType::class)
+public inline fun <T, reified R> Action.Companion.mapping(
     noinline builder: MapActionBuilder<T, R>.() -> Unit,
 ): Action<T, R> = MapAction(typeOf<R>(), builder)
 

@@ -6,60 +6,74 @@ import space.kscience.dataforge.names.*
 
 /**
  * A class that takes [MutableMeta] provider and adds obsevability on top of that
+ *
+ * TODO rewrite to properly work with detached nodes
  */
 private class ObservableMetaWrapper(
     val root: MutableMeta,
-    val absoluteName: Name,
+    val nodeName: Name,
     val listeners: MutableSet<MetaListener>,
 ) : ObservableMutableMeta {
-    override val items: Map<NameToken, ObservableMutableMeta>
-        get() = root.items.keys.associateWith {
-            ObservableMetaWrapper(root, absoluteName + it, listeners)
-        }
 
-    override fun get(name: Name): ObservableMutableMeta? =
-        root.get(name)?.let { ObservableMetaWrapper(root, this.absoluteName + name, listeners) }
+    override val self get() = this
+
+    override val items: Map<NameToken, ObservableMutableMeta>
+        get() = root[nodeName]?.items?.keys?.associateWith {
+            ObservableMetaWrapper(root, nodeName + it, listeners)
+        } ?: emptyMap()
+
+    override fun get(name: Name): ObservableMutableMeta? = if (root[nodeName + name] == null) {
+        null
+    } else {
+        ObservableMetaWrapper(root, nodeName + name, listeners)
+    }
 
     @ThreadSafe
     override fun onChange(owner: Any?, callback: Meta.(name: Name) -> Unit) {
         listeners.add(
-            MetaListener(Pair(owner, absoluteName)) { name ->
-                if (name.startsWith(absoluteName)) {
-                    (this[absoluteName] ?: Meta.EMPTY).callback(name.removeFirstOrNull(absoluteName)!!)
+            MetaListener(Pair(owner, nodeName)) { fullName ->
+                if (fullName.startsWith(nodeName)) {
+                    root[nodeName]?.callback(fullName.removeFirstOrNull(nodeName)!!)
                 }
             }
         )
     }
 
     override fun removeListener(owner: Any?) {
-        listeners.removeAll { it.owner === Pair(owner, absoluteName) }
+        listeners.removeAll { it.owner === Pair(owner, nodeName) }
     }
 
     override fun invalidate(name: Name) {
-        listeners.forEach { it.callback(this, name) }
+        listeners.forEach { it.callback(this, nodeName + name) }
     }
 
     override var value: Value?
-        get() = root.value
+        get() = root[nodeName]?.value
         set(value) {
-            root.value = value
+            root.getOrCreate(nodeName).value = value
             invalidate(Name.EMPTY)
         }
 
     override fun getOrCreate(name: Name): ObservableMutableMeta =
-        ObservableMetaWrapper(root, this.absoluteName + name, listeners)
+        ObservableMetaWrapper(root, nodeName + name, listeners)
+
+    fun removeNode(name: Name): Meta? {
+        val oldMeta = get(name)
+        //remember to remove listener
+        oldMeta?.removeListener(this)
+
+        return oldMeta
+    }
 
     override fun set(name: Name, node: Meta?) {
-        val oldMeta = get(name)
-        //don't forget to remove listener
-        oldMeta?.removeListener(this)
-        root.set(absoluteName + name, node)
+        val oldMeta = removeNode(name)
+        root[nodeName + name] = node
         if (oldMeta != node) {
             invalidate(name)
         }
     }
 
-    override fun toMeta(): Meta = root[absoluteName]?.toMeta() ?: Meta.EMPTY
+    override fun toMeta(): Meta = root[nodeName]?.toMeta() ?: Meta.EMPTY
 
     override fun toString(): String = Meta.toString(this)
     override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)

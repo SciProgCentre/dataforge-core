@@ -2,22 +2,24 @@ plugins {
     id("space.kscience.gradle.mpp")
 }
 
-kscience{
+description = "Scripting definition fow workspace generation"
+
+kscience {
     jvm()
-    dependencies {
+    commonMain {
         api(projects.dataforgeWorkspace)
         implementation(kotlin("scripting-common"))
     }
-    dependencies(jvmMain){
+    jvmMain {
         implementation(kotlin("scripting-jvm-host"))
         implementation(kotlin("scripting-jvm"))
     }
-    dependencies(jvmTest){
+    jvmTest {
         implementation(spclibs.logback.classic)
     }
 }
 
 
-readme{
+readme {
     maturity = space.kscience.gradle.Maturity.PROTOTYPE
 }

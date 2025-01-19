@@ -6,10 +6,10 @@ kscience{
     jvm()
     js()
     native()
+    wasm()
     useCoroutines()
     dependencies {
-        api(project(":dataforge-meta"))
-        api(kotlin("reflect"))
+        api(projects.dataforgeMeta)
     }
 }
 

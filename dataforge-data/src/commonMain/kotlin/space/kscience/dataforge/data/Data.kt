@@ -4,8 +4,8 @@ import kotlinx.coroutines.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
 import space.kscience.dataforge.meta.isEmpty
-import space.kscience.dataforge.misc.DFInternal
-import space.kscience.dataforge.misc.DfId
+import space.kscience.dataforge.misc.DfType
+import space.kscience.dataforge.misc.UnsafeKType
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KType
@@ -14,7 +14,7 @@ import kotlin.reflect.typeOf
 /**
  * A data element characterized by its meta
  */
-@DfId(Data.TYPE)
+@DfType(Data.TYPE)
 public interface Data<out T> : Goal<T>, MetaRepr {
     /**
      * Type marker for the data. The type is known before the calculation takes place so it could be checked.
@@ -41,7 +41,7 @@ public interface Data<out T> : Goal<T>, MetaRepr {
          */
         internal val TYPE_OF_NOTHING: KType = typeOf<Unit>()
 
-        public inline fun <reified T : Any> static(
+        public inline fun <reified T> wrapValue(
             value: T,
             meta: Meta = Meta.EMPTY,
         ): Data<T> = StaticData(typeOf<T>(), value, meta)
@@ -50,10 +50,10 @@ public interface Data<out T> : Goal<T>, MetaRepr {
          * An empty data containing only meta
          */
         @OptIn(DelicateCoroutinesApi::class)
-        public fun empty(meta: Meta): Data<Nothing> = object : Data<Nothing> {
-            override val type: KType = TYPE_OF_NOTHING
+        public fun buildEmpty(meta: Meta): Data<Nothing> = object : Data<Nothing> {
+            override val type: KType get() = TYPE_OF_NOTHING
             override val meta: Meta = meta
-            override val dependencies: Collection<Goal<*>> = emptyList()
+            override val dependencies: Collection<Goal<*>> get() = emptyList()
             override val deferred: Deferred<Nothing>
                 get() = GlobalScope.async(start = CoroutineStart.LAZY) {
                     error("The Data is empty and could not be computed")
@@ -62,6 +62,8 @@ public interface Data<out T> : Goal<T>, MetaRepr {
             override fun async(coroutineScope: CoroutineScope): Deferred<Nothing> = deferred
             override fun reset() {}
         }
+
+        public val EMPTY: Data<Nothing> = buildEmpty(Meta.EMPTY)
     }
 }
 
@@ -69,39 +71,37 @@ public interface Data<out T> : Goal<T>, MetaRepr {
  * A lazily computed variant of [Data] based on [LazyGoal]
  * One must ensure that proper [type] is used so this method should not be used
  */
-private class LazyData<T : Any>(
+private class LazyData<T>(
     override val type: KType,
     override val meta: Meta = Meta.EMPTY,
     additionalContext: CoroutineContext = EmptyCoroutineContext,
-    dependencies: Collection<Goal<*>> = emptyList(),
+    dependencies: Iterable<Goal<*>> = emptyList(),
     block: suspend () -> T,
 ) : Data<T>, LazyGoal<T>(additionalContext, dependencies, block)
 
-public class StaticData<T : Any>(
+public class StaticData<T>(
     override val type: KType,
     value: T,
     override val meta: Meta = Meta.EMPTY,
 ) : Data<T>, StaticGoal<T>(value)
 
 @Suppress("FunctionName")
-public inline fun <reified T : Any> Data(value: T, meta: Meta = Meta.EMPTY): StaticData<T> =
+public inline fun <reified T> Data(value: T, meta: Meta = Meta.EMPTY): StaticData<T> =
     StaticData(typeOf<T>(), value, meta)
 
-@Suppress("FunctionName")
-@DFInternal
-public fun <T : Any> Data(
+@UnsafeKType
+public fun <T> Data(
     type: KType,
     meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
-    dependencies: Collection<Goal<*>> = emptyList(),
+    dependencies: Iterable<Goal<*>> = emptyList(),
     block: suspend () -> T,
 ): Data<T> = LazyData(type, meta, context, dependencies, block)
 
-@OptIn(DFInternal::class)
-@Suppress("FunctionName")
-public inline fun <reified T : Any> Data(
+@OptIn(UnsafeKType::class)
+public inline fun <reified T> Data(
     meta: Meta = Meta.EMPTY,
     context: CoroutineContext = EmptyCoroutineContext,
-    dependencies: Collection<Goal<*>> = emptyList(),
+    dependencies: Iterable<Goal<*>> = emptyList(),
     noinline block: suspend () -> T,
 ): Data<T> = Data(typeOf<T>(), meta, context, dependencies, block)

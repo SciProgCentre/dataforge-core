@@ -2,7 +2,7 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.json.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
-import space.kscience.dataforge.meta.descriptors.item
+import space.kscience.dataforge.meta.descriptors.node
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -32,7 +32,7 @@ class JsonMetaTest {
     }
 
     val descriptor = MetaDescriptor {
-        item("nodeArray") {
+        node("nodeArray") {
             indexKey = "index"
         }
     }

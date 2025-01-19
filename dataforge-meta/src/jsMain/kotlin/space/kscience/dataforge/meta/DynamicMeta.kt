@@ -31,6 +31,9 @@ public fun Meta.toDynamic(): dynamic {
 }
 
 public class DynamicMeta(internal val obj: dynamic) : TypedMeta<DynamicMeta> {
+
+    override val self: DynamicMeta get() = this
+
     private fun keys(): Array<String> = js("Object").keys(obj) as Array<String>
 
     private fun isArray(obj: dynamic): Boolean =

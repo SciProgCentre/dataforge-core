@@ -9,7 +9,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  * Lazy computation result with its dependencies to allowing to stat computing dependencies ahead of time
  */
 public interface Goal<out T> {
-    public val dependencies: Collection<Goal<*>>
+    public val dependencies: Iterable<Goal<*>>
 
     /**
      * Returns current running coroutine if the goal is started. Null if the computation is not started.
@@ -32,7 +32,7 @@ public interface Goal<out T> {
     public companion object
 }
 
-public fun Goal<*>.launch(coroutineScope: CoroutineScope): Job = async(coroutineScope)
+public fun Goal<*>.launchIn(coroutineScope: CoroutineScope): Job = async(coroutineScope)
 
 public suspend fun <T> Goal<T>.await(): T = coroutineScope { async(this).await() }
 
@@ -54,7 +54,7 @@ public open class StaticGoal<T>(public val value: T) : Goal<T> {
  */
 public open class LazyGoal<T>(
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    override val dependencies: Collection<Goal<*>> = emptyList(),
+    override val dependencies: Iterable<Goal<*>> = emptyList(),
     public val block: suspend () -> T,
 ) : Goal<T> {
 
@@ -64,11 +64,14 @@ public open class LazyGoal<T>(
     /**
      * Get ongoing computation or start a new one.
      * Does not guarantee thread safety. In case of multi-thread access, could create orphan computations.
-     * If [GoalExecutionRestriction] is present in the [coroutineScope] context, the call could produce a error a warning
+     * If [GoalExecutionRestriction] is present in the [coroutineScope] context, the call could produce an error or a warning
      * depending on the settings.
+     *
+     * If [Goal] is already started on a different scope, it is not restarted.
      */
     @OptIn(DFExperimental::class)
-    override fun async(coroutineScope: CoroutineScope): Deferred<T> {
+    override fun async(coroutineScope: CoroutineScope): Deferred<T> = deferred ?: run {
+
         val log = coroutineScope.coroutineContext[GoalLogger]
         // Check if context restricts goal computation
         coroutineScope.coroutineContext[GoalExecutionRestriction]?.let { restriction ->
@@ -82,16 +85,17 @@ public open class LazyGoal<T>(
         }
 
         log?.emit { "Starting dependencies computation for ${this@LazyGoal}" }
-        val startedDependencies = this.dependencies.map { goal ->
-            goal.run { async(coroutineScope) }
+        val startedDependencies = dependencies.map { goal ->
+            goal.async(coroutineScope)
         }
-        return deferred ?: coroutineScope.async(
+
+        coroutineScope.async(
             coroutineContext
                     + CoroutineMonitor()
                     + Dependencies(startedDependencies)
                     + GoalExecutionRestriction(GoalExecutionRestrictionPolicy.NONE) // Remove restrictions on goal execution
         ) {
-            //cancel execution if error encountered in one of dependencies
+            //cancel execution if error encountered in one of the dependencies
             startedDependencies.forEach { deferred ->
                 deferred.invokeOnCompletion { error ->
                     if (error != null) this.cancel(CancellationException("Dependency $deferred failed with error: ${error.message}"))
