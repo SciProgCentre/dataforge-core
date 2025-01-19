@@ -22,6 +22,12 @@ subprojects {
     }
 }
 
+dependencies{
+    subprojects.forEach {
+        dokka(it)
+    }
+}
+
 readme {
     readmeTemplate = file("docs/templates/README-TEMPLATE.md")
 }

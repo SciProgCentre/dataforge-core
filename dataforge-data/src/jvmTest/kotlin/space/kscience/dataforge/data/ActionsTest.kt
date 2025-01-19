@@ -13,7 +13,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(DFExperimental::class, ExperimentalCoroutinesApi::class)
 internal class ActionsTest {
     @Test
-    fun testStaticMapAction() = runTest(timeout = 500.milliseconds) {
+    fun testStaticMapAction() = runTest(timeout = 200.milliseconds) {
         val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
         }
@@ -26,11 +26,11 @@ internal class ActionsTest {
 
         val result = plusOne(data)
 
-        assertEquals(2, result.awaitData("1").await())
+        assertEquals(5, result.awaitData("4").await())
     }
 
     @Test
-    fun testDynamicMapAction() = runTest(timeout = 500.milliseconds) {
+    fun testDynamicMapAction() = runTest(timeout = 200.milliseconds) {
         val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
         }
@@ -43,7 +43,7 @@ internal class ActionsTest {
             source.writeValue(it.toString(), it)
         }
 
-        assertEquals(2, result.awaitData("1").await())
+        assertEquals(5, result.awaitData("4").await())
     }
 
 }

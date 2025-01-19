@@ -3,25 +3,44 @@
 ## Unreleased
 
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## 0.10.0 - 2025-01-19
+
+### Added
+
 - Coroutine exception logging in context
 - `ObservableMutableMetaSerializer`
 - `MutableMetaView` - a Meta wrapper that creates nodes only when its or its children are changed. 
 
 ### Changed
+
 - Simplify inheritance logic in `MutableTypedMeta`
 - Full rework of `DataTree` and associated interfaces (`DataSource`, `DataSink`, etc.).
+- Filter data by type is moved from `dataforge-data` to `dataforge-workspace` to avoid reflection dependency.
 
 ### Deprecated
+
 - MetaProvider `spec` is replaced by `readable`. `listOfSpec` replaced with `listOfReadable`
 
 ### Removed
+
 - Remove implicit io format resolver in `IOPlugin` and `FileWorkspaceCache`. There are no guarantees that only one format is present in the contrxt for each type.
+- Dependencies on `atomicfu` and `kotlin.reflect` from dataforge-data to improve performance.
 
 ### Fixed
+
 - Fixed NameToken parsing.
 - Top level string list meta conversion.
-
-### Security
 
 ## 0.9.0 - 2024-06-04
 

@@ -8,25 +8,30 @@ import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
-
+import kotlin.reflect.typeOf
 
 @DFExperimental
 public val KClass<*>.dfType: String
     get() = findAnnotation<DfType>()?.id ?: simpleName ?: ""
+
+@DFExperimental
+public val KType.dfType: String
+    get() = findAnnotation<DfType>()?.id ?: (classifier as? KClass<*>)?.simpleName ?: ""
 
 /**
  * Provide an object with given name inferring target from its type using [DfType] annotation
  */
 @DFExperimental
 public inline fun <reified T : Any> Provider.provideByType(name: String): T? {
-    val target = T::class.dfType
+    val target = typeOf<T>().dfType
     return provide(target, name)
 }
 
 @DFExperimental
 public inline fun <reified T : Any> Provider.top(): Map<Name, T> {
-    val target = T::class.dfType
+    val target = typeOf<T>().dfType
     return top(target)
 }
 
@@ -35,15 +40,15 @@ public inline fun <reified T : Any> Provider.top(): Map<Name, T> {
  */
 @DFExperimental
 public inline fun <reified T : Any> Context.gather(inherit: Boolean = true): Map<Name, T> =
-    gather<T>(T::class.dfType, inherit)
+    gather<T>(typeOf<T>().dfType, inherit)
 
 
 @DFExperimental
 public inline fun <reified T : Any> PluginBuilder.provides(items: Map<Name, T>) {
-    provides(T::class.dfType, items)
+    provides(typeOf<T>().dfType, items)
 }
 
 @DFExperimental
 public inline fun <reified T : Any> PluginBuilder.provides(vararg items: Named) {
-    provides(T::class.dfType, *items)
+    provides(typeOf<T>().dfType, *items)
 }

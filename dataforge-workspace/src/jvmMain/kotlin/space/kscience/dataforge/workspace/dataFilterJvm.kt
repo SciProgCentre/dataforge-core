@@ -1,5 +1,6 @@
-package space.kscience.dataforge.data
+package space.kscience.dataforge.workspace
 
+import space.kscience.dataforge.data.*
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
 import kotlin.reflect.KType
@@ -20,16 +21,6 @@ private fun <R> Data<*>.castOrNull(type: KType): Data<R>? =
         }
     }
 
-//@Suppress("UNCHECKED_CAST")
-//@DFInternal
-//public fun <R> Sequence<DataUpdate<*>>.filterByDataType(type: KType): Sequence<NamedData<R>> =
-//    filter { it.type.isSubtypeOf(type) } as Sequence<NamedData<R>>
-//
-//@Suppress("UNCHECKED_CAST")
-//@DFInternal
-//public fun <R> Flow<DataUpdate<*>>.filterByDataType(type: KType): Flow<NamedData<R>> =
-//    filter { it.type.isSubtypeOf(type) } as Flow<NamedData<R>>
-
 /**
  * Select all data matching given type and filters. Does not modify paths
  *
@@ -40,7 +31,7 @@ private fun <R> Data<*>.castOrNull(type: KType): Data<R>? =
 public fun <R> DataTree<*>.filterByType(
     type: KType,
     branch: Name = Name.EMPTY,
-    filter: DataFilter = DataFilter.EMPTY,
+    filter: DataFilter = DataFilter.Companion.EMPTY,
 ): DataTree<R> {
     val filterWithType = DataFilter { name, meta, dataType ->
         filter.accepts(name, meta, dataType) && dataType.isSubtypeOf(type)
@@ -54,7 +45,7 @@ public fun <R> DataTree<*>.filterByType(
 @OptIn(DFInternal::class)
 public inline fun <reified R : Any> DataTree<*>.filterByType(
     branch: Name = Name.EMPTY,
-    filter: DataFilter = DataFilter.EMPTY,
+    filter: DataFilter = DataFilter.Companion.EMPTY,
 ): DataTree<R> = filterByType(typeOf<R>(), branch, filter = filter)
 
 /**

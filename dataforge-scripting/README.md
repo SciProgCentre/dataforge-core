@@ -1,6 +1,6 @@
 # Module dataforge-scripting
 
-
+Scripting definition fow workspace generation
 
 ## Usage
 

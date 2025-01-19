@@ -2,6 +2,8 @@ plugins {
     id("space.kscience.gradle.mpp")
 }
 
+description = "A framework for pull-based data processing"
+
 kscience {
     jvm()
     js()

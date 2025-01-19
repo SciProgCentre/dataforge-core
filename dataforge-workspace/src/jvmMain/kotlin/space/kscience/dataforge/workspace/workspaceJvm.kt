@@ -1,7 +1,6 @@
 package space.kscience.dataforge.workspace
 
 import space.kscience.dataforge.data.DataTree
-import space.kscience.dataforge.data.filterByType
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
