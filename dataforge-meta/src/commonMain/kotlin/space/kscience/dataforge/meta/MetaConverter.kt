@@ -11,7 +11,7 @@ import space.kscience.dataforge.misc.DFExperimental
 /**
  * A converter of generic object to and from [Meta]
  */
-public interface MetaConverter<T>: MetaReader<T> {
+public interface MetaConverter<T> : MetaReader<T> {
 
     /**
      * A descriptor for resulting meta
@@ -114,6 +114,12 @@ public interface MetaConverter<T>: MetaReader<T> {
             override fun readOrNull(source: Meta): E = source.enum<E>() as? E ?: error("The Item is not a Enum")
 
             override fun convert(obj: E): Meta = Meta(obj.asValue())
+        }
+
+        public val stringList: MetaConverter<List<String>> = object : MetaConverter<List<String>> {
+            override fun convert(obj: List<String>): Meta = Meta(obj.map { it.asValue() }.asValue())
+
+            override fun readOrNull(source: Meta): List<String>? = source.stringList
         }
 
         public fun <T> valueList(

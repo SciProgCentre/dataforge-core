@@ -6,7 +6,7 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.DataTree
 import space.kscience.dataforge.data.asSequence
-import space.kscience.dataforge.data.launch
+import space.kscience.dataforge.data.launchIn
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
 
@@ -33,9 +33,9 @@ public fun <T> Workspace.wrapResult(data: DataTree<T>, taskName: Name, taskMeta:
  * Start computation for all data elements of this node.
  * The resulting [Job] is completed only when all of them are completed.
  */
-public fun TaskResult<*>.launch(scope: CoroutineScope): Job {
+public fun TaskResult<*>.launchIn(scope: CoroutineScope): Job {
     val jobs = asSequence().map {
-        it.data.launch(scope)
+        it.launchIn(scope)
     }.toList()
     return scope.launch { jobs.joinAll() }
 }

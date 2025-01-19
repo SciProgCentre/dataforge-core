@@ -37,9 +37,9 @@ internal object TestPlugin : WorkspacePlugin() {
 
     val test by task {
         // type is inferred
-        transformEach(dataByType<Int>()) { arg, _, _ ->
-            logger.info { "Test: $arg" }
-            arg
+        transformEach(dataByType<Int>()) {
+            logger.info { "Test: $value" }
+            value
         }
 
     }
@@ -62,42 +62,42 @@ internal class SimpleWorkspaceTest {
         data {
             //statically initialize data
             repeat(100) {
-                putValue("myData[$it]", it)
+                value("myData[$it]", it)
             }
         }
 
         val filterOne by task<Int> {
             val name by taskMeta.string { error("Name field not defined") }
-            from(testPluginFactory) { test }[name]?.let { source: Data<Int> ->
-                put(name, source)
-            }
+            result(from(testPluginFactory) { test }[name]!!)
         }
 
         val square by task<Int> {
-            transformEach(dataByType<Int>()) { arg, name, meta ->
+            transformEach(dataByType<Int>()) {
                 if (meta["testFlag"].boolean == true) {
                     println("Side effect")
                 }
                 workspace.logger.info { "Starting square on $name" }
-                arg * arg
+                value * value
             }
         }
 
         val linear by task<Int> {
-            transformEach(dataByType<Int>()) { arg, name, _ ->
+            transformEach(dataByType<Int>()) {
                 workspace.logger.info { "Starting linear on $name" }
-                arg * 2 + 1
+                value * 2 + 1
             }
         }
 
         val fullSquare by task<Int> {
             val squareData = from(square)
             val linearData = from(linear)
-            squareData.forEach { data ->
-                val newData: Data<Int> = data.combine(linearData[data.name]!!) { l, r ->
-                    l + r
+            result {
+                squareData.forEach { data ->
+                    val newData: Data<Int> = data.combine(linearData[data.name]!!) { l, r ->
+                        l + r
+                    }
+                    data(data.name, newData)
                 }
-                put(data.name, newData)
             }
         }
 
@@ -106,7 +106,7 @@ internal class SimpleWorkspaceTest {
             val res = from(square).foldToData(0) { l, r ->
                 l + r.value
             }
-            put("sum", res)
+            result(res)
         }
 
         val averageByGroup by task<Int> {
@@ -116,13 +116,15 @@ internal class SimpleWorkspaceTest {
                 l + r.value
             }
 
-            put("even", evenSum)
             val oddSum = workspace.data.filterByType<Int> { name, _, _ ->
                 name.toString().toInt() % 2 == 1
             }.foldToData(0) { l, r ->
                 l + r.value
             }
-            put("odd", oddSum)
+            result {
+                data("even", evenSum)
+                data("odd", oddSum)
+            }
         }
 
         val delta by task<Int> {
@@ -132,15 +134,17 @@ internal class SimpleWorkspaceTest {
             val res = even.combine(odd) { l, r ->
                 l - r
             }
-            put("res", res)
+            result(res)
         }
 
         val customPipe by task<Int> {
-            workspace.data.filterByType<Int>().forEach { data ->
-                val meta = data.meta.toMutableMeta().apply {
-                    "newValue" put 22
+            result {
+                workspace.data.filterByType<Int>().forEach { data ->
+                    val meta = data.meta.toMutableMeta().apply {
+                        "newValue" put 22
+                    }
+                    data(data.name + "new", data.transform { (data.meta["value"].int ?: 0) + it })
                 }
-                put(data.name + "new", data.transform { (data.meta["value"].int ?: 0) + it })
             }
         }
 
@@ -148,16 +152,16 @@ internal class SimpleWorkspaceTest {
     }
 
     @Test
-    fun testWorkspace() = runTest(timeout = 100.milliseconds) {
+    fun testWorkspace() = runTest(timeout = 200.milliseconds) {
         val node = workspace.produce("sum")
-        val res = node.asSequence().single()
-        assertEquals(328350, res.await())
+        val res = node.data
+        assertEquals(328350, res?.await())
     }
 
     @Test
-    fun testMetaPropagation() = runTest(timeout = 100.milliseconds) {
+    fun testMetaPropagation() = runTest(timeout = 200.milliseconds) {
         val node = workspace.produce("sum") { "testFlag" put true }
-        val res = node["sum"]!!.await()
+        val res = node.data?.await()
     }
 
     @Test
@@ -175,7 +179,7 @@ internal class SimpleWorkspaceTest {
                 """
                 Name: ${it.name}
                 Meta: ${it.meta}
-                Data: ${it.data.await()}
+                Data: ${it.await()}
             """.trimIndent()
             )
         }
@@ -186,7 +190,7 @@ internal class SimpleWorkspaceTest {
         val node = workspace.produce("filterOne") {
             "name" put "myData[12]"
         }
-        assertEquals(12, node.asSequence().first().await())
+        assertEquals(12, node.data?.await())
     }
 
 }

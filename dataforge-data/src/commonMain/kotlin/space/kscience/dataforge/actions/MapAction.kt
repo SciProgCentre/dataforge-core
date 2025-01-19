@@ -37,6 +37,7 @@ public class MapActionBuilder<T, R>(
     /**
      * Set unsafe [outputType] for the resulting data. Be sure that it is correct.
      */
+    @UnsafeKType
     public fun <R1 : R> result(outputType: KType, f: suspend ActionEnv.(T) -> R1) {
         this.outputType = outputType
         result = f;
@@ -45,6 +46,7 @@ public class MapActionBuilder<T, R>(
     /**
      * Calculate the result of goal
      */
+    @OptIn(UnsafeKType::class)
     public inline fun <reified R1 : R> result(noinline f: suspend ActionEnv.(T) -> R1): Unit = result(typeOf<R1>(), f)
 }
 
@@ -54,22 +56,21 @@ public class MapAction<T, R>(
     private val block: MapActionBuilder<T, R>.() -> Unit,
 ) : AbstractAction<T, R>(outputType) {
 
-    private fun DataSink<R>.mapOne(name: Name, data: Data<T>?, meta: Meta) {
+    private fun mapOne(name: Name, data: Data<T>?, meta: Meta): Pair<Name, Data<R>?> {
         //fast return for null data
         if (data == null) {
-            put(name, null)
-            return
+            return name to null
         }
         // Creating a new environment for action using **old** name, old meta and task meta
         val env = ActionEnv(name, data.meta, meta)
 
         //applying transformation from builder
         val builder = MapActionBuilder<T, R>(
-            name,
-            data.meta.toMutableMeta(), // using data meta
-            meta,
-            data.type,
-            outputType
+            name = name,
+            meta = data.meta.toMutableMeta(), // using data meta
+            actionMeta = meta,
+            dataType = data.type,
+            outputType = outputType
         ).apply(block)
 
         //getting new name
@@ -82,21 +83,26 @@ public class MapAction<T, R>(
             builder.result(env, data.await())
         }
         //setting the data node
-        put(newName, newData)
+        return newName to newData
     }
 
-    override fun DataSink<R>.generate(source: DataTree<T>, meta: Meta) {
-        source.forEach { mapOne(it.name, it.data, meta) }
+    override fun DataBuilderScope<R>.generate(source: DataTree<T>, meta: Meta): Map<Name, Data<R>> = buildMap {
+        source.forEach { data ->
+            val (name, data) = mapOne(data.name, data, meta)
+            if (data != null) {
+                check(name !in keys) { "Data with key $name already exist in the result" }
+                put(name, data)
+            }
+        }
     }
-
-
 
     override suspend fun DataSink<R>.update(
         source: DataTree<T>,
-        meta: Meta,
-        updatedData: DataUpdate<T>,
-    )  {
-        mapOne(updatedData.name, updatedData.data, meta)
+        actionMeta: Meta,
+        updateName: Name,
+    ) {
+        val (name, data) = mapOne(updateName, source.read(updateName), actionMeta)
+        write(name, data)
     }
 }
 

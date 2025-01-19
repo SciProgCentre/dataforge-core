@@ -34,9 +34,9 @@ private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): J
         val childDescriptor = descriptor?.nodes?.get(body)
         if (list.size == 1) {
             val (token, element) = list.first()
-                //do not add an empty element
-                val child: JsonElement = element.toJsonWithIndex(childDescriptor, token.index)
-            if(token.index == null) {
+            //do not add an empty element
+            val child: JsonElement = element.toJsonWithIndex(childDescriptor, token.index)
+            if (token.index == null) {
                 body to child
             } else {
                 body to JsonArray(listOf(child))
@@ -106,7 +106,7 @@ private fun JsonElement.toValueOrNull(descriptor: MetaDescriptor?): Value? = whe
 private fun MutableMap<NameToken, SealedMeta>.addJsonElement(
     key: String,
     element: JsonElement,
-    descriptor: MetaDescriptor?
+    descriptor: MetaDescriptor?,
 ) {
     when (element) {
         is JsonPrimitive -> put(NameToken(key), Meta(element.toValue(descriptor)))
@@ -117,8 +117,11 @@ private fun MutableMap<NameToken, SealedMeta>.addJsonElement(
             } else {
                 val indexKey = descriptor?.indexKey ?: Meta.INDEX_KEY
                 element.forEachIndexed { serial, childElement ->
-                    val index = (childElement as? JsonObject)?.get(indexKey)?.jsonPrimitive?.content
+
+                    val index = (childElement as? JsonObject)
+                        ?.get(indexKey)?.jsonPrimitive?.content
                         ?: serial.toString()
+
                     val child: SealedMeta = when (childElement) {
                         is JsonObject -> childElement.toMeta(descriptor)
                         is JsonArray -> {
@@ -133,12 +136,14 @@ private fun MutableMap<NameToken, SealedMeta>.addJsonElement(
                                 Meta(childValue)
                             }
                         }
+
                         is JsonPrimitive -> Meta(childElement.toValue(null))
                     }
                     put(NameToken(key, index), child)
                 }
             }
         }
+
         is JsonObject -> {
             val indexKey = descriptor?.indexKey ?: Meta.INDEX_KEY
             val index = element[indexKey]?.jsonPrimitive?.content
@@ -160,11 +165,15 @@ public fun JsonObject.toMeta(descriptor: MetaDescriptor? = null): SealedMeta {
 public fun JsonElement.toMeta(descriptor: MetaDescriptor? = null): SealedMeta = when (this) {
     is JsonPrimitive -> Meta(toValue(descriptor))
     is JsonObject -> toMeta(descriptor)
-    is JsonArray -> SealedMeta(null,
-        linkedMapOf<NameToken, SealedMeta>().apply {
-            addJsonElement(Meta.JSON_ARRAY_KEY, this@toMeta, null)
-        }
-    )
+    is JsonArray -> if (all { it is JsonPrimitive }) {
+        Meta(map { it.toValueOrNull(descriptor) ?: error("Unreachable: should not contain objects") }.asValue())
+    } else {
+        SealedMeta(null,
+            linkedMapOf<NameToken, SealedMeta>().apply {
+                addJsonElement(Meta.JSON_ARRAY_KEY, this@toMeta, null)
+            }
+        )
+    }
 }
 
 //

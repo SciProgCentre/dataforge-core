@@ -1,20 +1,20 @@
 package space.kscience.dataforge.workspace
 
-import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.context.PluginFactory
-import space.kscience.dataforge.data.DataTree
-import space.kscience.dataforge.data.forEach
-import space.kscience.dataforge.data.putAll
-import space.kscience.dataforge.data.transform
-import space.kscience.dataforge.meta.*
+import space.kscience.dataforge.data.*
+import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.MutableMeta
+import space.kscience.dataforge.meta.copy
+import space.kscience.dataforge.meta.remove
 import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.plus
 
 /**
  * A task meta without a node corresponding to the task itself (removing a node with name of the task).
  */
-public val TaskResultBuilder<*>.defaultDependencyMeta: Meta
+public val TaskResultScope<*>.defaultDependencyMeta: Meta
     get() = taskMeta.copy {
         remove(taskName)
     }
@@ -25,12 +25,12 @@ public val TaskResultBuilder<*>.defaultDependencyMeta: Meta
  * @param selector a workspace data selector. Could be either task selector or initial data selector.
  * @param dependencyMeta meta used for selector. The same meta is used for caching. By default, uses [defaultDependencyMeta].
  */
-public suspend fun <T> TaskResultBuilder<*>.from(
+public suspend fun <T> TaskResultScope<*>.from(
     selector: DataSelector<T>,
     dependencyMeta: Meta = defaultDependencyMeta,
 ): DataTree<T> = selector.select(workspace, dependencyMeta)
 
-public suspend inline fun <T, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
+public suspend inline fun <T, reified P : WorkspacePlugin> TaskResultScope<*>.from(
     plugin: P,
     dependencyMeta: Meta = defaultDependencyMeta,
     selectorBuilder: P.() -> TaskReference<T>,
@@ -50,7 +50,7 @@ public suspend inline fun <T, reified P : WorkspacePlugin> TaskResultBuilder<*>.
  * @param dependencyMeta meta used for selector. The same meta is used for caching. By default, uses [defaultDependencyMeta].
  * @param selectorBuilder a builder of task from the plugin.
  */
-public suspend inline fun <reified T, reified P : WorkspacePlugin> TaskResultBuilder<*>.from(
+public suspend inline fun <reified T, reified P : WorkspacePlugin> TaskResultScope<*>.from(
     pluginFactory: PluginFactory<P>,
     dependencyMeta: Meta = defaultDependencyMeta,
     selectorBuilder: P.() -> TaskReference<T>,
@@ -64,7 +64,7 @@ public suspend inline fun <reified T, reified P : WorkspacePlugin> TaskResultBui
     return res as TaskResult<T>
 }
 
-public val TaskResultBuilder<*>.allData: DataSelector<*>
+public val TaskResultScope<*>.allData: DataSelector<*>
     get() = DataSelector { workspace, _ -> workspace.data }
 
 /**
@@ -76,44 +76,50 @@ public val TaskResultBuilder<*>.allData: DataSelector<*>
  * @param dataMetaTransform additional transformation of individual data meta.
  * @param action process individual data asynchronously.
  */
+@OptIn(UnsafeKType::class)
 @DFExperimental
-public suspend inline fun <T, reified R> TaskResultBuilder<R>.transformEach(
+public suspend fun <T, R> TaskResultScope<R>.transformEach(
     selector: DataSelector<T>,
     dependencyMeta: Meta = defaultDependencyMeta,
     dataMetaTransform: MutableMeta.(name: Name) -> Unit = {},
-    crossinline action: suspend (arg: T, name: Name, meta: Meta) -> R,
-) {
-    from(selector, dependencyMeta).forEach { data ->
-        val meta = data.meta.toMutableMeta().apply {
-            taskMeta[taskName]?.let { taskName.put(it) }
-            dataMetaTransform(data.name)
-        }
-
-        val res = data.transform(meta, workspace.context.coroutineContext) {
-            action(it, data.name, meta)
-        }
-
-        put(data.name, res)
+    action: suspend NamedValueWithMeta<T>.() -> R,
+): DataTree<R> = from(selector, dependencyMeta).transformEach<T, R>(
+    resultType,
+    workspace.context,
+    metaTransform = { name ->
+        taskMeta[taskName]?.let { taskName put it }
+        dataMetaTransform(name)
     }
-}
-
-/**
- * Set given [dataSet] as a task result.
- */
-public fun <T> TaskResultBuilder<T>.result(dataSet: DataTree<T>) {
-    this.putAll(dataSet)
-}
-
-/**
- * Use provided [action] to fill the result
- */
-@DFExperimental
-public suspend inline fun <T, reified R> TaskResultBuilder<R>.actionFrom(
-    selector: DataSelector<T>,
-    action: Action<T, R>,
-    dependencyMeta: Meta = defaultDependencyMeta,
 ) {
-    putAll(action.execute(from(selector, dependencyMeta), dependencyMeta, workspace))
+    action(it)
 }
+
+@OptIn(UnsafeKType::class)
+public fun <R> TaskResultScope<R>.result(data: Data<R>): DataTree<R> = DataTree.static(resultType) {
+    data(Name.EMPTY, data)
+}
+
+@OptIn(UnsafeKType::class)
+public fun <R> TaskResultScope<R>.result(builder: StaticDataBuilder<R>.() -> Unit): DataTree<R> =
+    DataTree.static(resultType, builder)
+
+///**
+// * Set given [dataSet] as a task result.
+// */
+//public fun <T> TaskResultBuilder<T>.result(dataSet: DataTree<T>) {
+//    putAll(dataSet)
+//}
+
+///**
+// * Use provided [action] to fill the result
+// */
+//@DFExperimental
+//public suspend inline fun <T, reified R> TaskResultScope<R>.actionFrom(
+//    selector: DataSelector<T>,
+//    action: Action<T, R>,
+//    dependencyMeta: Meta = defaultDependencyMeta,
+//) {
+//    putAll(action.execute(from(selector, dependencyMeta), dependencyMeta, workspace))
+//}
 
 

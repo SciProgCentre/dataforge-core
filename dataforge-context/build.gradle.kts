@@ -13,11 +13,10 @@ kscience {
     useSerialization()
     commonMain {
         api(projects.dataforgeMeta)
-        api(spclibs.atomicfu)
     }
     jvmMain{
-        api(kotlin("reflect"))
-        api("org.slf4j:slf4j-api:1.7.30")
+        api(spclibs.kotlin.reflect)
+        api(spclibs.slf4j)
     }
 }
 

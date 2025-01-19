@@ -1,8 +1,6 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.actions.invoke
@@ -12,41 +10,40 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(DFExperimental::class)
+@OptIn(DFExperimental::class, ExperimentalCoroutinesApi::class)
 internal class ActionsTest {
     @Test
-    fun testStaticMapAction() = runTest(timeout = 500.milliseconds) {
-        val data: DataTree<Int> = DataTree {
+    fun testStaticMapAction() = runTest(timeout = 200.milliseconds) {
+        val plusOne = Action.mapping<Int, Int> {
+            result { it + 1 }
+        }
+
+        val data: DataTree<Int> = DataTree.static {
             repeat(10) {
-                putValue(it.toString(), it)
+                value(it.toString(), it)
             }
         }
 
-        val plusOne = Action.mapping<Int, Int> {
-            result { it + 1 }
-        }
         val result = plusOne(data)
-        assertEquals(2, result["1"]?.await())
+
+        assertEquals(5, result.awaitData("4").await())
     }
 
     @Test
-    fun testDynamicMapAction() = runTest(timeout = 500.milliseconds) {
-        val source: MutableDataTree<Int> = MutableDataTree()
-
+    fun testDynamicMapAction() = runTest(timeout = 200.milliseconds) {
         val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
         }
 
-        val result = plusOne(source)
+        val source: MutableDataTree<Int> = MutableDataTree()
 
+        val result: DataTree<Int> = plusOne(source)
 
         repeat(10) {
-            source.updateValue(it.toString(), it)
+            source.writeValue(it.toString(), it)
         }
 
-        result.updates.take(10).onEach { println(it.name) }.collect()
-
-        assertEquals(2, result["1"]?.await())
+        assertEquals(5, result.awaitData("4").await())
     }
 
 }

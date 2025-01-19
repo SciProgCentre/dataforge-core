@@ -59,7 +59,7 @@ private class ObservableMetaWrapper(
 
     fun removeNode(name: Name): Meta? {
         val oldMeta = get(name)
-        //don't forget to remove listener
+        //remember to remove listener
         oldMeta?.removeListener(this)
 
         return oldMeta

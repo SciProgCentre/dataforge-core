@@ -3,6 +3,8 @@ package space.kscience.dataforge.actions
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
+import space.kscience.dataforge.meta.get
+import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
@@ -13,7 +15,7 @@ import kotlin.reflect.typeOf
 
 public class JoinGroup<T, R>(
     public var name: String,
-    internal val set: DataTree<T>,
+    internal val data: DataTree<T>,
     @PublishedApi internal var outputType: KType,
 ) {
 
@@ -41,12 +43,17 @@ public class ReduceGroupBuilder<T, R>(
     private val groupRules: MutableList<(DataTree<T>) -> List<JoinGroup<T, R>>> = ArrayList();
 
     /**
-     * introduce grouping by meta value
+     * Group by a meta value
      */
-    public fun byValue(tag: String, defaultTag: String = "@default", action: JoinGroup<T, R>.() -> Unit) {
+    @OptIn(UnsafeKType::class)
+    public fun byMetaValue(tag: String, defaultTag: String = "@default", action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { node ->
-            GroupRule.byMetaValue(tag, defaultTag).gather(node).map {
-                JoinGroup<T, R>(it.key, it.value, outputType).apply(action)
+            val groups = mutableMapOf<String, MutableMap<Name, Data<T>>>()
+            node.forEach { data ->
+                groups.getOrPut(data.meta[tag]?.string ?: defaultTag) { mutableMapOf() }.put(data.name, data)
+            }
+            groups.map { (key, dataMap) ->
+                JoinGroup<T, R>(key, dataMap.asTree(node.dataType), outputType).apply(action)
             }
         }
     }
@@ -84,11 +91,11 @@ internal class ReduceAction<T, R>(
 ) : AbstractAction<T, R>(outputType) {
     //TODO optimize reduction. Currently, the whole action recalculates on push
 
-    override fun DataSink<R>.generate(source: DataTree<T>, meta: Meta) {
+    override fun DataBuilderScope<R>.generate(source: DataTree<T>, meta: Meta): Map<Name, Data<R>> = buildMap {
         ReduceGroupBuilder<T, R>(meta, outputType).apply(action).buildGroups(source).forEach { group ->
-            val dataFlow: Map<Name, Data<T>> = group.set.asSequence().fold(HashMap()) { acc, value ->
+            val dataFlow: Map<Name, Data<T>> = group.data.asSequence().fold(HashMap()) { acc, value ->
                 acc.apply {
-                    acc[value.name] = value.data
+                    acc[value.name] = value
                 }
             }
 

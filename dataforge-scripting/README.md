@@ -1,12 +1,12 @@
 # Module dataforge-scripting
 
-
+Scripting definition fow workspace generation
 
 ## Usage
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:dataforge-scripting:0.9.0-dev-1`.
+The Maven coordinates of this project are `space.kscience:dataforge-scripting:0.10.0`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -16,6 +16,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:dataforge-scripting:0.9.0-dev-1")
+    implementation("space.kscience:dataforge-scripting:0.10.0")
 }
 ```

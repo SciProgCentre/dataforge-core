@@ -1,5 +1,6 @@
 package space.kscience.dataforge.context
 
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -67,7 +68,9 @@ public open class Context internal constructor(
 
     override val coroutineContext: CoroutineContext by lazy {
         (parent ?: Global).coroutineContext.let { parenContext ->
-            parenContext + coroutineContext + SupervisorJob(parenContext[Job])
+            parenContext + coroutineContext + SupervisorJob(parenContext[Job]) + CoroutineExceptionHandler { _, throwable ->
+                logger.error(throwable) { "Exception in context $name" }
+            }
         }
     }
 

@@ -8,6 +8,9 @@ import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+/**
+ * A serializer for [Value]
+ */
 public object ValueSerializer : KSerializer<Value> {
     private val listSerializer by lazy { ListSerializer(ValueSerializer) }
 

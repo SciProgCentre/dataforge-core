@@ -46,3 +46,20 @@ public object MutableMetaSerializer : KSerializer<MutableMeta> {
         encoder.encodeSerializableValue(MetaSerializer, value)
     }
 }
+
+/**
+ * A serializer for [ObservableMutableMeta]
+ */
+public object ObservableMutableMetaSerializer : KSerializer<ObservableMutableMeta> {
+
+    override val descriptor: SerialDescriptor = MetaSerializer.descriptor
+
+    override fun deserialize(decoder: Decoder): ObservableMutableMeta {
+        val meta = decoder.decodeSerializableValue(MetaSerializer)
+        return ((meta as? MutableMeta) ?: meta.toMutableMeta()).asObservable()
+    }
+
+    override fun serialize(encoder: Encoder, value: ObservableMutableMeta) {
+        encoder.encodeSerializableValue(MetaSerializer, value)
+    }
+}

@@ -1,10 +1,8 @@
 package space.kscience.dataforge.meta
 
+import kotlinx.serialization.Serializable
 import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.cutFirst
-import space.kscience.dataforge.names.firstOrNull
-import space.kscience.dataforge.names.isEmpty
 
 
 internal data class MetaListener(
@@ -38,21 +36,10 @@ public interface ObservableMeta : Meta {
 /**
  * A [Meta] which is both observable and mutable
  */
+@Serializable(ObservableMutableMetaSerializer::class)
+@MetaBuilderMarker
 public interface ObservableMutableMeta : ObservableMeta, MutableMeta, MutableTypedMeta<ObservableMutableMeta> {
-
     override val self: ObservableMutableMeta get() = this
-
-    override fun getOrCreate(name: Name): ObservableMutableMeta
-
-    override fun get(name: Name): ObservableMutableMeta? {
-        tailrec fun ObservableMutableMeta.find(name: Name): ObservableMutableMeta? = if (name.isEmpty()) {
-            this
-        } else {
-            items[name.firstOrNull()!!]?.find(name.cutFirst())
-        }
-
-        return find(name)
-    }
 }
 
 internal abstract class AbstractObservableMeta : ObservableMeta {

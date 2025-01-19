@@ -8,7 +8,7 @@ import space.kscience.dataforge.meta.copy
 private class MetaMaskData<T>(val origin: Data<T>, override val meta: Meta) : Data<T> by origin
 
 /**
- * A data with overriden meta. It reflects original data computed state.
+ * A data with overridden meta. It reflects original data computed state.
  */
 public fun <T> Data<T>.withMeta(newMeta: Meta): Data<T> = if (this is MetaMaskData) {
     MetaMaskData(origin, newMeta)

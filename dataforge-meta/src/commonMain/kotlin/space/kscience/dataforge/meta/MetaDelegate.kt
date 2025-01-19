@@ -24,19 +24,44 @@ public fun MetaProvider.node(
     }
 }
 
+
 /**
- * Use [metaReader] to read the Meta node
+ * Use [reader] to read the Meta node
  */
-public fun <T> MetaProvider.spec(
-    metaReader: MetaReader<T>,
+public fun <T> MetaProvider.readable(
+    reader: MetaReader<T>,
     key: Name? = null,
 ): MetaDelegate<T?> = object : MetaDelegate<T?> {
-    override val descriptor: MetaDescriptor? get() = metaReader.descriptor
+    override val descriptor: MetaDescriptor? get() = reader.descriptor
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-        return get(key ?: property.name.asName())?.let { metaReader.read(it) }
+        return get(key ?: property.name.asName())?.let { reader.read(it) }
     }
 }
+
+/**
+ * Use [reader] to read the Meta node or return [default] if node does not exist
+ */
+public fun <T> MetaProvider.readable(
+    reader: MetaReader<T>,
+    default: T,
+    key: Name? = null,
+): MetaDelegate<T> = object : MetaDelegate<T> {
+    override val descriptor: MetaDescriptor? get() = reader.descriptor
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        return get(key ?: property.name.asName())?.let { reader.read(it) } ?: default
+    }
+}
+
+/**
+ * Use [reader] to read the Meta node
+ */
+@Deprecated("Replace with readable", ReplaceWith("readable(metaReader, key)"))
+public fun <T> MetaProvider.spec(
+    reader: MetaReader<T>,
+    key: Name? = null,
+): MetaDelegate<T?> = readable(reader, key)
 
 /**
  * Use object serializer to transform it to Meta and back
@@ -45,34 +70,51 @@ public fun <T> MetaProvider.spec(
 public inline fun <reified T> MetaProvider.serializable(
     key: Name? = null,
     descriptor: MetaDescriptor? = null,
-): MetaDelegate<T?> = spec(MetaConverter.serializable(descriptor), key)
+): MetaDelegate<T?> = readable(MetaConverter.serializable(descriptor), key)
+
+@DFExperimental
+public inline fun <reified T> MetaProvider.serializable(
+    key: Name? = null,
+    default: T,
+    descriptor: MetaDescriptor? = null,
+): MetaDelegate<T> = readable(MetaConverter.serializable(descriptor), default, key)
 
 @Deprecated("Use convertable", ReplaceWith("convertable(converter, key)"))
 public fun <T> MetaProvider.node(
     key: Name? = null,
     converter: MetaReader<T>,
-): ReadOnlyProperty<Any?, T?> = spec(converter, key)
+): ReadOnlyProperty<Any?, T?> = readable(converter, key)
 
 /**
- * Use [converter] to convert a list of same name siblings meta to object
+ * Use [reader] to convert a list of same name siblings meta to object
  */
-public fun <T> Meta.listOfSpec(
-    converter: MetaReader<T>,
+public fun <T> Meta.listOfReadable(
+    reader: MetaReader<T>,
     key: Name? = null,
 ): MetaDelegate<List<T>> = object : MetaDelegate<List<T>> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
         val name = key ?: property.name.asName()
-        return getIndexed(name).values.map { converter.read(it) }
+        return getIndexed(name).values.map { reader.read(it) }
     }
 
-    override val descriptor: MetaDescriptor? = converter.descriptor?.copy(multiple = true)
+    override val descriptor: MetaDescriptor? = reader.descriptor?.copy(multiple = true)
 }
+
+
+/**
+ * Use [converter] to convert a list of same name siblings meta to object
+ */
+@Deprecated("Replace with readingList", ReplaceWith("readingList(converter, key)"))
+public fun <T> Meta.listOfSpec(
+    converter: MetaReader<T>,
+    key: Name? = null,
+): MetaDelegate<List<T>> = listOfReadable(converter, key)
 
 @DFExperimental
 public inline fun <reified T> Meta.listOfSerializable(
     key: Name? = null,
     descriptor: MetaDescriptor? = null,
-): MetaDelegate<List<T>> = listOfSpec(MetaConverter.serializable(descriptor), key)
+): MetaDelegate<List<T>> = listOfReadable(MetaConverter.serializable(descriptor), key)
 
 /**
  * A property delegate that uses custom key

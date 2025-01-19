@@ -2,7 +2,9 @@ package space.kscience.dataforge.workspace
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import space.kscience.dataforge.data.*
+import space.kscience.dataforge.data.DataTree
+import space.kscience.dataforge.data.forEach
+import space.kscience.dataforge.data.meta
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
@@ -32,8 +34,8 @@ public suspend fun <T : Any> IOPlugin.writeDataDirectory(
     } else if (!Files.isDirectory(path)) {
         error("Can't write a node into file")
     }
-    dataSet.forEach { (name, data) ->
-        val childPath = path.resolve(name.tokens.joinToString("/") { token -> token.toStringUnescaped() })
+    dataSet.forEach { data ->
+        val childPath = path.resolve(data.name.tokens.joinToString("/") { token -> token.toStringUnescaped() })
         childPath.parent.createDirectories()
         val envelope = data.toEnvelope(format)
         if (envelopeFormat != null) {

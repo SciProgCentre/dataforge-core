@@ -9,7 +9,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.9.0"
+    version = "0.10.0"
 }
 
 subprojects {
@@ -19,6 +19,12 @@ subprojects {
         compilerOptions {
             freeCompilerArgs.add("-Xcontext-receivers")
         }
+    }
+}
+
+dependencies{
+    subprojects.forEach {
+        dokka(it)
     }
 }
 
@@ -32,7 +38,7 @@ ksciencePublish {
         useSPCTeam()
     }
     repository("spc", "https://maven.sciprog.center/kscience")
-    sonatype("https://oss.sonatype.org")
+    central()
 }
 
 apiValidation {

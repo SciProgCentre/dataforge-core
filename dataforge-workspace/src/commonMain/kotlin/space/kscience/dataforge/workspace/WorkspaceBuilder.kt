@@ -4,20 +4,17 @@ import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.ContextBuilder
 import space.kscience.dataforge.context.Global
-import space.kscience.dataforge.data.DataSink
 import space.kscience.dataforge.data.DataTree
-import space.kscience.dataforge.data.MutableDataTree
+import space.kscience.dataforge.data.StaticDataBuilder
+import space.kscience.dataforge.data.static
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFBuilder
-import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.asName
-import kotlin.collections.set
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.typeOf
 
 public data class TaskReference<T>(public val taskName: Name, public val task: Task<T>) : DataSelector<T> {
 
@@ -42,7 +39,7 @@ public interface TaskContainer {
 public inline fun <reified T : Any> TaskContainer.registerTask(
     name: String,
     descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
-    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+    noinline builder: suspend TaskResultScope<T>.() -> DataTree<T>,
 ): Unit = registerTask(Name.parse(name), Task(MetaDescriptor(descriptorBuilder), builder))
 
 /**
@@ -51,7 +48,7 @@ public inline fun <reified T : Any> TaskContainer.registerTask(
 public inline fun <reified T : Any> TaskContainer.buildTask(
     name: String,
     descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
-    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+    noinline builder: suspend TaskResultScope<T>.() -> DataTree<T>,
 ): TaskReference<T> {
     val theName = Name.parse(name)
     val descriptor = MetaDescriptor(descriptorBuilder)
@@ -62,7 +59,7 @@ public inline fun <reified T : Any> TaskContainer.buildTask(
 
 public inline fun <reified T : Any> TaskContainer.task(
     descriptor: MetaDescriptor,
-    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+    noinline builder: suspend TaskResultScope<T>.() -> DataTree<T>,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
     val taskName = Name.parse(property.name)
     val task = Task(descriptor, builder)
@@ -75,7 +72,7 @@ public inline fun <reified T : Any> TaskContainer.task(
  */
 public inline fun <reified T : Any, C : MetaRepr> TaskContainer.task(
     specification: MetaReader<C>,
-    noinline builder: suspend TaskResultBuilder<T>.(C) -> Unit,
+    noinline builder: suspend TaskResultScope<T>.(C) -> DataTree<T>,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> = PropertyDelegateProvider { _, property ->
     val taskName = Name.parse(property.name)
     val task = Task(specification, builder)
@@ -88,7 +85,7 @@ public inline fun <reified T : Any, C : MetaRepr> TaskContainer.task(
  */
 public inline fun <reified T : Any> TaskContainer.task(
     noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
-    noinline builder: suspend TaskResultBuilder<T>.() -> Unit,
+    noinline builder: suspend TaskResultScope<T>.() -> DataTree<T>,
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<T>>> =
     task(MetaDescriptor(descriptorBuilder), builder)
 
@@ -102,15 +99,15 @@ public inline fun <T : Any, reified R : Any> TaskContainer.action(
     noinline descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
 ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, TaskReference<R>>> =
     task(MetaDescriptor(descriptorBuilder)) {
-        result(action.execute(from(selector), taskMeta.copy(metaTransform), workspace))
+        action.execute(from(selector), taskMeta.copy(metaTransform), workspace)
     }
 
 public class WorkspaceBuilder(
     private val parentContext: Context = Global,
 ) : TaskContainer {
     private var context: Context? = null
-    @OptIn(UnsafeKType::class)
-    private val data = MutableDataTree<Any?>(typeOf<Any?>())
+
+    private var data: DataTree<Any?>? = null
     private val targets: HashMap<String, Meta> = HashMap()
     private val tasks = HashMap<Name, Task<*>>()
     private var cache: WorkspaceCache? = null
@@ -125,8 +122,8 @@ public class WorkspaceBuilder(
     /**
      * Define intrinsic data for the workspace
      */
-    public fun data(builder: DataSink<Any?>.() -> Unit) {
-        data.apply(builder)
+    public fun data(builder: StaticDataBuilder<Any?>.() -> Unit) {
+        data = DataTree.static(builder)
     }
 
     /**
@@ -152,7 +149,7 @@ public class WorkspaceBuilder(
         val postProcess: suspend (TaskResult<*>) -> TaskResult<*> = { result ->
             cache?.cache(result) ?: result
         }
-        return WorkspaceImpl(context ?: parentContext, data, targets, tasks, postProcess)
+        return WorkspaceImpl(context ?: parentContext, data ?: DataTree.EMPTY, targets, tasks, postProcess)
     }
 }
 
