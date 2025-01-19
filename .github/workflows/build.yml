@@ -15,11 +15,11 @@ jobs:
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v2
-      - name: Set up JDK 11
+      - name: Set up JDK
         uses: DeLaGuardo/setup-graalvm@4.0
         with:
           graalvm: 21.2.0
-          java: java11
+          java: java17
           arch: amd64
       - name: Cache gradle
         uses: actions/cache@v2
