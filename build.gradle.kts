@@ -38,7 +38,7 @@ ksciencePublish {
         useSPCTeam()
     }
     repository("spc", "https://maven.sciprog.center/kscience")
-    sonatype("https://oss.sonatype.org")
+    central()
 }
 
 apiValidation {
