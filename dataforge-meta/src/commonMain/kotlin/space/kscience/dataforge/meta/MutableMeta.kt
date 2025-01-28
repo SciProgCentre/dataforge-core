@@ -438,7 +438,7 @@ public inline fun Meta.copy(modification: MutableMeta.() -> Unit = {}): Meta = M
 
 private class MutableMetaWithDefault(
     val source: MutableMeta, val default: MetaProvider, val rootName: Name,
-) : MutableMeta by source {
+) : MutableMeta {
     override val items: Map<NameToken, MutableMeta>
         get() {
             val sourceKeys: Collection<NameToken> = source[rootName]?.items?.keys ?: emptyList()
@@ -456,6 +456,17 @@ private class MutableMetaWithDefault(
         }
 
     override fun get(name: Name): MutableMeta = MutableMetaWithDefault(source, default, rootName + name)
+
+    override fun set(name: Name, node: Meta?) {
+        source[name] = node
+    }
+
+    override fun setValue(name: Name, value: Value?) {
+        source.setValue(name, value)
+    }
+
+    override fun getOrCreate(name: Name): MutableMeta =
+        MutableMetaWithDefault(source, default, rootName + name)
 
     override fun toString(): String = Meta.toString(this)
     override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)

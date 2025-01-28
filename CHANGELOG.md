@@ -11,6 +11,7 @@
 ### Removed
 
 ### Fixed
+- Incorrect work of `MetaWithDefault::getValue`
 
 ### Security
 
