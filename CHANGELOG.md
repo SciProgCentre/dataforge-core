@@ -3,8 +3,11 @@
 ## Unreleased
 
 ### Added
+- Relax requirements for `withDefault` and `view`. Now they could be used with `MutableMetaProvider`
+- Add `MutableMetaProvider` to `MutableMeta` converter `asMutableMeta`.
 
 ### Changed
+- Implementation of `Meta::withDefault`
 
 ### Deprecated
 

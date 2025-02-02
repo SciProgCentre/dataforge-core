@@ -6,7 +6,7 @@ package space.kscience.dataforge.meta
 public fun Value.isNull(): Boolean = this == Null
 
 /**
- * Check if value is list.
+ * Check if the value is a list.
  */
 public fun Value.isList(): Boolean = this.type == ValueType.LIST
 

@@ -37,7 +37,7 @@ public interface MutableMeta : Meta, MutableMetaProvider {
     override val items: Map<NameToken, MutableMeta>
 
     /**
-     * Get or set value of this node
+     * Get or set the value of this node
      */
     override var value: Value?
 
@@ -437,7 +437,7 @@ public inline fun Meta.copy(modification: MutableMeta.() -> Unit = {}): Meta = M
 }
 
 private class MutableMetaWithDefault(
-    val source: MutableMeta, val default: MetaProvider, val rootName: Name,
+    val source: MutableMetaProvider, val default: MetaProvider, val rootName: Name,
 ) : MutableMeta {
     override val items: Map<NameToken, MutableMeta>
         get() {
@@ -474,9 +474,20 @@ private class MutableMetaWithDefault(
 }
 
 /**
- * Create a mutable item provider that uses given provider for default values if those are not found in this provider.
+ * Create a mutable item provider that uses a given provider for default values if those are not found in this provider.
  * Changes are propagated only to this provider.
  */
-public fun MutableMeta.withDefault(default: MetaProvider?): MutableMeta = if (default == null) {
-    this
-} else MutableMetaWithDefault(this, default, Name.EMPTY)
+public fun MutableMetaProvider.withDefault(
+    default: MetaProvider?
+): MutableMeta = if (default == null) {
+    (this as? MutableMeta) ?: asMutableMeta()
+} else {
+    MutableMetaWithDefault(this, default, Name.EMPTY)
+}
+
+/**
+ * Use multiple default providers. Providers are queried in order of appearance. The first non-null value is returned
+ */
+public fun MutableMetaProvider.withDefaults(vararg defaults: MetaProvider): MutableMeta = withDefault { name ->
+    defaults.firstNotNullOfOrNull { it[name] }
+}
