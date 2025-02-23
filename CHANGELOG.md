@@ -15,6 +15,7 @@
 
 ### Fixed
 - Incorrect work of `MetaWithDefault::getValue`
+- Incorrect work of scheme delegate
 
 ### Security
 
