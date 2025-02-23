@@ -3,21 +3,33 @@
 ## Unreleased
 
 ### Added
-- Relax requirements for `withDefault` and `view`. Now they could be used with `MutableMetaProvider`
-- Add `MutableMetaProvider` to `MutableMeta` converter `asMutableMeta`.
 
 ### Changed
-- Implementation of `Meta::withDefault`
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
-- Incorrect work of `MetaWithDefault::getValue`
-- Incorrect work of scheme delegate
 
 ### Security
+
+## 0.10.1 - 2025-02-23
+
+### Added
+
+- Relax requirements for `withDefault` and `view`. Now they could be used with `MutableMetaProvider`
+- Add `MutableMetaProvider` to `MutableMeta` converter `asMutableMeta`.
+
+### Changed
+
+- Implementation of `Meta::withDefault`
+- `scheme` extension limited to `MutableMeta` to avoid resolution ambiguity with `Scheme`
+
+### Fixed
+
+- Incorrect work of `MetaWithDefault::getValue`
+- Incorrect work of scheme delegate
 
 ## 0.10.0 - 2025-01-19
 
