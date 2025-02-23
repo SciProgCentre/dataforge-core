@@ -26,16 +26,15 @@ internal class TestScheme : Scheme() {
     companion object : SchemeSpec<TestScheme>(::TestScheme)
 }
 
-private class SchemeWithInit: Scheme(){
+private class SchemeWithInit : Scheme() {
     init {
         set("initial", "initialValue")
     }
 
     var initial by string()
 
-    companion object: SchemeSpec<SchemeWithInit>(::SchemeWithInit)
+    companion object : SchemeSpec<SchemeWithInit>(::SchemeWithInit)
 }
-
 
 
 class SpecificationTest {
@@ -126,11 +125,11 @@ class SpecificationTest {
     }
 
     @Test
-    fun testListSubscription(){
+    fun testListSubscription() {
         val scheme = TestScheme.empty()
         var value: Value? = null
-        scheme.v = ListValue(0.0,0.0,0.0)
-        scheme.useProperty(TestScheme::v){
+        scheme.v = ListValue(0.0, 0.0, 0.0)
+        scheme.useProperty(TestScheme::v) {
             value = it
         }
         scheme.v = ListValue(1.0, 2.0, 3.0)
@@ -138,17 +137,17 @@ class SpecificationTest {
     }
 
     @Test
-    fun testSubScheme(){
+    fun testSubScheme() {
         val scheme = TestScheme.empty()
 
         scheme.sub.subValue = "aaa"
 
-        assertEquals("aaa",scheme.sub.subValue)
+        assertEquals("aaa", scheme.sub.subValue)
     }
 
 
     @Test
-    fun testSchemeWithInit(){
+    fun testSchemeWithInit() {
         val scheme = SchemeWithInit()
         assertEquals("initialValue", scheme.initial)
         scheme.initial = "none"

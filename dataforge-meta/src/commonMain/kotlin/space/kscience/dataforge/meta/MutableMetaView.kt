@@ -9,7 +9,7 @@ import space.kscience.dataforge.names.plus
  * A [Meta] child proxy that creates required nodes on value write
  */
 private class MutableMetaView(
-    val origin: MutableMeta,
+    val origin: MutableMetaProvider,
     val path: Name
 ) : MutableMeta {
 
@@ -42,6 +42,11 @@ private class MutableMetaView(
  * The difference between this method and regular [getOrCreate] is that [getOrCreate] always creates and attaches node
  * even if it is empty.
  */
-public fun MutableMeta.view(name: Name): MutableMeta = MutableMetaView(this, name)
+public fun MutableMetaProvider.view(name: Name): MutableMeta = MutableMetaView(this, name)
 
-public fun MutableMeta.view(name: String): MutableMeta = view(name.parseAsName())
+public fun MutableMetaProvider.view(name: String): MutableMeta = view(name.parseAsName())
+
+/**
+ * Create a view of root node, thus effectively representing [MutableMetaProvider] as [MutableMeta]
+ */
+public fun MutableMetaProvider.asMutableMeta(): MutableMeta = view(Name.EMPTY)

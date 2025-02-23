@@ -249,11 +249,26 @@ public inline fun <reified E : Enum<E>> Meta?.enum(): E? = this?.value?.let {
 public val Meta?.stringList: List<String>? get() = this?.value?.list?.map { it.string }
 
 /**
- * Create a provider that uses given provider for default values if those are not found in this provider
+ * Create a provider that uses a given provider for default values if those are not found in this provider
  */
-public fun Meta.withDefault(default: MetaProvider?): Meta = if (default == null) {
+public fun MetaProvider.withDefault(default: MetaProvider?): Meta = if (default == null && this is Meta) {
     this
 } else {
-    //TODO optimize
-    toMutableMeta().withDefault(default)
+    object : Meta {
+        override val value: Value?
+            get() = this@withDefault.getValue(Name.EMPTY) ?: default?.getValue(Name.EMPTY)
+
+        override val items: Map<NameToken, Meta>
+            get() = buildMap {
+                default?.get(Name.EMPTY)?.items?.let { putAll(it) }
+                this@withDefault.get(Name.EMPTY)?.items?.let { putAll(it) }
+            }
+
+        override fun toString(): String = Meta.toString(this)
+
+        override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
+
+        override fun hashCode(): Int = Meta.hashCode(this)
+
+    }
 }

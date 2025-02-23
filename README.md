@@ -106,6 +106,7 @@ In this section, we will try to cover DataForge main ideas in the form of questi
 > **Maturity**: PROTOTYPE
 
 ### [dataforge-workspace](dataforge-workspace)
+> A framework for pull-based data processing
 >
 > **Maturity**: EXPERIMENTAL
 

@@ -77,6 +77,7 @@ public class FilteredDataTree<T>(
         }
 }
 
+@OptIn(DFInternal::class)
 public fun <T> DataTree<T>.filterData(
     predicate: DataFilter,
-): FilteredDataTree<T> = FilteredDataTree(this, predicate, Name.EMPTY)
+): DataTree<T> = FilteredDataTree(this, predicate, Name.EMPTY)

@@ -13,29 +13,14 @@ jobs:
     runs-on: ${{matrix.os}}
     timeout-minutes: 40
     steps:
-      - name: Checkout the repo
-        uses: actions/checkout@v2
-      - name: Set up JDK
-        uses: DeLaGuardo/setup-graalvm@4.0
-        with:
-          graalvm: 21.2.0
-          java: java17
-          arch: amd64
-      - name: Cache gradle
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('*.gradle.kts') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Cache konan
-        uses: actions/cache@v2
-        with:
-          path: ~/.konan
-          key: ${{ runner.os }}-gradle-${{ hashFiles('*.gradle.kts') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Build
-        run: ./gradlew build --build-cache --no-daemon --stacktrace
+    - name: Checkout sources
+      uses: actions/checkout@v4
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: 17
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+    - name: Build with Gradle
+      run: ./gradlew build
