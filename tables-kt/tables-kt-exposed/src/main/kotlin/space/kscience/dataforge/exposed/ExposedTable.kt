@@ -156,7 +156,8 @@ public inline fun <reified T : Any> ExposedTable(
     }
 
     transaction(db) {
-        SchemaUtils.createMissingTablesAndColumns(table)
+        SchemaUtils.create(table)
     }
+
     return ExposedTable(db, table)
 }
