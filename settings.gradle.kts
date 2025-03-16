@@ -47,5 +47,9 @@ include(
     ":dataforge-context",
     ":dataforge-data",
     ":dataforge-workspace",
-    ":dataforge-scripting"
+    ":dataforge-scripting",
+    ":tables-kt:tables-kt-exposed",
+    ":tables-kt:tables-kt-dataframe",
+    ":tables-kt:tables-kt-jupyter",
+    ":tables-kt:tables-kt-csv"
 )

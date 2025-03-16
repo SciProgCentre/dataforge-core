@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Move Tables-kt to DataForge repository and make it follow DataForge versioning
 
 ### Changed
 

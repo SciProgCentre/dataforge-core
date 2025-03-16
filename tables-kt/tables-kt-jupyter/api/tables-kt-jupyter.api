@@ -1,0 +1,5 @@
+public final class space/kscience/tables/TablesForJupyter : org/jetbrains/kotlinx/jupyter/api/libraries/JupyterIntegration {
+	public fun <init> ()V
+	public fun onLoaded (Lorg/jetbrains/kotlinx/jupyter/api/libraries/JupyterIntegration$Builder;)V
+}
+
