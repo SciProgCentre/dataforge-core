@@ -1,5 +1,6 @@
 package pace.kscience.dataforge.io.proto
 
+import kotlinx.io.readString
 import kotlinx.io.writeString
 import space.kscience.dataforge.io.Envelope
 import space.kscience.dataforge.io.toByteArray
@@ -75,6 +76,7 @@ class ProtoBufTest {
 
         val buffer = kotlinx.io.Buffer()
         ProtoEnvelopeFormat.writeTo(buffer,envelope)
+//        println(buffer.copy().readString())
         val result = ProtoEnvelopeFormat.readFrom(buffer)
 
         assertEquals(envelope.meta, result.meta)
