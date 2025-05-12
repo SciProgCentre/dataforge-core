@@ -15,7 +15,7 @@ kscience{
     js()
     native()
     wasm()
-    useContextReceivers()
+    useContextParameters()
     dependencies {
         api(projects.dataforgeIo)
     }
