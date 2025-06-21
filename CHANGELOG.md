@@ -6,6 +6,7 @@
 - Move Tables-kt to DataForge repository and make it follow DataForge versioning
 
 ### Changed
+- **BREAKING** `Context.request(plugin)` now has nullable parameter null means taking existing plugin with any configuration. 
 
 ### Deprecated
 
