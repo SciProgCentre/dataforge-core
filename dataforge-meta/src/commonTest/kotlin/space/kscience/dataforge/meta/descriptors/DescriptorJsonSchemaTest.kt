@@ -2,10 +2,8 @@ package space.kscience.dataforge.meta.descriptors
 
 import io.github.optimumcode.json.schema.JsonSchema
 import space.kscience.dataforge.meta.ValueType
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class DescriptorJsonSchemaTest {
 
@@ -25,23 +23,13 @@ class DescriptorJsonSchemaTest {
         }
     }
 
-    @BeforeTest
-    fun prepareDescriptor() {
-
-    }
-
     @Test
     fun testIsJsonSchemaValid() {
         // Arrange
         val descriptorJsonSchema = descriptor.toJsonSchema()
 
-        // Act
-        val result = runCatching {
-            JsonSchema.fromJsonElement(descriptorJsonSchema)
-        }
-
-        // Assert
-        assertTrue(result.isSuccess, "Expected no exception but got ${result.exceptionOrNull()}")
+        // Act & Assert
+        JsonSchema.fromJsonElement(descriptorJsonSchema)
     }
 
     @Test
@@ -49,13 +37,8 @@ class DescriptorJsonSchemaTest {
         // Arrange
         val descriptorJsonSchema = descriptor.toJsonSchema()
 
-        // Act
-        val result = runCatching {
-            descriptorJsonSchema.toMetaDescriptor()
-        }
-
-        // Assert
-        assertTrue(result.isSuccess, "Expected no exception but got ${result.exceptionOrNull()}")
+        // Act & Assert
+        descriptorJsonSchema.toMetaDescriptor()
     }
 
     @Test

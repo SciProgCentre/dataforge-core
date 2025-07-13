@@ -1,5 +1,27 @@
 package space.kscience.dataforge.meta.descriptors
 
+/**
+ * A comprehensive JSON Schema implementation supporting Draft 2020-12 specification.
+ *
+ * This object provides:
+ * - Core JSON Schema vocabulary constants (like `$schema`, `$id`, `$ref`)
+ * - Standard validation keywords (type, enum, pattern, etc.)
+ * - Schema composition keywords (allOf, anyOf, oneOf)
+ * - Metadata annotations (title, description, examples)
+ * - Custom extensions for specialized use cases
+ * - Version management for JSON Schema specifications
+ *
+ * The structure follows the official JSON Schema organization with nested vocabulary objects:
+ * - [Vocabularies.Core]: Fundamental schema identification and referencing
+ * - [Vocabularies.Applicator]: Schema composition and combination
+ * - [Vocabularies.Validation]: Instance validation constraints
+ * - [Vocabularies.MetaData]: Descriptive metadata
+ * - [Vocabularies.Custom]: Domain-specific extensions
+ *
+ * @property VERSION The supported JSON Schema version (DRAFT_2020_12 by default)
+ *
+ * @see <a href="https://json-schema.org/draft/2020-12/json-schema-core.html">JSON Schema Core Specification</a>
+ */
 public object JsonSchema {
     public val VERSION: JsonSchemaVersion = JsonSchemaVersion.DRAFT_2020_12
 

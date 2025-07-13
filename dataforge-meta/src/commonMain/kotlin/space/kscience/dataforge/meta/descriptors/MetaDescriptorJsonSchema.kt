@@ -3,12 +3,27 @@ package space.kscience.dataforge.meta.descriptors
 import kotlinx.serialization.json.*
 import space.kscience.dataforge.meta.*
 
-public object MetaDescriptorJsonSchemaConverter {
-    public fun convert(metaDescriptor: MetaDescriptor): JsonObject {
-        return convert(metaDescriptor, 1, null)
+/**
+ * A converter between [MetaDescriptor] and JSON Schema ([JsonObject]) representations.
+ *
+ * Provides bidirectional conversion between metadata descriptors and JSON Schema format,
+ * handling:
+ * - Basic schema metadata (title, description)
+ * - Value type restrictions and validation
+ * - Allowed values (enums)
+ * - Required fields
+ * - Nested properties
+ * - Default values
+ * - Custom metadata fields (indexKey, multiple, attributes)
+ *
+ * The converter maintains JSON Schema compatibility while preserving all [MetaDescriptor] features.
+ */
+private object MetaDescriptorJsonSchemaConverter {
+    fun convertMetaDescriptorToJsonSchema(metaDescriptor: MetaDescriptor): JsonObject {
+        return convertMetaDescriptorToJsonSchema(metaDescriptor, 1, null)
     }
 
-    private fun convert(metaDescriptor: MetaDescriptor, depth: Int, title: String?): JsonObject = buildJsonObject {
+    private fun convertMetaDescriptorToJsonSchema(metaDescriptor: MetaDescriptor, depth: Int, title: String?): JsonObject = buildJsonObject {
         // Basic metadata
         if (depth == 1) {
             put(JsonSchema.Vocabularies.Core.SCHEMA, JsonSchema.VERSION.value)
@@ -49,7 +64,7 @@ public object MetaDescriptorJsonSchemaConverter {
             put(
                 JsonSchema.Vocabularies.Applicator.PROPERTIES, buildJsonObject {
                     metaDescriptor.nodes.forEach { (title, node) ->
-                        put(title, convert(node, depth + 1, title))
+                        put(title, convertMetaDescriptorToJsonSchema(node, depth + 1, title))
                     }
                 })
         }
@@ -65,11 +80,11 @@ public object MetaDescriptorJsonSchemaConverter {
         put(JsonSchema.Vocabularies.Custom.ATTRIBUTES, Json.encodeToJsonElement(metaDescriptor.attributes))
     }
 
-    public fun convert(jsonObject: JsonObject): MetaDescriptor {
-        return convert(jsonObject, 1)
+    fun convertJsonSchemaToMetaDescriptor(jsonObject: JsonObject): MetaDescriptor {
+        return convertJsonSchemaToMetaDescriptor(jsonObject, 1)
     }
 
-    private fun convert(jsonObject: JsonObject, depth: Int): MetaDescriptor {
+    private fun convertJsonSchemaToMetaDescriptor(jsonObject: JsonObject, depth: Int): MetaDescriptor {
         val builder = MetaDescriptorBuilder()
 
         // Handle basic metadata
@@ -115,7 +130,7 @@ public object MetaDescriptorJsonSchemaConverter {
         // Handle child nodes
         jsonObject[JsonSchema.Vocabularies.Applicator.PROPERTIES]?.jsonObject?.let { properties ->
             properties.forEach { (name, schema) ->
-                builder.node(name, convert(schema.jsonObject, depth + 1))
+                builder.node(name, convertJsonSchemaToMetaDescriptor(schema.jsonObject, depth + 1))
             }
         }
 
@@ -150,6 +165,9 @@ public object MetaDescriptorJsonSchemaConverter {
         ValueType.NULL -> "null"
     }
 
+    /**
+     * Convert JSON Schema type string to [ValueType]
+     */
     private fun jsonTypeToValueType(type: String?): ValueType? = when (type) {
         "number" -> ValueType.NUMBER
         "string" -> ValueType.STRING
@@ -194,12 +212,12 @@ public object MetaDescriptorJsonSchemaConverter {
  * Convert [MetaDescriptor] to a JSON Schema [JsonObject]
  */
 public fun MetaDescriptor.toJsonSchema(): JsonObject {
-    return MetaDescriptorJsonSchemaConverter.convert(this)
+    return MetaDescriptorJsonSchemaConverter.convertMetaDescriptorToJsonSchema(this)
 }
 
 /**
  * Convert JSON Schema [JsonObject] to [MetaDescriptor]
  */
 public fun JsonObject.toMetaDescriptor(): MetaDescriptor {
-    return MetaDescriptorJsonSchemaConverter.convert(this)
+    return MetaDescriptorJsonSchemaConverter.convertJsonSchemaToMetaDescriptor(this)
 }
