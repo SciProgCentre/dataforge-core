@@ -10,6 +10,12 @@ kscience {
     useSerialization {
         json()
     }
+
+    commonTest {
+        dependencies {
+            implementation("io.github.optimumcode:json-schema-validator:0.5.2")
+        }
+    }
 }
 
 description = "Meta definition and basic operations on meta"

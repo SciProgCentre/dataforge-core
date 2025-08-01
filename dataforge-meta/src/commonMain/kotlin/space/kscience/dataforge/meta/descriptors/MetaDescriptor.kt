@@ -71,7 +71,14 @@ public data class MetaDescriptor(
     }
 }
 
-public val MetaDescriptor.required: Boolean get() = valueRestriction == ValueRestriction.REQUIRED || nodes.values.any { required }
+public val MetaDescriptor.required: Boolean get() = checkRequired(hashSetOf())
+
+private fun MetaDescriptor.checkRequired(visited: MutableSet<MetaDescriptor>): Boolean {
+    if (this in visited) return false
+    visited.add(this)
+    return valueRestriction == ValueRestriction.REQUIRED ||
+            nodes.values.any { it.checkRequired(visited) }
+}
 
 public val MetaDescriptor.allowedValues: List<Value>? get() = attributes[MetaDescriptor.ALLOWED_VALUES_KEY]?.value?.list
 
