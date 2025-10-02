@@ -17,7 +17,7 @@ public class NameToken(public val body: String, public val index: String? = null
     private val bodyEscaped by lazy {
         val escaped = buildString {
             body.forEach {
-                if (it in escapedChars) {
+                if (it in escapedBodyChars) {
                     append('\\')
                 }
                 append(it)
@@ -26,8 +26,22 @@ public class NameToken(public val body: String, public val index: String? = null
         if (escaped == body) body else escaped
     }
 
+    private val indexEscaped by lazy {
+        index?.let { idx ->
+            val escaped = buildString {
+                idx.forEach {
+                    if (it in escapedIndexChars) {
+                        append('\\')
+                    }
+                    append(it)
+                }
+            }
+            if (escaped == idx) idx else escaped
+        }
+    }
+
     override fun toString(): String = if (hasIndex()) {
-        "${bodyEscaped}[$index]"
+        "${bodyEscaped}[${indexEscaped!!}]"
     } else {
         bodyEscaped
     }
@@ -61,7 +75,8 @@ public class NameToken(public val body: String, public val index: String? = null
 
     public companion object {
 
-        private val escapedChars = listOf('\\', '.', '[', ']')
+        private val escapedBodyChars = listOf('\\', '.', '[', ']')
+        private val escapedIndexChars = listOf('\\', ']')
 
         /**
          * Parse name token from a string
