@@ -1,6 +1,9 @@
 package space.kscience.dataforge.meta
 
 import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.NameToken
+import space.kscience.dataforge.names.first
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -94,9 +97,43 @@ class MetaTest {
 
     @Test
     fun testValueParseQuotedString() {
-        assertEquals(StringValue("abc"), Value.parse("\"abc\""))
-        assertEquals(StringValue(""), Value.parse("\"\""))
-        assertEquals(StringValue("\""), Value.parse("\""))
+        val cases = listOf(
+            "\"abc\"" to "abc",
+            "\"\"" to "",
+            "\"123\"" to "123",
+            "\"true\"" to "true",
+            "\" a b \"" to " a b "
+        )
+
+        for ((input, expected) in cases) {
+            val v = Value.parse(input)
+            assertTrue(v is StringValue, "Expected StringValue for $input")
+            assertEquals(expected, v.string, "Wrong literal parsing for $input")
+        }
+    }
+
+    @Test
+    fun `single double-quote char is not treated as a quoted block`() {
+        val v = Value.parse("\"")
+        assertTrue(v is StringValue, "Expected StringValue for single quote")
+        assertEquals("\"", v.string)
+    }
+
+    private fun assertRoundTrip(token: NameToken, expectedString: String) {
+        val asString = token.toString()
+        assertEquals(expectedString, asString, "String representation mismatch for token with index '${token.index}'")
+        val reparsed = Name.parse(asString).first()
+        assertEquals(token, reparsed, "Round-trip parse(toString()) failed for token: $token")
+    }
+
+    @Test
+    fun `index with opening bracket is parsable`() {
+        assertRoundTrip(NameToken("tok", "a[b"), "tok[a\\[b]")
+    }
+
+    @Test
+    fun `mixed index stays parsable and equal after round-trip`() {
+        assertRoundTrip(NameToken("tok", "a\\b]c[d"), "tok[a\\\\b\\]c\\[d]")
     }
 
     @Test
@@ -125,5 +162,4 @@ class MetaTest {
 
         assertEquals(a.hashCode(), b.hashCode(), "Equal numeric Values must produce equal hash codes")
     }
-
 }
