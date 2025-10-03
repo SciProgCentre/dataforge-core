@@ -131,6 +131,9 @@ public fun Source.readWithSeparatorTo(
         val flushedByte = if (rb.isFull()) rb[0] else null
         rb.push(byte)
         if (rb.contentEquals(separator)) {
+            if (flushedByte != null) {
+                output?.writeByte(flushedByte)
+            }
             return counter
         } else if (flushedByte != null) {
             output?.writeByte(flushedByte)
