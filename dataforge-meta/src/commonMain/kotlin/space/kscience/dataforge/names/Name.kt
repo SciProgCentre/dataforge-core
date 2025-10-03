@@ -68,47 +68,57 @@ public class Name(public val tokens: List<NameToken>) {
                 for (it in string) {
                     when {
                         escape -> {
-                            if (queryOn()) {
-                                queryBuilder.append(it)
-                            } else {
-                                bodyBuilder.append(it)
-                            }
+                            (if (queryOn()) queryBuilder else bodyBuilder).append(it)
                             escape = false
                         }
 
                         it == '\\' -> {
                             escape = true
+                            if (queryOn()) queryBuilder.append(it)
                         }
 
                         queryOn() -> {
+                            queryBuilder.append(it)
                             when (it) {
                                 '[' -> bracketCount++
                                 ']' -> bracketCount--
                             }
-                            if (queryOn()) queryBuilder.append(it)
                         }
 
                         else -> when (it) {
                             '.' -> {
-                                val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
-                                add(NameToken(bodyBuilder.toString(), query))
+                                val query = if (queryBuilder.isNotEmpty()) queryBuilder.toString().dropLast(1) else null
+                                add(NameToken(bodyBuilder.toString(), query?.unescape()))
                                 bodyBuilder = StringBuilder()
                                 queryBuilder = StringBuilder()
                             }
-
                             '[' -> bracketCount++
                             ']' -> error("Syntax error: closing bracket ] not have not matching open bracket")
-                            else -> {
-                                if (queryBuilder.isNotEmpty()) error("Syntax error: only name end and name separator are allowed after index")
-                                bodyBuilder.append(it)
-                            }
+                            else -> bodyBuilder.append(it)
                         }
                     }
                 }
-                val query = if (queryBuilder.isEmpty()) null else queryBuilder.toString()
-                add(NameToken(bodyBuilder.toString(), query))
+                val query = if (queryBuilder.isNotEmpty()) queryBuilder.toString().dropLast(1) else null
+                add(NameToken(bodyBuilder.toString(), query?.unescape()))
             }
             return Name(tokens)
+        }
+
+        private fun String.unescape(): String {
+            if ('\\' !in this) return this
+            val builder = StringBuilder(length)
+            var i = 0
+            while (i < length) {
+                val char = this[i]
+                if (char == '\\' && i + 1 < length) {
+                    builder.append(this[i + 1])
+                    i += 2
+                } else {
+                    builder.append(char)
+                    i++
+                }
+            }
+            return builder.toString()
         }
     }
 }

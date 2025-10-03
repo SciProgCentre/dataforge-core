@@ -1,5 +1,6 @@
 package space.kscience.dataforge.io
 
+import kotlinx.io.Buffer
 import kotlinx.io.buffered
 import kotlinx.io.bytestring.encodeToByteString
 import kotlinx.io.readByteArray
@@ -54,5 +55,29 @@ class IOTest {
             }
         }
 
+    }
+
+    @Test
+    fun testReadWithSeparatorToLosesByteOnShortEof() {
+        val separator = "END_SEPARATOR".encodeToByteString()
+        val content = "short"
+        val source = Buffer().apply { write(content.encodeToByteArray()) }
+        val output = Buffer()
+
+        source.readWithSeparatorTo(output, separator, errorOnEof = false)
+
+        assertEquals(content, output.readByteArray().decodeToString(), "Should not lose the first byte on short EOF")
+    }
+
+    @Test
+    fun `range operator on Binary is inclusive`() {
+        val src = byteArrayOf(0, 1, 2, 3, 4).asBinary()
+
+        val slice = src[1..3]
+
+        assertEquals(3, slice.size, "Binary[1..3] must contain 3 bytes")
+
+        val bytes = slice.toByteArray()
+        assertEquals(listOf<Byte>(1, 2, 3), bytes.toList(), "Slice content must include the right bound")
     }
 }

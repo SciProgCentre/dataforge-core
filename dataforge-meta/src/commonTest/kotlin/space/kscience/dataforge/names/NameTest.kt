@@ -74,4 +74,13 @@ class NameTest {
             NameToken.parse("token[22]ddd")
         }
     }
+
+    @Test
+    fun testIndexEscaping() {
+        val tokenWithBracketInIndex = NameToken("a", "b]c")
+        val asString = tokenWithBracketInIndex.toString()
+        val parsedName = Name.parse(asString)
+        assertEquals(1, parsedName.length, "Parsed name should have a single token")
+        assertEquals(tokenWithBracketInIndex, parsedName.firstOrNull(), "Parsed token should be equal to the original")
+    }
 }
