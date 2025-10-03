@@ -110,6 +110,11 @@ In this section, we will try to cover DataForge main ideas in the form of questi
 >
 > **Maturity**: EXPERIMENTAL
 
+### [tables-kt](tables-kt)
+> A lightweight multiplatform library for tables
+>
+> **Maturity**: EXPERIMENTAL
+
 ### [dataforge-io/dataforge-io-proto](dataforge-io/dataforge-io-proto)
 > ProtoBuf Meta representation
 >
@@ -119,4 +124,20 @@ In this section, we will try to cover DataForge main ideas in the form of questi
 > YAML meta converters and Front Matter envelope format
 >
 > **Maturity**: PROTOTYPE
+
+### [tables-kt/tables-kt-csv](tables-kt/tables-kt-csv)
+>
+> **Maturity**: EXPERIMENTAL
+
+### [tables-kt/tables-kt-dataframe](tables-kt/tables-kt-dataframe)
+>
+> **Maturity**: PROTOTYPE
+
+### [tables-kt/tables-kt-exposed](tables-kt/tables-kt-exposed)
+>
+> **Maturity**: EXPERIMENTAL
+
+### [tables-kt/tables-kt-jupyter](tables-kt/tables-kt-jupyter)
+>
+> **Maturity**: EXPERIMENTAL
 

@@ -10,12 +10,12 @@ allprojects {
     version = "0.4.1"
 }
 
-kscience{
+kscience {
     jvm()
     js()
     native()
-    wasm()
-    useContextReceivers()
+    wasmJs()
+    useContextParameters()
     dependencies {
         api(projects.dataforgeIo)
     }

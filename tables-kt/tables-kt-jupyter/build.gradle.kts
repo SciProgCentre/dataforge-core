@@ -9,7 +9,7 @@ dependencies {
 }
 
 kscience{
-    jupyterLibrary("space.kscience.tables.TablesForJupyter")
+//    jupyterLibrary("space.kscience.tables.TablesForJupyter")
 }
 
 readme {

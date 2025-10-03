@@ -6,7 +6,7 @@ Scripting definition fow workspace generation
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:dataforge-scripting:0.10.0`.
+The Maven coordinates of this project are `space.kscience:dataforge-scripting:0.10.2-dev`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -16,6 +16,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:dataforge-scripting:0.10.0")
+    implementation("space.kscience:dataforge-scripting:0.10.2-dev")
 }
 ```

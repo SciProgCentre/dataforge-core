@@ -35,18 +35,18 @@ dependencies {
 ## Modules
 
 
-### [tables-kt-csv](tables-kt-csv)
+### [tables-kt/tables-kt-csv](tables-kt/tables-kt-csv)
 >
 > **Maturity**: EXPERIMENTAL
 
-### [tables-kt-dataframe](tables-kt-dataframe)
+### [tables-kt/tables-kt-dataframe](tables-kt/tables-kt-dataframe)
 >
 > **Maturity**: PROTOTYPE
 
-### [tables-kt-exposed](tables-kt-exposed)
+### [tables-kt/tables-kt-exposed](tables-kt/tables-kt-exposed)
 >
 > **Maturity**: EXPERIMENTAL
 
-### [tables-kt-jupyter](tables-kt-jupyter)
+### [tables-kt/tables-kt-jupyter](tables-kt/tables-kt-jupyter)
 >
 > **Maturity**: EXPERIMENTAL

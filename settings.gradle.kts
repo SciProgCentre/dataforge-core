@@ -14,11 +14,10 @@ pluginManagement {
     }
 
     plugins {
-        id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
+        id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
         id("space.kscience.gradle.project") version toolsVersion
         id("space.kscience.gradle.mpp") version toolsVersion
         id("space.kscience.gradle.jvm") version toolsVersion
-        id("space.kscience.gradle.js") version toolsVersion
     }
 }
 

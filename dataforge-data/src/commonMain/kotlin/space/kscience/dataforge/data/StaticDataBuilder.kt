@@ -45,7 +45,7 @@ public fun <T> StaticDataBuilder<T>.node(prefix: Name, block: StaticDataBuilder<
     }
 }
 
-public fun <T> StaticDataBuilder<T>.node(prefix: String, block: StaticDataBuilder<T>.() -> Unit) =
+public fun <T> StaticDataBuilder<T>.node(prefix: String, block: StaticDataBuilder<T>.() -> Unit): Unit =
     node(prefix.parseAsName(), block)
 
 public fun <T> StaticDataBuilder<T>.node(prefix: String, tree: DataTree<T>) {

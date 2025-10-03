@@ -17,7 +17,7 @@ subprojects {
 
     tasks.withType<KotlinCompile> {
         compilerOptions {
-            freeCompilerArgs.add("-Xcontext-receivers")
+            freeCompilerArgs.add("-Xcontext-parameters")
         }
     }
 }
@@ -29,7 +29,7 @@ dependencies{
 }
 
 readme {
-    readmeTemplate = file("docs/templates/README-TEMPLATE.md")
+    readmeTemplate = file("docs/README-TEMPLATE.md")
 }
 
 ksciencePublish {
