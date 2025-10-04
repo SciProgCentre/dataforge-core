@@ -116,6 +116,17 @@ public interface MetaConverter<T> : MetaReader<T> {
             override fun convert(obj: E): Meta = Meta(obj.asValue())
         }
 
+        public fun <E, N> valuedEnum(
+            valueReader: (Meta) -> N?,
+            entryProvider: (N) -> E?,
+        ): MetaConverter<ValuedEnumValue<E, N>> where E : Enum<E>, E : ValuedEnum<E, N>, N : Number =
+            object : MetaConverter<ValuedEnumValue<E, N>> {
+                override fun readOrNull(source: Meta): ValuedEnumValue<E, N>? =
+                    valueReader(source)?.let { ValuedEnumValue.fromValue(it, entryProvider) }
+
+                override fun convert(obj: ValuedEnumValue<E, N>): Meta = Meta(obj.value.asValue())
+            }
+
         public val stringList: MetaConverter<List<String>> = object : MetaConverter<List<String>> {
             override fun convert(obj: List<String>): Meta = Meta(obj.map { it.asValue() }.asValue())
 

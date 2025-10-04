@@ -188,3 +188,71 @@ public fun MetaProvider.boolean(key: Name? = null, default: () -> Boolean): Meta
 
 public fun MetaProvider.number(key: Name? = null, default: () -> Number): MetaDelegate<Number> =
     value(key = key) { it?.numberOrNull ?: default() }
+
+/**
+ * A read-only delegate for a [ValuedEnumValue] property.
+ *
+ * @param E The enum type, which must implement [ValuedEnum].
+ * @param N The numeric type of the enum's value.
+ * @param valueReader A function to read a value of type `N` from a `Meta` object (e.g., `Meta::int`).
+ * @param entryProvider A function to resolve a raw value of type `N` to an enum entry.
+ * @param key The explicit [Name] of the property. If null, the name of the delegated property is used.
+ */
+public fun <E, N> MetaProvider.valuedEnum(
+    valueReader: (Meta) -> N?,
+    entryProvider: (N) -> E?,
+    key: Name? = null,
+): ReadOnlyProperty<Any?, ValuedEnumValue<E, N>?> where E : Enum<E>, E : ValuedEnum<E, N>, N : Number =
+    readable(MetaConverter.valuedEnum(valueReader, entryProvider), key)
+
+
+/**
+ * A non-nullable read-only delegate for a [ValuedEnumValue] property with a default value.
+ * @param default The default enum entry to use if the value is not present.
+ */
+public fun <E, N> MetaProvider.valuedEnum(
+    valueReader: (Meta) -> N?,
+    entryProvider: (N) -> E?,
+    default: E,
+    key: Name? = null,
+): ReadOnlyProperty<Any?, ValuedEnumValue<E, N>> where E : Enum<E>, E : ValuedEnum<E, N>, N : Number =
+    readable(MetaConverter.valuedEnum(valueReader, entryProvider), ValuedEnumValue.of(default), key)
+
+public fun <E> MetaProvider.intValuedEnum(
+    entryProvider: (Int) -> E?,
+    key: Name? = null,
+): ReadOnlyProperty<Any?, ValuedEnumValue<E, Int>?> where E : Enum<E>, E : ValuedEnum<E, Int> =
+    valuedEnum(Meta::int, entryProvider, key)
+
+public fun <E> MetaProvider.intValuedEnum(
+    entryProvider: (Int) -> E?,
+    default: E,
+    key: Name? = null,
+): ReadOnlyProperty<Any?, ValuedEnumValue<E, Int>> where E : Enum<E>, E : ValuedEnum<E, Int> =
+    valuedEnum(Meta::int, entryProvider, default, key)
+
+public fun <E> MetaProvider.shortValuedEnum(
+    entryProvider: (Short) -> E?,
+    key: Name? = null,
+): ReadOnlyProperty<Any?, ValuedEnumValue<E, Short>?> where E : Enum<E>, E : ValuedEnum<E, Short> =
+    valuedEnum(Meta::short, entryProvider, key)
+
+public fun <E> MetaProvider.shortValuedEnum(
+    entryProvider: (Short) -> E?,
+    default: E,
+    key: Name? = null,
+): ReadOnlyProperty<Any?, ValuedEnumValue<E, Short>> where E : Enum<E>, E : ValuedEnum<E, Short> =
+    valuedEnum(Meta::short, entryProvider, default, key)
+
+public fun <E> MetaProvider.byteValuedEnum(
+    entryProvider: (Byte) -> E?,
+    key: Name? = null,
+): ReadOnlyProperty<Any?, ValuedEnumValue<E, Byte>?> where E : Enum<E>, E : ValuedEnum<E, Byte> =
+    valuedEnum({ it.number?.toByte() }, entryProvider, key)
+
+public fun <E> MetaProvider.byteValuedEnum(
+    entryProvider: (Byte) -> E?,
+    default: E,
+    key: Name? = null,
+): ReadOnlyProperty<Any?, ValuedEnumValue<E, Byte>> where E : Enum<E>, E : ValuedEnum<E, Byte> =
+    valuedEnum({ it.number?.toByte() }, entryProvider, default, key)
