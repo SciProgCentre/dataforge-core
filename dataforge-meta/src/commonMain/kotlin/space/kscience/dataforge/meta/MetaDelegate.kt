@@ -188,3 +188,15 @@ public fun MetaProvider.boolean(key: Name? = null, default: () -> Boolean): Meta
 
 public fun MetaProvider.number(key: Name? = null, default: () -> Number): MetaDelegate<Number> =
     value(key = key) { it?.numberOrNull ?: default() }
+
+/* Unsigned number delegates */
+
+public fun MetaProvider.uint(key: Name? = null): MetaDelegate<UInt?> = value(key = key) { it?.uint }
+
+public fun MetaProvider.ulong(key: Name? = null): MetaDelegate<ULong?> = value(key = key) { it?.ulong }
+
+public fun MetaProvider.uint(default: UInt, key: Name? = null): MetaDelegate<UInt> =
+    value(key = key) { it?.uint ?: default }
+
+public fun MetaProvider.ulong(default: ULong, key: Name? = null): MetaDelegate<ULong> =
+    value(key = key) { it?.ulong ?: default }

@@ -24,6 +24,42 @@ public val Value.boolean: Boolean
 //            || (type == ValueType.STRING && string.toBoolean())
 //            || (type == ValueType.)
 
+/**
+ * Strictly converts this [Value] to a [UInt], returning `null` if the conversion is lossy or impossible.
+ * - For numeric values, returns a `UInt` only if the number is a non-negative integer within the `UInt` range.
+ * - For string values, uses `String.toUIntOrNull()`.
+ * - This accessor is **strict** and avoids silent truncation or reinterpretation of out-of-range numbers.
+ */
+public val Value.uint: UInt?
+    get() = when (this) {
+        is NumberValue -> number.toLong().takeIf { it in 0L..UInt.MAX_VALUE.toLong() }?.toUInt()
+        else -> string.toUIntOrNull()
+    }
+
+/**
+ * Converts this [Value] to a [UInt] using Kotlin's standard coercing (truncating) conversion.
+ * Use with caution, as this can lead to data loss if the original number is outside the `UInt` range.
+ * For example, `(UInt.MAX_VALUE.toLong() + 1L)` will be truncated.
+ */
+public val Value.uintCoerced: UInt? get() = numberOrNull?.toLong()?.toUInt()
+
+/**
+ * Strictly converts this [Value] to a [ULong], returning `null` if the conversion is lossy or impossible.
+ * - For numeric values, returns a `ULong` only if the number is a non-negative integer.
+ * - For string values, uses `String.toULongOrNull()`.
+ * - This accessor is **strict** and avoids silent bitwise reinterpretation of negative numbers.
+ */
+public val Value.ulong: ULong?
+    get() = when (this) {
+        is NumberValue -> number.toLong().takeIf { it >= 0L }?.toULong()
+        else -> string.toULongOrNull()
+    }
+
+/**
+ * Converts this [Value] to a [ULong] using Kotlin's standard coercing (bitwise reinterpreting) conversion.
+ * This will reinterpret negative `Long` values - for example, `-1L` becomes `ULong.MAX_VALUE`.
+ */
+public val Value.ulongCoerced: ULong? get() = numberOrNull?.toLong()?.toULong()
 
 public val Value.int: Int get() = number.toInt()
 public val Value.double: Double get() = number.toDouble()

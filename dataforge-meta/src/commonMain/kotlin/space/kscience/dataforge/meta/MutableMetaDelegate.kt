@@ -251,3 +251,37 @@ public fun <T> MutableMetaProvider.listValue(
     writer = { it?.map(writer)?.asValue() },
     reader = { it?.list?.map(reader) }
 )
+
+/* Unsigned number delegates */
+
+public fun MutableMetaProvider.uint(key: Name? = null): MutableMetaDelegate<UInt?> =
+    value(key, writer = { it?.toLong()?.asValue() }) { it?.uint }
+
+public fun MutableMetaProvider.ulong(key: Name? = null): MutableMetaDelegate<ULong?> =
+    value(
+        key,
+        writer = { ulong ->
+            when {
+                ulong == null -> null
+                ulong <= Long.MAX_VALUE.toULong() -> ulong.toLong().asValue()
+                else -> ulong.toString().asValue()
+            }
+        }
+    ) { it?.ulong }
+
+
+/* Safe unsigned number delegates */
+
+public fun MutableMetaProvider.uint(default: UInt, key: Name? = null): MutableMetaDelegate<UInt> =
+    value(key, writer = { it.toLong().asValue() }) { it?.uint ?: default }
+
+public fun MutableMetaProvider.ulong(default: ULong, key: Name? = null): MutableMetaDelegate<ULong> =
+    value(
+        key,
+        writer = { ulong ->
+            when {
+                ulong <= Long.MAX_VALUE.toULong() -> ulong.toLong().asValue()
+                else -> ulong.toString().asValue()
+            }
+        }
+    ) { it?.ulong ?: default }
