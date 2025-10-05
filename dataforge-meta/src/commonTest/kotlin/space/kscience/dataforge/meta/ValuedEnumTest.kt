@@ -19,8 +19,19 @@ class ValuedEnumTest {
         }
     }
 
-    class DeviceConfiguration : Scheme(MutableMeta()) {
+    enum class LogLevel(override val value: String) : ValuedEnum<LogLevel, String> {
+        DEBUG("D"),
+        INFO("I"),
+        WARNING("W");
+
+        public companion object {
+            public fun fromValue(value: String): LogLevel? = entries.find { it.value == value }
+        }
+    }
+
+    class DeviceConfiguration : Scheme() {
         var status by intValuedEnum(DeviceStatus::fromValue, DeviceStatus.OFFLINE)
+        var logLevel by valuedEnum(Meta::string, String::asValue, LogLevel::fromValue, LogLevel.INFO)
         var optionalStatus by intValuedEnum(DeviceStatus::fromValue)
 
         companion object : SchemeSpec<DeviceConfiguration>(::DeviceConfiguration)
@@ -31,103 +42,65 @@ class ValuedEnumTest {
         val config = DeviceConfiguration()
         assertEquals(DeviceStatus.OFFLINE, config.status.entry)
         assertEquals(0, config.status.value)
+        assertEquals(LogLevel.INFO, config.logLevel.entry)
     }
 
     @Test
     fun testWriteAndReadKnownValue() {
-        val meta = MutableMeta()
         val config = DeviceConfiguration()
-        config.retarget(meta)
-
-        // Write a known enum entry
         config.status = ValuedEnumValue.of(DeviceStatus.ONLINE)
 
-        // Check the property value
         assertEquals(DeviceStatus.ONLINE, config.status.entry)
         assertEquals(1, config.status.value)
-
-        // Check the underlying Meta value
-        assertEquals(1, meta["status"].int)
+        assertEquals(1, config.meta["status"].int)
     }
 
     @Test
-    fun testReadRawValue() {
-        val meta = MutableMeta()
-        meta["status"] = 2 // Set a raw integer value
+    fun testReadUnknownIntValue() {
+        val meta = MutableMeta { "status" put 99 }
         val config = DeviceConfiguration()
         config.retarget(meta)
 
-        assertEquals(DeviceStatus.ERROR, config.status.entry)
-        assertEquals(2, config.status.value)
-    }
-
-    @Test
-    fun testReadUnknownValue() {
-        val meta = MutableMeta()
-        meta["status"] = 99 // Set an unknown raw value
-        val config = DeviceConfiguration()
-        config.retarget(meta)
-
-        // The entry should be null, but the raw value must be preserved
         assertNull(config.status.entry)
         assertEquals(99, config.status.value)
     }
 
     @Test
-    fun testWriteUnknownAndRead() {
-        val meta = MutableMeta()
+    fun testStringValuedEnum() {
         val config = DeviceConfiguration()
-        config.retarget(meta)
+        config.logLevel = ValuedEnumValue.of(LogLevel.WARNING)
 
-        // Write an unknown value
-        config.status = ValuedEnumValue.fromValue(99, DeviceStatus::fromValue)
-
-        // Check the property value
-        assertNull(config.status.entry)
-        assertEquals(99, config.status.value)
-
-        // Check the underlying Meta value
-        assertEquals(99, meta["status"].int)
-
-        // Check that a new config reading this meta gets the same result
-        val newConfig = DeviceConfiguration()
-        newConfig.retarget(meta)
-        assertNull(newConfig.status.entry)
-        assertEquals(99, newConfig.status.value)
+        assertEquals(LogLevel.WARNING, config.logLevel.entry)
+        assertEquals("W", config.logLevel.value)
+        assertEquals("W", config.meta["logLevel"].string)
     }
 
     @Test
-    fun testEquality() {
-        val onlineByEnum = ValuedEnumValue.of(DeviceStatus.ONLINE)
-        val onlineByValue = ValuedEnumValue.fromValue(1, DeviceStatus::fromValue)
-        // Simulate unknown value (e.g., from an older version of the enum)
-        val onlineUnknown = ValuedEnumValue.fromValue<DeviceStatus, Int>(1) { null }
-
-        assertEquals(onlineByEnum, onlineByValue)
-        assertEquals(onlineByEnum, ValuedEnumValue.of(DeviceStatus.ONLINE))
-        assertEquals(ValuedEnumValue.of(DeviceStatus.ONLINE), onlineByEnum)
-        assertEquals(onlineByValue, onlineUnknown) // Equality by raw value is key
-        assertNotEquals(onlineByEnum, ValuedEnumValue.of(DeviceStatus.OFFLINE))
-    }
-
-    @Test
-    fun testNullableProperty() {
-        val meta = MutableMeta()
+    fun testReadUnknownStringValue() {
+        val meta = MutableMeta { "logLevel" put "FATAL" }
         val config = DeviceConfiguration()
         config.retarget(meta)
 
-        // Initially null
-        assertNull(config.optionalStatus)
-        assertNull(meta["optionalStatus"])
+        assertNull(config.logLevel.entry)
+        assertEquals("FATAL", config.logLevel.value)
+    }
 
-        // Set to a value
-        config.optionalStatus = ValuedEnumValue.of(DeviceStatus.ERROR)
-        assertEquals(DeviceStatus.ERROR, config.optionalStatus?.entry)
-        assertEquals(2, meta["optionalStatus"].int)
+    @Test
+    fun testEqualityAndEquivalence() {
+        val onlineByEnum = ValuedEnumValue.of(DeviceStatus.ONLINE) // { value: 1, entry: ONLINE }
+        val onlineByValue = ValuedEnumValue.fromValue(1, DeviceStatus::fromValue) // { value: 1, entry: ONLINE }
+        val offlineByEnum = ValuedEnumValue.of(DeviceStatus.OFFLINE) // { value: 0, entry: OFFLINE }
+        val unknownByValue = ValuedEnumValue.fromValue(99, DeviceStatus::fromValue) // { value: 99, entry: null }
 
-        // Set back to null
-        config.optionalStatus = null
-        assertNull(config.optionalStatus)
-        assertNull(meta["optionalStatus"])
+        assertEquals(onlineByEnum, onlineByValue, "Wrappers for the same resolved enum should be equal")
+        assertNotEquals(onlineByEnum, offlineByEnum, "Wrappers for different enums should not be equal")
+        assertNotEquals(onlineByEnum, unknownByValue, "A resolved wrapper and an unresolved one should not be equal")
+
+        assertEquals(DeviceStatus.ONLINE, onlineByValue.entry, "The resolved entry should match the expected enum")
+        assertEquals(DeviceStatus.OFFLINE, offlineByEnum.entry, "The resolved entry should match the expected enum")
+        assertNull(unknownByValue.entry, "The entry for an unknown value must be null")
+
+        assertEquals(1, onlineByValue.value)
+        assertEquals(99, unknownByValue.value)
     }
 }

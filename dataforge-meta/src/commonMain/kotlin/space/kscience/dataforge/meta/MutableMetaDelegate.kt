@@ -256,66 +256,69 @@ public fun <T> MutableMetaProvider.listValue(
  * A read-write delegate for a [ValuedEnumValue] property.
  *
  * @param E The enum type, which must implement [ValuedEnum].
- * @param N The numeric type of the enum's value.
- * @param valueReader A function to read a value of type `N` from a `Meta` object (e.g., `Meta::int`).
- * @param entryProvider A function to resolve a raw value of type `N` to an enum entry.
+ * @param T The type of the enum's value.
+ * @param valueReader A function to read a value of type `T` from a `Meta` object (e.g., `Meta::int`).
+ * @param valueWriter A function to write a value of type `T` into a [Value].
+ * @param entryProvider A function to resolve a raw value of type `T` to an enum entry.
  * @param key The explicit [Name] of the property. If null, the name of the delegated property is used.
  */
-public fun <E, N> MutableMetaProvider.valuedEnum(
-    valueReader: (Meta) -> N?,
-    entryProvider: (N) -> E?,
+public fun <E, T> MutableMetaProvider.valuedEnum(
+    valueReader: (Meta) -> T?,
+    valueWriter: (T) -> Value,
+    entryProvider: (T) -> E?,
     key: Name? = null,
-): ReadWriteProperty<Any?, ValuedEnumValue<E, N>?> where E : Enum<E>, E : ValuedEnum<E, N>, N : Number =
-    convertable(MetaConverter.valuedEnum(valueReader, entryProvider), key)
+): ReadWriteProperty<Any?, ValuedEnumValue<E, T>?> where E : Enum<E>, E : ValuedEnum<E, T> =
+    convertable(MetaConverter.valuedEnum(valueReader, valueWriter, entryProvider), key)
 
 
 /**
  * A non-nullable read-write delegate for a [ValuedEnumValue] property with a default value.
  * @param default The default enum entry to use if the value is not present.
  */
-public fun <E, N> MutableMetaProvider.valuedEnum(
-    valueReader: (Meta) -> N?,
-    entryProvider: (N) -> E?,
+public fun <E, T> MutableMetaProvider.valuedEnum(
+    valueReader: (Meta) -> T?,
+    valueWriter: (T) -> Value,
+    entryProvider: (T) -> E?,
     default: E,
     key: Name? = null,
-): ReadWriteProperty<Any?, ValuedEnumValue<E, N>> where E : Enum<E>, E : ValuedEnum<E, N>, N : Number =
-    convertable(MetaConverter.valuedEnum(valueReader, entryProvider), ValuedEnumValue.of(default), key)
+): ReadWriteProperty<Any?, ValuedEnumValue<E, T>> where E : Enum<E>, E : ValuedEnum<E, T> =
+    convertable(MetaConverter.valuedEnum(valueReader, valueWriter, entryProvider), ValuedEnumValue.of(default), key)
 
 public fun <E> MutableMetaProvider.intValuedEnum(
     entryProvider: (Int) -> E?,
     key: Name? = null,
 ): ReadWriteProperty<Any?, ValuedEnumValue<E, Int>?> where E : Enum<E>, E : ValuedEnum<E, Int> =
-    valuedEnum(Meta::int, entryProvider, key)
+    valuedEnum(Meta::int, Int::asValue, entryProvider, key)
 
 public fun <E> MutableMetaProvider.intValuedEnum(
     entryProvider: (Int) -> E?,
     default: E,
     key: Name? = null,
 ): ReadWriteProperty<Any?, ValuedEnumValue<E, Int>> where E : Enum<E>, E : ValuedEnum<E, Int> =
-    valuedEnum(Meta::int, entryProvider, default, key)
+    valuedEnum(Meta::int, Int::asValue, entryProvider, default, key)
 
 public fun <E> MutableMetaProvider.shortValuedEnum(
     entryProvider: (Short) -> E?,
     key: Name? = null,
 ): ReadWriteProperty<Any?, ValuedEnumValue<E, Short>?> where E : Enum<E>, E : ValuedEnum<E, Short> =
-    valuedEnum(Meta::short, entryProvider, key)
+    valuedEnum(Meta::short, Short::asValue, entryProvider, key)
 
 public fun <E> MutableMetaProvider.shortValuedEnum(
     entryProvider: (Short) -> E?,
     default: E,
     key: Name? = null,
 ): ReadWriteProperty<Any?, ValuedEnumValue<E, Short>> where E : Enum<E>, E : ValuedEnum<E, Short> =
-    valuedEnum(Meta::short, entryProvider, default, key)
+    valuedEnum(Meta::short, Short::asValue, entryProvider, default, key)
 
 public fun <E> MutableMetaProvider.byteValuedEnum(
     entryProvider: (Byte) -> E?,
     key: Name? = null,
 ): ReadWriteProperty<Any?, ValuedEnumValue<E, Byte>?> where E : Enum<E>, E : ValuedEnum<E, Byte> =
-    valuedEnum({ it.number?.toByte() }, entryProvider, key)
+    valuedEnum({ it.number?.toByte() }, Byte::asValue, entryProvider, key)
 
 public fun <E> MutableMetaProvider.byteValuedEnum(
     entryProvider: (Byte) -> E?,
     default: E,
     key: Name? = null,
 ): ReadWriteProperty<Any?, ValuedEnumValue<E, Byte>> where E : Enum<E>, E : ValuedEnum<E, Byte> =
-    valuedEnum({ it.number?.toByte() }, entryProvider, default, key)
+    valuedEnum({ it.number?.toByte() }, Byte::asValue, entryProvider, default, key)
