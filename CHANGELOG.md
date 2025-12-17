@@ -24,6 +24,10 @@
 
 - **BREAKING** `Context.request(plugin)` now has nullable parameter null means taking existing plugin with any configuration.
 
+### Fixed
+
+- Some bugs in name parsing and validation.
+
 ## 0.10.1 - 2025-02-23
 
 ### Added
