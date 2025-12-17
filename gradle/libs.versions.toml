@@ -2,6 +2,7 @@
 
 dataframe = "0.15.0"
 exposed = "0.60.0"
+wire = "5.4.0"
 
 [libraries]
 attributes = "space.kscience:attributes-kt:0.3.0"
@@ -9,5 +10,8 @@ kotlinx-dataframe = { module = "org.jetbrains.kotlinx:dataframe", version.ref = 
 csv = "com.jsoizo:kotlin-csv:1.10.0"
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire"}
 
 [plugins]
+
+wire = { id = "com.squareup.wire", version.ref = "wire" }

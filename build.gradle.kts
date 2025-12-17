@@ -1,3 +1,6 @@
+@file:OptIn(ExperimentalAbiValidation::class)
+
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import space.kscience.gradle.useApache2Licence
 import space.kscience.gradle.useSPCTeam
@@ -9,7 +12,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.10.2-dev"
+    version = "0.10.2"
 }
 
 subprojects {
@@ -22,7 +25,7 @@ subprojects {
     }
 }
 
-dependencies{
+dependencies {
     subprojects.forEach {
         dokka(it)
     }
@@ -32,15 +35,20 @@ readme {
     readmeTemplate = file("docs/README-TEMPLATE.md")
 }
 
-ksciencePublish {
+
+kscienceProject {
     pom("https://github.com/SciProgCentre/kmath") {
         useApache2Licence()
         useSPCTeam()
     }
-    repository("spc", "https://maven.sciprog.center/kscience")
-    central()
-}
+    publishTo("spc", "https://maven.sciprog.center/kscience")
+    publishToCentral()
 
-apiValidation {
-    nonPublicMarkers.add("space.kscience.dataforge.misc.DFExperimental")
+    abiValidation {
+        filters {
+            excluded {
+                annotatedWith.add("space.kscience.dataforge.misc.DFExperimental")
+            }
+        }
+    }
 }

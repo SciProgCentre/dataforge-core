@@ -1,5 +1,6 @@
 plugins {
     id("space.kscience.gradle.jvm")
+    alias(spclibs.plugins.kotlin.jupyter.api)
     `maven-publish`
 }
 
@@ -8,8 +9,10 @@ dependencies {
     api(spclibs.kotlinx.html)
 }
 
-kscience{
-//    jupyterLibrary("space.kscience.tables.TablesForJupyter")
+kotlinJupyter{
+    integrations {
+        producer("space.kscience.tables.TablesForJupyter")
+    }
 }
 
 readme {

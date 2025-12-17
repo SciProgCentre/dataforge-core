@@ -1,6 +1,6 @@
 plugins {
     id("space.kscience.gradle.mpp")
-    id("com.squareup.wire") version "4.9.9"
+    alias (libs.plugins.wire)
 }
 
 description = "ProtoBuf meta IO"
@@ -10,7 +10,7 @@ kscience {
 //    js()
     dependencies {
         api(projects.dataforgeIo)
-        api("com.squareup.wire:wire-runtime:4.9.9")
+        api(libs.wire.runtime)
     }
     useSerialization {
         protobuf()

@@ -1,6 +1,6 @@
 package space.kscience.dataforge.meta.descriptors
 
-import io.github.optimumcode.json.schema.JsonSchema
+
 import space.kscience.dataforge.meta.ValueType
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,7 +29,7 @@ class DescriptorJsonSchemaTest {
         val descriptorJsonSchema = descriptor.toJsonSchema()
 
         // Act & Assert
-        JsonSchema.fromJsonElement(descriptorJsonSchema)
+        io.github.optimumcode.json.schema.JsonSchema.fromJsonElement(descriptorJsonSchema)
     }
 
     @Test

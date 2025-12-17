@@ -11,10 +11,8 @@ kscience {
         json()
     }
 
-    commonTest {
-        dependencies {
-            implementation("io.github.optimumcode:json-schema-validator:0.5.2")
-        }
+    jvmTest {
+        implementation("io.github.optimumcode:json-schema-validator:0.5.2")
     }
 }
 
