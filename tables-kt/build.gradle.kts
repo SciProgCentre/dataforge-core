@@ -5,11 +5,6 @@ plugins {
 
 description = "A lightweight multiplatform library for tables"
 
-allprojects {
-    group = "space.kscience"
-    version = "0.4.1"
-}
-
 kscience {
     jvm()
     js()

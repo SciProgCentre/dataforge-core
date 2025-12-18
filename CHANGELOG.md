@@ -18,7 +18,8 @@
 
 ### Added
 
-- Move Tables-kt to DataForge repository and make it follow DataForge versioning
+- Move Tables-kt to DataForge repository
+- Json schema support for MetaDescriptor.
 
 ### Changed
 
