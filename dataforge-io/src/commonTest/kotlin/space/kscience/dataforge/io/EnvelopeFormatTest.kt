@@ -25,6 +25,7 @@ class EnvelopeFormatTest {
         val bytes = res.data?.read {
             readByteArray()
         }
+//        println(byteArray.decodeToString())
         assertEquals("12345678", bytes?.decodeToString())
     }
 

@@ -85,12 +85,13 @@ public class PluginManager internal constructor(
  * Fetch a plugin with given meta from the context. If the plugin (with given meta) is already registered, it is returned.
  * Otherwise, new child context with the plugin is created. In the later case the context could be retrieved from the plugin.
  */
-public inline fun <reified T : Plugin> Context.request(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY): T {
+public inline fun <reified T : Plugin> Context.request(factory: PluginFactory<T>, meta: Meta? = null): T {
     val existing = plugins[factory]
-    return if (existing != null && existing.meta == meta) existing
-    else {
+    return if (existing != null && (meta == null || existing.meta == meta)) {
+        existing
+    } else {
         buildContext(name = this@request.name + factory.tag.name) {
-            plugin(factory, meta)
+            plugin(factory, meta ?: Meta.EMPTY)
         }.plugins[factory]!!
     }
 }

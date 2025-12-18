@@ -8,7 +8,7 @@ kscience {
     jvm()
     js()
     native()
-    wasm()
+    wasmJs()
     useCoroutines()
     useSerialization {
         protobuf()

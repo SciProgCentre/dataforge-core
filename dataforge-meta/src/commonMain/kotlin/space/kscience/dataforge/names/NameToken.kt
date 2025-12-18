@@ -16,18 +16,25 @@ public class NameToken(public val body: String, public val index: String? = null
 
     private val bodyEscaped by lazy {
         val escaped = buildString {
-            body.forEach {
-                if (it in escapedChars) {
+            body.forEach { ch ->
+                if (ch in escapedBodyChars) {
                     append('\\')
                 }
-                append(it)
+                append(ch)
             }
         }
         if (escaped == body) body else escaped
     }
 
+    private val indexEscaped by lazy {
+        index?.replace("\\", "\\\\")
+            ?.replace("]", "\\]")
+            ?.replace("[", "\\[")
+    }
+
+
     override fun toString(): String = if (hasIndex()) {
-        "${bodyEscaped}[$index]"
+        "${bodyEscaped}[${indexEscaped!!}]"
     } else {
         bodyEscaped
     }
@@ -61,7 +68,7 @@ public class NameToken(public val body: String, public val index: String? = null
 
     public companion object {
 
-        private val escapedChars = listOf('\\', '.', '[', ']')
+        private val escapedBodyChars = listOf('\\', '.', '[', ']')
 
         /**
          * Parse name token from a string
@@ -69,25 +76,25 @@ public class NameToken(public val body: String, public val index: String? = null
         public fun parse(string: String): NameToken {
             var indexStart = -1
             var indexEnd = -1
+            var escape = false
             string.forEachIndexed { index, c ->
+                if(escape){
+                    escape = false
+                    return@forEachIndexed
+                }
                 when (c) {
-                    '[' -> when {
-                        indexStart >= 0 -> error("Second opening bracket not allowed in NameToken: $string")
-                        else -> indexStart = index
-                    }
-
-                    ']' -> when {
-                        indexStart < 0 -> error("Closing index bracket could not be used before opening bracket in NameToken: $string")
-                        indexEnd >= 0 -> error("Second closing bracket not allowed in NameToken: $string")
-                        else -> indexEnd = index
-                    }
-
+                    '\\' -> escape = true
+                    '[' -> if(indexStart < 0) indexStart = index
+                    ']' -> if(indexStart >= 0) indexEnd = index
                     else -> if (indexEnd >= 0) error("Symbols not allowed after index in NameToken: $string")
                 }
             }
+
             if (indexStart >= 0 && indexEnd < 0) error("Opening bracket without closing bracket not allowed in NameToken: $string")
+            if (indexStart > indexEnd && indexEnd != -1) error("Closing bracket before opening one in NameToken: $string")
+
             return NameToken(
-                if (indexStart >= 0) string.substring(0, indexStart) else string,
+                if (indexStart >= 0) string.take(indexStart) else string,
                 if (indexStart >= 0) string.substring(indexStart + 1, indexEnd) else null
             )
         }

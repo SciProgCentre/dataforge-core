@@ -1,12 +1,12 @@
 # Module dataforge-workspace
 
-
+A framework for pull-based data processing
 
 ## Usage
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:dataforge-workspace:0.10.0`.
+The Maven coordinates of this project are `space.kscience:dataforge-workspace:0.10.2`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -16,6 +16,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:dataforge-workspace:0.10.0")
+    implementation("space.kscience:dataforge-workspace:0.10.2")
 }
 ```

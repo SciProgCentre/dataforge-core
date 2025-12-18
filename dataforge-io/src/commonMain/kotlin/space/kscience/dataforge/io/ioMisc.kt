@@ -30,7 +30,7 @@ public inline fun ByteArray(block: Sink.() -> Unit): ByteArray =
 public inline fun Binary(block: Sink.() -> Unit): Binary =
     ByteArray(block).asBinary()
 
-public operator fun Binary.get(range: IntRange): Binary = view(range.first, range.last - range.first)
+public operator fun Binary.get(range: IntRange): Binary = view(range.first, range.last - range.first + 1)
 
 /**
  * Return inferred [EnvelopeFormat] if only one format could read given file. If no format accepts the binary, return null. If
@@ -128,21 +128,26 @@ public fun Source.readWithSeparatorTo(
         val byte = readByte()
         counter++
         if (counter >= atMost) error("Maximum number of bytes to be read $atMost reached.")
+        val flushedByte = if (rb.isFull()) rb[0] else null
         rb.push(byte)
         if (rb.contentEquals(separator)) {
+            if (flushedByte != null) {
+                output?.writeByte(flushedByte)
+            }
             return counter
-        } else if (rb.isFull()) {
-            output?.writeByte(rb[0])
+        } else if (flushedByte != null) {
+            output?.writeByte(flushedByte)
         }
     }
 
     if (errorOnEof) {
         error("Read to the end of input without encountering ${separator.decodeToString()}")
     } else {
-        for (i in 1 until rb.size) {
-            output?.writeByte(rb[i])
+        if (output != null) {
+            for (i in 0 until rb.size) {
+                output.writeByte(rb[i])
+            }
         }
-        counter += (rb.size - 1)
         return counter
     }
 }

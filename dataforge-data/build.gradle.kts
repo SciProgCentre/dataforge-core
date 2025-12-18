@@ -2,17 +2,17 @@ plugins {
     id("space.kscience.gradle.mpp")
 }
 
-kscience{
+kscience {
     jvm()
     js()
     native()
-    wasm()
+    wasmJs()
     useCoroutines()
     dependencies {
         api(projects.dataforgeMeta)
     }
 }
 
-readme{
+readme {
     maturity = space.kscience.gradle.Maturity.EXPERIMENTAL
 }

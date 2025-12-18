@@ -1,3 +1,5 @@
+import space.kscience.gradle.DependencyConfiguration
+
 plugins {
     id("space.kscience.gradle.mpp")
 }
@@ -8,9 +10,12 @@ kscience {
     jvm()
     js()
     native()
-    wasm()
+    wasmJs()
     useSerialization()
-    useSerialization(sourceSet = space.kscience.gradle.DependencySourceSet.TEST) {
+    useSerialization(
+        sourceSet = space.kscience.gradle.DependencySourceSet.TEST,
+        configuration = DependencyConfiguration.IMPLEMENTATION
+    ) {
         cbor()
     }
     dependencies {

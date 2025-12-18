@@ -7,18 +7,17 @@ pluginManagement {
     val toolsVersion: String by extra
 
     repositories {
-        mavenLocal()
         maven("https://repo.kotlin.link")
         mavenCentral()
         gradlePluginPortal()
+        mavenLocal()
     }
 
     plugins {
-        id("org.gradle.toolchains.foojay-resolver-convention") version "0.7.0"
+        id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
         id("space.kscience.gradle.project") version toolsVersion
         id("space.kscience.gradle.mpp") version toolsVersion
         id("space.kscience.gradle.jvm") version toolsVersion
-        id("space.kscience.gradle.js") version toolsVersion
     }
 }
 
@@ -27,9 +26,9 @@ dependencyResolutionManagement {
     val toolsVersion: String by extra
 
     repositories {
-        mavenLocal()
         maven("https://repo.kotlin.link")
         mavenCentral()
+        mavenLocal()
     }
 
     versionCatalogs {
@@ -47,5 +46,9 @@ include(
     ":dataforge-context",
     ":dataforge-data",
     ":dataforge-workspace",
-    ":dataforge-scripting"
+    ":dataforge-scripting",
+    ":tables-kt:tables-kt-exposed",
+    ":tables-kt:tables-kt-dataframe",
+    ":tables-kt:tables-kt-jupyter",
+    ":tables-kt:tables-kt-csv"
 )

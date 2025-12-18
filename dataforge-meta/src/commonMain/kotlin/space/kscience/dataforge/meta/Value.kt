@@ -83,16 +83,16 @@ public interface Value {
          */
         public fun parse(string: String): Value {
 
-            //Trying to get integer
             if (string.isEmpty() || string == Null.string) {
                 return Null
             }
 
             //string constants
-            if (string.startsWith("\"") && string.endsWith("\"")) {
-                return StringValue(string.substring(1, string.length - 2))
+            if (string.length >= 2 && string.startsWith("\"") && string.endsWith("\"")) {
+                return StringValue(string.substring(1, string.length - 1))
             }
 
+            //Trying to get integer
             string.toIntOrNull()?.let {
                 return NumberValue(it)
             }
@@ -190,7 +190,11 @@ public class NumberValue(public val number: Number) : Value {
         }
     }
 
-    override fun hashCode(): Int = numberOrNull.hashCode()
+    override fun hashCode(): Int {
+        val d = number.toDouble()
+        val canonical = if (d == 0.0) 0.0 else d
+        return canonical.hashCode()
+    }
 }
 
 @JvmInline

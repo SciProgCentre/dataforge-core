@@ -6,9 +6,13 @@ kscience {
     jvm()
     js()
     native()
-    wasm()
+    wasmJs()
     useSerialization {
         json()
+    }
+
+    jvmTest {
+        implementation("io.github.optimumcode:json-schema-validator:0.5.2")
     }
 }
 
