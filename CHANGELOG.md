@@ -5,6 +5,7 @@
 ### Added
 
 ### Changed
+- Include flag to include file extensions into FileDataTree node names.
 
 ### Deprecated
 

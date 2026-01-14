@@ -21,11 +21,21 @@ import kotlin.io.path.*
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
-
+/**
+ * Represents a data tree for managing and monitoring files and directories.
+ * It manages binary data and associated metadata, supports both file-based and directory-based structures,
+ * and optionally observes file system changes.
+ *
+ * @property io The IOPlugin instance used for reading and handling file formats.
+ * @property path The path to the file or directory to be managed by the data tree.
+ * @property monitor Whether to enable monitoring for changes in the file system. Defaults to false.
+ * @property includeExtensions Whether to include file extensions in the node names. Defaults to false.
+ */
 public class FileDataTree(
     public val io: IOPlugin,
     public val path: Path,
-    private val monitor: Boolean = false
+    private val monitor: Boolean = false,
+    public val includeExtensions: Boolean = false,
 ) : DataTree<Binary> {
     override val dataType: KType = typeOf<Binary>()
 
@@ -55,7 +65,7 @@ public class FileDataTree(
     private fun readFilesFromDirectory(
         path: Path
     ): Map<NameToken, FileDataTree> = path.listDirectoryEntries().filterNot { it.name.startsWith("@") }.associate {
-        NameToken.parse(it.nameWithoutExtension) to FileDataTree(io, it)
+        NameToken(if (includeExtensions) it.name else it.nameWithoutExtension) to FileDataTree(io, it)
     }
 
     override val data: Data<Binary>?
