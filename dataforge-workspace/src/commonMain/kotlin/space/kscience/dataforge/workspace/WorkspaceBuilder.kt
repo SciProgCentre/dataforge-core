@@ -4,8 +4,8 @@ import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.ContextBuilder
 import space.kscience.dataforge.context.Global
+import space.kscience.dataforge.data.DataBuilder
 import space.kscience.dataforge.data.DataTree
-import space.kscience.dataforge.data.StaticDataBuilder
 import space.kscience.dataforge.data.static
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
@@ -122,7 +122,7 @@ public class WorkspaceBuilder(
     /**
      * Define intrinsic data for the workspace
      */
-    public fun data(builder: StaticDataBuilder<Any?>.() -> Unit) {
+    public fun data(builder: DataBuilder<Any?>.() -> Unit) {
         data = DataTree.static(builder)
     }
 

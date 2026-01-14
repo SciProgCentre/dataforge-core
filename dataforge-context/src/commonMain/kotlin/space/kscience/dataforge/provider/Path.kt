@@ -25,7 +25,7 @@ import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.parseAsName
 import kotlin.jvm.JvmInline
 
-private object PathSerializer : KSerializer<Path> {
+public object PathSerializer : KSerializer<Path> {
 
     override val descriptor: SerialDescriptor
         get() = String.serializer().descriptor

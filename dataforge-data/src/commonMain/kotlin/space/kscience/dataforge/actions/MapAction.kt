@@ -73,10 +73,10 @@ public class MapAction<T, R>(
             outputType = outputType
         ).apply(block)
 
-        //getting new name
+        //getting the new name
         val newName = builder.name
 
-        //getting new meta
+        //getting the new meta
         val newMeta = builder.meta.seal()
 
         val newData = Data(builder.outputType, newMeta, dependencies = listOf(data)) {

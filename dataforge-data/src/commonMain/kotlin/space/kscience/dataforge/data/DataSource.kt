@@ -45,7 +45,7 @@ public suspend fun <T> ObservableDataSource<T>.awaitData(name: String): Data<T> 
     awaitData(name.parseAsName())
 
 /**
- * A tree like structure for data holding
+ * A tree-like structure for data holding
  */
 public interface DataTree<out T> : ObservableDataSource<T> {
 

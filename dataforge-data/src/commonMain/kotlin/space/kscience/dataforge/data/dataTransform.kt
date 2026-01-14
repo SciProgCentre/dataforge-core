@@ -205,29 +205,31 @@ public fun <T, R> DataTree<T>.transformEach(
     scope: CoroutineScope,
     metaTransform: MutableMeta.(name: Name) -> Unit = {},
     compute: suspend (NamedValueWithMeta<T>) -> R,
-): DataTree<R> = DataTree<R>(
+): DataTree<R> = DataTree.dynamic<R>(
     outputType,
-    scope,
-    initialData = asSequence().associate { namedData: NamedData<T> ->
+    scope
+) {
+    asSequence().forEach { namedData: NamedData<T> ->
         val newMeta = namedData.meta.toMutableMeta().apply {
             metaTransform(namedData.name)
         }.seal()
         val newData = Data(outputType, newMeta, scope.coroutineContext, listOf(namedData)) {
             compute(namedData.awaitWithMeta())
         }
-        namedData.name to newData
+        data(namedData.name, newData)
     }
-) {
-    updates.collect { name ->
-        val data: Data<T>? = read(name)
-        if (data == null) write(name, null) else {
-            val newMeta = data.meta.toMutableMeta().apply {
-                metaTransform(name)
-            }.seal()
-            val d = Data(outputType, newMeta, scope.coroutineContext, listOf(data)) {
-                compute(NamedValueWithMeta(name, data.await(), data.meta))
+    update {
+        updates.collect { name ->
+            val data: Data<T>? = read(name)
+            if (data == null) write(name, null) else {
+                val newMeta = data.meta.toMutableMeta().apply {
+                    metaTransform(name)
+                }.seal()
+                val d = Data(outputType, newMeta, scope.coroutineContext, listOf(data)) {
+                    compute(NamedValueWithMeta(name, data.await(), data.meta))
+                }
+                write(name, d)
             }
-            write(name, d)
         }
     }
 }
@@ -255,7 +257,7 @@ internal fun DataTree<*>.joinMeta(): Meta = Meta {
 
 /**
  * Reduce current snapshot of the [DataTree] to a single [Data].
- * Even if a tree is changed in the future, only current data set is taken.
+ * Even if a tree is changed in the future, only the current data set is taken.
  */
 public inline fun <T, reified R> DataTree<T>.reduceToData(
     meta: Meta = joinMeta(),

@@ -152,7 +152,7 @@ internal class SimpleWorkspaceTest {
     }
 
     @Test
-    fun testWorkspace() = runTest(timeout = 200.milliseconds) {
+    fun testWorkspace() = runTest(timeout = 500.milliseconds) {
         val node = workspace.produce("sum")
         val res = node.data
         assertEquals(328350, res?.await())

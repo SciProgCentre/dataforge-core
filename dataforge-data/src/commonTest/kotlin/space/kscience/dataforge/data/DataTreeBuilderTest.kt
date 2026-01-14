@@ -1,7 +1,6 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import space.kscience.dataforge.names.asName
 import kotlin.test.Test
@@ -48,15 +47,11 @@ internal class DataTreeBuilderTest {
     }
 
     @Test
-    fun testDynamicUpdates() = runTest(timeout = 500.milliseconds) {
-        var job: Job? = null
-
+    fun testMutableDataTree() = runTest(timeout = 500.milliseconds) {
         val subNode = MutableDataTree<Int>()
 
         val rootNode = MutableDataTree<Int>() {
-            job = launch {
-                writeAllAndWatch(subNode, "sub".asName())
-            }
+            launchWriteJobFrom(subNode, backgroundScope, "sub".asName())
         }
 
         repeat(10) {
@@ -68,6 +63,27 @@ internal class DataTreeBuilderTest {
         assertEquals(9, rootNode.awaitData("sub.value[9]").await())
         assertEquals(8, rootNode.awaitData("sub.value[8]").await())
         println("finished")
-        job?.cancel()
+    }
+
+    @Test
+    fun testDynamicTree() = runTest(timeout = 500.milliseconds) {
+        val subNode = MutableDataTree<Int>()
+
+        val rootNode = DataTree.dynamic<Int>(backgroundScope) {
+            observeNode("sub".asName(),subNode)
+        }
+
+        //need this for a virtual time dispatcher to complete the subscription before write start
+        delay(1)
+
+        repeat(10) {
+            subNode.writeValue("value[$it]", it)
+        }
+
+        assertEquals(9, subNode.awaitData("value[9]").await())
+        assertEquals(8, subNode.awaitData("value[8]").await())
+        assertEquals(9, rootNode.awaitData("sub.value[9]").await())
+        assertEquals(8, rootNode.awaitData("sub.value[8]").await())
+        println("finished")
     }
 }

@@ -6,9 +6,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import space.kscience.dataforge.data.Data
-import space.kscience.dataforge.data.DataTree
-import space.kscience.dataforge.data.StaticData
+import space.kscience.dataforge.data.*
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.copy
@@ -167,6 +165,15 @@ public class FileDataTree(
 public fun IOPlugin.readDirectory(path: Path, monitor: Boolean = false): FileDataTree =
     FileDataTree(this, path, monitor)
 
+
+public suspend fun DataSink<Any>.directory(
+    io: IOPlugin,
+    path: Path,
+    monitor: Boolean = false,
+    prefix: Name = Name.EMPTY
+) {
+    writeAll(io.readDirectory(path, monitor), prefix)
+}
 
 ///**
 // * @param resources The names of the resources to read.
