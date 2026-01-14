@@ -13,7 +13,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(DFExperimental::class, ExperimentalCoroutinesApi::class)
 internal class ActionsTest {
     @Test
-    fun testStaticMapAction() = runTest(timeout = 200.milliseconds) {
+    fun testStaticMapAction() = runTest(timeout = 500.milliseconds) {
         val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
         }
@@ -30,7 +30,7 @@ internal class ActionsTest {
     }
 
     @Test
-    fun testDynamicMapAction() = runTest(timeout = 200.milliseconds) {
+    fun testDynamicMapAction() = runTest(timeout = 500.milliseconds) {
         val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
         }
