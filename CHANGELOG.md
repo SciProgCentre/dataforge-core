@@ -5,9 +5,6 @@
 ### Added
 
 ### Changed
-- **BREAKING** DataTree builders refactor.
-- Introduce DynamicDataBuilder to combine immediate write and updates.
-- Tables-kt follows DataForge versioning.
 
 ### Deprecated
 
@@ -16,6 +13,14 @@
 ### Fixed
 
 ### Security
+
+## 0.10.3 - 2026-01-14
+
+### Changed
+
+- **BREAKING** DataTree builders refactor.
+- Introduce DynamicDataBuilder to combine immediate write and updates.
+- Tables-kt follows DataForge versioning.
 
 ## 0.10.2 - 2025-12-17
 
