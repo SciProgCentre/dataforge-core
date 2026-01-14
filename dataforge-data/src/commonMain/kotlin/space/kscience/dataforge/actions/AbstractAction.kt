@@ -36,7 +36,6 @@ public abstract class AbstractAction<T, R>(
      *
      * @param source the source data tree in case we need several data items to update
      * @param actionMeta the metadata used for the whole data tree
-     * @param updatedData an updated item
      */
     protected open suspend fun DataSink<R>.update(
         source: DataTree<T>,
@@ -52,20 +51,24 @@ public abstract class AbstractAction<T, R>(
         source: DataTree<T>,
         meta: Meta,
         updatesScope: CoroutineScope
-    ): DataTree<R> = DataTree(
-        dataType = outputType,
-        scope = updatesScope,
-        initialData = DataBuilderScope<R>().generate(source, meta)
+    ): DataTree<R> = DataTree.dynamic<R>(
+        outputType,
+        updatesScope,
     ) {
 
-        //propagate updates
-        val updateSink = DataSink<R> { name, data ->
-            write(name, data)
-        }
+        generate(source, meta).forEach { (name, data) -> data(name, data) }
 
-        with(updateSink) {
-            source.updates.collect {
-                update(source, meta, it)
+        update {
+
+            //propagate updates
+            val updateSink = DataSink<R> { name, data ->
+                write(name, data)
+            }
+
+            with(updateSink) {
+                source.updates.collect {
+                    update(source, meta, it)
+                }
             }
         }
     }

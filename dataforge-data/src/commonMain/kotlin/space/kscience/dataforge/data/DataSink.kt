@@ -1,22 +1,17 @@
 package space.kscience.dataforge.data
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.mapNotNull
-import space.kscience.dataforge.misc.UnsafeKType
-import space.kscience.dataforge.names.*
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.MutableMeta
+import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.isEmpty
+import space.kscience.dataforge.names.plus
 
-/**
- * A marker scope for data builders
- */
-public interface DataBuilderScope<in T> {
-    public companion object : DataBuilderScope<Nothing>
-}
 
-@Suppress("UNCHECKED_CAST")
-public fun <T> DataBuilderScope(): DataBuilderScope<T> = DataBuilderScope as DataBuilderScope<T>
 
 /**
  * Asynchronous data sink
@@ -28,106 +23,147 @@ public fun interface DataSink<in T> : DataBuilderScope<T> {
     public suspend fun write(name: Name, data: Data<T>?)
 }
 
-
 /**
- * A mutable version of [DataTree]
+ * Write single data into the sink
  */
-public interface MutableDataTree<T> : DataTree<T>, DataSink<T> {
-    override val items: Map<NameToken, MutableDataTree<T>>
-//
-//    public fun getOrCreateItem(token: NameToken): MutableDataTree<T>
-//
-//    public suspend fun put(token: NameToken, data: Data<T>?)
-//
-//    override suspend fun put(name: Name, data: Data<T>?): Unit {
-//        when (name.length) {
-//            0 -> this.data = data
-//            1 -> put(name.first(), data)
-//            else -> getOrCreateItem(name.first()).put(name.cutFirst(), data)
-//        }
-//    }
+public suspend fun <T> DataSink<T>.write(value: NamedData<T>) {
+    write(value.name, value)
 }
 
 /**
- * Provide a mutable subtree if it exists
+ * Write all data produced by [block] into this sink with the given prefix.
  */
-public tailrec fun <T> MutableDataTree<T>.branch(name: Name): MutableDataTree<T>? =
-    when (name.length) {
-        0 -> this
-        1 -> items[name.first()]
-        else -> items[name.first()]?.branch(name.cutFirst())
+public inline fun <T> DataSink<T>.writeAll(
+    prefix: Name,
+    block: DataSink<T>.() -> Unit,
+) {
+    if (prefix.isEmpty()) {
+        apply(block)
+    } else {
+        val proxyDataSink = DataSink<T> { name, data -> this@writeAll.write(prefix + name, data) }
+
+        proxyDataSink.apply(block)
     }
-
-private class MutableDataTreeRoot<T>(
-    override val dataType: KType,
-) : MutableDataTree<T> {
-
-    override val items = HashMap<NameToken, MutableDataTree<T>>()
-    override val updates = MutableSharedFlow<Name>()
-
-    inner class MutableDataTreeBranch(val branchName: Name) : MutableDataTree<T> {
-
-        override var data: Data<T>? = null
-            private set
-
-        override val items = HashMap<NameToken, MutableDataTree<T>>()
-
-        override val updates: Flow<Name> = this@MutableDataTreeRoot.updates.mapNotNull { update ->
-            update.removeFirstOrNull(branchName)
-        }
-        override val dataType: KType get() = this@MutableDataTreeRoot.dataType
-
-        override suspend fun write(
-            name: Name,
-            data: Data<T>?
-        ) {
-            when (name.length) {
-                0 -> {
-                    this.data = data
-                    this@MutableDataTreeRoot.updates.emit(branchName)
-                }
-
-                else -> {
-                    val token = name.first()
-                    items.getOrPut(token) { MutableDataTreeBranch(branchName + token) }.write(name.cutFirst(), data)
-                }
-            }
-        }
-    }
-    override var data: Data<T>? = null
-        private set
-
-    override suspend fun write(
-        name: Name,
-        data: Data<T>?
-    ) {
-        when (name.length) {
-            0 -> {
-                this.data = data
-                this@MutableDataTreeRoot.updates.emit(Name.EMPTY)
-            }
-
-            else -> {
-                val token = name.first()
-                items.getOrPut(token) { MutableDataTreeBranch(token.asName()) }.write(name.cutFirst(), data)
-            }
-        }
-    }
-
 }
 
 /**
- * Create a new [MutableDataTree]
+ * Write all data produced by [block] into this sink with the given prefix.
  */
-@UnsafeKType
-public fun <T> MutableDataTree(
-    type: KType,
-): MutableDataTree<T> = MutableDataTreeRoot<T>(type)
+public inline fun <T> DataSink<T>.writeAll(
+    prefix: String,
+    block: DataSink<T>.() -> Unit,
+): Unit = writeAll(prefix.asName(), block)
+
 
 /**
- * Create and initialize an observable mutable data tree.
+ * Write single data into the sink
  */
-@OptIn(UnsafeKType::class)
-public inline fun <reified T> MutableDataTree(
-    generator: MutableDataTree<T>.() -> Unit = {},
-): MutableDataTree<T> = MutableDataTree<T>(typeOf<T>()).apply { generator() }
+public suspend fun <T> DataSink<T>.write(name: String, value: Data<T>) {
+    write(Name.parse(name), value)
+}
+
+@Deprecated("Use writeAll(tree, name) instead", ReplaceWith("writeAll(tree, name)"))
+public suspend fun <T> DataSink<T>.writeAll(name: Name, tree: DataTree<T>) {
+    writeAll(name) { writeAll(tree.asSequence()) }
+}
+
+/**
+ * Write all data from the tree into this sink with the given prefix. Do not observe the tree changes.
+ */
+public suspend fun <T> DataSink<T>.writeAll(tree: DataTree<T>, prefix: Name = Name.EMPTY) {
+    if (prefix.isEmpty()) {
+        writeAll(tree)
+    } else {
+        writeAll(prefix) { writeAll(tree.asSequence()) }
+    }
+}
+
+/**
+ * Write all data from the tree into this sink with the given prefix. Do not observe the tree changes.
+ */
+public suspend fun <T> DataSink<T>.writeAll(name: String, tree: DataTree<T>) {
+    writeAll(Name.parse(name)) { writeAll(tree.asSequence()) }
+}
+
+/**
+ * Produce lazy [Data] and emit it into the [MutableDataTree]
+ */
+public suspend inline fun <reified T> DataSink<T>.writeValue(
+    name: String,
+    meta: Meta = Meta.EMPTY,
+    noinline producer: suspend () -> T,
+) {
+    val data = Data(meta, block = producer)
+    write(name, data)
+}
+
+/**
+ * Produce lazy [Data] and emit it into the [MutableDataTree]
+ */
+public suspend inline fun <reified T> DataSink<T>.writeValue(
+    name: Name,
+    meta: Meta = Meta.EMPTY,
+    noinline producer: suspend () -> T,
+) {
+    val data = Data(meta, block = producer)
+    write(name, data)
+}
+
+/**
+ * Emit static data with the fixed value
+ */
+public suspend inline fun <reified T> DataSink<T>.writeValue(
+    name: Name,
+    value: T,
+    meta: Meta = Meta.EMPTY,
+): Unit = write(name, Data.wrapValue(value, meta))
+
+public suspend inline fun <reified T> DataSink<T>.writeValue(
+    name: String,
+    value: T,
+    meta: Meta = Meta.EMPTY,
+): Unit = write(name, Data.wrapValue(value, meta))
+
+/**
+ * Emit static data with the fixed value
+ */
+public suspend inline fun <reified T> DataSink<T>.writeValue(
+    name: String,
+    value: T,
+    metaBuilder: MutableMeta.() -> Unit,
+): Unit = write(Name.parse(name), Data.wrapValue(value, Meta(metaBuilder)))
+
+/**
+ * Write all data from the sequence into this sink. Does not return until source is exhausted.
+ */
+public suspend fun <T> DataSink<T>.writeAll(sequence: Sequence<NamedData<T>>) {
+    sequence.forEach {
+        write(it)
+    }
+}
+
+/**
+ * Write all data from the map into this sink.
+ */
+public suspend fun <T> DataSink<T>.writeAll(map: Map<Name, Data<T>?>) {
+    map.forEach { (name, data) ->
+        write(name, data)
+    }
+}
+
+/**
+ * Copy all data from [this] and mirror changes if they appear. Returns a job that can be canceled.
+ *
+ * Use provided [scope] to launch the job and control its lifecycle.
+ */
+@OptIn(DFExperimental::class)
+public fun <T : Any> DataSink<T>.launchWriteJobFrom(
+    source: DataTree<T>,
+    scope: CoroutineScope,
+    prefix: Name = Name.EMPTY,
+): Job = scope.launch {
+    writeAll(source, prefix)
+    source.updates.collect {
+        write(prefix + it, source.read(it))
+    }
+}

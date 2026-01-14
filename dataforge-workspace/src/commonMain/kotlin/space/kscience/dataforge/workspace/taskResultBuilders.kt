@@ -100,7 +100,7 @@ public fun <R> TaskResultScope<R>.result(data: Data<R>): DataTree<R> = DataTree.
 }
 
 @OptIn(UnsafeKType::class)
-public fun <R> TaskResultScope<R>.result(builder: StaticDataBuilder<R>.() -> Unit): DataTree<R> =
+public fun <R> TaskResultScope<R>.result(builder: DataBuilder<R>.() -> Unit): DataTree<R> =
     DataTree.static(resultType, builder)
 
 ///**
