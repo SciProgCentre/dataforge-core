@@ -11,8 +11,6 @@ import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.isEmpty
 import space.kscience.dataforge.names.plus
 
-
-
 /**
  * Asynchronous data sink
  */

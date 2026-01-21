@@ -6,6 +6,7 @@
 - Ability to unwrap NamedData
 
 ### Changed
+- **BREAKING** Data builders use `put` instead of `data`. Use `putValue` for static values and `value` for root value.
 - Include flag to include file extensions into FileDataTree node names.
 
 ### Deprecated
@@ -13,6 +14,7 @@
 ### Removed
 
 ### Fixed
+- DataTree filter bug
 
 ### Security
 

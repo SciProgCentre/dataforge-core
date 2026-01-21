@@ -62,7 +62,7 @@ internal class SimpleWorkspaceTest {
         data {
             //statically initialize data
             repeat(100) {
-                value("myData[$it]", it)
+                putValue("myData[$it]", it)
             }
         }
 
@@ -96,7 +96,7 @@ internal class SimpleWorkspaceTest {
                     val newData: Data<Int> = data.combine(linearData[data.name]!!) { l, r ->
                         l + r
                     }
-                    data(data.name, newData)
+                    put(data.name, newData)
                 }
             }
         }
@@ -122,8 +122,8 @@ internal class SimpleWorkspaceTest {
                 l + r.value
             }
             result {
-                data("even", evenSum)
-                data("odd", oddSum)
+                put("even", evenSum)
+                put("odd", oddSum)
             }
         }
 
@@ -143,7 +143,7 @@ internal class SimpleWorkspaceTest {
                     val meta = data.meta.toMutableMeta().apply {
                         "newValue" put 22
                     }
-                    data(data.name + "new", data.transform { (data.meta["value"].int ?: 0) + it })
+                    put(data.name + "new", data.transform { (data.meta["value"].int ?: 0) + it })
                 }
             }
         }

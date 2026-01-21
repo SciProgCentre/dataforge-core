@@ -56,7 +56,7 @@ public abstract class AbstractAction<T, R>(
         updatesScope,
     ) {
 
-        generate(source, meta).forEach { (name, data) -> data(name, data) }
+        generate(source, meta).forEach { (name, data) -> put(name, data) }
 
         update {
 

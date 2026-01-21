@@ -20,7 +20,7 @@ internal class ActionsTest {
 
         val data: DataTree<Int> = DataTree.static {
             repeat(10) {
-                value(it.toString(), it)
+                putValue(it.toString(), it)
             }
         }
 

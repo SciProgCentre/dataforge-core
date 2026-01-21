@@ -96,7 +96,7 @@ public suspend fun <T, R> TaskResultScope<R>.transformEach(
 
 @OptIn(UnsafeKType::class)
 public fun <R> TaskResultScope<R>.result(data: Data<R>): DataTree<R> = DataTree.static(resultType) {
-    data(Name.EMPTY, data)
+    put(Name.EMPTY, data)
 }
 
 @OptIn(UnsafeKType::class)

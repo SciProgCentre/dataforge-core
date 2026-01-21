@@ -10,6 +10,7 @@ import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.io.yaml.YamlPlugin
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
@@ -23,11 +24,11 @@ import kotlin.test.assertEquals
 class FileDataTest {
     val dataNode = DataTree.static<String> {
         node("dir") {
-            value("a", "Some string") {
+            putValue("a", "Some string", Meta {
                 "content" put "Some string"
-            }
+            })
         }
-        value("b", "root data")
+        putValue("b", "root data")
 //        meta {
 //            "content" put "This is root meta node"
 //        }

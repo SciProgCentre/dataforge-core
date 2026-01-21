@@ -9,7 +9,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.*
 import kotlin.reflect.KType
@@ -18,9 +17,14 @@ import kotlin.reflect.typeOf
 /**
  * A builder for data trees
  */
-public fun interface DataBuilder<T> : DataBuilderScope<T> {
-    public fun data(name: Name, data: Data<T>)
+public fun interface DataBuilder<in T> : DataBuilderScope<T> {
+    public fun put(name: Name, data: Data<T>)
 }
+
+/**
+ * Put root data into the builder
+ */
+public fun <T> DataBuilder<T>.data(data: Data<T>): Unit = put(Name.EMPTY, data)
 
 @Deprecated("Use DataBuilder instead", ReplaceWith("DataBuilder<T>"))
 public typealias StaticDataBuilder<T> = DataBuilder<T>
@@ -28,7 +32,7 @@ public typealias StaticDataBuilder<T> = DataBuilder<T>
 /**
  * A builder for dynamic data trees
  */
-public interface DynamicDataBuilder<T> : DataBuilder<T> {
+public interface DynamicDataBuilder<in T> : DataBuilder<T> {
     /**
      * Asynchronously update the data tree.
      *
@@ -45,7 +49,7 @@ public interface DynamicDataBuilder<T> : DataBuilder<T> {
 private class DataMapBuilder<T> : DataBuilder<T> {
     val map = mutableMapOf<Name, Data<T>>()
 
-    override fun data(name: Name, data: Data<T>) {
+    override fun put(name: Name, data: Data<T>) {
         if (map.containsKey(name)) {
             error("Duplicate key '$name'")
         } else {
@@ -109,31 +113,51 @@ private class DataTreeBuilder<T>(
 private val emptySharedFlow = MutableSharedFlow<Nothing>()
 
 
-public fun <T> DataBuilder<T>.data(name: String, data: Data<T>) {
-    data(name.parseAsName(), data)
+public fun <T> DataBuilder<T>.put(name: String, data: Data<T>) {
+    put(name.parseAsName(), data)
 }
 
-public inline fun <T, reified T1 : T> DataBuilder<T>.value(
+/**
+ * Put static value with given [name]
+ */
+public inline fun <T, reified T1 : T> DataBuilder<T>.putValue(
     name: String,
     value: T1,
-    metaBuilder: MutableMeta.() -> Unit = {}
+    meta: Meta = Meta.EMPTY
 ) {
-    data(name, Data(value, Meta(metaBuilder)))
+    put(name, Data(value, meta))
 }
 
+/**
+ * Put static value as root data.
+ */
+public inline fun <T, reified T1 : T> DataBuilder<T>.value(
+    value: T1,
+    meta: Meta = Meta.EMPTY
+) {
+    put(Name.EMPTY, Data(value, meta))
+}
+
+
+/**
+ * Put a node using provided builder [block]
+ */
 public fun <T> DataBuilder<T>.node(prefix: Name, block: DataBuilder<T>.() -> Unit) {
     val map = DataMapBuilder<T>().apply(block).map
     map.forEach { (name, data) ->
-        data(prefix + name, data)
+        put(prefix + name, data)
     }
 }
 
 public fun <T> DataBuilder<T>.node(prefix: String, block: DataBuilder<T>.() -> Unit): Unit =
     node(prefix.parseAsName(), block)
 
+/**
+ * Put a static [DataTree] with given prefix.
+ */
 public fun <T> DataBuilder<T>.node(prefix: Name, tree: DataTree<T>) {
     tree.forEach { data ->
-        data(prefix + data.name, data)
+        put(prefix + data.name, data)
     }
 }
 
@@ -155,6 +179,9 @@ public fun <T> DynamicDataBuilder<T>.observeNode(prefix: Name, tree: DataTree<T>
     }
 }
 
+/**
+ * Write current state of the [tree] into this builder and propagate updates from it.
+ */
 public fun <T> DynamicDataBuilder<T>.observeNode(prefix: String, tree: DataTree<T>): Unit =
     observeNode(prefix.parseAsName(), tree)
 
@@ -182,7 +209,7 @@ public fun <T> DataTree.Companion.dynamic(
             updaters.add(block)
         }
 
-        override fun data(name: Name, data: Data<T>) {
+        override fun put(name: Name, data: Data<T>) {
             initialData[name] = data
         }
 
@@ -203,13 +230,27 @@ public fun <T> DataTree.Companion.dynamic(
     }
 }
 
-
+/**
+ * Creates a dynamic [DataTree] of the specified type.
+ *
+ * This method constructs a [DataTree] where updates to the data are applied
+ * dynamically and concurrently. The specific order of update application
+ * is undetermined due to the concurrent nature of operations.
+ *
+ * @param T The type of the data encapsulated in the [DataTree].
+ * @param scope The [CoroutineScope] used to manage the dynamic updates.
+ * @param block A configuration block defining the dynamic data updates and initial data structure.
+ * @return A dynamic [DataTree] instance of type [T].
+ */
 @OptIn(UnsafeKType::class)
 public inline fun <reified T> DataTree.Companion.dynamic(
     scope: CoroutineScope,
     noinline block: DynamicDataBuilder<T>.() -> Unit
 ): DataTree<T> = dynamic(typeOf<T>(), scope, block)
 
+/**
+ * Create a static [DataTree] from a flat map
+ */
 @OptIn(UnsafeKType::class)
 public inline fun <reified T> DataTree(
     data: Map<Name, Data<T>>
@@ -233,6 +274,9 @@ public fun <T> Map<Name, Data<T>>.asTree(type: KType): DataTree<T> = FlatDataTre
 public inline fun <reified T> Map<Name, Data<T>>.asTree(): DataTree<T> = asTree(typeOf<T>())
 
 
+/**
+ * Collect a sequence of [NamedData] to a [DataTree]
+ */
 @UnsafeKType
 public fun <T> Sequence<NamedData<T>>.toTree(type: KType): DataTree<T> = FlatDataTree(
     dataType = type,
@@ -248,13 +292,17 @@ public fun <T> Sequence<NamedData<T>>.toTree(type: KType): DataTree<T> = FlatDat
 @OptIn(UnsafeKType::class)
 public inline fun <reified T> Sequence<NamedData<T>>.toTree(): DataTree<T> = toTree(typeOf<T>())
 
-
+/**
+ * Create a static [DataTree] from a builder
+ */
 @UnsafeKType
 public fun <T> DataTree.Companion.static(
     type: KType, block: DataBuilder<T>.() -> Unit
 ): DataTree<T> = DataMapBuilder<T>().apply(block).map.asTree(type)
 
-
+/**
+ * Create a static [DataTree] from a builder
+ */
 @OptIn(UnsafeKType::class)
 public inline fun <reified T> DataTree.Companion.static(
     noinline block: DataBuilder<T>.() -> Unit

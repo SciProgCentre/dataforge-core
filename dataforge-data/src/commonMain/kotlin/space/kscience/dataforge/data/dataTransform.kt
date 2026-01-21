@@ -216,7 +216,7 @@ public fun <T, R> DataTree<T>.transformEach(
         val newData = Data(outputType, newMeta, scope.coroutineContext, listOf(namedData)) {
             compute(namedData.awaitWithMeta())
         }
-        data(namedData.name, newData)
+        put(namedData.name, newData)
     }
     update {
         updates.collect { name ->
