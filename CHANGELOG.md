@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Ability to unwrap NamedData
 
 ### Changed
 - Include flag to include file extensions into FileDataTree node names.
