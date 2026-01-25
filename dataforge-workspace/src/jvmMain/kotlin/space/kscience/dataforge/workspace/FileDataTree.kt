@@ -35,7 +35,7 @@ public class FileDataTree(
     public val io: IOPlugin,
     public val path: Path,
     private val monitor: Boolean = false,
-    public val includeExtensions: Boolean = false,
+    public val includeExtensions: Boolean = true,
 ) : DataTree<Binary> {
     override val dataType: KType = typeOf<Binary>()
 
@@ -124,7 +124,7 @@ public class FileDataTree(
         callbackFlow<Name> {
             val watchService: WatchService = path.fileSystem.newWatchService()
 
-            fun Path.toName() = Name(map { NameToken.parse(it.nameWithoutExtension) })
+            fun Path.toName() = Name(map { NameToken.parse(if(includeExtensions) it.name else it.nameWithoutExtension) })
 
             fun monitor(childPath: Path): Job {
                 val key: WatchKey = childPath.register(
@@ -172,10 +172,24 @@ public class FileDataTree(
     }
 }
 
-public fun IOPlugin.readDirectory(path: Path, monitor: Boolean = false): FileDataTree =
-    FileDataTree(this, path, monitor)
+/**
+ * Reads a directory and constructs a [FileDataTree] from its contents based on the provided parameters.
+ *
+ * @param path The path of the directory to read.
+ * @param monitor A flag indicating whether changes in the directory should be monitored. Default is `false`.
+ * @param includeExtensions A flag indicating whether file extensions should be included into names. Default is `true`.
+ */
+public fun IOPlugin.readDirectory(path: Path, monitor: Boolean = false, includeExtensions: Boolean = true): FileDataTree =
+    FileDataTree(io = this, path = path, monitor = monitor, includeExtensions = includeExtensions)
 
-
+/**
+ * Writes the contents of a directory to a dynamic data sink.
+ *
+ * @param io The IO plugin to use for reading the directory.
+ * @param path The path of the directory to read.
+ * @param monitor A flag indicating whether changes in the directory should be monitored. Default is `false`.
+ * @param prefix The prefix to use for the names of the files in the directory. Default is an empty name.
+ */
 public suspend fun DataSink<Any>.directory(
     io: IOPlugin,
     path: Path,

@@ -5,6 +5,7 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.names.NameToken
+import space.kscience.dataforge.names.last
 import kotlin.reflect.typeOf
 import kotlin.test.*
 
@@ -72,17 +73,17 @@ class FilteredDataTreeTest {
     @Test
     fun testNestedFiltering() {
         // Define a filter allowing only names containing "allowed"
-        val filter = DataFilter { name, _, _ -> name.toString().contains("allowed") }
+        val filter = DataFilter { name, _, _ -> name.last().body == "allowed"}
 
         val dataTree = DataTree.static<String> {
-            node("allowedChild") {
+            node("allowed") {
                 value("child")
-                node("notAllowed") {
-                    value("grandchild")
+                node("notAllowedChild") {
+                    value("notAllowedChild")
                 }
             }
-            node("disallowedChild") {
-                value("disallowed")
+            node("notAllowed") {
+                value("notAllowed")
             }
         }
 
@@ -90,10 +91,10 @@ class FilteredDataTreeTest {
         val filteredTree = dataTree.filterData(filter)
 
         // Test nested filtered items
-        assertTrue(filteredTree.items.containsKey(NameToken("allowedChild")))
-        assertFalse(filteredTree.items.containsKey(NameToken("disallowedChild")))
+        assertTrue(filteredTree.items.containsKey(NameToken("allowed")))
+        assertFalse(filteredTree.items.containsKey(NameToken("notAllowed")))
 
-        val filteredChildTree = filteredTree.items[NameToken("allowedChild")]
+        val filteredChildTree = filteredTree.branch("allowed")
         assertNotNull(filteredChildTree)
         assertTrue(filteredChildTree.items.isEmpty())
     }

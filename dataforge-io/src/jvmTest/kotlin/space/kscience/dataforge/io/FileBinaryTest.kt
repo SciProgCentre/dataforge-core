@@ -22,7 +22,7 @@ class FileBinaryTest {
     @Test
     fun testSize() {
         val binary = envelope.data
-        assertEquals(binary?.size?.toInt(), binary?.toByteArray()?.size)
+        assertEquals(binary?.size, binary?.toByteArray()?.size)
     }
 
     @Test
@@ -40,7 +40,7 @@ class FileBinaryTest {
         }
         val binary = envelopeFromFile.data!!
         println(binary.toByteArray().size)
-        assertEquals(binary.size.toInt(), binary.toByteArray().size)
+        assertEquals(binary.size, binary.toByteArray().size)
 
     }
 
