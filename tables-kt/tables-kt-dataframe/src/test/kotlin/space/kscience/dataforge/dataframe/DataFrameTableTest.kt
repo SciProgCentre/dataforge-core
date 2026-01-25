@@ -1,7 +1,6 @@
 package space.kscience.dataforge.dataframe
 
 import org.jetbrains.kotlinx.dataframe.api.add
-import org.jetbrains.kotlinx.dataframe.api.column
 import org.junit.jupiter.api.Test
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.tables.*
@@ -29,19 +28,11 @@ internal class DataFrameTableTest {
 
         val dataFrame = table.toDataFrame()
 
-        //println( dataFrame)
-
-        val z by column<Double>()
-
-        val newFrame = dataFrame.add {
-            z.from { it[x] + it[y] + 1.0 }
-        }
-
-        //println(newFrame)
+        val newFrame = dataFrame.add("z") { it[x] + it[y] + 1.0 }
 
         val newTable = newFrame.asTable()
 
-        assertEquals(newTable.columns[x], table.columns[x])
+        assertEquals(table.columns[x], newTable.columns[x])
         assertTrue {
             table.rowsToColumn("z") { it[x] + it[y] + 1.0 }.contentEquals(newTable.columns["z"])
         }

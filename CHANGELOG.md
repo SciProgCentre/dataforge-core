@@ -6,7 +6,8 @@
 - Ability to unwrap NamedData
 
 ### Changed
-- **BREAKING** 
+- Updated Exposed in tables to 1.0.0
+- **BREAKING** DataTree builders refactor. 
 - Updated Exposed in tables to 1.0.0
 - **BREAKING** filter data by type separated from branch by type.
 - **BREAKING** Data builders use `put` instead of `data`. Use `putValue` for static values and `value` for root value.
