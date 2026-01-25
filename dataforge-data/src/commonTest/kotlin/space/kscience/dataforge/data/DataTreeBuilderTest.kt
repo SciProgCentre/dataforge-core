@@ -69,8 +69,8 @@ internal class DataTreeBuilderTest {
     fun testDynamicTree() = runTest(timeout = 500.milliseconds) {
         val subNode = MutableDataTree<Int>()
 
-        val rootNode = DataTree.dynamic<Int>(backgroundScope) {
-            observeNode("sub".asName(),subNode)
+        val rootNode = DataTree.dynamic<Int>{
+            observeNode("sub", backgroundScope, subNode)
         }
 
         //need this for a virtual time dispatcher to complete the subscription before write start

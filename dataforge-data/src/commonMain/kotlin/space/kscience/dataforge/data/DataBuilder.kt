@@ -34,13 +34,14 @@ public typealias StaticDataBuilder<T> = DataBuilder<T>
  */
 public interface DynamicDataBuilder<in T> : DataBuilder<T> {
     /**
-     * Asynchronously update the data tree.
+     * Asynchronously update the data tree with corresponding update [scope].
+     * When the [scope] is cancelled, the update is cancelled as well.
      *
      * This method could be called multiple times. In this case different updaters are applied simultaneously and concurrently.
      *
      * Since updates are concurrent, the specific order of application is undetermined.
      */
-    public fun update(block: suspend DataSink<T>.() -> Unit)
+    public fun update(scope: CoroutineScope, block: suspend DataSink<T>.() -> Unit)
 }
 
 /**
@@ -169,10 +170,10 @@ public fun <T> DataBuilder<T>.node(prefix: String, tree: DataTree<T>): Unit = no
 /**
  * Write current state of the [tree] into this builder and propagate updates from it.
  */
-public fun <T> DynamicDataBuilder<T>.observeNode(prefix: Name, tree: DataTree<T>) {
+public fun <T> DynamicDataBuilder<T>.observeNode(prefix: Name, scope: CoroutineScope, tree: DataTree<T>) {
     node(prefix, tree)
 
-    update {
+    update(scope) {
         tree.updates.collect {
             write(prefix + it, tree[it])
         }
@@ -182,8 +183,8 @@ public fun <T> DynamicDataBuilder<T>.observeNode(prefix: Name, tree: DataTree<T>
 /**
  * Write current state of the [tree] into this builder and propagate updates from it.
  */
-public fun <T> DynamicDataBuilder<T>.observeNode(prefix: String, tree: DataTree<T>): Unit =
-    observeNode(prefix.parseAsName(), tree)
+public fun <T> DynamicDataBuilder<T>.observeNode(prefix: String, scope: CoroutineScope, tree: DataTree<T>): Unit =
+    observeNode(prefix.parseAsName(), scope, tree)
 
 /**
  * Create a static [DataTree] from a flat map
@@ -197,16 +198,15 @@ public fun <T> DataTree(type: KType, data: Map<Name, Data<T>>): DataTree<T> =
  */
 public fun <T> DataTree.Companion.dynamic(
     type: KType,
-    scope: CoroutineScope,
     block: DynamicDataBuilder<T>.() -> Unit
 ): DataTree<T> {
 
     val initialData = mutableMapOf<Name, Data<T>>()
-    val updaters = mutableListOf<suspend DataSink<T>.() -> Unit>()
+    val updaters = mutableListOf<Pair<CoroutineScope, suspend DataSink<T>.() -> Unit>>()
 
     val dynamicDataBuilder = object : DynamicDataBuilder<T> {
-        override fun update(block: suspend DataSink<T>.() -> Unit) {
-            updaters.add(block)
+        override fun update(scope: CoroutineScope, block: suspend DataSink<T>.() -> Unit) {
+            updaters.add(scope to block)
         }
 
         override fun put(name: Name, data: Data<T>) {
@@ -221,7 +221,7 @@ public fun <T> DataTree.Companion.dynamic(
         FlatDataTree(type, initialData, emptySharedFlow, Name.EMPTY)
     } else {
         DataTreeBuilder<T>(type, initialData).apply {
-            updaters.forEach { updater ->
+            updaters.forEach { (scope, updater) ->
                 scope.launch(GoalExecutionRestriction(GoalExecutionRestrictionPolicy.ERROR)) {
                     updater()
                 }
@@ -238,15 +238,13 @@ public fun <T> DataTree.Companion.dynamic(
  * is undetermined due to the concurrent nature of operations.
  *
  * @param T The type of the data encapsulated in the [DataTree].
- * @param scope The [CoroutineScope] used to manage the dynamic updates.
  * @param block A configuration block defining the dynamic data updates and initial data structure.
  * @return A dynamic [DataTree] instance of type [T].
  */
 @OptIn(UnsafeKType::class)
 public inline fun <reified T> DataTree.Companion.dynamic(
-    scope: CoroutineScope,
     noinline block: DynamicDataBuilder<T>.() -> Unit
-): DataTree<T> = dynamic(typeOf<T>(), scope, block)
+): DataTree<T> = dynamic(typeOf<T>(), block)
 
 /**
  * Create a static [DataTree] from a flat map

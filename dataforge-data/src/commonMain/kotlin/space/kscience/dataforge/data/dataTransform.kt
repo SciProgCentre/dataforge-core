@@ -206,8 +206,7 @@ public fun <T, R> DataTree<T>.transformEach(
     metaTransform: MutableMeta.(name: Name) -> Unit = {},
     compute: suspend (NamedValueWithMeta<T>) -> R,
 ): DataTree<R> = DataTree.dynamic<R>(
-    outputType,
-    scope
+    outputType
 ) {
     asSequence().forEach { namedData: NamedData<T> ->
         val newMeta = namedData.meta.toMutableMeta().apply {
@@ -218,7 +217,7 @@ public fun <T, R> DataTree<T>.transformEach(
         }
         put(namedData.name, newData)
     }
-    update {
+    update(scope) {
         updates.collect { name ->
             val data: Data<T>? = read(name)
             if (data == null) write(name, null) else {

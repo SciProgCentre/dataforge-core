@@ -5,8 +5,8 @@ plugins {
 
 dependencies {
     api(projects.tablesKt)
-    api(libs.exposed.core)
-    testImplementation(libs.exposed.jdbc)
+//    api(libs.exposed.core)
+    api(libs.exposed.jdbc)
     testImplementation("com.h2database:h2:2.4.240")
     testImplementation(spclibs.logback.classic)
 }
