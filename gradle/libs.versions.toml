@@ -1,7 +1,7 @@
 [versions]
 
 dataframe = "0.15.0"
-exposed = "0.60.0"
+exposed = "1.0.0"
 wire = "5.4.0"
 
 [libraries]

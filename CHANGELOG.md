@@ -6,6 +6,8 @@
 - Ability to unwrap NamedData
 
 ### Changed
+- Updated Exposed in tables to 1.0.0
+- **BREAKING** filter data by type separated from branch by type.
 - **BREAKING** Data builders use `put` instead of `data`. Use `putValue` for static values and `value` for root value.
 - Include flag to include file extensions into FileDataTree node names.
 
