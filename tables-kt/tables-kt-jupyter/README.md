@@ -6,7 +6,7 @@
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:tables-kt-jupyter:0.10.3`.
+The Maven coordinates of this project are `space.kscience:tables-kt-jupyter:0.11.0-dev-1`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -16,6 +16,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:tables-kt-jupyter:0.10.3")
+    implementation("space.kscience:tables-kt-jupyter:0.11.0-dev-1")
 }
 ```

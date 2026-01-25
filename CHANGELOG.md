@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Documentation and safety for Tables-kt-dataframe
 - Ability to unwrap NamedData
 
 ### Changed
