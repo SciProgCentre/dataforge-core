@@ -17,22 +17,9 @@ import kotlin.reflect.typeOf
 /**
  * A builder for data trees
  */
-public fun interface DataBuilder<in T> : DataBuilderScope<T> {
+public interface DataTreeBuilder<in T> : DataBuilderScope<T> {
     public fun put(name: Name, data: Data<T>)
-}
 
-/**
- * Put root data into the builder
- */
-public fun <T> DataBuilder<T>.data(data: Data<T>): Unit = put(Name.EMPTY, data)
-
-@Deprecated("Use DataBuilder instead", ReplaceWith("DataBuilder<T>"))
-public typealias StaticDataBuilder<T> = DataBuilder<T>
-
-/**
- * A builder for dynamic data trees
- */
-public interface DynamicDataBuilder<in T> : DataBuilder<T> {
     /**
      * Asynchronously update the data tree with corresponding update [scope].
      * When the [scope] is cancelled, the update is cancelled as well.
@@ -45,19 +32,9 @@ public interface DynamicDataBuilder<in T> : DataBuilder<T> {
 }
 
 /**
- * A builder for data tree branches and static data
+ * Put root data into the builder
  */
-private class DataMapBuilder<T> : DataBuilder<T> {
-    val map = mutableMapOf<Name, Data<T>>()
-
-    override fun put(name: Name, data: Data<T>) {
-        if (map.containsKey(name)) {
-            error("Duplicate key '$name'")
-        } else {
-            map[name] = data
-        }
-    }
-}
+public fun <T> DataTreeBuilder<T>.data(data: Data<T>): Unit = put(Name.EMPTY, data)
 
 /**
  * Map-based implementation of [DataTree]
@@ -85,10 +62,10 @@ private class FlatDataTree<T>(
 /**
  * A builder for [FlatDataTree].
  */
-private class DataTreeBuilder<T>(
+private class DataTreeBuilderImpl<T>(
     private val type: KType,
     initialData: Map<Name, Data<T>> = emptyMap(),
-) : DataSink<T> {
+) : DataSink<T>, DataTreeBuilder<T> {
 
     private val map = HashMap<Name, Data<T>>(initialData)
 
@@ -96,6 +73,10 @@ private class DataTreeBuilder<T>(
 
     private val updatesFlow = MutableSharedFlow<Name>()
 
+
+    override fun put(name: Name, data: Data<T>) {
+        map[name] = data
+    }
 
     override suspend fun write(name: Name, data: Data<T>?) {
         mutex.withLock {
@@ -108,20 +89,27 @@ private class DataTreeBuilder<T>(
         updatesFlow.emit(name)
     }
 
+    override fun update(
+        scope: CoroutineScope,
+        block: suspend DataSink<T>.() -> Unit
+    ) {
+        scope.launch { block() }
+    }
+
     fun build(): DataTree<T> = FlatDataTree(type, map, updatesFlow, Name.EMPTY)
 }
 
 private val emptySharedFlow = MutableSharedFlow<Nothing>()
 
 
-public fun <T> DataBuilder<T>.put(name: String, data: Data<T>) {
+public fun <T> DataTreeBuilder<T>.put(name: String, data: Data<T>) {
     put(name.parseAsName(), data)
 }
 
 /**
  * Put static value with given [name]
  */
-public inline fun <T, reified T1 : T> DataBuilder<T>.putValue(
+public inline fun <T, reified T1 : T> DataTreeBuilder<T>.putValue(
     name: String,
     value: T1,
     meta: Meta = Meta.EMPTY
@@ -132,7 +120,7 @@ public inline fun <T, reified T1 : T> DataBuilder<T>.putValue(
 /**
  * Put static value as root data.
  */
-public inline fun <T, reified T1 : T> DataBuilder<T>.value(
+public inline fun <T, reified T1 : T> DataTreeBuilder<T>.value(
     value: T1,
     meta: Meta = Meta.EMPTY
 ) {
@@ -143,20 +131,35 @@ public inline fun <T, reified T1 : T> DataBuilder<T>.value(
 /**
  * Put a node using provided builder [block]
  */
-public fun <T> DataBuilder<T>.node(prefix: Name, block: DataBuilder<T>.() -> Unit) {
-    val map = DataMapBuilder<T>().apply(block).map
-    map.forEach { (name, data) ->
-        put(prefix + name, data)
+public fun <T> DataTreeBuilder<T>.node(prefix: Name, block: DataTreeBuilder<T>.() -> Unit) {
+    if(prefix.isEmpty()) return block()
+
+    val proxy = object : DataTreeBuilder<T> {
+        override fun put(name: Name, data: Data<T>) {
+            this@node.put(prefix + name, data)
+        }
+
+        override fun update(
+            scope: CoroutineScope,
+            block: suspend DataSink<T>.() -> Unit
+        ) {
+            this@node.update(scope){
+                val sinkProxy = DataSink<T> { name, data -> write(prefix + name, data) }
+                sinkProxy.block()
+            }
+        }
+
     }
+    return proxy.block()
 }
 
-public fun <T> DataBuilder<T>.node(prefix: String, block: DataBuilder<T>.() -> Unit): Unit =
+public fun <T> DataTreeBuilder<T>.node(prefix: String, block: DataTreeBuilder<T>.() -> Unit): Unit =
     node(prefix.parseAsName(), block)
 
 /**
  * Put a static [DataTree] with given prefix.
  */
-public fun <T> DataBuilder<T>.node(prefix: Name, tree: DataTree<T>) {
+public fun <T> DataTreeBuilder<T>.node(prefix: Name, tree: DataTree<T>) {
     tree.forEach { data ->
         put(prefix + data.name, data)
     }
@@ -165,12 +168,12 @@ public fun <T> DataBuilder<T>.node(prefix: Name, tree: DataTree<T>) {
 /**
  * Write current state of the [tree] into this builder. Does not propagate updates from it.
  */
-public fun <T> DataBuilder<T>.node(prefix: String, tree: DataTree<T>): Unit = node(prefix.parseAsName(), tree)
+public fun <T> DataTreeBuilder<T>.node(prefix: String, tree: DataTree<T>): Unit = node(prefix.parseAsName(), tree)
 
 /**
  * Write current state of the [tree] into this builder and propagate updates from it.
  */
-public fun <T> DynamicDataBuilder<T>.observeNode(prefix: Name, scope: CoroutineScope, tree: DataTree<T>) {
+public fun <T> DataTreeBuilder<T>.observeNode(prefix: Name, scope: CoroutineScope, tree: DataTree<T>) {
     node(prefix, tree)
 
     update(scope) {
@@ -183,7 +186,7 @@ public fun <T> DynamicDataBuilder<T>.observeNode(prefix: Name, scope: CoroutineS
 /**
  * Write current state of the [tree] into this builder and propagate updates from it.
  */
-public fun <T> DynamicDataBuilder<T>.observeNode(prefix: String, scope: CoroutineScope, tree: DataTree<T>): Unit =
+public fun <T> DataTreeBuilder<T>.observeNode(prefix: String, scope: CoroutineScope, tree: DataTree<T>): Unit =
     observeNode(prefix.parseAsName(), scope, tree)
 
 /**
@@ -191,20 +194,21 @@ public fun <T> DynamicDataBuilder<T>.observeNode(prefix: String, scope: Coroutin
  */
 @UnsafeKType
 public fun <T> DataTree(type: KType, data: Map<Name, Data<T>>): DataTree<T> =
-    DataTreeBuilder(type, data).build()
+    DataTreeBuilderImpl(type, data).build()
 
 /**
  * Create a dynamic [DataTree]
  */
-public fun <T> DataTree.Companion.dynamic(
+@UnsafeKType
+public fun <T> DataTree(
     type: KType,
-    block: DynamicDataBuilder<T>.() -> Unit
+    block: DataTreeBuilder<T>.() -> Unit
 ): DataTree<T> {
 
     val initialData = mutableMapOf<Name, Data<T>>()
     val updaters = mutableListOf<Pair<CoroutineScope, suspend DataSink<T>.() -> Unit>>()
 
-    val dynamicDataBuilder = object : DynamicDataBuilder<T> {
+    val dynamicDataBuilder = object : DataTreeBuilder<T> {
         override fun update(scope: CoroutineScope, block: suspend DataSink<T>.() -> Unit) {
             updaters.add(scope to block)
         }
@@ -220,7 +224,7 @@ public fun <T> DataTree.Companion.dynamic(
     return if (updaters.isEmpty()) {
         FlatDataTree(type, initialData, emptySharedFlow, Name.EMPTY)
     } else {
-        DataTreeBuilder<T>(type, initialData).apply {
+        DataTreeBuilderImpl<T>(type, initialData).apply {
             updaters.forEach { (scope, updater) ->
                 scope.launch(GoalExecutionRestriction(GoalExecutionRestrictionPolicy.ERROR)) {
                     updater()
@@ -242,9 +246,9 @@ public fun <T> DataTree.Companion.dynamic(
  * @return A dynamic [DataTree] instance of type [T].
  */
 @OptIn(UnsafeKType::class)
-public inline fun <reified T> DataTree.Companion.dynamic(
-    noinline block: DynamicDataBuilder<T>.() -> Unit
-): DataTree<T> = dynamic(typeOf<T>(), block)
+public inline fun <reified T> DataTree(
+    noinline block: DataTreeBuilder<T>.() -> Unit
+): DataTree<T> = DataTree(typeOf<T>(), block)
 
 /**
  * Create a static [DataTree] from a flat map
@@ -289,19 +293,3 @@ public fun <T> Sequence<NamedData<T>>.toTree(type: KType): DataTree<T> = FlatDat
  */
 @OptIn(UnsafeKType::class)
 public inline fun <reified T> Sequence<NamedData<T>>.toTree(): DataTree<T> = toTree(typeOf<T>())
-
-/**
- * Create a static [DataTree] from a builder
- */
-@UnsafeKType
-public fun <T> DataTree.Companion.static(
-    type: KType, block: DataBuilder<T>.() -> Unit
-): DataTree<T> = DataMapBuilder<T>().apply(block).map.asTree(type)
-
-/**
- * Create a static [DataTree] from a builder
- */
-@OptIn(UnsafeKType::class)
-public inline fun <reified T> DataTree.Companion.static(
-    noinline block: DataBuilder<T>.() -> Unit
-): DataTree<T> = static(typeOf<T>(), block)

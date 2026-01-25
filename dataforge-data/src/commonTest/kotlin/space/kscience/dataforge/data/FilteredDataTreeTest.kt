@@ -15,7 +15,7 @@ class FilteredDataTreeTest {
     @Test
     fun testAcceptsAll() = runTest {
         // Define DataTree structure
-        val dataTree = DataTree.static<String> {
+        val dataTree = DataTree<String> {
             value("root")
             node("childToken") {
                 value("child")
@@ -37,7 +37,7 @@ class FilteredDataTreeTest {
         // Define filter to reject all data of type Int
         val filter = DataFilter { _, _, type -> type != typeOf<Int>() }
 
-        val dataTree = DataTree.static<Int> {
+        val dataTree = DataTree<Int> {
             value(42)
         }
 
@@ -53,7 +53,7 @@ class FilteredDataTreeTest {
         // Define a name-based filter rejecting everything under "rejectedToken"
         val filter = DataFilter { name, _, _ -> !name.toString().contains("rejectedToken") }
 
-        val dataTree = DataTree.static<String> {
+        val dataTree = DataTree<String> {
             node("rejectedToken") {
                 value("rejected")
             }
@@ -75,7 +75,7 @@ class FilteredDataTreeTest {
         // Define a filter allowing only names containing "allowed"
         val filter = DataFilter { name, _, _ -> name.last().body == "allowed"}
 
-        val dataTree = DataTree.static<String> {
+        val dataTree = DataTree<String> {
             node("allowed") {
                 value("child")
                 node("notAllowedChild") {
@@ -104,7 +104,7 @@ class FilteredDataTreeTest {
         // Define a filter based on metadata
         val filter = DataFilter { _, meta, _ -> meta?.get("key").string == "value" }
 
-        val dataTree = DataTree.static<String> {
+        val dataTree = DataTree<String> {
             value("accepted", Meta { "key" put "value" })
             node("child") {
                 value("rejected", Meta { "key" put "otherValue" })

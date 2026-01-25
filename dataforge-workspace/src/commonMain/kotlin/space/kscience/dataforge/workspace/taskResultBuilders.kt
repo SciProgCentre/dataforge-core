@@ -95,13 +95,13 @@ public suspend fun <T, R> TaskResultScope<R>.transformEach(
 }
 
 @OptIn(UnsafeKType::class)
-public fun <R> TaskResultScope<R>.result(data: Data<R>): DataTree<R> = DataTree.static(resultType) {
+public fun <R> TaskResultScope<R>.result(data: Data<R>): DataTree<R> = DataTree(resultType) {
     put(Name.EMPTY, data)
 }
 
 @OptIn(UnsafeKType::class)
-public fun <R> TaskResultScope<R>.result(builder: DataBuilder<R>.() -> Unit): DataTree<R> =
-    DataTree.static(resultType, builder)
+public fun <R> TaskResultScope<R>.result(builder: DataTreeBuilder<R>.() -> Unit): DataTree<R> =
+    DataTree(resultType, builder)
 
 ///**
 // * Set given [dataSet] as a task result.

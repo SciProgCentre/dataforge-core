@@ -18,7 +18,7 @@ internal class ActionsTest {
             result { it + 1 }
         }
 
-        val data: DataTree<Int> = DataTree.static {
+        val data: DataTree<Int> = DataTree {
             repeat(10) {
                 putValue(it.toString(), it)
             }

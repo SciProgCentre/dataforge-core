@@ -51,9 +51,7 @@ public abstract class AbstractAction<T, R>(
         source: DataTree<T>,
         meta: Meta,
         updatesScope: CoroutineScope
-    ): DataTree<R> = DataTree.dynamic<R>(
-        outputType,
-    ) {
+    ): DataTree<R> = DataTree<R>(outputType) {
 
         generate(source, meta).forEach { (name, data) -> put(name, data) }
 

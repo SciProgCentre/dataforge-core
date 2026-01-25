@@ -11,7 +11,7 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class DataTreeBuilderTest {
     @Test
     fun testTreeBuild() = runTest(timeout = 500.milliseconds) {
-        val node = DataTree.static<Any> {
+        val node = DataTree<Any> {
             node("primary") {
                 putValue("a", "a")
                 putValue("b", "b")
@@ -28,12 +28,12 @@ internal class DataTreeBuilderTest {
 
     @Test
     fun testDataUpdate() = runTest(timeout = 500.milliseconds) {
-        val updateData = DataTree.static<Any> {
+        val updateData = DataTree<Any> {
             put("a", Data.wrapValue("a"))
             put("b", Data.wrapValue("b"))
         }
 
-        val node = DataTree.static<Any> {
+        val node = DataTree<Any> {
             node("primary") {
                 putValue("a", "a")
                 putValue("b", "b")
@@ -69,7 +69,7 @@ internal class DataTreeBuilderTest {
     fun testDynamicTree() = runTest(timeout = 500.milliseconds) {
         val subNode = MutableDataTree<Int>()
 
-        val rootNode = DataTree.dynamic<Int>{
+        val rootNode = DataTree<Int>{
             observeNode("sub", backgroundScope, subNode)
         }
 

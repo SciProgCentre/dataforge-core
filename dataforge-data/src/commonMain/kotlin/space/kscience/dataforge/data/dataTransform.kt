@@ -205,7 +205,7 @@ public fun <T, R> DataTree<T>.transformEach(
     scope: CoroutineScope,
     metaTransform: MutableMeta.(name: Name) -> Unit = {},
     compute: suspend (NamedValueWithMeta<T>) -> R,
-): DataTree<R> = DataTree.dynamic<R>(
+): DataTree<R> = DataTree<R>(
     outputType
 ) {
     asSequence().forEach { namedData: NamedData<T> ->

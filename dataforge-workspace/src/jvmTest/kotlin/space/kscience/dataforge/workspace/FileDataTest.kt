@@ -22,7 +22,7 @@ import kotlin.test.assertEquals
 
 
 class FileDataTest {
-    val dataNode = DataTree.static<String> {
+    val dataNode = DataTree<String> {
         node("dir") {
             putValue("a", "Some string", Meta {
                 "content" put "Some string"
