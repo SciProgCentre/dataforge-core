@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFExperimental
+import java.net.URI
 import java.net.URL
 import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KProperty
@@ -60,7 +61,7 @@ public fun MetaDescriptorBuilder.forAnnotatedElement(element: KAnnotatedElement)
 
             is DescriptorResource -> loadDescriptorFromResource(it)
 
-            is DescriptorUrl -> loadDescriptorFromUrl(URL(it.url))
+            is DescriptorUrl -> loadDescriptorFromUrl(URI.create(it.url).toURL())
         }
     }
 }
@@ -73,7 +74,7 @@ public fun MetaDescriptorBuilder.forProperty(property: KProperty<*>) {
 
             is DescriptorResource -> loadDescriptorFromResource(it)
 
-            is DescriptorUrl -> loadDescriptorFromUrl(URL(it.url))
+            is DescriptorUrl -> loadDescriptorFromUrl(URI.create(it.url).toURL())
         }
     }
 }

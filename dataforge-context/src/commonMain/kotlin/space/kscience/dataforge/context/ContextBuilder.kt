@@ -97,21 +97,21 @@ public class ContextBuilder internal constructor(
 }
 
 /**
- * Check if current context contains all plugins required by the builder and return it does or forks to a new context
+ * Check if the current context contains all plugins required by the builder and properties are the same and return it does or forks to a new context
  * if it does not.
  */
 @DFExperimental
-public fun Context.modify(block: ContextBuilder.() -> Unit): Context {
+public fun Context.deriveContext(deriveSuffix: String = "mod", block: ContextBuilder.() -> Unit): Context {
 
     fun Context.contains(factory: PluginFactory<*>, meta: Meta): Boolean {
         val loaded = plugins[factory.tag] ?: return false
         return loaded.meta == meta
     }
 
-    val builder = ContextBuilder(this, name + "mod", properties).apply(block)
-    val requiresFork = builder.factories.any { (factory, meta) ->
+    val builder = ContextBuilder(this, name + deriveSuffix, properties).apply(block)
+    val requiresFork = !Meta.equals(properties,builder.meta) || builder.factories.any { (factory, meta) ->
         !contains(factory, meta)
-    } || ((properties as Meta) == builder.meta)
+    }
 
     return if (requiresFork) builder.build() else this
 }

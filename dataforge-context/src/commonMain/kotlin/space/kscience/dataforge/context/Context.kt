@@ -88,7 +88,7 @@ public open class Context internal constructor(
     @ThreadSafe
     public fun buildContext(name: Name? = null, block: ContextBuilder.() -> Unit = {}): Context {
         val existing = name?.let { childrenContexts[name] }
-        return existing?.modify(block) ?: ContextBuilder(this, name).apply(block).build().also {
+        return existing?.deriveContext(block = block) ?: ContextBuilder(this, name).apply(block).build().also {
             childrenContexts[it.name] = it
         }
     }
@@ -121,8 +121,8 @@ public open class Context internal constructor(
      */
     public val serializationModule: SerializersModule by lazy {
         val pluginModules = plugins.mapNotNull { it.serializerModule }
-        if(pluginModules.isEmpty()) {
-            parent?.serializationModule ?: SerializersModule{}
+        if (pluginModules.isEmpty()) {
+            parent?.serializationModule ?: SerializersModule {}
         } else {
             val pluginModule = pluginModules.reduce { acc, module -> acc + module }
             parent?.serializationModule?.overwriteWith(pluginModule) ?: pluginModule

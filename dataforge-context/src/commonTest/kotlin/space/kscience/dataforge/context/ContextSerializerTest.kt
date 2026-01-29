@@ -9,8 +9,8 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import kotlinx.serialization.serializer
-import space.kscience.dataforge.names.asName
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertTrue
 
@@ -60,7 +60,7 @@ class ContextSerializerTest {
 
     }
 
-    class PluginB2 : AbstractPlugin() {
+    class PluginBFail : AbstractPlugin() {
         override val tag: PluginTag = PluginTag("B2")
 
         override val serializerModule: SerializersModule = SerializersModule {
@@ -74,7 +74,7 @@ class ContextSerializerTest {
 
     @Test
     fun testContextWithSerializers() {
-        val context = Context("test") {
+        val context = Context {
             plugin(PluginA())
             plugin(PluginB())
         }
@@ -88,14 +88,14 @@ class ContextSerializerTest {
 
     @Test
     fun testContextInheritance() {
-        val parentContext = Context("parent") {
+        val parentContext = Context {
             plugin(PluginA())
+            plugin(PluginBFail())
         }
 
-        val childContext = parentContext.buildContext("child".asName()) {
+        val childContext = parentContext.buildContext {
             plugin(PluginB())
         }
-
 
         val stringA = childContext.json.encodeToString(serializer<Body>(), BodyA())
 
@@ -103,15 +103,18 @@ class ContextSerializerTest {
         val stringB = childContext.json.encodeToString(serializer<Body>(), BodyB())
 
         assertTrue { childContext.json.decodeFromString<Body>(stringB) is BodyB }
+
+        assertEquals("\"Fail\"", parentContext.json.encodeToString(serializer<Body>(), BodyB()))
+
     }
 
 
     @Test
     fun testConflict() {
-        val context = Context("test") {
+        val context = Context {
             plugin(PluginA())
             plugin(PluginB())
-            plugin(PluginB2())
+            plugin(PluginBFail())
         }
 
         assertFails {

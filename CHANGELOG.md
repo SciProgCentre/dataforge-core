@@ -3,11 +3,12 @@
 ## Unreleased
 
 ### Added
-- Plugin based serialization capability to context
+- Plugin-based serialization capability to context
 - Documentation and safety for Tables-kt-dataframe
 - Ability to unwrap NamedData
 
 ### Changed
+- Change context `modify` to context `deriveContext` and add modification suffix as parameter.
 - Updated Exposed in tables to 1.0.0
 - **BREAKING** DataTree builders refactor. 
 - Updated Exposed in tables to 1.0.0
