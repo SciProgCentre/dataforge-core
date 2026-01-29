@@ -1,5 +1,6 @@
 package space.kscience.dataforge.context
 
+import kotlinx.serialization.modules.SerializersModule
 import space.kscience.dataforge.context.Plugin.Companion.TARGET
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
@@ -61,6 +62,8 @@ public interface Plugin : Named, ContextAware, Provider, MetaRepr {
         "tag" put tag
         "meta" put meta
     }
+
+    public val serializerModule: SerializersModule? get() = null
 
     public companion object {
         public const val TARGET: String = "plugin"

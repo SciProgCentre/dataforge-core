@@ -10,9 +10,6 @@ import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -74,7 +71,7 @@ public class ContextBuilder internal constructor(
 
         fun addPlugin(factory: PluginFactory<*>, meta: Meta) {
             val existing = plugins[factory.tag]
-            // Add if does not exist
+            // Add if it does not exist
             if (existing == null) {
                 //TODO bypass if parent already has plugin with given meta?
                 val plugin = factory.build(parent, meta)

@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Plugin based serialization capability to context
 - Documentation and safety for Tables-kt-dataframe
 - Ability to unwrap NamedData
 
