@@ -50,7 +50,7 @@ In this section, we will try to cover DataForge main ideas in the form of questi
 
 * **Modularisation**. Contrary to lot other frameworks, DataForge is intrinsically modular. The mandatory part is a rather tiny core module. Everything else could be customized.
 
-* **Context encapsulation**. Every DataForge task is executed in some context. The context isolates environment for the task and also works as dependency injection base and specifies interaction of the task with the external world.
+* **Context encapsulation**. Every DataForge task is executed in some context. The context isolates environment for the task and also works as dependency injection base and specifies interaction of the task with the external world. See [Context](../dataforge-context/docs/context.md) and [Plugin Mechanics](../dataforge-context/docs/plugins.md) for more details.
 
 ### Misc
 

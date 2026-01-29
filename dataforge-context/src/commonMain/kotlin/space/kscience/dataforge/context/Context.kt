@@ -81,14 +81,15 @@ public open class Context internal constructor(
     private val childrenContexts = HashMap<Name, Context>()
 
     /**
-     * Get and validate existing context or build and register a new child context.
-     * @param name the relative (tail) name of the new context. If null, uses context hash code as a marker.
+     * Build and register a new child context.
+     * @param name the relative (tail) name of the new context. If null, use context hash code as a marker.
      */
     @OptIn(DFExperimental::class)
     @ThreadSafe
     public fun buildContext(name: Name? = null, block: ContextBuilder.() -> Unit = {}): Context {
         val existing = name?.let { childrenContexts[name] }
-        return existing?.deriveContext(block = block) ?: ContextBuilder(this, name).apply(block).build().also {
+        if (existing != null) error("Context $name already exists in $this")
+        return ContextBuilder(this, name).apply(block).build().also {
             childrenContexts[it.name] = it
         }
     }
@@ -107,6 +108,11 @@ public open class Context internal constructor(
         "parent" to parent?.name
         properties.layers.firstOrNull()?.let { set("properties", it) }
         "plugins" putIndexed plugins.map { it.toMeta() }
+    }
+
+    override fun toString(): String {
+        val parentString = if(parent == Global) "" else ", parent=$parent"
+        return "Context(name=$name$parentString)"
     }
 
     /**
