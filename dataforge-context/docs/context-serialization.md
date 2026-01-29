@@ -38,4 +38,4 @@ public val json: Json by lazy {
 }
 ```
 
-The `prettyPrint` setting can be configured via context metadata using the `json.prettyPrint` key.
+The `prettyPrint`, `isLinient` and `ignoreUnknownKeys` setting can be configured via context metadata using the `json.prettyPrint`, `json.isLinient` and `json.ignoreUnknownKeys` key.

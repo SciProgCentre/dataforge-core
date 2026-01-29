@@ -136,6 +136,8 @@ public open class Context internal constructor(
     public val json: Json by lazy {
         Json {
             prettyPrint = meta["json.prettyPrint"]?.boolean ?: true
+            isLenient = meta["json.lenient"]?.boolean ?: true
+            ignoreUnknownKeys = meta["json.ignoreUnknownKeys"]?.boolean ?: true
             serializersModule = serializationModule
         }
     }
