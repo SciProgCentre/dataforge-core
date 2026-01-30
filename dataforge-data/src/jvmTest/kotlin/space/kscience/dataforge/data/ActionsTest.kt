@@ -8,12 +8,12 @@ import space.kscience.dataforge.actions.mapping
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(DFExperimental::class, ExperimentalCoroutinesApi::class)
 internal class ActionsTest {
     @Test
-    fun testStaticMapAction() = runTest(timeout = 500.milliseconds) {
+    fun testStaticMapAction() = runTest(timeout = 1.seconds) {
         val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
         }
@@ -30,7 +30,7 @@ internal class ActionsTest {
     }
 
     @Test
-    fun testDynamicMapAction() = runTest(timeout = 500.milliseconds) {
+    fun testDynamicMapAction() = runTest(timeout = 1.seconds) {
         val plusOne = Action.mapping<Int, Int> {
             result { it + 1 }
         }

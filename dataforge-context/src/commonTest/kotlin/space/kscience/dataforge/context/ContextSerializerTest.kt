@@ -1,6 +1,7 @@
 package space.kscience.dataforge.context
 
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
@@ -8,7 +9,6 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
-import kotlinx.serialization.serializer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -71,6 +71,8 @@ class ContextSerializerTest {
 
     }
 
+    val polymorphicSerializer = PolymorphicSerializer(Body::class)
+
 
     @Test
     fun testContextWithSerializers() {
@@ -80,9 +82,9 @@ class ContextSerializerTest {
         }
 
 
-        val string = context.json.encodeToString(serializer<Body>(), BodyA())
+        val string = context.json.encodeToString(polymorphicSerializer, BodyA())
 
-        assertTrue { context.json.decodeFromString<Body>(string) is BodyA }
+        assertTrue { context.json.decodeFromString(polymorphicSerializer, string) is BodyA }
 
     }
 
@@ -97,14 +99,14 @@ class ContextSerializerTest {
             plugin(PluginB())
         }
 
-        val stringA = childContext.json.encodeToString(serializer<Body>(), BodyA())
+        val stringA = childContext.json.encodeToString(polymorphicSerializer, BodyA())
 
-        assertTrue { childContext.json.decodeFromString<Body>(stringA) is BodyA }
-        val stringB = childContext.json.encodeToString(serializer<Body>(), BodyB())
+        assertTrue { childContext.json.decodeFromString<Body>(polymorphicSerializer, stringA) is BodyA }
+        val stringB = childContext.json.encodeToString(polymorphicSerializer, BodyB())
 
-        assertTrue { childContext.json.decodeFromString<Body>(stringB) is BodyB }
+        assertTrue { childContext.json.decodeFromString<Body>(polymorphicSerializer, stringB) is BodyB }
 
-        assertEquals("\"Fail\"", parentContext.json.encodeToString(serializer<Body>(), BodyB()))
+        assertEquals("\"Fail\"", parentContext.json.encodeToString(polymorphicSerializer, BodyB()))
 
     }
 
@@ -118,7 +120,7 @@ class ContextSerializerTest {
         }
 
         assertFails {
-            context.json.encodeToString(serializer<Body>(), BodyB())
+            context.json.encodeToString(polymorphicSerializer, BodyB())
         }
     }
 

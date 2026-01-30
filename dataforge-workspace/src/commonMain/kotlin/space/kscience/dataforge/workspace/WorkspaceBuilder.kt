@@ -11,7 +11,6 @@ import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
@@ -114,8 +113,8 @@ public class WorkspaceBuilder(
     /**
      * Define a context for the workspace
      */
-    public fun context(block: ContextBuilder.() -> Unit = {}) {
-        this.context = parentContext.buildContext("workspace".asName(), block)
+    public fun context(contextName: Name? = null, block: ContextBuilder.() -> Unit = {}) {
+        this.context = parentContext.buildContext(contextName, block)
     }
 
     /**
