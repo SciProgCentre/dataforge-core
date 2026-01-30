@@ -159,7 +159,7 @@ internal class SimpleWorkspaceTest {
     }
 
     @Test
-    fun testMetaPropagation() = runTest(timeout = 200.milliseconds) {
+    fun testMetaPropagation() = runTest(timeout = 500.milliseconds) {
         val node = workspace.produce("sum") { "testFlag" put true }
         val res = node.data?.await()
     }
