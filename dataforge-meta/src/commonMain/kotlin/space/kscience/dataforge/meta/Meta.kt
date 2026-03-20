@@ -188,6 +188,7 @@ public operator fun <M : TypedMeta<M>> M?.get(key: String): M? = this?.get(key.p
  * The sequence includes root value with empty name
  */
 public fun Meta.valueSequence(): Sequence<Pair<Name, Value>> = sequence {
+    value?.let { yield(Name.EMPTY to it) }
     items.forEach { (key, item) ->
         value?.let { yield(Name.EMPTY to it) }
         item.value?.let { itemValue ->

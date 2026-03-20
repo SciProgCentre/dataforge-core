@@ -162,4 +162,9 @@ class MetaTest {
 
         assertEquals(a.hashCode(), b.hashCode(), "Equal numeric Values must produce equal hash codes")
     }
+
+    @Test
+    fun `meta with a value to sequence`(){
+        assertEquals(1, Meta(2).valueSequence().count())
+    }
 }
