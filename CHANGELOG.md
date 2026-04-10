@@ -8,6 +8,7 @@
 - Ability to unwrap NamedData
 
 ### Changed
+- **BREAKING** Refactor Tables text API.
 - Change context `modify` to context `deriveContext` and add modification suffix as parameter.
 - Updated Exposed in tables to 1.0.0
 - **BREAKING** DataTree builders refactor. 
