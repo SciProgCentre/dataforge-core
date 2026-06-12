@@ -1,9 +1,6 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.meta.descriptors.Described
-import space.kscience.dataforge.meta.descriptors.MetaDescriptor
-import space.kscience.dataforge.meta.descriptors.get
-import space.kscience.dataforge.meta.descriptors.validate
+import space.kscience.dataforge.meta.descriptors.*
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
@@ -68,7 +65,10 @@ public open class Scheme(
 
     override fun setValue(name: Name, value: Value?) {
         val valueDescriptor = descriptor?.get(name)
-        if (valueDescriptor?.validate(value) != false) {
+        if (
+            valueDescriptor == null ||
+            valueDescriptor.validateWithResult(value, Name.EMPTY) is MetaValidationResult.Valid
+        ) {
             meta.setValue(name, value)
         } else error("Value $value is not validated by $valueDescriptor")
     }
