@@ -2,10 +2,10 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.serializer
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
-import space.kscience.dataforge.misc.DFExperimental
+import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.parseAsName
 
 
 /**
@@ -48,6 +48,16 @@ public interface MetaConverter<T> : MetaReader<T> {
 
             override fun readOrNull(source: Meta): String? = source.string
             override fun convert(obj: String): Meta = Meta(obj.asValue())
+        }
+
+        public val name: MetaConverter<Name> = object : MetaConverter<Name> {
+            override val descriptor: MetaDescriptor = MetaDescriptor {
+                valueType(ValueType.STRING)
+            }
+
+
+            override fun readOrNull(source: Meta): Name? = source.string?.parseAsName()
+            override fun convert(obj: Name): Meta = Meta(obj.toString())
         }
 
         public val boolean: MetaConverter<Boolean> = object : MetaConverter<Boolean> {
@@ -136,14 +146,13 @@ public interface MetaConverter<T> : MetaReader<T> {
         }
 
         /**
-         * Automatically generate [MetaConverter] for a class using its serializer and optional [descriptor]
+         * Automatically generate [MetaConverter] for a class using its [serializer] and optional [descriptor]
          */
-        @DFExperimental
-        public inline fun <reified T> serializable(
+        public fun <T> serializable(
+            serializer: KSerializer<T>,
             descriptor: MetaDescriptor? = null,
             jsonEncoder: Json = Json,
         ): MetaConverter<T> = object : MetaConverter<T> {
-            private val serializer: KSerializer<T> = serializer()
 
             override fun readOrNull(source: Meta): T? {
                 val json = source.toJson(descriptor)
@@ -151,11 +160,18 @@ public interface MetaConverter<T> : MetaReader<T> {
             }
 
             override fun convert(obj: T): Meta {
-                val json = jsonEncoder.encodeToJsonElement(obj)
+                val json = jsonEncoder.encodeToJsonElement(serializer, obj)
                 return json.toMeta(descriptor)
             }
-
         }
+
+        /**
+         * Automatically generate [MetaConverter] for a class using inferred serializer and optional [descriptor]
+         */
+        public inline fun <reified T> serializable(
+            descriptor: MetaDescriptor? = null,
+            jsonEncoder: Json = Json,
+        ): MetaConverter<T> = serializable(serializer = serializer(), descriptor, jsonEncoder)
 
     }
 }
