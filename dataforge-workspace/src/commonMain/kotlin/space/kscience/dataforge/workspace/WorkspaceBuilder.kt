@@ -100,6 +100,7 @@ public inline fun <T : Any, reified R : Any> TaskContainer.action(
         action.execute(from(selector), taskMeta.copy(metaTransform), workspace)
     }
 
+@DFBuilder
 public class WorkspaceBuilder(
     private val parentContext: Context = Global,
 ) : TaskContainer {
@@ -157,6 +158,6 @@ public class WorkspaceBuilder(
 public inline fun WorkspaceBuilder.target(name: String, mutableMeta: MutableMeta.() -> Unit): Unit =
     target(name, Meta(mutableMeta))
 
-@DFBuilder
+
 public fun Workspace(parentContext: Context = Global, builder: WorkspaceBuilder.() -> Unit): Workspace =
     WorkspaceBuilder(parentContext).apply(builder).build()

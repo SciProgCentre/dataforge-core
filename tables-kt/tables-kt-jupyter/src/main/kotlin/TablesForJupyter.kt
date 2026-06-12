@@ -38,8 +38,10 @@ public class TablesForJupyter : JupyterIntegration() {
 
         import(
             "space.kscience.tables.*",
+            "space.kscience.dataforge.misc.*",
+            "space.kscience.dataforge.names.*",
             "space.kscience.dataforge.meta.*",
-            "space.kscience.dataforge.values.*"
+            "space.kscience.dataforge.meta.descriptors.*"
             //"space.kscience.tables.io.*",
         )
 

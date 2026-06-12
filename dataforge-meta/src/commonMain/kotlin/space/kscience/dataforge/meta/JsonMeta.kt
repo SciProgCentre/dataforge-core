@@ -23,7 +23,7 @@ public fun Value.toJson(descriptor: MetaDescriptor? = null): JsonElement = when 
 }
 
 //Use these methods to customize JSON key mapping
-private fun String.toJsonKey(descriptor: MetaDescriptor?) = descriptor?.attributes?.get("jsonName").string ?: toString()
+private fun String.toJsonKey(descriptor: MetaDescriptor?) = descriptor?.attributes?.get("jsonName").string ?: this
 
 private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): JsonElement = if (items.isEmpty()) {
     value?.toJson(descriptor) ?: JsonObject(emptyMap())
@@ -175,73 +175,3 @@ public fun JsonElement.toMeta(descriptor: MetaDescriptor? = null): SealedMeta = 
         )
     }
 }
-
-//
-///**
-// * A meta wrapping json object
-// */
-//public class JsonMeta(
-//    private val json: JsonElement,
-//    private val descriptor: MetaDescriptor? = null
-//) : TypedMeta<JsonMeta> {
-//
-//    private val indexName by lazy { descriptor?.indexKey ?: Meta.INDEX_KEY }
-//
-//    override val value: Value? by lazy {
-//        json.toValueOrNull(descriptor)
-//    }
-//
-//    private fun MutableMap<NameToken, JsonMeta>.appendArray(json: JsonArray, key: String) {
-//        json.forEachIndexed { index, child ->
-//            if (child is JsonArray) {
-//                appendArray(child, key)
-//            } else {
-//                //Use explicit index or order for index
-//                val tokenIndex = (child as? JsonObject)
-//                    ?.get(indexName)
-//                    ?.jsonPrimitive?.content
-//                    ?: index.toString()
-//                val token = NameToken(key, tokenIndex)
-//                this[token] = JsonMeta(child)
-//            }
-//        }
-//    }
-//
-//    override val items: Map<NameToken, JsonMeta> by lazy {
-//        val map = HashMap<NameToken, JsonMeta>()
-//        when (json) {
-//            is JsonObject -> json.forEach { (name, child) ->
-//                //skip value key
-//                if (name != Meta.VALUE_KEY) {
-//                    if (child is JsonArray && child.any { it is JsonObject }) {
-//                        map.appendArray(child, name)
-//                    } else {
-//
-//                        val index = (child as? JsonObject)?.get(indexName)?.jsonPrimitive?.content
-//                        val token = NameToken(name, index)
-//                        map[token] = JsonMeta(child, descriptor?.get(name))
-//                    }
-//                }
-//            }
-//            is JsonArray -> {
-//                //return children only if it is not value
-//                if (value == null) map.appendArray(json, JSON_ARRAY_KEY)
-//            }
-//            else -> {
-//                //do nothing
-//            }
-//        }
-//        map
-//    }
-//
-//    override fun toString(): String = Meta.toString(this)
-//    override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
-//    override fun hashCode(): Int = Meta.hashCode(this)
-//
-//    public companion object {
-//        /**
-//         * A key representing top-level json array of nodes, which could not be directly represented by a meta node
-//         */
-//        public const val JSON_ARRAY_KEY: String = "@jsonArray"
-//    }
-//}

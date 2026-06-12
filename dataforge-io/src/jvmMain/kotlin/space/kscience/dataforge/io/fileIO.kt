@@ -216,7 +216,7 @@ public fun IOPlugin.readEnvelopeFile(
 }
 
 /**
- * Write envelope file to given [path] using [envelopeFormat] and optional [metaFormat]
+ * Write an envelope file to given [path] using [envelopeFormat]
  */
 @DFExperimental
 public fun IOPlugin.writeEnvelopeFile(

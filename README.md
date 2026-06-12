@@ -75,7 +75,11 @@ In this section, we will try to cover DataForge main ideas in the form of questi
 > **Features:**
 > - [context](dataforge-context/docs/context.md) : Context is a single extension point for all applications. It allows to configure application and handle its lifecycle.
 > - [plugins](dataforge-context/docs/plugins.md) : Plugin system is a powerful dependency injection and extensibility mechanism. 
+It allows to construct required capabilities for specific application in a single space. 
+Also it provides a capability sharing bus. For example one plugin could provide factories for dynamic 
+instantiation in another plugin. 
 > - [context-serialization](dataforge-context/docs/context-serialization.md) : Serializer aggregation for context. Each plugin could supply its own serializer module. 
+Those modules are aggregated into one serializer module in context.
 
 
 ### [dataforge-data](dataforge-data)
@@ -89,6 +93,8 @@ In this section, we will try to cover DataForge main ideas in the form of questi
 >
 > **Features:**
 > - [IO format](dataforge-io/src/commonMain/kotlin/space/kscience/dataforge/io/IOFormat.kt) : A generic API for reading something from binary representation and writing it to Binary.
+
+Similar to KSerializer, but without schema.
 > - [Binary](dataforge-io/src/commonMain/kotlin/space/kscience/dataforge/io/Binary.kt) : Multi-read random access binary.
 > - [Envelope](dataforge-io/src/commonMain/kotlin/space/kscience/dataforge/io/Envelope.kt) : API and implementations for combined data and metadata format.
 > - [Tagged envelope](dataforge-io/src/commonMain/kotlin/space/kscience/dataforge/io/TaggedEnvelope.kt) : Implementation for binary-friendly envelope format with machine readable tag and forward size declaration.
@@ -102,7 +108,17 @@ In this section, we will try to cover DataForge main ideas in the form of questi
 >
 > **Features:**
 > - [Meta](dataforge-meta/src/commonMain/kotlin/space/kscience/dataforge/meta/Meta.kt) : **Meta** is the representation of basic DataForge concept: Metadata, but it also could be called meta-value tree.
+
+Each Meta node could hava a node Value as well as a map of named child items.
+            
 > - [Value](dataforge-meta/src/commonMain/kotlin/space/kscience/dataforge/meta/Value.kt) : **Value** a sum type for different meta values.
+
+The following types are implemented in core (custom ones are also available):
+    * null
+    * boolean
+    * number
+    * string
+    * list of values
 > - [Name](dataforge-meta/src/commonMain/kotlin/space/kscience/dataforge/names/Name.kt) : **Name** is an identifier to access tree-like structure.
 
 
