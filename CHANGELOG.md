@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- Rows to envelope converter
+- Validation for MetaSpec
+- Detailed Meta validation result
 - Plugin-based serialization capability to context
 - Documentation and safety for Tables-kt-dataframe
 - Ability to unwrap NamedData
@@ -22,6 +25,7 @@
 ### Removed
 
 ### Fixed
+- Meta validation for multiple list values with `allowedValues` and `multiple` turned on.
 - DataTree filter bug
 
 ### Security
