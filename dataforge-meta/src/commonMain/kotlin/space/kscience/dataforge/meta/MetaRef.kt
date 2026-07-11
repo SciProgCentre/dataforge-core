@@ -95,7 +95,7 @@ public abstract class MetaSpec : MetaRefStore {
     /**
      * Override to provide custom [MetaDescriptor]
      */
-    protected open fun MetaDescriptorBuilder.buildDescriptor(): Unit = Unit
+    protected open fun MetaDescriptorBuilder.customizeDescriptor(): Unit = Unit
 
     override val descriptor: MetaDescriptor by lazy {
         MetaDescriptor {
@@ -104,7 +104,7 @@ public abstract class MetaSpec : MetaRefStore {
                     node(ref.name, ref.descriptor)
                 }
             }
-            buildDescriptor()
+            customizeDescriptor()
         }
     }
 }
@@ -123,6 +123,9 @@ public fun <T> MetaSpec.item(
 
 //utility methods to add different nodes
 
+/**
+ * An item with type [Meta]
+ */
 public fun MetaSpec.metaItem(
     key: Name? = null,
     descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},

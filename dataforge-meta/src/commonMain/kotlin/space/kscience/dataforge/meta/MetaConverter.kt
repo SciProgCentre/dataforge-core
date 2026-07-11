@@ -145,6 +145,23 @@ public interface MetaConverter<T> : MetaReader<T> {
             override fun convert(obj: List<T>): Meta = Meta(obj.map(writer).asValue())
         }
 
+//        public fun <T> list(
+//            elementConverter: MetaConverter<T>
+//        ): MetaConverter<List<T>> = object : MetaConverter<List<T>>{
+//
+//            override val descriptor: MetaDescriptor = MetaDescriptor{
+//
+//            }
+//
+//            override fun readOrNull(source: Meta): List<T>? {
+//                return source.getIndexedList()
+//            }
+//
+//            override fun convert(obj: List<T>): Meta {
+//                TODO("Not yet implemented")
+//            }
+//        }
+
         /**
          * Automatically generate [MetaConverter] for a class using its [serializer] and optional [descriptor]
          */

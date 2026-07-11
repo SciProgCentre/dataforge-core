@@ -1,7 +1,6 @@
 package space.kscience.dataforge.names
 
 import kotlinx.serialization.Serializable
-import space.kscience.dataforge.misc.DFExperimental
 import kotlin.native.concurrent.ThreadLocal
 
 
@@ -32,18 +31,6 @@ public class Name(public val tokens: List<NameToken>) {
 
     public companion object {
         public const val NAME_SEPARATOR: String = "."
-
-        /**
-         * Match any single token (both body and index)
-         */
-        @DFExperimental
-        public val MATCH_ANY_TOKEN: NameToken = NameToken("*")
-
-        /**
-         * Token that allows to match the whole tail or the whole head of the name. Must match at least one token.
-         */
-        @DFExperimental
-        public val MATCH_ALL_TOKEN: NameToken = NameToken("**")
 
         public val EMPTY: Name = Name(emptyList())
 
@@ -179,6 +166,8 @@ public fun Name.replaceLast(replacement: (NameToken) -> NameToken): Name {
  * The input string could contain dots and braces, but they are just escaped, not parsed.
  */
 public fun String.asName(): Name = if (isBlank()) Name.EMPTY else NameToken(this).asName()
+
+
 
 public operator fun NameToken.plus(other: Name): Name = Name(listOf(this) + other.tokens)
 
