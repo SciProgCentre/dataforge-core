@@ -1,7 +1,7 @@
 package space.kscience.dataforge.meta
 
 import kotlinx.serialization.json.Json
-import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.Name
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -28,7 +28,7 @@ class MetaSerializationTest {
                     "d" put 1
                 }
                 setIndexed(
-                    "sns2".asName(),
+                    Name.of("sns2"),
                     listOf(
                         Meta { "d" put "first" },
                         Meta("53")

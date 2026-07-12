@@ -12,7 +12,7 @@ class NameTest {
     @Test
     fun equalityTest() {
         val name1 = Name.parse("token1.token2[2].token3")
-        val name2 = "token1".asName() + "token2[2].token3"
+        val name2 = Name.of("token1") + "token2[2].token3"
         assertEquals(name1, name2)
     }
 
@@ -29,7 +29,7 @@ class NameTest {
     @Test
     fun escapeTest() {
         val escapedName = Name.parse("token\\.one.token2")
-        val unescapedName = "token\\.one.token2".asName()
+        val unescapedName = Name.of("token\\.one.token2")
 
         assertEquals(2, escapedName.length)
         assertEquals(1, unescapedName.length)

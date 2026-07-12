@@ -3,7 +3,6 @@ package space.kscience.dataforge.meta
 import kotlinx.serialization.json.Json
 import space.kscience.dataforge.meta.descriptors.*
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.startsWith
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
@@ -85,7 +84,7 @@ public abstract class MetaSpec : MetaRefStore {
         descriptor: MetaDescriptor? = converter.descriptor,
     ): PropertyDelegateProvider<MetaSpec, ReadOnlyProperty<MetaSpec, MetaRef<T>>> =
         PropertyDelegateProvider { _, property ->
-            val ref = MetaRef(key ?: property.name.asName(), converter, descriptor)
+            val ref = MetaRef(key ?: Name.of(property.name), converter, descriptor)
             registerRef(ref)
             ReadOnlyProperty { _, _ ->
                 ref
@@ -95,7 +94,7 @@ public abstract class MetaSpec : MetaRefStore {
     /**
      * Override to provide custom [MetaDescriptor]
      */
-    protected open fun MetaDescriptorBuilder.buildDescriptor(): Unit = Unit
+    protected open fun MetaDescriptorBuilder.customizeDescriptor(): Unit = Unit
 
     override val descriptor: MetaDescriptor by lazy {
         MetaDescriptor {
@@ -104,7 +103,7 @@ public abstract class MetaSpec : MetaRefStore {
                     node(ref.name, ref.descriptor)
                 }
             }
-            buildDescriptor()
+            customizeDescriptor()
         }
     }
 }
@@ -123,6 +122,9 @@ public fun <T> MetaSpec.item(
 
 //utility methods to add different nodes
 
+/**
+ * An item with type [Meta]
+ */
 public fun MetaSpec.metaItem(
     key: Name? = null,
     descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},

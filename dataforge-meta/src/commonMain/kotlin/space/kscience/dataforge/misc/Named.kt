@@ -16,7 +16,6 @@
 package space.kscience.dataforge.misc
 
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.isEmpty
 
 /**
@@ -44,7 +43,7 @@ public interface Named {
             return if (obj is Named) {
                 obj.name
             } else {
-                obj.toString().asName()
+                Name.of(obj.toString())
             }
         }
     }

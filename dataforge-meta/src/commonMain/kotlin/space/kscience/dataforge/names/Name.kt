@@ -1,7 +1,6 @@
 package space.kscience.dataforge.names
 
 import kotlinx.serialization.Serializable
-import space.kscience.dataforge.misc.DFExperimental
 import kotlin.native.concurrent.ThreadLocal
 
 
@@ -32,18 +31,6 @@ public class Name(public val tokens: List<NameToken>) {
 
     public companion object {
         public const val NAME_SEPARATOR: String = "."
-
-        /**
-         * Match any single token (both body and index)
-         */
-        @DFExperimental
-        public val MATCH_ANY_TOKEN: NameToken = NameToken("*")
-
-        /**
-         * Token that allows to match the whole tail or the whole head of the name. Must match at least one token.
-         */
-        @DFExperimental
-        public val MATCH_ALL_TOKEN: NameToken = NameToken("**")
 
         public val EMPTY: Name = Name(emptyList())
 
@@ -92,6 +79,7 @@ public class Name(public val tokens: List<NameToken>) {
                                 bodyBuilder = StringBuilder()
                                 queryBuilder = StringBuilder()
                             }
+
                             '[' -> bracketCount++
                             ']' -> error("Syntax error: closing bracket ] not have not matching open bracket")
                             else -> bodyBuilder.append(it)
@@ -124,11 +112,18 @@ public class Name(public val tokens: List<NameToken>) {
 }
 
 /**
+ * Create a Name from vararg tokens. If there are no tokens, return the empty name.
+ */
+public fun Name(vararg tokens: NameToken): Name = if(tokens.isEmpty()) Name.EMPTY else  Name(tokens.toList())
+
+
+/**
  * Transform this [Name] to a string without escaping special characters in tokens.
  *
  * Parsing it back will produce a valid, but different name
  */
-public fun Name.toStringUnescaped(): String = tokens.joinToString(separator = Name.NAME_SEPARATOR) { it.toStringUnescaped() }
+public fun Name.toStringUnescaped(): String =
+    tokens.joinToString(separator = Name.NAME_SEPARATOR) { it.toStringUnescaped() }
 
 public operator fun Name.get(i: Int): NameToken = tokens[i]
 
@@ -175,10 +170,12 @@ public fun Name.replaceLast(replacement: (NameToken) -> NameToken): Name {
 
 
 /**
- * Convert the [String] to a [Name] by simply wrapping it in a single name token without parsing.
+ * Convert the [String] to a [Name] by simply wrapping it in a single name token body without parsing.
  * The input string could contain dots and braces, but they are just escaped, not parsed.
+ * @deprecated This method name was confusing because people used it for parsing instead of `parseAsName`
  */
-public fun String.asName(): Name = if (isBlank()) Name.EMPTY else NameToken(this).asName()
+@Deprecated("", ReplaceWith("Name.of(this)"))
+public fun String.asName(): Name = Name.of(this)
 
 public operator fun NameToken.plus(other: Name): Name = Name(listOf(this) + other.tokens)
 

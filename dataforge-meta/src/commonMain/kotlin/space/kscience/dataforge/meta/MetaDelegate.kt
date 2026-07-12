@@ -4,7 +4,6 @@ import space.kscience.dataforge.meta.descriptors.Described
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -20,7 +19,7 @@ public fun MetaProvider.node(
     override val descriptor: MetaDescriptor? = descriptor
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): Meta? {
-        return get(key ?: property.name.asName())
+        return get(key ?: Name.of(property.name))
     }
 }
 
@@ -35,7 +34,7 @@ public fun <T> MetaProvider.readable(
     override val descriptor: MetaDescriptor? get() = reader.descriptor
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-        return get(key ?: property.name.asName())?.let { reader.read(it) }
+        return get(key ?: Name.of(property.name))?.let { reader.read(it) }
     }
 }
 
@@ -50,7 +49,7 @@ public fun <T> MetaProvider.readable(
     override val descriptor: MetaDescriptor? get() = reader.descriptor
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return get(key ?: property.name.asName())?.let { reader.read(it) } ?: default
+        return get(key ?: Name.of(property.name))?.let { reader.read(it) } ?: default
     }
 }
 
@@ -93,7 +92,7 @@ public fun <T> Meta.listOfReadable(
     key: Name? = null,
 ): MetaDelegate<List<T>> = object : MetaDelegate<List<T>> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         return getIndexed(name).values.map { reader.read(it) }
     }
 
@@ -123,7 +122,7 @@ public fun MetaProvider.value(
     key: Name? = null,
     descriptor: MetaDescriptor? = null,
 ): MetaDelegate<Value?> = object : MetaDelegate<Value?> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): Value? = get(key ?: property.name.asName())?.value
+    override fun getValue(thisRef: Any?, property: KProperty<*>): Value? = get(key ?: Name.of(property.name))?.value
 
     override val descriptor: MetaDescriptor? = descriptor
 }
@@ -133,7 +132,7 @@ public fun <R> MetaProvider.value(
     descriptor: MetaDescriptor? = null,
     reader: (Value?) -> R,
 ): MetaDelegate<R> = object : MetaDelegate<R> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): R = reader(get(key ?: property.name.asName())?.value)
+    override fun getValue(thisRef: Any?, property: KProperty<*>): R = reader(get(key ?: Name.of(property.name))?.value)
 
     override val descriptor: MetaDescriptor? = descriptor
 }

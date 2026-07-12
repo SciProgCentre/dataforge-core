@@ -1,12 +1,12 @@
 package space.kscience.dataforge.meta.descriptors
 
 import space.kscience.dataforge.meta.*
-import space.kscience.dataforge.meta.set
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.cutFirst
 import space.kscience.dataforge.names.first
 import space.kscience.dataforge.names.length
-import kotlin.collections.set
+import kotlin.reflect.KProperty1
+import kotlin.reflect.typeOf
 
 public class MetaDescriptorBuilder @PublishedApi internal constructor() {
     public var description: String? = null
@@ -30,6 +30,7 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
      * The default value
      */
     public var default: Value? = null
+    public var childrenDescriptor: MetaDescriptorBuilder? = null
 
     public fun default(value: Any?) {
         default = Value.of(value)
@@ -60,9 +61,9 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
 
     public fun node(
         name: Name,
-        descriptorBuilder: MetaDescriptor,
+        descriptor: MetaDescriptor,
     ): Unit {
-        node(name, descriptorBuilder.toBuilder())
+        node(name, descriptor.toBuilder())
     }
 
     public var allowedValues: List<Value>
@@ -84,6 +85,7 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
         valueTypes = descriptor.valueTypes
         indexKey = descriptor.indexKey
         default = descriptor.defaultValue
+        childrenDescriptor = descriptor.childrenDescriptor?.toBuilder()
         attributes.update(descriptor.attributes)
     }
 
@@ -96,6 +98,7 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
         valueTypes = valueTypes,
         indexKey = indexKey,
         defaultValue = default,
+        childrenDescriptor = childrenDescriptor?.build(),
         attributes = attributes
     )
 }
@@ -147,6 +150,7 @@ private fun MetaDescriptor.toBuilder(): MetaDescriptorBuilder = MetaDescriptorBu
     valueTypes = this@toBuilder.valueTypes
     indexKey = this@toBuilder.indexKey
     default = defaultValue
+    childrenDescriptor = this@toBuilder.childrenDescriptor?.toBuilder()
     attributes = this@toBuilder.attributes.toMutableMeta()
 }
 
@@ -182,6 +186,57 @@ public inline fun <reified E : Enum<E>> MetaDescriptorBuilder.enum(
     }
     allowedValues = enumValues<E>().map { it.asValue() }
     modifier()
+}
+
+/**
+ * Add a [MetaRef]-based descriptor as a child to this descriptor
+ */
+public fun <T> MetaDescriptorBuilder.ref(ref: MetaRef<T>): Unit = node(ref.name, ref.descriptor ?: MetaDescriptor())
+
+
+/**
+ * Add a value item to a [MetaDescriptor] inferring some of its properties from the type
+ */
+public inline fun <S : Scheme, reified T> MetaDescriptorBuilder.value(
+    property: KProperty1<S, T>,
+    noinline block: MetaDescriptorBuilder.() -> Unit = {},
+): Unit = when (typeOf<T>()) {
+    typeOf<Number>(), typeOf<Int>(), typeOf<Double>(), typeOf<Short>(), typeOf<Long>(), typeOf<Float>() ->
+        value(property.name, ValueType.NUMBER) {
+            block()
+        }
+    typeOf<Number?>(), typeOf<Int?>(), typeOf<Double?>(), typeOf<Short?>(), typeOf<Long?>(), typeOf<Float?>() ->
+        value(property.name, ValueType.NUMBER) {
+            block()
+        }
+    typeOf<Boolean>() -> value(property.name, ValueType.BOOLEAN) {
+        block()
+    }
+    typeOf<List<Number>>(), typeOf<List<Int>>(), typeOf<List<Double>>(), typeOf<List<Short>>(), typeOf<List<Long>>(), typeOf<List<Float>>(),
+    typeOf<IntArray>(), typeOf<DoubleArray>(), typeOf<ShortArray>(), typeOf<LongArray>(), typeOf<FloatArray>(),
+        -> value(property.name, ValueType.NUMBER) {
+        multiple = true
+        block()
+    }
+    typeOf<String>() -> value(property.name, ValueType.STRING) {
+        block()
+    }
+    typeOf<List<String>>(), typeOf<Array<String>>() -> value(property.name, ValueType.STRING) {
+        multiple = true
+        block()
+    }
+    else -> node(property.name, block)
+}
+
+/**
+ * Add a schem-based branch to a [MetaDescriptor]
+ */
+public inline fun <S : Scheme, reified T : Scheme> MetaDescriptorBuilder.scheme(
+    property: KProperty1<S, T>,
+    spec: SchemeSpec<T>,
+    noinline block: MetaDescriptorBuilder.() -> Unit = {},
+) {
+    node(property.name, spec, block)
 }
 
 /**

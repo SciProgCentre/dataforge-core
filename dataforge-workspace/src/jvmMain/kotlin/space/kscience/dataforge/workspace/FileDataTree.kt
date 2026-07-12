@@ -12,7 +12,6 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.copy
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
@@ -162,7 +161,7 @@ public class FileDataTree(
     }
 
     public companion object {
-        public val FILE_KEY: Name = "file".asName()
+        public val FILE_KEY: Name = Name.of("file")
         public val FILE_PATH_KEY: Name = FILE_KEY + "path"
         public val FILE_EXTENSION_KEY: Name = FILE_KEY + "extension"
         public val FILE_CREATE_TIME_KEY: Name = FILE_KEY + "created"

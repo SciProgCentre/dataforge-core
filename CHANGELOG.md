@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Serial descriptor builder based on 
 - Rows to envelope converter
 - Validation for MetaSpec
 - Detailed Meta validation result
@@ -21,8 +22,10 @@
 - Include flag to include file extensions into FileDataTree node names.
 
 ### Deprecated
+- `String.asName` is deprecated in favor of `Name.of()`
 
 ### Removed
+- String name pattern is replaced by a class-based name pattern 
 
 ### Fixed
 - Meta validation for multiple list values with `allowedValues` and `multiple` turned on.

@@ -49,7 +49,7 @@ public object ValueSerializer : KSerializer<Value> {
             ValueType.NUMBER -> encodeDouble(value.double)
             ValueType.BOOLEAN -> encodeBoolean(value.boolean)
             ValueType.STRING -> encodeString(value.string)
-            ValueType.LIST -> encodeSerializableValue(ListSerializer(ValueSerializer),value.list)
+            ValueType.LIST -> encodeSerializableValue(ListSerializer(ValueSerializer), value.list)
         }
     }
 

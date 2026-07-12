@@ -2,7 +2,7 @@
 
 Meta definition and basic operations on meta.
 
-## Main features
+## Features
 
 ### [Name](src/commonMain/kotlin/space/kscience/dataforge/names/Name.kt) 
 
@@ -24,24 +24,8 @@ The following types are implemented in core (custom ones are also available):
 * string
 * list of values
 
-## Additional features
-
-- [NamePattern](docs/NamePattern.md)
+### [NamePattern](docs/NamePattern.md)
 
 ## Usage
 
-## Artifact:
-
-The Maven coordinates of this project are `space.kscience:dataforge-meta:0.11.0-dev-6`.
-
-**Gradle Kotlin DSL:**
-```kotlin
-repositories {
-    maven("https://repo.kotlin.link")
-    mavenCentral()
-}
-
-dependencies {
-    implementation("space.kscience:dataforge-meta:0.11.0-dev-6")
-}
-```
+${artifact}

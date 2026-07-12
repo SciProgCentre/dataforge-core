@@ -35,6 +35,7 @@ public enum class ValueRestriction {
  *  Empty list means that no value should be present in this node.
  * @param indexKey An index field by which this node is identified in case of same name siblings construct
  * @param defaultValue the default [Meta.value] for the node
+ * @param childrenDescriptor if present,
  * @param attributes additional attributes of this descriptor. For example, validation and widget parameters
  */
 @Serializable
@@ -46,7 +47,8 @@ public data class MetaDescriptor(
     public val valueTypes: List<ValueType>? = null,
     public val indexKey: String = Meta.INDEX_KEY,
     public val defaultValue: Value? = null,
-    public val attributes: Meta = Meta.EMPTY,
+    public val childrenDescriptor: MetaDescriptor? = null,
+    public val attributes: Meta = Meta.EMPTY
 ) {
     @Deprecated("Replace by nodes", ReplaceWith("nodes"))
     public val children: Map<String, MetaDescriptor> get() = nodes
