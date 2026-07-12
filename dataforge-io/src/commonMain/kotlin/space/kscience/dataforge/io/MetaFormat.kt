@@ -11,7 +11,6 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -40,7 +39,7 @@ public interface MetaFormat : IOFormat<Meta> {
 public interface MetaFormatFactory : IOFormatFactory<Meta>, MetaFormat {
     public val shortName: String
 
-    override val name: Name get() = "meta".asName() + shortName
+    override val name: Name get() = Name.of("meta") + shortName
 
     override val type: KType get() = typeOf<Meta>()
 

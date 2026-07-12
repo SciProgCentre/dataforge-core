@@ -10,14 +10,14 @@ import space.kscience.dataforge.io.PartDescriptor.Companion.MULTIPART_KEY
 import space.kscience.dataforge.io.PartDescriptor.Companion.PARTS_KEY
 import space.kscience.dataforge.io.PartDescriptor.Companion.SEPARATOR_KEY
 import space.kscience.dataforge.meta.*
-import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.getIndexedList
 import space.kscience.dataforge.names.plus
 
 private class PartDescriptor : Scheme() {
     var offset by int(0)
     var size by int(0)
-    var partMeta by node("meta".asName())
+    var partMeta by node(Name.of("meta"))
 
     companion object : SchemeSpec<PartDescriptor>(::PartDescriptor) {
         val MULTIPART_KEY = ENVELOPE_NODE_KEY + "multipart"

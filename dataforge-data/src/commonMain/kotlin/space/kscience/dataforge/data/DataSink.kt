@@ -7,7 +7,6 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MutableMeta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.isEmpty
 import space.kscience.dataforge.names.plus
 
@@ -50,7 +49,7 @@ public inline fun <T> DataSink<T>.writeAll(
 public inline fun <T> DataSink<T>.writeAll(
     prefix: String,
     block: DataSink<T>.() -> Unit,
-): Unit = writeAll(prefix.asName(), block)
+): Unit = writeAll(Name.of(prefix), block)
 
 
 /**

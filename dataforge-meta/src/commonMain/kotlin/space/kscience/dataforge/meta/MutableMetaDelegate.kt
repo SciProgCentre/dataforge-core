@@ -4,7 +4,6 @@ import space.kscience.dataforge.meta.descriptors.Described
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.getIndexedList
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -22,11 +21,11 @@ public fun MutableMetaProvider.node(
     override val descriptor: MetaDescriptor? = descriptor
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): Meta? {
-        return get(key ?: property.name.asName())
+        return get(key ?: Name.of(property.name))
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: Meta?) {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         set(name, value)
     }
 }
@@ -44,12 +43,12 @@ public fun <T> MutableMetaProvider.convertable(
 
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         return get(name)?.let { converter.read(it) }
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         set(name, value?.let { converter.convert(it) })
     }
 }
@@ -64,12 +63,12 @@ public fun <T> MutableMetaProvider.convertable(
 
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         return get(name)?.let { converter.read(it) } ?: default
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         set(name, value?.let { converter.convert(it) })
     }
 }
@@ -102,12 +101,12 @@ public fun <T> MutableMeta.listOfConvertable(
     override val descriptor: MetaDescriptor? = converter.descriptor?.copy(multiple = true)
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         return getIndexedList(name).map { converter.read(it) }
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<T>) {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         setIndexed(name, value.map { converter.convert(it) })
     }
 }
@@ -126,10 +125,10 @@ public fun MutableMetaProvider.value(
     override val descriptor: MetaDescriptor? = descriptor
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): Value? =
-        get(key ?: property.name.asName())?.value
+        get(key ?: Name.of(property.name))?.value
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: Value?) {
-        setValue(key ?: property.name.asName(), value)
+        setValue(key ?: Name.of(property.name), value)
     }
 }
 
@@ -142,10 +141,10 @@ public fun <T> MutableMetaProvider.value(
     override val descriptor: MetaDescriptor? = descriptor
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T =
-        reader(get(key ?: property.name.asName())?.value)
+        reader(get(key ?: Name.of(property.name))?.value)
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        setValue(key ?: property.name.asName(), writer(value))
+        setValue(key ?: Name.of(property.name), writer(value))
     }
 }
 

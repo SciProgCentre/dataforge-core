@@ -22,6 +22,7 @@
 - Include flag to include file extensions into FileDataTree node names.
 
 ### Deprecated
+- `String.asName` is deprecated in favor of `Name.of()`
 
 ### Removed
 - String name pattern is replaced by a class-based name pattern 

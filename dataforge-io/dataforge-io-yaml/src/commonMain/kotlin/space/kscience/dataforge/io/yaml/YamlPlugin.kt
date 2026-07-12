@@ -9,7 +9,6 @@ import space.kscience.dataforge.io.IOPlugin
 import space.kscience.dataforge.io.MetaFormatFactory
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 
 public class YamlPlugin(meta: Meta) : AbstractPlugin(meta) {
     public val io: IOPlugin by require(IOPlugin)
@@ -17,7 +16,7 @@ public class YamlPlugin(meta: Meta) : AbstractPlugin(meta) {
     override val tag: PluginTag get() = Companion.tag
 
     override fun content(target: String): Map<Name, Any> = when (target) {
-        MetaFormatFactory.META_FORMAT_TYPE -> mapOf("yaml".asName() to YamlMetaFormat)
+        MetaFormatFactory.META_FORMAT_TYPE -> mapOf(Name.of("yaml") to YamlMetaFormat)
         EnvelopeFormatFactory.ENVELOPE_FORMAT_TYPE -> mapOf(FrontMatterEnvelopeFormat.name to FrontMatterEnvelopeFormat)
         else -> super.content(target)
     }

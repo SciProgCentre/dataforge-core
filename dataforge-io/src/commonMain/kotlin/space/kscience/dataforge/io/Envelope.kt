@@ -4,7 +4,6 @@ import space.kscience.dataforge.meta.Laminate
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
 
 public interface Envelope {
@@ -16,7 +15,7 @@ public interface Envelope {
         /**
          * meta keys
          */
-        public val ENVELOPE_NODE_KEY: Name = "@envelope".asName()
+        public val ENVELOPE_NODE_KEY: Name = Name.of("@envelope")
         public val ENVELOPE_TYPE_KEY: Name = ENVELOPE_NODE_KEY + "type"
         public val ENVELOPE_DATA_TYPE_KEY: Name = ENVELOPE_NODE_KEY + "dataType"
         public val ENVELOPE_DATA_ID_KEY: Name = ENVELOPE_NODE_KEY + "dataID"

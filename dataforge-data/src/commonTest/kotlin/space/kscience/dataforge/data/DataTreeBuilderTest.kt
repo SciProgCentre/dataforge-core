@@ -2,7 +2,7 @@ package space.kscience.dataforge.data
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
-import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.Name
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
@@ -51,7 +51,7 @@ internal class DataTreeBuilderTest {
         val subNode = MutableDataTree<Int>()
 
         val rootNode = MutableDataTree<Int>() {
-            launchWriteJobFrom(subNode, backgroundScope, "sub".asName())
+            launchWriteJobFrom(subNode, backgroundScope, Name.of("sub"))
         }
 
         repeat(10) {

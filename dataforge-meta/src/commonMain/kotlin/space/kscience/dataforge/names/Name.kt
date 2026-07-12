@@ -79,6 +79,7 @@ public class Name(public val tokens: List<NameToken>) {
                                 bodyBuilder = StringBuilder()
                                 queryBuilder = StringBuilder()
                             }
+
                             '[' -> bracketCount++
                             ']' -> error("Syntax error: closing bracket ] not have not matching open bracket")
                             else -> bodyBuilder.append(it)
@@ -111,11 +112,18 @@ public class Name(public val tokens: List<NameToken>) {
 }
 
 /**
+ * Create a Name from vararg tokens. If there are no tokens, return the empty name.
+ */
+public fun Name(vararg tokens: NameToken): Name = if(tokens.isEmpty()) Name.EMPTY else  Name(tokens.toList())
+
+
+/**
  * Transform this [Name] to a string without escaping special characters in tokens.
  *
  * Parsing it back will produce a valid, but different name
  */
-public fun Name.toStringUnescaped(): String = tokens.joinToString(separator = Name.NAME_SEPARATOR) { it.toStringUnescaped() }
+public fun Name.toStringUnescaped(): String =
+    tokens.joinToString(separator = Name.NAME_SEPARATOR) { it.toStringUnescaped() }
 
 public operator fun Name.get(i: Int): NameToken = tokens[i]
 
@@ -162,12 +170,12 @@ public fun Name.replaceLast(replacement: (NameToken) -> NameToken): Name {
 
 
 /**
- * Convert the [String] to a [Name] by simply wrapping it in a single name token without parsing.
+ * Convert the [String] to a [Name] by simply wrapping it in a single name token body without parsing.
  * The input string could contain dots and braces, but they are just escaped, not parsed.
+ * @deprecated This method name was confusing because people used it for parsing instead of `parseAsName`
  */
-public fun String.asName(): Name = if (isBlank()) Name.EMPTY else NameToken(this).asName()
-
-
+@Deprecated("", ReplaceWith("Name.of(this)"))
+public fun String.asName(): Name = Name.of(this)
 
 public operator fun NameToken.plus(other: Name): Name = Name(listOf(this) + other.tokens)
 
