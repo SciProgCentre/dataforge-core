@@ -4,7 +4,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
 
-    val toolsVersion: String by extra
+    val toolsVersion: String = providers.gradleProperty("toolsVersion").get()
 
     repositories {
         maven("https://repo.kotlin.link")
@@ -26,7 +26,7 @@ plugins {
 
 dependencyResolutionManagement {
 
-    val toolsVersion: String by extra
+    val toolsVersion: String = providers.gradleProperty("toolsVersion").get()
 
     repositories {
         maven("https://repo.kotlin.link")

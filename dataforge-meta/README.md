@@ -2,18 +2,13 @@
 
 Meta definition and basic operations on meta.
 
-## Main features
+## Features
 
-### [Name](src/commonMain/kotlin/space/kscience/dataforge/names/Name.kt) 
+### [Name](docs/Name.md) 
 
 **Name** is an identifier to access tree-like structure.
 
-### [Meta](src/commonMain/kotlin/space/kscience/dataforge/meta/Meta.kt)
-
-**Meta** is the representation of basic DataForge concept: Metadata, but it also could be called meta-value tree.
-Each Meta node could hava a node Value as well as a map of named child items.
-
-### [Value](src/commonMain/kotlin/space/kscience/dataforge/meta/Value.kt)
+### [Value](docs/Value.md)
 
 **Value** a sum type for different meta values.
 
@@ -24,9 +19,24 @@ The following types are implemented in core (custom ones are also available):
 * string
 * list of values
 
-## Additional features
+### [Meta](docs/Meta.md)
 
-- [NamePattern](docs/NamePattern.md)
+**Meta** is the representation of basic DataForge concept: Metadata, but it also could be called meta-value tree.
+Each Meta node could hava a node Value as well as a map of named child items.
+
+### [Laminate](docs/Laminate.md)
+
+**Laminate** is a multi-layered meta view with resolution rules.
+
+### [NamePattern](docs/NamePattern.md)
+
+### [Serialization](docs/Serialization.md)
+
+### [MetaDescriptor](docs/MetaDescriptor.md)
+
+### [Meta Type Safety](docs/meta%20type%20safety.md)
+
+**Scheme**, **MetaRef**, and **MetaConverter** provide type-safe access to dynamic Meta structures.
 
 ## Usage
 
