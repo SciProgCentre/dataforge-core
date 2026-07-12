@@ -3,6 +3,21 @@
 ## Unreleased
 
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## 0.11.0 - 2026-07-12
+
+### Added
+
 - Serial descriptor builder based on 
 - Rows to envelope converter
 - Validation for MetaSpec
@@ -12,26 +27,27 @@
 - Ability to unwrap NamedData
 
 ### Changed
+
 - **BREAKING** Refactor Tables text API.
 - Change context `modify` to context `deriveContext` and add modification suffix as parameter.
 - Updated Exposed in tables to 1.0.0
 - **BREAKING** DataTree builders refactor. 
-- Updated Exposed in tables to 1.0.0
 - **BREAKING** filter data by type separated from branch by type.
 - **BREAKING** Data builders use `put` instead of `data`. Use `putValue` for static values and `value` for root value.
 - Include flag to include file extensions into FileDataTree node names.
 
 ### Deprecated
+
 - `String.asName` is deprecated in favor of `Name.of()`
 
 ### Removed
+
 - String name pattern is replaced by a class-based name pattern 
 
 ### Fixed
+
 - Meta validation for multiple list values with `allowedValues` and `multiple` turned on.
 - DataTree filter bug
-
-### Security
 
 ## 0.10.3 - 2026-01-14
 

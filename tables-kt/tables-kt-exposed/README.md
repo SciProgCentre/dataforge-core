@@ -11,7 +11,7 @@ An integration to represent SQL tables as DataForg table via Exposed-JDBC
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:tables-kt-exposed:0.11.0-dev-5`.
+The Maven coordinates of this project are `space.kscience:tables-kt-exposed:0.11.0`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -21,6 +21,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:tables-kt-exposed:0.11.0-dev-5")
+    implementation("space.kscience:tables-kt-exposed:0.11.0")
 }
 ```
