@@ -3,6 +3,7 @@ package space.kscience.dataforge.workspace
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.misc.DFInternal
 import space.kscience.dataforge.names.Name
+import space.kscience.dataforge.names.parseAsName
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.typeOf
@@ -30,23 +31,48 @@ private fun <R> Data<*>.castOrNull(type: KType): Data<R>? =
 @DFInternal
 public fun <R> DataTree<*>.filterByType(
     type: KType,
-    branch: Name = Name.EMPTY,
-    filter: DataFilter = DataFilter.Companion.EMPTY,
+    filter: DataFilter = DataFilter.EMPTY,
 ): DataTree<R> {
     val filterWithType = DataFilter { name, meta, dataType ->
         filter.accepts(name, meta, dataType) && dataType.isSubtypeOf(type)
     }
-    return FilteredDataTree(this, filterWithType, branch, type) as DataTree<R>
+    return FilteredDataTree(this, filterWithType, branch = Name.EMPTY, dataType = type) as DataTree<R>
+}
+
+@Suppress("UNCHECKED_CAST")
+@DFInternal
+public fun <R> DataTree<*>.branchByType(
+    type: KType,
+    branch: Name,
+    filter: DataFilter = DataFilter.EMPTY,
+): DataTree<R> {
+    val filterWithType = DataFilter { name, meta, dataType ->
+        filter.accepts(name, meta, dataType) && dataType.isSubtypeOf(type)
+    }
+    return FilteredDataTree(this, filterWithType, branch = branch, dataType = type) as DataTree<R>
 }
 
 /**
- * Select a single datum of the appropriate type
+ * Filter data in a [DataTree] by type and optional additional [DataFilter]
  */
 @OptIn(DFInternal::class)
 public inline fun <reified R : Any> DataTree<*>.filterByType(
-    branch: Name = Name.EMPTY,
-    filter: DataFilter = DataFilter.Companion.EMPTY,
-): DataTree<R> = filterByType(typeOf<R>(), branch, filter = filter)
+    filter: DataFilter = DataFilter.EMPTY,
+): DataTree<R> = filterByType(typeOf<R>(), filter = filter)
+
+/**
+ * Filter data in a branch by type and optional additional [DataFilter]
+ */
+@OptIn(DFInternal::class)
+public inline fun <reified R : Any> DataTree<*>.branchByType(
+    branch: Name,
+    filter: DataFilter = DataFilter.EMPTY,
+): DataTree<R> = branchByType(typeOf<R>(), branch, filter = filter)
+
+public inline fun <reified R : Any> DataTree<*>.branchByType(
+    branch: String,
+    filter: DataFilter = DataFilter.EMPTY,
+): DataTree<R> = branchByType(branch.parseAsName(), filter = filter)
 
 /**
  * Select a single datum if it is present and of given [type]

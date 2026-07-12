@@ -5,6 +5,7 @@ import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.json.Json
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaSerializer
+import space.kscience.dataforge.meta.Null
 import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.names.Name
 import kotlin.test.Test
@@ -20,6 +21,7 @@ class MetaSerializerTest {
             "b" put "DDD"
             "c" put 11.1
             "array" put doubleArrayOf(1.0, 2.0, 3.0)
+            "null" put Null
         }
     }
 

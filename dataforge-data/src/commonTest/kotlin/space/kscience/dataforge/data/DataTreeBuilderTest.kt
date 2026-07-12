@@ -2,7 +2,7 @@ package space.kscience.dataforge.data
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
-import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.Name
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
@@ -11,13 +11,13 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class DataTreeBuilderTest {
     @Test
     fun testTreeBuild() = runTest(timeout = 500.milliseconds) {
-        val node = DataTree.static<Any> {
+        val node = DataTree<Any> {
             node("primary") {
-                value("a", "a")
-                value("b", "b")
+                putValue("a", "a")
+                putValue("b", "b")
             }
-            value("c.d", "c.d")
-            value("c.f", "c.f")
+            putValue("c.d", "c.d")
+            putValue("c.f", "c.f")
         }
         assertEquals("a", node["primary.a"]?.await())
         assertEquals("b", node["primary.b"]?.await())
@@ -28,17 +28,17 @@ internal class DataTreeBuilderTest {
 
     @Test
     fun testDataUpdate() = runTest(timeout = 500.milliseconds) {
-        val updateData = DataTree.static<Any> {
-            data("a", Data.wrapValue("a"))
-            data("b", Data.wrapValue("b"))
+        val updateData = DataTree<Any> {
+            put("a", Data.wrapValue("a"))
+            put("b", Data.wrapValue("b"))
         }
 
-        val node = DataTree.static<Any> {
+        val node = DataTree<Any> {
             node("primary") {
-                value("a", "a")
-                value("b", "b")
+                putValue("a", "a")
+                putValue("b", "b")
             }
-            value("root", "root")
+            putValue("root", "root")
             node("update", updateData)
         }
 
@@ -51,7 +51,7 @@ internal class DataTreeBuilderTest {
         val subNode = MutableDataTree<Int>()
 
         val rootNode = MutableDataTree<Int>() {
-            launchWriteJobFrom(subNode, backgroundScope, "sub".asName())
+            launchWriteJobFrom(subNode, backgroundScope, Name.of("sub"))
         }
 
         repeat(10) {
@@ -69,8 +69,8 @@ internal class DataTreeBuilderTest {
     fun testDynamicTree() = runTest(timeout = 500.milliseconds) {
         val subNode = MutableDataTree<Int>()
 
-        val rootNode = DataTree.dynamic<Int>(backgroundScope) {
-            observeNode("sub".asName(),subNode)
+        val rootNode = DataTree<Int>{
+            observeNode("sub", backgroundScope, subNode)
         }
 
         //need this for a virtual time dispatcher to complete the subscription before write start

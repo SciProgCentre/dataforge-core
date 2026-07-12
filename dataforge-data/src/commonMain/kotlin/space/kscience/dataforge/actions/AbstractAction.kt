@@ -51,14 +51,11 @@ public abstract class AbstractAction<T, R>(
         source: DataTree<T>,
         meta: Meta,
         updatesScope: CoroutineScope
-    ): DataTree<R> = DataTree.dynamic<R>(
-        outputType,
-        updatesScope,
-    ) {
+    ): DataTree<R> = DataTree<R>(outputType) {
 
-        generate(source, meta).forEach { (name, data) -> data(name, data) }
+        generate(source, meta).forEach { (name, data) -> put(name, data) }
 
-        update {
+        update(updatesScope) {
 
             //propagate updates
             val updateSink = DataSink<R> { name, data ->

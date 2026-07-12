@@ -14,7 +14,7 @@ The library is intended as multiplatform. It supports JVM, JS-IR and Native targ
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:tables-kt:0.10.3`.
+The Maven coordinates of this project are `space.kscience:tables-kt:0.11.0`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:tables-kt:0.10.3")
+    implementation("space.kscience:tables-kt:0.11.0")
 }
 ```
 
@@ -40,12 +40,23 @@ dependencies {
 > **Maturity**: EXPERIMENTAL
 
 ### [tables-kt/tables-kt-dataframe](tables-kt/tables-kt-dataframe)
->
-> **Maturity**: PROTOTYPE
-
-### [tables-kt/tables-kt-exposed](tables-kt/tables-kt-exposed)
+> An integration to convert DataForg tables to DataFrame and back.
 >
 > **Maturity**: EXPERIMENTAL
+>
+> **Features:**
+> - [asDataFrame](tables-kt/tables-kt-dataframe/src/main/kotlin/space/kscience/dataforge/dataframe/TableAsDataFrame.kt) : Conversion from DataForge Table to DataFrame via `asDataFrame()` extension function.
+> - [asTable](tables-kt/tables-kt-dataframe/src/main/kotlin/space/kscience/dataforge/dataframe/DataFrameAsTable.kt) : Conversion from DataFrame to DataForge Table via `asTable()` extension function.
+
+
+### [tables-kt/tables-kt-exposed](tables-kt/tables-kt-exposed)
+> An integration to represent SQL tables as DataForg table via Exposed-JDBC
+>
+> **Maturity**: EXPERIMENTAL
+>
+> **Features:**
+> - [ExposedTable](tables-kt/tables-kt-exposed/src/main/kotlin/space/kscience/dataforge/exposed/ExposedTable.kt) : Create a table from JDBC database with `ExposedTable`.
+
 
 ### [tables-kt/tables-kt-jupyter](tables-kt/tables-kt-jupyter)
 >

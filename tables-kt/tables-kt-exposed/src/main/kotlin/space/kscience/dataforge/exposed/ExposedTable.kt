@@ -2,9 +2,15 @@
 
 package space.kscience.dataforge.exposed
 
-import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.transaction
+
+import org.jetbrains.exposed.v1.core.IColumnType
+import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import space.kscience.dataforge.meta.Meta
 import space.kscience.tables.Column
 import space.kscience.tables.Row
@@ -12,7 +18,7 @@ import space.kscience.tables.RowTable
 import space.kscience.tables.Table
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
-import org.jetbrains.exposed.sql.Column as SqlColumn
+import org.jetbrains.exposed.v1.core.Column as SqlColumn
 
 /**
  * Exposed based [Column] implementation.
@@ -74,7 +80,7 @@ public class ExposedRow<T : Any>(
      * Acquires the value of [column] in this row.
      */
     public override fun getOrNull(column: String): T? = transaction(db) {
-        val theColumn = sqlTable.columns.find { it.name == column } as SqlColumn<T>? ?: return@transaction null
+        val theColumn = sqlTable.columns.find { it.name == column } as? SqlColumn<T>? ?: return@transaction null
         sqlRow.getOrNull(theColumn)
     }
 }
@@ -112,8 +118,8 @@ public class ExposedTable<T : Any>(
         }
 
     public override fun getOrNull(row: Int, column: String): T? = transaction(db) {
-        val sqlColumn: SqlColumn<T> = sqlTable.columns.find { it.name == column } as SqlColumn<T>?
-            ?: return@transaction null
+        val sqlColumn: SqlColumn<T> =
+            sqlTable.columns.find { it.name == column } as? SqlColumn<T>? ?: return@transaction null
 
         sqlTable.selectAll().where { sqlTable.id eq row + 1 }.firstOrNull()?.getOrNull(sqlColumn)
     }
@@ -137,7 +143,7 @@ public inline fun <reified T : Any> ExposedTable(
  *
  * @param T The type of table items.
  * @param db The Exposed database.
- * @param tableName The name of table.
+ * @param tableName The name of the table.
  * @param columns The list of columns' names.
  * @param sqlColumnType The [IColumnType] for [T].
  * @return A new [ExposedTable].

@@ -12,7 +12,6 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.copy
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
@@ -21,11 +20,21 @@ import kotlin.io.path.*
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
-
+/**
+ * Represents a data tree for managing and monitoring files and directories.
+ * It manages binary data and associated metadata, supports both file-based and directory-based structures,
+ * and optionally observes file system changes.
+ *
+ * @property io The IOPlugin instance used for reading and handling file formats.
+ * @property path The path to the file or directory to be managed by the data tree.
+ * @property monitor Whether to enable monitoring for changes in the file system. Defaults to false.
+ * @property includeExtensions Whether to include file extensions in the node names. Defaults to false.
+ */
 public class FileDataTree(
     public val io: IOPlugin,
     public val path: Path,
-    private val monitor: Boolean = false
+    private val monitor: Boolean = false,
+    public val includeExtensions: Boolean = true,
 ) : DataTree<Binary> {
     override val dataType: KType = typeOf<Binary>()
 
@@ -55,7 +64,7 @@ public class FileDataTree(
     private fun readFilesFromDirectory(
         path: Path
     ): Map<NameToken, FileDataTree> = path.listDirectoryEntries().filterNot { it.name.startsWith("@") }.associate {
-        NameToken.parse(it.nameWithoutExtension) to FileDataTree(io, it)
+        NameToken(if (includeExtensions) it.name else it.nameWithoutExtension) to FileDataTree(io, it)
     }
 
     override val data: Data<Binary>?
@@ -114,7 +123,7 @@ public class FileDataTree(
         callbackFlow<Name> {
             val watchService: WatchService = path.fileSystem.newWatchService()
 
-            fun Path.toName() = Name(map { NameToken.parse(it.nameWithoutExtension) })
+            fun Path.toName() = Name(map { NameToken.parse(if(includeExtensions) it.name else it.nameWithoutExtension) })
 
             fun monitor(childPath: Path): Job {
                 val key: WatchKey = childPath.register(
@@ -152,7 +161,7 @@ public class FileDataTree(
     }
 
     public companion object {
-        public val FILE_KEY: Name = "file".asName()
+        public val FILE_KEY: Name = Name.of("file")
         public val FILE_PATH_KEY: Name = FILE_KEY + "path"
         public val FILE_EXTENSION_KEY: Name = FILE_KEY + "extension"
         public val FILE_CREATE_TIME_KEY: Name = FILE_KEY + "created"
@@ -162,10 +171,24 @@ public class FileDataTree(
     }
 }
 
-public fun IOPlugin.readDirectory(path: Path, monitor: Boolean = false): FileDataTree =
-    FileDataTree(this, path, monitor)
+/**
+ * Reads a directory and constructs a [FileDataTree] from its contents based on the provided parameters.
+ *
+ * @param path The path of the directory to read.
+ * @param monitor A flag indicating whether changes in the directory should be monitored. Default is `false`.
+ * @param includeExtensions A flag indicating whether file extensions should be included into names. Default is `true`.
+ */
+public fun IOPlugin.readDirectory(path: Path, monitor: Boolean = false, includeExtensions: Boolean = true): FileDataTree =
+    FileDataTree(io = this, path = path, monitor = monitor, includeExtensions = includeExtensions)
 
-
+/**
+ * Writes the contents of a directory to a dynamic data sink.
+ *
+ * @param io The IO plugin to use for reading the directory.
+ * @param path The path of the directory to read.
+ * @param monitor A flag indicating whether changes in the directory should be monitored. Default is `false`.
+ * @param prefix The prefix to use for the names of the files in the directory. Default is an empty name.
+ */
 public suspend fun DataSink<Any>.directory(
     io: IOPlugin,
     path: Path,

@@ -1,9 +1,6 @@
 package space.kscience.dataforge.meta
 
-import space.kscience.dataforge.meta.descriptors.Described
-import space.kscience.dataforge.meta.descriptors.MetaDescriptor
-import space.kscience.dataforge.meta.descriptors.get
-import space.kscience.dataforge.meta.descriptors.validate
+import space.kscience.dataforge.meta.descriptors.*
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
@@ -68,7 +65,10 @@ public open class Scheme(
 
     override fun setValue(name: Name, value: Value?) {
         val valueDescriptor = descriptor?.get(name)
-        if (valueDescriptor?.validate(value) != false) {
+        if (
+            valueDescriptor == null ||
+            valueDescriptor.validateWithResult(value, Name.EMPTY) is MetaValidationResult.Valid
+        ) {
             meta.setValue(name, value)
         } else error("Value $value is not validated by $valueDescriptor")
     }
@@ -226,13 +226,13 @@ public fun <T : Scheme> MutableMeta.scheme(
     key: Name? = null,
 ): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         val node = getOrCreate(name)
         return spec.write(node)
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         set(name, value.toMeta())
     }
 }
@@ -251,12 +251,12 @@ public fun <T : Scheme> MutableMeta.schemeOrNull(
     key: Name? = null,
 ): ReadWriteProperty<Any?, T?> = object : ReadWriteProperty<Any?, T?> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         return if (get(name) == null) null else spec.write(getOrCreate(name))
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         if (value == null) remove(name)
         else set(name, value.toMeta())
     }
@@ -277,12 +277,12 @@ public fun <T : Scheme> MutableMeta.listOfScheme(
     key: Name? = null,
 ): ReadWriteProperty<Any?, List<T>> = object : ReadWriteProperty<Any?, List<T>> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         return getIndexedList(name).map { spec.write(it as MutableMeta) }
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<T>) {
-        val name = key ?: property.name.asName()
+        val name = key ?: Name.of(property.name)
         setIndexed(name, value.map { it.toMeta() })
     }
 }
@@ -308,7 +308,7 @@ public fun <S : Scheme, T> S.useProperty(
     //Pass initial value.
     callBack(property.get(this))
     meta.onChange(owner) { name ->
-        if (name.startsWith(property.name.asName())) {
+        if (name.startsWith(Name.of(property.name))) {
             callBack(property.get(this@useProperty))
         }
     }

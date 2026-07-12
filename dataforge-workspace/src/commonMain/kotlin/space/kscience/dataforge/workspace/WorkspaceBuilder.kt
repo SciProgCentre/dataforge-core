@@ -4,15 +4,13 @@ import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.ContextBuilder
 import space.kscience.dataforge.context.Global
-import space.kscience.dataforge.data.DataBuilder
 import space.kscience.dataforge.data.DataTree
-import space.kscience.dataforge.data.static
+import space.kscience.dataforge.data.DataTreeBuilder
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder
 import space.kscience.dataforge.misc.DFBuilder
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
@@ -102,6 +100,7 @@ public inline fun <T : Any, reified R : Any> TaskContainer.action(
         action.execute(from(selector), taskMeta.copy(metaTransform), workspace)
     }
 
+@DFBuilder
 public class WorkspaceBuilder(
     private val parentContext: Context = Global,
 ) : TaskContainer {
@@ -115,15 +114,15 @@ public class WorkspaceBuilder(
     /**
      * Define a context for the workspace
      */
-    public fun context(block: ContextBuilder.() -> Unit = {}) {
-        this.context = parentContext.buildContext("workspace".asName(), block)
+    public fun context(contextName: Name? = null, block: ContextBuilder.() -> Unit = {}) {
+        this.context = parentContext.buildContext(contextName, block)
     }
 
     /**
      * Define intrinsic data for the workspace
      */
-    public fun data(builder: DataBuilder<Any?>.() -> Unit) {
-        data = DataTree.static(builder)
+    public fun data(builder: DataTreeBuilder<Any?>.() -> Unit) {
+        data = DataTree(builder)
     }
 
     /**
@@ -159,6 +158,6 @@ public class WorkspaceBuilder(
 public inline fun WorkspaceBuilder.target(name: String, mutableMeta: MutableMeta.() -> Unit): Unit =
     target(name, Meta(mutableMeta))
 
-@DFBuilder
+
 public fun Workspace(parentContext: Context = Global, builder: WorkspaceBuilder.() -> Unit): Workspace =
     WorkspaceBuilder(parentContext).apply(builder).build()

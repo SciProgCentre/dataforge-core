@@ -18,7 +18,7 @@ public interface DataSource<out T> {
     public val dataType: KType
 
     /**
-     * Get data with given name. Or null if it is not present
+     * Get data with the given [name]. Or null if it is not present
      */
     public fun read(name: Name): Data<T>?
 }

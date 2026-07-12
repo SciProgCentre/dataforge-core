@@ -4,6 +4,10 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.overwriteWith
+import kotlinx.serialization.modules.plus
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.Named
@@ -32,7 +36,7 @@ public open class Context internal constructor(
 ) : Named, MetaRepr, Provider, CoroutineScope {
 
     /**
-     * Context properties. Working as substitute for environment variables
+     * Context properties. Working as a substitute for environment variables
      */
     public val properties: Laminate = if (parent == null) {
         Laminate(meta)
@@ -77,14 +81,15 @@ public open class Context internal constructor(
     private val childrenContexts = HashMap<Name, Context>()
 
     /**
-     * Get and validate existing context or build and register a new child context.
-     * @param name the relative (tail) name of the new context. If null, uses context hash code as a marker.
+     * Build and register a new child context.
+     * @param name the relative (tail) name of the new context. If null, use context hash code as a marker.
      */
     @OptIn(DFExperimental::class)
     @ThreadSafe
     public fun buildContext(name: Name? = null, block: ContextBuilder.() -> Unit = {}): Context {
         val existing = name?.let { childrenContexts[name] }
-        return existing?.modify(block) ?: ContextBuilder(this, name).apply(block).build().also {
+        if (existing != null) error("Context $name already exists in $this")
+        return ContextBuilder(this, name).apply(block).build().also {
             childrenContexts[it.name] = it
         }
     }
@@ -103,6 +108,44 @@ public open class Context internal constructor(
         "parent" to parent?.name
         properties.layers.firstOrNull()?.let { set("properties", it) }
         "plugins" putIndexed plugins.map { it.toMeta() }
+    }
+
+    override fun toString(): String {
+        val parentString = if(parent == Global) "" else ", parent=$parent"
+        return "Context(name=$name$parentString)"
+    }
+
+    /**
+     * A lazily initialized property that defines the serialization module for the current context.
+     *
+     * If plugin serializers modules are conflicting, throw a [kotlinx.serialization.modules.SerializerAlreadyRegisteredException].
+     *
+     * The module is constructed by combining the serialization modules provided
+     * by the plugins associated with the context. If the context has a parent,
+     * the parent's serialization module is combined with the plugins' serialization
+     * modules. Plugin serializers are overwriting serializers from the parent.
+     */
+    public val serializationModule: SerializersModule by lazy {
+        val pluginModules = plugins.mapNotNull { it.serializerModule }
+        if (pluginModules.isEmpty()) {
+            parent?.serializationModule ?: SerializersModule {}
+        } else {
+            val pluginModule = pluginModules.reduce { acc, module -> acc + module }
+            parent?.serializationModule?.overwriteWith(pluginModule) ?: pluginModule
+        }
+    }
+
+
+    /**
+     * Json format for this context
+     */
+    public val json: Json by lazy {
+        Json {
+            prettyPrint = meta["json.prettyPrint"]?.boolean ?: true
+            isLenient = meta["json.lenient"]?.boolean ?: true
+            ignoreUnknownKeys = meta["json.ignoreUnknownKeys"]?.boolean ?: true
+            serializersModule = serializationModule
+        }
     }
 
     public companion object {

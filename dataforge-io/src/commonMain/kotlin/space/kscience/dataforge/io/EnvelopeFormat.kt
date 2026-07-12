@@ -6,7 +6,6 @@ import space.kscience.dataforge.io.EnvelopeFormatFactory.Companion.ENVELOPE_FORM
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -27,7 +26,7 @@ public interface EnvelopeFormatFactory : IOFormatFactory<Envelope>, EnvelopeForm
     public fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat?
 
     public companion object {
-        public val ENVELOPE_FACTORY_NAME: Name = "envelope".asName()
+        public val ENVELOPE_FACTORY_NAME: Name = Name.of("envelope")
         public const val ENVELOPE_FORMAT_TYPE: String = "io.format.envelope"
     }
 }

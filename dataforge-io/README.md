@@ -5,6 +5,8 @@ IO module
 ## Features
 
  - [IO format](src/commonMain/kotlin/space/kscience/dataforge/io/IOFormat.kt) : A generic API for reading something from binary representation and writing it to Binary.
+
+Similar to KSerializer, but without schema.
  - [Binary](src/commonMain/kotlin/space/kscience/dataforge/io/Binary.kt) : Multi-read random access binary.
  - [Envelope](src/commonMain/kotlin/space/kscience/dataforge/io/Envelope.kt) : API and implementations for combined data and metadata format.
  - [Tagged envelope](src/commonMain/kotlin/space/kscience/dataforge/io/TaggedEnvelope.kt) : Implementation for binary-friendly envelope format with machine readable tag and forward size declaration.
@@ -15,7 +17,7 @@ IO module
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:dataforge-io:0.10.3`.
+The Maven coordinates of this project are `space.kscience:dataforge-io:0.11.0`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -25,6 +27,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:dataforge-io:0.10.3")
+    implementation("space.kscience:dataforge-io:0.11.0")
 }
 ```

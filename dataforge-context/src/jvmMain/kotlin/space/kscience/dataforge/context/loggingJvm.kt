@@ -7,7 +7,7 @@ import space.kscience.dataforge.names.Name
 public class SlfLogManager : AbstractPlugin(), LogManager {
 
     override fun logger(name: Name): Logger = Logger { tag, body ->
-        val logger = LoggerFactory.getLogger("[${context.name}] $name") //KotlinLogging.logger("[${context.name}] $name")
+        val logger = LoggerFactory.getLogger("${context.name.toString().uppercase()}.$name") //KotlinLogging.logger("[${context.name}] $name")
         val message = body.safe
         when (tag) {
             LogManager.DEBUG -> logger.debug(message)
@@ -25,7 +25,7 @@ public class SlfLogManager : AbstractPlugin(), LogManager {
     public companion object : PluginFactory<SlfLogManager> {
         override fun build(context: Context, meta: Meta): SlfLogManager = SlfLogManager()
 
-        override val tag: PluginTag = PluginTag(group = PluginTag.DATAFORGE_GROUP, name = "log.kotlinLogging")
+        override val tag: PluginTag = PluginTag(group = PluginTag.DATAFORGE_GROUP, name = "log.slf4j")
     }
 }
 

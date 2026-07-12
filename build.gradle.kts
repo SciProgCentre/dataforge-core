@@ -1,7 +1,6 @@
 @file:OptIn(ExperimentalAbiValidation::class)
 
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import space.kscience.gradle.useApache2Licence
 import space.kscience.gradle.useSPCTeam
 
@@ -12,17 +11,11 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.10.3"
+    version = "0.11.0"
 }
 
 subprojects {
     apply(plugin = "maven-publish")
-
-    tasks.withType<KotlinCompile> {
-        compilerOptions {
-            freeCompilerArgs.add("-Xcontext-parameters")
-        }
-    }
 }
 
 dependencies {
@@ -46,7 +39,7 @@ kscienceProject {
 
     abiValidation {
         filters {
-            excluded {
+            exclude {
                 annotatedWith.add("space.kscience.dataforge.misc.DFExperimental")
             }
         }

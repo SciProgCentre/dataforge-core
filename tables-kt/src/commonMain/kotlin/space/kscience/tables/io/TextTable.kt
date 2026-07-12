@@ -6,7 +6,12 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.io.readByteArray
 import kotlinx.io.readLine
 import space.kscience.dataforge.io.Binary
+import space.kscience.dataforge.io.Envelope
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.Value
+import space.kscience.dataforge.meta.isEmpty
+import space.kscience.dataforge.meta.set
+import space.kscience.dataforge.names.NameToken
 import space.kscience.tables.*
 
 /**
@@ -27,7 +32,7 @@ internal class TextTable(
 
     private fun readAt(offset: Int): Row<Value> = binary.read(offset) {
         val line = readLine() ?: error("Line not found")
-        return@read line.readRow(headers, delimiter)
+        Table.readTextRow(line, headers, delimiter)
     }
 
     override fun getOrNull(row: Int, column: String): Value? {
@@ -67,11 +72,47 @@ private suspend fun Binary.buildRowIndex(): List<Int> = lineIndexFlow().toList()
 
 
 /**
+ * Convert given [Table] to a TSV-based envelope, encoding header in Meta
+ */
+public fun Table<Value>.toTextEnvelope(): Envelope = Envelope {
+    meta {
+        "header" put {
+            headers.forEachIndexed { index: Int, columnHeader: ColumnHeader<Value> ->
+                set(NameToken("column", index.toString()), Meta {
+                    "name" put columnHeader.name
+                    if (!columnHeader.meta.isEmpty()) {
+                        "meta" put columnHeader.meta
+                    }
+                })
+            }
+        }
+    }
+
+    type = "table.value"
+    dataID = "valueTable[${this@toTextEnvelope.hashCode()}]"
+
+    data = Binary {
+        Table.writeTextRows(this, this@toTextEnvelope)
+    }
+}
+
+/**
  * Read given binary as TSV [Value] table.
  * This method does not read the whole table into memory. Instead, it reads it ones and saves line offset index. Then
  * it reads specific lines on-demand.
  */
-public suspend fun Binary.readTextTable(header: ValueTableHeader): Table<Value> {
-    val index = buildRowIndex()
-    return TextTable(header, this, index)
+public suspend fun Table.Companion.readTextTable(binary: Binary, header: ValueTableHeader): Table<Value> {
+    val index = binary.buildRowIndex()
+    return TextTable(header, binary, index)
 }
+
+/**
+ * Read given [Envelope] as TSV [Value] table.
+ */
+public suspend fun Table.Companion.readTextTable(envelope: Envelope): Table<Value> {
+    val header = TextRows.readHeader(envelope.meta)
+
+    return readTextTable(envelope.data ?: Binary.EMPTY, header)
+}
+
+

@@ -20,7 +20,7 @@ class ContextTest {
 
     @Test
     fun testPluginManager() {
-        val context = Context("test") {
+        val context = Context{
             plugin(DummyPlugin())
         }
         val members = context.gather<Name>("test")

@@ -6,7 +6,7 @@
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:dataforge-data:0.10.3`.
+The Maven coordinates of this project are `space.kscience:dataforge-data:0.11.0`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -16,6 +16,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:dataforge-data:0.10.3")
+    implementation("space.kscience:dataforge-data:0.11.0")
 }
 ```

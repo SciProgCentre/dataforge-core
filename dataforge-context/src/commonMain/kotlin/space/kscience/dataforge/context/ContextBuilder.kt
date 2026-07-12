@@ -10,9 +10,6 @@ import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName
 import space.kscience.dataforge.names.plus
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -74,7 +71,7 @@ public class ContextBuilder internal constructor(
 
         fun addPlugin(factory: PluginFactory<*>, meta: Meta) {
             val existing = plugins[factory.tag]
-            // Add if does not exist
+            // Add if it does not exist
             if (existing == null) {
                 //TODO bypass if parent already has plugin with given meta?
                 val plugin = factory.build(parent, meta)
@@ -100,21 +97,21 @@ public class ContextBuilder internal constructor(
 }
 
 /**
- * Check if current context contains all plugins required by the builder and return it does or forks to a new context
+ * Check if the current context contains all plugins required by the builder and properties are the same and return it does or forks to a new context
  * if it does not.
  */
 @DFExperimental
-public fun Context.modify(block: ContextBuilder.() -> Unit): Context {
+public fun Context.deriveContext(deriveSuffix: String = "mod", block: ContextBuilder.() -> Unit): Context {
 
     fun Context.contains(factory: PluginFactory<*>, meta: Meta): Boolean {
         val loaded = plugins[factory.tag] ?: return false
         return loaded.meta == meta
     }
 
-    val builder = ContextBuilder(this, name + "mod", properties).apply(block)
-    val requiresFork = builder.factories.any { (factory, meta) ->
+    val builder = ContextBuilder(this, name + deriveSuffix, properties).apply(block)
+    val requiresFork = !Meta.equals(properties,builder.meta) || builder.factories.any { (factory, meta) ->
         !contains(factory, meta)
-    } || ((properties as Meta) == builder.meta)
+    }
 
     return if (requiresFork) builder.build() else this
 }

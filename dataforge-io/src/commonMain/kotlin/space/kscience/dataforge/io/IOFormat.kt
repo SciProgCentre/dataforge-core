@@ -10,7 +10,6 @@ import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name
-import space.kscience.dataforge.names.asName
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -74,8 +73,8 @@ public interface IOFormatFactory<T> : Factory<IOFormat<T>>, Named {
 
     public companion object {
         public const val IO_FORMAT_TYPE: String = "io.format"
-        public val NAME_KEY: Name = "name".asName()
-        public val META_KEY: Name = "meta".asName()
+        public val NAME_KEY: Name = Name.of("name")
+        public val META_KEY: Name = Name.of("meta")
     }
 }
 
@@ -84,7 +83,7 @@ public fun <T> Binary(obj: T, format: IOWriter<T>): Binary = Binary { format.wri
 public object FloatIOFormat : IOFormat<Float>, IOFormatFactory<Float> {
     override fun build(context: Context, meta: Meta): IOFormat<Float> = this
 
-    override val name: Name = "float32".asName()
+    override val name: Name = Name.of("float32")
 
     override val type: KType get() = typeOf<Float>()
 
@@ -99,7 +98,7 @@ public object FloatIOFormat : IOFormat<Float>, IOFormatFactory<Float> {
 public object DoubleIOFormat : IOFormat<Double>, IOFormatFactory<Double> {
     override fun build(context: Context, meta: Meta): IOFormat<Double> = this
 
-    override val name: Name = "float64".asName()
+    override val name: Name = Name.of("float64")
 
     override val type: KType get() = typeOf<Double>()
 

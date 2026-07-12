@@ -68,6 +68,16 @@ internal fun <T> TableColumn<T>.asDataColumn(): AnyCol = if (this is DataColumnA
 
 //TODO convert typed value columns to primitive columns
 
+/**
+ * Converts the current [Table] instance into a [DataFrame].
+ *
+ * This function maps the table's columns to data frame columns and constructs
+ * a new [DataFrame] from the mapped columns. The resulting [DataFrame] provides
+ * a tabular data structure with additional capabilities for data manipulation
+ * and analysis.
+ *
+ * @return A [DataFrame] created from the contents of the [Table].
+ */
 @Suppress("UNCHECKED_CAST")
 public fun <T> Table<T>.toDataFrame(): DataFrame<T> =
     dataFrameOf(columns.map { it.asDataColumn() }) as DataFrame<T>

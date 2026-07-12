@@ -7,13 +7,21 @@ import space.kscience.dataforge.names.Name
 /**
  * A data coupled to a name.
  */
-public interface NamedData<out T> : Data<T>, Named
+public interface NamedData<out T> : Data<T>, Named {
+    /**
+     * Extract inner data without name
+     */
+    public fun unwrap(): Data<T>
+}
 
 
 private class NamedDataImpl<T>(
     override val name: Name,
     val data: Data<T>,
 ) : Data<T> by data, NamedData<T> {
+
+    override fun unwrap(): Data<T> = data
+
     override fun toString(): String = buildString {
         append("NamedData(name=\"$name\"")
         if (data is StaticData) {
@@ -27,7 +35,7 @@ private class NamedDataImpl<T>(
 }
 
 public fun <T> Data<T>.named(name: Name): NamedData<T> = if (this is NamedData) {
-    NamedDataImpl(name, this)
+    NamedDataImpl(name, unwrap())
 } else {
     NamedDataImpl(name, this)
 }

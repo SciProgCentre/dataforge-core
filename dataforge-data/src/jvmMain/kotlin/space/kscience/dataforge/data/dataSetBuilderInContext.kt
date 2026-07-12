@@ -1,5 +1,3 @@
-@file:Suppress("CONTEXT_RECEIVERS_DEPRECATED")
-
 package space.kscience.dataforge.data
 
 import space.kscience.dataforge.names.Name

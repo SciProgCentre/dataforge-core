@@ -9,11 +9,23 @@ import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.plus
 import kotlin.reflect.KType
 
+/**
+ * Represents a functional interface to filter data based on a given set of criteria.
+ *
+ * The [DataFilter] interface defines a single method, [accepts], which determines
+ * whether the provided combination of [Name] of the data inside the tree, [Meta] of the data,
+ * and its `KType` satisfies the filtering conditions.
+ *
+ * The type filter takes into account only the declared data type, not the actual type of the data content.
+ */
 public fun interface DataFilter {
 
     public fun accepts(name: Name, meta: Meta?, type: KType): Boolean
 
     public companion object {
+        /**
+         * A filter that always accepts data
+         */
         public val EMPTY: DataFilter = DataFilter { _, _, _ -> true }
     }
 }
@@ -61,7 +73,7 @@ public class FilteredDataTree<T>(
 
     override val data: Data<T>?
         get() = source[branch].takeIf {
-            filter.accepts(Name.EMPTY, it?.meta, it?.type ?: dataType)
+            filter.accepts(branch, it?.meta, it?.type ?: dataType)
         }
 
     override val items: Map<NameToken, DataTree<T>>

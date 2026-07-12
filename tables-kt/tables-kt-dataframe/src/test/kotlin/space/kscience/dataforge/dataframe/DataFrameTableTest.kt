@@ -1,12 +1,14 @@
 package space.kscience.dataforge.dataframe
 
 import org.jetbrains.kotlinx.dataframe.api.add
-import org.jetbrains.kotlinx.dataframe.api.column
 import org.junit.jupiter.api.Test
+import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.tables.*
 import kotlin.math.pow
+import kotlin.reflect.typeOf
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 import kotlin.test.assertTrue
 
 @OptIn(DFExperimental::class)
@@ -29,21 +31,34 @@ internal class DataFrameTableTest {
 
         val dataFrame = table.toDataFrame()
 
-        //println( dataFrame)
-
-        val z by column<Double>()
-
-        val newFrame = dataFrame.add {
-            z.from { it[x] + it[y] + 1.0 }
-        }
-
-        //println(newFrame)
+        val newFrame = dataFrame.add("z") { it[x] + it[y] + 1.0 }
 
         val newTable = newFrame.asTable()
 
-        assertEquals(newTable.columns[x], table.columns[x])
+        assertEquals(table.columns[x], newTable.columns[x])
         assertTrue {
             table.rowsToColumn("z") { it[x] + it[y] + 1.0 }.contentEquals(newTable.columns["z"])
+        }
+    }
+
+    @Test
+    fun testDataFrameAccessors() {
+        val x by ColumnHeader.typed<Double>()
+        val y by ColumnHeader.typed<Number>()
+        val y2 = SimpleColumnHeader<Int>("y", typeOf<Int>(), Meta.EMPTY)
+
+        val table = ColumnTable<Number?>(100) {
+            //filling column with double values equal to index
+            fill(x) { it.toDouble() }
+            fill(y) { it.toDouble() }
+        }
+
+        val dataFrame = table.toDataFrame()
+
+        assertEquals(table[2, x], dataFrame[2][x])
+        assertEquals(table[2, y], dataFrame[2][y])
+        assertFails {
+            dataFrame[2][y2]
         }
     }
 }

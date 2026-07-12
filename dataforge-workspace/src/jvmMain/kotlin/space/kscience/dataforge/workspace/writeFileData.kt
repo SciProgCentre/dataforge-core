@@ -7,11 +7,9 @@ import space.kscience.dataforge.data.forEach
 import space.kscience.dataforge.data.meta
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.misc.DFExperimental
-import space.kscience.dataforge.names.Name
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.spi.FileSystemProvider
-import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.extension
@@ -20,7 +18,6 @@ import kotlin.io.path.extension
 /**
  * Write the data tree to existing directory or create a new one using default [java.nio.file.FileSystem] provider
  *
- * @param nameToPath a [Name] to [Path] converter used to create
  */
 @DFExperimental
 public suspend fun <T : Any> IOPlugin.writeDataDirectory(
