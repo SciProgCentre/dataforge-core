@@ -169,6 +169,8 @@ public open class SchemeSpec<T : Scheme>(
     private val builder: () -> T,
 ) : MetaConverter<T> {
 
+    //TODO make SchemeSpec iplement serializer
+
     override val descriptor: MetaDescriptor? get() = null
 
     override fun readOrNull(source: Meta): T = builder().also {

@@ -97,5 +97,7 @@ public inline fun <reified T : Plugin> Context.request(factory: PluginFactory<T>
 }
 
 @Deprecated("Replace with request", ReplaceWith("request(factory, meta)"))
-public inline fun <reified T : Plugin> Context.fetch(factory: PluginFactory<T>, meta: Meta = Meta.EMPTY): T =
-    request(factory, meta)
+public inline fun <reified T : Plugin> Context.fetch(
+    factory: PluginFactory<T>,
+    meta: Meta = Meta.EMPTY,
+): T = request(factory, meta)

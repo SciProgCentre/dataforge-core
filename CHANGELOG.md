@@ -11,6 +11,8 @@
 ### Removed
 
 ### Fixed
+- Return context derivation to buildContext
+- Type derivation and handling in MetaDescriptor
 
 ### Security
 

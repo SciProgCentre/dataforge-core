@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * A single name token. Body is not allowed to be empty.
- * Following symbols are escaped on serialization in name tokens: `{}.:\`.
+ * Following symbols are escaped on serialization in name tokens: `\][.`.
  * A name token could have appendix in square brackets called *index*
  */
 @Serializable(NameTokenSerializer::class)

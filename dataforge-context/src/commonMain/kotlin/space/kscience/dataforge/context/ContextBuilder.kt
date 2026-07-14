@@ -9,7 +9,6 @@ import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName
-import space.kscience.dataforge.names.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -94,24 +93,4 @@ public class ContextBuilder internal constructor(
 
         return Context(contextName, parent, plugins.values.toSet(), meta.seal(), coroutineContext)
     }
-}
-
-/**
- * Check if the current context contains all plugins required by the builder and properties are the same and return it does or forks to a new context
- * if it does not.
- */
-@DFExperimental
-public fun Context.deriveContext(deriveSuffix: String = "mod", block: ContextBuilder.() -> Unit): Context {
-
-    fun Context.contains(factory: PluginFactory<*>, meta: Meta): Boolean {
-        val loaded = plugins[factory.tag] ?: return false
-        return loaded.meta == meta
-    }
-
-    val builder = ContextBuilder(this, name + deriveSuffix, properties).apply(block)
-    val requiresFork = !Meta.equals(properties,builder.meta) || builder.factories.any { (factory, meta) ->
-        !contains(factory, meta)
-    }
-
-    return if (requiresFork) builder.build() else this
 }

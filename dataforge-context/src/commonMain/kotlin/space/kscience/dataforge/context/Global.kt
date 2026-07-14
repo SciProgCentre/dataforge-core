@@ -21,4 +21,4 @@ private object GlobalContext : Context(Name.of("GLOBAL"), null, emptySet(), Meta
 public val Global: Context get() = GlobalContext
 
 public fun Context(name: String? = null, block: ContextBuilder.() -> Unit = {}): Context =
-    Global.buildContext(name?.parseAsName(), block)
+    Global.buildContext(name?.parseAsName(), block = block)

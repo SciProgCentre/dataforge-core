@@ -86,9 +86,39 @@ public open class Context internal constructor(
      */
     @OptIn(DFExperimental::class)
     @ThreadSafe
-    public fun buildContext(name: Name? = null, block: ContextBuilder.() -> Unit = {}): Context {
-        val existing = name?.let { childrenContexts[name] }
-        if (existing != null) error("Context $name already exists in $this")
+    public fun buildContext(
+        name: Name? = null,
+        block: ContextBuilder.() -> Unit = {},
+    ): Context {
+
+        /*
+         * Check if the current context contains all plugins required by the builder and properties are the same and return it does or forks to a new context
+         * if it does not.
+         */
+        if (name != null) {
+            childrenContexts[name]?.let { existing ->
+                val builder = ContextBuilder(existing, meta = existing.properties).apply(block)
+                
+                val requiresFork = !Meta.equals(existing.properties, builder.meta)
+                        || builder.factories.any { (factory, meta) ->
+                    val loaded = existing.plugins[factory.tag]
+                    loaded == null || loaded.meta != meta
+                }
+
+                if (!requiresFork) return existing
+
+                // Search for existing fork
+                existing.childrenContexts.values.find { child ->
+                    Meta.equals(child.properties, builder.meta) && builder.factories.all { (factory, meta) ->
+                        val loaded = child.plugins[factory.tag]
+                        loaded != null && loaded.meta == meta
+                    }
+                }?.let { return it }
+
+                return existing.buildContext(block = block)
+            }
+        }
+
         return ContextBuilder(this, name).apply(block).build().also {
             childrenContexts[it.name] = it
         }
@@ -111,7 +141,7 @@ public open class Context internal constructor(
     }
 
     override fun toString(): String {
-        val parentString = if(parent == Global) "" else ", parent=$parent"
+        val parentString = if (parent == Global) "" else ", parent=$parent"
         return "Context(name=$name$parentString)"
     }
 
