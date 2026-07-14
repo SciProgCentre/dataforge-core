@@ -219,10 +219,10 @@ public operator fun MutableMetaProvider.set(key: String, metas: Iterable<Meta>):
 
 /**
  * Update the existing mutable node with another node.
- * Values that are present in the current provider and are missing in [meta] are kept.
+ * Values that are present in the current provider and are missing in [from] are kept.
  */
-public fun MutableMetaProvider.update(meta: Meta) {
-    meta.valueSequence().forEach { (name, value) ->
+public fun MutableMetaProvider.update(from: Meta) {
+    from.valueSequence().forEach { (name, value) ->
         set(name, value)
     }
 }
