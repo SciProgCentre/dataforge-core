@@ -88,7 +88,7 @@ By default, a new context inherits the coroutine context from its parent and add
 You can create child contexts from any existing context:
 
 ```kotlin
-val child = parentContext.buildContext("child") {
+val child = parentContext.buildContext(Name.parse("child")) {
     // ...
 }
 ```
@@ -97,7 +97,9 @@ Child context inherits all properties and plugins from their parent but could ov
 
 Closing parent context automatically closes all its child contexts.
 
-If a child context with the same name already exists, `buildContext` will return it (potentially deriving it if additional configuration is provided).
+`buildContext` always creates a new child context. If a child context with the same name already exists, it will be replaced in the parent's registry. 
+
+To intelligently reuse existing contexts, use `deriveContext`. It returns the current context or an existing child if they already satisfy the requirements (requested plugins and properties). Otherwise, it calls `buildContext` to create a new one.
 
 ## Example: Complex Context Setup
 
@@ -114,7 +116,7 @@ val analysisContext = Context("analysis") {
     }
 }
 
-val subTaskContext = analysisContext.buildContext("subtask") {
+val subTaskContext = analysisContext.buildContext(Name.parse("subtask")) {
     properties {
         "priority" put "high"
     }
