@@ -52,7 +52,9 @@ public interface MutableMeta : Meta, MutableMetaProvider {
     }
 
     override fun setValue(name: Name, value: Value?) {
-        if (value != getValue(name)) {
+        if (name.isEmpty()) {
+            this.value = value
+        } else if (value != getValue(name)) {
             getOrCreate(name).value = value
         }
     }

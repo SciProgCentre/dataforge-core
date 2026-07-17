@@ -1,8 +1,6 @@
 package space.kscience.dataforge.context
 
-import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.misc.DFInternal
-import space.kscience.dataforge.names.plus
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
@@ -80,24 +78,3 @@ public class PluginManager internal constructor(
 
     override fun iterator(): Iterator<Plugin> = plugins.iterator()
 }
-
-/**
- * Fetch a plugin with given meta from the context. If the plugin (with given meta) is already registered, it is returned.
- * Otherwise, new child context with the plugin is created. In the later case the context could be retrieved from the plugin.
- */
-public inline fun <reified T : Plugin> Context.request(factory: PluginFactory<T>, meta: Meta? = null): T {
-    val existing = plugins[factory]
-    return if (existing != null && (meta == null || existing.meta == meta)) {
-        existing
-    } else {
-        buildContext(name = this@request.name + factory.tag.name) {
-            plugin(factory, meta ?: Meta.EMPTY)
-        }.plugins[factory]!!
-    }
-}
-
-@Deprecated("Replace with request", ReplaceWith("request(factory, meta)"))
-public inline fun <reified T : Plugin> Context.fetch(
-    factory: PluginFactory<T>,
-    meta: Meta = Meta.EMPTY,
-): T = request(factory, meta)

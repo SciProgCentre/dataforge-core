@@ -9,9 +9,7 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.overwriteWith
 import kotlinx.serialization.modules.plus
 import space.kscience.dataforge.meta.*
-import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.Named
-import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.provider.Provider
 import kotlin.coroutines.CoroutineContext
@@ -84,44 +82,39 @@ public open class Context internal constructor(
      * Build and register a new child context.
      * @param name the relative (tail) name of the new context. If null, use context hash code as a marker.
      */
-    @OptIn(DFExperimental::class)
-    @ThreadSafe
     public fun buildContext(
         name: Name? = null,
         block: ContextBuilder.() -> Unit = {},
+    ): Context = ContextBuilder(this, name).apply(block).build().also {
+        childrenContexts[it.name] = it
+    }
+
+    /**
+     * Check if the current context already has plugins and properties matching the given block.
+     * If it does, return it, otherwise create a new child context ensured to have them
+     */
+    public fun deriveContext(
+        block: ContextBuilder.() -> Unit = {},
     ): Context {
+        val builder = ContextBuilder(this, meta = properties).apply(block)
 
-        /*
-         * Check if the current context contains all plugins required by the builder and properties are the same and return it does or forks to a new context
-         * if it does not.
-         */
-        if (name != null) {
-            childrenContexts[name]?.let { existing ->
-                val builder = ContextBuilder(existing, meta = existing.properties).apply(block)
-                
-                val requiresFork = !Meta.equals(existing.properties, builder.meta)
-                        || builder.factories.any { (factory, meta) ->
-                    val loaded = existing.plugins[factory.tag]
-                    loaded == null || loaded.meta != meta
-                }
+        val requiresFork = !Meta.equals(properties, builder.meta)
+                || builder.factories.any { (factory, meta) ->
+            val loaded = plugins[factory.tag]
+            loaded == null || loaded.meta != meta
+        }
 
-                if (!requiresFork) return existing
+        if (!requiresFork) return this
 
-                // Search for existing fork
-                existing.childrenContexts.values.find { child ->
-                    Meta.equals(child.properties, builder.meta) && builder.factories.all { (factory, meta) ->
-                        val loaded = child.plugins[factory.tag]
-                        loaded != null && loaded.meta == meta
-                    }
-                }?.let { return it }
-
-                return existing.buildContext(block = block)
+        // Search for existing child that adheres to restrictions
+        childrenContexts.values.find { child ->
+            Meta.equals(child.properties, builder.meta) && builder.factories.all { (factory, meta) ->
+                val loaded = child.plugins[factory.tag]
+                loaded != null && loaded.meta == meta
             }
-        }
+        }?.let { return it }
 
-        return ContextBuilder(this, name).apply(block).build().also {
-            childrenContexts[it.name] = it
-        }
+        return buildContext(block = block)
     }
 
     /**
@@ -182,6 +175,22 @@ public open class Context internal constructor(
         public const val PROPERTY_TARGET: String = "context.property"
     }
 }
+
+/**
+ * Fetch a plugin with given meta from the context. If the plugin (with given meta) is already registered, it is returned.
+ * Otherwise, new child context with the plugin is created. In the later case the context could be retrieved from the plugin.
+ */
+public inline fun <reified T : Plugin> Context.request(factory: PluginFactory<T>, meta: Meta? = null): T {
+    return deriveContext {
+        plugin(factory, meta ?: Meta.EMPTY)
+    }.plugins[factory]!!
+}
+
+@Deprecated("Replace with request", ReplaceWith("request(factory, meta)"))
+public inline fun <reified T : Plugin> Context.fetch(
+    factory: PluginFactory<T>,
+    meta: Meta = Meta.EMPTY,
+): T = request(factory, meta)
 
 /**
  * The interface for something that encapsulated in context

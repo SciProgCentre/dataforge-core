@@ -72,7 +72,6 @@ public class ContextBuilder internal constructor(
             val existing = plugins[factory.tag]
             // Add if it does not exist
             if (existing == null) {
-                //TODO bypass if parent already has plugin with given meta?
                 val plugin = factory.build(parent, meta)
 
                 for ((depFactory, deoMeta) in plugin.dependsOn()) {

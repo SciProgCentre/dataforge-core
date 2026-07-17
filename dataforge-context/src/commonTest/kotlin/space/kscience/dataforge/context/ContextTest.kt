@@ -5,10 +5,7 @@ import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.appendFirst
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotSame
-import kotlin.test.assertSame
+import kotlin.test.*
 
 
 class ContextTest {
@@ -30,7 +27,7 @@ class ContextTest {
 
     @Test
     fun testPluginManager() {
-        val context = Context{
+        val context = Context {
             plugin(TestPlugin())
         }
         val members = context.gather<Name>("test")
@@ -41,10 +38,10 @@ class ContextTest {
     }
 
     @Test
-    fun testPluginBuild(){
+    fun testPluginBuild() {
         val context = Context()
         val plugin = context.request(TestPlugin)
-        
+
         val members = plugin.context.gather<Name>("test")
         assertEquals(3, members.count())
         members.forEach {
@@ -88,16 +85,18 @@ class ContextTest {
     }
 
     @Test
-    fun testRequestNoFork() {
+    fun doubleRequest() {
         val context = Context()
-        context.request(TestPlugin, Meta { "a" put 1 })
+        val initial = context.request(TestPlugin, Meta { "a" put 1 })
 
-        val plugin1 = context.request(TestPlugin, Meta { "a" put 1 })
-        assertEquals("1", plugin1.meta["a"].string)
+        val second = context.request(TestPlugin, Meta { "a" put 1 })
+        assertEquals("1", second.meta["a"].string)
+        assertEquals(initial, second)
 
-        kotlin.test.assertFails {
-            context.request(TestPlugin, Meta { "a" put 2 })
-        }
+
+        val third = context.request(TestPlugin, Meta { "a" put 2 })
+
+        assertNotEquals(initial, third)
     }
 
 
