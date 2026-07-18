@@ -3,20 +3,31 @@
 ## Unreleased
 
 ### Added
-- Separate methods to build and derive contexts
 
 ### Changed
-- Context builders accept string instead of names
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
-- Return context derivation to buildContext
-- Type derivation and handling in MetaDescriptor
 
 ### Security
+
+## 0.11.1 - 2026-07-18
+
+### Added
+
+- Separate methods to build and derive contexts
+
+### Changed
+
+- Context builders accept string instead of names
+
+### Fixed
+
+- Return context derivation to buildContext
+- Type derivation and handling in MetaDescriptor
 
 ## 0.11.0 - 2026-07-12
 

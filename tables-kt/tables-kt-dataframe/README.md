@@ -12,7 +12,7 @@ An integration to convert DataForg tables to DataFrame and back.
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:tables-kt-dataframe:0.11.0`.
+The Maven coordinates of this project are `space.kscience:tables-kt-dataframe:0.11.1`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -22,6 +22,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:tables-kt-dataframe:0.11.0")
+    implementation("space.kscience:tables-kt-dataframe:0.11.1")
 }
 ```

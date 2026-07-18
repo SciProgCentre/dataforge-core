@@ -6,7 +6,7 @@ ProtoBuf meta IO
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:dataforge-io-proto:0.11.0`.
+The Maven coordinates of this project are `space.kscience:dataforge-io-proto:0.11.1`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -16,6 +16,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:dataforge-io-proto:0.11.0")
+    implementation("space.kscience:dataforge-io-proto:0.11.1")
 }
 ```
