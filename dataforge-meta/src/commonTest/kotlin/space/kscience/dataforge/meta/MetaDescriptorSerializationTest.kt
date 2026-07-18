@@ -1,8 +1,9 @@
-package space.kscience.dataforge.meta.descriptors
+package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
-import space.kscience.dataforge.meta.ValueType
-import space.kscience.dataforge.meta.string
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
+import space.kscience.dataforge.meta.descriptors.ValueRestriction
+import space.kscience.dataforge.meta.descriptors.allowedValues
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

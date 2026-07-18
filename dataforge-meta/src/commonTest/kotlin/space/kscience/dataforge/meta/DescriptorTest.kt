@@ -102,4 +102,31 @@ class DescriptorTest {
         assertTrue(descriptor.validate(Meta { "number" put 1.1 }))
         assertFalse(descriptor.validate(Meta { "number" put "string" }))
     }
+
+    @Test
+    fun testMultipleElementsInList() {
+        val descriptor = MetaDescriptor {
+            node("list") {
+                valueType(ValueType.NUMBER, ValueType.LIST, ValueType.NULL)
+                multiple = true
+                default(listOf(0))
+                allowedValues(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+            }
+        }
+
+
+        assertTrue(descriptor.validate(Meta {
+            "list" put ListValue(1, 3, 8)
+        }))
+
+        assertFalse(descriptor.validate(Meta {
+            "list" put ListValue(1, 3, 11)
+        }))
+
+        assertTrue(descriptor.validate(Meta { "list" put 2 }))
+        assertFalse(descriptor.validate(Meta { "list" put -2 }))
+
+        assertTrue(descriptor.validate(Meta { "list" put listOf<Value>().asValue() }))
+
+    }
 }

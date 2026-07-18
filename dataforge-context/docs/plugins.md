@@ -62,15 +62,6 @@ Each `Context` has a `PluginManager` that:
 - Manages the plugin lifecycle.
 - Handles plugin lookups (including searching in parent contexts).
 
-### Requesting a Plugin
-You can request a plugin from a context using the `request` extension function:
-
-```kotlin
-val myPlugin = context.request(MyPluginFactory)
-```
-
-If the plugin is already present in the context or its parents, it is returned. Otherwise, a new child context is created with the requested plugin.
-
 ## Plugin Factories
 
 Plugins are typically created using a `PluginFactory`. This allows the framework to instantiate plugins dynamically based on metadata or explicit requests. Also it allows using type-safe reference to plugins via their types and dependency injection.

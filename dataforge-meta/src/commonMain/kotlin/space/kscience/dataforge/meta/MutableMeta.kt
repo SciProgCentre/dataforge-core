@@ -52,7 +52,9 @@ public interface MutableMeta : Meta, MutableMetaProvider {
     }
 
     override fun setValue(name: Name, value: Value?) {
-        if (value != getValue(name)) {
+        if (name.isEmpty()) {
+            this.value = value
+        } else if (value != getValue(name)) {
             getOrCreate(name).value = value
         }
     }
@@ -219,10 +221,10 @@ public operator fun MutableMetaProvider.set(key: String, metas: Iterable<Meta>):
 
 /**
  * Update the existing mutable node with another node.
- * Values that are present in the current provider and are missing in [meta] are kept.
+ * Values that are present in the current provider and are missing in [from] are kept.
  */
-public fun MutableMetaProvider.update(meta: Meta) {
-    meta.valueSequence().forEach { (name, value) ->
+public fun MutableMetaProvider.update(from: Meta) {
+    from.valueSequence().forEach { (name, value) ->
         set(name, value)
     }
 }

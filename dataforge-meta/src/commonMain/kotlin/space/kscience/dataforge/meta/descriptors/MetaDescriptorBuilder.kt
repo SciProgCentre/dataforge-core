@@ -205,26 +205,41 @@ public inline fun <S : Scheme, reified T> MetaDescriptorBuilder.value(
         value(property.name, ValueType.NUMBER) {
             block()
         }
+
     typeOf<Number?>(), typeOf<Int?>(), typeOf<Double?>(), typeOf<Short?>(), typeOf<Long?>(), typeOf<Float?>() ->
         value(property.name, ValueType.NUMBER) {
             block()
         }
+
     typeOf<Boolean>() -> value(property.name, ValueType.BOOLEAN) {
         block()
     }
-    typeOf<List<Number>>(), typeOf<List<Int>>(), typeOf<List<Double>>(), typeOf<List<Short>>(), typeOf<List<Long>>(), typeOf<List<Float>>(),
-    typeOf<IntArray>(), typeOf<DoubleArray>(), typeOf<ShortArray>(), typeOf<LongArray>(), typeOf<FloatArray>(),
-        -> value(property.name, ValueType.NUMBER) {
-        multiple = true
-        block()
-    }
+
     typeOf<String>() -> value(property.name, ValueType.STRING) {
         block()
     }
-    typeOf<List<String>>(), typeOf<Array<String>>() -> value(property.name, ValueType.STRING) {
+
+    typeOf<List<Number>>(), typeOf<List<Int>>(), typeOf<List<Double>>(), typeOf<List<Short>>(), typeOf<List<Long>>(), typeOf<List<Float>>(),
+    typeOf<IntArray>(), typeOf<DoubleArray>(), typeOf<ShortArray>(), typeOf<LongArray>(), typeOf<FloatArray>() -> value(
+        property.name,
+        ValueType.NUMBER,
+        ValueType.LIST,
+        ValueType.NULL
+    ) {
         multiple = true
         block()
     }
+
+    typeOf<List<String>>(), typeOf<Array<String>>() -> value(
+        property.name,
+        ValueType.STRING,
+        ValueType.LIST,
+        ValueType.NULL
+    ) {
+        multiple = true
+        block()
+    }
+
     else -> node(property.name, block)
 }
 

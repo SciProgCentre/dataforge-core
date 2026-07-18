@@ -127,7 +127,13 @@ public fun MetaDescriptor.validateWithResult(value: Value?, name: Name): MetaVal
 
     allowedValues != null -> {
         val allowedValues = allowedValues!!
-        if (value.type == ValueType.LIST && multiple) {
+        if (value.type == ValueType.NULL) {
+            if (required) {
+                MetaValidationResult.RequiredValueIsMissing(name)
+            } else {
+                MetaValidationResult.Valid
+            }
+        } else if (value.type == ValueType.LIST && multiple) {
             if (value.list.all { it in allowedValues }) {
                 MetaValidationResult.Valid
             } else {

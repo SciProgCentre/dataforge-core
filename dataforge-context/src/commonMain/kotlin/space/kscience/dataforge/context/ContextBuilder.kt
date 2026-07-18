@@ -9,7 +9,7 @@ import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName
-import space.kscience.dataforge.names.plus
+import space.kscience.dataforge.names.parseAsName
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -19,7 +19,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 @DFBuilder
 public class ContextBuilder internal constructor(
     private val parent: Context,
-    public val name: Name? = null,
+    public val name: String? = null,
     meta: Meta = Meta.EMPTY,
 ) {
     internal val factories = HashMap<PluginFactory<*>, Meta>()
@@ -66,14 +66,13 @@ public class ContextBuilder internal constructor(
 
 
     public fun build(): Context {
-        val contextName = name ?: NameToken("@auto", hashCode().toUInt().toString(16)).asName()
+        val contextName: Name = name?.parseAsName() ?: NameToken("@auto", hashCode().toUInt().toString(16)).asName()
         val plugins = HashMap<PluginTag, Plugin>()
 
         fun addPlugin(factory: PluginFactory<*>, meta: Meta) {
             val existing = plugins[factory.tag]
             // Add if it does not exist
             if (existing == null) {
-                //TODO bypass if parent already has plugin with given meta?
                 val plugin = factory.build(parent, meta)
 
                 for ((depFactory, deoMeta) in plugin.dependsOn()) {
@@ -94,24 +93,4 @@ public class ContextBuilder internal constructor(
 
         return Context(contextName, parent, plugins.values.toSet(), meta.seal(), coroutineContext)
     }
-}
-
-/**
- * Check if the current context contains all plugins required by the builder and properties are the same and return it does or forks to a new context
- * if it does not.
- */
-@DFExperimental
-public fun Context.deriveContext(deriveSuffix: String = "mod", block: ContextBuilder.() -> Unit): Context {
-
-    fun Context.contains(factory: PluginFactory<*>, meta: Meta): Boolean {
-        val loaded = plugins[factory.tag] ?: return false
-        return loaded.meta == meta
-    }
-
-    val builder = ContextBuilder(this, name + deriveSuffix, properties).apply(block)
-    val requiresFork = !Meta.equals(properties,builder.meta) || builder.factories.any { (factory, meta) ->
-        !contains(factory, meta)
-    }
-
-    return if (requiresFork) builder.build() else this
 }
