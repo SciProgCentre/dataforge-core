@@ -9,6 +9,7 @@ import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.asName
+import space.kscience.dataforge.names.parseAsName
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -18,7 +19,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 @DFBuilder
 public class ContextBuilder internal constructor(
     private val parent: Context,
-    public val name: Name? = null,
+    public val name: String? = null,
     meta: Meta = Meta.EMPTY,
 ) {
     internal val factories = HashMap<PluginFactory<*>, Meta>()
@@ -65,7 +66,7 @@ public class ContextBuilder internal constructor(
 
 
     public fun build(): Context {
-        val contextName = name ?: NameToken("@auto", hashCode().toUInt().toString(16)).asName()
+        val contextName: Name = name?.parseAsName() ?: NameToken("@auto", hashCode().toUInt().toString(16)).asName()
         val plugins = HashMap<PluginTag, Plugin>()
 
         fun addPlugin(factory: PluginFactory<*>, meta: Meta) {

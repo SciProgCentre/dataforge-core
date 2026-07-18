@@ -79,14 +79,25 @@ public open class Context internal constructor(
     private val childrenContexts = HashMap<Name, Context>()
 
     /**
-     * Build and register a new child context.
+     * Build and register a new child context. If context with the same name, properties and plugins already exists, reuse it.
+     * Throw an exception if context with the same name exists but is different.
      * @param name the relative (tail) name of the new context. If null, use context hash code as a marker.
      */
     public fun buildContext(
-        name: Name? = null,
+        name: String? = null,
         block: ContextBuilder.() -> Unit = {},
     ): Context = ContextBuilder(this, name).apply(block).build().also {
-        childrenContexts[it.name] = it
+        val existing = childrenContexts[it.name]
+        if (existing != null) {
+            if (equals(existing, it)) {
+                //reuse existing context if it is the same
+                return existing
+            } else {
+                error("Context with name ${it.name} already exists but has different properties and plugins")
+            }
+        } else {
+            childrenContexts[it.name] = it
+        }
     }
 
     /**
@@ -173,6 +184,12 @@ public open class Context internal constructor(
 
     public companion object {
         public const val PROPERTY_TARGET: String = "context.property"
+
+        internal fun equals(c1: Context, c2: Context): Boolean =
+            c1.properties == c2.properties &&
+                    c1.plugins.tags == c2.plugins.tags &&
+                    c1.plugins.all { c2.plugins[it.tag]?.meta == it.meta }
+
     }
 }
 
@@ -185,12 +202,6 @@ public inline fun <reified T : Plugin> Context.request(factory: PluginFactory<T>
         plugin(factory, meta ?: Meta.EMPTY)
     }.plugins[factory]!!
 }
-
-@Deprecated("Replace with request", ReplaceWith("request(factory, meta)"))
-public inline fun <reified T : Plugin> Context.fetch(
-    factory: PluginFactory<T>,
-    meta: Meta = Meta.EMPTY,
-): T = request(factory, meta)
 
 /**
  * The interface for something that encapsulated in context

@@ -114,7 +114,7 @@ public class WorkspaceBuilder(
     /**
      * Define a context for the workspace
      */
-    public fun context(contextName: Name? = null, block: ContextBuilder.() -> Unit = {}) {
+    public fun context(contextName: String? = null, block: ContextBuilder.() -> Unit = {}) {
         this.context = parentContext.buildContext(contextName, block = block)
     }
 

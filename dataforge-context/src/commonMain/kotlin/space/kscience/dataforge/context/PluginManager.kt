@@ -78,3 +78,9 @@ public class PluginManager internal constructor(
 
     override fun iterator(): Iterator<Plugin> = plugins.iterator()
 }
+
+/**
+ * Set of tags of all loaded plugins
+ */
+public val PluginManager.tags: Set<PluginTag>
+    get() = mapTo(mutableSetOf()) { it.tag }

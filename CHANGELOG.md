@@ -3,8 +3,10 @@
 ## Unreleased
 
 ### Added
+- Separate methods to build and derive contexts
 
 ### Changed
+- Context builders accept string instead of names
 
 ### Deprecated
 
