@@ -13,8 +13,12 @@ import space.kscience.dataforge.names.plus
 
 
 /**
- * A streaming-friendly envelope format with a short binary tag.
- * TODO add description
+ * A class responsible for managing the tagged envelope format, which encapsulates an envelope (a combination of metadata and data)
+ * along with additional structures like a header or tag for serialization and communication purposes.
+ *
+ * @property io The IO plugin providing input/output functionality, meta format resolution, and envelope format factories.
+ * @property version The envelope format version being used (default is `VERSION.DF02`).
+ * @property metaFormatFactory The factory to create metadata formats. The default is `JsonMetaFormat`.
  */
 public class TaggedEnvelopeFormat(
     public val io: IOPlugin,
@@ -63,7 +67,6 @@ public class TaggedEnvelopeFormat(
      * Read an envelope from input into memory
      *
      * @param source an input to read from
-     * @param formats a collection of meta formats to resolve
      */
     override fun readFrom(source: Source): Envelope {
         val tag = source.readTag(this.version)
