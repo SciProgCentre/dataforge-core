@@ -92,11 +92,14 @@ public fun JsonPrimitive.toValue(descriptor: MetaDescriptor?): Value = when (thi
 private fun JsonElement.toValueOrNull(descriptor: MetaDescriptor?): Value? = when (this) {
     is JsonPrimitive -> toValue(descriptor)
     is JsonObject -> get(Meta.VALUE_KEY)?.toValueOrNull(descriptor)
-    is JsonArray -> {
-        if (isEmpty()) ListValue.EMPTY else {
-            val values = map { it.toValueOrNull(descriptor) }
-            values.map { it ?: return null }.asValue()
-        }
+
+    is JsonArray -> if (isEmpty()) {
+        ListValue.EMPTY
+    } else if (all { it is JsonPrimitive }) {
+        val values = map { it.toValueOrNull(descriptor) }
+        values.map { it ?: return null }.asValue()
+    } else {
+        null
     }
 }
 
@@ -127,7 +130,8 @@ private fun MutableMap<NameToken, SealedMeta>.addJsonElement(
                         is JsonArray -> {
                             val childValue = childElement.toValueOrNull(null)
                             if (childValue == null) {
-                                SealedMeta(null,
+                                SealedMeta(
+                                    null,
                                     hashMapOf<NameToken, SealedMeta>().apply {
                                         addJsonElement(Meta.JSON_ARRAY_KEY, childElement, null)
                                     }
@@ -168,7 +172,8 @@ public fun JsonElement.toMeta(descriptor: MetaDescriptor? = null): SealedMeta = 
     is JsonArray -> if (all { it is JsonPrimitive }) {
         Meta(map { it.toValueOrNull(descriptor) ?: error("Unreachable: should not contain objects") }.asValue())
     } else {
-        SealedMeta(null,
+        SealedMeta(
+            null,
             linkedMapOf<NameToken, SealedMeta>().apply {
                 addJsonElement(Meta.JSON_ARRAY_KEY, this@toMeta, null)
             }
