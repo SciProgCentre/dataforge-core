@@ -28,7 +28,6 @@ public interface MutableMetaProvider : MetaProvider, MutableValueProvider {
 
 /**
  * Mutable variant of [Meta]
- * TODO documentation
  */
 @Serializable(MutableMetaSerializer::class)
 @MetaBuilderMarker
@@ -64,88 +63,108 @@ public interface MutableMeta : Meta, MutableMetaProvider {
      */
     public fun getOrCreate(name: Name): MutableMeta
 
-    //TODO to be moved to extensions with multi-receivers
-
-    public infix fun Name.put(value: Value?) {
-        setValue(this, value)
-    }
-
-    public infix fun Name.put(string: String) {
-        setValue(this, string.asValue())
-    }
-
-    public infix fun Name.put(number: Number) {
-        setValue(this, number.asValue())
-    }
-
-    public infix fun Name.put(boolean: Boolean) {
-        setValue(this, boolean.asValue())
-    }
-
-    public infix fun Name.put(enum: Enum<*>) {
-        setValue(this, EnumValue(enum))
-    }
-
-    public infix fun Name.putIndexed(iterable: Iterable<Meta>) {
-        setIndexed(this, iterable)
-    }
-
-    public infix fun Name.put(meta: Meta) {
-        set(this, meta)
-    }
-
-    public infix fun Name.put(repr: MetaRepr) {
-        set(this, repr.toMeta())
-    }
-
-    public infix fun Name.put(builder: MutableMeta.() -> Unit) {
-        getOrCreate(this).apply(builder)
-    }
-
-    public infix fun String.put(meta: Meta) {
-        set(Name.parse(this), meta)
-    }
-
-    public infix fun String.put(value: Value?) {
-        setValue(Name.parse(this), value)
-    }
-
-    public infix fun String.put(string: String) {
-        setValue(Name.parse(this), string.asValue())
-    }
-
-    public infix fun String.put(number: Number) {
-        setValue(Name.parse(this), number.asValue())
-    }
-
-    public infix fun String.put(boolean: Boolean) {
-        setValue(Name.parse(this), boolean.asValue())
-    }
-
-    public infix fun String.put(enum: Enum<*>) {
-        setValue(Name.parse(this), EnumValue(enum))
-    }
-
-    public infix fun String.put(array: DoubleArray) {
-        setValue(Name.parse(this), array.asValue())
-    }
-
-    public infix fun String.put(array: ByteArray) {
-        setValue(Name.parse(this), array.asValue())
-    }
-
-    public infix fun String.put(repr: MetaRepr) {
-        set(Name.parse(this), repr.toMeta())
-    }
-
-    public infix fun String.putIndexed(iterable: Iterable<Meta>) {
-        setIndexed(Name.parse(this), iterable)
-    }
-
-    public infix fun String.put(builder: MutableMeta.() -> Unit) {
-        getOrCreate(parseAsName()).apply(builder)
-    }
 }
+
+context(mutableMeta: MutableMeta)
+public infix fun Name.put(value: Value?) {
+    mutableMeta.setValue(this, value)
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun Name.put(string: String) {
+    mutableMeta.setValue(this, string.asValue())
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun Name.put(number: Number) {
+    mutableMeta.setValue(this, number.asValue())
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun Name.put(boolean: Boolean) {
+    mutableMeta.setValue(this, boolean.asValue())
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun Name.put(enum: Enum<*>) {
+    mutableMeta.setValue(this, EnumValue(enum))
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun Name.putIndexed(iterable: Iterable<Meta>) {
+    mutableMeta.setIndexed(this, iterable)
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun Name.put(meta: Meta) {
+    mutableMeta.set(this, meta)
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun Name.put(repr: MetaRepr) {
+    mutableMeta[this] = repr.toMeta()
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun Name.put(builder: MutableMeta.() -> Unit) {
+    mutableMeta.getOrCreate(this).apply(builder)
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(meta: Meta) {
+    mutableMeta.set(Name.parse(this), meta)
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(value: Value?) {
+    mutableMeta.setValue(Name.parse(this), value)
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(string: String) {
+    mutableMeta.setValue(Name.parse(this), string.asValue())
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(number: Number) {
+    mutableMeta.setValue(Name.parse(this), number.asValue())
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(boolean: Boolean) {
+    mutableMeta.setValue(Name.parse(this), boolean.asValue())
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(enum: Enum<*>) {
+    mutableMeta.setValue(Name.parse(this), EnumValue(enum))
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(array: DoubleArray) {
+    mutableMeta.setValue(Name.parse(this), array.asValue())
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(array: ByteArray) {
+    mutableMeta.setValue(Name.parse(this), array.asValue())
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(repr: MetaRepr) {
+    mutableMeta[Name.parse(this)] = repr.toMeta()
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.putIndexed(iterable: Iterable<Meta>) {
+    mutableMeta.setIndexed(Name.parse(this), iterable)
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(builder: MutableMeta.() -> Unit) {
+    mutableMeta.getOrCreate(parseAsName()).apply(builder)
+}
+
 
 /**
  * Set or replace value at given [name]
@@ -277,12 +296,11 @@ private class MutableMetaImpl(
             }
         }
 
-    private val children: LinkedHashMap<NameToken, ObservableMutableMeta> =
-        LinkedHashMap(children.mapValues { (key, meta) ->
+    override val items: Map<NameToken, ObservableMutableMeta>
+        field: LinkedHashMap<NameToken, ObservableMutableMeta> = children.mapValuesTo(LinkedHashMap()) { (key, meta) ->
             MutableMetaImpl(meta.value, meta.items).also { it.adoptBy(this, key) }
-        })
+        }
 
-    override val items: Map<NameToken, ObservableMutableMeta> get() = children
 
     @DFExperimental
     override fun attach(name: Name, node: ObservableMutableMeta) {
@@ -294,13 +312,13 @@ private class MutableMetaImpl(
     }
 
     /**
-     * Create and attach empty node
+     * Create and attach an empty node
      */
     private fun createNode(name: Name): ObservableMutableMeta = when (name.length) {
         0 -> throw IllegalArgumentException("Can't create a node with empty name")
         1 -> {
             val newNode = MutableMetaImpl(null)
-            children[name.first()] = newNode
+            items[name.first()] = newNode
             newNode.adoptBy(this, name.first())
             newNode
         } //do not notify, no value changed
@@ -319,10 +337,10 @@ private class MutableMetaImpl(
         if (oldItem != newItem) {
             if (newItem == null) {
                 //remove child and remove stale listener
-                children.remove(key)?.removeListener(this)
+                items.remove(key)?.removeListener(this)
             } else {
                 newItem.adoptBy(this, key)
-                children[key] = newItem
+                items[key] = newItem
             }
             invalidate(key.asName())
         }
@@ -346,11 +364,11 @@ private class MutableMetaImpl(
                     val token = name.firstOrNull()!!
                     //remove child and invalidate if argument is null
                     if (node == null) {
-                        children.remove(token)?.removeListener(this)
+                        items.remove(token)?.removeListener(this)
                     } else {
                         val newNode = wrapItem(node)
                         newNode.adoptBy(this, token)
-                        children[token] = newNode
+                        items[token] = newNode
                     }
                 }
 
@@ -360,7 +378,7 @@ private class MutableMetaImpl(
                     if (items[token] == null) {
                         val newNode = MutableMetaImpl(null)
                         newNode.adoptBy(this, token)
-                        children[token] = newNode
+                        items[token] = newNode
                     }
                     items[token]?.set(name.cutFirst(), node)
                 }

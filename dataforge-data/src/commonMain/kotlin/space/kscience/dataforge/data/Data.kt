@@ -4,6 +4,7 @@ import kotlinx.coroutines.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
 import space.kscience.dataforge.meta.isEmpty
+import space.kscience.dataforge.meta.put
 import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.misc.UnsafeKType
 import kotlin.coroutines.CoroutineContext

@@ -4,6 +4,7 @@ import kotlinx.serialization.modules.SerializersModule
 import space.kscience.dataforge.context.Plugin.Companion.TARGET
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
+import space.kscience.dataforge.meta.put
 import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.misc.Named
 import space.kscience.dataforge.names.Name

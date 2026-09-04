@@ -4,6 +4,7 @@ import space.kscience.dataforge.io.parse
 import space.kscience.dataforge.io.toString
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.get
+import space.kscience.dataforge.meta.put
 import space.kscience.dataforge.meta.seal
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.Test

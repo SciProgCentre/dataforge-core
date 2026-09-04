@@ -2,6 +2,7 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
+import kotlin.jvm.JvmName
 
 
 /**
@@ -247,18 +248,22 @@ public fun Boolean.asValue(): Value = if (this) True else False
 
 public fun String.asValue(): Value = StringValue(this)
 
-public fun Iterable<Value>.asValue(): Value {
-    val list = toList()
-    return if (list.isEmpty()) Null else ListValue(this.toList())
-}
+@JvmName("valuesAsValue")
+public fun Iterable<Value>.asValue(): Value = ListValue(toList())
 
-public fun IntArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
+@JvmName("stringsAsValue")
+public fun Iterable<String>.asValue(): Value = ListValue(map { it.asValue() })
 
-public fun LongArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
+@JvmName("numberAsValue")
+public fun Iterable<Number>.asValue(): Value = ListValue(map { it.asValue() })
 
-public fun ShortArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
+public fun IntArray.asValue(): Value = ListValue(map { NumberValue(it) })
 
-public fun FloatArray.asValue(): Value = if (isEmpty()) Null else ListValue(map { NumberValue(it) })
+public fun LongArray.asValue(): Value = ListValue(map { NumberValue(it) })
+
+public fun ShortArray.asValue(): Value = ListValue(map { NumberValue(it) })
+
+public fun FloatArray.asValue(): Value = ListValue(map { NumberValue(it) })
 
 public fun <E : Enum<E>> E.asValue(): Value = EnumValue(this)
 

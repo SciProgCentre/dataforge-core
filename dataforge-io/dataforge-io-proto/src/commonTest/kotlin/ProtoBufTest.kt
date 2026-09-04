@@ -1,12 +1,12 @@
 package pace.kscience.dataforge.io.proto
 
-import kotlinx.io.readString
 import kotlinx.io.writeString
 import space.kscience.dataforge.io.Envelope
 import space.kscience.dataforge.io.toByteArray
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.asValue
 import space.kscience.dataforge.meta.get
+import space.kscience.dataforge.meta.put
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

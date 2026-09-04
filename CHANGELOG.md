@@ -5,6 +5,7 @@
 ### Added
 
 ### Changed
+- **BREAKING** MutableMeta.put infix functions are moved to context receiver extensions
 
 ### Deprecated
 

@@ -12,6 +12,7 @@ import space.kscience.dataforge.io.*
 import space.kscience.dataforge.io.yaml.YamlPlugin
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.get
+import space.kscience.dataforge.meta.put
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
 import kotlin.io.path.deleteExisting

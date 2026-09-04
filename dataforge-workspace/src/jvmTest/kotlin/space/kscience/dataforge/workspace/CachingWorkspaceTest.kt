@@ -7,6 +7,7 @@ import space.kscience.dataforge.data.putValue
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.boolean
 import space.kscience.dataforge.meta.get
+import space.kscience.dataforge.meta.put
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.assertEquals
 

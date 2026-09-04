@@ -1,6 +1,7 @@
 package space.kscience.dataforge.io
 
 import space.kscience.dataforge.context.Global
+import space.kscience.dataforge.meta.put
 import space.kscience.dataforge.misc.DFExperimental
 import java.nio.file.Files
 import kotlin.test.Test
