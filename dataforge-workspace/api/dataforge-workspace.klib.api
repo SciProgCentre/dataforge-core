@@ -1,0 +1,181 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxX64, macosArm64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <space.kscience:dataforge-workspace>
+abstract fun interface <#A: out kotlin/Any?> space.kscience.dataforge.workspace/DataSelector { // space.kscience.dataforge.workspace/DataSelector|null[0]
+    abstract suspend fun select(space.kscience.dataforge.workspace/Workspace, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.workspace/DataSelector.select|select(space.kscience.dataforge.workspace.Workspace;space.kscience.dataforge.meta.Meta){}[0]
+}
+
+abstract interface <#A: kotlin/Any?, #B: kotlin/Any> space.kscience.dataforge.workspace/TaskWithSpec : space.kscience.dataforge.workspace/Task<#A> { // space.kscience.dataforge.workspace/TaskWithSpec|null[0]
+    abstract val spec // space.kscience.dataforge.workspace/TaskWithSpec.spec|{}spec[0]
+        abstract fun <get-spec>(): space.kscience.dataforge.meta/MetaReader<#B> // space.kscience.dataforge.workspace/TaskWithSpec.spec.<get-spec>|<get-spec>(){}[0]
+    open val descriptor // space.kscience.dataforge.workspace/TaskWithSpec.descriptor|{}descriptor[0]
+        open fun <get-descriptor>(): space.kscience.dataforge.meta.descriptors/MetaDescriptor? // space.kscience.dataforge.workspace/TaskWithSpec.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+    abstract suspend fun execute(space.kscience.dataforge.workspace/Workspace, space.kscience.dataforge.names/Name, #B): space.kscience.dataforge.workspace/TaskResult<#A> // space.kscience.dataforge.workspace/TaskWithSpec.execute|execute(space.kscience.dataforge.workspace.Workspace;space.kscience.dataforge.names.Name;1:1){}[0]
+    open suspend fun execute(space.kscience.dataforge.workspace/Workspace, space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.workspace/TaskResult<#A> // space.kscience.dataforge.workspace/TaskWithSpec.execute|execute(space.kscience.dataforge.workspace.Workspace;space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta){}[0]
+}
+
+abstract interface <#A: kotlin/Any?> space.kscience.dataforge.workspace/Task : space.kscience.dataforge.meta.descriptors/Described { // space.kscience.dataforge.workspace/Task|null[0]
+    open val fingerprint // space.kscience.dataforge.workspace/Task.fingerprint|{}fingerprint[0]
+        open fun <get-fingerprint>(): kotlin/String // space.kscience.dataforge.workspace/Task.fingerprint.<get-fingerprint>|<get-fingerprint>(){}[0]
+
+    abstract suspend fun execute(space.kscience.dataforge.workspace/Workspace, space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.workspace/TaskResult<#A> // space.kscience.dataforge.workspace/Task.execute|execute(space.kscience.dataforge.workspace.Workspace;space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta){}[0]
+
+    final object Companion { // space.kscience.dataforge.workspace/Task.Companion|null[0]
+        final const val TYPE // space.kscience.dataforge.workspace/Task.Companion.TYPE|{}TYPE[0]
+            final fun <get-TYPE>(): kotlin/String // space.kscience.dataforge.workspace/Task.Companion.TYPE.<get-TYPE>|<get-TYPE>(){}[0]
+    }
+}
+
+abstract interface space.kscience.dataforge.workspace/TaskContainer { // space.kscience.dataforge.workspace/TaskContainer|null[0]
+    abstract fun registerTask(space.kscience.dataforge.names/Name, space.kscience.dataforge.workspace/Task<*>) // space.kscience.dataforge.workspace/TaskContainer.registerTask|registerTask(space.kscience.dataforge.names.Name;space.kscience.dataforge.workspace.Task<*>){}[0]
+}
+
+abstract interface space.kscience.dataforge.workspace/Workspace : kotlinx.coroutines/CoroutineScope, space.kscience.dataforge.context/ContextAware, space.kscience.dataforge.provider/Provider { // space.kscience.dataforge.workspace/Workspace|null[0]
+    abstract val data // space.kscience.dataforge.workspace/Workspace.data|{}data[0]
+        abstract fun <get-data>(): space.kscience.dataforge.data/DataTree<*> // space.kscience.dataforge.workspace/Workspace.data.<get-data>|<get-data>(){}[0]
+    abstract val targets // space.kscience.dataforge.workspace/Workspace.targets|{}targets[0]
+        abstract fun <get-targets>(): kotlin.collections/Map<kotlin/String, space.kscience.dataforge.meta/Meta> // space.kscience.dataforge.workspace/Workspace.targets.<get-targets>|<get-targets>(){}[0]
+    abstract val tasks // space.kscience.dataforge.workspace/Workspace.tasks|{}tasks[0]
+        abstract fun <get-tasks>(): kotlin.collections/Map<space.kscience.dataforge.names/Name, space.kscience.dataforge.workspace/Task<*>> // space.kscience.dataforge.workspace/Workspace.tasks.<get-tasks>|<get-tasks>(){}[0]
+    open val coroutineContext // space.kscience.dataforge.workspace/Workspace.coroutineContext|{}coroutineContext[0]
+        open fun <get-coroutineContext>(): kotlin.coroutines/CoroutineContext // space.kscience.dataforge.workspace/Workspace.coroutineContext.<get-coroutineContext>|<get-coroutineContext>(){}[0]
+
+    open fun content(kotlin/String): kotlin.collections/Map<space.kscience.dataforge.names/Name, kotlin/Any> // space.kscience.dataforge.workspace/Workspace.content|content(kotlin.String){}[0]
+    open suspend fun produce(space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.workspace/TaskResult<*> // space.kscience.dataforge.workspace/Workspace.produce|produce(space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta){}[0]
+    open suspend fun produceData(space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/Meta, space.kscience.dataforge.names/Name): space.kscience.dataforge.data/Data<*>? // space.kscience.dataforge.workspace/Workspace.produceData|produceData(space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta;space.kscience.dataforge.names.Name){}[0]
+
+    final object Companion { // space.kscience.dataforge.workspace/Workspace.Companion|null[0]
+        final const val TYPE // space.kscience.dataforge.workspace/Workspace.Companion.TYPE|{}TYPE[0]
+            final fun <get-TYPE>(): kotlin/String // space.kscience.dataforge.workspace/Workspace.Companion.TYPE.<get-TYPE>|<get-TYPE>(){}[0]
+    }
+}
+
+abstract interface space.kscience.dataforge.workspace/WorkspaceCache { // space.kscience.dataforge.workspace/WorkspaceCache|null[0]
+    abstract suspend fun <#A1: kotlin/Any?> cache(space.kscience.dataforge.workspace/TaskResult<#A1>): space.kscience.dataforge.workspace/TaskResult<#A1> // space.kscience.dataforge.workspace/WorkspaceCache.cache|cache(space.kscience.dataforge.workspace.TaskResult<0:0>){0§<kotlin.Any?>}[0]
+}
+
+abstract class space.kscience.dataforge.workspace/WorkspacePlugin : space.kscience.dataforge.context/AbstractPlugin, space.kscience.dataforge.workspace/TaskContainer { // space.kscience.dataforge.workspace/WorkspacePlugin|null[0]
+    constructor <init>() // space.kscience.dataforge.workspace/WorkspacePlugin.<init>|<init>(){}[0]
+
+    open fun content(kotlin/String): kotlin.collections/Map<space.kscience.dataforge.names/Name, kotlin/Any> // space.kscience.dataforge.workspace/WorkspacePlugin.content|content(kotlin.String){}[0]
+    open fun registerTask(space.kscience.dataforge.names/Name, space.kscience.dataforge.workspace/Task<*>) // space.kscience.dataforge.workspace/WorkspacePlugin.registerTask|registerTask(space.kscience.dataforge.names.Name;space.kscience.dataforge.workspace.Task<*>){}[0]
+}
+
+final class <#A: in kotlin/Any?> space.kscience.dataforge.workspace/TaskResultScope : space.kscience.dataforge.data/DataBuilderScope<#A> { // space.kscience.dataforge.workspace/TaskResultScope|null[0]
+    constructor <init>(kotlin.reflect/KType, space.kscience.dataforge.workspace/Workspace, space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.workspace/TaskResultScope.<init>|<init>(kotlin.reflect.KType;space.kscience.dataforge.workspace.Workspace;space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta){}[0]
+
+    final val resultType // space.kscience.dataforge.workspace/TaskResultScope.resultType|{}resultType[0]
+        final fun <get-resultType>(): kotlin.reflect/KType // space.kscience.dataforge.workspace/TaskResultScope.resultType.<get-resultType>|<get-resultType>(){}[0]
+    final val taskMeta // space.kscience.dataforge.workspace/TaskResultScope.taskMeta|{}taskMeta[0]
+        final fun <get-taskMeta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.workspace/TaskResultScope.taskMeta.<get-taskMeta>|<get-taskMeta>(){}[0]
+    final val taskName // space.kscience.dataforge.workspace/TaskResultScope.taskName|{}taskName[0]
+        final fun <get-taskName>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.workspace/TaskResultScope.taskName.<get-taskName>|<get-taskName>(){}[0]
+    final val workspace // space.kscience.dataforge.workspace/TaskResultScope.workspace|{}workspace[0]
+        final fun <get-workspace>(): space.kscience.dataforge.workspace/Workspace // space.kscience.dataforge.workspace/TaskResultScope.workspace.<get-workspace>|<get-workspace>(){}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.dataforge.workspace/TaskReference : space.kscience.dataforge.workspace/DataSelector<#A> { // space.kscience.dataforge.workspace/TaskReference|null[0]
+    constructor <init>(space.kscience.dataforge.names/Name, space.kscience.dataforge.workspace/Task<#A>) // space.kscience.dataforge.workspace/TaskReference.<init>|<init>(space.kscience.dataforge.names.Name;space.kscience.dataforge.workspace.Task<1:0>){}[0]
+
+    final val task // space.kscience.dataforge.workspace/TaskReference.task|{}task[0]
+        final fun <get-task>(): space.kscience.dataforge.workspace/Task<#A> // space.kscience.dataforge.workspace/TaskReference.task.<get-task>|<get-task>(){}[0]
+    final val taskName // space.kscience.dataforge.workspace/TaskReference.taskName|{}taskName[0]
+        final fun <get-taskName>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.workspace/TaskReference.taskName.<get-taskName>|<get-taskName>(){}[0]
+
+    final fun component1(): space.kscience.dataforge.names/Name // space.kscience.dataforge.workspace/TaskReference.component1|component1(){}[0]
+    final fun component2(): space.kscience.dataforge.workspace/Task<#A> // space.kscience.dataforge.workspace/TaskReference.component2|component2(){}[0]
+    final fun copy(space.kscience.dataforge.names/Name = ..., space.kscience.dataforge.workspace/Task<#A> = ...): space.kscience.dataforge.workspace/TaskReference<#A> // space.kscience.dataforge.workspace/TaskReference.copy|copy(space.kscience.dataforge.names.Name;space.kscience.dataforge.workspace.Task<1:0>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.dataforge.workspace/TaskReference.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.dataforge.workspace/TaskReference.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // space.kscience.dataforge.workspace/TaskReference.toString|toString(){}[0]
+    final suspend fun select(space.kscience.dataforge.workspace/Workspace, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.workspace/TaskReference.select|select(space.kscience.dataforge.workspace.Workspace;space.kscience.dataforge.meta.Meta){}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.dataforge.workspace/TaskResult : space.kscience.dataforge.data/DataTree<#A> { // space.kscience.dataforge.workspace/TaskResult|null[0]
+    constructor <init>(space.kscience.dataforge.data/DataTree<#A>, space.kscience.dataforge.workspace/Workspace, space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.workspace/TaskResult.<init>|<init>(space.kscience.dataforge.data.DataTree<1:0>;space.kscience.dataforge.workspace.Workspace;space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta){}[0]
+
+    final val content // space.kscience.dataforge.workspace/TaskResult.content|{}content[0]
+        final fun <get-content>(): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.workspace/TaskResult.content.<get-content>|<get-content>(){}[0]
+    final val data // space.kscience.dataforge.workspace/TaskResult.data|{}data[0]
+        final fun <get-data>(): space.kscience.dataforge.data/Data<#A>? // space.kscience.dataforge.workspace/TaskResult.data.<get-data>|<get-data>(){}[0]
+    final val dataType // space.kscience.dataforge.workspace/TaskResult.dataType|{}dataType[0]
+        final fun <get-dataType>(): kotlin.reflect/KType // space.kscience.dataforge.workspace/TaskResult.dataType.<get-dataType>|<get-dataType>(){}[0]
+    final val items // space.kscience.dataforge.workspace/TaskResult.items|{}items[0]
+        final fun <get-items>(): kotlin.collections/Map<space.kscience.dataforge.names/NameToken, space.kscience.dataforge.data/DataTree<#A>> // space.kscience.dataforge.workspace/TaskResult.items.<get-items>|<get-items>(){}[0]
+    final val taskMeta // space.kscience.dataforge.workspace/TaskResult.taskMeta|{}taskMeta[0]
+        final fun <get-taskMeta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.workspace/TaskResult.taskMeta.<get-taskMeta>|<get-taskMeta>(){}[0]
+    final val taskName // space.kscience.dataforge.workspace/TaskResult.taskName|{}taskName[0]
+        final fun <get-taskName>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.workspace/TaskResult.taskName.<get-taskName>|<get-taskName>(){}[0]
+    final val updates // space.kscience.dataforge.workspace/TaskResult.updates|{}updates[0]
+        final fun <get-updates>(): kotlinx.coroutines.flow/Flow<space.kscience.dataforge.names/Name> // space.kscience.dataforge.workspace/TaskResult.updates.<get-updates>|<get-updates>(){}[0]
+    final val workspace // space.kscience.dataforge.workspace/TaskResult.workspace|{}workspace[0]
+        final fun <get-workspace>(): space.kscience.dataforge.workspace/Workspace // space.kscience.dataforge.workspace/TaskResult.workspace.<get-workspace>|<get-workspace>(){}[0]
+
+    final fun component1(): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.workspace/TaskResult.component1|component1(){}[0]
+    final fun component2(): space.kscience.dataforge.workspace/Workspace // space.kscience.dataforge.workspace/TaskResult.component2|component2(){}[0]
+    final fun component3(): space.kscience.dataforge.names/Name // space.kscience.dataforge.workspace/TaskResult.component3|component3(){}[0]
+    final fun component4(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.workspace/TaskResult.component4|component4(){}[0]
+    final fun copy(space.kscience.dataforge.data/DataTree<#A> = ..., space.kscience.dataforge.workspace/Workspace = ..., space.kscience.dataforge.names/Name = ..., space.kscience.dataforge.meta/Meta = ...): space.kscience.dataforge.workspace/TaskResult<#A> // space.kscience.dataforge.workspace/TaskResult.copy|copy(space.kscience.dataforge.data.DataTree<1:0>;space.kscience.dataforge.workspace.Workspace;space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.dataforge.workspace/TaskResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.dataforge.workspace/TaskResult.hashCode|hashCode(){}[0]
+    final fun read(space.kscience.dataforge.names/Name): space.kscience.dataforge.data/Data<#A>? // space.kscience.dataforge.workspace/TaskResult.read|read(space.kscience.dataforge.names.Name){}[0]
+    final fun toString(): kotlin/String // space.kscience.dataforge.workspace/TaskResult.toString|toString(){}[0]
+}
+
+final class space.kscience.dataforge.workspace/ContextGoalLogger : space.kscience.dataforge.data/GoalLogger { // space.kscience.dataforge.workspace/ContextGoalLogger|null[0]
+    constructor <init>(space.kscience.dataforge.context/Context) // space.kscience.dataforge.workspace/ContextGoalLogger.<init>|<init>(space.kscience.dataforge.context.Context){}[0]
+
+    final val context // space.kscience.dataforge.workspace/ContextGoalLogger.context|{}context[0]
+        final fun <get-context>(): space.kscience.dataforge.context/Context // space.kscience.dataforge.workspace/ContextGoalLogger.context.<get-context>|<get-context>(){}[0]
+
+    final fun emit(kotlin/Array<out kotlin/String>..., kotlin.coroutines/SuspendFunction0<kotlin/String>) // space.kscience.dataforge.workspace/ContextGoalLogger.emit|emit(kotlin.Array<out|kotlin.String>...;kotlin.coroutines.SuspendFunction0<kotlin.String>){}[0]
+}
+
+final class space.kscience.dataforge.workspace/WorkspaceBuilder : space.kscience.dataforge.workspace/TaskContainer { // space.kscience.dataforge.workspace/WorkspaceBuilder|null[0]
+    constructor <init>(space.kscience.dataforge.context/Context = ...) // space.kscience.dataforge.workspace/WorkspaceBuilder.<init>|<init>(space.kscience.dataforge.context.Context){}[0]
+
+    final fun build(): space.kscience.dataforge.workspace/Workspace // space.kscience.dataforge.workspace/WorkspaceBuilder.build|build(){}[0]
+    final fun cache(space.kscience.dataforge.workspace/WorkspaceCache) // space.kscience.dataforge.workspace/WorkspaceBuilder.cache|cache(space.kscience.dataforge.workspace.WorkspaceCache){}[0]
+    final fun context(kotlin/String? = ..., kotlin/Function1<space.kscience.dataforge.context/ContextBuilder, kotlin/Unit> = ...) // space.kscience.dataforge.workspace/WorkspaceBuilder.context|context(kotlin.String?;kotlin.Function1<space.kscience.dataforge.context.ContextBuilder,kotlin.Unit>){}[0]
+    final fun data(kotlin/Function1<space.kscience.dataforge.data/DataTreeBuilder<kotlin/Any?>, kotlin/Unit>) // space.kscience.dataforge.workspace/WorkspaceBuilder.data|data(kotlin.Function1<space.kscience.dataforge.data.DataTreeBuilder<kotlin.Any?>,kotlin.Unit>){}[0]
+    final fun registerTask(space.kscience.dataforge.names/Name, space.kscience.dataforge.workspace/Task<*>) // space.kscience.dataforge.workspace/WorkspaceBuilder.registerTask|registerTask(space.kscience.dataforge.names.Name;space.kscience.dataforge.workspace.Task<*>){}[0]
+    final fun target(kotlin/String, space.kscience.dataforge.meta/Meta?) // space.kscience.dataforge.workspace/WorkspaceBuilder.target|target(kotlin.String;space.kscience.dataforge.meta.Meta?){}[0]
+}
+
+final val space.kscience.dataforge.workspace/allData // space.kscience.dataforge.workspace/allData|@space.kscience.dataforge.workspace.TaskResultScope<*>{}allData[0]
+    final fun (space.kscience.dataforge.workspace/TaskResultScope<*>).<get-allData>(): space.kscience.dataforge.workspace/DataSelector<*> // space.kscience.dataforge.workspace/allData.<get-allData>|<get-allData>@space.kscience.dataforge.workspace.TaskResultScope<*>(){}[0]
+final val space.kscience.dataforge.workspace/defaultDependencyMeta // space.kscience.dataforge.workspace/defaultDependencyMeta|@space.kscience.dataforge.workspace.TaskResultScope<*>{}defaultDependencyMeta[0]
+    final fun (space.kscience.dataforge.workspace/TaskResultScope<*>).<get-defaultDependencyMeta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.workspace/defaultDependencyMeta.<get-defaultDependencyMeta>|<get-defaultDependencyMeta>@space.kscience.dataforge.workspace.TaskResultScope<*>(){}[0]
+final val space.kscience.dataforge.workspace/goalLogger // space.kscience.dataforge.workspace/goalLogger|@space.kscience.dataforge.workspace.Workspace{}goalLogger[0]
+    final fun (space.kscience.dataforge.workspace/Workspace).<get-goalLogger>(): space.kscience.dataforge.data/GoalLogger // space.kscience.dataforge.workspace/goalLogger.<get-goalLogger>|<get-goalLogger>@space.kscience.dataforge.workspace.Workspace(){}[0]
+
+final fun (space.kscience.dataforge.workspace/TaskResult<*>).space.kscience.dataforge.workspace/launchIn(kotlinx.coroutines/CoroutineScope): kotlinx.coroutines/Job // space.kscience.dataforge.workspace/launchIn|launchIn@space.kscience.dataforge.workspace.TaskResult<*>(kotlinx.coroutines.CoroutineScope){}[0]
+final fun <#A: kotlin/Any, #B: space.kscience.dataforge.meta/MetaRepr> space.kscience.dataforge.workspace/Task(kotlin.reflect/KType, space.kscience.dataforge.meta/MetaReader<#B>, kotlin.coroutines/SuspendFunction2<space.kscience.dataforge.workspace/TaskResultScope<#A>, #B, space.kscience.dataforge.data/DataTree<#A>>): space.kscience.dataforge.workspace/TaskWithSpec<#A, #B> // space.kscience.dataforge.workspace/Task|Task(kotlin.reflect.KType;space.kscience.dataforge.meta.MetaReader<0:1>;kotlin.coroutines.SuspendFunction2<space.kscience.dataforge.workspace.TaskResultScope<0:0>,0:1,space.kscience.dataforge.data.DataTree<0:0>>){0§<kotlin.Any>;1§<space.kscience.dataforge.meta.MetaRepr>}[0]
+final fun <#A: kotlin/Any> space.kscience.dataforge.workspace/Task(kotlin.reflect/KType, space.kscience.dataforge.meta.descriptors/MetaDescriptor? = ..., kotlin.coroutines/SuspendFunction1<space.kscience.dataforge.workspace/TaskResultScope<#A>, space.kscience.dataforge.data/DataTree<#A>>): space.kscience.dataforge.workspace/Task<#A> // space.kscience.dataforge.workspace/Task|Task(kotlin.reflect.KType;space.kscience.dataforge.meta.descriptors.MetaDescriptor?;kotlin.coroutines.SuspendFunction1<space.kscience.dataforge.workspace.TaskResultScope<0:0>,space.kscience.dataforge.data.DataTree<0:0>>){0§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.workspace/TaskResultScope<#A>).space.kscience.dataforge.workspace/result(kotlin/Function1<space.kscience.dataforge.data/DataTreeBuilder<#A>, kotlin/Unit>): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.workspace/result|result@space.kscience.dataforge.workspace.TaskResultScope<0:0>(kotlin.Function1<space.kscience.dataforge.data.DataTreeBuilder<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.workspace/TaskResultScope<#A>).space.kscience.dataforge.workspace/result(space.kscience.dataforge.data/Data<#A>): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.workspace/result|result@space.kscience.dataforge.workspace.TaskResultScope<0:0>(space.kscience.dataforge.data.Data<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.workspace/Workspace).space.kscience.dataforge.workspace/wrapResult(space.kscience.dataforge.data/DataTree<#A>, space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.workspace/TaskResult<#A> // space.kscience.dataforge.workspace/wrapResult|wrapResult@space.kscience.dataforge.workspace.Workspace(space.kscience.dataforge.data.DataTree<0:0>;space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta){0§<kotlin.Any?>}[0]
+final fun space.kscience.dataforge.workspace/Workspace(space.kscience.dataforge.context/Context = ..., kotlin/Function1<space.kscience.dataforge.workspace/WorkspaceBuilder, kotlin/Unit>): space.kscience.dataforge.workspace/Workspace // space.kscience.dataforge.workspace/Workspace|Workspace(space.kscience.dataforge.context.Context;kotlin.Function1<space.kscience.dataforge.workspace.WorkspaceBuilder,kotlin.Unit>){}[0]
+final inline fun (space.kscience.dataforge.workspace/WorkspaceBuilder).space.kscience.dataforge.workspace/target(kotlin/String, kotlin/Function1<space.kscience.dataforge.meta/MutableMeta, kotlin/Unit>) // space.kscience.dataforge.workspace/target|target@space.kscience.dataforge.workspace.WorkspaceBuilder(kotlin.String;kotlin.Function1<space.kscience.dataforge.meta.MutableMeta,kotlin.Unit>){}[0]
+final inline fun <#A: kotlin/Any, #B: reified kotlin/Any> (space.kscience.dataforge.workspace/TaskContainer).space.kscience.dataforge.workspace/action(space.kscience.dataforge.workspace/DataSelector<#A>, space.kscience.dataforge.actions/Action<#A, #B>, noinline kotlin/Function1<space.kscience.dataforge.meta/MutableMeta, kotlin/Unit> = ..., noinline kotlin/Function1<space.kscience.dataforge.meta.descriptors/MetaDescriptorBuilder, kotlin/Unit> = ...): kotlin.properties/PropertyDelegateProvider<kotlin/Any?, kotlin.properties/ReadOnlyProperty<kotlin/Any?, space.kscience.dataforge.workspace/TaskReference<#B>>> // space.kscience.dataforge.workspace/action|action@space.kscience.dataforge.workspace.TaskContainer(space.kscience.dataforge.workspace.DataSelector<0:0>;space.kscience.dataforge.actions.Action<0:0,0:1>;kotlin.Function1<space.kscience.dataforge.meta.MutableMeta,kotlin.Unit>;kotlin.Function1<space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder,kotlin.Unit>){0§<kotlin.Any>;1§<kotlin.Any>}[0]
+final inline fun <#A: reified kotlin/Any, #B: space.kscience.dataforge.meta/MetaRepr> (space.kscience.dataforge.workspace/TaskContainer).space.kscience.dataforge.workspace/task(space.kscience.dataforge.meta/MetaReader<#B>, noinline kotlin.coroutines/SuspendFunction2<space.kscience.dataforge.workspace/TaskResultScope<#A>, #B, space.kscience.dataforge.data/DataTree<#A>>): kotlin.properties/PropertyDelegateProvider<kotlin/Any?, kotlin.properties/ReadOnlyProperty<kotlin/Any?, space.kscience.dataforge.workspace/TaskReference<#A>>> // space.kscience.dataforge.workspace/task|task@space.kscience.dataforge.workspace.TaskContainer(space.kscience.dataforge.meta.MetaReader<0:1>;kotlin.coroutines.SuspendFunction2<space.kscience.dataforge.workspace.TaskResultScope<0:0>,0:1,space.kscience.dataforge.data.DataTree<0:0>>){0§<kotlin.Any>;1§<space.kscience.dataforge.meta.MetaRepr>}[0]
+final inline fun <#A: reified kotlin/Any, #B: space.kscience.dataforge.meta/MetaRepr> space.kscience.dataforge.workspace/Task(space.kscience.dataforge.meta/MetaReader<#B>, noinline kotlin.coroutines/SuspendFunction2<space.kscience.dataforge.workspace/TaskResultScope<#A>, #B, space.kscience.dataforge.data/DataTree<#A>>): space.kscience.dataforge.workspace/Task<#A> // space.kscience.dataforge.workspace/Task|Task(space.kscience.dataforge.meta.MetaReader<0:1>;kotlin.coroutines.SuspendFunction2<space.kscience.dataforge.workspace.TaskResultScope<0:0>,0:1,space.kscience.dataforge.data.DataTree<0:0>>){0§<kotlin.Any>;1§<space.kscience.dataforge.meta.MetaRepr>}[0]
+final inline fun <#A: reified kotlin/Any> (space.kscience.dataforge.io/Envelope).space.kscience.dataforge.workspace/toData(space.kscience.dataforge.io/IOReader<#A>): space.kscience.dataforge.data/Data<#A> // space.kscience.dataforge.workspace/toData|toData@space.kscience.dataforge.io.Envelope(space.kscience.dataforge.io.IOReader<0:0>){0§<kotlin.Any>}[0]
+final inline fun <#A: reified kotlin/Any> (space.kscience.dataforge.workspace/TaskContainer).space.kscience.dataforge.workspace/buildTask(kotlin/String, kotlin/Function1<space.kscience.dataforge.meta.descriptors/MetaDescriptorBuilder, kotlin/Unit> = ..., noinline kotlin.coroutines/SuspendFunction1<space.kscience.dataforge.workspace/TaskResultScope<#A>, space.kscience.dataforge.data/DataTree<#A>>): space.kscience.dataforge.workspace/TaskReference<#A> // space.kscience.dataforge.workspace/buildTask|buildTask@space.kscience.dataforge.workspace.TaskContainer(kotlin.String;kotlin.Function1<space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder,kotlin.Unit>;kotlin.coroutines.SuspendFunction1<space.kscience.dataforge.workspace.TaskResultScope<0:0>,space.kscience.dataforge.data.DataTree<0:0>>){0§<kotlin.Any>}[0]
+final inline fun <#A: reified kotlin/Any> (space.kscience.dataforge.workspace/TaskContainer).space.kscience.dataforge.workspace/registerTask(kotlin/String, kotlin/Function1<space.kscience.dataforge.meta.descriptors/MetaDescriptorBuilder, kotlin/Unit> = ..., noinline kotlin.coroutines/SuspendFunction1<space.kscience.dataforge.workspace/TaskResultScope<#A>, space.kscience.dataforge.data/DataTree<#A>>) // space.kscience.dataforge.workspace/registerTask|registerTask@space.kscience.dataforge.workspace.TaskContainer(kotlin.String;kotlin.Function1<space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder,kotlin.Unit>;kotlin.coroutines.SuspendFunction1<space.kscience.dataforge.workspace.TaskResultScope<0:0>,space.kscience.dataforge.data.DataTree<0:0>>){0§<kotlin.Any>}[0]
+final inline fun <#A: reified kotlin/Any> (space.kscience.dataforge.workspace/TaskContainer).space.kscience.dataforge.workspace/task(noinline kotlin/Function1<space.kscience.dataforge.meta.descriptors/MetaDescriptorBuilder, kotlin/Unit> = ..., noinline kotlin.coroutines/SuspendFunction1<space.kscience.dataforge.workspace/TaskResultScope<#A>, space.kscience.dataforge.data/DataTree<#A>>): kotlin.properties/PropertyDelegateProvider<kotlin/Any?, kotlin.properties/ReadOnlyProperty<kotlin/Any?, space.kscience.dataforge.workspace/TaskReference<#A>>> // space.kscience.dataforge.workspace/task|task@space.kscience.dataforge.workspace.TaskContainer(kotlin.Function1<space.kscience.dataforge.meta.descriptors.MetaDescriptorBuilder,kotlin.Unit>;kotlin.coroutines.SuspendFunction1<space.kscience.dataforge.workspace.TaskResultScope<0:0>,space.kscience.dataforge.data.DataTree<0:0>>){0§<kotlin.Any>}[0]
+final inline fun <#A: reified kotlin/Any> (space.kscience.dataforge.workspace/TaskContainer).space.kscience.dataforge.workspace/task(space.kscience.dataforge.meta.descriptors/MetaDescriptor, noinline kotlin.coroutines/SuspendFunction1<space.kscience.dataforge.workspace/TaskResultScope<#A>, space.kscience.dataforge.data/DataTree<#A>>): kotlin.properties/PropertyDelegateProvider<kotlin/Any?, kotlin.properties/ReadOnlyProperty<kotlin/Any?, space.kscience.dataforge.workspace/TaskReference<#A>>> // space.kscience.dataforge.workspace/task|task@space.kscience.dataforge.workspace.TaskContainer(space.kscience.dataforge.meta.descriptors.MetaDescriptor;kotlin.coroutines.SuspendFunction1<space.kscience.dataforge.workspace.TaskResultScope<0:0>,space.kscience.dataforge.data.DataTree<0:0>>){0§<kotlin.Any>}[0]
+final inline fun <#A: reified kotlin/Any> space.kscience.dataforge.workspace/Task(space.kscience.dataforge.meta.descriptors/MetaDescriptor? = ..., noinline kotlin.coroutines/SuspendFunction1<space.kscience.dataforge.workspace/TaskResultScope<#A>, space.kscience.dataforge.data/DataTree<#A>>): space.kscience.dataforge.workspace/Task<#A> // space.kscience.dataforge.workspace/Task|Task(space.kscience.dataforge.meta.descriptors.MetaDescriptor?;kotlin.coroutines.SuspendFunction1<space.kscience.dataforge.workspace.TaskResultScope<0:0>,space.kscience.dataforge.data.DataTree<0:0>>){0§<kotlin.Any>}[0]
+final suspend fun (space.kscience.dataforge.workspace/Workspace).space.kscience.dataforge.workspace/produce(kotlin/String, kotlin/Function1<space.kscience.dataforge.meta/MutableMeta, kotlin/Unit> = ...): space.kscience.dataforge.workspace/TaskResult<*> // space.kscience.dataforge.workspace/produce|produce@space.kscience.dataforge.workspace.Workspace(kotlin.String;kotlin.Function1<space.kscience.dataforge.meta.MutableMeta,kotlin.Unit>){}[0]
+final suspend fun (space.kscience.dataforge.workspace/Workspace).space.kscience.dataforge.workspace/produce(kotlin/String, kotlin/String): space.kscience.dataforge.workspace/TaskResult<*> // space.kscience.dataforge.workspace/produce|produce@space.kscience.dataforge.workspace.Workspace(kotlin.String;kotlin.String){}[0]
+final suspend fun (space.kscience.dataforge.workspace/Workspace).space.kscience.dataforge.workspace/produce(kotlin/String, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.workspace/TaskResult<*> // space.kscience.dataforge.workspace/produce|produce@space.kscience.dataforge.workspace.Workspace(kotlin.String;space.kscience.dataforge.meta.Meta){}[0]
+final suspend fun <#A: kotlin/Any> (space.kscience.dataforge.data/Data<#A>).space.kscience.dataforge.workspace/toEnvelope(space.kscience.dataforge.io/IOWriter<#A>): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.workspace/toEnvelope|toEnvelope@space.kscience.dataforge.data.Data<0:0>(space.kscience.dataforge.io.IOWriter<0:0>){0§<kotlin.Any>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.workspace/TaskResultScope<*>).space.kscience.dataforge.workspace/from(space.kscience.dataforge.workspace/DataSelector<#A>, space.kscience.dataforge.meta/Meta = ...): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.workspace/from|from@space.kscience.dataforge.workspace.TaskResultScope<*>(space.kscience.dataforge.workspace.DataSelector<0:0>;space.kscience.dataforge.meta.Meta){0§<kotlin.Any?>}[0]
+final suspend inline fun <#A: kotlin/Any?, #B: reified space.kscience.dataforge.workspace/WorkspacePlugin> (space.kscience.dataforge.workspace/TaskResultScope<*>).space.kscience.dataforge.workspace/from(#B, space.kscience.dataforge.meta/Meta = ..., kotlin/Function1<#B, space.kscience.dataforge.workspace/TaskReference<#A>>): space.kscience.dataforge.workspace/TaskResult<#A> // space.kscience.dataforge.workspace/from|from@space.kscience.dataforge.workspace.TaskResultScope<*>(0:1;space.kscience.dataforge.meta.Meta;kotlin.Function1<0:1,space.kscience.dataforge.workspace.TaskReference<0:0>>){0§<kotlin.Any?>;1§<space.kscience.dataforge.workspace.WorkspacePlugin>}[0]
+final suspend inline fun <#A: reified kotlin/Any?, #B: reified space.kscience.dataforge.workspace/WorkspacePlugin> (space.kscience.dataforge.workspace/TaskResultScope<*>).space.kscience.dataforge.workspace/from(space.kscience.dataforge.context/PluginFactory<#B>, space.kscience.dataforge.meta/Meta = ..., kotlin/Function1<#B, space.kscience.dataforge.workspace/TaskReference<#A>>): space.kscience.dataforge.workspace/TaskResult<#A> // space.kscience.dataforge.workspace/from|from@space.kscience.dataforge.workspace.TaskResultScope<*>(space.kscience.dataforge.context.PluginFactory<0:1>;space.kscience.dataforge.meta.Meta;kotlin.Function1<0:1,space.kscience.dataforge.workspace.TaskReference<0:0>>){0§<kotlin.Any?>;1§<space.kscience.dataforge.workspace.WorkspacePlugin>}[0]

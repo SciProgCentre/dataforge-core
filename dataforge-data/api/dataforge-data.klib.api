@@ -1,0 +1,462 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxX64, macosArm64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <space.kscience:dataforge-data>
+final enum class space.kscience.dataforge.data/GoalExecutionRestrictionPolicy : kotlin/Enum<space.kscience.dataforge.data/GoalExecutionRestrictionPolicy> { // space.kscience.dataforge.data/GoalExecutionRestrictionPolicy|null[0]
+    enum entry ERROR // space.kscience.dataforge.data/GoalExecutionRestrictionPolicy.ERROR|null[0]
+    enum entry NONE // space.kscience.dataforge.data/GoalExecutionRestrictionPolicy.NONE|null[0]
+    enum entry WARNING // space.kscience.dataforge.data/GoalExecutionRestrictionPolicy.WARNING|null[0]
+
+    final val entries // space.kscience.dataforge.data/GoalExecutionRestrictionPolicy.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<space.kscience.dataforge.data/GoalExecutionRestrictionPolicy> // space.kscience.dataforge.data/GoalExecutionRestrictionPolicy.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): space.kscience.dataforge.data/GoalExecutionRestrictionPolicy // space.kscience.dataforge.data/GoalExecutionRestrictionPolicy.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<space.kscience.dataforge.data/GoalExecutionRestrictionPolicy> // space.kscience.dataforge.data/GoalExecutionRestrictionPolicy.values|values#static(){}[0]
+}
+
+abstract fun interface <#A: in kotlin/Any?> space.kscience.dataforge.data/DataSink : space.kscience.dataforge.data/DataBuilderScope<#A> { // space.kscience.dataforge.data/DataSink|null[0]
+    abstract suspend fun write(space.kscience.dataforge.names/Name, space.kscience.dataforge.data/Data<#A>?) // space.kscience.dataforge.data/DataSink.write|write(space.kscience.dataforge.names.Name;space.kscience.dataforge.data.Data<1:0>?){}[0]
+}
+
+abstract fun interface <#A: kotlin/Any?, #B: kotlin/Any?> space.kscience.dataforge.actions/Action { // space.kscience.dataforge.actions/Action|null[0]
+    abstract fun execute(space.kscience.dataforge.data/DataTree<#A>, space.kscience.dataforge.meta/Meta, kotlinx.coroutines/CoroutineScope): space.kscience.dataforge.data/DataTree<#B> // space.kscience.dataforge.actions/Action.execute|execute(space.kscience.dataforge.data.DataTree<1:0>;space.kscience.dataforge.meta.Meta;kotlinx.coroutines.CoroutineScope){}[0]
+
+    final object Companion // space.kscience.dataforge.actions/Action.Companion|null[0]
+}
+
+abstract fun interface space.kscience.dataforge.data/DataFilter { // space.kscience.dataforge.data/DataFilter|null[0]
+    abstract fun accepts(space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/Meta?, kotlin.reflect/KType): kotlin/Boolean // space.kscience.dataforge.data/DataFilter.accepts|accepts(space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta?;kotlin.reflect.KType){}[0]
+
+    final object Companion { // space.kscience.dataforge.data/DataFilter.Companion|null[0]
+        final val EMPTY // space.kscience.dataforge.data/DataFilter.Companion.EMPTY|{}EMPTY[0]
+            final fun <get-EMPTY>(): space.kscience.dataforge.data/DataFilter // space.kscience.dataforge.data/DataFilter.Companion.EMPTY.<get-EMPTY>|<get-EMPTY>(){}[0]
+    }
+}
+
+abstract interface <#A: in kotlin/Any?> space.kscience.dataforge.data/DataBuilderScope { // space.kscience.dataforge.data/DataBuilderScope|null[0]
+    final object Companion : space.kscience.dataforge.data/DataBuilderScope<kotlin/Nothing> // space.kscience.dataforge.data/DataBuilderScope.Companion|null[0]
+}
+
+abstract interface <#A: in kotlin/Any?> space.kscience.dataforge.data/DataTreeBuilder : space.kscience.dataforge.data/DataBuilderScope<#A> { // space.kscience.dataforge.data/DataTreeBuilder|null[0]
+    abstract fun put(space.kscience.dataforge.names/Name, space.kscience.dataforge.data/Data<#A>) // space.kscience.dataforge.data/DataTreeBuilder.put|put(space.kscience.dataforge.names.Name;space.kscience.dataforge.data.Data<1:0>){}[0]
+    abstract fun update(kotlinx.coroutines/CoroutineScope, kotlin.coroutines/SuspendFunction1<space.kscience.dataforge.data/DataSink<#A>, kotlin/Unit>) // space.kscience.dataforge.data/DataTreeBuilder.update|update(kotlinx.coroutines.CoroutineScope;kotlin.coroutines.SuspendFunction1<space.kscience.dataforge.data.DataSink<1:0>,kotlin.Unit>){}[0]
+}
+
+abstract interface <#A: kotlin/Any?> space.kscience.dataforge.data/MutableDataTree : space.kscience.dataforge.data/DataSink<#A>, space.kscience.dataforge.data/DataTree<#A> { // space.kscience.dataforge.data/MutableDataTree|null[0]
+    abstract val items // space.kscience.dataforge.data/MutableDataTree.items|{}items[0]
+        abstract fun <get-items>(): kotlin.collections/Map<space.kscience.dataforge.names/NameToken, space.kscience.dataforge.data/MutableDataTree<#A>> // space.kscience.dataforge.data/MutableDataTree.items.<get-items>|<get-items>(){}[0]
+}
+
+abstract interface <#A: out kotlin/Any?> space.kscience.dataforge.data/Data : space.kscience.dataforge.data/Goal<#A>, space.kscience.dataforge.meta/MetaRepr { // space.kscience.dataforge.data/Data|null[0]
+    abstract val meta // space.kscience.dataforge.data/Data.meta|{}meta[0]
+        abstract fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.data/Data.meta.<get-meta>|<get-meta>(){}[0]
+    abstract val type // space.kscience.dataforge.data/Data.type|{}type[0]
+        abstract fun <get-type>(): kotlin.reflect/KType // space.kscience.dataforge.data/Data.type.<get-type>|<get-type>(){}[0]
+
+    open fun toMeta(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.data/Data.toMeta|toMeta(){}[0]
+
+    final object Companion { // space.kscience.dataforge.data/Data.Companion|null[0]
+        final const val TYPE // space.kscience.dataforge.data/Data.Companion.TYPE|{}TYPE[0]
+            final fun <get-TYPE>(): kotlin/String // space.kscience.dataforge.data/Data.Companion.TYPE.<get-TYPE>|<get-TYPE>(){}[0]
+
+        final val EMPTY // space.kscience.dataforge.data/Data.Companion.EMPTY|{}EMPTY[0]
+            final fun <get-EMPTY>(): space.kscience.dataforge.data/Data<kotlin/Nothing> // space.kscience.dataforge.data/Data.Companion.EMPTY.<get-EMPTY>|<get-EMPTY>(){}[0]
+
+        final fun buildEmpty(space.kscience.dataforge.meta/Meta): space.kscience.dataforge.data/Data<kotlin/Nothing> // space.kscience.dataforge.data/Data.Companion.buildEmpty|buildEmpty(space.kscience.dataforge.meta.Meta){}[0]
+        final inline fun <#A2: reified kotlin/Any?> wrapValue(#A2, space.kscience.dataforge.meta/Meta = ...): space.kscience.dataforge.data/Data<#A2> // space.kscience.dataforge.data/Data.Companion.wrapValue|wrapValue(0:0;space.kscience.dataforge.meta.Meta){0§<kotlin.Any?>}[0]
+    }
+}
+
+abstract interface <#A: out kotlin/Any?> space.kscience.dataforge.data/DataSource { // space.kscience.dataforge.data/DataSource|null[0]
+    abstract val dataType // space.kscience.dataforge.data/DataSource.dataType|{}dataType[0]
+        abstract fun <get-dataType>(): kotlin.reflect/KType // space.kscience.dataforge.data/DataSource.dataType.<get-dataType>|<get-dataType>(){}[0]
+
+    abstract fun read(space.kscience.dataforge.names/Name): space.kscience.dataforge.data/Data<#A>? // space.kscience.dataforge.data/DataSource.read|read(space.kscience.dataforge.names.Name){}[0]
+}
+
+abstract interface <#A: out kotlin/Any?> space.kscience.dataforge.data/DataTree : space.kscience.dataforge.data/ObservableDataSource<#A> { // space.kscience.dataforge.data/DataTree|null[0]
+    abstract val data // space.kscience.dataforge.data/DataTree.data|{}data[0]
+        abstract fun <get-data>(): space.kscience.dataforge.data/Data<#A>? // space.kscience.dataforge.data/DataTree.data.<get-data>|<get-data>(){}[0]
+    abstract val items // space.kscience.dataforge.data/DataTree.items|{}items[0]
+        abstract fun <get-items>(): kotlin.collections/Map<space.kscience.dataforge.names/NameToken, space.kscience.dataforge.data/DataTree<#A>> // space.kscience.dataforge.data/DataTree.items.<get-items>|<get-items>(){}[0]
+    abstract val updates // space.kscience.dataforge.data/DataTree.updates|{}updates[0]
+        abstract fun <get-updates>(): kotlinx.coroutines.flow/Flow<space.kscience.dataforge.names/Name> // space.kscience.dataforge.data/DataTree.updates.<get-updates>|<get-updates>(){}[0]
+
+    open fun read(space.kscience.dataforge.names/Name): space.kscience.dataforge.data/Data<#A>? // space.kscience.dataforge.data/DataTree.read|read(space.kscience.dataforge.names.Name){}[0]
+
+    final object Companion { // space.kscience.dataforge.data/DataTree.Companion|null[0]
+        final val EMPTY // space.kscience.dataforge.data/DataTree.Companion.EMPTY|{}EMPTY[0]
+            final fun <get-EMPTY>(): space.kscience.dataforge.data/DataTree<kotlin/Nothing> // space.kscience.dataforge.data/DataTree.Companion.EMPTY.<get-EMPTY>|<get-EMPTY>(){}[0]
+    }
+}
+
+abstract interface <#A: out kotlin/Any?> space.kscience.dataforge.data/Goal { // space.kscience.dataforge.data/Goal|null[0]
+    abstract val deferred // space.kscience.dataforge.data/Goal.deferred|{}deferred[0]
+        abstract fun <get-deferred>(): kotlinx.coroutines/Deferred<#A>? // space.kscience.dataforge.data/Goal.deferred.<get-deferred>|<get-deferred>(){}[0]
+    abstract val dependencies // space.kscience.dataforge.data/Goal.dependencies|{}dependencies[0]
+        abstract fun <get-dependencies>(): kotlin.collections/Iterable<space.kscience.dataforge.data/Goal<*>> // space.kscience.dataforge.data/Goal.dependencies.<get-dependencies>|<get-dependencies>(){}[0]
+
+    abstract fun async(kotlinx.coroutines/CoroutineScope): kotlinx.coroutines/Deferred<#A> // space.kscience.dataforge.data/Goal.async|async(kotlinx.coroutines.CoroutineScope){}[0]
+    abstract fun reset() // space.kscience.dataforge.data/Goal.reset|reset(){}[0]
+
+    final object Companion // space.kscience.dataforge.data/Goal.Companion|null[0]
+}
+
+abstract interface <#A: out kotlin/Any?> space.kscience.dataforge.data/NamedData : space.kscience.dataforge.data/Data<#A>, space.kscience.dataforge.misc/Named { // space.kscience.dataforge.data/NamedData|null[0]
+    abstract fun unwrap(): space.kscience.dataforge.data/Data<#A> // space.kscience.dataforge.data/NamedData.unwrap|unwrap(){}[0]
+}
+
+abstract interface <#A: out kotlin/Any?> space.kscience.dataforge.data/ObservableDataSource : space.kscience.dataforge.data/DataSource<#A> { // space.kscience.dataforge.data/ObservableDataSource|null[0]
+    abstract val updates // space.kscience.dataforge.data/ObservableDataSource.updates|{}updates[0]
+        abstract fun <get-updates>(): kotlinx.coroutines.flow/Flow<space.kscience.dataforge.names/Name> // space.kscience.dataforge.data/ObservableDataSource.updates.<get-updates>|<get-updates>(){}[0]
+}
+
+abstract interface space.kscience.dataforge.data/GoalLogger : kotlin.coroutines/CoroutineContext.Element { // space.kscience.dataforge.data/GoalLogger|null[0]
+    open val key // space.kscience.dataforge.data/GoalLogger.key|{}key[0]
+        open fun <get-key>(): kotlin.coroutines/CoroutineContext.Key<*> // space.kscience.dataforge.data/GoalLogger.key.<get-key>|<get-key>(){}[0]
+
+    abstract fun emit(kotlin/Array<out kotlin/String>..., kotlin.coroutines/SuspendFunction0<kotlin/String>) // space.kscience.dataforge.data/GoalLogger.emit|emit(kotlin.Array<out|kotlin.String>...;kotlin.coroutines.SuspendFunction0<kotlin.String>){}[0]
+
+    final object Companion : kotlin.coroutines/CoroutineContext.Key<space.kscience.dataforge.data/GoalLogger> { // space.kscience.dataforge.data/GoalLogger.Companion|null[0]
+        final const val WARNING_TAG // space.kscience.dataforge.data/GoalLogger.Companion.WARNING_TAG|{}WARNING_TAG[0]
+            final fun <get-WARNING_TAG>(): kotlin/String // space.kscience.dataforge.data/GoalLogger.Companion.WARNING_TAG.<get-WARNING_TAG>|<get-WARNING_TAG>(){}[0]
+    }
+}
+
+abstract class <#A: kotlin/Any?, #B: kotlin/Any?> space.kscience.dataforge.actions/AbstractAction : space.kscience.dataforge.actions/Action<#A, #B> { // space.kscience.dataforge.actions/AbstractAction|null[0]
+    constructor <init>(kotlin.reflect/KType) // space.kscience.dataforge.actions/AbstractAction.<init>|<init>(kotlin.reflect.KType){}[0]
+
+    final val outputType // space.kscience.dataforge.actions/AbstractAction.outputType|{}outputType[0]
+        final fun <get-outputType>(): kotlin.reflect/KType // space.kscience.dataforge.actions/AbstractAction.outputType.<get-outputType>|<get-outputType>(){}[0]
+
+    abstract fun (space.kscience.dataforge.data/DataBuilderScope<#B>).generate(space.kscience.dataforge.data/DataTree<#A>, space.kscience.dataforge.meta/Meta): kotlin.collections/Map<space.kscience.dataforge.names/Name, space.kscience.dataforge.data/Data<#B>> // space.kscience.dataforge.actions/AbstractAction.generate|generate@space.kscience.dataforge.data.DataBuilderScope<1:1>(space.kscience.dataforge.data.DataTree<1:0>;space.kscience.dataforge.meta.Meta){}[0]
+    open fun execute(space.kscience.dataforge.data/DataTree<#A>, space.kscience.dataforge.meta/Meta, kotlinx.coroutines/CoroutineScope): space.kscience.dataforge.data/DataTree<#B> // space.kscience.dataforge.actions/AbstractAction.execute|execute(space.kscience.dataforge.data.DataTree<1:0>;space.kscience.dataforge.meta.Meta;kotlinx.coroutines.CoroutineScope){}[0]
+    open suspend fun (space.kscience.dataforge.data/DataSink<#B>).update(space.kscience.dataforge.data/DataTree<#A>, space.kscience.dataforge.meta/Meta, space.kscience.dataforge.names/Name) // space.kscience.dataforge.actions/AbstractAction.update|update@space.kscience.dataforge.data.DataSink<1:1>(space.kscience.dataforge.data.DataTree<1:0>;space.kscience.dataforge.meta.Meta;space.kscience.dataforge.names.Name){}[0]
+}
+
+final class <#A: kotlin/Any?, #B: kotlin/Any?> space.kscience.dataforge.actions/JoinGroup { // space.kscience.dataforge.actions/JoinGroup|null[0]
+    constructor <init>(kotlin/String, space.kscience.dataforge.data/DataTree<#A>, kotlin.reflect/KType) // space.kscience.dataforge.actions/JoinGroup.<init>|<init>(kotlin.String;space.kscience.dataforge.data.DataTree<1:0>;kotlin.reflect.KType){}[0]
+
+    final var meta // space.kscience.dataforge.actions/JoinGroup.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/MutableMeta // space.kscience.dataforge.actions/JoinGroup.meta.<get-meta>|<get-meta>(){}[0]
+        final fun <set-meta>(space.kscience.dataforge.meta/MutableMeta) // space.kscience.dataforge.actions/JoinGroup.meta.<set-meta>|<set-meta>(space.kscience.dataforge.meta.MutableMeta){}[0]
+    final var name // space.kscience.dataforge.actions/JoinGroup.name|{}name[0]
+        final fun <get-name>(): kotlin/String // space.kscience.dataforge.actions/JoinGroup.name.<get-name>|<get-name>(){}[0]
+        final fun <set-name>(kotlin/String) // space.kscience.dataforge.actions/JoinGroup.name.<set-name>|<set-name>(kotlin.String){}[0]
+    final var outputType // space.kscience.dataforge.actions/JoinGroup.outputType|{}outputType[0]
+        final fun <get-outputType>(): kotlin.reflect/KType // space.kscience.dataforge.actions/JoinGroup.outputType.<get-outputType>|<get-outputType>(){}[0]
+        final fun <set-outputType>(kotlin.reflect/KType) // space.kscience.dataforge.actions/JoinGroup.outputType.<set-outputType>|<set-outputType>(kotlin.reflect.KType){}[0]
+    final var result // space.kscience.dataforge.actions/JoinGroup.result|{}result[0]
+        final fun <get-result>(): kotlin.coroutines/SuspendFunction2<space.kscience.dataforge.actions/ActionEnv, kotlin.collections/Map<space.kscience.dataforge.names/Name, space.kscience.dataforge.data/ValueWithMeta<#A>>, #B> // space.kscience.dataforge.actions/JoinGroup.result.<get-result>|<get-result>(){}[0]
+        final fun <set-result>(kotlin.coroutines/SuspendFunction2<space.kscience.dataforge.actions/ActionEnv, kotlin.collections/Map<space.kscience.dataforge.names/Name, space.kscience.dataforge.data/ValueWithMeta<#A>>, #B>) // space.kscience.dataforge.actions/JoinGroup.result.<set-result>|<set-result>(kotlin.coroutines.SuspendFunction2<space.kscience.dataforge.actions.ActionEnv,kotlin.collections.Map<space.kscience.dataforge.names.Name,space.kscience.dataforge.data.ValueWithMeta<1:0>>,1:1>){}[0]
+
+    final inline fun <#A1: reified #B> result(noinline kotlin.coroutines/SuspendFunction2<space.kscience.dataforge.actions/ActionEnv, kotlin.collections/Map<space.kscience.dataforge.names/Name, space.kscience.dataforge.data/ValueWithMeta<#A>>, #A1>) // space.kscience.dataforge.actions/JoinGroup.result|result(kotlin.coroutines.SuspendFunction2<space.kscience.dataforge.actions.ActionEnv,kotlin.collections.Map<space.kscience.dataforge.names.Name,space.kscience.dataforge.data.ValueWithMeta<1:0>>,0:0>){0§<1:1>}[0]
+}
+
+final class <#A: kotlin/Any?, #B: kotlin/Any?> space.kscience.dataforge.actions/MapAction : space.kscience.dataforge.actions/AbstractAction<#A, #B> { // space.kscience.dataforge.actions/MapAction|null[0]
+    constructor <init>(kotlin.reflect/KType, kotlin/Function1<space.kscience.dataforge.actions/MapActionBuilder<#A, #B>, kotlin/Unit>) // space.kscience.dataforge.actions/MapAction.<init>|<init>(kotlin.reflect.KType;kotlin.Function1<space.kscience.dataforge.actions.MapActionBuilder<1:0,1:1>,kotlin.Unit>){}[0]
+}
+
+final class <#A: kotlin/Any?, #B: kotlin/Any?> space.kscience.dataforge.actions/MapActionBuilder { // space.kscience.dataforge.actions/MapActionBuilder|null[0]
+    constructor <init>(space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/MutableMeta, space.kscience.dataforge.meta/Meta, kotlin.reflect/KType, kotlin.reflect/KType) // space.kscience.dataforge.actions/MapActionBuilder.<init>|<init>(space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.MutableMeta;space.kscience.dataforge.meta.Meta;kotlin.reflect.KType;kotlin.reflect.KType){}[0]
+
+    final val actionMeta // space.kscience.dataforge.actions/MapActionBuilder.actionMeta|{}actionMeta[0]
+        final fun <get-actionMeta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.actions/MapActionBuilder.actionMeta.<get-actionMeta>|<get-actionMeta>(){}[0]
+    final val dataType // space.kscience.dataforge.actions/MapActionBuilder.dataType|{}dataType[0]
+        final fun <get-dataType>(): kotlin.reflect/KType // space.kscience.dataforge.actions/MapActionBuilder.dataType.<get-dataType>|<get-dataType>(){}[0]
+
+    final var meta // space.kscience.dataforge.actions/MapActionBuilder.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/MutableMeta // space.kscience.dataforge.actions/MapActionBuilder.meta.<get-meta>|<get-meta>(){}[0]
+        final fun <set-meta>(space.kscience.dataforge.meta/MutableMeta) // space.kscience.dataforge.actions/MapActionBuilder.meta.<set-meta>|<set-meta>(space.kscience.dataforge.meta.MutableMeta){}[0]
+    final var name // space.kscience.dataforge.actions/MapActionBuilder.name|{}name[0]
+        final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.actions/MapActionBuilder.name.<get-name>|<get-name>(){}[0]
+        final fun <set-name>(space.kscience.dataforge.names/Name) // space.kscience.dataforge.actions/MapActionBuilder.name.<set-name>|<set-name>(space.kscience.dataforge.names.Name){}[0]
+    final var outputType // space.kscience.dataforge.actions/MapActionBuilder.outputType|{}outputType[0]
+        final fun <get-outputType>(): kotlin.reflect/KType // space.kscience.dataforge.actions/MapActionBuilder.outputType.<get-outputType>|<get-outputType>(){}[0]
+        final fun <set-outputType>(kotlin.reflect/KType) // space.kscience.dataforge.actions/MapActionBuilder.outputType.<set-outputType>|<set-outputType>(kotlin.reflect.KType){}[0]
+    final var result // space.kscience.dataforge.actions/MapActionBuilder.result|{}result[0]
+        final fun <get-result>(): kotlin.coroutines/SuspendFunction2<space.kscience.dataforge.actions/ActionEnv, #A, #B> // space.kscience.dataforge.actions/MapActionBuilder.result.<get-result>|<get-result>(){}[0]
+        final fun <set-result>(kotlin.coroutines/SuspendFunction2<space.kscience.dataforge.actions/ActionEnv, #A, #B>) // space.kscience.dataforge.actions/MapActionBuilder.result.<set-result>|<set-result>(kotlin.coroutines.SuspendFunction2<space.kscience.dataforge.actions.ActionEnv,1:0,1:1>){}[0]
+
+    final fun <#A1: #B> result(kotlin.reflect/KType, kotlin.coroutines/SuspendFunction2<space.kscience.dataforge.actions/ActionEnv, #A, #A1>) // space.kscience.dataforge.actions/MapActionBuilder.result|result(kotlin.reflect.KType;kotlin.coroutines.SuspendFunction2<space.kscience.dataforge.actions.ActionEnv,1:0,0:0>){0§<1:1>}[0]
+    final inline fun <#A1: reified #B> result(noinline kotlin.coroutines/SuspendFunction2<space.kscience.dataforge.actions/ActionEnv, #A, #A1>) // space.kscience.dataforge.actions/MapActionBuilder.result|result(kotlin.coroutines.SuspendFunction2<space.kscience.dataforge.actions.ActionEnv,1:0,0:0>){0§<1:1>}[0]
+}
+
+final class <#A: kotlin/Any?, #B: kotlin/Any?> space.kscience.dataforge.actions/ReduceAction : space.kscience.dataforge.actions/AbstractAction<#A, #B> { // space.kscience.dataforge.actions/ReduceAction|null[0]
+    constructor <init>(kotlin.reflect/KType, kotlin/Function1<space.kscience.dataforge.actions/ReduceGroupBuilder<#A, #B>, kotlin/Unit>) // space.kscience.dataforge.actions/ReduceAction.<init>|<init>(kotlin.reflect.KType;kotlin.Function1<space.kscience.dataforge.actions.ReduceGroupBuilder<1:0,1:1>,kotlin.Unit>){}[0]
+}
+
+final class <#A: kotlin/Any?, #B: kotlin/Any?> space.kscience.dataforge.actions/ReduceGroupBuilder { // space.kscience.dataforge.actions/ReduceGroupBuilder|null[0]
+    constructor <init>(space.kscience.dataforge.meta/Meta, kotlin.reflect/KType) // space.kscience.dataforge.actions/ReduceGroupBuilder.<init>|<init>(space.kscience.dataforge.meta.Meta;kotlin.reflect.KType){}[0]
+
+    final val actionMeta // space.kscience.dataforge.actions/ReduceGroupBuilder.actionMeta|{}actionMeta[0]
+        final fun <get-actionMeta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.actions/ReduceGroupBuilder.actionMeta.<get-actionMeta>|<get-actionMeta>(){}[0]
+
+    final fun byMetaValue(kotlin/String, kotlin/String = ..., kotlin/Function1<space.kscience.dataforge.actions/JoinGroup<#A, #B>, kotlin/Unit>) // space.kscience.dataforge.actions/ReduceGroupBuilder.byMetaValue|byMetaValue(kotlin.String;kotlin.String;kotlin.Function1<space.kscience.dataforge.actions.JoinGroup<1:0,1:1>,kotlin.Unit>){}[0]
+    final fun group(kotlin/String, space.kscience.dataforge.data/DataFilter, kotlin/Function1<space.kscience.dataforge.actions/JoinGroup<#A, #B>, kotlin/Unit>) // space.kscience.dataforge.actions/ReduceGroupBuilder.group|group(kotlin.String;space.kscience.dataforge.data.DataFilter;kotlin.Function1<space.kscience.dataforge.actions.JoinGroup<1:0,1:1>,kotlin.Unit>){}[0]
+    final fun result(kotlin/String, kotlin.coroutines/SuspendFunction2<space.kscience.dataforge.actions/ActionEnv, kotlin.collections/Map<space.kscience.dataforge.names/Name, space.kscience.dataforge.data/ValueWithMeta<#A>>, #B>) // space.kscience.dataforge.actions/ReduceGroupBuilder.result|result(kotlin.String;kotlin.coroutines.SuspendFunction2<space.kscience.dataforge.actions.ActionEnv,kotlin.collections.Map<space.kscience.dataforge.names.Name,space.kscience.dataforge.data.ValueWithMeta<1:0>>,1:1>){}[0]
+}
+
+final class <#A: kotlin/Any?, #B: kotlin/Any?> space.kscience.dataforge.actions/SplitAction : space.kscience.dataforge.actions/AbstractAction<#A, #B> { // space.kscience.dataforge.actions/SplitAction|null[0]
+    constructor <init>(kotlin.reflect/KType, kotlin/Function1<space.kscience.dataforge.actions/SplitBuilder<#A, #B>, kotlin/Unit>) // space.kscience.dataforge.actions/SplitAction.<init>|<init>(kotlin.reflect.KType;kotlin.Function1<space.kscience.dataforge.actions.SplitBuilder<1:0,1:1>,kotlin.Unit>){}[0]
+}
+
+final class <#A: kotlin/Any?, #B: kotlin/Any?> space.kscience.dataforge.actions/SplitBuilder { // space.kscience.dataforge.actions/SplitBuilder|null[0]
+    constructor <init>(space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.actions/SplitBuilder.<init>|<init>(space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta){}[0]
+
+    final val meta // space.kscience.dataforge.actions/SplitBuilder.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.actions/SplitBuilder.meta.<get-meta>|<get-meta>(){}[0]
+    final val name // space.kscience.dataforge.actions/SplitBuilder.name|{}name[0]
+        final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.actions/SplitBuilder.name.<get-name>|<get-name>(){}[0]
+
+    final fun fragment(kotlin/String, kotlin/Function1<space.kscience.dataforge.actions/SplitBuilder.FragmentRule<#A, #B>, kotlin/Unit>) // space.kscience.dataforge.actions/SplitBuilder.fragment|fragment(kotlin.String;kotlin.Function1<space.kscience.dataforge.actions.SplitBuilder.FragmentRule<1:0,1:1>,kotlin.Unit>){}[0]
+
+    final class <#A1: kotlin/Any?, #B1: kotlin/Any?> FragmentRule { // space.kscience.dataforge.actions/SplitBuilder.FragmentRule|null[0]
+        constructor <init>(space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/MutableMeta, kotlin.reflect/KType) // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.<init>|<init>(space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.MutableMeta;kotlin.reflect.KType){}[0]
+
+        final val name // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.name|{}name[0]
+            final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.name.<get-name>|<get-name>(){}[0]
+
+        final var meta // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.meta|{}meta[0]
+            final fun <get-meta>(): space.kscience.dataforge.meta/MutableMeta // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.meta.<get-meta>|<get-meta>(){}[0]
+            final fun <set-meta>(space.kscience.dataforge.meta/MutableMeta) // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.meta.<set-meta>|<set-meta>(space.kscience.dataforge.meta.MutableMeta){}[0]
+        final var outputType // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.outputType|{}outputType[0]
+            final fun <get-outputType>(): kotlin.reflect/KType // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.outputType.<get-outputType>|<get-outputType>(){}[0]
+            final fun <set-outputType>(kotlin.reflect/KType) // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.outputType.<set-outputType>|<set-outputType>(kotlin.reflect.KType){}[0]
+        final var result // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.result|{}result[0]
+            final fun <get-result>(): kotlin.coroutines/SuspendFunction1<#A1, #B1> // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.result.<get-result>|<get-result>(){}[0]
+            final fun <set-result>(kotlin.coroutines/SuspendFunction1<#A1, #B1>) // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.result.<set-result>|<set-result>(kotlin.coroutines.SuspendFunction1<1:0,1:1>){}[0]
+
+        final inline fun <#A2: reified #B1> result(noinline kotlin.coroutines/SuspendFunction1<#A1, #A2>) // space.kscience.dataforge.actions/SplitBuilder.FragmentRule.result|result(kotlin.coroutines.SuspendFunction1<1:0,0:0>){0§<1:1>}[0]
+    }
+}
+
+final class <#A: kotlin/Any?> space.kscience.dataforge.data/FilteredDataTree : space.kscience.dataforge.data/DataTree<#A> { // space.kscience.dataforge.data/FilteredDataTree|null[0]
+    constructor <init>(space.kscience.dataforge.data/DataTree<#A>, space.kscience.dataforge.data/DataFilter, space.kscience.dataforge.names/Name, kotlin.reflect/KType = ...) // space.kscience.dataforge.data/FilteredDataTree.<init>|<init>(space.kscience.dataforge.data.DataTree<1:0>;space.kscience.dataforge.data.DataFilter;space.kscience.dataforge.names.Name;kotlin.reflect.KType){}[0]
+
+    final val branch // space.kscience.dataforge.data/FilteredDataTree.branch|{}branch[0]
+        final fun <get-branch>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.data/FilteredDataTree.branch.<get-branch>|<get-branch>(){}[0]
+    final val data // space.kscience.dataforge.data/FilteredDataTree.data|{}data[0]
+        final fun <get-data>(): space.kscience.dataforge.data/Data<#A>? // space.kscience.dataforge.data/FilteredDataTree.data.<get-data>|<get-data>(){}[0]
+    final val dataType // space.kscience.dataforge.data/FilteredDataTree.dataType|{}dataType[0]
+        final fun <get-dataType>(): kotlin.reflect/KType // space.kscience.dataforge.data/FilteredDataTree.dataType.<get-dataType>|<get-dataType>(){}[0]
+    final val filter // space.kscience.dataforge.data/FilteredDataTree.filter|{}filter[0]
+        final fun <get-filter>(): space.kscience.dataforge.data/DataFilter // space.kscience.dataforge.data/FilteredDataTree.filter.<get-filter>|<get-filter>(){}[0]
+    final val items // space.kscience.dataforge.data/FilteredDataTree.items|{}items[0]
+        final fun <get-items>(): kotlin.collections/Map<space.kscience.dataforge.names/NameToken, space.kscience.dataforge.data/DataTree<#A>> // space.kscience.dataforge.data/FilteredDataTree.items.<get-items>|<get-items>(){}[0]
+    final val source // space.kscience.dataforge.data/FilteredDataTree.source|{}source[0]
+        final fun <get-source>(): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.data/FilteredDataTree.source.<get-source>|<get-source>(){}[0]
+    final val updates // space.kscience.dataforge.data/FilteredDataTree.updates|{}updates[0]
+        final fun <get-updates>(): kotlinx.coroutines.flow/Flow<space.kscience.dataforge.names/Name> // space.kscience.dataforge.data/FilteredDataTree.updates.<get-updates>|<get-updates>(){}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.dataforge.data/NamedValueWithMeta { // space.kscience.dataforge.data/NamedValueWithMeta|null[0]
+    constructor <init>(space.kscience.dataforge.names/Name, #A, space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.data/NamedValueWithMeta.<init>|<init>(space.kscience.dataforge.names.Name;1:0;space.kscience.dataforge.meta.Meta){}[0]
+
+    final val meta // space.kscience.dataforge.data/NamedValueWithMeta.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.data/NamedValueWithMeta.meta.<get-meta>|<get-meta>(){}[0]
+    final val name // space.kscience.dataforge.data/NamedValueWithMeta.name|{}name[0]
+        final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.data/NamedValueWithMeta.name.<get-name>|<get-name>(){}[0]
+    final val value // space.kscience.dataforge.data/NamedValueWithMeta.value|{}value[0]
+        final fun <get-value>(): #A // space.kscience.dataforge.data/NamedValueWithMeta.value.<get-value>|<get-value>(){}[0]
+
+    final fun component1(): space.kscience.dataforge.names/Name // space.kscience.dataforge.data/NamedValueWithMeta.component1|component1(){}[0]
+    final fun component2(): #A // space.kscience.dataforge.data/NamedValueWithMeta.component2|component2(){}[0]
+    final fun component3(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.data/NamedValueWithMeta.component3|component3(){}[0]
+    final fun copy(space.kscience.dataforge.names/Name = ..., #A = ..., space.kscience.dataforge.meta/Meta = ...): space.kscience.dataforge.data/NamedValueWithMeta<#A> // space.kscience.dataforge.data/NamedValueWithMeta.copy|copy(space.kscience.dataforge.names.Name;1:0;space.kscience.dataforge.meta.Meta){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.dataforge.data/NamedValueWithMeta.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.dataforge.data/NamedValueWithMeta.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // space.kscience.dataforge.data/NamedValueWithMeta.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.dataforge.data/StaticData : space.kscience.dataforge.data/Data<#A>, space.kscience.dataforge.data/StaticGoal<#A> { // space.kscience.dataforge.data/StaticData|null[0]
+    constructor <init>(kotlin.reflect/KType, #A, space.kscience.dataforge.meta/Meta = ...) // space.kscience.dataforge.data/StaticData.<init>|<init>(kotlin.reflect.KType;1:0;space.kscience.dataforge.meta.Meta){}[0]
+
+    final val meta // space.kscience.dataforge.data/StaticData.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.data/StaticData.meta.<get-meta>|<get-meta>(){}[0]
+    final val type // space.kscience.dataforge.data/StaticData.type|{}type[0]
+        final fun <get-type>(): kotlin.reflect/KType // space.kscience.dataforge.data/StaticData.type.<get-type>|<get-type>(){}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.dataforge.data/ValueWithMeta { // space.kscience.dataforge.data/ValueWithMeta|null[0]
+    constructor <init>(#A, space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.data/ValueWithMeta.<init>|<init>(1:0;space.kscience.dataforge.meta.Meta){}[0]
+
+    final val meta // space.kscience.dataforge.data/ValueWithMeta.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.data/ValueWithMeta.meta.<get-meta>|<get-meta>(){}[0]
+    final val value // space.kscience.dataforge.data/ValueWithMeta.value|{}value[0]
+        final fun <get-value>(): #A // space.kscience.dataforge.data/ValueWithMeta.value.<get-value>|<get-value>(){}[0]
+
+    final fun component1(): #A // space.kscience.dataforge.data/ValueWithMeta.component1|component1(){}[0]
+    final fun component2(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.data/ValueWithMeta.component2|component2(){}[0]
+    final fun copy(#A = ..., space.kscience.dataforge.meta/Meta = ...): space.kscience.dataforge.data/ValueWithMeta<#A> // space.kscience.dataforge.data/ValueWithMeta.copy|copy(1:0;space.kscience.dataforge.meta.Meta){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.dataforge.data/ValueWithMeta.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.dataforge.data/ValueWithMeta.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // space.kscience.dataforge.data/ValueWithMeta.toString|toString(){}[0]
+}
+
+final class space.kscience.dataforge.actions/ActionEnv { // space.kscience.dataforge.actions/ActionEnv|null[0]
+    constructor <init>(space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/Meta, space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.actions/ActionEnv.<init>|<init>(space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta;space.kscience.dataforge.meta.Meta){}[0]
+
+    final val actionMeta // space.kscience.dataforge.actions/ActionEnv.actionMeta|{}actionMeta[0]
+        final fun <get-actionMeta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.actions/ActionEnv.actionMeta.<get-actionMeta>|<get-actionMeta>(){}[0]
+    final val meta // space.kscience.dataforge.actions/ActionEnv.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.actions/ActionEnv.meta.<get-meta>|<get-meta>(){}[0]
+    final val name // space.kscience.dataforge.actions/ActionEnv.name|{}name[0]
+        final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.actions/ActionEnv.name.<get-name>|<get-name>(){}[0]
+
+    final fun component1(): space.kscience.dataforge.names/Name // space.kscience.dataforge.actions/ActionEnv.component1|component1(){}[0]
+    final fun component2(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.actions/ActionEnv.component2|component2(){}[0]
+    final fun component3(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.actions/ActionEnv.component3|component3(){}[0]
+    final fun copy(space.kscience.dataforge.names/Name = ..., space.kscience.dataforge.meta/Meta = ..., space.kscience.dataforge.meta/Meta = ...): space.kscience.dataforge.actions/ActionEnv // space.kscience.dataforge.actions/ActionEnv.copy|copy(space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta;space.kscience.dataforge.meta.Meta){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.dataforge.actions/ActionEnv.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.dataforge.actions/ActionEnv.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // space.kscience.dataforge.actions/ActionEnv.toString|toString(){}[0]
+}
+
+final class space.kscience.dataforge.data/Dependencies : kotlin.coroutines/CoroutineContext.Element { // space.kscience.dataforge.data/Dependencies|null[0]
+    constructor <init>(kotlin.collections/Collection<kotlinx.coroutines/Job>) // space.kscience.dataforge.data/Dependencies.<init>|<init>(kotlin.collections.Collection<kotlinx.coroutines.Job>){}[0]
+
+    final val key // space.kscience.dataforge.data/Dependencies.key|{}key[0]
+        final fun <get-key>(): kotlin.coroutines/CoroutineContext.Key<*> // space.kscience.dataforge.data/Dependencies.key.<get-key>|<get-key>(){}[0]
+    final val values // space.kscience.dataforge.data/Dependencies.values|{}values[0]
+        final fun <get-values>(): kotlin.collections/Collection<kotlinx.coroutines/Job> // space.kscience.dataforge.data/Dependencies.values.<get-values>|<get-values>(){}[0]
+
+    final object Companion : kotlin.coroutines/CoroutineContext.Key<space.kscience.dataforge.data/Dependencies> // space.kscience.dataforge.data/Dependencies.Companion|null[0]
+}
+
+final class space.kscience.dataforge.data/GoalExecutionRestriction : kotlin.coroutines/CoroutineContext.Element { // space.kscience.dataforge.data/GoalExecutionRestriction|null[0]
+    constructor <init>(space.kscience.dataforge.data/GoalExecutionRestrictionPolicy = ...) // space.kscience.dataforge.data/GoalExecutionRestriction.<init>|<init>(space.kscience.dataforge.data.GoalExecutionRestrictionPolicy){}[0]
+
+    final val key // space.kscience.dataforge.data/GoalExecutionRestriction.key|{}key[0]
+        final fun <get-key>(): kotlin.coroutines/CoroutineContext.Key<*> // space.kscience.dataforge.data/GoalExecutionRestriction.key.<get-key>|<get-key>(){}[0]
+    final val policy // space.kscience.dataforge.data/GoalExecutionRestriction.policy|{}policy[0]
+        final fun <get-policy>(): space.kscience.dataforge.data/GoalExecutionRestrictionPolicy // space.kscience.dataforge.data/GoalExecutionRestriction.policy.<get-policy>|<get-policy>(){}[0]
+
+    final object Companion : kotlin.coroutines/CoroutineContext.Key<space.kscience.dataforge.data/GoalExecutionRestriction> // space.kscience.dataforge.data/GoalExecutionRestriction.Companion|null[0]
+}
+
+open class <#A: kotlin/Any?> space.kscience.dataforge.data/LazyGoal : space.kscience.dataforge.data/Goal<#A> { // space.kscience.dataforge.data/LazyGoal|null[0]
+    constructor <init>(kotlin.coroutines/CoroutineContext = ..., kotlin.collections/Iterable<space.kscience.dataforge.data/Goal<*>> = ..., kotlin.coroutines/SuspendFunction0<#A>) // space.kscience.dataforge.data/LazyGoal.<init>|<init>(kotlin.coroutines.CoroutineContext;kotlin.collections.Iterable<space.kscience.dataforge.data.Goal<*>>;kotlin.coroutines.SuspendFunction0<1:0>){}[0]
+
+    final val block // space.kscience.dataforge.data/LazyGoal.block|{}block[0]
+        final fun <get-block>(): kotlin.coroutines/SuspendFunction0<#A> // space.kscience.dataforge.data/LazyGoal.block.<get-block>|<get-block>(){}[0]
+    open val dependencies // space.kscience.dataforge.data/LazyGoal.dependencies|{}dependencies[0]
+        open fun <get-dependencies>(): kotlin.collections/Iterable<space.kscience.dataforge.data/Goal<*>> // space.kscience.dataforge.data/LazyGoal.dependencies.<get-dependencies>|<get-dependencies>(){}[0]
+
+    final var deferred // space.kscience.dataforge.data/LazyGoal.deferred|{}deferred[0]
+        final fun <get-deferred>(): kotlinx.coroutines/Deferred<#A>? // space.kscience.dataforge.data/LazyGoal.deferred.<get-deferred>|<get-deferred>(){}[0]
+
+    open fun async(kotlinx.coroutines/CoroutineScope): kotlinx.coroutines/Deferred<#A> // space.kscience.dataforge.data/LazyGoal.async|async(kotlinx.coroutines.CoroutineScope){}[0]
+    open fun reset() // space.kscience.dataforge.data/LazyGoal.reset|reset(){}[0]
+}
+
+open class <#A: kotlin/Any?> space.kscience.dataforge.data/StaticGoal : space.kscience.dataforge.data/Goal<#A> { // space.kscience.dataforge.data/StaticGoal|null[0]
+    constructor <init>(#A) // space.kscience.dataforge.data/StaticGoal.<init>|<init>(1:0){}[0]
+
+    final val value // space.kscience.dataforge.data/StaticGoal.value|{}value[0]
+        final fun <get-value>(): #A // space.kscience.dataforge.data/StaticGoal.value.<get-value>|<get-value>(){}[0]
+    open val deferred // space.kscience.dataforge.data/StaticGoal.deferred|{}deferred[0]
+        open fun <get-deferred>(): kotlinx.coroutines/Deferred<#A> // space.kscience.dataforge.data/StaticGoal.deferred.<get-deferred>|<get-deferred>(){}[0]
+    open val dependencies // space.kscience.dataforge.data/StaticGoal.dependencies|{}dependencies[0]
+        open fun <get-dependencies>(): kotlin.collections/Collection<space.kscience.dataforge.data/Goal<*>> // space.kscience.dataforge.data/StaticGoal.dependencies.<get-dependencies>|<get-dependencies>(){}[0]
+
+    open fun async(kotlinx.coroutines/CoroutineScope): kotlinx.coroutines/Deferred<#A> // space.kscience.dataforge.data/StaticGoal.async|async(kotlinx.coroutines.CoroutineScope){}[0]
+    open fun reset() // space.kscience.dataforge.data/StaticGoal.reset|reset(){}[0]
+}
+
+final val space.kscience.dataforge.data/dependencies // space.kscience.dataforge.data/dependencies|@kotlinx.coroutines.Job{}dependencies[0]
+    final fun (kotlinx.coroutines/Job).<get-dependencies>(): kotlin.collections/Collection<kotlinx.coroutines/Job> // space.kscience.dataforge.data/dependencies.<get-dependencies>|<get-dependencies>@kotlinx.coroutines.Job(){}[0]
+final val space.kscience.dataforge.data/isComplete // space.kscience.dataforge.data/isComplete|@space.kscience.dataforge.data.Goal<*>{}isComplete[0]
+    final fun (space.kscience.dataforge.data/Goal<*>).<get-isComplete>(): kotlin/Boolean // space.kscience.dataforge.data/isComplete.<get-isComplete>|<get-isComplete>@space.kscience.dataforge.data.Goal<*>(){}[0]
+final val space.kscience.dataforge.data/meta // space.kscience.dataforge.data/meta|@space.kscience.dataforge.data.DataTree<*>{}meta[0]
+    final fun (space.kscience.dataforge.data/DataTree<*>).<get-meta>(): space.kscience.dataforge.meta/Meta? // space.kscience.dataforge.data/meta.<get-meta>|<get-meta>@space.kscience.dataforge.data.DataTree<*>(){}[0]
+
+final fun (kotlin.collections/Iterable<space.kscience.dataforge.data/Data<*>>).space.kscience.dataforge.data/joinMeta(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.data/joinMeta|joinMeta@kotlin.collections.Iterable<space.kscience.dataforge.data.Data<*>>(){}[0]
+final fun (kotlin.collections/Map<*, space.kscience.dataforge.data/Data<*>>).space.kscience.dataforge.data/joinMeta(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.data/joinMeta|joinMeta@kotlin.collections.Map<*,space.kscience.dataforge.data.Data<*>>(){}[0]
+final fun (space.kscience.dataforge.data/DataTree<*>).space.kscience.dataforge.data/isEmpty(): kotlin/Boolean // space.kscience.dataforge.data/isEmpty|isEmpty@space.kscience.dataforge.data.DataTree<*>(){}[0]
+final fun (space.kscience.dataforge.data/DataTree<*>).space.kscience.dataforge.data/joinMeta(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.data/joinMeta|joinMeta@space.kscience.dataforge.data.DataTree<*>(){}[0]
+final fun (space.kscience.dataforge.data/Goal<*>).space.kscience.dataforge.data/launchIn(kotlinx.coroutines/CoroutineScope): kotlinx.coroutines/Job // space.kscience.dataforge.data/launchIn|launchIn@space.kscience.dataforge.data.Goal<*>(kotlinx.coroutines.CoroutineScope){}[0]
+final fun <#A: kotlin/Any> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/launchWriteJobFrom(space.kscience.dataforge.data/DataTree<#A>, kotlinx.coroutines/CoroutineScope, space.kscience.dataforge.names/Name = ...): kotlinx.coroutines/Job // space.kscience.dataforge.data/launchWriteJobFrom|launchWriteJobFrom@space.kscience.dataforge.data.DataSink<0:0>(space.kscience.dataforge.data.DataTree<0:0>;kotlinx.coroutines.CoroutineScope;space.kscience.dataforge.names.Name){0§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any?, #B: kotlin/Any?, #C: kotlin/Any?> (kotlin.collections/Map<#A, space.kscience.dataforge.data/Data<#B>>).space.kscience.dataforge.data/reduceToData(kotlin.reflect/KType, space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., kotlin.coroutines/SuspendFunction1<kotlin.collections/Map<#A, space.kscience.dataforge.data/ValueWithMeta<#B>>, #C>): space.kscience.dataforge.data/Data<#C> // space.kscience.dataforge.data/reduceToData|reduceToData@kotlin.collections.Map<0:0,space.kscience.dataforge.data.Data<0:1>>(kotlin.reflect.KType;space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<kotlin.collections.Map<0:0,space.kscience.dataforge.data.ValueWithMeta<0:1>>,0:2>){0§<kotlin.Any?>;1§<kotlin.Any?>;2§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?, #B: kotlin/Any?, #C: kotlin/Any?> (space.kscience.dataforge.actions/Action<#A, #B>).space.kscience.dataforge.actions/then(space.kscience.dataforge.actions/Action<#B, #C>): space.kscience.dataforge.actions/Action<#A, #C> // space.kscience.dataforge.actions/then|then@space.kscience.dataforge.actions.Action<0:0,0:1>(space.kscience.dataforge.actions.Action<0:1,0:2>){0§<kotlin.Any?>;1§<kotlin.Any?>;2§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?, #B: kotlin/Any?> (space.kscience.dataforge.data/Data<#A>).space.kscience.dataforge.data/transform(kotlin.reflect/KType, space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., kotlin.coroutines/SuspendFunction1<#A, #B>): space.kscience.dataforge.data/Data<#B> // space.kscience.dataforge.data/transform|transform@space.kscience.dataforge.data.Data<0:0>(kotlin.reflect.KType;space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<0:0,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?, #B: kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.actions/transform(space.kscience.dataforge.actions/Action<#A, #B>, space.kscience.dataforge.meta/Meta = ..., kotlinx.coroutines/CoroutineScope = ...): space.kscience.dataforge.data/DataTree<#B> // space.kscience.dataforge.actions/transform|transform@space.kscience.dataforge.data.DataTree<0:0>(space.kscience.dataforge.actions.Action<0:0,0:1>;space.kscience.dataforge.meta.Meta;kotlinx.coroutines.CoroutineScope){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?, #B: kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/transformEach(kotlin.reflect/KType, kotlinx.coroutines/CoroutineScope, kotlin/Function2<space.kscience.dataforge.meta/MutableMeta, space.kscience.dataforge.names/Name, kotlin/Unit> = ..., kotlin.coroutines/SuspendFunction1<space.kscience.dataforge.data/NamedValueWithMeta<#A>, #B>): space.kscience.dataforge.data/DataTree<#B> // space.kscience.dataforge.data/transformEach|transformEach@space.kscience.dataforge.data.DataTree<0:0>(kotlin.reflect.KType;kotlinx.coroutines.CoroutineScope;kotlin.Function2<space.kscience.dataforge.meta.MutableMeta,space.kscience.dataforge.names.Name,kotlin.Unit>;kotlin.coroutines.SuspendFunction1<space.kscience.dataforge.data.NamedValueWithMeta<0:0>,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlin.collections/Map<space.kscience.dataforge.names/Name, space.kscience.dataforge.data/Data<#A>>).space.kscience.dataforge.data/asTree(kotlin.reflect/KType): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.data/asTree|asTree@kotlin.collections.Map<space.kscience.dataforge.names.Name,space.kscience.dataforge.data.Data<0:0>>(kotlin.reflect.KType){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlin.sequences/Sequence<space.kscience.dataforge.data/NamedData<#A>>).space.kscience.dataforge.data/toTree(kotlin.reflect/KType): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.data/toTree|toTree@kotlin.sequences.Sequence<space.kscience.dataforge.data.NamedData<0:0>>(kotlin.reflect.KType){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/Data<#A>).space.kscience.dataforge.data/named(space.kscience.dataforge.names/Name): space.kscience.dataforge.data/NamedData<#A> // space.kscience.dataforge.data/named|named@space.kscience.dataforge.data.Data<0:0>(space.kscience.dataforge.names.Name){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/Data<#A>).space.kscience.dataforge.data/withMeta(space.kscience.dataforge.meta/Meta): space.kscience.dataforge.data/Data<#A> // space.kscience.dataforge.data/withMeta|withMeta@space.kscience.dataforge.data.Data<0:0>(space.kscience.dataforge.meta.Meta){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataSource<#A>).space.kscience.dataforge.data/filterData(space.kscience.dataforge.data/DataFilter): space.kscience.dataforge.data/DataSource<#A> // space.kscience.dataforge.data/filterData|filterData@space.kscience.dataforge.data.DataSource<0:0>(space.kscience.dataforge.data.DataFilter){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataSource<#A>).space.kscience.dataforge.data/isObservable(): kotlin/Boolean // space.kscience.dataforge.data/isObservable|isObservable@space.kscience.dataforge.data.DataSource<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/asSequence(space.kscience.dataforge.names/Name = ...): kotlin.sequences/Sequence<space.kscience.dataforge.data/NamedData<#A>> // space.kscience.dataforge.data/asSequence|asSequence@space.kscience.dataforge.data.DataTree<0:0>(space.kscience.dataforge.names.Name){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/branch(kotlin/String): space.kscience.dataforge.data/DataTree<#A>? // space.kscience.dataforge.data/branch|branch@space.kscience.dataforge.data.DataTree<0:0>(kotlin.String){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/branch(space.kscience.dataforge.names/Name): space.kscience.dataforge.data/DataTree<#A>? // space.kscience.dataforge.data/branch|branch@space.kscience.dataforge.data.DataTree<0:0>(space.kscience.dataforge.names.Name){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/filterData(space.kscience.dataforge.data/DataFilter): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.data/filterData|filterData@space.kscience.dataforge.data.DataTree<0:0>(space.kscience.dataforge.data.DataFilter){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/get(kotlin/String): space.kscience.dataforge.data/Data<#A>? // space.kscience.dataforge.data/get|get@space.kscience.dataforge.data.DataTree<0:0>(kotlin.String){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/get(space.kscience.dataforge.names/Name): space.kscience.dataforge.data/Data<#A>? // space.kscience.dataforge.data/get|get@space.kscience.dataforge.data.DataTree<0:0>(space.kscience.dataforge.names.Name){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/walk(space.kscience.dataforge.names/Name = ...): kotlin.sequences/Sequence<kotlin/Pair<space.kscience.dataforge.names/Name, space.kscience.dataforge.data/DataTree<#A>>> // space.kscience.dataforge.data/walk|walk@space.kscience.dataforge.data.DataTree<0:0>(space.kscience.dataforge.names.Name){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTreeBuilder<#A>).space.kscience.dataforge.data/data(space.kscience.dataforge.data/Data<#A>) // space.kscience.dataforge.data/data|data@space.kscience.dataforge.data.DataTreeBuilder<0:0>(space.kscience.dataforge.data.Data<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTreeBuilder<#A>).space.kscience.dataforge.data/node(kotlin/String, kotlin/Function1<space.kscience.dataforge.data/DataTreeBuilder<#A>, kotlin/Unit>) // space.kscience.dataforge.data/node|node@space.kscience.dataforge.data.DataTreeBuilder<0:0>(kotlin.String;kotlin.Function1<space.kscience.dataforge.data.DataTreeBuilder<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTreeBuilder<#A>).space.kscience.dataforge.data/node(kotlin/String, space.kscience.dataforge.data/DataTree<#A>) // space.kscience.dataforge.data/node|node@space.kscience.dataforge.data.DataTreeBuilder<0:0>(kotlin.String;space.kscience.dataforge.data.DataTree<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTreeBuilder<#A>).space.kscience.dataforge.data/node(space.kscience.dataforge.names/Name, kotlin/Function1<space.kscience.dataforge.data/DataTreeBuilder<#A>, kotlin/Unit>) // space.kscience.dataforge.data/node|node@space.kscience.dataforge.data.DataTreeBuilder<0:0>(space.kscience.dataforge.names.Name;kotlin.Function1<space.kscience.dataforge.data.DataTreeBuilder<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTreeBuilder<#A>).space.kscience.dataforge.data/node(space.kscience.dataforge.names/Name, space.kscience.dataforge.data/DataTree<#A>) // space.kscience.dataforge.data/node|node@space.kscience.dataforge.data.DataTreeBuilder<0:0>(space.kscience.dataforge.names.Name;space.kscience.dataforge.data.DataTree<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTreeBuilder<#A>).space.kscience.dataforge.data/observeNode(kotlin/String, kotlinx.coroutines/CoroutineScope, space.kscience.dataforge.data/DataTree<#A>) // space.kscience.dataforge.data/observeNode|observeNode@space.kscience.dataforge.data.DataTreeBuilder<0:0>(kotlin.String;kotlinx.coroutines.CoroutineScope;space.kscience.dataforge.data.DataTree<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTreeBuilder<#A>).space.kscience.dataforge.data/observeNode(space.kscience.dataforge.names/Name, kotlinx.coroutines/CoroutineScope, space.kscience.dataforge.data/DataTree<#A>) // space.kscience.dataforge.data/observeNode|observeNode@space.kscience.dataforge.data.DataTreeBuilder<0:0>(space.kscience.dataforge.names.Name;kotlinx.coroutines.CoroutineScope;space.kscience.dataforge.data.DataTree<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTreeBuilder<#A>).space.kscience.dataforge.data/put(kotlin/String, space.kscience.dataforge.data/Data<#A>) // space.kscience.dataforge.data/put|put@space.kscience.dataforge.data.DataTreeBuilder<0:0>(kotlin.String;space.kscience.dataforge.data.Data<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/MutableDataTree<#A>).space.kscience.dataforge.data/branch(space.kscience.dataforge.names/Name): space.kscience.dataforge.data/MutableDataTree<#A>? // space.kscience.dataforge.data/branch|branch@space.kscience.dataforge.data.MutableDataTree<0:0>(space.kscience.dataforge.names.Name){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.data/ObservableDataSource<#A>).space.kscience.dataforge.data/filterData(space.kscience.dataforge.data/DataFilter): space.kscience.dataforge.data/ObservableDataSource<#A> // space.kscience.dataforge.data/filterData|filterData@space.kscience.dataforge.data.ObservableDataSource<0:0>(space.kscience.dataforge.data.DataFilter){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> space.kscience.dataforge.data/Data(kotlin.reflect/KType, space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., kotlin.collections/Iterable<space.kscience.dataforge.data/Goal<*>> = ..., kotlin.coroutines/SuspendFunction0<#A>): space.kscience.dataforge.data/Data<#A> // space.kscience.dataforge.data/Data|Data(kotlin.reflect.KType;space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.collections.Iterable<space.kscience.dataforge.data.Goal<*>>;kotlin.coroutines.SuspendFunction0<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> space.kscience.dataforge.data/DataBuilderScope(): space.kscience.dataforge.data/DataBuilderScope<#A> // space.kscience.dataforge.data/DataBuilderScope|DataBuilderScope(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> space.kscience.dataforge.data/DataTree(kotlin.reflect/KType, kotlin.collections/Map<space.kscience.dataforge.names/Name, space.kscience.dataforge.data/Data<#A>>): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.data/DataTree|DataTree(kotlin.reflect.KType;kotlin.collections.Map<space.kscience.dataforge.names.Name,space.kscience.dataforge.data.Data<0:0>>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> space.kscience.dataforge.data/DataTree(kotlin.reflect/KType, kotlin/Function1<space.kscience.dataforge.data/DataTreeBuilder<#A>, kotlin/Unit>): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.data/DataTree|DataTree(kotlin.reflect.KType;kotlin.Function1<space.kscience.dataforge.data.DataTreeBuilder<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> space.kscience.dataforge.data/MutableDataTree(kotlin.reflect/KType): space.kscience.dataforge.data/MutableDataTree<#A> // space.kscience.dataforge.data/MutableDataTree|MutableDataTree(kotlin.reflect.KType){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> space.kscience.dataforge.data/NamedData(space.kscience.dataforge.names/Name, space.kscience.dataforge.data/Data<#A>): space.kscience.dataforge.data/NamedData<#A> // space.kscience.dataforge.data/NamedData|NamedData(space.kscience.dataforge.names.Name;space.kscience.dataforge.data.Data<0:0>){0§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: kotlin/Any?, #C: reified kotlin/Any?> (kotlin.collections/Map<#A, space.kscience.dataforge.data/Data<#B>>).space.kscience.dataforge.data/reduceToData(space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., crossinline kotlin.coroutines/SuspendFunction1<kotlin.collections/Map<#A, space.kscience.dataforge.data/ValueWithMeta<#B>>, #C>): space.kscience.dataforge.data/Data<#C> // space.kscience.dataforge.data/reduceToData|reduceToData@kotlin.collections.Map<0:0,space.kscience.dataforge.data.Data<0:1>>(space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<kotlin.collections.Map<0:0,space.kscience.dataforge.data.ValueWithMeta<0:1>>,0:2>){0§<kotlin.Any?>;1§<kotlin.Any?>;2§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: kotlin/Any?, #C: reified kotlin/Any?> (space.kscience.dataforge.data/Data<#A>).space.kscience.dataforge.data/combine(space.kscience.dataforge.data/Data<#B>, space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., crossinline kotlin.coroutines/SuspendFunction2<#A, #B, #C>): space.kscience.dataforge.data/Data<#C> // space.kscience.dataforge.data/combine|combine@space.kscience.dataforge.data.Data<0:0>(space.kscience.dataforge.data.Data<0:1>;space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction2<0:0,0:1,0:2>){0§<kotlin.Any?>;1§<kotlin.Any?>;2§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: kotlin/Any?> (kotlin.collections/Iterable<space.kscience.dataforge.data/Data<#A>>).space.kscience.dataforge.data/reduceToData(kotlin.reflect/KType, space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., crossinline kotlin.coroutines/SuspendFunction1<kotlin.collections/Collection<space.kscience.dataforge.data/ValueWithMeta<#A>>, #B>): space.kscience.dataforge.data/Data<#B> // space.kscience.dataforge.data/reduceToData|reduceToData@kotlin.collections.Iterable<space.kscience.dataforge.data.Data<0:0>>(kotlin.reflect.KType;space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<kotlin.collections.Collection<space.kscience.dataforge.data.ValueWithMeta<0:0>>,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: kotlin/Any?> (kotlin.collections/Iterable<space.kscience.dataforge.data/NamedData<#A>>).space.kscience.dataforge.data/reduceNamedToData(kotlin.reflect/KType, space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., crossinline kotlin.coroutines/SuspendFunction1<kotlin.collections/Collection<space.kscience.dataforge.data/NamedValueWithMeta<#A>>, #B>): space.kscience.dataforge.data/Data<#B> // space.kscience.dataforge.data/reduceNamedToData|reduceNamedToData@kotlin.collections.Iterable<space.kscience.dataforge.data.NamedData<0:0>>(kotlin.reflect.KType;space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<kotlin.collections.Collection<space.kscience.dataforge.data.NamedValueWithMeta<0:0>>,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified #A> (space.kscience.dataforge.data/DataTreeBuilder<#A>).space.kscience.dataforge.data/putValue(kotlin/String, #B, space.kscience.dataforge.meta/Meta = ...) // space.kscience.dataforge.data/putValue|putValue@space.kscience.dataforge.data.DataTreeBuilder<0:0>(kotlin.String;0:1;space.kscience.dataforge.meta.Meta){0§<kotlin.Any?>;1§<0:0>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified #A> (space.kscience.dataforge.data/DataTreeBuilder<#A>).space.kscience.dataforge.data/value(#B, space.kscience.dataforge.meta/Meta = ...) // space.kscience.dataforge.data/value|value@space.kscience.dataforge.data.DataTreeBuilder<0:0>(0:1;space.kscience.dataforge.meta.Meta){0§<kotlin.Any?>;1§<0:0>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any?> (kotlin.collections/Iterable<space.kscience.dataforge.data/Data<#A>>).space.kscience.dataforge.data/foldToData(#B, space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., crossinline kotlin.coroutines/SuspendFunction2<#B, space.kscience.dataforge.data/ValueWithMeta<#A>, #B>): space.kscience.dataforge.data/Data<#B> // space.kscience.dataforge.data/foldToData|foldToData@kotlin.collections.Iterable<space.kscience.dataforge.data.Data<0:0>>(0:1;space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction2<0:1,space.kscience.dataforge.data.ValueWithMeta<0:0>,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any?> (kotlin.collections/Iterable<space.kscience.dataforge.data/Data<#A>>).space.kscience.dataforge.data/reduceToData(space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., crossinline kotlin.coroutines/SuspendFunction1<kotlin.collections/Collection<space.kscience.dataforge.data/ValueWithMeta<#A>>, #B>): space.kscience.dataforge.data/Data<#B> // space.kscience.dataforge.data/reduceToData|reduceToData@kotlin.collections.Iterable<space.kscience.dataforge.data.Data<0:0>>(space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<kotlin.collections.Collection<space.kscience.dataforge.data.ValueWithMeta<0:0>>,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any?> (kotlin.collections/Iterable<space.kscience.dataforge.data/NamedData<#A>>).space.kscience.dataforge.data/foldNamedToData(#B, space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., crossinline kotlin.coroutines/SuspendFunction2<#B, space.kscience.dataforge.data/NamedValueWithMeta<#A>, #B>): space.kscience.dataforge.data/Data<#B> // space.kscience.dataforge.data/foldNamedToData|foldNamedToData@kotlin.collections.Iterable<space.kscience.dataforge.data.NamedData<0:0>>(0:1;space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction2<0:1,space.kscience.dataforge.data.NamedValueWithMeta<0:0>,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any?> (kotlin.collections/Iterable<space.kscience.dataforge.data/NamedData<#A>>).space.kscience.dataforge.data/reduceNamedToData(space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., crossinline kotlin.coroutines/SuspendFunction1<kotlin.collections/Collection<space.kscience.dataforge.data/NamedValueWithMeta<#A>>, #B>): space.kscience.dataforge.data/Data<#B> // space.kscience.dataforge.data/reduceNamedToData|reduceNamedToData@kotlin.collections.Iterable<space.kscience.dataforge.data.NamedData<0:0>>(space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<kotlin.collections.Collection<space.kscience.dataforge.data.NamedValueWithMeta<0:0>>,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any?> (space.kscience.dataforge.actions/Action.Companion).space.kscience.dataforge.actions/mapping(noinline kotlin/Function1<space.kscience.dataforge.actions/MapActionBuilder<#A, #B>, kotlin/Unit>): space.kscience.dataforge.actions/Action<#A, #B> // space.kscience.dataforge.actions/mapping|mapping@space.kscience.dataforge.actions.Action.Companion(kotlin.Function1<space.kscience.dataforge.actions.MapActionBuilder<0:0,0:1>,kotlin.Unit>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any?> (space.kscience.dataforge.actions/Action.Companion).space.kscience.dataforge.actions/splitting(noinline kotlin/Function1<space.kscience.dataforge.actions/SplitBuilder<#A, #B>, kotlin/Unit>): space.kscience.dataforge.actions/Action<#A, #B> // space.kscience.dataforge.actions/splitting|splitting@space.kscience.dataforge.actions.Action.Companion(kotlin.Function1<space.kscience.dataforge.actions.SplitBuilder<0:0,0:1>,kotlin.Unit>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any?> (space.kscience.dataforge.data/Data<#A>).space.kscience.dataforge.data/transform(space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., crossinline kotlin.coroutines/SuspendFunction1<#A, #B>): space.kscience.dataforge.data/Data<#B> // space.kscience.dataforge.data/transform|transform@space.kscience.dataforge.data.Data<0:0>(space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<0:0,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/foldToData(#B, space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., crossinline kotlin.coroutines/SuspendFunction2<#B, space.kscience.dataforge.data/NamedValueWithMeta<#A>, #B>): space.kscience.dataforge.data/Data<#B> // space.kscience.dataforge.data/foldToData|foldToData@space.kscience.dataforge.data.DataTree<0:0>(0:1;space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction2<0:1,space.kscience.dataforge.data.NamedValueWithMeta<0:0>,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/reduceToData(space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., crossinline kotlin.coroutines/SuspendFunction1<kotlin.collections/Iterable<space.kscience.dataforge.data/NamedValueWithMeta<#A>>, #B>): space.kscience.dataforge.data/Data<#B> // space.kscience.dataforge.data/reduceToData|reduceToData@space.kscience.dataforge.data.DataTree<0:0>(space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<kotlin.collections.Iterable<space.kscience.dataforge.data.NamedValueWithMeta<0:0>>,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/transformEach(kotlinx.coroutines/CoroutineScope, noinline kotlin/Function2<space.kscience.dataforge.meta/MutableMeta, space.kscience.dataforge.names/Name, kotlin/Unit> = ..., noinline kotlin.coroutines/SuspendFunction1<space.kscience.dataforge.data/NamedValueWithMeta<#A>, #B>): space.kscience.dataforge.data/DataTree<#B> // space.kscience.dataforge.data/transformEach|transformEach@space.kscience.dataforge.data.DataTree<0:0>(kotlinx.coroutines.CoroutineScope;kotlin.Function2<space.kscience.dataforge.meta.MutableMeta,space.kscience.dataforge.names.Name,kotlin.Unit>;kotlin.coroutines.SuspendFunction1<space.kscience.dataforge.data.NamedValueWithMeta<0:0>,0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?> (space.kscience.dataforge.data/Data<#A>).space.kscience.dataforge.data/withMeta(kotlin/Function1<space.kscience.dataforge.meta/MutableMeta, kotlin/Unit>): space.kscience.dataforge.data/Data<#A> // space.kscience.dataforge.data/withMeta|withMeta@space.kscience.dataforge.data.Data<0:0>(kotlin.Function1<space.kscience.dataforge.meta.MutableMeta,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeAll(kotlin/String, kotlin/Function1<space.kscience.dataforge.data/DataSink<#A>, kotlin/Unit>) // space.kscience.dataforge.data/writeAll|writeAll@space.kscience.dataforge.data.DataSink<0:0>(kotlin.String;kotlin.Function1<space.kscience.dataforge.data.DataSink<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeAll(space.kscience.dataforge.names/Name, kotlin/Function1<space.kscience.dataforge.data/DataSink<#A>, kotlin/Unit>) // space.kscience.dataforge.data/writeAll|writeAll@space.kscience.dataforge.data.DataSink<0:0>(space.kscience.dataforge.names.Name;kotlin.Function1<space.kscience.dataforge.data.DataSink<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataTree<#A>).space.kscience.dataforge.data/forEach(kotlin/Function1<space.kscience.dataforge.data/NamedData<#A>, kotlin/Unit>) // space.kscience.dataforge.data/forEach|forEach@space.kscience.dataforge.data.DataTree<0:0>(kotlin.Function1<space.kscience.dataforge.data.NamedData<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?, #B: reified kotlin/Any?> (space.kscience.dataforge.actions/Action.Companion).space.kscience.dataforge.actions/reducing(noinline kotlin/Function1<space.kscience.dataforge.actions/ReduceGroupBuilder<#A, #B>, kotlin/Unit>): space.kscience.dataforge.actions/Action<#A, #B> // space.kscience.dataforge.actions/reducing|reducing@space.kscience.dataforge.actions.Action.Companion(kotlin.Function1<space.kscience.dataforge.actions.ReduceGroupBuilder<0:0,0:1>,kotlin.Unit>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> (kotlin.collections/Map<space.kscience.dataforge.names/Name, space.kscience.dataforge.data/Data<#A>>).space.kscience.dataforge.data/asTree(): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.data/asTree|asTree@kotlin.collections.Map<space.kscience.dataforge.names.Name,space.kscience.dataforge.data.Data<0:0>>(){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> (kotlin.sequences/Sequence<space.kscience.dataforge.data/NamedData<#A>>).space.kscience.dataforge.data/toTree(): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.data/toTree|toTree@kotlin.sequences.Sequence<space.kscience.dataforge.data.NamedData<0:0>>(){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> space.kscience.dataforge.data/Data(#A, space.kscience.dataforge.meta/Meta = ...): space.kscience.dataforge.data/StaticData<#A> // space.kscience.dataforge.data/Data|Data(0:0;space.kscience.dataforge.meta.Meta){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> space.kscience.dataforge.data/Data(space.kscience.dataforge.meta/Meta = ..., kotlin.coroutines/CoroutineContext = ..., kotlin.collections/Iterable<space.kscience.dataforge.data/Goal<*>> = ..., noinline kotlin.coroutines/SuspendFunction0<#A>): space.kscience.dataforge.data/Data<#A> // space.kscience.dataforge.data/Data|Data(space.kscience.dataforge.meta.Meta;kotlin.coroutines.CoroutineContext;kotlin.collections.Iterable<space.kscience.dataforge.data.Goal<*>>;kotlin.coroutines.SuspendFunction0<0:0>){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> space.kscience.dataforge.data/DataTree(kotlin.collections/Map<space.kscience.dataforge.names/Name, space.kscience.dataforge.data/Data<#A>>): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.data/DataTree|DataTree(kotlin.collections.Map<space.kscience.dataforge.names.Name,space.kscience.dataforge.data.Data<0:0>>){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> space.kscience.dataforge.data/DataTree(noinline kotlin/Function1<space.kscience.dataforge.data/DataTreeBuilder<#A>, kotlin/Unit>): space.kscience.dataforge.data/DataTree<#A> // space.kscience.dataforge.data/DataTree|DataTree(kotlin.Function1<space.kscience.dataforge.data.DataTreeBuilder<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> space.kscience.dataforge.data/MutableDataTree(kotlin/Function1<space.kscience.dataforge.data/MutableDataTree<#A>, kotlin/Unit> = ...): space.kscience.dataforge.data/MutableDataTree<#A> // space.kscience.dataforge.data/MutableDataTree|MutableDataTree(kotlin.Function1<space.kscience.dataforge.data.MutableDataTree<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/Data<#A>).space.kscience.dataforge.data/awaitWithMeta(): space.kscience.dataforge.data/ValueWithMeta<#A> // space.kscience.dataforge.data/awaitWithMeta|awaitWithMeta@space.kscience.dataforge.data.Data<0:0>(){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/write(kotlin/String, space.kscience.dataforge.data/Data<#A>) // space.kscience.dataforge.data/write|write@space.kscience.dataforge.data.DataSink<0:0>(kotlin.String;space.kscience.dataforge.data.Data<0:0>){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/write(space.kscience.dataforge.data/NamedData<#A>) // space.kscience.dataforge.data/write|write@space.kscience.dataforge.data.DataSink<0:0>(space.kscience.dataforge.data.NamedData<0:0>){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeAll(kotlin.collections/Map<space.kscience.dataforge.names/Name, space.kscience.dataforge.data/Data<#A>?>) // space.kscience.dataforge.data/writeAll|writeAll@space.kscience.dataforge.data.DataSink<0:0>(kotlin.collections.Map<space.kscience.dataforge.names.Name,space.kscience.dataforge.data.Data<0:0>?>){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeAll(kotlin.sequences/Sequence<space.kscience.dataforge.data/NamedData<#A>>) // space.kscience.dataforge.data/writeAll|writeAll@space.kscience.dataforge.data.DataSink<0:0>(kotlin.sequences.Sequence<space.kscience.dataforge.data.NamedData<0:0>>){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeAll(kotlin/String, space.kscience.dataforge.data/DataTree<#A>) // space.kscience.dataforge.data/writeAll|writeAll@space.kscience.dataforge.data.DataSink<0:0>(kotlin.String;space.kscience.dataforge.data.DataTree<0:0>){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeAll(space.kscience.dataforge.data/DataTree<#A>, space.kscience.dataforge.names/Name = ...) // space.kscience.dataforge.data/writeAll|writeAll@space.kscience.dataforge.data.DataSink<0:0>(space.kscience.dataforge.data.DataTree<0:0>;space.kscience.dataforge.names.Name){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeAll(space.kscience.dataforge.names/Name, space.kscience.dataforge.data/DataTree<#A>) // space.kscience.dataforge.data/writeAll|writeAll@space.kscience.dataforge.data.DataSink<0:0>(space.kscience.dataforge.names.Name;space.kscience.dataforge.data.DataTree<0:0>){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/Goal<#A>).space.kscience.dataforge.data/await(): #A // space.kscience.dataforge.data/await|await@space.kscience.dataforge.data.Goal<0:0>(){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/NamedData<#A>).space.kscience.dataforge.data/awaitWithMeta(): space.kscience.dataforge.data/NamedValueWithMeta<#A> // space.kscience.dataforge.data/awaitWithMeta|awaitWithMeta@space.kscience.dataforge.data.NamedData<0:0>(){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/ObservableDataSource<#A>).space.kscience.dataforge.data/awaitData(kotlin/String): space.kscience.dataforge.data/Data<#A> // space.kscience.dataforge.data/awaitData|awaitData@space.kscience.dataforge.data.ObservableDataSource<0:0>(kotlin.String){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (space.kscience.dataforge.data/ObservableDataSource<#A>).space.kscience.dataforge.data/awaitData(space.kscience.dataforge.names/Name): space.kscience.dataforge.data/Data<#A> // space.kscience.dataforge.data/awaitData|awaitData@space.kscience.dataforge.data.ObservableDataSource<0:0>(space.kscience.dataforge.names.Name){0§<kotlin.Any?>}[0]
+final suspend inline fun <#A: reified kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeValue(kotlin/String, #A, kotlin/Function1<space.kscience.dataforge.meta/MutableMeta, kotlin/Unit>) // space.kscience.dataforge.data/writeValue|writeValue@space.kscience.dataforge.data.DataSink<0:0>(kotlin.String;0:0;kotlin.Function1<space.kscience.dataforge.meta.MutableMeta,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final suspend inline fun <#A: reified kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeValue(kotlin/String, #A, space.kscience.dataforge.meta/Meta = ...) // space.kscience.dataforge.data/writeValue|writeValue@space.kscience.dataforge.data.DataSink<0:0>(kotlin.String;0:0;space.kscience.dataforge.meta.Meta){0§<kotlin.Any?>}[0]
+final suspend inline fun <#A: reified kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeValue(kotlin/String, space.kscience.dataforge.meta/Meta = ..., noinline kotlin.coroutines/SuspendFunction0<#A>) // space.kscience.dataforge.data/writeValue|writeValue@space.kscience.dataforge.data.DataSink<0:0>(kotlin.String;space.kscience.dataforge.meta.Meta;kotlin.coroutines.SuspendFunction0<0:0>){0§<kotlin.Any?>}[0]
+final suspend inline fun <#A: reified kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeValue(space.kscience.dataforge.names/Name, #A, space.kscience.dataforge.meta/Meta = ...) // space.kscience.dataforge.data/writeValue|writeValue@space.kscience.dataforge.data.DataSink<0:0>(space.kscience.dataforge.names.Name;0:0;space.kscience.dataforge.meta.Meta){0§<kotlin.Any?>}[0]
+final suspend inline fun <#A: reified kotlin/Any?> (space.kscience.dataforge.data/DataSink<#A>).space.kscience.dataforge.data/writeValue(space.kscience.dataforge.names/Name, space.kscience.dataforge.meta/Meta = ..., noinline kotlin.coroutines/SuspendFunction0<#A>) // space.kscience.dataforge.data/writeValue|writeValue@space.kscience.dataforge.data.DataSink<0:0>(space.kscience.dataforge.names.Name;space.kscience.dataforge.meta.Meta;kotlin.coroutines.SuspendFunction0<0:0>){0§<kotlin.Any?>}[0]

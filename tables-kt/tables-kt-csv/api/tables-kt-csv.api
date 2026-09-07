@@ -1,0 +1,27 @@
+public final class space/kscience/tables/csv/CsvFileJvmKt {
+	public static final fun readCsv (Lspace/kscience/tables/Table$Companion;Ljava/nio/file/Path;Lkotlin/jvm/functions/Function1;)Lspace/kscience/tables/Table;
+	public static synthetic fun readCsv$default (Lspace/kscience/tables/Table$Companion;Ljava/nio/file/Path;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/tables/Table;
+	public static final fun readCsvRows (Lspace/kscience/tables/Table$Companion;Ljava/nio/file/Path;Lkotlin/jvm/functions/Function1;)Lspace/kscience/tables/Rows;
+	public static synthetic fun readCsvRows$default (Lspace/kscience/tables/Table$Companion;Ljava/nio/file/Path;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/tables/Rows;
+	public static final fun writeCsvFile (Lspace/kscience/tables/Table$Companion;Ljava/nio/file/Path;Lspace/kscience/tables/Table;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun writeCsvFile$default (Lspace/kscience/tables/Table$Companion;Ljava/nio/file/Path;Lspace/kscience/tables/Table;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public final class space/kscience/tables/csv/CsvFormats {
+	public static final field INSTANCE Lspace/kscience/tables/csv/CsvFormats;
+	public final fun getTsvReader ()Lkotlin/jvm/functions/Function1;
+	public final fun getTsvWriter ()Lkotlin/jvm/functions/Function1;
+}
+
+public final class space/kscience/tables/csv/CsvStringJvmKt {
+	public static final fun readCsv (Lspace/kscience/tables/Table$Companion;Ljava/net/URL;Lkotlin/jvm/functions/Function1;)Lspace/kscience/tables/Table;
+	public static synthetic fun readCsv$default (Lspace/kscience/tables/Table$Companion;Ljava/net/URL;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/tables/Table;
+	public static final fun writeCsvString (Lspace/kscience/tables/Table$Companion;Lspace/kscience/tables/Table;Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
+	public static synthetic fun writeCsvString$default (Lspace/kscience/tables/Table$Companion;Lspace/kscience/tables/Table;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class space/kscience/tables/csv/CsvStringKt {
+	public static final fun readCsvString (Lspace/kscience/tables/Table$Companion;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lspace/kscience/tables/Table;
+	public static synthetic fun readCsvString$default (Lspace/kscience/tables/Table$Companion;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/tables/Table;
+}
+

@@ -1,66 +1,63 @@
-public final class hep/dataforge/io/yaml/FrontMatterEnvelopeFormat : hep/dataforge/io/EnvelopeFormat {
-	public static final field Companion Lhep/dataforge/io/yaml/FrontMatterEnvelopeFormat$Companion;
-	public static final field SEPARATOR Ljava/lang/String;
-	public fun <init> (Lhep/dataforge/io/IOPlugin;Lhep/dataforge/meta/Meta;)V
-	public synthetic fun <init> (Lhep/dataforge/io/IOPlugin;Lhep/dataforge/meta/Meta;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getDefaultMetaFormat ()Lhep/dataforge/io/MetaFormatFactory;
-	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/io/Envelope;
-	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
-	public fun readPartial (Lkotlinx/io/Input;)Lhep/dataforge/io/PartialEnvelope;
-	public fun toMeta ()Lhep/dataforge/meta/Meta;
-	public fun writeEnvelope (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/Meta;)V
-	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;)V
-	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+public final class space/kscience/dataforge/io/yaml/FrontMatterEnvelopeFormat : space/kscience/dataforge/io/EnvelopeFormat {
+	public static final field Companion Lspace/kscience/dataforge/io/yaml/FrontMatterEnvelopeFormat$Companion;
+	public fun <init> (Lspace/kscience/dataforge/io/IOPlugin;Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/io/MetaFormatFactory;)V
+	public synthetic fun <init> (Lspace/kscience/dataforge/io/IOPlugin;Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/io/MetaFormatFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun readFrom (Lkotlinx/io/Source;)Ljava/lang/Object;
+	public fun readFrom (Lkotlinx/io/Source;)Lspace/kscience/dataforge/io/Envelope;
+	public synthetic fun readFrom (Lspace/kscience/dataforge/io/Binary;)Ljava/lang/Object;
+	public fun readFrom (Lspace/kscience/dataforge/io/Binary;)Lspace/kscience/dataforge/io/Envelope;
+	public synthetic fun writeTo (Lkotlinx/io/Sink;Ljava/lang/Object;)V
+	public fun writeTo (Lkotlinx/io/Sink;Lspace/kscience/dataforge/io/Envelope;)V
 }
 
-public final class hep/dataforge/io/yaml/FrontMatterEnvelopeFormat$Companion : hep/dataforge/io/EnvelopeFormatFactory {
-	public fun getDefaultMetaFormat ()Lhep/dataforge/io/MetaFormatFactory;
-	public fun getName ()Lhep/dataforge/names/Name;
-	public fun getType ()Lkotlin/reflect/KClass;
-	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/EnvelopeFormat;
-	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
-	public fun peekFormat (Lhep/dataforge/io/IOPlugin;Lkotlinx/io/Input;)Lhep/dataforge/io/EnvelopeFormat;
-	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/io/Envelope;
-	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
-	public fun readPartial (Lkotlinx/io/Input;)Lhep/dataforge/io/PartialEnvelope;
-	public fun toMeta ()Lhep/dataforge/meta/Meta;
-	public fun writeEnvelope (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;Lhep/dataforge/io/MetaFormatFactory;Lhep/dataforge/meta/Meta;)V
-	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/io/Envelope;)V
-	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+public final class space/kscience/dataforge/io/yaml/FrontMatterEnvelopeFormat$Companion : space/kscience/dataforge/io/EnvelopeFormatFactory {
+	public synthetic fun build (Lspace/kscience/dataforge/context/Context;Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Object;
+	public fun build (Lspace/kscience/dataforge/context/Context;Lspace/kscience/dataforge/meta/Meta;)Lspace/kscience/dataforge/io/EnvelopeFormat;
+	public fun getName ()Lspace/kscience/dataforge/names/Name;
+	public final fun getSEPARATOR ()Lkotlinx/io/bytestring/ByteString;
+	public fun peekFormat (Lspace/kscience/dataforge/io/IOPlugin;Lspace/kscience/dataforge/io/Binary;)Lspace/kscience/dataforge/io/EnvelopeFormat;
+	public synthetic fun readFrom (Lkotlinx/io/Source;)Ljava/lang/Object;
+	public fun readFrom (Lkotlinx/io/Source;)Lspace/kscience/dataforge/io/Envelope;
+	public synthetic fun readFrom (Lspace/kscience/dataforge/io/Binary;)Ljava/lang/Object;
+	public fun readFrom (Lspace/kscience/dataforge/io/Binary;)Lspace/kscience/dataforge/io/Envelope;
+	public synthetic fun writeTo (Lkotlinx/io/Sink;Ljava/lang/Object;)V
+	public fun writeTo (Lkotlinx/io/Sink;Lspace/kscience/dataforge/io/Envelope;)V
 }
 
-public final class hep/dataforge/io/yaml/YamlMetaFormat : hep/dataforge/io/MetaFormat {
-	public static final field Companion Lhep/dataforge/io/yaml/YamlMetaFormat$Companion;
-	public fun <init> (Lhep/dataforge/meta/Meta;)V
-	public fun readMeta (Lkotlinx/io/Input;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Meta;
-	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/meta/Meta;
-	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
-	public fun toMeta ()Lhep/dataforge/meta/Meta;
-	public fun writeMeta (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
-	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;)V
-	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+public final class space/kscience/dataforge/io/yaml/YamlMetaFormat : space/kscience/dataforge/io/MetaFormat {
+	public static final field Companion Lspace/kscience/dataforge/io/yaml/YamlMetaFormat$Companion;
+	public fun <init> (Lspace/kscience/dataforge/meta/Meta;)V
+	public fun readMeta (Lkotlinx/io/Source;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lspace/kscience/dataforge/meta/Meta;
+	public fun writeMeta (Lkotlinx/io/Sink;Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)V
 }
 
-public final class hep/dataforge/io/yaml/YamlMetaFormat$Companion : hep/dataforge/io/MetaFormatFactory {
+public final class space/kscience/dataforge/io/yaml/YamlMetaFormat$Companion : space/kscience/dataforge/io/MetaFormatFactory {
+	public synthetic fun build (Lspace/kscience/dataforge/context/Context;Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Object;
+	public fun build (Lspace/kscience/dataforge/context/Context;Lspace/kscience/dataforge/meta/Meta;)Lspace/kscience/dataforge/io/MetaFormat;
 	public fun getKey ()S
-	public fun getName ()Lhep/dataforge/names/Name;
 	public fun getShortName ()Ljava/lang/String;
-	public fun getType ()Lkotlin/reflect/KClass;
-	public fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Lhep/dataforge/io/MetaFormat;
-	public synthetic fun invoke (Lhep/dataforge/meta/Meta;Lhep/dataforge/context/Context;)Ljava/lang/Object;
-	public fun readMeta (Lkotlinx/io/Input;Lhep/dataforge/meta/descriptors/NodeDescriptor;)Lhep/dataforge/meta/Meta;
-	public fun readObject (Lkotlinx/io/Input;)Lhep/dataforge/meta/Meta;
-	public synthetic fun readObject (Lkotlinx/io/Input;)Ljava/lang/Object;
-	public fun toMeta ()Lhep/dataforge/meta/Meta;
-	public fun writeMeta (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;Lhep/dataforge/meta/descriptors/NodeDescriptor;)V
-	public fun writeObject (Lkotlinx/io/Output;Lhep/dataforge/meta/Meta;)V
-	public synthetic fun writeObject (Lkotlinx/io/Output;Ljava/lang/Object;)V
+	public fun readMeta (Lkotlinx/io/Source;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lspace/kscience/dataforge/meta/Meta;
+	public fun writeMeta (Lkotlinx/io/Sink;Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)V
 }
 
-public final class hep/dataforge/io/yaml/YamlMetaFormatKt {
-	public static final fun toMeta (Lnet/mamoe/yamlkt/YamlMap;)Lhep/dataforge/meta/Meta;
-	public static final fun toMetaItem (Lnet/mamoe/yamlkt/YamlElement;Lhep/dataforge/meta/descriptors/ItemDescriptor;)Lhep/dataforge/meta/TypedMetaItem;
-	public static synthetic fun toMetaItem$default (Lnet/mamoe/yamlkt/YamlElement;Lhep/dataforge/meta/descriptors/ItemDescriptor;ILjava/lang/Object;)Lhep/dataforge/meta/TypedMetaItem;
-	public static final fun toYaml (Lhep/dataforge/meta/Meta;)Lnet/mamoe/yamlkt/YamlMap;
+public final class space/kscience/dataforge/io/yaml/YamlMetaFormatKt {
+	public static final fun toMeta (Lnet/mamoe/yamlkt/YamlElement;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lspace/kscience/dataforge/meta/Meta;
+	public static final fun toMeta (Lnet/mamoe/yamlkt/YamlMap;)Lspace/kscience/dataforge/meta/Meta;
+	public static synthetic fun toMeta$default (Lnet/mamoe/yamlkt/YamlElement;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/Meta;
+	public static final fun toYaml (Lspace/kscience/dataforge/meta/Meta;)Lnet/mamoe/yamlkt/YamlMap;
+}
+
+public final class space/kscience/dataforge/io/yaml/YamlPlugin : space/kscience/dataforge/context/AbstractPlugin {
+	public static final field Companion Lspace/kscience/dataforge/io/yaml/YamlPlugin$Companion;
+	public fun <init> (Lspace/kscience/dataforge/meta/Meta;)V
+	public fun content (Ljava/lang/String;)Ljava/util/Map;
+	public final fun getIo ()Lspace/kscience/dataforge/io/IOPlugin;
+	public fun getTag ()Lspace/kscience/dataforge/context/PluginTag;
+}
+
+public final class space/kscience/dataforge/io/yaml/YamlPlugin$Companion : space/kscience/dataforge/context/PluginFactory {
+	public synthetic fun build (Lspace/kscience/dataforge/context/Context;Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Object;
+	public fun build (Lspace/kscience/dataforge/context/Context;Lspace/kscience/dataforge/meta/Meta;)Lspace/kscience/dataforge/io/yaml/YamlPlugin;
+	public fun getTag ()Lspace/kscience/dataforge/context/PluginTag;
 }
 

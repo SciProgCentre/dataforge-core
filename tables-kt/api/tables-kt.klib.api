@@ -1,0 +1,396 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxX64, macosArm64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <space.kscience:tables-kt>
+abstract interface <#A: kotlin/Any?> space.kscience.tables.io/RowsEnvelopeConverter { // space.kscience.tables.io/RowsEnvelopeConverter|null[0]
+    abstract fun readRows(space.kscience.dataforge.io/Envelope): space.kscience.tables/Rows<#A> // space.kscience.tables.io/RowsEnvelopeConverter.readRows|readRows(space.kscience.dataforge.io.Envelope){}[0]
+    abstract fun writeRows(space.kscience.tables/Rows<#A>): space.kscience.dataforge.io/Envelope // space.kscience.tables.io/RowsEnvelopeConverter.writeRows|writeRows(space.kscience.tables.Rows<1:0>){}[0]
+}
+
+abstract interface <#A: kotlin/Any?> space.kscience.tables/MutableTable : space.kscience.tables/Table<#A> { // space.kscience.tables/MutableTable|null[0]
+    abstract fun set(kotlin/Int, kotlin/String, #A?) // space.kscience.tables/MutableTable.set|set(kotlin.Int;kotlin.String;1:0?){}[0]
+}
+
+abstract interface <#A: out kotlin/Any?> space.kscience.tables/Column : space.kscience.tables/ColumnHeader<#A> { // space.kscience.tables/Column|null[0]
+    abstract val size // space.kscience.tables/Column.size|{}size[0]
+        abstract fun <get-size>(): kotlin/Int // space.kscience.tables/Column.size.<get-size>|<get-size>(){}[0]
+
+    abstract fun getOrNull(kotlin/Int): #A? // space.kscience.tables/Column.getOrNull|getOrNull(kotlin.Int){}[0]
+}
+
+abstract interface <#A: out kotlin/Any?> space.kscience.tables/ColumnHeader { // space.kscience.tables/ColumnHeader|null[0]
+    abstract val meta // space.kscience.tables/ColumnHeader.meta|{}meta[0]
+        abstract fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.tables/ColumnHeader.meta.<get-meta>|<get-meta>(){}[0]
+    abstract val name // space.kscience.tables/ColumnHeader.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String // space.kscience.tables/ColumnHeader.name.<get-name>|<get-name>(){}[0]
+    abstract val type // space.kscience.tables/ColumnHeader.type|{}type[0]
+        abstract fun <get-type>(): kotlin.reflect/KType // space.kscience.tables/ColumnHeader.type.<get-type>|<get-type>(){}[0]
+
+    final object Companion { // space.kscience.tables/ColumnHeader.Companion|null[0]
+        final fun value(space.kscience.dataforge.meta/ValueType = ..., kotlin/Function1<space.kscience.tables/ValueColumnScheme, kotlin/Unit> = ...): kotlin.properties/ReadOnlyProperty<kotlin/Any?, space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value>> // space.kscience.tables/ColumnHeader.Companion.value|value(space.kscience.dataforge.meta.ValueType;kotlin.Function1<space.kscience.tables.ValueColumnScheme,kotlin.Unit>){}[0]
+        final inline fun <#A2: reified kotlin/Any?> typed(crossinline kotlin/Function1<space.kscience.tables/ColumnScheme, kotlin/Unit> = ...): kotlin.properties/ReadOnlyProperty<kotlin/Any?, space.kscience.tables/ColumnHeader<#A2>> // space.kscience.tables/ColumnHeader.Companion.typed|typed(kotlin.Function1<space.kscience.tables.ColumnScheme,kotlin.Unit>){0§<kotlin.Any?>}[0]
+    }
+}
+
+abstract interface <#A: out kotlin/Any?> space.kscience.tables/Row { // space.kscience.tables/Row|null[0]
+    abstract fun getOrNull(kotlin/String): #A? // space.kscience.tables/Row.getOrNull|getOrNull(kotlin.String){}[0]
+}
+
+abstract interface <#A: out kotlin/Any?> space.kscience.tables/Rows { // space.kscience.tables/Rows|null[0]
+    abstract val headers // space.kscience.tables/Rows.headers|{}headers[0]
+        abstract fun <get-headers>(): kotlin.collections/List<space.kscience.tables/ColumnHeader<#A>> // space.kscience.tables/Rows.headers.<get-headers>|<get-headers>(){}[0]
+
+    abstract fun rowSequence(): kotlin.sequences/Sequence<space.kscience.tables/Row<#A>> // space.kscience.tables/Rows.rowSequence|rowSequence(){}[0]
+}
+
+abstract interface <#A: out kotlin/Any?> space.kscience.tables/Table : space.kscience.tables/Rows<#A> { // space.kscience.tables/Table|null[0]
+    abstract val columns // space.kscience.tables/Table.columns|{}columns[0]
+        abstract fun <get-columns>(): kotlin.collections/Collection<space.kscience.tables/Column<#A>> // space.kscience.tables/Table.columns.<get-columns>|<get-columns>(){}[0]
+    abstract val rows // space.kscience.tables/Table.rows|{}rows[0]
+        abstract fun <get-rows>(): kotlin.collections/List<space.kscience.tables/Row<#A>> // space.kscience.tables/Table.rows.<get-rows>|<get-rows>(){}[0]
+    open val headers // space.kscience.tables/Table.headers|{}headers[0]
+        open fun <get-headers>(): kotlin.collections/List<space.kscience.tables/ColumnHeader<#A>> // space.kscience.tables/Table.headers.<get-headers>|<get-headers>(){}[0]
+
+    abstract fun getOrNull(kotlin/Int, kotlin/String): #A? // space.kscience.tables/Table.getOrNull|getOrNull(kotlin.Int;kotlin.String){}[0]
+    open fun rowSequence(): kotlin.sequences/Sequence<space.kscience.tables/Row<#A>> // space.kscience.tables/Table.rowSequence|rowSequence(){}[0]
+
+    final object Companion // space.kscience.tables/Table.Companion|null[0]
+}
+
+final class <#A: kotlin/Any?, #B: kotlin/Any?> space.kscience.tables/CachedTransformationColumn : space.kscience.tables/Column<#B> { // space.kscience.tables/CachedTransformationColumn|null[0]
+    constructor <init>(space.kscience.tables/Table<#A>, kotlin.reflect/KType, kotlin/String, space.kscience.dataforge.meta/Meta, kotlin/Function1<space.kscience.tables/Row<#A>, #B?>) // space.kscience.tables/CachedTransformationColumn.<init>|<init>(space.kscience.tables.Table<1:0>;kotlin.reflect.KType;kotlin.String;space.kscience.dataforge.meta.Meta;kotlin.Function1<space.kscience.tables.Row<1:0>,1:1?>){}[0]
+
+    final val mapper // space.kscience.tables/CachedTransformationColumn.mapper|{}mapper[0]
+        final fun <get-mapper>(): kotlin/Function1<space.kscience.tables/Row<#A>, #B?> // space.kscience.tables/CachedTransformationColumn.mapper.<get-mapper>|<get-mapper>(){}[0]
+    final val meta // space.kscience.tables/CachedTransformationColumn.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.tables/CachedTransformationColumn.meta.<get-meta>|<get-meta>(){}[0]
+    final val name // space.kscience.tables/CachedTransformationColumn.name|{}name[0]
+        final fun <get-name>(): kotlin/String // space.kscience.tables/CachedTransformationColumn.name.<get-name>|<get-name>(){}[0]
+    final val size // space.kscience.tables/CachedTransformationColumn.size|{}size[0]
+        final fun <get-size>(): kotlin/Int // space.kscience.tables/CachedTransformationColumn.size.<get-size>|<get-size>(){}[0]
+    final val table // space.kscience.tables/CachedTransformationColumn.table|{}table[0]
+        final fun <get-table>(): space.kscience.tables/Table<#A> // space.kscience.tables/CachedTransformationColumn.table.<get-table>|<get-table>(){}[0]
+    final val type // space.kscience.tables/CachedTransformationColumn.type|{}type[0]
+        final fun <get-type>(): kotlin.reflect/KType // space.kscience.tables/CachedTransformationColumn.type.<get-type>|<get-type>(){}[0]
+
+    final fun getOrNull(kotlin/Int): #B? // space.kscience.tables/CachedTransformationColumn.getOrNull|getOrNull(kotlin.Int){}[0]
+}
+
+final class <#A: kotlin/Any?, #B: kotlin/Any?> space.kscience.tables/TransformationColumn : space.kscience.tables/Column<#B> { // space.kscience.tables/TransformationColumn|null[0]
+    constructor <init>(space.kscience.tables/Table<#A>, kotlin.reflect/KType, kotlin/String, space.kscience.dataforge.meta/Meta, kotlin/Function1<space.kscience.tables/Row<#A>, #B?>) // space.kscience.tables/TransformationColumn.<init>|<init>(space.kscience.tables.Table<1:0>;kotlin.reflect.KType;kotlin.String;space.kscience.dataforge.meta.Meta;kotlin.Function1<space.kscience.tables.Row<1:0>,1:1?>){}[0]
+
+    final val mapper // space.kscience.tables/TransformationColumn.mapper|{}mapper[0]
+        final fun <get-mapper>(): kotlin/Function1<space.kscience.tables/Row<#A>, #B?> // space.kscience.tables/TransformationColumn.mapper.<get-mapper>|<get-mapper>(){}[0]
+    final val meta // space.kscience.tables/TransformationColumn.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.tables/TransformationColumn.meta.<get-meta>|<get-meta>(){}[0]
+    final val name // space.kscience.tables/TransformationColumn.name|{}name[0]
+        final fun <get-name>(): kotlin/String // space.kscience.tables/TransformationColumn.name.<get-name>|<get-name>(){}[0]
+    final val size // space.kscience.tables/TransformationColumn.size|{}size[0]
+        final fun <get-size>(): kotlin/Int // space.kscience.tables/TransformationColumn.size.<get-size>|<get-size>(){}[0]
+    final val table // space.kscience.tables/TransformationColumn.table|{}table[0]
+        final fun <get-table>(): space.kscience.tables/Table<#A> // space.kscience.tables/TransformationColumn.table.<get-table>|<get-table>(){}[0]
+    final val type // space.kscience.tables/TransformationColumn.type|{}type[0]
+        final fun <get-type>(): kotlin.reflect/KType // space.kscience.tables/TransformationColumn.type.<get-type>|<get-type>(){}[0]
+
+    final fun getOrNull(kotlin/Int): #B? // space.kscience.tables/TransformationColumn.getOrNull|getOrNull(kotlin.Int){}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.tables/ColumnTableBuilder : space.kscience.tables/ColumnTable<#A> { // space.kscience.tables/ColumnTableBuilder|null[0]
+    constructor <init>(kotlin/Int, kotlin.collections/MutableList<space.kscience.tables/Column<#A>> = ...) // space.kscience.tables/ColumnTableBuilder.<init>|<init>(kotlin.Int;kotlin.collections.MutableList<space.kscience.tables.Column<1:0>>){}[0]
+
+    final val rows // space.kscience.tables/ColumnTableBuilder.rows|{}rows[0]
+        final fun <get-rows>(): kotlin.collections/List<space.kscience.tables/Row<#A>> // space.kscience.tables/ColumnTableBuilder.rows.<get-rows>|<get-rows>(){}[0]
+    final val rowsSize // space.kscience.tables/ColumnTableBuilder.rowsSize|{}rowsSize[0]
+        final fun <get-rowsSize>(): kotlin/Int // space.kscience.tables/ColumnTableBuilder.rowsSize.<get-rowsSize>|<get-rowsSize>(){}[0]
+
+    final var values // space.kscience.tables/ColumnTableBuilder.values|@space.kscience.tables.ColumnHeader<0:0>{0§<1:0>}values[0]
+        final fun <#A2: #A> (space.kscience.tables/ColumnHeader<#A2>).<get-values>(): kotlin.collections/Collection<#A2?> // space.kscience.tables/ColumnTableBuilder.values.<get-values>|<get-values>@space.kscience.tables.ColumnHeader<0:0>(){0§<1:0>}[0]
+        final fun <#A2: #A> (space.kscience.tables/ColumnHeader<#A2>).<set-values>(kotlin.collections/Collection<#A2?>) // space.kscience.tables/ColumnTableBuilder.values.<set-values>|<set-values>@space.kscience.tables.ColumnHeader<0:0>(kotlin.collections.Collection<0:0?>){0§<1:0>}[0]
+
+    final fun addColumn(space.kscience.tables/Column<#A>, kotlin/Int? = ...) // space.kscience.tables/ColumnTableBuilder.addColumn|addColumn(space.kscience.tables.Column<1:0>;kotlin.Int?){}[0]
+    final fun getOrNull(kotlin/Int, kotlin/String): #A? // space.kscience.tables/ColumnTableBuilder.getOrNull|getOrNull(kotlin.Int;kotlin.String){}[0]
+    final fun removeColumn(kotlin/String) // space.kscience.tables/ColumnTableBuilder.removeColumn|removeColumn(kotlin.String){}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.tables/ListColumn : space.kscience.tables/Column<#A> { // space.kscience.tables/ListColumn|null[0]
+    constructor <init>(kotlin/String, kotlin.collections/List<#A?>, kotlin.reflect/KType, space.kscience.dataforge.meta/Meta) // space.kscience.tables/ListColumn.<init>|<init>(kotlin.String;kotlin.collections.List<1:0?>;kotlin.reflect.KType;space.kscience.dataforge.meta.Meta){}[0]
+
+    final val data // space.kscience.tables/ListColumn.data|{}data[0]
+        final fun <get-data>(): kotlin.collections/List<#A?> // space.kscience.tables/ListColumn.data.<get-data>|<get-data>(){}[0]
+    final val meta // space.kscience.tables/ListColumn.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.tables/ListColumn.meta.<get-meta>|<get-meta>(){}[0]
+    final val name // space.kscience.tables/ListColumn.name|{}name[0]
+        final fun <get-name>(): kotlin/String // space.kscience.tables/ListColumn.name.<get-name>|<get-name>(){}[0]
+    final val size // space.kscience.tables/ListColumn.size|{}size[0]
+        final fun <get-size>(): kotlin/Int // space.kscience.tables/ListColumn.size.<get-size>|<get-size>(){}[0]
+    final val type // space.kscience.tables/ListColumn.type|{}type[0]
+        final fun <get-type>(): kotlin.reflect/KType // space.kscience.tables/ListColumn.type.<get-type>|<get-type>(){}[0]
+
+    final fun getOrNull(kotlin/Int): #A? // space.kscience.tables/ListColumn.getOrNull|getOrNull(kotlin.Int){}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.tables/RowTableBuilder : space.kscience.tables/RowTable<#A> { // space.kscience.tables/RowTableBuilder|null[0]
+    constructor <init>(kotlin.collections/MutableList<space.kscience.tables/Row<#A>>, kotlin.collections/MutableList<space.kscience.tables/ColumnHeader<#A>>) // space.kscience.tables/RowTableBuilder.<init>|<init>(kotlin.collections.MutableList<space.kscience.tables.Row<1:0>>;kotlin.collections.MutableList<space.kscience.tables.ColumnHeader<1:0>>){}[0]
+
+    final val headers // space.kscience.tables/RowTableBuilder.headers|{}headers[0]
+        final fun <get-headers>(): kotlin.collections/MutableList<space.kscience.tables/ColumnHeader<#A>> // space.kscience.tables/RowTableBuilder.headers.<get-headers>|<get-headers>(){}[0]
+    final val rows // space.kscience.tables/RowTableBuilder.rows|{}rows[0]
+        final fun <get-rows>(): kotlin.collections/MutableList<space.kscience.tables/Row<#A>> // space.kscience.tables/RowTableBuilder.rows.<get-rows>|<get-rows>(){}[0]
+
+    final fun <#A1: #A> addColumn(space.kscience.tables/ColumnHeader<#A>) // space.kscience.tables/RowTableBuilder.addColumn|addColumn(space.kscience.tables.ColumnHeader<1:0>){0§<1:0>}[0]
+    final fun <#A1: #A> newColumn(kotlin/String, kotlin.reflect/KType, space.kscience.dataforge.meta/Meta, kotlin/Int?): space.kscience.tables/ColumnHeader<#A1> // space.kscience.tables/RowTableBuilder.newColumn|newColumn(kotlin.String;kotlin.reflect.KType;space.kscience.dataforge.meta.Meta;kotlin.Int?){0§<1:0>}[0]
+    final fun <#A1: #A> row(kotlin/Array<out kotlin/Pair<space.kscience.tables/ColumnHeader<#A1>, #A1>>...): space.kscience.tables/Row<#A> // space.kscience.tables/RowTableBuilder.row|row(kotlin.Array<out|kotlin.Pair<space.kscience.tables.ColumnHeader<0:0>,0:0>>...){0§<1:0>}[0]
+    final fun addRow(space.kscience.tables/Row<#A>): space.kscience.tables/Row<#A> // space.kscience.tables/RowTableBuilder.addRow|addRow(space.kscience.tables.Row<1:0>){}[0]
+    final fun row(kotlin.collections/Map<kotlin/String, #A?>): space.kscience.tables/Row<#A> // space.kscience.tables/RowTableBuilder.row|row(kotlin.collections.Map<kotlin.String,1:0?>){}[0]
+    final inline fun <#A1: reified #A> column(kotlin/Int? = ..., noinline kotlin/Function1<space.kscience.tables/ColumnScheme, kotlin/Unit> = ...): kotlin.properties/PropertyDelegateProvider<kotlin/Any?, kotlin.properties/ReadOnlyProperty<kotlin/Any?, space.kscience.tables/ColumnHeader<#A1>>> // space.kscience.tables/RowTableBuilder.column|column(kotlin.Int?;kotlin.Function1<space.kscience.tables.ColumnScheme,kotlin.Unit>){0§<1:0>}[0]
+    final inline fun <#A1: reified #A> newColumn(kotlin/String, kotlin/Int? = ..., noinline kotlin/Function1<space.kscience.tables/ColumnScheme, kotlin/Unit> = ...): space.kscience.tables/ColumnHeader<#A1> // space.kscience.tables/RowTableBuilder.newColumn|newColumn(kotlin.String;kotlin.Int?;kotlin.Function1<space.kscience.tables.ColumnScheme,kotlin.Unit>){0§<1:0>}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.tables/SimpleColumnHeader : space.kscience.tables/ColumnHeader<#A> { // space.kscience.tables/SimpleColumnHeader|null[0]
+    constructor <init>(kotlin/String, kotlin.reflect/KType, space.kscience.dataforge.meta/Meta) // space.kscience.tables/SimpleColumnHeader.<init>|<init>(kotlin.String;kotlin.reflect.KType;space.kscience.dataforge.meta.Meta){}[0]
+
+    final val meta // space.kscience.tables/SimpleColumnHeader.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.tables/SimpleColumnHeader.meta.<get-meta>|<get-meta>(){}[0]
+    final val name // space.kscience.tables/SimpleColumnHeader.name|{}name[0]
+        final fun <get-name>(): kotlin/String // space.kscience.tables/SimpleColumnHeader.name.<get-name>|<get-name>(){}[0]
+    final val type // space.kscience.tables/SimpleColumnHeader.type|{}type[0]
+        final fun <get-type>(): kotlin.reflect/KType // space.kscience.tables/SimpleColumnHeader.type.<get-type>|<get-type>(){}[0]
+
+    final fun component1(): kotlin/String // space.kscience.tables/SimpleColumnHeader.component1|component1(){}[0]
+    final fun component2(): kotlin.reflect/KType // space.kscience.tables/SimpleColumnHeader.component2|component2(){}[0]
+    final fun component3(): space.kscience.dataforge.meta/Meta // space.kscience.tables/SimpleColumnHeader.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.reflect/KType = ..., space.kscience.dataforge.meta/Meta = ...): space.kscience.tables/SimpleColumnHeader<#A> // space.kscience.tables/SimpleColumnHeader.copy|copy(kotlin.String;kotlin.reflect.KType;space.kscience.dataforge.meta.Meta){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.tables/SimpleColumnHeader.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.tables/SimpleColumnHeader.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // space.kscience.tables/SimpleColumnHeader.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.tables/SpreadSheetCell { // space.kscience.tables/SpreadSheetCell|null[0]
+    constructor <init>(kotlin/Int, kotlin/String, #A) // space.kscience.tables/SpreadSheetCell.<init>|<init>(kotlin.Int;kotlin.String;1:0){}[0]
+
+    final val column // space.kscience.tables/SpreadSheetCell.column|{}column[0]
+        final fun <get-column>(): kotlin/String // space.kscience.tables/SpreadSheetCell.column.<get-column>|<get-column>(){}[0]
+    final val id // space.kscience.tables/SpreadSheetCell.id|{}id[0]
+        final fun <get-id>(): kotlin/String // space.kscience.tables/SpreadSheetCell.id.<get-id>|<get-id>(){}[0]
+    final val row // space.kscience.tables/SpreadSheetCell.row|{}row[0]
+        final fun <get-row>(): kotlin/Int // space.kscience.tables/SpreadSheetCell.row.<get-row>|<get-row>(){}[0]
+    final val value // space.kscience.tables/SpreadSheetCell.value|{}value[0]
+        final fun <get-value>(): #A // space.kscience.tables/SpreadSheetCell.value.<get-value>|<get-value>(){}[0]
+
+    final fun component1(): kotlin/Int // space.kscience.tables/SpreadSheetCell.component1|component1(){}[0]
+    final fun component2(): kotlin/String // space.kscience.tables/SpreadSheetCell.component2|component2(){}[0]
+    final fun component3(): #A // space.kscience.tables/SpreadSheetCell.component3|component3(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/String = ..., #A = ...): space.kscience.tables/SpreadSheetCell<#A> // space.kscience.tables/SpreadSheetCell.copy|copy(kotlin.Int;kotlin.String;1:0){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.tables/SpreadSheetCell.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.tables/SpreadSheetCell.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // space.kscience.tables/SpreadSheetCell.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.tables/SpreadSheetTable : space.kscience.tables/MutableTable<#A> { // space.kscience.tables/SpreadSheetTable|null[0]
+    constructor <init>(kotlin.reflect/KType, kotlin.collections/MutableMap<kotlin/String, space.kscience.tables/SpreadSheetCell<#A>> = ..., kotlin.collections/MutableMap<kotlin/String, space.kscience.tables/ColumnHeader<#A>> = ...) // space.kscience.tables/SpreadSheetTable.<init>|<init>(kotlin.reflect.KType;kotlin.collections.MutableMap<kotlin.String,space.kscience.tables.SpreadSheetCell<1:0>>;kotlin.collections.MutableMap<kotlin.String,space.kscience.tables.ColumnHeader<1:0>>){}[0]
+
+    final val cellMap // space.kscience.tables/SpreadSheetTable.cellMap|{}cellMap[0]
+        final fun <get-cellMap>(): kotlin.collections/MutableMap<kotlin/String, space.kscience.tables/SpreadSheetCell<#A>> // space.kscience.tables/SpreadSheetTable.cellMap.<get-cellMap>|<get-cellMap>(){}[0]
+    final val cells // space.kscience.tables/SpreadSheetTable.cells|{}cells[0]
+        final fun <get-cells>(): kotlin.collections/Collection<space.kscience.tables/SpreadSheetCell<#A>> // space.kscience.tables/SpreadSheetTable.cells.<get-cells>|<get-cells>(){}[0]
+    final val columnDefs // space.kscience.tables/SpreadSheetTable.columnDefs|{}columnDefs[0]
+        final fun <get-columnDefs>(): kotlin.collections/MutableMap<kotlin/String, space.kscience.tables/ColumnHeader<#A>> // space.kscience.tables/SpreadSheetTable.columnDefs.<get-columnDefs>|<get-columnDefs>(){}[0]
+    final val columns // space.kscience.tables/SpreadSheetTable.columns|{}columns[0]
+        final fun <get-columns>(): kotlin.collections/Collection<space.kscience.tables/Column<#A>> // space.kscience.tables/SpreadSheetTable.columns.<get-columns>|<get-columns>(){}[0]
+    final val rows // space.kscience.tables/SpreadSheetTable.rows|{}rows[0]
+        final fun <get-rows>(): kotlin.collections/List<space.kscience.tables/Row<#A>> // space.kscience.tables/SpreadSheetTable.rows.<get-rows>|<get-rows>(){}[0]
+
+    final fun getOrNull(kotlin/Int, kotlin/String): #A? // space.kscience.tables/SpreadSheetTable.getOrNull|getOrNull(kotlin.Int;kotlin.String){}[0]
+    final fun set(kotlin/Int, kotlin/String, #A?) // space.kscience.tables/SpreadSheetTable.set|set(kotlin.Int;kotlin.String;1:0?){}[0]
+    final inline fun <#A1: reified #A> defineColumn(kotlin/String, kotlin/Function1<space.kscience.tables/ColumnScheme, kotlin/Unit>) // space.kscience.tables/SpreadSheetTable.defineColumn|defineColumn(kotlin.String;kotlin.Function1<space.kscience.tables.ColumnScheme,kotlin.Unit>){0§<1:0>}[0]
+}
+
+final class space.kscience.tables/DoubleColumn : space.kscience.tables/Column<kotlin/Double> { // space.kscience.tables/DoubleColumn|null[0]
+    constructor <init>(kotlin/String, kotlin/DoubleArray, space.kscience.dataforge.meta/Meta = ...) // space.kscience.tables/DoubleColumn.<init>|<init>(kotlin.String;kotlin.DoubleArray;space.kscience.dataforge.meta.Meta){}[0]
+
+    final val data // space.kscience.tables/DoubleColumn.data|{}data[0]
+        final fun <get-data>(): kotlin/DoubleArray // space.kscience.tables/DoubleColumn.data.<get-data>|<get-data>(){}[0]
+    final val meta // space.kscience.tables/DoubleColumn.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.tables/DoubleColumn.meta.<get-meta>|<get-meta>(){}[0]
+    final val name // space.kscience.tables/DoubleColumn.name|{}name[0]
+        final fun <get-name>(): kotlin/String // space.kscience.tables/DoubleColumn.name.<get-name>|<get-name>(){}[0]
+    final val size // space.kscience.tables/DoubleColumn.size|{}size[0]
+        final fun <get-size>(): kotlin/Int // space.kscience.tables/DoubleColumn.size.<get-size>|<get-size>(){}[0]
+    final val type // space.kscience.tables/DoubleColumn.type|{}type[0]
+        final fun <get-type>(): kotlin.reflect/KType // space.kscience.tables/DoubleColumn.type.<get-type>|<get-type>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.tables/DoubleColumn.equals|equals(kotlin.Any?){}[0]
+    final fun getDouble(kotlin/Int): kotlin/Double // space.kscience.tables/DoubleColumn.getDouble|getDouble(kotlin.Int){}[0]
+    final fun getOrNull(kotlin/Int): kotlin/Double // space.kscience.tables/DoubleColumn.getOrNull|getOrNull(kotlin.Int){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.tables/DoubleColumn.hashCode|hashCode(){}[0]
+
+    final object Companion { // space.kscience.tables/DoubleColumn.Companion|null[0]
+        final inline fun <#A2: reified kotlin/Any> invoke(kotlin/String, kotlin/DoubleArray, noinline kotlin/Function1<space.kscience.tables/ColumnScheme, kotlin/Unit>): space.kscience.tables/DoubleColumn // space.kscience.tables/DoubleColumn.Companion.invoke|invoke(kotlin.String;kotlin.DoubleArray;kotlin.Function1<space.kscience.tables.ColumnScheme,kotlin.Unit>){0§<kotlin.Any>}[0]
+    }
+}
+
+final class space.kscience.tables/IntColumn : space.kscience.tables/Column<kotlin/Int> { // space.kscience.tables/IntColumn|null[0]
+    constructor <init>(kotlin/String, kotlin/IntArray, space.kscience.dataforge.meta/Meta = ...) // space.kscience.tables/IntColumn.<init>|<init>(kotlin.String;kotlin.IntArray;space.kscience.dataforge.meta.Meta){}[0]
+
+    final val data // space.kscience.tables/IntColumn.data|{}data[0]
+        final fun <get-data>(): kotlin/IntArray // space.kscience.tables/IntColumn.data.<get-data>|<get-data>(){}[0]
+    final val meta // space.kscience.tables/IntColumn.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.tables/IntColumn.meta.<get-meta>|<get-meta>(){}[0]
+    final val name // space.kscience.tables/IntColumn.name|{}name[0]
+        final fun <get-name>(): kotlin/String // space.kscience.tables/IntColumn.name.<get-name>|<get-name>(){}[0]
+    final val size // space.kscience.tables/IntColumn.size|{}size[0]
+        final fun <get-size>(): kotlin/Int // space.kscience.tables/IntColumn.size.<get-size>|<get-size>(){}[0]
+    final val type // space.kscience.tables/IntColumn.type|{}type[0]
+        final fun <get-type>(): kotlin.reflect/KType // space.kscience.tables/IntColumn.type.<get-type>|<get-type>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.tables/IntColumn.equals|equals(kotlin.Any?){}[0]
+    final fun getInt(kotlin/Int): kotlin/Int // space.kscience.tables/IntColumn.getInt|getInt(kotlin.Int){}[0]
+    final fun getOrNull(kotlin/Int): kotlin/Int // space.kscience.tables/IntColumn.getOrNull|getOrNull(kotlin.Int){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.tables/IntColumn.hashCode|hashCode(){}[0]
+
+    final object Companion { // space.kscience.tables/IntColumn.Companion|null[0]
+        final inline fun <#A2: reified kotlin/Any> invoke(kotlin/String, kotlin/IntArray, noinline kotlin/Function1<space.kscience.tables/ColumnScheme, kotlin/Unit>): space.kscience.tables/IntColumn // space.kscience.tables/IntColumn.Companion.invoke|invoke(kotlin.String;kotlin.IntArray;kotlin.Function1<space.kscience.tables.ColumnScheme,kotlin.Unit>){0§<kotlin.Any>}[0]
+    }
+}
+
+final class space.kscience.tables/ValueColumnScheme : space.kscience.tables/ColumnScheme { // space.kscience.tables/ValueColumnScheme|null[0]
+    constructor <init>() // space.kscience.tables/ValueColumnScheme.<init>|<init>(){}[0]
+
+    final var valueType // space.kscience.tables/ValueColumnScheme.valueType|{}valueType[0]
+        final fun <get-valueType>(): space.kscience.dataforge.meta/ValueType // space.kscience.tables/ValueColumnScheme.valueType.<get-valueType>|<get-valueType>(){}[0]
+        final fun <set-valueType>(space.kscience.dataforge.meta/ValueType) // space.kscience.tables/ValueColumnScheme.valueType.<set-valueType>|<set-valueType>(space.kscience.dataforge.meta.ValueType){}[0]
+
+    final object Companion : space.kscience.dataforge.meta/SchemeSpec<space.kscience.tables/ValueColumnScheme> // space.kscience.tables/ValueColumnScheme.Companion|null[0]
+}
+
+final value class <#A: kotlin/Any?> space.kscience.tables/MapRow : space.kscience.tables/Row<#A> { // space.kscience.tables/MapRow|null[0]
+    constructor <init>(kotlin.collections/Map<kotlin/String, #A?>) // space.kscience.tables/MapRow.<init>|<init>(kotlin.collections.Map<kotlin.String,1:0?>){}[0]
+
+    final val values // space.kscience.tables/MapRow.values|{}values[0]
+        final fun <get-values>(): kotlin.collections/Map<kotlin/String, #A?> // space.kscience.tables/MapRow.values.<get-values>|<get-values>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.tables/MapRow.equals|equals(kotlin.Any?){}[0]
+    final fun getOrNull(kotlin/String): #A? // space.kscience.tables/MapRow.getOrNull|getOrNull(kotlin.String){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.tables/MapRow.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // space.kscience.tables/MapRow.toString|toString(){}[0]
+}
+
+final value class space.kscience.tables/MetaRow : space.kscience.tables/Row<space.kscience.dataforge.meta/Value> { // space.kscience.tables/MetaRow|null[0]
+    constructor <init>(space.kscience.dataforge.meta/Meta) // space.kscience.tables/MetaRow.<init>|<init>(space.kscience.dataforge.meta.Meta){}[0]
+
+    final val meta // space.kscience.tables/MetaRow.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.tables/MetaRow.meta.<get-meta>|<get-meta>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.tables/MetaRow.equals|equals(kotlin.Any?){}[0]
+    final fun getOrNull(kotlin/String): space.kscience.dataforge.meta/Value? // space.kscience.tables/MetaRow.getOrNull|getOrNull(kotlin.String){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.tables/MetaRow.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // space.kscience.tables/MetaRow.toString|toString(){}[0]
+}
+
+open class <#A: kotlin/Any?> space.kscience.tables/RowTable : space.kscience.tables/Table<#A> { // space.kscience.tables/RowTable|null[0]
+    constructor <init>(kotlin.collections/List<space.kscience.tables/ColumnHeader<#A>>, kotlin.collections/List<space.kscience.tables/Row<#A>>) // space.kscience.tables/RowTable.<init>|<init>(kotlin.collections.List<space.kscience.tables.ColumnHeader<1:0>>;kotlin.collections.List<space.kscience.tables.Row<1:0>>){}[0]
+
+    open val columns // space.kscience.tables/RowTable.columns|{}columns[0]
+        open fun <get-columns>(): kotlin.collections/List<space.kscience.tables/Column<#A>> // space.kscience.tables/RowTable.columns.<get-columns>|<get-columns>(){}[0]
+    open val headers // space.kscience.tables/RowTable.headers|{}headers[0]
+        open fun <get-headers>(): kotlin.collections/List<space.kscience.tables/ColumnHeader<#A>> // space.kscience.tables/RowTable.headers.<get-headers>|<get-headers>(){}[0]
+    open val rows // space.kscience.tables/RowTable.rows|{}rows[0]
+        open fun <get-rows>(): kotlin.collections/List<space.kscience.tables/Row<#A>> // space.kscience.tables/RowTable.rows.<get-rows>|<get-rows>(){}[0]
+
+    open fun getOrNull(kotlin/Int, kotlin/String): #A? // space.kscience.tables/RowTable.getOrNull|getOrNull(kotlin.Int;kotlin.String){}[0]
+}
+
+open class <#A: out kotlin/Any?> space.kscience.tables/ColumnTable : space.kscience.tables/Table<#A> { // space.kscience.tables/ColumnTable|null[0]
+    constructor <init>(kotlin.collections/Collection<space.kscience.tables/Column<#A>>) // space.kscience.tables/ColumnTable.<init>|<init>(kotlin.collections.Collection<space.kscience.tables.Column<1:0>>){}[0]
+
+    final val columns // space.kscience.tables/ColumnTable.columns|{}columns[0]
+        final fun <get-columns>(): kotlin.collections/Collection<space.kscience.tables/Column<#A>> // space.kscience.tables/ColumnTable.columns.<get-columns>|<get-columns>(){}[0]
+    open val rows // space.kscience.tables/ColumnTable.rows|{}rows[0]
+        open fun <get-rows>(): kotlin.collections/List<space.kscience.tables/Row<#A>> // space.kscience.tables/ColumnTable.rows.<get-rows>|<get-rows>(){}[0]
+
+    open fun getOrNull(kotlin/Int, kotlin/String): #A? // space.kscience.tables/ColumnTable.getOrNull|getOrNull(kotlin.Int;kotlin.String){}[0]
+}
+
+open class space.kscience.tables/ColumnScheme : space.kscience.dataforge.meta/Scheme { // space.kscience.tables/ColumnScheme|null[0]
+    constructor <init>() // space.kscience.tables/ColumnScheme.<init>|<init>(){}[0]
+
+    final var title // space.kscience.tables/ColumnScheme.title|{}title[0]
+        final fun <get-title>(): kotlin/String? // space.kscience.tables/ColumnScheme.title.<get-title>|<get-title>(){}[0]
+        final fun <set-title>(kotlin/String?) // space.kscience.tables/ColumnScheme.title.<set-title>|<set-title>(kotlin.String?){}[0]
+
+    final object Companion : space.kscience.dataforge.meta/SchemeSpec<space.kscience.tables/ColumnScheme> // space.kscience.tables/ColumnScheme.Companion|null[0]
+}
+
+final val space.kscience.tables.io/textWidth // space.kscience.tables.io/textWidth|@space.kscience.tables.ColumnHeader<space.kscience.dataforge.meta.Value>{}textWidth[0]
+    final fun (space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value>).<get-textWidth>(): kotlin/Int // space.kscience.tables.io/textWidth.<get-textWidth>|<get-textWidth>@space.kscience.tables.ColumnHeader<space.kscience.dataforge.meta.Value>(){}[0]
+final val space.kscience.tables/indices // space.kscience.tables/indices|@space.kscience.tables.Column<*>{}indices[0]
+    final fun (space.kscience.tables/Column<*>).<get-indices>(): kotlin.ranges/IntRange // space.kscience.tables/indices.<get-indices>|<get-indices>@space.kscience.tables.Column<*>(){}[0]
+final val space.kscience.tables/properties // space.kscience.tables/properties|@space.kscience.tables.ColumnHeader<*>{}properties[0]
+    final fun (space.kscience.tables/ColumnHeader<*>).<get-properties>(): space.kscience.tables/ColumnScheme // space.kscience.tables/properties.<get-properties>|<get-properties>@space.kscience.tables.ColumnHeader<*>(){}[0]
+final val space.kscience.tables/properties // space.kscience.tables/properties|@space.kscience.tables.ColumnHeader<space.kscience.dataforge.meta.Value>{}properties[0]
+    final fun (space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value>).<get-properties>(): space.kscience.tables/ValueColumnScheme // space.kscience.tables/properties.<get-properties>|<get-properties>@space.kscience.tables.ColumnHeader<space.kscience.dataforge.meta.Value>(){}[0]
+final val space.kscience.tables/rowsSize // space.kscience.tables/rowsSize|@space.kscience.tables.Table<0:0>{0§<kotlin.Any?>}rowsSize[0]
+    final fun <#A1: kotlin/Any?> (space.kscience.tables/Table<#A1>).<get-rowsSize>(): kotlin/Int // space.kscience.tables/rowsSize.<get-rowsSize>|<get-rowsSize>@space.kscience.tables.Table<0:0>(){0§<kotlin.Any?>}[0]
+final val space.kscience.tables/valueType // space.kscience.tables/valueType|@space.kscience.tables.ColumnHeader<space.kscience.dataforge.meta.Value>{}valueType[0]
+    final fun (space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value>).<get-valueType>(): space.kscience.dataforge.meta/ValueType? // space.kscience.tables/valueType.<get-valueType>|<get-valueType>@space.kscience.tables.ColumnHeader<space.kscience.dataforge.meta.Value>(){}[0]
+
+final fun (space.kscience.dataforge.meta/MetaRepr).space.kscience.tables/asRow(): space.kscience.tables/MetaRow // space.kscience.tables/asRow|asRow@space.kscience.dataforge.meta.MetaRepr(){}[0]
+final fun (space.kscience.tables/MutableTable<space.kscience.dataforge.meta/Value>).space.kscience.tables/set(kotlin/Int, kotlin/String, kotlin/Any?) // space.kscience.tables/set|set@space.kscience.tables.MutableTable<space.kscience.dataforge.meta.Value>(kotlin.Int;kotlin.String;kotlin.Any?){}[0]
+final fun (space.kscience.tables/RowTableBuilder<in space.kscience.dataforge.meta/Value>).space.kscience.tables/column(space.kscience.dataforge.meta/ValueType, kotlin/Int? = ..., kotlin/Function1<space.kscience.tables/ValueColumnScheme, kotlin/Unit> = ...): kotlin.properties/PropertyDelegateProvider<kotlin/Any?, kotlin.properties/ReadOnlyProperty<kotlin/Any?, space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value>>> // space.kscience.tables/column|column@space.kscience.tables.RowTableBuilder<in|space.kscience.dataforge.meta.Value>(space.kscience.dataforge.meta.ValueType;kotlin.Int?;kotlin.Function1<space.kscience.tables.ValueColumnScheme,kotlin.Unit>){}[0]
+final fun (space.kscience.tables/RowTableBuilder<in space.kscience.dataforge.meta/Value>).space.kscience.tables/newColumn(kotlin/String, space.kscience.dataforge.meta/ValueType, kotlin/Int? = ..., kotlin/Function1<space.kscience.tables/ValueColumnScheme, kotlin/Unit> = ...): space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value> // space.kscience.tables/newColumn|newColumn@space.kscience.tables.RowTableBuilder<in|space.kscience.dataforge.meta.Value>(kotlin.String;space.kscience.dataforge.meta.ValueType;kotlin.Int?;kotlin.Function1<space.kscience.tables.ValueColumnScheme,kotlin.Unit>){}[0]
+final fun (space.kscience.tables/RowTableBuilder<space.kscience.dataforge.meta/Value>).space.kscience.tables/row(space.kscience.dataforge.meta/Meta): space.kscience.tables/Row<space.kscience.dataforge.meta/Value> // space.kscience.tables/row|row@space.kscience.tables.RowTableBuilder<space.kscience.dataforge.meta.Value>(space.kscience.dataforge.meta.Meta){}[0]
+final fun (space.kscience.tables/RowTableBuilder<space.kscience.dataforge.meta/Value>).space.kscience.tables/valueRow(kotlin/Array<out kotlin/Pair<space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value>, kotlin/Any?>>...): space.kscience.tables/Row<space.kscience.dataforge.meta/Value> // space.kscience.tables/valueRow|valueRow@space.kscience.tables.RowTableBuilder<space.kscience.dataforge.meta.Value>(kotlin.Array<out|kotlin.Pair<space.kscience.tables.ColumnHeader<space.kscience.dataforge.meta.Value>,kotlin.Any?>>...){}[0]
+final fun (space.kscience.tables/SpreadSheetTable<space.kscience.dataforge.meta/Value>).space.kscience.tables/set(kotlin/Int, space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value>, kotlin/Any?) // space.kscience.tables/set|set@space.kscience.tables.SpreadSheetTable<space.kscience.dataforge.meta.Value>(kotlin.Int;space.kscience.tables.ColumnHeader<space.kscience.dataforge.meta.Value>;kotlin.Any?){}[0]
+final fun (space.kscience.tables/SpreadSheetTable<space.kscience.dataforge.meta/Value>).space.kscience.tables/set(space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value>, kotlin.collections/List<kotlin/Any?>) // space.kscience.tables/set|set@space.kscience.tables.SpreadSheetTable<space.kscience.dataforge.meta.Value>(space.kscience.tables.ColumnHeader<space.kscience.dataforge.meta.Value>;kotlin.collections.List<kotlin.Any?>){}[0]
+final fun (space.kscience.tables/Table.Companion).space.kscience.tables.io/readTextRow(kotlin/String, kotlin.collections/List<space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value>>, kotlin.text/Regex): space.kscience.tables/Row<space.kscience.dataforge.meta/Value> // space.kscience.tables.io/readTextRow|readTextRow@space.kscience.tables.Table.Companion(kotlin.String;kotlin.collections.List<space.kscience.tables.ColumnHeader<space.kscience.dataforge.meta.Value>>;kotlin.text.Regex){}[0]
+final fun (space.kscience.tables/Table.Companion).space.kscience.tables.io/readTextRows(space.kscience.dataforge.io/Envelope, kotlin.text/Regex = ...): space.kscience.tables/Rows<space.kscience.dataforge.meta/Value> // space.kscience.tables.io/readTextRows|readTextRows@space.kscience.tables.Table.Companion(space.kscience.dataforge.io.Envelope;kotlin.text.Regex){}[0]
+final fun (space.kscience.tables/Table.Companion).space.kscience.tables.io/writeTextRows(kotlinx.io/Sink, space.kscience.tables/Rows<space.kscience.dataforge.meta/Value>, kotlin/String = ...) // space.kscience.tables.io/writeTextRows|writeTextRows@space.kscience.tables.Table.Companion(kotlinx.io.Sink;space.kscience.tables.Rows<space.kscience.dataforge.meta.Value>;kotlin.String){}[0]
+final fun (space.kscience.tables/Table<space.kscience.dataforge.meta/Value>).space.kscience.tables.io/toTextEnvelope(): space.kscience.dataforge.io/Envelope // space.kscience.tables.io/toTextEnvelope|toTextEnvelope@space.kscience.tables.Table<space.kscience.dataforge.meta.Value>(){}[0]
+final fun <#A: kotlin/Any> (space.kscience.tables/Row<#A>).space.kscience.tables/get(kotlin/String): #A // space.kscience.tables/get|get@space.kscience.tables.Row<0:0>(kotlin.String){0§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any?, #B: #A> (kotlin.collections/Collection<space.kscience.tables/Column<#A>>).space.kscience.tables/get(space.kscience.tables/ColumnHeader<#B>): space.kscience.tables/Column<#B> // space.kscience.tables/get|get@kotlin.collections.Collection<space.kscience.tables.Column<0:0>>(space.kscience.tables.ColumnHeader<0:1>){0§<kotlin.Any?>;1§<0:0>}[0]
+final fun <#A: kotlin/Any?, #B: #A> (space.kscience.tables/ColumnTableBuilder<#A>).space.kscience.tables/column(space.kscience.tables/ColumnHeader<#B>, kotlin.collections/Iterable<#B>) // space.kscience.tables/column|column@space.kscience.tables.ColumnTableBuilder<0:0>(space.kscience.tables.ColumnHeader<0:1>;kotlin.collections.Iterable<0:1>){0§<kotlin.Any?>;1§<0:0>}[0]
+final fun <#A: kotlin/Any?, #B: #A> (space.kscience.tables/ColumnTableBuilder<#A>).space.kscience.tables/fill(space.kscience.tables/ColumnHeader<#B>, kotlin/Int? = ..., kotlin/Function1<kotlin/Int, #B?>): space.kscience.tables/Column<#B> // space.kscience.tables/fill|fill@space.kscience.tables.ColumnTableBuilder<0:0>(space.kscience.tables.ColumnHeader<0:1>;kotlin.Int?;kotlin.Function1<kotlin.Int,0:1?>){0§<kotlin.Any?>;1§<0:0>}[0]
+final fun <#A: kotlin/Any?, #B: #A> (space.kscience.tables/ColumnTableBuilder<#A>).space.kscience.tables/transform(space.kscience.tables/ColumnHeader<#B>, kotlin/Int? = ..., kotlin/Function1<space.kscience.tables/Row<#A>, #B>) // space.kscience.tables/transform|transform@space.kscience.tables.ColumnTableBuilder<0:0>(space.kscience.tables.ColumnHeader<0:1>;kotlin.Int?;kotlin.Function1<space.kscience.tables.Row<0:0>,0:1>){0§<kotlin.Any?>;1§<0:0>}[0]
+final fun <#A: kotlin/Any?, #B: #A> (space.kscience.tables/MutableTable<#A>).space.kscience.tables/set(kotlin/Int, space.kscience.tables/ColumnHeader<#B>, #B?) // space.kscience.tables/set|set@space.kscience.tables.MutableTable<0:0>(kotlin.Int;space.kscience.tables.ColumnHeader<0:1>;0:1?){0§<kotlin.Any?>;1§<0:0>}[0]
+final fun <#A: kotlin/Any?, #B: kotlin/Any?> (space.kscience.tables/Table<#A>).space.kscience.tables/rowsToColumn(space.kscience.tables/ColumnHeader<#B>, kotlin/Boolean = ..., kotlin/Function1<space.kscience.tables/Row<#A>, #B?>): space.kscience.tables/Column<#B> // space.kscience.tables/rowsToColumn|rowsToColumn@space.kscience.tables.Table<0:0>(space.kscience.tables.ColumnHeader<0:1>;kotlin.Boolean;kotlin.Function1<space.kscience.tables.Row<0:0>,0:1?>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlin.collections/Collection<space.kscience.tables/Column<#A>>).space.kscience.tables/get(kotlin/String): space.kscience.tables/Column<#A> // space.kscience.tables/get|get@kotlin.collections.Collection<space.kscience.tables.Column<0:0>>(kotlin.String){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlin.collections/Collection<space.kscience.tables/Column<#A>>).space.kscience.tables/getOrNull(kotlin/String): space.kscience.tables/Column<#A>? // space.kscience.tables/getOrNull|getOrNull@kotlin.collections.Collection<space.kscience.tables.Column<0:0>>(kotlin.String){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Column<#A>).space.kscience.tables/get(kotlin/Int): #A // space.kscience.tables/get|get@space.kscience.tables.Column<0:0>(kotlin.Int){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Column<#A>).space.kscience.tables/iterator(): kotlin.collections/Iterator<#A?> // space.kscience.tables/iterator|iterator@space.kscience.tables.Column<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Column<#A>).space.kscience.tables/listValues(): kotlin.collections/List<#A?> // space.kscience.tables/listValues|listValues@space.kscience.tables.Column<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Column<#A>).space.kscience.tables/sequence(): kotlin.sequences/Sequence<#A?> // space.kscience.tables/sequence|sequence@space.kscience.tables.Column<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/ColumnTable<#A>).space.kscience.tables/builder(): space.kscience.tables/ColumnTableBuilder<#A> // space.kscience.tables/builder|builder@space.kscience.tables.ColumnTable<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/MutableTable<#A>).space.kscience.tables/set(kotlin/String, kotlin.collections/Iterable<#A>) // space.kscience.tables/set|set@space.kscience.tables.MutableTable<0:0>(kotlin.String;kotlin.collections.Iterable<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/RowTable<#A>).space.kscience.tables/toMutableRowTable(): space.kscience.tables/RowTableBuilder<#A> // space.kscience.tables/toMutableRowTable|toMutableRowTable@space.kscience.tables.RowTable<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Rows<#A>).space.kscience.tables/collect(): space.kscience.tables/Table<#A> // space.kscience.tables/collect|collect@space.kscience.tables.Rows<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/SpreadSheetTable<#A>).space.kscience.tables/set(space.kscience.tables/ColumnHeader<#A>, kotlin.collections/List<#A>) // space.kscience.tables/set|set@space.kscience.tables.SpreadSheetTable<0:0>(space.kscience.tables.ColumnHeader<0:0>;kotlin.collections.List<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Table<#A>).space.kscience.tables/get(kotlin/Int, kotlin/String): #A // space.kscience.tables/get|get@space.kscience.tables.Table<0:0>(kotlin.Int;kotlin.String){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Table<#A>).space.kscience.tables/rowsToDoubleColumn(kotlin/String, space.kscience.dataforge.meta/Meta = ..., kotlin/Function1<space.kscience.tables/Row<#A>, kotlin/Double>): space.kscience.tables/DoubleColumn // space.kscience.tables/rowsToDoubleColumn|rowsToDoubleColumn@space.kscience.tables.Table<0:0>(kotlin.String;space.kscience.dataforge.meta.Meta;kotlin.Function1<space.kscience.tables.Row<0:0>,kotlin.Double>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Table<#A>).space.kscience.tables/rowsToIntColumn(kotlin/String, space.kscience.dataforge.meta/Meta = ..., kotlin/Function1<space.kscience.tables/Row<#A>, kotlin/Int>): space.kscience.tables/IntColumn // space.kscience.tables/rowsToIntColumn|rowsToIntColumn@space.kscience.tables.Table<0:0>(kotlin.String;space.kscience.dataforge.meta.Meta;kotlin.Function1<space.kscience.tables.Row<0:0>,kotlin.Int>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Table<#A>).space.kscience.tables/toColumnTable(): space.kscience.tables/ColumnTable<#A> // space.kscience.tables/toColumnTable|toColumnTable@space.kscience.tables.Table<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Table<#A>).space.kscience.tables/toRowTable(): space.kscience.tables/RowTable<#A> // space.kscience.tables/toRowTable|toRowTable@space.kscience.tables.Table<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Table<#A>).space.kscience.tables/withColumns(kotlin/Function1<space.kscience.tables/ColumnTableBuilder<#A>, kotlin/Unit>): space.kscience.tables/ColumnTable<#A> // space.kscience.tables/withColumns|withColumns@space.kscience.tables.Table<0:0>(kotlin.Function1<space.kscience.tables.ColumnTableBuilder<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Table<#A>).space.kscience.tables/withRows(kotlin/Function1<space.kscience.tables/RowTableBuilder<#A>, kotlin/Unit>): space.kscience.tables/RowTable<#A> // space.kscience.tables/withRows|withRows@space.kscience.tables.Table<0:0>(kotlin.Function1<space.kscience.tables.RowTableBuilder<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> space.kscience.tables/ColumnTable(kotlin/Array<out space.kscience.tables/Column<#A>>...): space.kscience.tables/ColumnTable<#A> // space.kscience.tables/ColumnTable|ColumnTable(kotlin.Array<out|space.kscience.tables.Column<0:0>>...){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> space.kscience.tables/ListColumn(space.kscience.tables/ColumnHeader<#A>, kotlin.collections/List<#A?>): space.kscience.tables/ListColumn<#A> // space.kscience.tables/ListColumn|ListColumn(space.kscience.tables.ColumnHeader<0:0>;kotlin.collections.List<0:0?>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> space.kscience.tables/ListColumn(space.kscience.tables/ColumnHeader<#A>, kotlin/Int, kotlin/Function1<kotlin/Int, #A?>): space.kscience.tables/ListColumn<#A> // space.kscience.tables/ListColumn|ListColumn(space.kscience.tables.ColumnHeader<0:0>;kotlin.Int;kotlin.Function1<kotlin.Int,0:0?>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> space.kscience.tables/Row(kotlin/Array<out kotlin/Pair<space.kscience.tables/ColumnHeader<#A>, #A>>...): space.kscience.tables/MapRow<#A> // space.kscience.tables/Row|Row(kotlin.Array<out|kotlin.Pair<space.kscience.tables.ColumnHeader<0:0>,0:0>>...){0§<kotlin.Any?>}[0]
+final fun space.kscience.tables/ColumnHeader(kotlin/String, space.kscience.dataforge.meta/ValueType, kotlin/Function1<space.kscience.tables/ValueColumnScheme, kotlin/Unit> = ...): space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value> // space.kscience.tables/ColumnHeader|ColumnHeader(kotlin.String;space.kscience.dataforge.meta.ValueType;kotlin.Function1<space.kscience.tables.ValueColumnScheme,kotlin.Unit>){}[0]
+final inline fun <#A: kotlin/Any?, #B: reified #A> (space.kscience.tables/ColumnTableBuilder<#A>).space.kscience.tables/transform(kotlin/String, kotlin/Int? = ..., noinline kotlin/Function1<space.kscience.tables/Row<#A>, #B>) // space.kscience.tables/transform|transform@space.kscience.tables.ColumnTableBuilder<0:0>(kotlin.String;kotlin.Int?;kotlin.Function1<space.kscience.tables.Row<0:0>,0:1>){0§<kotlin.Any?>;1§<0:0>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified #A> (space.kscience.tables/Row<#A>).space.kscience.tables/get(space.kscience.tables/ColumnHeader<#B>): #B // space.kscience.tables/get|get@space.kscience.tables.Row<0:0>(space.kscience.tables.ColumnHeader<0:1>){0§<kotlin.Any?>;1§<0:0>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified #A> (space.kscience.tables/Table<#A>).space.kscience.tables/get(kotlin/Int, space.kscience.tables/ColumnHeader<#B>): #B? // space.kscience.tables/get|get@space.kscience.tables.Table<0:0>(kotlin.Int;space.kscience.tables.ColumnHeader<0:1>){0§<kotlin.Any?>;1§<0:0>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any> (space.kscience.tables/Column<#A>).space.kscience.tables/map(space.kscience.dataforge.meta/Meta = ..., noinline kotlin/Function1<#A?, #B>): space.kscience.tables/Column<#B> // space.kscience.tables/map|map@space.kscience.tables.Column<0:0>(space.kscience.dataforge.meta.Meta;kotlin.Function1<0:0?,0:1>){0§<kotlin.Any?>;1§<kotlin.Any>}[0]
+final inline fun <#A: kotlin/Any?, #B: reified kotlin/Any?> (space.kscience.tables/Table<#A>).space.kscience.tables/rowsToColumn(kotlin/String, space.kscience.dataforge.meta/Meta = ..., kotlin/Boolean = ..., noinline kotlin/Function1<space.kscience.tables/Row<#A>, #B?>): space.kscience.tables/Column<#B> // space.kscience.tables/rowsToColumn|rowsToColumn@space.kscience.tables.Table<0:0>(kotlin.String;space.kscience.dataforge.meta.Meta;kotlin.Boolean;kotlin.Function1<space.kscience.tables.Row<0:0>,0:1?>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?> (space.kscience.tables/Column<#A>).space.kscience.tables/contentEquals(space.kscience.tables/Column<#A>, kotlin/Function2<#A?, #A?, kotlin/Boolean> = ...): kotlin/Boolean // space.kscience.tables/contentEquals|contentEquals@space.kscience.tables.Column<0:0>(space.kscience.tables.Column<0:0>;kotlin.Function2<0:0?,0:0?,kotlin.Boolean>){0§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?> space.kscience.tables/ColumnTable(kotlin/Int, kotlin/Function1<space.kscience.tables/ColumnTableBuilder<#A>, kotlin/Unit>): space.kscience.tables/ColumnTable<#A> // space.kscience.tables/ColumnTable|ColumnTable(kotlin.Int;kotlin.Function1<space.kscience.tables.ColumnTableBuilder<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final inline fun <#A: kotlin/Any?> space.kscience.tables/RowTable(kotlin/Array<out space.kscience.tables/ColumnHeader<#A>>..., kotlin/Function1<space.kscience.tables/RowTableBuilder<#A>, kotlin/Unit>): space.kscience.tables/RowTable<#A> // space.kscience.tables/RowTable|RowTable(kotlin.Array<out|space.kscience.tables.ColumnHeader<0:0>>...;kotlin.Function1<space.kscience.tables.RowTableBuilder<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> space.kscience.tables/ColumnHeader(kotlin/String, kotlin/Function1<space.kscience.tables/ColumnScheme, kotlin/Unit> = ...): space.kscience.tables/ColumnHeader<#A> // space.kscience.tables/ColumnHeader|ColumnHeader(kotlin.String;kotlin.Function1<space.kscience.tables.ColumnScheme,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> space.kscience.tables/ListColumn(kotlin/String, space.kscience.tables/ColumnScheme, kotlin.collections/List<#A?>): space.kscience.tables/ListColumn<#A> // space.kscience.tables/ListColumn|ListColumn(kotlin.String;space.kscience.tables.ColumnScheme;kotlin.collections.List<0:0?>){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> space.kscience.tables/ListColumn(kotlin/String, space.kscience.tables/ColumnScheme, kotlin/Int, kotlin/Function1<kotlin/Int, #A?>): space.kscience.tables/ListColumn<#A> // space.kscience.tables/ListColumn|ListColumn(kotlin.String;space.kscience.tables.ColumnScheme;kotlin.Int;kotlin.Function1<kotlin.Int,0:0?>){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> space.kscience.tables/SpreadSheetTable(kotlin/Function1<space.kscience.tables/SpreadSheetTable<#A>, kotlin/Unit>): space.kscience.tables/SpreadSheetTable<#A> // space.kscience.tables/SpreadSheetTable|SpreadSheetTable(kotlin.Function1<space.kscience.tables.SpreadSheetTable<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final suspend fun (space.kscience.tables/Table.Companion).space.kscience.tables.io/readTextTable(space.kscience.dataforge.io/Binary, kotlin.collections/List<space.kscience.tables/ColumnHeader<space.kscience.dataforge.meta/Value>>): space.kscience.tables/Table<space.kscience.dataforge.meta/Value> // space.kscience.tables.io/readTextTable|readTextTable@space.kscience.tables.Table.Companion(space.kscience.dataforge.io.Binary;kotlin.collections.List<space.kscience.tables.ColumnHeader<space.kscience.dataforge.meta.Value>>){}[0]
+final suspend fun (space.kscience.tables/Table.Companion).space.kscience.tables.io/readTextTable(space.kscience.dataforge.io/Envelope): space.kscience.tables/Table<space.kscience.dataforge.meta/Value> // space.kscience.tables.io/readTextTable|readTextTable@space.kscience.tables.Table.Companion(space.kscience.dataforge.io.Envelope){}[0]

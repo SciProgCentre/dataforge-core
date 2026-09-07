@@ -1,0 +1,340 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxX64, macosArm64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <space.kscience:dataforge-context>
+abstract fun interface <#A: out kotlin/Any?> space.kscience.dataforge.context/Factory { // space.kscience.dataforge.context/Factory|null[0]
+    abstract fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): #A // space.kscience.dataforge.context/Factory.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+}
+
+abstract fun interface space.kscience.dataforge.context/Logger { // space.kscience.dataforge.context/Logger|null[0]
+    abstract fun log(kotlin/String, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/Logger.log|log(kotlin.String;kotlin.Function0<kotlin.String>){}[0]
+}
+
+abstract interface <#A: space.kscience.dataforge.context/Plugin> space.kscience.dataforge.context/PluginFactory : space.kscience.dataforge.context/Factory<#A> { // space.kscience.dataforge.context/PluginFactory|null[0]
+    abstract val tag // space.kscience.dataforge.context/PluginFactory.tag|{}tag[0]
+        abstract fun <get-tag>(): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.context/PluginFactory.tag.<get-tag>|<get-tag>(){}[0]
+
+    final object Companion { // space.kscience.dataforge.context/PluginFactory.Companion|null[0]
+        final const val TYPE // space.kscience.dataforge.context/PluginFactory.Companion.TYPE|{}TYPE[0]
+            final fun <get-TYPE>(): kotlin/String // space.kscience.dataforge.context/PluginFactory.Companion.TYPE.<get-TYPE>|<get-TYPE>(){}[0]
+    }
+}
+
+abstract interface space.kscience.dataforge.context/ContextAware { // space.kscience.dataforge.context/ContextAware|null[0]
+    abstract val context // space.kscience.dataforge.context/ContextAware.context|{}context[0]
+        abstract fun <get-context>(): space.kscience.dataforge.context/Context // space.kscience.dataforge.context/ContextAware.context.<get-context>|<get-context>(){}[0]
+}
+
+abstract interface space.kscience.dataforge.context/LogManager : space.kscience.dataforge.context/Logger, space.kscience.dataforge.context/Plugin { // space.kscience.dataforge.context/LogManager|null[0]
+    abstract val defaultLogger // space.kscience.dataforge.context/LogManager.defaultLogger|{}defaultLogger[0]
+        abstract fun <get-defaultLogger>(): space.kscience.dataforge.context/Logger // space.kscience.dataforge.context/LogManager.defaultLogger.<get-defaultLogger>|<get-defaultLogger>(){}[0]
+
+    abstract fun logger(space.kscience.dataforge.names/Name): space.kscience.dataforge.context/Logger // space.kscience.dataforge.context/LogManager.logger|logger(space.kscience.dataforge.names.Name){}[0]
+    open fun log(kotlin/String, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/LogManager.log|log(kotlin.String;kotlin.Function0<kotlin.String>){}[0]
+    open fun log(space.kscience.dataforge.names/Name, kotlin/String, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/LogManager.log|log(space.kscience.dataforge.names.Name;kotlin.String;kotlin.Function0<kotlin.String>){}[0]
+
+    final object Companion { // space.kscience.dataforge.context/LogManager.Companion|null[0]
+        final const val DEBUG // space.kscience.dataforge.context/LogManager.Companion.DEBUG|{}DEBUG[0]
+            final fun <get-DEBUG>(): kotlin/String // space.kscience.dataforge.context/LogManager.Companion.DEBUG.<get-DEBUG>|<get-DEBUG>(){}[0]
+        final const val ERROR // space.kscience.dataforge.context/LogManager.Companion.ERROR|{}ERROR[0]
+            final fun <get-ERROR>(): kotlin/String // space.kscience.dataforge.context/LogManager.Companion.ERROR.<get-ERROR>|<get-ERROR>(){}[0]
+        final const val INFO // space.kscience.dataforge.context/LogManager.Companion.INFO|{}INFO[0]
+            final fun <get-INFO>(): kotlin/String // space.kscience.dataforge.context/LogManager.Companion.INFO.<get-INFO>|<get-INFO>(){}[0]
+        final const val TRACE // space.kscience.dataforge.context/LogManager.Companion.TRACE|{}TRACE[0]
+            final fun <get-TRACE>(): kotlin/String // space.kscience.dataforge.context/LogManager.Companion.TRACE.<get-TRACE>|<get-TRACE>(){}[0]
+        final const val WARNING // space.kscience.dataforge.context/LogManager.Companion.WARNING|{}WARNING[0]
+            final fun <get-WARNING>(): kotlin/String // space.kscience.dataforge.context/LogManager.Companion.WARNING.<get-WARNING>|<get-WARNING>(){}[0]
+    }
+}
+
+abstract interface space.kscience.dataforge.context/Plugin : space.kscience.dataforge.context/ContextAware, space.kscience.dataforge.meta/MetaRepr, space.kscience.dataforge.misc/Named, space.kscience.dataforge.provider/Provider { // space.kscience.dataforge.context/Plugin|null[0]
+    abstract val isAttached // space.kscience.dataforge.context/Plugin.isAttached|{}isAttached[0]
+        abstract fun <get-isAttached>(): kotlin/Boolean // space.kscience.dataforge.context/Plugin.isAttached.<get-isAttached>|<get-isAttached>(){}[0]
+    abstract val meta // space.kscience.dataforge.context/Plugin.meta|{}meta[0]
+        abstract fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.context/Plugin.meta.<get-meta>|<get-meta>(){}[0]
+    abstract val tag // space.kscience.dataforge.context/Plugin.tag|{}tag[0]
+        abstract fun <get-tag>(): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.context/Plugin.tag.<get-tag>|<get-tag>(){}[0]
+    open val name // space.kscience.dataforge.context/Plugin.name|{}name[0]
+        open fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.context/Plugin.name.<get-name>|<get-name>(){}[0]
+    open val serializerModule // space.kscience.dataforge.context/Plugin.serializerModule|{}serializerModule[0]
+        open fun <get-serializerModule>(): kotlinx.serialization.modules/SerializersModule? // space.kscience.dataforge.context/Plugin.serializerModule.<get-serializerModule>|<get-serializerModule>(){}[0]
+
+    abstract fun attach(space.kscience.dataforge.context/Context) // space.kscience.dataforge.context/Plugin.attach|attach(space.kscience.dataforge.context.Context){}[0]
+    abstract fun dependsOn(): kotlin.collections/Map<space.kscience.dataforge.context/PluginFactory<*>, space.kscience.dataforge.meta/Meta> // space.kscience.dataforge.context/Plugin.dependsOn|dependsOn(){}[0]
+    abstract fun detach() // space.kscience.dataforge.context/Plugin.detach|detach(){}[0]
+    open fun toMeta(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.context/Plugin.toMeta|toMeta(){}[0]
+
+    final object Companion { // space.kscience.dataforge.context/Plugin.Companion|null[0]
+        final const val TARGET // space.kscience.dataforge.context/Plugin.Companion.TARGET|{}TARGET[0]
+            final fun <get-TARGET>(): kotlin/String // space.kscience.dataforge.context/Plugin.Companion.TARGET.<get-TARGET>|<get-TARGET>(){}[0]
+    }
+}
+
+abstract interface space.kscience.dataforge.provider/Provider { // space.kscience.dataforge.provider/Provider|null[0]
+    open val defaultChainTarget // space.kscience.dataforge.provider/Provider.defaultChainTarget|{}defaultChainTarget[0]
+        open fun <get-defaultChainTarget>(): kotlin/String // space.kscience.dataforge.provider/Provider.defaultChainTarget.<get-defaultChainTarget>|<get-defaultChainTarget>(){}[0]
+    open val defaultTarget // space.kscience.dataforge.provider/Provider.defaultTarget|{}defaultTarget[0]
+        open fun <get-defaultTarget>(): kotlin/String // space.kscience.dataforge.provider/Provider.defaultTarget.<get-defaultTarget>|<get-defaultTarget>(){}[0]
+
+    open fun content(kotlin/String): kotlin.collections/Map<space.kscience.dataforge.names/Name, kotlin/Any> // space.kscience.dataforge.provider/Provider.content|content(kotlin.String){}[0]
+}
+
+abstract class space.kscience.dataforge.context/AbstractPlugin : space.kscience.dataforge.context/Plugin { // space.kscience.dataforge.context/AbstractPlugin|null[0]
+    constructor <init>(space.kscience.dataforge.meta/Meta = ...) // space.kscience.dataforge.context/AbstractPlugin.<init>|<init>(space.kscience.dataforge.meta.Meta){}[0]
+
+    open val context // space.kscience.dataforge.context/AbstractPlugin.context|{}context[0]
+        open fun <get-context>(): space.kscience.dataforge.context/Context // space.kscience.dataforge.context/AbstractPlugin.context.<get-context>|<get-context>(){}[0]
+    open val isAttached // space.kscience.dataforge.context/AbstractPlugin.isAttached|{}isAttached[0]
+        open fun <get-isAttached>(): kotlin/Boolean // space.kscience.dataforge.context/AbstractPlugin.isAttached.<get-isAttached>|<get-isAttached>(){}[0]
+    open val meta // space.kscience.dataforge.context/AbstractPlugin.meta|{}meta[0]
+        open fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.context/AbstractPlugin.meta.<get-meta>|<get-meta>(){}[0]
+
+    final fun <#A1: space.kscience.dataforge.context/Plugin> require(space.kscience.dataforge.context/PluginFactory<#A1>, kotlin.reflect/KClass<#A1>, space.kscience.dataforge.meta/Meta = ...): kotlin.properties/ReadOnlyProperty<space.kscience.dataforge.context/AbstractPlugin, #A1> // space.kscience.dataforge.context/AbstractPlugin.require|require(space.kscience.dataforge.context.PluginFactory<0:0>;kotlin.reflect.KClass<0:0>;space.kscience.dataforge.meta.Meta){0§<space.kscience.dataforge.context.Plugin>}[0]
+    final inline fun <#A1: reified space.kscience.dataforge.context/Plugin> require(space.kscience.dataforge.context/PluginFactory<#A1>, space.kscience.dataforge.meta/Meta = ...): kotlin.properties/ReadOnlyProperty<space.kscience.dataforge.context/AbstractPlugin, #A1> // space.kscience.dataforge.context/AbstractPlugin.require|require(space.kscience.dataforge.context.PluginFactory<0:0>;space.kscience.dataforge.meta.Meta){0§<space.kscience.dataforge.context.Plugin>}[0]
+    open fun attach(space.kscience.dataforge.context/Context) // space.kscience.dataforge.context/AbstractPlugin.attach|attach(space.kscience.dataforge.context.Context){}[0]
+    open fun dependsOn(): kotlin.collections/Map<space.kscience.dataforge.context/PluginFactory<*>, space.kscience.dataforge.meta/Meta> // space.kscience.dataforge.context/AbstractPlugin.dependsOn|dependsOn(){}[0]
+    open fun detach() // space.kscience.dataforge.context/AbstractPlugin.detach|detach(){}[0]
+}
+
+final class space.kscience.dataforge.context/ContextBuilder { // space.kscience.dataforge.context/ContextBuilder|null[0]
+    final val name // space.kscience.dataforge.context/ContextBuilder.name|{}name[0]
+        final fun <get-name>(): kotlin/String? // space.kscience.dataforge.context/ContextBuilder.name.<get-name>|<get-name>(){}[0]
+
+    final fun build(): space.kscience.dataforge.context/Context // space.kscience.dataforge.context/ContextBuilder.build|build(){}[0]
+    final fun coroutineContext(kotlin.coroutines/CoroutineContext) // space.kscience.dataforge.context/ContextBuilder.coroutineContext|coroutineContext(kotlin.coroutines.CoroutineContext){}[0]
+    final fun plugin(kotlin/String, kotlin/String = ..., kotlin/String = ..., kotlin/Function1<space.kscience.dataforge.meta/MutableMeta, kotlin/Unit> = ...) // space.kscience.dataforge.context/ContextBuilder.plugin|plugin(kotlin.String;kotlin.String;kotlin.String;kotlin.Function1<space.kscience.dataforge.meta.MutableMeta,kotlin.Unit>){}[0]
+    final fun plugin(space.kscience.dataforge.context/Plugin) // space.kscience.dataforge.context/ContextBuilder.plugin|plugin(space.kscience.dataforge.context.Plugin){}[0]
+    final fun plugin(space.kscience.dataforge.context/PluginFactory<*>, kotlin/Function1<space.kscience.dataforge.meta/MutableMeta, kotlin/Unit> = ...) // space.kscience.dataforge.context/ContextBuilder.plugin|plugin(space.kscience.dataforge.context.PluginFactory<*>;kotlin.Function1<space.kscience.dataforge.meta.MutableMeta,kotlin.Unit>){}[0]
+    final fun plugin(space.kscience.dataforge.context/PluginFactory<*>, space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.context/ContextBuilder.plugin|plugin(space.kscience.dataforge.context.PluginFactory<*>;space.kscience.dataforge.meta.Meta){}[0]
+    final fun plugin(space.kscience.dataforge.context/PluginTag, kotlin/Function1<space.kscience.dataforge.meta/MutableMeta, kotlin/Unit> = ...) // space.kscience.dataforge.context/ContextBuilder.plugin|plugin(space.kscience.dataforge.context.PluginTag;kotlin.Function1<space.kscience.dataforge.meta.MutableMeta,kotlin.Unit>){}[0]
+    final fun properties(kotlin/Function1<space.kscience.dataforge.meta/MutableMeta, kotlin/Unit>) // space.kscience.dataforge.context/ContextBuilder.properties|properties(kotlin.Function1<space.kscience.dataforge.meta.MutableMeta,kotlin.Unit>){}[0]
+}
+
+final class space.kscience.dataforge.context/DefaultLogManager : space.kscience.dataforge.context/AbstractPlugin, space.kscience.dataforge.context/LogManager { // space.kscience.dataforge.context/DefaultLogManager|null[0]
+    constructor <init>() // space.kscience.dataforge.context/DefaultLogManager.<init>|<init>(){}[0]
+
+    final val defaultLogger // space.kscience.dataforge.context/DefaultLogManager.defaultLogger|{}defaultLogger[0]
+        final fun <get-defaultLogger>(): space.kscience.dataforge.context/Logger // space.kscience.dataforge.context/DefaultLogManager.defaultLogger.<get-defaultLogger>|<get-defaultLogger>(){}[0]
+    final val tag // space.kscience.dataforge.context/DefaultLogManager.tag|{}tag[0]
+        final fun <get-tag>(): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.context/DefaultLogManager.tag.<get-tag>|<get-tag>(){}[0]
+
+    final fun logger(space.kscience.dataforge.names/Name): space.kscience.dataforge.context/Logger // space.kscience.dataforge.context/DefaultLogManager.logger|logger(space.kscience.dataforge.names.Name){}[0]
+
+    final object Companion : space.kscience.dataforge.context/PluginFactory<space.kscience.dataforge.context/DefaultLogManager> { // space.kscience.dataforge.context/DefaultLogManager.Companion|null[0]
+        final val tag // space.kscience.dataforge.context/DefaultLogManager.Companion.tag|{}tag[0]
+            final fun <get-tag>(): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.context/DefaultLogManager.Companion.tag.<get-tag>|<get-tag>(){}[0]
+
+        final fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.context/DefaultLogManager // space.kscience.dataforge.context/DefaultLogManager.Companion.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+    }
+}
+
+final class space.kscience.dataforge.context/PluginBuilder { // space.kscience.dataforge.context/PluginBuilder|null[0]
+    constructor <init>(kotlin/String, kotlin/String = ..., kotlin/String = ...) // space.kscience.dataforge.context/PluginBuilder.<init>|<init>(kotlin.String;kotlin.String;kotlin.String){}[0]
+
+    final val tag // space.kscience.dataforge.context/PluginBuilder.tag|{}tag[0]
+        final fun <get-tag>(): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.context/PluginBuilder.tag.<get-tag>|<get-tag>(){}[0]
+
+    final fun build(): space.kscience.dataforge.context/PluginFactory<*> // space.kscience.dataforge.context/PluginBuilder.build|build(){}[0]
+    final fun provides(kotlin/String, kotlin.collections/Map<space.kscience.dataforge.names/Name, kotlin/Any>) // space.kscience.dataforge.context/PluginBuilder.provides|provides(kotlin.String;kotlin.collections.Map<space.kscience.dataforge.names.Name,kotlin.Any>){}[0]
+    final fun provides(kotlin/String, kotlin/Array<out space.kscience.dataforge.misc/Named>...) // space.kscience.dataforge.context/PluginBuilder.provides|provides(kotlin.String;kotlin.Array<out|space.kscience.dataforge.misc.Named>...){}[0]
+    final fun requires(space.kscience.dataforge.context/PluginFactory<*>, space.kscience.dataforge.meta/Meta = ...) // space.kscience.dataforge.context/PluginBuilder.requires|requires(space.kscience.dataforge.context.PluginFactory<*>;space.kscience.dataforge.meta.Meta){}[0]
+}
+
+final class space.kscience.dataforge.context/PluginManager : kotlin.collections/Iterable<space.kscience.dataforge.context/Plugin>, space.kscience.dataforge.context/ContextAware { // space.kscience.dataforge.context/PluginManager|null[0]
+    final val context // space.kscience.dataforge.context/PluginManager.context|{}context[0]
+        final fun <get-context>(): space.kscience.dataforge.context/Context // space.kscience.dataforge.context/PluginManager.context.<get-context>|<get-context>(){}[0]
+
+    final fun <#A1: kotlin/Any> getByType(kotlin.reflect/KClass<#A1>, space.kscience.dataforge.context/PluginTag? = ..., kotlin/Boolean = ...): #A1? // space.kscience.dataforge.context/PluginManager.getByType|getByType(kotlin.reflect.KClass<0:0>;space.kscience.dataforge.context.PluginTag?;kotlin.Boolean){0§<kotlin.Any>}[0]
+    final fun find(kotlin/Boolean = ..., kotlin/Function1<space.kscience.dataforge.context/Plugin, kotlin/Boolean>): space.kscience.dataforge.context/Plugin? // space.kscience.dataforge.context/PluginManager.find|find(kotlin.Boolean;kotlin.Function1<space.kscience.dataforge.context.Plugin,kotlin.Boolean>){}[0]
+    final fun get(space.kscience.dataforge.context/PluginTag, kotlin/Boolean = ...): space.kscience.dataforge.context/Plugin? // space.kscience.dataforge.context/PluginManager.get|get(space.kscience.dataforge.context.PluginTag;kotlin.Boolean){}[0]
+    final fun iterator(): kotlin.collections/Iterator<space.kscience.dataforge.context/Plugin> // space.kscience.dataforge.context/PluginManager.iterator|iterator(){}[0]
+    final fun list(kotlin/Boolean): kotlin.collections/Collection<space.kscience.dataforge.context/Plugin> // space.kscience.dataforge.context/PluginManager.list|list(kotlin.Boolean){}[0]
+    final inline fun <#A1: reified kotlin/Any> get(space.kscience.dataforge.context/PluginTag? = ..., kotlin/Boolean = ...): #A1? // space.kscience.dataforge.context/PluginManager.get|get(space.kscience.dataforge.context.PluginTag?;kotlin.Boolean){0§<kotlin.Any>}[0]
+    final inline fun <#A1: reified space.kscience.dataforge.context/Plugin> get(space.kscience.dataforge.context/PluginFactory<#A1>, kotlin/Boolean = ...): #A1? // space.kscience.dataforge.context/PluginManager.get|get(space.kscience.dataforge.context.PluginFactory<0:0>;kotlin.Boolean){0§<space.kscience.dataforge.context.Plugin>}[0]
+}
+
+final class space.kscience.dataforge.context/PluginTag : space.kscience.dataforge.meta/MetaRepr { // space.kscience.dataforge.context/PluginTag|null[0]
+    constructor <init>(kotlin/String, kotlin/String = ..., kotlin/String = ...) // space.kscience.dataforge.context/PluginTag.<init>|<init>(kotlin.String;kotlin.String;kotlin.String){}[0]
+
+    final val group // space.kscience.dataforge.context/PluginTag.group|{}group[0]
+        final fun <get-group>(): kotlin/String // space.kscience.dataforge.context/PluginTag.group.<get-group>|<get-group>(){}[0]
+    final val name // space.kscience.dataforge.context/PluginTag.name|{}name[0]
+        final fun <get-name>(): kotlin/String // space.kscience.dataforge.context/PluginTag.name.<get-name>|<get-name>(){}[0]
+    final val version // space.kscience.dataforge.context/PluginTag.version|{}version[0]
+        final fun <get-version>(): kotlin/String // space.kscience.dataforge.context/PluginTag.version.<get-version>|<get-version>(){}[0]
+
+    final fun component1(): kotlin/String // space.kscience.dataforge.context/PluginTag.component1|component1(){}[0]
+    final fun component2(): kotlin/String // space.kscience.dataforge.context/PluginTag.component2|component2(){}[0]
+    final fun component3(): kotlin/String // space.kscience.dataforge.context/PluginTag.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String = ...): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.context/PluginTag.copy|copy(kotlin.String;kotlin.String;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.dataforge.context/PluginTag.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.dataforge.context/PluginTag.hashCode|hashCode(){}[0]
+    final fun matches(space.kscience.dataforge.context/PluginTag): kotlin/Boolean // space.kscience.dataforge.context/PluginTag.matches|matches(space.kscience.dataforge.context.PluginTag){}[0]
+    final fun toMeta(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.context/PluginTag.toMeta|toMeta(){}[0]
+    final fun toString(): kotlin/String // space.kscience.dataforge.context/PluginTag.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<space.kscience.dataforge.context/PluginTag> { // space.kscience.dataforge.context/PluginTag.$serializer|null[0]
+        final val descriptor // space.kscience.dataforge.context/PluginTag.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // space.kscience.dataforge.context/PluginTag.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // space.kscience.dataforge.context/PluginTag.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.context/PluginTag.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, space.kscience.dataforge.context/PluginTag) // space.kscience.dataforge.context/PluginTag.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;space.kscience.dataforge.context.PluginTag){}[0]
+    }
+
+    final object Companion { // space.kscience.dataforge.context/PluginTag.Companion|null[0]
+        final const val DATAFORGE_GROUP // space.kscience.dataforge.context/PluginTag.Companion.DATAFORGE_GROUP|{}DATAFORGE_GROUP[0]
+            final fun <get-DATAFORGE_GROUP>(): kotlin/String // space.kscience.dataforge.context/PluginTag.Companion.DATAFORGE_GROUP.<get-DATAFORGE_GROUP>|<get-DATAFORGE_GROUP>(){}[0]
+
+        final fun fromString(kotlin/String): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.context/PluginTag.Companion.fromString|fromString(kotlin.String){}[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<space.kscience.dataforge.context/PluginTag> // space.kscience.dataforge.context/PluginTag.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class space.kscience.dataforge.provider/PathToken { // space.kscience.dataforge.provider/PathToken|null[0]
+    constructor <init>(space.kscience.dataforge.names/Name, kotlin/String? = ...) // space.kscience.dataforge.provider/PathToken.<init>|<init>(space.kscience.dataforge.names.Name;kotlin.String?){}[0]
+
+    final val name // space.kscience.dataforge.provider/PathToken.name|{}name[0]
+        final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.provider/PathToken.name.<get-name>|<get-name>(){}[0]
+    final val target // space.kscience.dataforge.provider/PathToken.target|{}target[0]
+        final fun <get-target>(): kotlin/String? // space.kscience.dataforge.provider/PathToken.target.<get-target>|<get-target>(){}[0]
+
+    final fun component1(): space.kscience.dataforge.names/Name // space.kscience.dataforge.provider/PathToken.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // space.kscience.dataforge.provider/PathToken.component2|component2(){}[0]
+    final fun copy(space.kscience.dataforge.names/Name = ..., kotlin/String? = ...): space.kscience.dataforge.provider/PathToken // space.kscience.dataforge.provider/PathToken.copy|copy(space.kscience.dataforge.names.Name;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.dataforge.provider/PathToken.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.dataforge.provider/PathToken.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // space.kscience.dataforge.provider/PathToken.toString|toString(){}[0]
+
+    final object Companion { // space.kscience.dataforge.provider/PathToken.Companion|null[0]
+        final const val TARGET_SEPARATOR // space.kscience.dataforge.provider/PathToken.Companion.TARGET_SEPARATOR|{}TARGET_SEPARATOR[0]
+            final fun <get-TARGET_SEPARATOR>(): kotlin/String // space.kscience.dataforge.provider/PathToken.Companion.TARGET_SEPARATOR.<get-TARGET_SEPARATOR>|<get-TARGET_SEPARATOR>(){}[0]
+
+        final fun parse(kotlin/String, kotlin/Boolean = ...): space.kscience.dataforge.provider/PathToken // space.kscience.dataforge.provider/PathToken.Companion.parse|parse(kotlin.String;kotlin.Boolean){}[0]
+    }
+}
+
+final value class space.kscience.dataforge.provider/Path : kotlin.collections/Iterable<space.kscience.dataforge.provider/PathToken> { // space.kscience.dataforge.provider/Path|null[0]
+    constructor <init>(kotlin.collections/List<space.kscience.dataforge.provider/PathToken>) // space.kscience.dataforge.provider/Path.<init>|<init>(kotlin.collections.List<space.kscience.dataforge.provider.PathToken>){}[0]
+
+    final val tokens // space.kscience.dataforge.provider/Path.tokens|{}tokens[0]
+        final fun <get-tokens>(): kotlin.collections/List<space.kscience.dataforge.provider/PathToken> // space.kscience.dataforge.provider/Path.tokens.<get-tokens>|<get-tokens>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.dataforge.provider/Path.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.dataforge.provider/Path.hashCode|hashCode(){}[0]
+    final fun iterator(): kotlin.collections/Iterator<space.kscience.dataforge.provider/PathToken> // space.kscience.dataforge.provider/Path.iterator|iterator(){}[0]
+    final fun toString(): kotlin/String // space.kscience.dataforge.provider/Path.toString|toString(){}[0]
+
+    final object Companion { // space.kscience.dataforge.provider/Path.Companion|null[0]
+        final const val PATH_SEGMENT_SEPARATOR // space.kscience.dataforge.provider/Path.Companion.PATH_SEGMENT_SEPARATOR|{}PATH_SEGMENT_SEPARATOR[0]
+            final fun <get-PATH_SEGMENT_SEPARATOR>(): kotlin/String // space.kscience.dataforge.provider/Path.Companion.PATH_SEGMENT_SEPARATOR.<get-PATH_SEGMENT_SEPARATOR>|<get-PATH_SEGMENT_SEPARATOR>(){}[0]
+
+        final fun parse(kotlin/String): space.kscience.dataforge.provider/Path // space.kscience.dataforge.provider/Path.Companion.parse|parse(kotlin.String){}[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<space.kscience.dataforge.provider/Path> // space.kscience.dataforge.provider/Path.Companion.serializer|serializer(){}[0]
+    }
+}
+
+open class space.kscience.dataforge.context/Context : kotlinx.coroutines/CoroutineScope, space.kscience.dataforge.meta/MetaRepr, space.kscience.dataforge.misc/Named, space.kscience.dataforge.provider/Provider { // space.kscience.dataforge.context/Context|null[0]
+    final val json // space.kscience.dataforge.context/Context.json|{}json[0]
+        final fun <get-json>(): kotlinx.serialization.json/Json // space.kscience.dataforge.context/Context.json.<get-json>|<get-json>(){}[0]
+    final val name // space.kscience.dataforge.context/Context.name|{}name[0]
+        final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.context/Context.name.<get-name>|<get-name>(){}[0]
+    final val parent // space.kscience.dataforge.context/Context.parent|{}parent[0]
+        final fun <get-parent>(): space.kscience.dataforge.context/Context? // space.kscience.dataforge.context/Context.parent.<get-parent>|<get-parent>(){}[0]
+    final val plugins // space.kscience.dataforge.context/Context.plugins|{}plugins[0]
+        final fun <get-plugins>(): space.kscience.dataforge.context/PluginManager // space.kscience.dataforge.context/Context.plugins.<get-plugins>|<get-plugins>(){}[0]
+    final val properties // space.kscience.dataforge.context/Context.properties|{}properties[0]
+        final fun <get-properties>(): space.kscience.dataforge.meta/Laminate // space.kscience.dataforge.context/Context.properties.<get-properties>|<get-properties>(){}[0]
+    final val serializationModule // space.kscience.dataforge.context/Context.serializationModule|{}serializationModule[0]
+        final fun <get-serializationModule>(): kotlinx.serialization.modules/SerializersModule // space.kscience.dataforge.context/Context.serializationModule.<get-serializationModule>|<get-serializationModule>(){}[0]
+    open val coroutineContext // space.kscience.dataforge.context/Context.coroutineContext|{}coroutineContext[0]
+        open fun <get-coroutineContext>(): kotlin.coroutines/CoroutineContext // space.kscience.dataforge.context/Context.coroutineContext.<get-coroutineContext>|<get-coroutineContext>(){}[0]
+    open val defaultTarget // space.kscience.dataforge.context/Context.defaultTarget|{}defaultTarget[0]
+        open fun <get-defaultTarget>(): kotlin/String // space.kscience.dataforge.context/Context.defaultTarget.<get-defaultTarget>|<get-defaultTarget>(){}[0]
+
+    final fun buildContext(kotlin/String? = ..., kotlin/Function1<space.kscience.dataforge.context/ContextBuilder, kotlin/Unit> = ...): space.kscience.dataforge.context/Context // space.kscience.dataforge.context/Context.buildContext|buildContext(kotlin.String?;kotlin.Function1<space.kscience.dataforge.context.ContextBuilder,kotlin.Unit>){}[0]
+    final fun content(kotlin/String, kotlin/Boolean): kotlin.collections/Map<space.kscience.dataforge.names/Name, kotlin/Any> // space.kscience.dataforge.context/Context.content|content(kotlin.String;kotlin.Boolean){}[0]
+    final fun deriveContext(kotlin/Function1<space.kscience.dataforge.context/ContextBuilder, kotlin/Unit> = ...): space.kscience.dataforge.context/Context // space.kscience.dataforge.context/Context.deriveContext|deriveContext(kotlin.Function1<space.kscience.dataforge.context.ContextBuilder,kotlin.Unit>){}[0]
+    open fun close() // space.kscience.dataforge.context/Context.close|close(){}[0]
+    open fun content(kotlin/String): kotlin.collections/Map<space.kscience.dataforge.names/Name, kotlin/Any> // space.kscience.dataforge.context/Context.content|content(kotlin.String){}[0]
+    open fun toMeta(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.context/Context.toMeta|toMeta(){}[0]
+    open fun toString(): kotlin/String // space.kscience.dataforge.context/Context.toString|toString(){}[0]
+
+    final object Companion { // space.kscience.dataforge.context/Context.Companion|null[0]
+        final const val PROPERTY_TARGET // space.kscience.dataforge.context/Context.Companion.PROPERTY_TARGET|{}PROPERTY_TARGET[0]
+            final fun <get-PROPERTY_TARGET>(): kotlin/String // space.kscience.dataforge.context/Context.Companion.PROPERTY_TARGET.<get-PROPERTY_TARGET>|<get-PROPERTY_TARGET>(){}[0]
+    }
+}
+
+final object space.kscience.dataforge.provider/PathSerializer : kotlinx.serialization/KSerializer<space.kscience.dataforge.provider/Path> { // space.kscience.dataforge.provider/PathSerializer|null[0]
+    final val descriptor // space.kscience.dataforge.provider/PathSerializer.descriptor|{}descriptor[0]
+        final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // space.kscience.dataforge.provider/PathSerializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+    final fun deserialize(kotlinx.serialization.encoding/Decoder): space.kscience.dataforge.provider/Path // space.kscience.dataforge.provider/PathSerializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+    final fun serialize(kotlinx.serialization.encoding/Encoder, space.kscience.dataforge.provider/Path) // space.kscience.dataforge.provider/PathSerializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;space.kscience.dataforge.provider.Path){}[0]
+}
+
+final val space.kscience.dataforge.context/Global // space.kscience.dataforge.context/Global|{}Global[0]
+    final fun <get-Global>(): space.kscience.dataforge.context/Context // space.kscience.dataforge.context/Global.<get-Global>|<get-Global>(){}[0]
+final val space.kscience.dataforge.context/logger // space.kscience.dataforge.context/logger|@space.kscience.dataforge.context.ContextAware{}logger[0]
+    final fun (space.kscience.dataforge.context/ContextAware).<get-logger>(): space.kscience.dataforge.context/Logger // space.kscience.dataforge.context/logger.<get-logger>|<get-logger>@space.kscience.dataforge.context.ContextAware(){}[0]
+final val space.kscience.dataforge.context/logger // space.kscience.dataforge.context/logger|@space.kscience.dataforge.context.Context{}logger[0]
+    final fun (space.kscience.dataforge.context/Context).<get-logger>(): space.kscience.dataforge.context/LogManager // space.kscience.dataforge.context/logger.<get-logger>|<get-logger>@space.kscience.dataforge.context.Context(){}[0]
+final val space.kscience.dataforge.context/tags // space.kscience.dataforge.context/tags|@space.kscience.dataforge.context.PluginManager{}tags[0]
+    final fun (space.kscience.dataforge.context/PluginManager).<get-tags>(): kotlin.collections/Set<space.kscience.dataforge.context/PluginTag> // space.kscience.dataforge.context/tags.<get-tags>|<get-tags>@space.kscience.dataforge.context.PluginManager(){}[0]
+final val space.kscience.dataforge.context/values // space.kscience.dataforge.context/values|@kotlin.sequences.Sequence<kotlin.collections.Map.Entry<space.kscience.dataforge.names.Name,0:0>>{0§<kotlin.Any?>}values[0]
+    final fun <#A1: kotlin/Any?> (kotlin.sequences/Sequence<kotlin.collections/Map.Entry<space.kscience.dataforge.names/Name, #A1>>).<get-values>(): kotlin.sequences/Sequence<#A1> // space.kscience.dataforge.context/values.<get-values>|<get-values>@kotlin.sequences.Sequence<kotlin.collections.Map.Entry<space.kscience.dataforge.names.Name,0:0>>(){0§<kotlin.Any?>}[0]
+final val space.kscience.dataforge.provider/head // space.kscience.dataforge.provider/head|@space.kscience.dataforge.provider.Path{}head[0]
+    final fun (space.kscience.dataforge.provider/Path).<get-head>(): space.kscience.dataforge.provider/PathToken? // space.kscience.dataforge.provider/head.<get-head>|<get-head>@space.kscience.dataforge.provider.Path(){}[0]
+final val space.kscience.dataforge.provider/length // space.kscience.dataforge.provider/length|@space.kscience.dataforge.provider.Path{}length[0]
+    final fun (space.kscience.dataforge.provider/Path).<get-length>(): kotlin/Int // space.kscience.dataforge.provider/length.<get-length>|<get-length>@space.kscience.dataforge.provider.Path(){}[0]
+final val space.kscience.dataforge.provider/tail // space.kscience.dataforge.provider/tail|@space.kscience.dataforge.provider.Path{}tail[0]
+    final fun (space.kscience.dataforge.provider/Path).<get-tail>(): space.kscience.dataforge.provider/Path? // space.kscience.dataforge.provider/tail.<get-tail>|<get-tail>@space.kscience.dataforge.provider.Path(){}[0]
+
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/debug(kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/debug|debug@space.kscience.dataforge.context.Logger(kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/error(kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/error|error@space.kscience.dataforge.context.Logger(kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/error(kotlin/Throwable?, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/error|error@space.kscience.dataforge.context.Logger(kotlin.Throwable?;kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/info(kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/info|info@space.kscience.dataforge.context.Logger(kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/trace(kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/trace|trace@space.kscience.dataforge.context.Logger(kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/warn(kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/warn|warn@space.kscience.dataforge.context.Logger(kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.names/Name).space.kscience.dataforge.provider/asPath(kotlin/String? = ...): space.kscience.dataforge.provider/Path // space.kscience.dataforge.provider/asPath|asPath@space.kscience.dataforge.names.Name(kotlin.String?){}[0]
+final fun (space.kscience.dataforge.provider/Path).space.kscience.dataforge.provider/plus(space.kscience.dataforge.provider/Path): space.kscience.dataforge.provider/Path // space.kscience.dataforge.provider/plus|plus@space.kscience.dataforge.provider.Path(space.kscience.dataforge.provider.Path){}[0]
+final fun (space.kscience.dataforge.provider/PathToken).space.kscience.dataforge.provider/asPath(): space.kscience.dataforge.provider/Path // space.kscience.dataforge.provider/asPath|asPath@space.kscience.dataforge.provider.PathToken(){}[0]
+final fun (space.kscience.dataforge.provider/Provider).space.kscience.dataforge.provider/provide(space.kscience.dataforge.provider/Path, kotlin/String? = ...): kotlin/Any? // space.kscience.dataforge.provider/provide|provide@space.kscience.dataforge.provider.Provider(space.kscience.dataforge.provider.Path;kotlin.String?){}[0]
+final fun <#A: kotlin/Any> (space.kscience.dataforge.context/Context).space.kscience.dataforge.context/gather(kotlin/String, kotlin.reflect/KClass<out #A>, kotlin/Boolean = ...): kotlin.collections/Map<space.kscience.dataforge.names/Name, #A> // space.kscience.dataforge.context/gather|gather@space.kscience.dataforge.context.Context(kotlin.String;kotlin.reflect.KClass<out|0:0>;kotlin.Boolean){0§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any> (space.kscience.dataforge.context/Context).space.kscience.dataforge.context/resolve(kotlin/String, space.kscience.dataforge.names/Name, kotlin.reflect/KClass<out #A>): #A? // space.kscience.dataforge.context/resolve|resolve@space.kscience.dataforge.context.Context(kotlin.String;space.kscience.dataforge.names.Name;kotlin.reflect.KClass<out|0:0>){0§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any> (space.kscience.dataforge.provider/Provider).space.kscience.dataforge.provider/top(kotlin/String, kotlin.reflect/KClass<out #A>): kotlin.collections/Map<space.kscience.dataforge.names/Name, #A> // space.kscience.dataforge.provider/top|top@space.kscience.dataforge.provider.Provider(kotlin.String;kotlin.reflect.KClass<out|0:0>){0§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.context/Factory<#A>).space.kscience.dataforge.context/invoke(space.kscience.dataforge.meta/Meta = ..., space.kscience.dataforge.context/Context = ...): #A // space.kscience.dataforge.context/invoke|invoke@space.kscience.dataforge.context.Factory<0:0>(space.kscience.dataforge.meta.Meta;space.kscience.dataforge.context.Context){0§<kotlin.Any?>}[0]
+final fun <#A: space.kscience.dataforge.misc/Named> (kotlin.collections/Collection<#A>).space.kscience.dataforge.context/associateByName(): kotlin.collections/Map<space.kscience.dataforge.names/Name, #A> // space.kscience.dataforge.context/associateByName|associateByName@kotlin.collections.Collection<0:0>(){0§<space.kscience.dataforge.misc.Named>}[0]
+final fun space.kscience.dataforge.context/Context(kotlin/String? = ..., kotlin/Function1<space.kscience.dataforge.context/ContextBuilder, kotlin/Unit> = ...): space.kscience.dataforge.context/Context // space.kscience.dataforge.context/Context|Context(kotlin.String?;kotlin.Function1<space.kscience.dataforge.context.ContextBuilder,kotlin.Unit>){}[0]
+final fun space.kscience.dataforge.context/PluginFactory(kotlin/String, kotlin/String = ..., kotlin/String = ..., kotlin/Function1<space.kscience.dataforge.context/PluginBuilder, kotlin/Unit>): space.kscience.dataforge.context/PluginFactory<*> // space.kscience.dataforge.context/PluginFactory|PluginFactory(kotlin.String;kotlin.String;kotlin.String;kotlin.Function1<space.kscience.dataforge.context.PluginBuilder,kotlin.Unit>){}[0]
+final fun space.kscience.dataforge.provider/Path(kotlin/Array<out kotlin/Pair<space.kscience.dataforge.names/Name, kotlin/String?>>...): space.kscience.dataforge.provider/Path // space.kscience.dataforge.provider/Path|Path(kotlin.Array<out|kotlin.Pair<space.kscience.dataforge.names.Name,kotlin.String?>>...){}[0]
+final fun space.kscience.dataforge.provider/Path(kotlin/Array<out space.kscience.dataforge.names/Name>...): space.kscience.dataforge.provider/Path // space.kscience.dataforge.provider/Path|Path(kotlin.Array<out|space.kscience.dataforge.names.Name>...){}[0]
+final inline fun <#A: reified kotlin/Any> (space.kscience.dataforge.context/Context).space.kscience.dataforge.context/gather(kotlin/String, kotlin/Boolean = ...): kotlin.collections/Map<space.kscience.dataforge.names/Name, #A> // space.kscience.dataforge.context/gather|gather@space.kscience.dataforge.context.Context(kotlin.String;kotlin.Boolean){0§<kotlin.Any>}[0]
+final inline fun <#A: reified kotlin/Any> (space.kscience.dataforge.context/Context).space.kscience.dataforge.context/resolve(kotlin/String, space.kscience.dataforge.names/Name): #A? // space.kscience.dataforge.context/resolve|resolve@space.kscience.dataforge.context.Context(kotlin.String;space.kscience.dataforge.names.Name){0§<kotlin.Any>}[0]
+final inline fun <#A: reified kotlin/Any> (space.kscience.dataforge.provider/Provider).space.kscience.dataforge.provider/provide(kotlin/String, kotlin/String? = ...): #A? // space.kscience.dataforge.provider/provide|provide@space.kscience.dataforge.provider.Provider(kotlin.String;kotlin.String?){0§<kotlin.Any>}[0]
+final inline fun <#A: reified kotlin/Any> (space.kscience.dataforge.provider/Provider).space.kscience.dataforge.provider/top(kotlin/String): kotlin.collections/Map<space.kscience.dataforge.names/Name, #A> // space.kscience.dataforge.provider/top|top@space.kscience.dataforge.provider.Provider(kotlin.String){0§<kotlin.Any>}[0]
+final inline fun <#A: reified space.kscience.dataforge.context/Plugin> (space.kscience.dataforge.context/Context).space.kscience.dataforge.context/request(space.kscience.dataforge.context/PluginFactory<#A>, space.kscience.dataforge.meta/Meta? = ...): #A // space.kscience.dataforge.context/request|request@space.kscience.dataforge.context.Context(space.kscience.dataforge.context.PluginFactory<0:0>;space.kscience.dataforge.meta.Meta?){0§<space.kscience.dataforge.context.Plugin>}[0]
+
+// Targets: [js]
+final class space.kscience.dataforge.context/ConsoleLogManager : space.kscience.dataforge.context/AbstractPlugin, space.kscience.dataforge.context/LogManager { // space.kscience.dataforge.context/ConsoleLogManager|null[0]
+    constructor <init>() // space.kscience.dataforge.context/ConsoleLogManager.<init>|<init>(){}[0]
+
+    final val defaultLogger // space.kscience.dataforge.context/ConsoleLogManager.defaultLogger|{}defaultLogger[0]
+        final fun <get-defaultLogger>(): space.kscience.dataforge.context/Logger // space.kscience.dataforge.context/ConsoleLogManager.defaultLogger.<get-defaultLogger>|<get-defaultLogger>(){}[0]
+    final val tag // space.kscience.dataforge.context/ConsoleLogManager.tag|{}tag[0]
+        final fun <get-tag>(): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.context/ConsoleLogManager.tag.<get-tag>|<get-tag>(){}[0]
+
+    final fun logger(space.kscience.dataforge.names/Name): space.kscience.dataforge.context/Logger // space.kscience.dataforge.context/ConsoleLogManager.logger|logger(space.kscience.dataforge.names.Name){}[0]
+
+    final object Companion : space.kscience.dataforge.context/PluginFactory<space.kscience.dataforge.context/ConsoleLogManager> { // space.kscience.dataforge.context/ConsoleLogManager.Companion|null[0]
+        final val tag // space.kscience.dataforge.context/ConsoleLogManager.Companion.tag|{}tag[0]
+            final fun <get-tag>(): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.context/ConsoleLogManager.Companion.tag.<get-tag>|<get-tag>(){}[0]
+
+        final fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.context/ConsoleLogManager // space.kscience.dataforge.context/ConsoleLogManager.Companion.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+    }
+}
