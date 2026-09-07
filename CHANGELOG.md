@@ -12,6 +12,7 @@
 ### Removed
 
 ### Fixed
+- Bug in json array that made it reconstruct ignoring child elements
 
 ### Security
 
