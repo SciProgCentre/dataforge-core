@@ -165,6 +165,7 @@ public interface MetaConverter<T> : MetaReader<T> {
 
         /**
          * Automatically generate [MetaConverter] for a class using its [serializer] and optional [descriptor]
+         * Publishes the supplied [descriptor], or derives one from [serializer] when it is absent.
          */
         public fun <T> serializable(
             serializer: KSerializer<T>,
@@ -172,7 +173,7 @@ public interface MetaConverter<T> : MetaReader<T> {
             jsonEncoder: Json = Json,
         ): MetaConverter<T> = object : MetaConverter<T> {
 
-            override val descriptor: MetaDescriptor = MetaDescriptor(serializer)
+            override val descriptor: MetaDescriptor = descriptor ?: MetaDescriptor(serializer)
 
             override fun readOrNull(source: Meta): T? {
                 val json = source.toJson(descriptor)
@@ -192,6 +193,7 @@ public interface MetaConverter<T> : MetaReader<T> {
 
         /**
          * Automatically generate [MetaConverter] for a class using inferred serializer and optional [descriptor]
+         * Publishes the supplied [descriptor], or derives one from the inferred serializer when it is absent.
          */
         public inline fun <reified T> serializable(
             descriptor: MetaDescriptor? = null,

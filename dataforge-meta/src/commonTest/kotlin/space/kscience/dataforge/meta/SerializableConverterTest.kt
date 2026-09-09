@@ -2,8 +2,13 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
+import space.kscience.dataforge.meta.descriptors.node
+import space.kscience.dataforge.names.NameToken
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertSame
 
 class SerializableConverterTest {
 
@@ -13,6 +18,47 @@ class SerializableConverterTest {
         val b: String,
         val c: List<Double> = emptyList(),
     )
+
+    @Serializable
+    private data class IndexedItem(val id: String, val value: Double = 0.0)
+
+    @Serializable
+    private data class IndexedData(val items: List<IndexedItem>)
+
+    @Test
+    fun testSerializableDescriptors() {
+        val descriptor = MetaDescriptor { description = "Custom data" }
+        assertSame(descriptor, MetaConverter.serializable(TestSerializable.serializer(), descriptor).descriptor)
+        assertSame(descriptor, MetaConverter.serializable<TestSerializable>(descriptor).descriptor)
+
+        val derived = MetaDescriptor(TestSerializable.serializer())
+        assertEquals(derived, MetaConverter.serializable(TestSerializable.serializer()).descriptor)
+        assertEquals(derived, MetaConverter.serializable<TestSerializable>().descriptor)
+    }
+
+    @Test
+    fun testCustomIndexAndEncoder() {
+        val descriptor = MetaDescriptor {
+            node("items") {
+                multiple = true
+                indexKey = "id"
+            }
+        }
+        val json = Json { encodeDefaults = false }
+        val converters = listOf(
+            MetaConverter.serializable(IndexedData.serializer(), descriptor, json),
+            MetaConverter.serializable<IndexedData>(descriptor, json),
+        )
+        val obj = IndexedData(listOf(IndexedItem("left", 2.0), IndexedItem("right")))
+        converters.forEach { converter ->
+            val meta = converter.convert(obj)
+            assertEquals(setOf(NameToken("items", "left"), NameToken("items", "right")), meta.items.keys)
+            assertEquals(2.0, meta["items[left].value"].double)
+            assertNull(meta["items[right].value"])
+            assertEquals(json.encodeToJsonElement(IndexedData.serializer(), obj), meta.toJson(descriptor))
+            assertEquals(obj, converter.read(meta))
+        }
+    }
 
     @Test
     fun testSerializableConversion() {

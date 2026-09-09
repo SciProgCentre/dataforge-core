@@ -12,6 +12,8 @@
 
 ### Fixed
 
+- Preserve explicit descriptors in serializable converters
+
 ### Security
 
 ## 0.12.0 - 2026-09-10
