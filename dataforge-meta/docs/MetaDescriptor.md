@@ -69,6 +69,7 @@ val descriptor = MetaDescriptor(Config.serializer())
 ```
 
 This bridge ensures that your `Meta` structures stay in sync with your serializable models.
+Nullable primitives and enums also allow an explicit `null` value.
 
 ## Connection to JSON Schema
 

@@ -39,7 +39,7 @@ class MetaDescriptorSerializationTest {
         assertEquals(ValueRestriction.REQUIRED, metaDescriptor.nodes["a"]?.valueRestriction)
 
         assertNotNull(metaDescriptor.nodes["b"])
-        assertEquals(listOf(ValueType.STRING), metaDescriptor.nodes["b"]?.valueTypes)
+        assertEquals(listOf(ValueType.STRING, ValueType.NULL), metaDescriptor.nodes["b"]?.valueTypes)
         assertEquals(ValueRestriction.NONE, metaDescriptor.nodes["b"]?.valueRestriction)
 
         assertNotNull(metaDescriptor.nodes["c"])
