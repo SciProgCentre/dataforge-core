@@ -1,13 +1,13 @@
 [versions]
 
 dataframe = "1.0.0-Beta4"
-exposed = "1.0.0"
-wire = "5.4.0"
+exposed = "1.5.0"
+wire = "6.4.7"
 
 [libraries]
-attributes = "space.kscience:attributes-kt:0.3.0"
+attributes = "space.kscience:attributes-kt:0.4.0"
 kotlinx-dataframe = { module = "org.jetbrains.kotlinx:dataframe", version.ref = "dataframe" }
-csv = "com.jsoizo:kotlin-csv:1.10.0"
+csv = "com.jsoizo:kotlin-csv:2.0.0"
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }

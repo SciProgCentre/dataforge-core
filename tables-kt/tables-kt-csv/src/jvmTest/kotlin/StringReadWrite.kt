@@ -1,5 +1,6 @@
 package space.kscience.tables.csv
 
+import com.jsoizo.kotlincsv.CsvDialect
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import space.kscience.dataforge.meta.Value
@@ -27,9 +28,9 @@ internal class StringReadWrite {
 
     @Test
     fun writeReadTsv() {
-        val string = Table.writeCsvString(table, CsvFormats.tsvWriter)
+        val string = Table.writeCsvString(table) { dialect = CsvDialect.TSV }
         println(string)
-        val reconstructed = Table.readCsvString(string, CsvFormats.tsvReader)
+        val reconstructed = Table.readCsvString(string){ dialect = CsvDialect.TSV }
 
         assertEquals("b2", reconstructed[1, "b"])
     }

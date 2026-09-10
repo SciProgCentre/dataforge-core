@@ -6,11 +6,5 @@
 // - Show declarations: true
 
 // Library unique name: <space.kscience:tables-kt-csv>
-final object space.kscience.tables.csv/CsvFormats { // space.kscience.tables.csv/CsvFormats|null[0]
-    final val tsvReader // space.kscience.tables.csv/CsvFormats.tsvReader|{}tsvReader[0]
-        final fun <get-tsvReader>(): kotlin/Function1<com.github.doyaaaaaken.kotlincsv.dsl.context/CsvReaderContext, kotlin/Unit> // space.kscience.tables.csv/CsvFormats.tsvReader.<get-tsvReader>|<get-tsvReader>(){}[0]
-    final val tsvWriter // space.kscience.tables.csv/CsvFormats.tsvWriter|{}tsvWriter[0]
-        final fun <get-tsvWriter>(): kotlin/Function1<com.github.doyaaaaaken.kotlincsv.dsl.context/CsvWriterContext, kotlin/Unit> // space.kscience.tables.csv/CsvFormats.tsvWriter.<get-tsvWriter>|<get-tsvWriter>(){}[0]
-}
-
-final fun (space.kscience.tables/Table.Companion).space.kscience.tables.csv/readCsvString(kotlin/String, kotlin/Function1<com.github.doyaaaaaken.kotlincsv.dsl.context/CsvReaderContext, kotlin/Unit> = ...): space.kscience.tables/Table<kotlin/String> // space.kscience.tables.csv/readCsvString|readCsvString@space.kscience.tables.Table.Companion(kotlin.String;kotlin.Function1<com.github.doyaaaaaken.kotlincsv.dsl.context.CsvReaderContext,kotlin.Unit>){}[0]
+final fun (space.kscience.tables/Table.Companion).space.kscience.tables.csv/readCsvString(kotlin/String, kotlin.collections/List<kotlin/String>? = ..., kotlin/Function1<com.jsoizo.kotlincsv.reader/CsvReaderConfigBuilder, kotlin/Unit> = ...): space.kscience.tables/Table<kotlin/String> // space.kscience.tables.csv/readCsvString|readCsvString@space.kscience.tables.Table.Companion(kotlin.String;kotlin.collections.List<kotlin.String>?;kotlin.Function1<com.jsoizo.kotlincsv.reader.CsvReaderConfigBuilder,kotlin.Unit>){}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Table.Companion).space.kscience.tables.csv/writeCsvString(space.kscience.tables/Table<#A?>, kotlin/Function1<#A?, kotlin/String> = ..., kotlin/Function1<com.jsoizo.kotlincsv.writer/CsvWriterConfigBuilder, kotlin/Unit> = ...): kotlin/String // space.kscience.tables.csv/writeCsvString|writeCsvString@space.kscience.tables.Table.Companion(space.kscience.tables.Table<0:0?>;kotlin.Function1<0:0?,kotlin.String>;kotlin.Function1<com.jsoizo.kotlincsv.writer.CsvWriterConfigBuilder,kotlin.Unit>){0§<kotlin.Any?>}[0]

@@ -50,6 +50,9 @@ public inline fun <T, reified R> Table<T>.rowsToColumn(
     TransformationColumn(this, typeOf<R>(), name, meta, mapper)
 }
 
+/**
+ * Create a virtual column from a given column header and sequential data
+ */
 public fun <T, R> Table<T>.rowsToColumn(
     header: ColumnHeader<R>,
     cache: Boolean = false,
@@ -60,6 +63,9 @@ public fun <T, R> Table<T>.rowsToColumn(
     TransformationColumn(this, header.type, header.name, header.meta, mapper)
 }
 
+/**
+ * Create a virtual column from a given column header and sequential data
+ */
 public fun <T> Table<T>.rowsToDoubleColumn(
     name: String,
     meta: Meta = Meta.EMPTY,
@@ -69,6 +75,9 @@ public fun <T> Table<T>.rowsToDoubleColumn(
     return DoubleColumn(name, data, meta)
 }
 
+/**
+ * Create a virtual column from a given column header and sequential data
+ */
 public fun <T> Table<T>.rowsToIntColumn(
     name: String,
     meta: Meta = Meta.EMPTY,

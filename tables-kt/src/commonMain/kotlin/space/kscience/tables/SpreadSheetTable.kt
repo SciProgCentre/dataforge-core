@@ -8,11 +8,16 @@ import kotlin.reflect.typeOf
 
 private fun cellId(row: Int, column: String) = "$column[$row]"
 
-
+/**
+ * A cell in a spreadsheet-like table.
+ */
 public data class SpreadSheetCell<T>(val row: Int, val column: String, val value: T) {
     val id: String get() = cellId(row, column)
 }
 
+/**
+ * A table implementation that stores data in a spreadsheet-like format.
+ */
 public class SpreadSheetTable<T>(
     private val cellValueType: KType,
     public val cellMap: MutableMap<String, SpreadSheetCell<T>> = HashMap(),
@@ -52,6 +57,9 @@ public class SpreadSheetTable<T>(
     }
 }
 
+/**
+ * Create a new [SpreadSheetTable] with the given type and apply the given builder.
+ */
 public inline fun <reified T> SpreadSheetTable(builder: SpreadSheetTable<T>.() -> Unit): SpreadSheetTable<T> =
     SpreadSheetTable<T>(typeOf<T>()).apply(builder)
 
