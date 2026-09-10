@@ -5,16 +5,25 @@
 ### Added
 
 ### Changed
-- **BREAKING** MutableMeta.put infix functions are moved to context receiver extensions
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
-- Bug in json array that made it reconstruct ignoring child elements
 
 ### Security
+
+## 0.12.0 - 2026-09-10
+
+### Changed
+
+- Tables-kt-csv update to kotlin-csv 2.0
+- **BREAKING** MutableMeta.put infix functions are moved to context receiver extensions
+
+### Fixed
+
+- Bug in json array that made it reconstruct ignoring child elements
 
 ## 0.11.1 - 2026-07-18
 
