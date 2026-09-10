@@ -50,9 +50,6 @@ public data class MetaDescriptor(
     public val childrenDescriptor: MetaDescriptor? = null,
     public val attributes: Meta = Meta.EMPTY
 ) {
-    @Deprecated("Replace by nodes", ReplaceWith("nodes"))
-    public val children: Map<String, MetaDescriptor> get() = nodes
-
     /**
      * A node constructed of default values for this descriptor and its children
      */

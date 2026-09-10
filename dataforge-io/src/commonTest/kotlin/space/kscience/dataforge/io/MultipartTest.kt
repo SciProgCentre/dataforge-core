@@ -4,6 +4,7 @@ import kotlinx.io.writeString
 import space.kscience.dataforge.context.Global
 import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.int
+import space.kscience.dataforge.meta.put
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.Test
 import kotlin.test.assertEquals

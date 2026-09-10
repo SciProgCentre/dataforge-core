@@ -2,6 +2,7 @@ package space.kscience.dataforge.meta
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.serializer
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.names.Name
@@ -171,9 +172,16 @@ public interface MetaConverter<T> : MetaReader<T> {
             jsonEncoder: Json = Json,
         ): MetaConverter<T> = object : MetaConverter<T> {
 
+            override val descriptor: MetaDescriptor = MetaDescriptor(serializer)
+
             override fun readOrNull(source: Meta): T? {
                 val json = source.toJson(descriptor)
-                return jsonEncoder.decodeFromJsonElement(serializer, json)
+                //process a case of top-level list separately
+                return if(json is JsonObject && (json.keys == setOf(Meta.JSON_ARRAY_KEY))){
+                    jsonEncoder.decodeFromJsonElement(serializer, json[Meta.JSON_ARRAY_KEY]!!)
+                } else {
+                    jsonEncoder.decodeFromJsonElement(serializer, json)
+                }
             }
 
             override fun convert(obj: T): Meta {

@@ -2,10 +2,7 @@ package space.kscience.dataforge.workspace
 
 import space.kscience.dataforge.context.PluginFactory
 import space.kscience.dataforge.data.*
-import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.MutableMeta
-import space.kscience.dataforge.meta.copy
-import space.kscience.dataforge.meta.remove
+import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.UnsafeKType
 import space.kscience.dataforge.names.Name

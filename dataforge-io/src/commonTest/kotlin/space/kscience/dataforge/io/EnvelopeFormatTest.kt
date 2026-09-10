@@ -2,6 +2,7 @@ package space.kscience.dataforge.io
 
 import kotlinx.io.readByteArray
 import kotlinx.io.writeString
+import space.kscience.dataforge.meta.put
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

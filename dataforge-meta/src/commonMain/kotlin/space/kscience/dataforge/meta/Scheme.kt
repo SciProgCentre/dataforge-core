@@ -169,7 +169,7 @@ public open class SchemeSpec<T : Scheme>(
     private val builder: () -> T,
 ) : MetaConverter<T> {
 
-    //TODO make SchemeSpec iplement serializer
+    //TODO make SchemeSpec implement serializer
 
     override val descriptor: MetaDescriptor? get() = null
 

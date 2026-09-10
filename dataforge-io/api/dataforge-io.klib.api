@@ -1,0 +1,400 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxX64, macosArm64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <space.kscience:dataforge-io>
+abstract fun interface <#A: in kotlin/Any?> space.kscience.dataforge.io/IOWriter { // space.kscience.dataforge.io/IOWriter|null[0]
+    abstract fun writeTo(kotlinx.io/Sink, #A) // space.kscience.dataforge.io/IOWriter.writeTo|writeTo(kotlinx.io.Sink;1:0){}[0]
+}
+
+abstract fun interface <#A: out kotlin/Any?> space.kscience.dataforge.io/IOReader { // space.kscience.dataforge.io/IOReader|null[0]
+    abstract fun readFrom(kotlinx.io/Source): #A // space.kscience.dataforge.io/IOReader.readFrom|readFrom(kotlinx.io.Source){}[0]
+    open fun readFrom(space.kscience.dataforge.io/Binary): #A // space.kscience.dataforge.io/IOReader.readFrom|readFrom(space.kscience.dataforge.io.Binary){}[0]
+
+    final object Companion { // space.kscience.dataforge.io/IOReader.Companion|null[0]
+        final val binary // space.kscience.dataforge.io/IOReader.Companion.binary|{}binary[0]
+            final fun <get-binary>(): space.kscience.dataforge.io/IOReader<space.kscience.dataforge.io/Binary> // space.kscience.dataforge.io/IOReader.Companion.binary.<get-binary>|<get-binary>(){}[0]
+    }
+}
+
+abstract interface <#A: kotlin/Any?> space.kscience.dataforge.io/IOFormat : space.kscience.dataforge.io/IOReader<#A>, space.kscience.dataforge.io/IOWriter<#A> // space.kscience.dataforge.io/IOFormat|null[0]
+
+abstract interface <#A: kotlin/Any?> space.kscience.dataforge.io/IOFormatFactory : space.kscience.dataforge.context/Factory<space.kscience.dataforge.io/IOFormat<#A>>, space.kscience.dataforge.misc/Named { // space.kscience.dataforge.io/IOFormatFactory|null[0]
+    abstract val type // space.kscience.dataforge.io/IOFormatFactory.type|{}type[0]
+        abstract fun <get-type>(): kotlin.reflect/KType // space.kscience.dataforge.io/IOFormatFactory.type.<get-type>|<get-type>(){}[0]
+
+    final object Companion { // space.kscience.dataforge.io/IOFormatFactory.Companion|null[0]
+        final const val IO_FORMAT_TYPE // space.kscience.dataforge.io/IOFormatFactory.Companion.IO_FORMAT_TYPE|{}IO_FORMAT_TYPE[0]
+            final fun <get-IO_FORMAT_TYPE>(): kotlin/String // space.kscience.dataforge.io/IOFormatFactory.Companion.IO_FORMAT_TYPE.<get-IO_FORMAT_TYPE>|<get-IO_FORMAT_TYPE>(){}[0]
+
+        final val META_KEY // space.kscience.dataforge.io/IOFormatFactory.Companion.META_KEY|{}META_KEY[0]
+            final fun <get-META_KEY>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/IOFormatFactory.Companion.META_KEY.<get-META_KEY>|<get-META_KEY>(){}[0]
+        final val NAME_KEY // space.kscience.dataforge.io/IOFormatFactory.Companion.NAME_KEY|{}NAME_KEY[0]
+            final fun <get-NAME_KEY>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/IOFormatFactory.Companion.NAME_KEY.<get-NAME_KEY>|<get-NAME_KEY>(){}[0]
+    }
+}
+
+abstract interface space.kscience.dataforge.io/Binary { // space.kscience.dataforge.io/Binary|null[0]
+    abstract val size // space.kscience.dataforge.io/Binary.size|{}size[0]
+        abstract fun <get-size>(): kotlin/Int // space.kscience.dataforge.io/Binary.size.<get-size>|<get-size>(){}[0]
+
+    abstract fun <#A1: kotlin/Any?> read(kotlin/Int = ..., kotlin/Int = ..., kotlin/Function1<kotlinx.io/Source, #A1>): #A1 // space.kscience.dataforge.io/Binary.read|read(kotlin.Int;kotlin.Int;kotlin.Function1<kotlinx.io.Source,0:0>){0§<kotlin.Any?>}[0]
+    abstract fun view(kotlin/Int, kotlin/Int = ...): space.kscience.dataforge.io/Binary // space.kscience.dataforge.io/Binary.view|view(kotlin.Int;kotlin.Int){}[0]
+    abstract suspend fun <#A1: kotlin/Any?> readSuspend(kotlin/Int = ..., kotlin/Int = ..., kotlin.coroutines/SuspendFunction1<kotlinx.io/Source, #A1>): #A1 // space.kscience.dataforge.io/Binary.readSuspend|readSuspend(kotlin.Int;kotlin.Int;kotlin.coroutines.SuspendFunction1<kotlinx.io.Source,0:0>){0§<kotlin.Any?>}[0]
+
+    final object Companion { // space.kscience.dataforge.io/Binary.Companion|null[0]
+        final val EMPTY // space.kscience.dataforge.io/Binary.Companion.EMPTY|{}EMPTY[0]
+            final fun <get-EMPTY>(): space.kscience.dataforge.io/Binary // space.kscience.dataforge.io/Binary.Companion.EMPTY.<get-EMPTY>|<get-EMPTY>(){}[0]
+    }
+}
+
+abstract interface space.kscience.dataforge.io/Envelope { // space.kscience.dataforge.io/Envelope|null[0]
+    abstract val data // space.kscience.dataforge.io/Envelope.data|{}data[0]
+        abstract fun <get-data>(): space.kscience.dataforge.io/Binary? // space.kscience.dataforge.io/Envelope.data.<get-data>|<get-data>(){}[0]
+    abstract val meta // space.kscience.dataforge.io/Envelope.meta|{}meta[0]
+        abstract fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io/Envelope.meta.<get-meta>|<get-meta>(){}[0]
+
+    final object Companion { // space.kscience.dataforge.io/Envelope.Companion|null[0]
+        final val ENVELOPE_DATA_ID_KEY // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_DATA_ID_KEY|{}ENVELOPE_DATA_ID_KEY[0]
+            final fun <get-ENVELOPE_DATA_ID_KEY>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_DATA_ID_KEY.<get-ENVELOPE_DATA_ID_KEY>|<get-ENVELOPE_DATA_ID_KEY>(){}[0]
+        final val ENVELOPE_DATA_TYPE_KEY // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_DATA_TYPE_KEY|{}ENVELOPE_DATA_TYPE_KEY[0]
+            final fun <get-ENVELOPE_DATA_TYPE_KEY>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_DATA_TYPE_KEY.<get-ENVELOPE_DATA_TYPE_KEY>|<get-ENVELOPE_DATA_TYPE_KEY>(){}[0]
+        final val ENVELOPE_DESCRIPTION_KEY // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_DESCRIPTION_KEY|{}ENVELOPE_DESCRIPTION_KEY[0]
+            final fun <get-ENVELOPE_DESCRIPTION_KEY>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_DESCRIPTION_KEY.<get-ENVELOPE_DESCRIPTION_KEY>|<get-ENVELOPE_DESCRIPTION_KEY>(){}[0]
+        final val ENVELOPE_NAME_KEY // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_NAME_KEY|{}ENVELOPE_NAME_KEY[0]
+            final fun <get-ENVELOPE_NAME_KEY>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_NAME_KEY.<get-ENVELOPE_NAME_KEY>|<get-ENVELOPE_NAME_KEY>(){}[0]
+        final val ENVELOPE_NODE_KEY // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_NODE_KEY|{}ENVELOPE_NODE_KEY[0]
+            final fun <get-ENVELOPE_NODE_KEY>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_NODE_KEY.<get-ENVELOPE_NODE_KEY>|<get-ENVELOPE_NODE_KEY>(){}[0]
+        final val ENVELOPE_TYPE_KEY // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_TYPE_KEY|{}ENVELOPE_TYPE_KEY[0]
+            final fun <get-ENVELOPE_TYPE_KEY>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/Envelope.Companion.ENVELOPE_TYPE_KEY.<get-ENVELOPE_TYPE_KEY>|<get-ENVELOPE_TYPE_KEY>(){}[0]
+
+        final inline fun invoke(kotlin/Function1<space.kscience.dataforge.io/EnvelopeBuilder, kotlin/Unit>): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/Envelope.Companion.invoke|invoke(kotlin.Function1<space.kscience.dataforge.io.EnvelopeBuilder,kotlin.Unit>){}[0]
+    }
+}
+
+abstract interface space.kscience.dataforge.io/EnvelopeFormat : space.kscience.dataforge.io/IOFormat<space.kscience.dataforge.io/Envelope> // space.kscience.dataforge.io/EnvelopeFormat|null[0]
+
+abstract interface space.kscience.dataforge.io/EnvelopeFormatFactory : space.kscience.dataforge.io/EnvelopeFormat, space.kscience.dataforge.io/IOFormatFactory<space.kscience.dataforge.io/Envelope> { // space.kscience.dataforge.io/EnvelopeFormatFactory|null[0]
+    open val type // space.kscience.dataforge.io/EnvelopeFormatFactory.type|{}type[0]
+        open fun <get-type>(): kotlin.reflect/KType // space.kscience.dataforge.io/EnvelopeFormatFactory.type.<get-type>|<get-type>(){}[0]
+
+    abstract fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io/EnvelopeFormat // space.kscience.dataforge.io/EnvelopeFormatFactory.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+    abstract fun peekFormat(space.kscience.dataforge.io/IOPlugin, space.kscience.dataforge.io/Binary): space.kscience.dataforge.io/EnvelopeFormat? // space.kscience.dataforge.io/EnvelopeFormatFactory.peekFormat|peekFormat(space.kscience.dataforge.io.IOPlugin;space.kscience.dataforge.io.Binary){}[0]
+
+    final object Companion { // space.kscience.dataforge.io/EnvelopeFormatFactory.Companion|null[0]
+        final const val ENVELOPE_FORMAT_TYPE // space.kscience.dataforge.io/EnvelopeFormatFactory.Companion.ENVELOPE_FORMAT_TYPE|{}ENVELOPE_FORMAT_TYPE[0]
+            final fun <get-ENVELOPE_FORMAT_TYPE>(): kotlin/String // space.kscience.dataforge.io/EnvelopeFormatFactory.Companion.ENVELOPE_FORMAT_TYPE.<get-ENVELOPE_FORMAT_TYPE>|<get-ENVELOPE_FORMAT_TYPE>(){}[0]
+
+        final val ENVELOPE_FACTORY_NAME // space.kscience.dataforge.io/EnvelopeFormatFactory.Companion.ENVELOPE_FACTORY_NAME|{}ENVELOPE_FACTORY_NAME[0]
+            final fun <get-ENVELOPE_FACTORY_NAME>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/EnvelopeFormatFactory.Companion.ENVELOPE_FACTORY_NAME.<get-ENVELOPE_FACTORY_NAME>|<get-ENVELOPE_FACTORY_NAME>(){}[0]
+    }
+}
+
+abstract interface space.kscience.dataforge.io/MetaFormat : space.kscience.dataforge.io/IOFormat<space.kscience.dataforge.meta/Meta> { // space.kscience.dataforge.io/MetaFormat|null[0]
+    abstract fun readMeta(kotlinx.io/Source, space.kscience.dataforge.meta.descriptors/MetaDescriptor? = ...): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io/MetaFormat.readMeta|readMeta(kotlinx.io.Source;space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+    abstract fun writeMeta(kotlinx.io/Sink, space.kscience.dataforge.meta/Meta, space.kscience.dataforge.meta.descriptors/MetaDescriptor? = ...) // space.kscience.dataforge.io/MetaFormat.writeMeta|writeMeta(kotlinx.io.Sink;space.kscience.dataforge.meta.Meta;space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+    open fun readFrom(kotlinx.io/Source): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io/MetaFormat.readFrom|readFrom(kotlinx.io.Source){}[0]
+    open fun writeTo(kotlinx.io/Sink, space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.io/MetaFormat.writeTo|writeTo(kotlinx.io.Sink;space.kscience.dataforge.meta.Meta){}[0]
+}
+
+abstract interface space.kscience.dataforge.io/MetaFormatFactory : space.kscience.dataforge.io/IOFormatFactory<space.kscience.dataforge.meta/Meta>, space.kscience.dataforge.io/MetaFormat { // space.kscience.dataforge.io/MetaFormatFactory|null[0]
+    abstract val shortName // space.kscience.dataforge.io/MetaFormatFactory.shortName|{}shortName[0]
+        abstract fun <get-shortName>(): kotlin/String // space.kscience.dataforge.io/MetaFormatFactory.shortName.<get-shortName>|<get-shortName>(){}[0]
+    open val key // space.kscience.dataforge.io/MetaFormatFactory.key|{}key[0]
+        open fun <get-key>(): kotlin/Short // space.kscience.dataforge.io/MetaFormatFactory.key.<get-key>|<get-key>(){}[0]
+    open val name // space.kscience.dataforge.io/MetaFormatFactory.name|{}name[0]
+        open fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/MetaFormatFactory.name.<get-name>|<get-name>(){}[0]
+    open val type // space.kscience.dataforge.io/MetaFormatFactory.type|{}type[0]
+        open fun <get-type>(): kotlin.reflect/KType // space.kscience.dataforge.io/MetaFormatFactory.type.<get-type>|<get-type>(){}[0]
+
+    abstract fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io/MetaFormat // space.kscience.dataforge.io/MetaFormatFactory.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+
+    final object Companion { // space.kscience.dataforge.io/MetaFormatFactory.Companion|null[0]
+        final const val META_FORMAT_TYPE // space.kscience.dataforge.io/MetaFormatFactory.Companion.META_FORMAT_TYPE|{}META_FORMAT_TYPE[0]
+            final fun <get-META_FORMAT_TYPE>(): kotlin/String // space.kscience.dataforge.io/MetaFormatFactory.Companion.META_FORMAT_TYPE.<get-META_FORMAT_TYPE>|<get-META_FORMAT_TYPE>(){}[0]
+    }
+}
+
+final class space.kscience.dataforge.io/EnvelopeBuilder : space.kscience.dataforge.io/Envelope { // space.kscience.dataforge.io/EnvelopeBuilder|null[0]
+    constructor <init>() // space.kscience.dataforge.io/EnvelopeBuilder.<init>|<init>(){}[0]
+
+    final var data // space.kscience.dataforge.io/EnvelopeBuilder.data|{}data[0]
+        final fun <get-data>(): space.kscience.dataforge.io/Binary? // space.kscience.dataforge.io/EnvelopeBuilder.data.<get-data>|<get-data>(){}[0]
+        final fun <set-data>(space.kscience.dataforge.io/Binary?) // space.kscience.dataforge.io/EnvelopeBuilder.data.<set-data>|<set-data>(space.kscience.dataforge.io.Binary?){}[0]
+    final var dataID // space.kscience.dataforge.io/EnvelopeBuilder.dataID|{}dataID[0]
+        final fun <get-dataID>(): kotlin/String? // space.kscience.dataforge.io/EnvelopeBuilder.dataID.<get-dataID>|<get-dataID>(){}[0]
+        final fun <set-dataID>(kotlin/String?) // space.kscience.dataforge.io/EnvelopeBuilder.dataID.<set-dataID>|<set-dataID>(kotlin.String?){}[0]
+    final var dataType // space.kscience.dataforge.io/EnvelopeBuilder.dataType|{}dataType[0]
+        final fun <get-dataType>(): kotlin/String? // space.kscience.dataforge.io/EnvelopeBuilder.dataType.<get-dataType>|<get-dataType>(){}[0]
+        final fun <set-dataType>(kotlin/String?) // space.kscience.dataforge.io/EnvelopeBuilder.dataType.<set-dataType>|<set-dataType>(kotlin.String?){}[0]
+    final var description // space.kscience.dataforge.io/EnvelopeBuilder.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // space.kscience.dataforge.io/EnvelopeBuilder.description.<get-description>|<get-description>(){}[0]
+        final fun <set-description>(kotlin/String?) // space.kscience.dataforge.io/EnvelopeBuilder.description.<set-description>|<set-description>(kotlin.String?){}[0]
+    final var meta // space.kscience.dataforge.io/EnvelopeBuilder.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io/EnvelopeBuilder.meta.<get-meta>|<get-meta>(){}[0]
+        final fun <set-meta>(space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.io/EnvelopeBuilder.meta.<set-meta>|<set-meta>(space.kscience.dataforge.meta.Meta){}[0]
+    final var name // space.kscience.dataforge.io/EnvelopeBuilder.name|{}name[0]
+        final fun <get-name>(): kotlin/String? // space.kscience.dataforge.io/EnvelopeBuilder.name.<get-name>|<get-name>(){}[0]
+        final fun <set-name>(kotlin/String?) // space.kscience.dataforge.io/EnvelopeBuilder.name.<set-name>|<set-name>(kotlin.String?){}[0]
+    final var type // space.kscience.dataforge.io/EnvelopeBuilder.type|{}type[0]
+        final fun <get-type>(): kotlin/String? // space.kscience.dataforge.io/EnvelopeBuilder.type.<get-type>|<get-type>(){}[0]
+        final fun <set-type>(kotlin/String?) // space.kscience.dataforge.io/EnvelopeBuilder.type.<set-type>|<set-type>(kotlin.String?){}[0]
+
+    final fun meta(kotlin/Function1<space.kscience.dataforge.meta/MutableMeta, kotlin/Unit>) // space.kscience.dataforge.io/EnvelopeBuilder.meta|meta(kotlin.Function1<space.kscience.dataforge.meta.MutableMeta,kotlin.Unit>){}[0]
+    final fun seal(): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/EnvelopeBuilder.seal|seal(){}[0]
+    final inline fun data(kotlin/Function1<kotlinx.io/Sink, kotlin/Unit>) // space.kscience.dataforge.io/EnvelopeBuilder.data|data(kotlin.Function1<kotlinx.io.Sink,kotlin.Unit>){}[0]
+}
+
+final class space.kscience.dataforge.io/EnvelopePart { // space.kscience.dataforge.io/EnvelopePart|null[0]
+    constructor <init>(space.kscience.dataforge.io/Binary, space.kscience.dataforge.meta/Meta?) // space.kscience.dataforge.io/EnvelopePart.<init>|<init>(space.kscience.dataforge.io.Binary;space.kscience.dataforge.meta.Meta?){}[0]
+
+    final val binary // space.kscience.dataforge.io/EnvelopePart.binary|{}binary[0]
+        final fun <get-binary>(): space.kscience.dataforge.io/Binary // space.kscience.dataforge.io/EnvelopePart.binary.<get-binary>|<get-binary>(){}[0]
+    final val description // space.kscience.dataforge.io/EnvelopePart.description|{}description[0]
+        final fun <get-description>(): space.kscience.dataforge.meta/Meta? // space.kscience.dataforge.io/EnvelopePart.description.<get-description>|<get-description>(){}[0]
+
+    final fun component1(): space.kscience.dataforge.io/Binary // space.kscience.dataforge.io/EnvelopePart.component1|component1(){}[0]
+    final fun component2(): space.kscience.dataforge.meta/Meta? // space.kscience.dataforge.io/EnvelopePart.component2|component2(){}[0]
+    final fun copy(space.kscience.dataforge.io/Binary = ..., space.kscience.dataforge.meta/Meta? = ...): space.kscience.dataforge.io/EnvelopePart // space.kscience.dataforge.io/EnvelopePart.copy|copy(space.kscience.dataforge.io.Binary;space.kscience.dataforge.meta.Meta?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // space.kscience.dataforge.io/EnvelopePart.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // space.kscience.dataforge.io/EnvelopePart.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // space.kscience.dataforge.io/EnvelopePart.toString|toString(){}[0]
+}
+
+final class space.kscience.dataforge.io/IOPlugin : space.kscience.dataforge.context/AbstractPlugin { // space.kscience.dataforge.io/IOPlugin|null[0]
+    constructor <init>(space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.io/IOPlugin.<init>|<init>(space.kscience.dataforge.meta.Meta){}[0]
+
+    final val envelopeFormatFactories // space.kscience.dataforge.io/IOPlugin.envelopeFormatFactories|{}envelopeFormatFactories[0]
+        final fun <get-envelopeFormatFactories>(): kotlin.collections/Collection<space.kscience.dataforge.io/EnvelopeFormatFactory> // space.kscience.dataforge.io/IOPlugin.envelopeFormatFactories.<get-envelopeFormatFactories>|<get-envelopeFormatFactories>(){}[0]
+    final val metaFormatFactories // space.kscience.dataforge.io/IOPlugin.metaFormatFactories|{}metaFormatFactories[0]
+        final fun <get-metaFormatFactories>(): kotlin.collections/Collection<space.kscience.dataforge.io/MetaFormatFactory> // space.kscience.dataforge.io/IOPlugin.metaFormatFactories.<get-metaFormatFactories>|<get-metaFormatFactories>(){}[0]
+    final val tag // space.kscience.dataforge.io/IOPlugin.tag|{}tag[0]
+        final fun <get-tag>(): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.io/IOPlugin.tag.<get-tag>|<get-tag>(){}[0]
+
+    final fun content(kotlin/String): kotlin.collections/Map<space.kscience.dataforge.names/Name, kotlin/Any> // space.kscience.dataforge.io/IOPlugin.content|content(kotlin.String){}[0]
+    final fun resolveEnvelopeFormat(space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io/EnvelopeFormat? // space.kscience.dataforge.io/IOPlugin.resolveEnvelopeFormat|resolveEnvelopeFormat(space.kscience.dataforge.meta.Meta){}[0]
+    final fun resolveMetaFormat(kotlin/Short, space.kscience.dataforge.meta/Meta = ...): space.kscience.dataforge.io/MetaFormat? // space.kscience.dataforge.io/IOPlugin.resolveMetaFormat|resolveMetaFormat(kotlin.Short;space.kscience.dataforge.meta.Meta){}[0]
+    final fun resolveMetaFormat(kotlin/String, space.kscience.dataforge.meta/Meta = ...): space.kscience.dataforge.io/MetaFormat? // space.kscience.dataforge.io/IOPlugin.resolveMetaFormat|resolveMetaFormat(kotlin.String;space.kscience.dataforge.meta.Meta){}[0]
+
+    final object Companion : space.kscience.dataforge.context/PluginFactory<space.kscience.dataforge.io/IOPlugin> { // space.kscience.dataforge.io/IOPlugin.Companion|null[0]
+        final val WORK_DIRECTORY_KEY // space.kscience.dataforge.io/IOPlugin.Companion.WORK_DIRECTORY_KEY|{}WORK_DIRECTORY_KEY[0]
+            final fun <get-WORK_DIRECTORY_KEY>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/IOPlugin.Companion.WORK_DIRECTORY_KEY.<get-WORK_DIRECTORY_KEY>|<get-WORK_DIRECTORY_KEY>(){}[0]
+        final val defaultEnvelopeFormats // space.kscience.dataforge.io/IOPlugin.Companion.defaultEnvelopeFormats|{}defaultEnvelopeFormats[0]
+            final fun <get-defaultEnvelopeFormats>(): kotlin.collections/List<space.kscience.dataforge.io/EnvelopeFormatFactory> // space.kscience.dataforge.io/IOPlugin.Companion.defaultEnvelopeFormats.<get-defaultEnvelopeFormats>|<get-defaultEnvelopeFormats>(){}[0]
+        final val defaultMetaFormats // space.kscience.dataforge.io/IOPlugin.Companion.defaultMetaFormats|{}defaultMetaFormats[0]
+            final fun <get-defaultMetaFormats>(): kotlin.collections/List<space.kscience.dataforge.io/MetaFormatFactory> // space.kscience.dataforge.io/IOPlugin.Companion.defaultMetaFormats.<get-defaultMetaFormats>|<get-defaultMetaFormats>(){}[0]
+        final val tag // space.kscience.dataforge.io/IOPlugin.Companion.tag|{}tag[0]
+            final fun <get-tag>(): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.io/IOPlugin.Companion.tag.<get-tag>|<get-tag>(){}[0]
+
+        final fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io/IOPlugin // space.kscience.dataforge.io/IOPlugin.Companion.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+    }
+}
+
+final class space.kscience.dataforge.io/JsonMetaFormat : space.kscience.dataforge.io/MetaFormat { // space.kscience.dataforge.io/JsonMetaFormat|null[0]
+    constructor <init>(kotlinx.serialization.json/Json = ...) // space.kscience.dataforge.io/JsonMetaFormat.<init>|<init>(kotlinx.serialization.json.Json){}[0]
+
+    final fun readMeta(kotlinx.io/Source, space.kscience.dataforge.meta.descriptors/MetaDescriptor?): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io/JsonMetaFormat.readMeta|readMeta(kotlinx.io.Source;space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+    final fun writeMeta(kotlinx.io/Sink, space.kscience.dataforge.meta/Meta, space.kscience.dataforge.meta.descriptors/MetaDescriptor?) // space.kscience.dataforge.io/JsonMetaFormat.writeMeta|writeMeta(kotlinx.io.Sink;space.kscience.dataforge.meta.Meta;space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+
+    final object Companion : space.kscience.dataforge.io/MetaFormatFactory { // space.kscience.dataforge.io/JsonMetaFormat.Companion|null[0]
+        final val DEFAULT_JSON // space.kscience.dataforge.io/JsonMetaFormat.Companion.DEFAULT_JSON|{}DEFAULT_JSON[0]
+            final fun <get-DEFAULT_JSON>(): kotlinx.serialization.json/Json // space.kscience.dataforge.io/JsonMetaFormat.Companion.DEFAULT_JSON.<get-DEFAULT_JSON>|<get-DEFAULT_JSON>(){}[0]
+        final val key // space.kscience.dataforge.io/JsonMetaFormat.Companion.key|{}key[0]
+            final fun <get-key>(): kotlin/Short // space.kscience.dataforge.io/JsonMetaFormat.Companion.key.<get-key>|<get-key>(){}[0]
+        final val shortName // space.kscience.dataforge.io/JsonMetaFormat.Companion.shortName|{}shortName[0]
+            final fun <get-shortName>(): kotlin/String // space.kscience.dataforge.io/JsonMetaFormat.Companion.shortName.<get-shortName>|<get-shortName>(){}[0]
+
+        final fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io/MetaFormat // space.kscience.dataforge.io/JsonMetaFormat.Companion.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+        final fun readMeta(kotlinx.io/Source, space.kscience.dataforge.meta.descriptors/MetaDescriptor?): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io/JsonMetaFormat.Companion.readMeta|readMeta(kotlinx.io.Source;space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+        final fun writeMeta(kotlinx.io/Sink, space.kscience.dataforge.meta/Meta, space.kscience.dataforge.meta.descriptors/MetaDescriptor?) // space.kscience.dataforge.io/JsonMetaFormat.Companion.writeMeta|writeMeta(kotlinx.io.Sink;space.kscience.dataforge.meta.Meta;space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+    }
+}
+
+final class space.kscience.dataforge.io/ProxyEnvelope : space.kscience.dataforge.io/Envelope { // space.kscience.dataforge.io/ProxyEnvelope|null[0]
+    constructor <init>(space.kscience.dataforge.io/Envelope, kotlin/Array<out space.kscience.dataforge.meta/Meta>...) // space.kscience.dataforge.io/ProxyEnvelope.<init>|<init>(space.kscience.dataforge.io.Envelope;kotlin.Array<out|space.kscience.dataforge.meta.Meta>...){}[0]
+
+    final val data // space.kscience.dataforge.io/ProxyEnvelope.data|{}data[0]
+        final fun <get-data>(): space.kscience.dataforge.io/Binary? // space.kscience.dataforge.io/ProxyEnvelope.data.<get-data>|<get-data>(){}[0]
+    final val meta // space.kscience.dataforge.io/ProxyEnvelope.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Laminate // space.kscience.dataforge.io/ProxyEnvelope.meta.<get-meta>|<get-meta>(){}[0]
+    final val source // space.kscience.dataforge.io/ProxyEnvelope.source|{}source[0]
+        final fun <get-source>(): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/ProxyEnvelope.source.<get-source>|<get-source>(){}[0]
+}
+
+final class space.kscience.dataforge.io/StringSource : kotlinx.io/RawSource { // space.kscience.dataforge.io/StringSource|null[0]
+    constructor <init>(kotlin/String, kotlin/Int = ..., kotlin/Int = ...) // space.kscience.dataforge.io/StringSource.<init>|<init>(kotlin.String;kotlin.Int;kotlin.Int){}[0]
+
+    final val offset // space.kscience.dataforge.io/StringSource.offset|{}offset[0]
+        final fun <get-offset>(): kotlin/Int // space.kscience.dataforge.io/StringSource.offset.<get-offset>|<get-offset>(){}[0]
+    final val size // space.kscience.dataforge.io/StringSource.size|{}size[0]
+        final fun <get-size>(): kotlin/Int // space.kscience.dataforge.io/StringSource.size.<get-size>|<get-size>(){}[0]
+    final val string // space.kscience.dataforge.io/StringSource.string|{}string[0]
+        final fun <get-string>(): kotlin/String // space.kscience.dataforge.io/StringSource.string.<get-string>|<get-string>(){}[0]
+
+    final fun close() // space.kscience.dataforge.io/StringSource.close|close(){}[0]
+    final fun readAtMostTo(kotlinx.io/Buffer, kotlin/Long): kotlin/Long // space.kscience.dataforge.io/StringSource.readAtMostTo|readAtMostTo(kotlinx.io.Buffer;kotlin.Long){}[0]
+}
+
+final class space.kscience.dataforge.io/TaggedEnvelopeFormat : space.kscience.dataforge.io/EnvelopeFormat { // space.kscience.dataforge.io/TaggedEnvelopeFormat|null[0]
+    constructor <init>(space.kscience.dataforge.io/IOPlugin, space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION = ..., space.kscience.dataforge.io/MetaFormatFactory = ...) // space.kscience.dataforge.io/TaggedEnvelopeFormat.<init>|<init>(space.kscience.dataforge.io.IOPlugin;space.kscience.dataforge.io.TaggedEnvelopeFormat.VERSION;space.kscience.dataforge.io.MetaFormatFactory){}[0]
+
+    final val io // space.kscience.dataforge.io/TaggedEnvelopeFormat.io|{}io[0]
+        final fun <get-io>(): space.kscience.dataforge.io/IOPlugin // space.kscience.dataforge.io/TaggedEnvelopeFormat.io.<get-io>|<get-io>(){}[0]
+    final val metaFormatFactory // space.kscience.dataforge.io/TaggedEnvelopeFormat.metaFormatFactory|{}metaFormatFactory[0]
+        final fun <get-metaFormatFactory>(): space.kscience.dataforge.io/MetaFormatFactory // space.kscience.dataforge.io/TaggedEnvelopeFormat.metaFormatFactory.<get-metaFormatFactory>|<get-metaFormatFactory>(){}[0]
+    final val version // space.kscience.dataforge.io/TaggedEnvelopeFormat.version|{}version[0]
+        final fun <get-version>(): space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION // space.kscience.dataforge.io/TaggedEnvelopeFormat.version.<get-version>|<get-version>(){}[0]
+
+    final fun readFrom(kotlinx.io/Source): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/TaggedEnvelopeFormat.readFrom|readFrom(kotlinx.io.Source){}[0]
+    final fun readFrom(space.kscience.dataforge.io/Binary): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/TaggedEnvelopeFormat.readFrom|readFrom(space.kscience.dataforge.io.Binary){}[0]
+    final fun writeTo(kotlinx.io/Sink, space.kscience.dataforge.io/Envelope) // space.kscience.dataforge.io/TaggedEnvelopeFormat.writeTo|writeTo(kotlinx.io.Sink;space.kscience.dataforge.io.Envelope){}[0]
+
+    final enum class VERSION : kotlin/Enum<space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION> { // space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION|null[0]
+        enum entry DF02 // space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION.DF02|null[0]
+        enum entry DF03 // space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION.DF03|null[0]
+
+        final val entries // space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION.entries|#static{}entries[0]
+            final fun <get-entries>(): kotlin.enums/EnumEntries<space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION> // space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION.entries.<get-entries>|<get-entries>#static(){}[0]
+        final val tagSize // space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION.tagSize|{}tagSize[0]
+            final fun <get-tagSize>(): kotlin/UInt // space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION.tagSize.<get-tagSize>|<get-tagSize>(){}[0]
+
+        final fun valueOf(kotlin/String): space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION // space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION.valueOf|valueOf#static(kotlin.String){}[0]
+        final fun values(): kotlin/Array<space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION> // space.kscience.dataforge.io/TaggedEnvelopeFormat.VERSION.values|values#static(){}[0]
+    }
+
+    final object Companion : space.kscience.dataforge.io/EnvelopeFormatFactory { // space.kscience.dataforge.io/TaggedEnvelopeFormat.Companion|null[0]
+        final val name // space.kscience.dataforge.io/TaggedEnvelopeFormat.Companion.name|{}name[0]
+            final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/TaggedEnvelopeFormat.Companion.name.<get-name>|<get-name>(){}[0]
+
+        final fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io/EnvelopeFormat // space.kscience.dataforge.io/TaggedEnvelopeFormat.Companion.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+        final fun peekFormat(space.kscience.dataforge.io/IOPlugin, space.kscience.dataforge.io/Binary): space.kscience.dataforge.io/EnvelopeFormat? // space.kscience.dataforge.io/TaggedEnvelopeFormat.Companion.peekFormat|peekFormat(space.kscience.dataforge.io.IOPlugin;space.kscience.dataforge.io.Binary){}[0]
+        final fun readFrom(kotlinx.io/Source): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/TaggedEnvelopeFormat.Companion.readFrom|readFrom(kotlinx.io.Source){}[0]
+        final fun readFrom(space.kscience.dataforge.io/Binary): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/TaggedEnvelopeFormat.Companion.readFrom|readFrom(space.kscience.dataforge.io.Binary){}[0]
+        final fun writeTo(kotlinx.io/Sink, space.kscience.dataforge.io/Envelope) // space.kscience.dataforge.io/TaggedEnvelopeFormat.Companion.writeTo|writeTo(kotlinx.io.Sink;space.kscience.dataforge.io.Envelope){}[0]
+    }
+}
+
+final class space.kscience.dataforge.io/TaglessEnvelopeFormat : space.kscience.dataforge.io/EnvelopeFormat { // space.kscience.dataforge.io/TaglessEnvelopeFormat|null[0]
+    constructor <init>(space.kscience.dataforge.io/IOPlugin, space.kscience.dataforge.meta/Meta = ..., space.kscience.dataforge.io/MetaFormatFactory = ...) // space.kscience.dataforge.io/TaglessEnvelopeFormat.<init>|<init>(space.kscience.dataforge.io.IOPlugin;space.kscience.dataforge.meta.Meta;space.kscience.dataforge.io.MetaFormatFactory){}[0]
+
+    final val io // space.kscience.dataforge.io/TaglessEnvelopeFormat.io|{}io[0]
+        final fun <get-io>(): space.kscience.dataforge.io/IOPlugin // space.kscience.dataforge.io/TaglessEnvelopeFormat.io.<get-io>|<get-io>(){}[0]
+    final val meta // space.kscience.dataforge.io/TaglessEnvelopeFormat.meta|{}meta[0]
+        final fun <get-meta>(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io/TaglessEnvelopeFormat.meta.<get-meta>|<get-meta>(){}[0]
+    final val metaFormatFactory // space.kscience.dataforge.io/TaglessEnvelopeFormat.metaFormatFactory|{}metaFormatFactory[0]
+        final fun <get-metaFormatFactory>(): space.kscience.dataforge.io/MetaFormatFactory // space.kscience.dataforge.io/TaglessEnvelopeFormat.metaFormatFactory.<get-metaFormatFactory>|<get-metaFormatFactory>(){}[0]
+
+    final fun readFrom(kotlinx.io/Source): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/TaglessEnvelopeFormat.readFrom|readFrom(kotlinx.io.Source){}[0]
+    final fun writeTo(kotlinx.io/Sink, space.kscience.dataforge.io/Envelope) // space.kscience.dataforge.io/TaglessEnvelopeFormat.writeTo|writeTo(kotlinx.io.Sink;space.kscience.dataforge.io.Envelope){}[0]
+
+    final object Companion : space.kscience.dataforge.io/EnvelopeFormatFactory { // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion|null[0]
+        final const val DATA_LENGTH_PROPERTY // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.DATA_LENGTH_PROPERTY|{}DATA_LENGTH_PROPERTY[0]
+            final fun <get-DATA_LENGTH_PROPERTY>(): kotlin/String // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.DATA_LENGTH_PROPERTY.<get-DATA_LENGTH_PROPERTY>|<get-DATA_LENGTH_PROPERTY>(){}[0]
+        final const val DATA_START // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.DATA_START|{}DATA_START[0]
+            final fun <get-DATA_START>(): kotlin/String // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.DATA_START.<get-DATA_START>|<get-DATA_START>(){}[0]
+        final const val END // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.END|{}END[0]
+            final fun <get-END>(): kotlin/String // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.END.<get-END>|<get-END>(){}[0]
+        final const val META_LENGTH_PROPERTY // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.META_LENGTH_PROPERTY|{}META_LENGTH_PROPERTY[0]
+            final fun <get-META_LENGTH_PROPERTY>(): kotlin/String // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.META_LENGTH_PROPERTY.<get-META_LENGTH_PROPERTY>|<get-META_LENGTH_PROPERTY>(){}[0]
+        final const val META_START // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.META_START|{}META_START[0]
+            final fun <get-META_START>(): kotlin/String // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.META_START.<get-META_START>|<get-META_START>(){}[0]
+        final const val META_TYPE_PROPERTY // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.META_TYPE_PROPERTY|{}META_TYPE_PROPERTY[0]
+            final fun <get-META_TYPE_PROPERTY>(): kotlin/String // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.META_TYPE_PROPERTY.<get-META_TYPE_PROPERTY>|<get-META_TYPE_PROPERTY>(){}[0]
+        final const val TAGLESS_ENVELOPE_TYPE // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.TAGLESS_ENVELOPE_TYPE|{}TAGLESS_ENVELOPE_TYPE[0]
+            final fun <get-TAGLESS_ENVELOPE_TYPE>(): kotlin/String // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.TAGLESS_ENVELOPE_TYPE.<get-TAGLESS_ENVELOPE_TYPE>|<get-TAGLESS_ENVELOPE_TYPE>(){}[0]
+        final const val code // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.code|{}code[0]
+            final fun <get-code>(): kotlin/Int // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.code.<get-code>|<get-code>(){}[0]
+
+        final val SEPARATOR_PREFIX // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.SEPARATOR_PREFIX|{}SEPARATOR_PREFIX[0]
+            final fun <get-SEPARATOR_PREFIX>(): kotlinx.io.bytestring/ByteString // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.SEPARATOR_PREFIX.<get-SEPARATOR_PREFIX>|<get-SEPARATOR_PREFIX>(){}[0]
+        final val TAGLESS_ENVELOPE_HEADER // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.TAGLESS_ENVELOPE_HEADER|{}TAGLESS_ENVELOPE_HEADER[0]
+            final fun <get-TAGLESS_ENVELOPE_HEADER>(): kotlinx.io.bytestring/ByteString // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.TAGLESS_ENVELOPE_HEADER.<get-TAGLESS_ENVELOPE_HEADER>|<get-TAGLESS_ENVELOPE_HEADER>(){}[0]
+        final val name // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.name|{}name[0]
+            final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.name.<get-name>|<get-name>(){}[0]
+
+        final fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io/EnvelopeFormat // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+        final fun peekFormat(space.kscience.dataforge.io/IOPlugin, space.kscience.dataforge.io/Binary): space.kscience.dataforge.io/EnvelopeFormat? // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.peekFormat|peekFormat(space.kscience.dataforge.io.IOPlugin;space.kscience.dataforge.io.Binary){}[0]
+        final fun readFrom(kotlinx.io/Source): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.readFrom|readFrom(kotlinx.io.Source){}[0]
+        final fun readFrom(space.kscience.dataforge.io/Binary): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.readFrom|readFrom(space.kscience.dataforge.io.Binary){}[0]
+        final fun writeTo(kotlinx.io/Sink, space.kscience.dataforge.io/Envelope) // space.kscience.dataforge.io/TaglessEnvelopeFormat.Companion.writeTo|writeTo(kotlinx.io.Sink;space.kscience.dataforge.io.Envelope){}[0]
+    }
+}
+
+final object space.kscience.dataforge.io/DoubleIOFormat : space.kscience.dataforge.io/IOFormat<kotlin/Double>, space.kscience.dataforge.io/IOFormatFactory<kotlin/Double> { // space.kscience.dataforge.io/DoubleIOFormat|null[0]
+    final val name // space.kscience.dataforge.io/DoubleIOFormat.name|{}name[0]
+        final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/DoubleIOFormat.name.<get-name>|<get-name>(){}[0]
+    final val type // space.kscience.dataforge.io/DoubleIOFormat.type|{}type[0]
+        final fun <get-type>(): kotlin.reflect/KType // space.kscience.dataforge.io/DoubleIOFormat.type.<get-type>|<get-type>(){}[0]
+
+    final fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io/IOFormat<kotlin/Double> // space.kscience.dataforge.io/DoubleIOFormat.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+    final fun readFrom(kotlinx.io/Source): kotlin/Double // space.kscience.dataforge.io/DoubleIOFormat.readFrom|readFrom(kotlinx.io.Source){}[0]
+    final fun writeTo(kotlinx.io/Sink, kotlin/Double) // space.kscience.dataforge.io/DoubleIOFormat.writeTo|writeTo(kotlinx.io.Sink;kotlin.Double){}[0]
+}
+
+final object space.kscience.dataforge.io/FloatIOFormat : space.kscience.dataforge.io/IOFormat<kotlin/Float>, space.kscience.dataforge.io/IOFormatFactory<kotlin/Float> { // space.kscience.dataforge.io/FloatIOFormat|null[0]
+    final val name // space.kscience.dataforge.io/FloatIOFormat.name|{}name[0]
+        final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io/FloatIOFormat.name.<get-name>|<get-name>(){}[0]
+    final val type // space.kscience.dataforge.io/FloatIOFormat.type|{}type[0]
+        final fun <get-type>(): kotlin.reflect/KType // space.kscience.dataforge.io/FloatIOFormat.type.<get-type>|<get-type>(){}[0]
+
+    final fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io/IOFormat<kotlin/Float> // space.kscience.dataforge.io/FloatIOFormat.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+    final fun readFrom(kotlinx.io/Source): kotlin/Float // space.kscience.dataforge.io/FloatIOFormat.readFrom|readFrom(kotlinx.io.Source){}[0]
+    final fun writeTo(kotlinx.io/Sink, kotlin/Float) // space.kscience.dataforge.io/FloatIOFormat.writeTo|writeTo(kotlinx.io.Sink;kotlin.Float){}[0]
+}
+
+final val space.kscience.dataforge.io/dataID // space.kscience.dataforge.io/dataID|@space.kscience.dataforge.io.Envelope{}dataID[0]
+    final fun (space.kscience.dataforge.io/Envelope).<get-dataID>(): kotlin/String? // space.kscience.dataforge.io/dataID.<get-dataID>|<get-dataID>@space.kscience.dataforge.io.Envelope(){}[0]
+final val space.kscience.dataforge.io/dataType // space.kscience.dataforge.io/dataType|@space.kscience.dataforge.io.Envelope{}dataType[0]
+    final fun (space.kscience.dataforge.io/Envelope).<get-dataType>(): kotlin/String? // space.kscience.dataforge.io/dataType.<get-dataType>|<get-dataType>@space.kscience.dataforge.io.Envelope(){}[0]
+final val space.kscience.dataforge.io/description // space.kscience.dataforge.io/description|@space.kscience.dataforge.io.Envelope{}description[0]
+    final fun (space.kscience.dataforge.io/Envelope).<get-description>(): kotlin/String? // space.kscience.dataforge.io/description.<get-description>|<get-description>@space.kscience.dataforge.io.Envelope(){}[0]
+final val space.kscience.dataforge.io/io // space.kscience.dataforge.io/io|@space.kscience.dataforge.context.Context{}io[0]
+    final fun (space.kscience.dataforge.context/Context).<get-io>(): space.kscience.dataforge.io/IOPlugin // space.kscience.dataforge.io/io.<get-io>|<get-io>@space.kscience.dataforge.context.Context(){}[0]
+final val space.kscience.dataforge.io/name // space.kscience.dataforge.io/name|@space.kscience.dataforge.io.EnvelopePart{}name[0]
+    final fun (space.kscience.dataforge.io/EnvelopePart).<get-name>(): kotlin/String? // space.kscience.dataforge.io/name.<get-name>|<get-name>@space.kscience.dataforge.io.EnvelopePart(){}[0]
+final val space.kscience.dataforge.io/type // space.kscience.dataforge.io/type|@space.kscience.dataforge.io.Envelope{}type[0]
+    final fun (space.kscience.dataforge.io/Envelope).<get-type>(): kotlin/String? // space.kscience.dataforge.io/type.<get-type>|<get-type>@space.kscience.dataforge.io.Envelope(){}[0]
+
+final fun (kotlin/ByteArray).space.kscience.dataforge.io/asBinary(): space.kscience.dataforge.io/Binary // space.kscience.dataforge.io/asBinary|asBinary@kotlin.ByteArray(){}[0]
+final fun (kotlin/String).space.kscience.dataforge.io/toAsciiByteString(): kotlinx.io.bytestring/ByteString // space.kscience.dataforge.io/toAsciiByteString|toAsciiByteString@kotlin.String(){}[0]
+final fun (kotlinx.io/Sink).space.kscience.dataforge.io/writeBinary(space.kscience.dataforge.io/Binary): kotlin/Int // space.kscience.dataforge.io/writeBinary|writeBinary@kotlinx.io.Sink(space.kscience.dataforge.io.Binary){}[0]
+final fun (kotlinx.io/Sink).space.kscience.dataforge.io/writeDouble(kotlin/Double) // space.kscience.dataforge.io/writeDouble|writeDouble@kotlinx.io.Sink(kotlin.Double){}[0]
+final fun (kotlinx.io/Sink).space.kscience.dataforge.io/writeFloat(kotlin/Float) // space.kscience.dataforge.io/writeFloat|writeFloat@kotlinx.io.Sink(kotlin.Float){}[0]
+final fun (kotlinx.io/Source).space.kscience.dataforge.io/discardLine(kotlin/Int = ..., kotlin/Boolean = ...): kotlin/Int // space.kscience.dataforge.io/discardLine|discardLine@kotlinx.io.Source(kotlin.Int;kotlin.Boolean){}[0]
+final fun (kotlinx.io/Source).space.kscience.dataforge.io/discardWithSeparator(kotlinx.io.bytestring/ByteString, kotlin/Int = ..., kotlin/Boolean = ...): kotlin/Int // space.kscience.dataforge.io/discardWithSeparator|discardWithSeparator@kotlinx.io.Source(kotlinx.io.bytestring.ByteString;kotlin.Int;kotlin.Boolean){}[0]
+final fun (kotlinx.io/Source).space.kscience.dataforge.io/readBinary(kotlin/Int? = ...): space.kscience.dataforge.io/Binary // space.kscience.dataforge.io/readBinary|readBinary@kotlinx.io.Source(kotlin.Int?){}[0]
+final fun (kotlinx.io/Source).space.kscience.dataforge.io/readDouble(): kotlin/Double // space.kscience.dataforge.io/readDouble|readDouble@kotlinx.io.Source(){}[0]
+final fun (kotlinx.io/Source).space.kscience.dataforge.io/readFloat(): kotlin/Float // space.kscience.dataforge.io/readFloat|readFloat@kotlinx.io.Source(){}[0]
+final fun (kotlinx.io/Source).space.kscience.dataforge.io/readWithSeparatorTo(kotlinx.io/Sink?, kotlinx.io.bytestring/ByteString, kotlin/Int = ..., kotlin/Boolean = ...): kotlin/Int // space.kscience.dataforge.io/readWithSeparatorTo|readWithSeparatorTo@kotlinx.io.Source(kotlinx.io.Sink?;kotlinx.io.bytestring.ByteString;kotlin.Int;kotlin.Boolean){}[0]
+final fun (space.kscience.dataforge.io/Binary).space.kscience.dataforge.io/get(kotlin.ranges/IntRange): space.kscience.dataforge.io/Binary // space.kscience.dataforge.io/get|get@space.kscience.dataforge.io.Binary(kotlin.ranges.IntRange){}[0]
+final fun (space.kscience.dataforge.io/Binary).space.kscience.dataforge.io/toByteArray(): kotlin/ByteArray // space.kscience.dataforge.io/toByteArray|toByteArray@space.kscience.dataforge.io.Binary(){}[0]
+final fun (space.kscience.dataforge.io/Envelope).space.kscience.dataforge.io/contentEquals(space.kscience.dataforge.io/Envelope): kotlin/Boolean // space.kscience.dataforge.io/contentEquals|contentEquals@space.kscience.dataforge.io.Envelope(space.kscience.dataforge.io.Envelope){}[0]
+final fun (space.kscience.dataforge.io/Envelope).space.kscience.dataforge.io/dataEquals(space.kscience.dataforge.io/Envelope): kotlin/Boolean // space.kscience.dataforge.io/dataEquals|dataEquals@space.kscience.dataforge.io.Envelope(space.kscience.dataforge.io.Envelope){}[0]
+final fun (space.kscience.dataforge.io/Envelope).space.kscience.dataforge.io/metaEquals(space.kscience.dataforge.io/Envelope): kotlin/Boolean // space.kscience.dataforge.io/metaEquals|metaEquals@space.kscience.dataforge.io.Envelope(space.kscience.dataforge.io.Envelope){}[0]
+final fun (space.kscience.dataforge.io/Envelope).space.kscience.dataforge.io/parts(): kotlin.collections/List<space.kscience.dataforge.io/EnvelopePart> // space.kscience.dataforge.io/parts|parts@space.kscience.dataforge.io.Envelope(){}[0]
+final fun (space.kscience.dataforge.io/Envelope).space.kscience.dataforge.io/withMetaLayers(kotlin/Array<out space.kscience.dataforge.meta/Meta>...): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/withMetaLayers|withMetaLayers@space.kscience.dataforge.io.Envelope(kotlin.Array<out|space.kscience.dataforge.meta.Meta>...){}[0]
+final fun (space.kscience.dataforge.io/EnvelopeBuilder).space.kscience.dataforge.io/envelopes(kotlin.collections/List<space.kscience.dataforge.io/Envelope>, kotlinx.io.bytestring/ByteString = ...) // space.kscience.dataforge.io/envelopes|envelopes@space.kscience.dataforge.io.EnvelopeBuilder(kotlin.collections.List<space.kscience.dataforge.io.Envelope>;kotlinx.io.bytestring.ByteString){}[0]
+final fun (space.kscience.dataforge.io/EnvelopeBuilder).space.kscience.dataforge.io/multipart(kotlin.collections/List<space.kscience.dataforge.io/EnvelopePart>, kotlinx.io.bytestring/ByteString = ...) // space.kscience.dataforge.io/multipart|multipart@space.kscience.dataforge.io.EnvelopeBuilder(kotlin.collections.List<space.kscience.dataforge.io.EnvelopePart>;kotlinx.io.bytestring.ByteString){}[0]
+final fun (space.kscience.dataforge.io/EnvelopeFormat).space.kscience.dataforge.io/read(kotlinx.io/Source): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/read|read@space.kscience.dataforge.io.EnvelopeFormat(kotlinx.io.Source){}[0]
+final fun (space.kscience.dataforge.io/EnvelopePart).space.kscience.dataforge.io/envelope(): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/envelope|envelope@space.kscience.dataforge.io.EnvelopePart(){}[0]
+final fun (space.kscience.dataforge.io/EnvelopePart).space.kscience.dataforge.io/envelope(space.kscience.dataforge.io/EnvelopeFormat): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/envelope|envelope@space.kscience.dataforge.io.EnvelopePart(space.kscience.dataforge.io.EnvelopeFormat){}[0]
+final fun (space.kscience.dataforge.io/IOPlugin).space.kscience.dataforge.io/peekBinaryEnvelopeFormat(space.kscience.dataforge.io/Binary): space.kscience.dataforge.io/EnvelopeFormat? // space.kscience.dataforge.io/peekBinaryEnvelopeFormat|peekBinaryEnvelopeFormat@space.kscience.dataforge.io.IOPlugin(space.kscience.dataforge.io.Binary){}[0]
+final fun (space.kscience.dataforge.io/IOPlugin).space.kscience.dataforge.io/readEnvelope(kotlin/String, kotlin/Boolean = ..., kotlin/Function2<space.kscience.dataforge.io/IOPlugin, space.kscience.dataforge.io/Binary, space.kscience.dataforge.io/EnvelopeFormat?> = ...): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/readEnvelope|readEnvelope@space.kscience.dataforge.io.IOPlugin(kotlin.String;kotlin.Boolean;kotlin.Function2<space.kscience.dataforge.io.IOPlugin,space.kscience.dataforge.io.Binary,space.kscience.dataforge.io.EnvelopeFormat?>){}[0]
+final fun (space.kscience.dataforge.io/IOPlugin).space.kscience.dataforge.io/readEnvelope(space.kscience.dataforge.io/Binary, kotlin/Boolean = ..., kotlin/Function2<space.kscience.dataforge.io/IOPlugin, space.kscience.dataforge.io/Binary, space.kscience.dataforge.io/EnvelopeFormat?> = ...): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/readEnvelope|readEnvelope@space.kscience.dataforge.io.IOPlugin(space.kscience.dataforge.io.Binary;kotlin.Boolean;kotlin.Function2<space.kscience.dataforge.io.IOPlugin,space.kscience.dataforge.io.Binary,space.kscience.dataforge.io.EnvelopeFormat?>){}[0]
+final fun (space.kscience.dataforge.io/MetaFormat).space.kscience.dataforge.io/parse(kotlin/String): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io/parse|parse@space.kscience.dataforge.io.MetaFormat(kotlin.String){}[0]
+final fun (space.kscience.dataforge.io/MetaFormatFactory).space.kscience.dataforge.io/parse(kotlin/String, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io/parse|parse@space.kscience.dataforge.io.MetaFormatFactory(kotlin.String;space.kscience.dataforge.meta.Meta){}[0]
+final fun (space.kscience.dataforge.meta/Meta).space.kscience.dataforge.io/toString(space.kscience.dataforge.io/MetaFormat): kotlin/String // space.kscience.dataforge.io/toString|toString@space.kscience.dataforge.meta.Meta(space.kscience.dataforge.io.MetaFormat){}[0]
+final fun (space.kscience.dataforge.meta/Meta).space.kscience.dataforge.io/toString(space.kscience.dataforge.io/MetaFormatFactory): kotlin/String // space.kscience.dataforge.io/toString|toString@space.kscience.dataforge.meta.Meta(space.kscience.dataforge.io.MetaFormatFactory){}[0]
+final fun <#A: kotlin/Any?> (kotlinx.io/Sink).space.kscience.dataforge.io/writeWith(space.kscience.dataforge.io/IOWriter<#A>, #A) // space.kscience.dataforge.io/writeWith|writeWith@kotlinx.io.Sink(space.kscience.dataforge.io.IOWriter<0:0>;0:0){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlinx.io/Source).space.kscience.dataforge.io/readWith(space.kscience.dataforge.io/IOReader<#A>): #A // space.kscience.dataforge.io/readWith|readWith@kotlinx.io.Source(space.kscience.dataforge.io.IOReader<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.dataforge.io/Binary).space.kscience.dataforge.io/readWith(space.kscience.dataforge.io/IOReader<#A>): #A // space.kscience.dataforge.io/readWith|readWith@space.kscience.dataforge.io.Binary(space.kscience.dataforge.io.IOReader<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> space.kscience.dataforge.io/Binary(#A, space.kscience.dataforge.io/IOWriter<#A>): space.kscience.dataforge.io/Binary // space.kscience.dataforge.io/Binary|Binary(0:0;space.kscience.dataforge.io.IOWriter<0:0>){0§<kotlin.Any?>}[0]
+final fun space.kscience.dataforge.io/Envelope(space.kscience.dataforge.meta/Meta, space.kscience.dataforge.io/Binary?): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/Envelope|Envelope(space.kscience.dataforge.meta.Meta;space.kscience.dataforge.io.Binary?){}[0]
+final inline fun <#A: reified kotlin/Any?> space.kscience.dataforge.io/IOReader(crossinline kotlin/Function1<kotlinx.io/Source, #A>): space.kscience.dataforge.io/IOReader<#A> // space.kscience.dataforge.io/IOReader|IOReader(kotlin.Function1<kotlinx.io.Source,0:0>){0§<kotlin.Any?>}[0]
+final inline fun space.kscience.dataforge.io/Binary(kotlin/Function1<kotlinx.io/Sink, kotlin/Unit>): space.kscience.dataforge.io/Binary // space.kscience.dataforge.io/Binary|Binary(kotlin.Function1<kotlinx.io.Sink,kotlin.Unit>){}[0]
+final inline fun space.kscience.dataforge.io/Buffer(kotlin/Function1<kotlinx.io/Sink, kotlin/Unit>): kotlinx.io/Buffer // space.kscience.dataforge.io/Buffer|Buffer(kotlin.Function1<kotlinx.io.Sink,kotlin.Unit>){}[0]
+final inline fun space.kscience.dataforge.io/ByteArray(kotlin/Function1<kotlinx.io/Sink, kotlin/Unit>): kotlin/ByteArray // space.kscience.dataforge.io/ByteArray|ByteArray(kotlin.Function1<kotlinx.io.Sink,kotlin.Unit>){}[0]
+final inline fun space.kscience.dataforge.io/Envelope(kotlin/Function1<space.kscience.dataforge.io/EnvelopeBuilder, kotlin/Unit>): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io/Envelope|Envelope(kotlin.Function1<space.kscience.dataforge.io.EnvelopeBuilder,kotlin.Unit>){}[0]

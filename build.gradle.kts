@@ -11,7 +11,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.11.1"
+    version = "0.12.0"
 }
 
 subprojects {
@@ -30,7 +30,7 @@ readme {
 
 
 kscienceProject {
-    pom("https://github.com/SciProgCentre/kmath") {
+    pom("https://github.com/SciProgCentre/dataforge-core") {
         useApache2Licence()
         useSPCTeam()
     }

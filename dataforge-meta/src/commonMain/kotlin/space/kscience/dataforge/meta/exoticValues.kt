@@ -54,7 +54,7 @@ public class DoubleArrayValue(override val value: DoubleArray) : Value, Iterable
 /**
  * A zero-copy wrapping of this [DoubleArray] in a [Value]
  */
-public fun DoubleArray.asValue(): Value = if (isEmpty()) Null else DoubleArrayValue(this)
+public fun DoubleArray.asValue(): Value = DoubleArrayValue(this)
 
 public val Value.doubleArray: DoubleArray
     get() = if (this is DoubleArrayValue) {

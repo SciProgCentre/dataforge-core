@@ -1,9 +1,7 @@
 package space.kscience.dataforge.values
 
+import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.DoubleArrayValue
-import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.doubleArray
-import space.kscience.dataforge.meta.get
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

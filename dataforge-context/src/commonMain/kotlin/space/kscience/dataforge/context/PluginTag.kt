@@ -3,6 +3,7 @@ package space.kscience.dataforge.context
 import kotlinx.serialization.Serializable
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.MetaRepr
+import space.kscience.dataforge.meta.put
 
 /**
  * The tag which contains information about name, group and version of some

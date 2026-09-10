@@ -57,4 +57,42 @@ class JsonMetaTest {
         )
         assertEquals(json, reconstructed)
     }
+
+    @Test
+    fun jsonArrayToMetaConversion() {
+        val jsonArray = buildJsonArray {
+            addJsonArray {
+                add(1); add(2); add(3)
+            }
+            addJsonArray {
+                add(4); add(5); add(6)
+            }
+            addJsonArray {
+                add(7); add(8); add(9)
+            }
+        }
+
+        assertEquals(jsonArray, jsonArray.toMeta().toJson())
+
+
+        val jsonWithChild = buildJsonObject {
+            "child" to jsonArray
+        }
+
+        assertEquals(jsonWithChild, jsonWithChild.toMeta().toJson())
+    }
+
+    @Test
+    fun metaToJsonArrayConversion() {
+        val meta = Meta {
+            value = listOf(
+                listOf(1, 2, 3).asValue(),
+                listOf(4, 5, 6).asValue(),
+                listOf(7, 8, 9).asValue()
+            ).asValue()
+        }
+        val json = meta.toJson()
+
+        assertEquals(json, json.toMeta().toJson())
+    }
 }

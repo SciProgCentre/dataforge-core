@@ -3,6 +3,7 @@ package space.kscience.dataforge.data
 import kotlinx.coroutines.test.runTest
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.get
+import space.kscience.dataforge.meta.put
 import space.kscience.dataforge.meta.string
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.last

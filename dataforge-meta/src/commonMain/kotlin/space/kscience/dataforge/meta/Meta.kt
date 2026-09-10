@@ -64,7 +64,7 @@ public interface Meta : MetaRepr, MetaProvider {
         public const val INDEX_KEY: String = "@index"
 
         public fun hashCode(meta: Meta): Int {
-            var result = meta.value?.hashCode() ?: 0
+            var result = meta.value.hashCode()
             result = 31 * result + meta.items.hashCode()
             return result
         }

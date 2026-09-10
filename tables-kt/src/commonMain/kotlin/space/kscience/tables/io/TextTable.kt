@@ -7,10 +7,7 @@ import kotlinx.io.readByteArray
 import kotlinx.io.readLine
 import space.kscience.dataforge.io.Binary
 import space.kscience.dataforge.io.Envelope
-import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.Value
-import space.kscience.dataforge.meta.isEmpty
-import space.kscience.dataforge.meta.set
+import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.names.NameToken
 import space.kscience.tables.*
 

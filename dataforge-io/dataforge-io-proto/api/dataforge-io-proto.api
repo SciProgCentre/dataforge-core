@@ -1,0 +1,124 @@
+public final class pace/kscience/dataforge/io/proto/PerformanceComparisonKt {
+	public static final fun main ()V
+	public static synthetic fun main ([Ljava/lang/String;)V
+}
+
+public final class pace/kscience/dataforge/io/proto/ProtoEnvelopeFormat : space/kscience/dataforge/io/EnvelopeFormat {
+	public static final field INSTANCE Lpace/kscience/dataforge/io/proto/ProtoEnvelopeFormat;
+	public synthetic fun readFrom (Lkotlinx/io/Source;)Ljava/lang/Object;
+	public fun readFrom (Lkotlinx/io/Source;)Lspace/kscience/dataforge/io/Envelope;
+	public synthetic fun writeTo (Lkotlinx/io/Sink;Ljava/lang/Object;)V
+	public fun writeTo (Lkotlinx/io/Sink;Lspace/kscience/dataforge/io/Envelope;)V
+}
+
+public final class pace/kscience/dataforge/io/proto/ProtoMetaFormat : space/kscience/dataforge/io/MetaFormat {
+	public static final field INSTANCE Lpace/kscience/dataforge/io/proto/ProtoMetaFormat;
+	public fun readMeta (Lkotlinx/io/Source;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lspace/kscience/dataforge/meta/Meta;
+	public fun writeMeta (Lkotlinx/io/Sink;Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)V
+}
+
+public final class space/kscience/dataforge/io/proto/ProtoEnvelope : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lspace/kscience/dataforge/io/proto/ProtoEnvelope$Companion;
+	public fun <init> ()V
+	public fun <init> (Lspace/kscience/dataforge/io/proto/ProtoMeta;Lokio/ByteString;Lokio/ByteString;)V
+	public synthetic fun <init> (Lspace/kscience/dataforge/io/proto/ProtoMeta;Lokio/ByteString;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lspace/kscience/dataforge/io/proto/ProtoMeta;Lokio/ByteString;Lokio/ByteString;)Lspace/kscience/dataforge/io/proto/ProtoEnvelope;
+	public static synthetic fun copy$default (Lspace/kscience/dataforge/io/proto/ProtoEnvelope;Lspace/kscience/dataforge/io/proto/ProtoMeta;Lokio/ByteString;Lokio/ByteString;ILjava/lang/Object;)Lspace/kscience/dataforge/io/proto/ProtoEnvelope;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDataBytes ()Lokio/ByteString;
+	public final fun getMeta ()Lspace/kscience/dataforge/io/proto/ProtoMeta;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class space/kscience/dataforge/io/proto/ProtoEnvelope$Companion {
+}
+
+public final class space/kscience/dataforge/io/proto/ProtoMeta : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lspace/kscience/dataforge/io/proto/ProtoMeta$Companion;
+	public fun <init> ()V
+	public fun <init> (Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValue;Ljava/util/Map;Lokio/ByteString;)V
+	public synthetic fun <init> (Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValue;Ljava/util/Map;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValue;Ljava/util/Map;Lokio/ByteString;)Lspace/kscience/dataforge/io/proto/ProtoMeta;
+	public static synthetic fun copy$default (Lspace/kscience/dataforge/io/proto/ProtoMeta;Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValue;Ljava/util/Map;Lokio/ByteString;ILjava/lang/Object;)Lspace/kscience/dataforge/io/proto/ProtoMeta;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/Map;
+	public final fun getProtoValue ()Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValue;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class space/kscience/dataforge/io/proto/ProtoMeta$Companion {
+}
+
+public final class space/kscience/dataforge/io/proto/ProtoMeta$Float64List : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lspace/kscience/dataforge/io/proto/ProtoMeta$Float64List$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/util/List;Lokio/ByteString;)Lspace/kscience/dataforge/io/proto/ProtoMeta$Float64List;
+	public static synthetic fun copy$default (Lspace/kscience/dataforge/io/proto/ProtoMeta$Float64List;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lspace/kscience/dataforge/io/proto/ProtoMeta$Float64List;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValues ()Ljava/util/List;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class space/kscience/dataforge/io/proto/ProtoMeta$Float64List$Companion {
+}
+
+public final class space/kscience/dataforge/io/proto/ProtoMeta$ProtoValue : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValue$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Double;Ljava/lang/Float;Ljava/lang/Integer;Ljava/lang/Long;Lokio/ByteString;Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValueList;Lspace/kscience/dataforge/io/proto/ProtoMeta$Float64List;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Double;Ljava/lang/Float;Ljava/lang/Integer;Ljava/lang/Long;Lokio/ByteString;Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValueList;Lspace/kscience/dataforge/io/proto/ProtoMeta$Float64List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Double;Ljava/lang/Float;Ljava/lang/Integer;Ljava/lang/Long;Lokio/ByteString;Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValueList;Lspace/kscience/dataforge/io/proto/ProtoMeta$Float64List;Lokio/ByteString;)Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValue;
+	public static synthetic fun copy$default (Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValue;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Double;Ljava/lang/Float;Ljava/lang/Integer;Ljava/lang/Long;Lokio/ByteString;Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValueList;Lspace/kscience/dataforge/io/proto/ProtoMeta$Float64List;Lokio/ByteString;ILjava/lang/Object;)Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBooleanValue ()Ljava/lang/Boolean;
+	public final fun getBytesValue ()Lokio/ByteString;
+	public final fun getDoubleValue ()Ljava/lang/Double;
+	public final fun getFloat64ListValue ()Lspace/kscience/dataforge/io/proto/ProtoMeta$Float64List;
+	public final fun getFloatValue ()Ljava/lang/Float;
+	public final fun getInt32Value ()Ljava/lang/Integer;
+	public final fun getInt64Value ()Ljava/lang/Long;
+	public final fun getListValue ()Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValueList;
+	public final fun getStringValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class space/kscience/dataforge/io/proto/ProtoMeta$ProtoValue$Companion {
+}
+
+public final class space/kscience/dataforge/io/proto/ProtoMeta$ProtoValueList : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValueList$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/util/List;Lokio/ByteString;)Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValueList;
+	public static synthetic fun copy$default (Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValueList;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lspace/kscience/dataforge/io/proto/ProtoMeta$ProtoValueList;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValues ()Ljava/util/List;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class space/kscience/dataforge/io/proto/ProtoMeta$ProtoValueList$Companion {
+}
+

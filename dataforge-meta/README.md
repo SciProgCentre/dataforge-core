@@ -42,7 +42,7 @@ Each Meta node could hava a node Value as well as a map of named child items.
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:dataforge-meta:0.11.1`.
+The Maven coordinates of this project are `space.kscience:dataforge-meta:0.12.0`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -52,6 +52,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:dataforge-meta:0.11.1")
+    implementation("space.kscience:dataforge-meta:0.12.0")
 }
 ```

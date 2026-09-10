@@ -1,0 +1,68 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxX64, macosArm64, mingwX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <space.kscience:dataforge-io-yaml>
+final class space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat : space.kscience.dataforge.io/EnvelopeFormat { // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat|null[0]
+    constructor <init>(space.kscience.dataforge.io/IOPlugin, space.kscience.dataforge.meta/Meta = ..., space.kscience.dataforge.io/MetaFormatFactory = ...) // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.<init>|<init>(space.kscience.dataforge.io.IOPlugin;space.kscience.dataforge.meta.Meta;space.kscience.dataforge.io.MetaFormatFactory){}[0]
+
+    final fun readFrom(kotlinx.io/Source): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.readFrom|readFrom(kotlinx.io.Source){}[0]
+    final fun readFrom(space.kscience.dataforge.io/Binary): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.readFrom|readFrom(space.kscience.dataforge.io.Binary){}[0]
+    final fun writeTo(kotlinx.io/Sink, space.kscience.dataforge.io/Envelope) // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.writeTo|writeTo(kotlinx.io.Sink;space.kscience.dataforge.io.Envelope){}[0]
+
+    final object Companion : space.kscience.dataforge.io/EnvelopeFormatFactory { // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.Companion|null[0]
+        final val SEPARATOR // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.Companion.SEPARATOR|{}SEPARATOR[0]
+            final fun <get-SEPARATOR>(): kotlinx.io.bytestring/ByteString // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.Companion.SEPARATOR.<get-SEPARATOR>|<get-SEPARATOR>(){}[0]
+        final val name // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.Companion.name|{}name[0]
+            final fun <get-name>(): space.kscience.dataforge.names/Name // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.Companion.name.<get-name>|<get-name>(){}[0]
+
+        final fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io/EnvelopeFormat // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.Companion.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+        final fun peekFormat(space.kscience.dataforge.io/IOPlugin, space.kscience.dataforge.io/Binary): space.kscience.dataforge.io/EnvelopeFormat? // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.Companion.peekFormat|peekFormat(space.kscience.dataforge.io.IOPlugin;space.kscience.dataforge.io.Binary){}[0]
+        final fun readFrom(kotlinx.io/Source): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.Companion.readFrom|readFrom(kotlinx.io.Source){}[0]
+        final fun readFrom(space.kscience.dataforge.io/Binary): space.kscience.dataforge.io/Envelope // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.Companion.readFrom|readFrom(space.kscience.dataforge.io.Binary){}[0]
+        final fun writeTo(kotlinx.io/Sink, space.kscience.dataforge.io/Envelope) // space.kscience.dataforge.io.yaml/FrontMatterEnvelopeFormat.Companion.writeTo|writeTo(kotlinx.io.Sink;space.kscience.dataforge.io.Envelope){}[0]
+    }
+}
+
+final class space.kscience.dataforge.io.yaml/YamlMetaFormat : space.kscience.dataforge.io/MetaFormat { // space.kscience.dataforge.io.yaml/YamlMetaFormat|null[0]
+    constructor <init>(space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.io.yaml/YamlMetaFormat.<init>|<init>(space.kscience.dataforge.meta.Meta){}[0]
+
+    final fun readMeta(kotlinx.io/Source, space.kscience.dataforge.meta.descriptors/MetaDescriptor?): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io.yaml/YamlMetaFormat.readMeta|readMeta(kotlinx.io.Source;space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+    final fun writeMeta(kotlinx.io/Sink, space.kscience.dataforge.meta/Meta, space.kscience.dataforge.meta.descriptors/MetaDescriptor?) // space.kscience.dataforge.io.yaml/YamlMetaFormat.writeMeta|writeMeta(kotlinx.io.Sink;space.kscience.dataforge.meta.Meta;space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+
+    final object Companion : space.kscience.dataforge.io/MetaFormatFactory { // space.kscience.dataforge.io.yaml/YamlMetaFormat.Companion|null[0]
+        final val key // space.kscience.dataforge.io.yaml/YamlMetaFormat.Companion.key|{}key[0]
+            final fun <get-key>(): kotlin/Short // space.kscience.dataforge.io.yaml/YamlMetaFormat.Companion.key.<get-key>|<get-key>(){}[0]
+        final val shortName // space.kscience.dataforge.io.yaml/YamlMetaFormat.Companion.shortName|{}shortName[0]
+            final fun <get-shortName>(): kotlin/String // space.kscience.dataforge.io.yaml/YamlMetaFormat.Companion.shortName.<get-shortName>|<get-shortName>(){}[0]
+
+        final fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io/MetaFormat // space.kscience.dataforge.io.yaml/YamlMetaFormat.Companion.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+        final fun readMeta(kotlinx.io/Source, space.kscience.dataforge.meta.descriptors/MetaDescriptor?): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io.yaml/YamlMetaFormat.Companion.readMeta|readMeta(kotlinx.io.Source;space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+        final fun writeMeta(kotlinx.io/Sink, space.kscience.dataforge.meta/Meta, space.kscience.dataforge.meta.descriptors/MetaDescriptor?) // space.kscience.dataforge.io.yaml/YamlMetaFormat.Companion.writeMeta|writeMeta(kotlinx.io.Sink;space.kscience.dataforge.meta.Meta;space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+    }
+}
+
+final class space.kscience.dataforge.io.yaml/YamlPlugin : space.kscience.dataforge.context/AbstractPlugin { // space.kscience.dataforge.io.yaml/YamlPlugin|null[0]
+    constructor <init>(space.kscience.dataforge.meta/Meta) // space.kscience.dataforge.io.yaml/YamlPlugin.<init>|<init>(space.kscience.dataforge.meta.Meta){}[0]
+
+    final val io // space.kscience.dataforge.io.yaml/YamlPlugin.io|{}io[0]
+        final fun <get-io>(): space.kscience.dataforge.io/IOPlugin // space.kscience.dataforge.io.yaml/YamlPlugin.io.<get-io>|<get-io>(){}[0]
+    final val tag // space.kscience.dataforge.io.yaml/YamlPlugin.tag|{}tag[0]
+        final fun <get-tag>(): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.io.yaml/YamlPlugin.tag.<get-tag>|<get-tag>(){}[0]
+
+    final fun content(kotlin/String): kotlin.collections/Map<space.kscience.dataforge.names/Name, kotlin/Any> // space.kscience.dataforge.io.yaml/YamlPlugin.content|content(kotlin.String){}[0]
+
+    final object Companion : space.kscience.dataforge.context/PluginFactory<space.kscience.dataforge.io.yaml/YamlPlugin> { // space.kscience.dataforge.io.yaml/YamlPlugin.Companion|null[0]
+        final val tag // space.kscience.dataforge.io.yaml/YamlPlugin.Companion.tag|{}tag[0]
+            final fun <get-tag>(): space.kscience.dataforge.context/PluginTag // space.kscience.dataforge.io.yaml/YamlPlugin.Companion.tag.<get-tag>|<get-tag>(){}[0]
+
+        final fun build(space.kscience.dataforge.context/Context, space.kscience.dataforge.meta/Meta): space.kscience.dataforge.io.yaml/YamlPlugin // space.kscience.dataforge.io.yaml/YamlPlugin.Companion.build|build(space.kscience.dataforge.context.Context;space.kscience.dataforge.meta.Meta){}[0]
+    }
+}
+
+final fun (net.mamoe.yamlkt/YamlElement).space.kscience.dataforge.io.yaml/toMeta(space.kscience.dataforge.meta.descriptors/MetaDescriptor? = ...): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io.yaml/toMeta|toMeta@net.mamoe.yamlkt.YamlElement(space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+final fun (net.mamoe.yamlkt/YamlMap).space.kscience.dataforge.io.yaml/toMeta(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io.yaml/toMeta|toMeta@net.mamoe.yamlkt.YamlMap(){}[0]
+final fun (space.kscience.dataforge.meta/Meta).space.kscience.dataforge.io.yaml/toYaml(): net.mamoe.yamlkt/YamlMap // space.kscience.dataforge.io.yaml/toYaml|toYaml@space.kscience.dataforge.meta.Meta(){}[0]

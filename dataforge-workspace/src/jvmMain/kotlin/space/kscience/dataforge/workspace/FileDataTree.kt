@@ -10,6 +10,7 @@ import space.kscience.dataforge.data.*
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.meta.copy
+import space.kscience.dataforge.meta.put
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.plus

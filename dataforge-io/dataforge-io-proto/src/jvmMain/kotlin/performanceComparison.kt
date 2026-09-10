@@ -3,6 +3,7 @@ package pace.kscience.dataforge.io.proto
 import kotlinx.io.writeString
 import space.kscience.dataforge.io.Envelope
 import space.kscience.dataforge.meta.asValue
+import space.kscience.dataforge.meta.put
 import kotlin.concurrent.thread
 import kotlin.time.measureTime
 
