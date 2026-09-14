@@ -12,6 +12,8 @@
 
 ### Fixed
 
+- Include null in descriptors derived from nullable primitive and enum serializers
+
 ### Security
 
 ## 0.12.0 - 2026-09-10

@@ -4,6 +4,7 @@ package space.kscience.dataforge.meta.descriptors
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.*
+import space.kscience.dataforge.meta.Null
 import space.kscience.dataforge.meta.ValueType
 import space.kscience.dataforge.meta.asValue
 
@@ -72,10 +73,18 @@ private fun MetaDescriptorBuilder.fromSerialDescriptor(
             // Contextual serialization is not supported
         }
     }
+
+    if (descriptor.isNullable && (descriptor.kind is PrimitiveKind || descriptor.kind == SerialKind.ENUM)) {
+        valueTypes = valueTypes?.plus(ValueType.NULL)
+        if (descriptor.kind == SerialKind.ENUM) {
+            allowedValues += Null
+        }
+    }
 }
 
 /**
  * Build a [MetaDescriptor] from a [SerialDescriptor].
+ * Nullable primitive and enum serializers allow an explicit null value.
  */
 public fun MetaDescriptor(descriptor: SerialDescriptor): MetaDescriptor = MetaDescriptor {
     fromSerialDescriptor(descriptor)
