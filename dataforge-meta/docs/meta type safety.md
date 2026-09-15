@@ -127,6 +127,8 @@ val meta = myDataConverter.convert(MyData("test", 1.0))
 val obj = myDataConverter.read(meta)
 ```
 
+An explicit descriptor is also exposed through `converter.descriptor`. Otherwise, this property is derived from the serializer.
+
 This is particularly useful when you want to use existing serializable models within a `Meta`-based environment without manually wrapping them in a `Scheme`.
 
 ## Comparison and Use Cases
