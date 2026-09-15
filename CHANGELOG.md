@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- Include null in descriptors derived from nullable primitive and enum serializers
 - Preserve explicit descriptors in serializable converters
 
 ### Security
