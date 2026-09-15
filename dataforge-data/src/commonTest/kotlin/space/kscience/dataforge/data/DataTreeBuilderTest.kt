@@ -1,5 +1,6 @@
 package space.kscience.dataforge.data
 
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import space.kscience.dataforge.names.Name
@@ -85,5 +86,59 @@ internal class DataTreeBuilderTest {
         assertEquals(9, rootNode.awaitData("sub.value[9]").await())
         assertEquals(8, rootNode.awaitData("sub.value[8]").await())
         println("finished")
+    }
+
+    @Test
+    fun testWriteTreeWithoutPrefix() = runTest {
+        val writes = mutableListOf<Name>()
+        val sink = DataSink<Int> { name, _ -> writes += name }
+        val source = DataTree<Int> {
+            putValue("root", 7)
+            putValue("nested.value", 42)
+        }
+
+        sink.writeAll(source)
+
+        assertEquals(2, writes.size)
+        assertEquals(setOf(Name.of("root"), Name.of("nested", "value")), writes.toSet())
+    }
+
+    @Test
+    fun testWriteTreeWithPrefix() = runTest {
+        val writes = mutableListOf<Name>()
+        val sink = DataSink<Int> { name, _ -> writes += name }
+        val source = DataTree<Int> {
+            putValue("root", 7)
+            putValue("nested.value", 42)
+        }
+
+        sink.writeAll(source, Name.of("prefix"))
+
+        assertEquals(2, writes.size)
+        assertEquals(
+            setOf(Name.of("prefix", "root"), Name.of("prefix", "nested", "value")),
+            writes.toSet(),
+        )
+    }
+
+    @Test
+    fun testWriteEmptyTreeWithoutPrefix() = runTest {
+        val writes = mutableListOf<Name>()
+        val sink = DataSink<Int> { name, _ -> writes += name }
+
+        sink.writeAll(DataTree<Int>(emptyMap()))
+
+        assertEquals(emptyList(), writes)
+    }
+
+    @Test
+    fun testLaunchWriteJobFromWithoutPrefix() = runTest {
+        val source = MutableDataTree<Int>()
+        source.writeValue("nested.value", 42)
+        val sink = MutableDataTree<Int>()
+        val job = sink.launchWriteJobFrom(source, this)
+
+        assertEquals(42, sink.awaitData("nested.value").await())
+        job.cancelAndJoin()
     }
 }

@@ -14,6 +14,7 @@
 
 - Include null in descriptors derived from nullable primitive and enum serializers
 - Preserve explicit descriptors in serializable converters
+- Fix copying a data tree without a prefix
 
 ### Security
 
