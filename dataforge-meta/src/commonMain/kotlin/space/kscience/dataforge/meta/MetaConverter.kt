@@ -121,8 +121,7 @@ public interface MetaConverter<T> : MetaReader<T> {
                 allowedValues(enumValues<E>())
             }
 
-            @Suppress("USELESS_CAST")
-            override fun readOrNull(source: Meta): E = source.enum<E>() as? E ?: error("The Item is not a Enum")
+            override fun readOrNull(source: Meta): E? = source.enum<E>()
 
             override fun convert(obj: E): Meta = Meta(obj.asValue())
         }
