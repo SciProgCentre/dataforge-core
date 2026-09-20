@@ -68,11 +68,7 @@ public suspend fun <T> DataSink<T>.writeAll(name: Name, tree: DataTree<T>) {
  * Write all data from the tree into this sink with the given prefix. Do not observe the tree changes.
  */
 public suspend fun <T> DataSink<T>.writeAll(tree: DataTree<T>, prefix: Name = Name.EMPTY) {
-    if (prefix.isEmpty()) {
-        writeAll(tree)
-    } else {
-        writeAll(prefix) { writeAll(tree.asSequence()) }
-    }
+    writeAll(prefix) { writeAll(tree.asSequence()) }
 }
 
 /**
