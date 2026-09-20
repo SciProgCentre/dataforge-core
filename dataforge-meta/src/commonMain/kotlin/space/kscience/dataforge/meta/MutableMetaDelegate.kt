@@ -180,7 +180,9 @@ public fun MutableMetaProvider.number(key: Name? = null, default: () -> Number):
 public inline fun <reified E : Enum<E>> MutableMetaProvider.enum(
     default: E,
     key: Name? = null,
-): MutableMetaDelegate<E> = value(key) { value -> value?.string?.let { enumValueOf<E>(it) } ?: default }
+): MutableMetaDelegate<E> = value(key) { value ->
+    value?.string?.let { str -> enumValues<E>().firstOrNull { it.name == str } } ?: default
+}
 
 /* Number delegates */
 
