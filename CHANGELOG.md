@@ -4,6 +4,8 @@
 
 ### Added
 
+- Object-node presence validation through descriptor attributes, including JSON Schema round trips
+
 ### Changed
 
 ### Deprecated

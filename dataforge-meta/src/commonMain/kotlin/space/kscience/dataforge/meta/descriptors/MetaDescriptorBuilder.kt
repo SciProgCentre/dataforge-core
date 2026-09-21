@@ -103,6 +103,17 @@ public class MetaDescriptorBuilder @PublishedApi internal constructor() {
     )
 }
 
+/** Set object-node presence; null removes the marker and restores legacy validation. */
+public var MetaDescriptorBuilder.nodeRequired: Boolean?
+    get() = attributes.readNodeRequired()
+    set(value) {
+        if (value == null) {
+            attributes.remove(MetaDescriptor.NODE_REQUIRED_KEY)
+        } else {
+            attributes[MetaDescriptor.NODE_REQUIRED_KEY] = value
+        }
+    }
+
 //public fun MetaDescriptorBuilder.item(name: String, block: MetaDescriptorBuilder.() -> Unit): MetaDescriptorBuilder =
 //    item(Name.parse(name), block)
 

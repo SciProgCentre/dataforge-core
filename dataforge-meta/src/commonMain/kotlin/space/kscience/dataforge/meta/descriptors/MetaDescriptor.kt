@@ -67,12 +67,14 @@ public data class MetaDescriptor(
     public companion object {
         public val EMPTY: MetaDescriptor = MetaDescriptor("Generic meta tree")
         internal const val ALLOWED_VALUES_KEY = "allowedValues"
+        internal const val NODE_REQUIRED_KEY = "nodeRequired"
     }
 }
 
 public val MetaDescriptor.required: Boolean get() = checkRequired(hashSetOf())
 
 private fun MetaDescriptor.checkRequired(visited: MutableSet<MetaDescriptor>): Boolean {
+    nodeRequired?.let { return it }
     if (this in visited) return false
     visited.add(this)
     return valueRestriction == ValueRestriction.REQUIRED ||
@@ -80,6 +82,30 @@ private fun MetaDescriptor.checkRequired(visited: MutableSet<MetaDescriptor>): B
 }
 
 public val MetaDescriptor.allowedValues: List<Value>? get() = attributes[MetaDescriptor.ALLOWED_VALUES_KEY]?.value?.list
+
+internal fun Meta.readNodeRequired(): Boolean? {
+    val attribute = get(MetaDescriptor.NODE_REQUIRED_KEY) ?: return null
+    require(attribute.items.isEmpty() && attribute.value?.type == ValueType.BOOLEAN) {
+        "nodeRequired must be a boolean"
+    }
+    return attribute.value!!.boolean
+}
+
+/**
+ * Presence of an object node, independently of its children's requirements.
+ * Null keeps legacy validation. Object descriptors use [ValueRestriction.NONE], no allowed values,
+ * and empty value types (non-null) or only [ValueType.NULL] (nullable).
+ */
+public val MetaDescriptor.nodeRequired: Boolean?
+    get() {
+        val required = attributes.readNodeRequired() ?: return null
+        require(valueRestriction == ValueRestriction.NONE &&
+                (valueTypes == emptyList<ValueType>() || valueTypes == listOf(ValueType.NULL)) &&
+                allowedValues == null) {
+            "Object descriptors require NONE, empty or NULL value types, and no allowed values"
+        }
+        return required
+    }
 
 public operator fun MetaDescriptor.get(name: Name): MetaDescriptor? = when (name.length) {
     0 -> this
@@ -92,6 +118,7 @@ public operator fun MetaDescriptor.get(name: String): MetaDescriptor? = get(name
 public sealed interface MetaValidationResult {
     public data object Valid : MetaValidationResult
     public sealed interface Invalid : MetaValidationResult
+    /** The required value or object node is missing at [name]. */
     public data class RequiredValueIsMissing(val name: Name) : Invalid
     public data class ProhibitedValueIsPresent(val name: Name) : Invalid
     public data class IncorrectValueType(
@@ -159,7 +186,25 @@ public fun MetaDescriptor.validateWithResult(value: Value?, name: Name): MetaVal
  * The validation is failed if at least one of results is [MetaValidationResult.Invalid]
  */
 public fun MetaDescriptor.validateWithResult(item: Meta?, name: Name): Sequence<MetaValidationResult> = sequence {
-    yield(validateWithResult(item?.value, name))
+    val objectRequired = nodeRequired
+    if (objectRequired != null) {
+        if (item == null) {
+            yield(if (objectRequired) MetaValidationResult.RequiredValueIsMissing(name) else MetaValidationResult.Valid)
+            return@sequence
+        }
+    }
+    val valueResult = validateWithResult(item?.value, name)
+    if (objectRequired != null) {
+        if (!valueResult.isValid) {
+            yield(valueResult)
+            return@sequence
+        }
+        if (item?.value?.type == ValueType.NULL) {
+            yield(if (item.items.isEmpty()) MetaValidationResult.Valid else MetaValidationResult.ProhibitedValueIsPresent(name))
+            return@sequence
+        }
+    }
+    yield(valueResult)
     nodes.forEach { (key, childDescriptor) ->
         yieldAll(childDescriptor.validateWithResult(item?.get(key), name + key))
     }

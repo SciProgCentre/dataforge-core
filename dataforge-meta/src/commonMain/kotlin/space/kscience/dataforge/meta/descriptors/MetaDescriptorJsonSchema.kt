@@ -33,7 +33,14 @@ private object MetaDescriptorJsonSchemaConverter {
         metaDescriptor.description?.let { put(JsonSchema.Vocabularies.MetaData.DESCRIPTION, it) }
 
         // Value type handling
-        when (metaDescriptor.valueRestriction) {
+        if (metaDescriptor.nodeRequired != null) {
+            put(
+                JsonSchema.Vocabularies.Validation.TYPE,
+                if (ValueType.NULL in metaDescriptor.valueTypes.orEmpty()) {
+                    buildJsonArray { add("object"); add("null") }
+                } else JsonPrimitive("object")
+            )
+        } else when (metaDescriptor.valueRestriction) {
             ValueRestriction.ABSENT -> put(JsonSchema.Vocabularies.Validation.TYPE, JsonPrimitive("null"))
             else -> {
                 metaDescriptor.valueTypes?.let { types ->
@@ -86,6 +93,10 @@ private object MetaDescriptorJsonSchemaConverter {
 
     private fun convertJsonSchemaToMetaDescriptor(jsonObject: JsonObject, depth: Int): MetaDescriptor {
         val builder = MetaDescriptorBuilder()
+        val attributes = jsonObject[JsonSchema.Vocabularies.Custom.ATTRIBUTES]?.jsonObject?.let {
+            Json.decodeFromJsonElement<Meta>(it)
+        }
+        builder.nodeRequired = attributes?.readNodeRequired()
 
         // Handle basic metadata
         builder.description = jsonObject[JsonSchema.Vocabularies.MetaData.DESCRIPTION]?.jsonPrimitive?.contentOrNull
@@ -97,13 +108,27 @@ private object MetaDescriptorJsonSchemaConverter {
             is JsonArray -> typeElement.mapNotNull { jsonTypeToValueType(it.jsonPrimitive.contentOrNull) }
             else -> null
         }
-        builder.valueTypes = valueTypes?.takeIf { it.isNotEmpty() }
+        if (builder.nodeRequired != null) {
+            val objectTypes = when (typeElement) {
+                is JsonPrimitive -> listOf(typeElement.contentOrNull)
+                is JsonArray -> typeElement.map { it.jsonPrimitive.contentOrNull }
+                else -> emptyList()
+            }
+            require(objectTypes == listOf("object") ||
+                    (objectTypes.size == 2 && objectTypes.toSet() == setOf("object", "null"))) {
+                "Object descriptors require an object or nullable object schema"
+            }
+            builder.valueTypes = if ("null" in objectTypes) listOf(ValueType.NULL) else emptyList()
+            builder.valueRestriction = ValueRestriction.NONE
+        } else {
+            builder.valueTypes = valueTypes?.takeIf { it.isNotEmpty() }
 
-        // Handle value restriction
-        builder.valueRestriction = when {
-            valueTypes?.contains(ValueType.NULL) == true && valueTypes.size == 1 -> ValueRestriction.ABSENT
-            jsonObject[JsonSchema.Vocabularies.Validation.REQUIRED] != null -> ValueRestriction.REQUIRED
-            else -> ValueRestriction.NONE
+            // Handle value restriction
+            builder.valueRestriction = when {
+                valueTypes?.contains(ValueType.NULL) == true && valueTypes.size == 1 -> ValueRestriction.ABSENT
+                jsonObject[JsonSchema.Vocabularies.Validation.REQUIRED] != null -> ValueRestriction.REQUIRED
+                else -> ValueRestriction.NONE
+            }
         }
 
         // Handle allowed values
@@ -136,22 +161,19 @@ private object MetaDescriptorJsonSchemaConverter {
 
         // Handle required fields
         val requiredFields = jsonObject[JsonSchema.Vocabularies.Validation.REQUIRED]?.jsonArray?.mapNotNull { it.jsonPrimitive.contentOrNull } ?: emptyList()
-        if (requiredFields.isNotEmpty()) {
-            builder.children.forEach { (name, childBuilder) ->
-                if (name in requiredFields) {
-                    childBuilder.valueRestriction = ValueRestriction.REQUIRED
-                }
+        builder.children.forEach { (name, childBuilder) ->
+            if (childBuilder.nodeRequired != null) {
+                childBuilder.nodeRequired = name in requiredFields
+            } else if (name in requiredFields) {
+                childBuilder.valueRestriction = ValueRestriction.REQUIRED
             }
         }
 
         // Handle custom fields
         builder.indexKey = jsonObject[JsonSchema.Vocabularies.Custom.INDEX_KEY]?.jsonPrimitive?.contentOrNull ?: Meta.INDEX_KEY
         builder.multiple = jsonObject[JsonSchema.Vocabularies.Custom.MULTIPLE]?.jsonPrimitive?.booleanOrNull ?: false
-        jsonObject[JsonSchema.Vocabularies.Custom.ATTRIBUTES]?.jsonObject?.let { attributes ->
-            builder.attributes.update(Json.decodeFromJsonElement(attributes))
-        }
-
-        return builder.build()
+        attributes?.let { builder.attributes.update(it) }
+        return builder.build().also { it.nodeRequired }
     }
 
     /**
