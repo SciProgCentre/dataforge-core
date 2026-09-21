@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- Allow empty byte-array binary reads and validate read ranges relative to the current view
 - Find metadata files by filename prefix and close directory streams in metadata readers
 - Include null in descriptors derived from nullable primitive and enum serializers
 - Preserve explicit descriptors in serializable converters
