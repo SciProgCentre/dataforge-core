@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- Allow empty byte-array binary reads and validate read ranges relative to the current view
 - Include null in descriptors derived from nullable primitive and enum serializers
 - Preserve explicit descriptors in serializable converters
 - Return null from enum readers and delegates when the value is not a member of the enum
