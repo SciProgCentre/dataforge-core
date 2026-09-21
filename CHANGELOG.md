@@ -8,6 +8,8 @@
 
 ### Changed
 
+- **BREAKING** Derived class and object descriptors distinguish optional node presence from explicit null
+
 ### Deprecated
 
 ### Removed

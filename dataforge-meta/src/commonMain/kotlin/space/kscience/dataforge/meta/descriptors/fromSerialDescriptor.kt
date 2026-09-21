@@ -11,7 +11,13 @@ import space.kscience.dataforge.meta.asValue
 private fun MetaDescriptorBuilder.fromSerialDescriptor(
     descriptor: SerialDescriptor,
     visited: Set<String> = emptySet(),
+    objectNodes: Boolean = true,
 ) {
+    if (objectNodes && (descriptor.kind == StructureKind.CLASS || descriptor.kind == StructureKind.OBJECT)) {
+        nodeRequired = nodeRequired ?: true
+        valueRestriction = ValueRestriction.NONE
+        valueTypes = if (descriptor.isNullable) listOf(ValueType.NULL) else emptyList()
+    }
     if (descriptor.serialName in visited) return
     val newVisited = visited + descriptor.serialName
 
@@ -41,7 +47,7 @@ private fun MetaDescriptorBuilder.fromSerialDescriptor(
                 valueTypes = listOf(ValueType.LIST)
             } else {
                 multiple = true
-                fromSerialDescriptor(elementDescriptor, newVisited)
+                fromSerialDescriptor(elementDescriptor, newVisited, objectNodes = false)
             }
         }
 
@@ -50,10 +56,13 @@ private fun MetaDescriptorBuilder.fromSerialDescriptor(
                 val elementName = descriptor.getElementName(i)
                 val elementDescriptor = descriptor.getElementDescriptor(i)
                 node(elementName) {
-                    if (!descriptor.isElementOptional(i) && !elementDescriptor.isNullable) {
+                    if (objectNodes &&
+                        (elementDescriptor.kind == StructureKind.CLASS || elementDescriptor.kind == StructureKind.OBJECT)) {
+                        nodeRequired = !descriptor.isElementOptional(i)
+                    } else if (!descriptor.isElementOptional(i) && !elementDescriptor.isNullable) {
                         valueRestriction = ValueRestriction.REQUIRED
                     }
-                    fromSerialDescriptor(elementDescriptor, newVisited)
+                    fromSerialDescriptor(elementDescriptor, newVisited, objectNodes)
                 }
             }
         }
@@ -61,7 +70,7 @@ private fun MetaDescriptorBuilder.fromSerialDescriptor(
         StructureKind.MAP -> {
             val elementDescriptor = descriptor.getElementDescriptor(1)
             childrenDescriptor = MetaDescriptorBuilder().apply {
-                fromSerialDescriptor(elementDescriptor, newVisited)
+                fromSerialDescriptor(elementDescriptor, newVisited, objectNodes = false)
             }
         }
 
@@ -85,6 +94,9 @@ private fun MetaDescriptorBuilder.fromSerialDescriptor(
 /**
  * Build a [MetaDescriptor] from a [SerialDescriptor].
  * Nullable primitive and enum serializers allow an explicit null value.
+ * Class and object nodes distinguish optional presence from nullable content using [nodeRequired].
+ * List and map subtrees retain legacy descriptors. Recursive children are not expanded repeatedly;
+ * contextual and polymorphic serializers still require their own validation.
  */
 public fun MetaDescriptor(descriptor: SerialDescriptor): MetaDescriptor = MetaDescriptor {
     fromSerialDescriptor(descriptor)
