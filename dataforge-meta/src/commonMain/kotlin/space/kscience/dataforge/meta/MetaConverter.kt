@@ -118,12 +118,12 @@ public interface MetaConverter<T> : MetaReader<T> {
         public inline fun <reified E : Enum<E>> enum(): MetaConverter<E> = object : MetaConverter<E> {
             override val descriptor: MetaDescriptor = MetaDescriptor {
                 valueType(ValueType.STRING)
-                allowedValues(enumValues<E>())
+                allowedValues = enumValues<E>().map { it.name.asValue() }
             }
 
             override fun readOrNull(source: Meta): E? = source.enum<E>()
 
-            override fun convert(obj: E): Meta = Meta(obj.asValue())
+            override fun convert(obj: E): Meta = Meta(obj.name.asValue())
         }
 
         public val stringList: MetaConverter<List<String>> = object : MetaConverter<List<String>> {
