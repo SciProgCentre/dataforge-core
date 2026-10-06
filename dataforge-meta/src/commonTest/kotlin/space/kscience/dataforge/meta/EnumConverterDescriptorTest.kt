@@ -9,8 +9,10 @@ import space.kscience.dataforge.meta.descriptors.validate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class EnumConverterDescriptorTest {
@@ -25,15 +27,16 @@ class EnumConverterDescriptorTest {
     private val converter = MetaConverter.enum<Choice>()
 
     @Test
-    fun enumDescriptorAcceptsEachScalarName() {
+    fun enumDescriptorKeepsEachNativeScalarValue() {
         val descriptor = assertNotNull(converter.descriptor)
         val allowed = assertNotNull(descriptor.allowedValues)
-        assertEquals(listOf("FIRST", "SECOND"), allowed.map { it.string })
-        assertEquals(listOf(ValueType.STRING, ValueType.STRING), allowed.map { it.type })
-        assertTrue(descriptor.validate(Meta("FIRST")))
-        assertTrue(descriptor.validate(Meta("SECOND")))
-        assertTrue(descriptor.validate(converter.convert(Choice.FIRST)))
-        assertTrue(descriptor.validate(converter.convert(Choice.SECOND)))
+        assertEquals(Choice.entries.size, allowed.size)
+        Choice.entries.forEachIndexed { index, choice ->
+            val value = assertIs<EnumValue<*>>(allowed[index])
+            assertEquals(ValueType.STRING, value.type)
+            assertSame(choice, value.value)
+            assertNativeRoundTrip(converter, choice)
+        }
         assertFalse(descriptor.validate(Meta("OTHER")))
     }
 
@@ -50,34 +53,40 @@ class EnumConverterDescriptorTest {
     fun enumReadsRemainNullableForUnknownNames() {
         assertEquals(Choice.FIRST, converter.readOrNull(Meta("FIRST")))
         assertEquals(Choice.SECOND, converter.readOrNull(Meta("SECOND")))
-        Choice.entries.forEach { assertRoundTrip(converter, it) }
+        Choice.entries.forEach { choice ->
+            val converted = assertNativeRoundTrip(converter, choice)
+            assertEquals(JsonPrimitive(choice.name), converted.toJson())
+            val restored = Json.decodeFromString(MetaSerializer, Json.encodeToString(MetaSerializer, converted))
+            assertSame(choice, converter.read(restored))
+        }
         assertNull(converter.readOrNull(Meta("OTHER")))
         assertNull(converter.readOrNull(Meta.EMPTY))
     }
 
     @Test
-    fun enumsWithCustomDisplayUseCanonicalNames() {
+    fun enumsWithCustomDisplayKeepNativeValuesAndNameReading() {
         val displayConverter = MetaConverter.enum<DisplayChoice>()
         val descriptor = assertNotNull(displayConverter.descriptor)
-        assertEquals(listOf("FIRST", "SECOND"), descriptor.allowedValues?.map { it.string })
-        assertEquals(
-            JsonArray(listOf(JsonPrimitive("FIRST"), JsonPrimitive("SECOND"))),
-            descriptor.toJsonSchema().getValue("enum"),
-        )
-        DisplayChoice.entries.forEach { assertRoundTrip(displayConverter, it) }
-        assertNull(displayConverter.readOrNull(Meta("display:FIRST")))
+        val allowed = assertNotNull(descriptor.allowedValues)
+        assertEquals(DisplayChoice.entries.size, allowed.size)
+        DisplayChoice.entries.forEachIndexed { index, choice ->
+            val value = assertIs<EnumValue<*>>(allowed[index])
+            assertEquals(ValueType.STRING, value.type)
+            assertSame(choice, value.value)
+            assertNativeRoundTrip(displayConverter, choice)
+            assertSame(choice, displayConverter.readOrNull(Meta(choice.name)))
+            assertNull(displayConverter.readOrNull(Meta(choice.toString())))
+        }
         assertNull(displayConverter.readOrNull(Meta("OTHER")))
         assertNull(displayConverter.readOrNull(Meta.EMPTY))
     }
 
-    private fun <E : Enum<E>> assertRoundTrip(converter: MetaConverter<E>, value: E) {
+    private fun <E : Enum<E>> assertNativeRoundTrip(converter: MetaConverter<E>, value: E): Meta {
         val descriptor = assertNotNull(converter.descriptor)
         val converted = converter.convert(value)
+        assertSame(value, assertIs<EnumValue<*>>(converted.value).value)
         assertTrue(descriptor.validate(converted))
-        assertEquals(value, converter.read(converted))
-        assertEquals(JsonPrimitive(value.name), converted.toJson())
-        val restored = Json.decodeFromString(MetaSerializer, Json.encodeToString(MetaSerializer, converted))
-        assertTrue(descriptor.validate(restored))
-        assertEquals(value, converter.read(restored))
+        assertSame(value, converter.read(converted))
+        return converted
     }
 }
