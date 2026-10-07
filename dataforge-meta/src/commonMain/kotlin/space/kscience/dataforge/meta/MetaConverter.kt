@@ -118,7 +118,7 @@ public interface MetaConverter<T> : MetaReader<T> {
         public inline fun <reified E : Enum<E>> enum(): MetaConverter<E> = object : MetaConverter<E> {
             override val descriptor: MetaDescriptor = MetaDescriptor {
                 valueType(ValueType.STRING)
-                allowedValues(enumValues<E>())
+                allowedValues(*enumValues<E>())
             }
 
             override fun readOrNull(source: Meta): E? = source.enum<E>()
