@@ -19,6 +19,7 @@ public interface Binary {
     /**
      * Read maximum of [atMost] bytes as input from the binary, starting at [offset]. The generated input is always closed
      * when leaving scope, so it could not be leaked outside of scope of [block].
+     * The offset is relative to this binary and may equal [size] for an empty read. [atMost] must be non-negative.
      */
     public fun <R> read(offset: Int = 0, atMost: Int = size - offset, block: Source.() -> R): R
 
@@ -42,8 +43,8 @@ internal class ByteArrayBinary(
 ) : Binary {
 
     override fun <R> read(offset: Int, atMost: Int, block: Source.() -> R): R {
-        require(offset >= 0) { "Offset must be positive" }
-        require(offset < array.size) { "Offset $offset is larger than array size" }
+        require(offset in 0..size) { "Offset $offset is outside binary size $size" }
+        require(atMost >= 0) { "Read limit must be non-negative" }
 
         return ByteArraySource(
             array,
@@ -53,8 +54,8 @@ internal class ByteArrayBinary(
     }
 
     override suspend fun <R> readSuspend(offset: Int, atMost: Int, block: suspend Source.() -> R): R {
-        require(offset >= 0) { "Offset must be positive" }
-        require(offset < array.size) { "Offset $offset is larger than array size" }
+        require(offset in 0..size) { "Offset $offset is outside binary size $size" }
+        require(atMost >= 0) { "Read limit must be non-negative" }
 
         val input = ByteArraySource(
             array,
