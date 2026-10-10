@@ -26,6 +26,12 @@ class EnumConverterDescriptorTest {
         override fun toString(): String = "display:$name"
     }
 
+    private enum class NumericDisplayChoice {
+        FIRST;
+
+        override fun toString(): String = "1"
+    }
+
     private val converter = MetaConverter.enum<Choice>()
 
     @Test
@@ -49,6 +55,10 @@ class EnumConverterDescriptorTest {
         }
         assertFalse(numeric.validate(Meta(1.5)))
         assertFalse(numeric.validate(Meta(listOf(1.5).asValue())))
+        val numericDisplay = assertNotNull(MetaConverter.enum<NumericDisplayChoice>().descriptor)
+            .copy(multiple = true, valueTypes = listOf(ValueType.STRING, ValueType.LIST))
+        assertFalse(numericDisplay.validate(Meta(listOf(1).asValue())))
+        assertTrue(numericDisplay.validate(Meta(listOf("1").asValue())))
         assertEquals(
             listOf(true, true, true),
             listOf(

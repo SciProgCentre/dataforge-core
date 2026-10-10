@@ -105,6 +105,11 @@ public sealed interface MetaValidationResult {
 
 public val MetaValidationResult.isValid: Boolean get() = this == MetaValidationResult.Valid
 
+private fun Value.matchesAllowed(allowed: Value): Boolean = when (allowed) {
+    is EnumValue<*> -> type == ValueType.STRING && allowed == this
+    else -> this == allowed
+}
+
 /**
  * Check if given [value] adheres to descriptor
  */
@@ -131,11 +136,7 @@ public fun MetaDescriptor.validateWithResult(value: Value?, name: Name): MetaVal
                 MetaValidationResult.Valid
             }
         } else if (value.type == ValueType.LIST && multiple) {
-            if (value.list.all { actual ->
-                    allowedValues.any {
-                        actual == it || (actual.type == ValueType.STRING && it is EnumValue<*> && it == actual)
-                    }
-                }) {
+            if (value.list.all { actual -> allowedValues.any { actual.matchesAllowed(it) } }) {
                 MetaValidationResult.Valid
             } else {
                 MetaValidationResult.ValueNotAllowed(
@@ -144,9 +145,7 @@ public fun MetaDescriptor.validateWithResult(value: Value?, name: Name): MetaVal
                     actual = value
                 )
             }
-        } else if (allowedValues.any {
-                value == it || (value.type == ValueType.STRING && it is EnumValue<*> && it == value)
-            }) {
+        } else if (allowedValues.any { value.matchesAllowed(it) }) {
             MetaValidationResult.Valid
         } else {
             MetaValidationResult.ValueNotAllowed(
