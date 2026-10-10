@@ -131,7 +131,11 @@ public fun MetaDescriptor.validateWithResult(value: Value?, name: Name): MetaVal
                 MetaValidationResult.Valid
             }
         } else if (value.type == ValueType.LIST && multiple) {
-            if (value.list.all { it in allowedValues }) {
+            if (value.list.all { actual ->
+                    allowedValues.any {
+                        actual == it || (actual.type == ValueType.STRING && it is EnumValue<*> && it == actual)
+                    }
+                }) {
                 MetaValidationResult.Valid
             } else {
                 MetaValidationResult.ValueNotAllowed(
@@ -140,7 +144,9 @@ public fun MetaDescriptor.validateWithResult(value: Value?, name: Name): MetaVal
                     actual = value
                 )
             }
-        } else if (value in allowedValues) {
+        } else if (allowedValues.any {
+                value == it || (value.type == ValueType.STRING && it is EnumValue<*> && it == value)
+            }) {
             MetaValidationResult.Valid
         } else {
             MetaValidationResult.ValueNotAllowed(
