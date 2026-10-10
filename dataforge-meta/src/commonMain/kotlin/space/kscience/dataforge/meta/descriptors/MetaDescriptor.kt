@@ -85,10 +85,11 @@ public val MetaDescriptor.allowedValues: List<Value>? get() = attributes[MetaDes
 
 internal fun Meta.readNodeRequired(): Boolean? {
     val attribute = get(MetaDescriptor.NODE_REQUIRED_KEY) ?: return null
-    require(attribute.items.isEmpty() && attribute.value?.type == ValueType.BOOLEAN) {
+    val value = attribute.value
+    require(attribute.items.isEmpty() && value != null && value.type == ValueType.BOOLEAN) {
         "nodeRequired must be a boolean"
     }
-    return attribute.value!!.boolean
+    return value.boolean
 }
 
 /**

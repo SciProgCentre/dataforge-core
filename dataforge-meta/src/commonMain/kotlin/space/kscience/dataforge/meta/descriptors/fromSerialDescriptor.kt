@@ -8,12 +8,15 @@ import space.kscience.dataforge.meta.Null
 import space.kscience.dataforge.meta.ValueType
 import space.kscience.dataforge.meta.asValue
 
+private val SerialDescriptor.isObject: Boolean
+    get() = kind == StructureKind.CLASS || kind == StructureKind.OBJECT
+
 private fun MetaDescriptorBuilder.fromSerialDescriptor(
     descriptor: SerialDescriptor,
     visited: Set<String> = emptySet(),
     objectNodes: Boolean = true,
 ) {
-    if (objectNodes && (descriptor.kind == StructureKind.CLASS || descriptor.kind == StructureKind.OBJECT)) {
+    if (objectNodes && descriptor.isObject) {
         nodeRequired = nodeRequired ?: true
         valueRestriction = ValueRestriction.NONE
         valueTypes = if (descriptor.isNullable) listOf(ValueType.NULL) else emptyList()
@@ -56,8 +59,7 @@ private fun MetaDescriptorBuilder.fromSerialDescriptor(
                 val elementName = descriptor.getElementName(i)
                 val elementDescriptor = descriptor.getElementDescriptor(i)
                 node(elementName) {
-                    if (objectNodes &&
-                        (elementDescriptor.kind == StructureKind.CLASS || elementDescriptor.kind == StructureKind.OBJECT)) {
+                    if (objectNodes && elementDescriptor.isObject) {
                         nodeRequired = !descriptor.isElementOptional(i)
                     } else if (!descriptor.isElementOptional(i) && !elementDescriptor.isNullable) {
                         valueRestriction = ValueRestriction.REQUIRED
