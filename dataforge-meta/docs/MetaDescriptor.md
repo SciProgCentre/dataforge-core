@@ -56,6 +56,9 @@ You can use a descriptor to validate a `Meta` tree:
 - `descriptor.validateWithResult(meta)`: Returns a sequence of `MetaValidationResult` providing detailed information
   about any discrepancies (e.g., `RequiredValueIsMissing`, `IncorrectValueType`).
 
+Native enum choices accept matching string values, including values in lists.
+Enum readers return null for native values from another enum type; strict `read` still fails.
+
 ## Integration with kotlinx.serialization
 
 `MetaDescriptor` can be automatically generated from `kotlinx.serialization` descriptors. This allows you to derive a
