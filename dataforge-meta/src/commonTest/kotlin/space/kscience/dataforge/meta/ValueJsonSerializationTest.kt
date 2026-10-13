@@ -41,7 +41,7 @@ class ValueJsonSerializationTest {
         assertEquals(ValueType.LIST, empty.type)
         assertTrue(empty.list.isEmpty())
         assertSame(Null, nullValue)
-        assertNotEquals(empty, nullValue)
+        assertNotEquals(empty.toJson(), nullValue.toJson())
     }
 
     @Test
@@ -80,8 +80,17 @@ class ValueJsonSerializationTest {
             Json.parseToJsonElement(encoded)
             val restored = json.decodeFromString(MetaDescriptor.serializer(), encoded)
             assertEquals(value.toJson(), assertNotNull(restored.defaultValue).toJson())
-            assertEquals(value.type, restored.defaultValue?.type)
+            assertEquals(value.type, restored.defaultValue.type)
         }
+    }
+
+    @Test
+    fun nullableDescriptorDefaultUsesJsonNull() {
+        val absent = json.encodeToString(MetaDescriptor.serializer(), MetaDescriptor())
+        val explicitNull = json.encodeToString(MetaDescriptor.serializer(), MetaDescriptor(defaultValue = Null))
+        assertEquals(absent, explicitNull)
+        assertNull(json.decodeFromString(MetaDescriptor.serializer(), absent).defaultValue)
+        assertNull(json.decodeFromString(MetaDescriptor.serializer(), explicitNull).defaultValue)
     }
 
     @Test
