@@ -59,7 +59,7 @@ public interface Plugin : Named, ContextAware, Provider, MetaRepr {
 
     override fun toMeta(): Meta = Meta {
         "context" put context.name.toString()
-        "type" to this::class.simpleName
+        this@Plugin::class.simpleName?.let { "type" put it }
         "tag" put tag
         "meta" put meta
     }
