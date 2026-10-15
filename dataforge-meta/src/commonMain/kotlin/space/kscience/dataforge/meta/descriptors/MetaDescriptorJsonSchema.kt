@@ -173,7 +173,7 @@ private object MetaDescriptorJsonSchemaConverter {
         builder.indexKey = jsonObject[JsonSchema.Vocabularies.Custom.INDEX_KEY]?.jsonPrimitive?.contentOrNull ?: Meta.INDEX_KEY
         builder.multiple = jsonObject[JsonSchema.Vocabularies.Custom.MULTIPLE]?.jsonPrimitive?.booleanOrNull ?: false
         attributes?.let { builder.attributes.update(it) }
-        return builder.build().also { it.nodeRequired }
+        return builder.build()
     }
 
     /**

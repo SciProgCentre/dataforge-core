@@ -97,20 +97,34 @@ class ObjectParentDescriptorTest {
     fun conflictingObjectDescriptorIsRejected() {
         val descriptor = objectDescriptor(false)
         val conflicts = listOf(
-            descriptor.copy(valueRestriction = ValueRestriction.REQUIRED),
-            descriptor.copy(valueRestriction = ValueRestriction.ABSENT),
-            descriptor.copy(valueTypes = null),
-            descriptor.copy(valueTypes = listOf(ValueType.STRING)),
-            descriptor.copy(valueTypes = listOf(ValueType.NULL, ValueType.NUMBER)),
-            descriptor.copy(attributes = Meta { "nodeRequired" put false; "allowedValues" put listOf(1).asValue() }),
-            descriptor.copy(attributes = Meta { "nodeRequired" put "false" }),
-            descriptor.copy(attributes = Meta { "nodeRequired" put 0 }),
-            descriptor.copy(attributes = Meta { "nodeRequired" put Null })
+            { descriptor.copy(valueRestriction = ValueRestriction.REQUIRED) },
+            { descriptor.copy(valueRestriction = ValueRestriction.ABSENT) },
+            { descriptor.copy(valueTypes = null) },
+            { descriptor.copy(valueTypes = listOf(ValueType.STRING)) },
+            { descriptor.copy(valueTypes = listOf(ValueType.NULL, ValueType.NUMBER)) },
+            { descriptor.copy(attributes = Meta { "nodeRequired" put false; "allowedValues" put listOf(1).asValue() }) },
+            { descriptor.copy(attributes = Meta { "nodeRequired" put "false" }) },
+            { descriptor.copy(attributes = Meta { "nodeRequired" put 0 }) },
+            { descriptor.copy(attributes = Meta { "nodeRequired" put Null }) }
         )
         for (conflict in conflicts) {
-            assertFailsWith<IllegalArgumentException> { conflict.errors(null) }
-            assertFailsWith<IllegalArgumentException> { conflict.required }
-            assertFailsWith<IllegalArgumentException> { conflict.toJsonSchema() }
+            assertFailsWith<IllegalArgumentException> { conflict() }
+        }
+    }
+
+    @Test
+    fun objectDescriptorIsCheckedAtConstruction() {
+        assertFailsWith<IllegalArgumentException> {
+            MetaDescriptor(attributes = Meta { "nodeRequired" put false })
+        }
+        assertFailsWith<IllegalArgumentException> {
+            MetaDescriptor {
+                nodeRequired = false
+                valueType(ValueType.NUMBER)
+            }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            objectDescriptor(false).copy { required() }
         }
     }
 

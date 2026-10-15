@@ -18,11 +18,21 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNotEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class MetaDescriptorSerializationTest {
+
+    @Test
+    fun conflictingObjectDescriptorIsRejectedDuringDeserialization() {
+        assertFailsWith<IllegalArgumentException> {
+            Json.decodeFromString<MetaDescriptor>(
+                """{"valueRestriction":"REQUIRED","valueTypes":[],"attributes":{"nodeRequired":false}}"""
+            )
+        }
+    }
 
     @Serializable
     data class Child(val n: Int)

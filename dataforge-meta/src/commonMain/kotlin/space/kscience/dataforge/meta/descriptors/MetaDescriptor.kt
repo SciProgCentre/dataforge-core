@@ -50,6 +50,16 @@ public data class MetaDescriptor(
     public val childrenDescriptor: MetaDescriptor? = null,
     public val attributes: Meta = Meta.EMPTY
 ) {
+    init {
+        if (attributes.readNodeRequired() != null) {
+            require(valueRestriction == ValueRestriction.NONE &&
+                    (valueTypes == emptyList<ValueType>() || valueTypes == listOf(ValueType.NULL)) &&
+                    allowedValues == null) {
+                "Object descriptors require NONE, empty or NULL value types, and no allowed values"
+            }
+        }
+    }
+
     /**
      * A node constructed of default values for this descriptor and its children
      */
@@ -98,15 +108,7 @@ internal fun Meta.readNodeRequired(): Boolean? {
  * and empty value types (non-null) or only [ValueType.NULL] (nullable).
  */
 public val MetaDescriptor.nodeRequired: Boolean?
-    get() {
-        val required = attributes.readNodeRequired() ?: return null
-        require(valueRestriction == ValueRestriction.NONE &&
-                (valueTypes == emptyList<ValueType>() || valueTypes == listOf(ValueType.NULL)) &&
-                allowedValues == null) {
-            "Object descriptors require NONE, empty or NULL value types, and no allowed values"
-        }
-        return required
-    }
+    get() = attributes.readNodeRequired()
 
 public operator fun MetaDescriptor.get(name: Name): MetaDescriptor? = when (name.length) {
     0 -> this
