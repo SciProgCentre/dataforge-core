@@ -18,10 +18,10 @@ import kotlin.test.assertTrue
 class DescriptorJsonSchemaTest {
 
     private fun objectParent(required: Boolean, nullable: Boolean): MetaDescriptor = MetaDescriptor {
-        attributes { "nodeRequired" put true }
+        nodeRequired = true
         valueTypes = emptyList()
         node("p") {
-            attributes { "nodeRequired" put required }
+            nodeRequired = required
             valueTypes = if (nullable) listOf(ValueType.NULL) else emptyList()
             value("n", ValueType.NUMBER) { valueRestriction = ValueRestriction.REQUIRED }
         }

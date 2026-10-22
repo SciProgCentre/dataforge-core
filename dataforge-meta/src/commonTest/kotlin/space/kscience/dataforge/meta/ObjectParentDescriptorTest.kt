@@ -13,7 +13,7 @@ class ObjectParentDescriptorTest {
     private val child = Name.parse("p.n")
 
     private fun objectDescriptor(required: Boolean, nullable: Boolean = false): MetaDescriptor = MetaDescriptor {
-        attributes { "nodeRequired" put required }
+        nodeRequired = required
         valueTypes = if (nullable) listOf(ValueType.NULL) else emptyList()
         value("n", ValueType.NUMBER) { valueRestriction = ValueRestriction.REQUIRED }
     }
@@ -24,14 +24,14 @@ class ObjectParentDescriptorTest {
     @Test
     fun absentOptionalParentDoesNotRequireDescendants() {
         for (nullable in listOf(false, true)) {
-            val descriptor = objectDescriptor(false, nullable)
+            val descriptor = objectDescriptor(required = false, nullable = nullable)
             assertEquals(emptyList(), descriptor.errors(null))
             assertFalse(descriptor.required)
         }
     }
 
     @Test
-    fun presentOptionalParentStillRequiresChildren() {
+    fun presentObjectParentStillRequiresChildren() {
         for (required in listOf(false, true)) {
             val descriptor = objectDescriptor(required)
             assertEquals(listOf(MetaValidationResult.RequiredValueIsMissing(child)), descriptor.errors(Meta.EMPTY))
@@ -46,7 +46,7 @@ class ObjectParentDescriptorTest {
     @Test
     fun nullLeafFollowsExistingValueTypes() {
         for (required in listOf(false, true)) {
-            assertEquals(emptyList(), objectDescriptor(required, true).errors(Meta(Null)))
+            assertEquals(emptyList(), objectDescriptor(required = required, nullable = true).errors(Meta(Null)))
             assertEquals(
                 listOf(MetaValidationResult.IncorrectValueType(parent, emptyList(), ValueType.NULL)),
                 objectDescriptor(required).errors(Meta(Null))
@@ -63,7 +63,7 @@ class ObjectParentDescriptorTest {
     @Test
     fun requiredParentReportsItsOwnPath() {
         for (nullable in listOf(false, true)) {
-            val descriptor = objectDescriptor(true, nullable)
+            val descriptor = objectDescriptor(required = true, nullable = nullable)
             assertTrue(descriptor.required)
             assertEquals(listOf(MetaValidationResult.RequiredValueIsMissing(parent)), descriptor.errors(null))
             val empty = descriptor.copy(nodes = emptyMap())
@@ -84,31 +84,31 @@ class ObjectParentDescriptorTest {
         val hybrid = Meta { value = Null; "n" put 1 }
         assertEquals(
             listOf(MetaValidationResult.ProhibitedValueIsPresent(parent)),
-            objectDescriptor(false, true).errors(hybrid)
+            objectDescriptor(required = false, nullable = true).errors(hybrid)
         )
         assertEquals(
             listOf(MetaValidationResult.IncorrectValueType(parent, emptyList(), ValueType.NULL)),
             objectDescriptor(false).errors(hybrid)
         )
-        assertEquals(emptyList(), objectDescriptor(false, true).copy(attributes = Meta.EMPTY).errors(hybrid))
+        assertEquals(emptyList(), objectDescriptor(required = false, nullable = true).copy(attributes = Meta.EMPTY).errors(hybrid))
     }
 
     @Test
     fun conflictingObjectDescriptorIsRejected() {
         val descriptor = objectDescriptor(false)
         val conflicts = listOf(
-            { descriptor.copy(valueRestriction = ValueRestriction.REQUIRED) },
-            { descriptor.copy(valueRestriction = ValueRestriction.ABSENT) },
-            { descriptor.copy(valueTypes = null) },
-            { descriptor.copy(valueTypes = listOf(ValueType.STRING)) },
-            { descriptor.copy(valueTypes = listOf(ValueType.NULL, ValueType.NUMBER)) },
-            { descriptor.copy(attributes = Meta { "nodeRequired" put false; "allowedValues" put listOf(1).asValue() }) },
-            { descriptor.copy(attributes = Meta { "nodeRequired" put "false" }) },
-            { descriptor.copy(attributes = Meta { "nodeRequired" put 0 }) },
-            { descriptor.copy(attributes = Meta { "nodeRequired" put Null }) }
+            "required value" to { descriptor.copy(valueRestriction = ValueRestriction.REQUIRED) },
+            "absent value" to { descriptor.copy(valueRestriction = ValueRestriction.ABSENT) },
+            "unrestricted value types" to { descriptor.copy(valueTypes = null) },
+            "string value type" to { descriptor.copy(valueTypes = listOf(ValueType.STRING)) },
+            "nullable number value type" to { descriptor.copy(valueTypes = listOf(ValueType.NULL, ValueType.NUMBER)) },
+            "allowed values" to { descriptor.copy { allowedValues(1) } },
+            "string nodeRequired marker" to { descriptor.copy(attributes = Meta { "nodeRequired" put "false" }) },
+            "number nodeRequired marker" to { descriptor.copy(attributes = Meta { "nodeRequired" put 0 }) },
+            "null nodeRequired marker" to { descriptor.copy(attributes = Meta { "nodeRequired" put Null }) }
         )
-        for (conflict in conflicts) {
-            assertFailsWith<IllegalArgumentException> { conflict() }
+        for ((label, conflict) in conflicts) {
+            assertFailsWith<IllegalArgumentException>(label) { conflict() }
         }
     }
 
@@ -129,7 +129,7 @@ class ObjectParentDescriptorTest {
     }
 
     @Test
-    fun nodeRequiredAccessorCanRestoreLegacyValidation() {
+    fun clearingNodeRequiredRestoresLegacyValidation() {
         val descriptor = MetaDescriptor {
             nodeRequired = false
             assertEquals(false, nodeRequired)

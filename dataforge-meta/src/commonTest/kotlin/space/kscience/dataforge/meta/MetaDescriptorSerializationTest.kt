@@ -17,13 +17,24 @@ import space.kscience.dataforge.names.Name
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertNotEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class MetaDescriptorSerializationTest {
+
+    @Test
+    fun optionalObjectMayBeAbsentButMustBeCompleteWhenPresent() {
+        val descriptor = MetaDescriptor(OptionalObject.serializer())
+        assertTrue(descriptor.validate(Meta.EMPTY))
+        assertEquals(
+            listOf(MetaValidationResult.RequiredValueIsMissing(Name.parse("p.n"))),
+            descriptor.validateWithResult(Meta { "p" put Meta.EMPTY }, Name.EMPTY)
+                .filterIsInstance<MetaValidationResult.Invalid>().toList()
+        )
+        assertTrue(descriptor.validate(Meta { "p" put { "n" put 1 } }))
+    }
 
     @Test
     fun conflictingObjectDescriptorIsRejectedDuringDeserialization() {
@@ -58,28 +69,27 @@ class MetaDescriptorSerializationTest {
     @Serializable
     object EmptyObject
 
+    private fun objectFieldDescriptors() = listOf(
+        Triple(MetaDescriptor(RequiredObject.serializer()), true, false),
+        Triple(MetaDescriptor(OptionalObject.serializer()), false, false),
+        Triple(MetaDescriptor(RequiredNullableObject.serializer()), true, true),
+        Triple(MetaDescriptor(OptionalNullableObject.serializer()), false, true)
+    )
+
     @Test
-    fun optionalNonNullAndRequiredNullableObjectsHaveDifferentDescriptors() {
-        assertNotEquals(
-            MetaDescriptor(OptionalObject.serializer()).nodes.getValue("p"),
-            MetaDescriptor(RequiredNullableObject.serializer()).nodes.getValue("p")
-        )
+    fun objectFieldDescriptorsKeepPresenceAndNullability() {
+        for ((descriptor, required, nullable) in objectFieldDescriptors()) {
+            assertEquals(true, descriptor.nodeRequired)
+            val field = descriptor.nodes.getValue("p")
+            assertEquals(required, field.nodeRequired, "required=$required, nullable=$nullable")
+            assertEquals(ValueRestriction.NONE, field.valueRestriction)
+            assertEquals(if (nullable) listOf(ValueType.NULL) else emptyList(), field.valueTypes)
+        }
     }
 
     @Test
-    fun objectFieldPresenceSurvivesSerializerDerivation() {
-        val descriptors = listOf(
-            Triple(MetaDescriptor(RequiredObject.serializer()), true, false),
-            Triple(MetaDescriptor(OptionalObject.serializer()), false, false),
-            Triple(MetaDescriptor(RequiredNullableObject.serializer()), true, true),
-            Triple(MetaDescriptor(OptionalNullableObject.serializer()), false, true)
-        )
-        for ((descriptor, required, nullable) in descriptors) {
-            assertEquals(true, descriptor.nodeRequired)
-            val field = descriptor.nodes.getValue("p")
-            assertEquals(required, field.nodeRequired)
-            assertEquals(ValueRestriction.NONE, field.valueRestriction)
-            assertEquals(if (nullable) listOf(ValueType.NULL) else emptyList(), field.valueTypes)
+    fun objectFieldsValidatePresenceAndNullability() {
+        for ((descriptor, required, nullable) in objectFieldDescriptors()) {
             fun errors(meta: Meta): List<MetaValidationResult.Invalid> =
                 descriptor.validateWithResult(meta, Name.EMPTY).filterIsInstance<MetaValidationResult.Invalid>().toList()
             assertEquals(
@@ -96,10 +106,22 @@ class MetaDescriptorSerializationTest {
                 errors(Meta { "p" put { "n" put "wrong" } })
             )
             assertTrue(descriptor.validate(Meta { "p" put { "n" put 1 } }))
+        }
+    }
+
+    @Test
+    fun objectFieldPresenceSurvivesJsonRoundTrip() {
+        for ((descriptor, required) in objectFieldDescriptors()) {
             val restored = Json.decodeFromString<MetaDescriptor>(Json.encodeToString(descriptor))
             assertEquals(descriptor, restored)
             assertEquals(!required, restored.validate(Meta.EMPTY))
-            assertEquals(descriptor, descriptor.toJsonSchema().toMetaDescriptor())
+        }
+    }
+
+    @Test
+    fun objectFieldPresenceSurvivesJsonSchemaRoundTrip() {
+        for ((descriptor, required, nullable) in objectFieldDescriptors()) {
+            assertEquals(descriptor, descriptor.toJsonSchema().toMetaDescriptor(), "required=$required, nullable=$nullable")
         }
     }
 
