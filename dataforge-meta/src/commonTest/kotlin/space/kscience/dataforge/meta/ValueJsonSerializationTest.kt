@@ -3,6 +3,7 @@ package space.kscience.dataforge.meta
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import kotlin.test.*
 
@@ -10,27 +11,36 @@ class ValueJsonSerializationTest {
     private val json = Json { encodeDefaults = true }
     private enum class TestEnum { SAMPLE }
 
-    private fun values(): List<Value> = listOf(
-        True, False, 0.asValue(), 0.25.asValue(), "".asValue(),
-        "17".asValue(), "false".asValue(), "null".asValue(), "native".asValue(),
-        Null, ListValue.EMPTY, TestEnum.SAMPLE.asValue(),
-        ListValue(listOf(False, Null, ListValue.EMPTY, ListValue(listOf(1.asValue(), "n".asValue())))),
+    private fun nativeValues(): List<Pair<Value, String>> = listOf(
+        True to "true",
+        False to "false",
+        0.asValue() to "0",
+        0.25.asValue() to "0.25",
+        "".asValue() to "\"\"",
+        "17".asValue() to "\"17\"",
+        "false".asValue() to "\"false\"",
+        "null".asValue() to "\"null\"",
+        "native".asValue() to "\"native\"",
+        Null to "null",
+        ListValue.EMPTY to "[]",
+        TestEnum.SAMPLE.asValue() to "\"SAMPLE\"",
+        ListValue(listOf(False, Null, ListValue.EMPTY, ListValue(listOf(1.asValue(), "n".asValue())))) to "[false,null,[],[1,\"n\"]]",
     )
 
     @Test
     fun jsonUsesNativeValues() {
-        values().forEach { value ->
+        for ((value, expected) in nativeValues()) {
             val encoded = json.encodeToString(ValueSerializer, value)
-            assertEquals(value.toJson(), Json.parseToJsonElement(encoded))
+            assertEquals(Json.parseToJsonElement(expected), Json.parseToJsonElement(encoded), expected)
         }
     }
 
     @Test
     fun jsonReadsNativeValues() {
-        values().forEach { value ->
-            val restored = json.decodeFromString(ValueSerializer, value.toJson().toString())
-            assertEquals(value.type, restored.type)
-            assertEquals(value.toJson(), restored.toJson())
+        for ((value, encoded) in nativeValues()) {
+            val restored = json.decodeFromString(ValueSerializer, encoded)
+            assertEquals(value.type, restored.type, encoded)
+            assertEquals(Json.parseToJsonElement(encoded), restored.toJson(), encoded)
         }
     }
 
@@ -73,11 +83,19 @@ class ValueJsonSerializationTest {
     }
 
     @Test
+    fun descriptorFalseDefaultUsesJsonBoolean() {
+        val descriptor = MetaDescriptor { default(false) }
+        val encoded = json.encodeToString(MetaDescriptor.serializer(), descriptor)
+        assertEquals(JsonPrimitive(false), Json.parseToJsonElement(encoded).jsonObject["defaultValue"])
+        assertEquals(descriptor, json.decodeFromString(MetaDescriptor.serializer(), encoded))
+    }
+
+    @Test
     fun descriptorDefaultsRemainNativeValues() {
         for (value in listOf(False, True, 0.asValue(), "native".asValue(), TestEnum.SAMPLE.asValue(), ListValue.EMPTY)) {
             val descriptor = MetaDescriptor(defaultValue = value)
             val encoded = json.encodeToString(MetaDescriptor.serializer(), descriptor)
-            Json.parseToJsonElement(encoded)
+            assertEquals(value.toJson(), Json.parseToJsonElement(encoded).jsonObject["defaultValue"])
             val restored = json.decodeFromString(MetaDescriptor.serializer(), encoded)
             assertEquals(value.toJson(), assertNotNull(restored.defaultValue).toJson())
             assertEquals(value.type, restored.defaultValue.type)
@@ -85,7 +103,7 @@ class ValueJsonSerializationTest {
     }
 
     @Test
-    fun nullableDescriptorDefaultUsesJsonNull() {
+    fun nullDescriptorDefaultIsNormalizedToAbsent() {
         val absent = json.encodeToString(MetaDescriptor.serializer(), MetaDescriptor())
         val explicitNull = json.encodeToString(MetaDescriptor.serializer(), MetaDescriptor(defaultValue = Null))
         assertEquals(absent, explicitNull)

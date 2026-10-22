@@ -8,8 +8,9 @@ import kotlin.test.*
 @OptIn(ExperimentalSerializationApi::class, ExperimentalStdlibApi::class)
 class ValueSerializerBinaryTest {
     @Test
-    fun nonJsonBytesStayUnchanged() {
+    fun cborBytesStayUnchanged() {
         val nested = ListValue(listOf(False, Null, ListValue.EMPTY, ListValue(listOf(1.asValue(), "n".asValue()))))
+        // Golden bytes from the pre-JSON serializer in 4da329b1.
         val cases = listOf(
             True to "f467424f4f4c45414ef5",
             False to "f467424f4f4c45414ef4",
