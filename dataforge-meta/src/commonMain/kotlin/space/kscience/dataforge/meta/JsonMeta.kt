@@ -5,6 +5,7 @@ package space.kscience.dataforge.meta
 import kotlinx.serialization.json.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.get
+import space.kscience.dataforge.names.NameIndexComparator
 import space.kscience.dataforge.names.NameToken
 
 private const val jsonArrayKey: String = "@jsonArray"
@@ -42,7 +43,7 @@ private fun Meta.toJsonWithIndex(descriptor: MetaDescriptor?, index: String?): J
                 body to JsonArray(listOf(child))
             }
         } else {
-            val elements: List<JsonElement> = list.sortedBy { it.key.index }.mapIndexed { index, entry ->
+            val elements: List<JsonElement> = list.sortedWith(compareBy(NameIndexComparator) { it.key.index }).mapIndexed { index, entry ->
                 //Use index if it is not equal to the item order
                 val actualIndex = if (index.toString() != entry.key.index) entry.key.index else null
                 entry.value.toJsonWithIndex(childDescriptor, actualIndex)

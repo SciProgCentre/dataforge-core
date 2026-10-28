@@ -41,10 +41,10 @@ public final class space/kscience/dataforge/io/yaml/YamlMetaFormat$Companion : s
 }
 
 public final class space/kscience/dataforge/io/yaml/YamlMetaFormatKt {
-	public static final fun toMeta (Lnet/mamoe/yamlkt/YamlElement;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lspace/kscience/dataforge/meta/Meta;
-	public static final fun toMeta (Lnet/mamoe/yamlkt/YamlMap;)Lspace/kscience/dataforge/meta/Meta;
-	public static synthetic fun toMeta$default (Lnet/mamoe/yamlkt/YamlElement;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/Meta;
-	public static final fun toYaml (Lspace/kscience/dataforge/meta/Meta;)Lnet/mamoe/yamlkt/YamlMap;
+	public static final fun toMeta (Lcom/charleskorn/kaml/YamlNode;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;)Lspace/kscience/dataforge/meta/Meta;
+	public static synthetic fun toMeta$default (Lcom/charleskorn/kaml/YamlNode;Lspace/kscience/dataforge/meta/descriptors/MetaDescriptor;ILjava/lang/Object;)Lspace/kscience/dataforge/meta/Meta;
+	public static final fun toYamlNode (Lspace/kscience/dataforge/meta/Meta;Lcom/charleskorn/kaml/YamlPath;)Lcom/charleskorn/kaml/YamlNode;
+	public static synthetic fun toYamlNode$default (Lspace/kscience/dataforge/meta/Meta;Lcom/charleskorn/kaml/YamlPath;ILjava/lang/Object;)Lcom/charleskorn/kaml/YamlNode;
 }
 
 public final class space/kscience/dataforge/io/yaml/YamlPlugin : space/kscience/dataforge/context/AbstractPlugin {

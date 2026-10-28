@@ -291,6 +291,10 @@ public final class space/kscience/dataforge/meta/MetaDelegateKt {
 }
 
 public final class space/kscience/dataforge/meta/MetaKt {
+	public static final fun filterIndexed (Lspace/kscience/dataforge/meta/Meta;Ljava/lang/String;)Ljava/util/Map;
+	public static final fun filterIndexed (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/names/Name;)Ljava/util/Map;
+	public static final fun filterIndexed (Lspace/kscience/dataforge/meta/TypedMeta;Ljava/lang/String;)Ljava/util/Map;
+	public static final fun filterIndexed (Lspace/kscience/dataforge/meta/TypedMeta;Lspace/kscience/dataforge/names/Name;)Ljava/util/Map;
 	public static final fun get (Lspace/kscience/dataforge/meta/Meta;Ljava/lang/String;)Lspace/kscience/dataforge/meta/Meta;
 	public static final fun get (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/meta/Meta;
 	public static final fun get (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/names/NameToken;)Lspace/kscience/dataforge/meta/Meta;
@@ -300,10 +304,6 @@ public final class space/kscience/dataforge/meta/MetaKt {
 	public static final fun getBoolean (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Boolean;
 	public static final fun getDouble (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Double;
 	public static final fun getFloat (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Float;
-	public static final fun getIndexed (Lspace/kscience/dataforge/meta/Meta;Ljava/lang/String;)Ljava/util/Map;
-	public static final fun getIndexed (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/names/Name;)Ljava/util/Map;
-	public static final fun getIndexed (Lspace/kscience/dataforge/meta/TypedMeta;Ljava/lang/String;)Ljava/util/Map;
-	public static final fun getIndexed (Lspace/kscience/dataforge/meta/TypedMeta;Lspace/kscience/dataforge/names/Name;)Ljava/util/Map;
 	public static final fun getInt (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Integer;
 	public static final fun getLong (Lspace/kscience/dataforge/meta/Meta;)Ljava/lang/Long;
 	public static final synthetic fun getNonNullable (Lspace/kscience/dataforge/meta/Meta;Lspace/kscience/dataforge/names/NameToken;)Lspace/kscience/dataforge/meta/Meta;

@@ -13,6 +13,8 @@ exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exp
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
 wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire"}
 
+kotaml = "io.heapy.kotaml:kotaml:0.112.0"
+
 [plugins]
 
 wire = { id = "com.squareup.wire", version.ref = "wire" }

@@ -7,6 +7,9 @@ import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.getIndexedList
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 
 /* Read-write delegates */
@@ -252,3 +255,31 @@ public fun <T> MutableMetaProvider.listValue(
     writer = { it?.map(writer)?.asValue() },
     reader = { it?.list?.map(reader) }
 )
+
+public fun MutableMetaProvider.instant(
+    key: Name? = null,
+    default: () -> Instant
+): MutableMetaDelegate<Instant> = value(key = key,
+    writer = {},
+    reader = {
+    when (it?.type) {
+        null, ValueType.NULL,  -> default()
+        ValueType.NUMBER -> Instant.fromEpochMilliseconds(it.number.toLong())
+        ValueType.STRING -> Instant.parse(it.string)
+        ValueType.BOOLEAN -> error("Instant cannot be represented as a boolean")
+        ValueType.LIST -> error("Instant cannot be represented as a list")
+    }
+        )
+
+public fun MetaProvider.duration(
+    key: Name? = null,
+    default: () -> Duration
+): MetaDelegate<Duration> = value(key = key) {
+    when (it?.type) {
+        null, ValueType.NULL,  -> default()
+        ValueType.NUMBER -> it.double.seconds
+        ValueType.STRING -> Duration.parse(it.string)
+        ValueType.BOOLEAN -> error("Duration cannot be represented as a boolean")
+        ValueType.LIST -> error("Duration cannot be represented as a list")
+    }
+}

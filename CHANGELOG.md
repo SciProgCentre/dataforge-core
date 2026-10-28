@@ -5,6 +5,9 @@
 ### Added
 
 ### Changed
+- Replace yamlkt with kotaml
+- Meta::getIndexed renamed to Meta::filterIndexed to better reflect its functionality
+
 
 ### Deprecated
 

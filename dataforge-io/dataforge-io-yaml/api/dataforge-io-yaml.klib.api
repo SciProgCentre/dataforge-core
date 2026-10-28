@@ -63,6 +63,5 @@ final class space.kscience.dataforge.io.yaml/YamlPlugin : space.kscience.datafor
     }
 }
 
-final fun (net.mamoe.yamlkt/YamlElement).space.kscience.dataforge.io.yaml/toMeta(space.kscience.dataforge.meta.descriptors/MetaDescriptor? = ...): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io.yaml/toMeta|toMeta@net.mamoe.yamlkt.YamlElement(space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
-final fun (net.mamoe.yamlkt/YamlMap).space.kscience.dataforge.io.yaml/toMeta(): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io.yaml/toMeta|toMeta@net.mamoe.yamlkt.YamlMap(){}[0]
-final fun (space.kscience.dataforge.meta/Meta).space.kscience.dataforge.io.yaml/toYaml(): net.mamoe.yamlkt/YamlMap // space.kscience.dataforge.io.yaml/toYaml|toYaml@space.kscience.dataforge.meta.Meta(){}[0]
+final fun (com.charleskorn.kaml/YamlNode).space.kscience.dataforge.io.yaml/toMeta(space.kscience.dataforge.meta.descriptors/MetaDescriptor? = ...): space.kscience.dataforge.meta/Meta // space.kscience.dataforge.io.yaml/toMeta|toMeta@com.charleskorn.kaml.YamlNode(space.kscience.dataforge.meta.descriptors.MetaDescriptor?){}[0]
+final fun (space.kscience.dataforge.meta/Meta).space.kscience.dataforge.io.yaml/toYamlNode(com.charleskorn.kaml/YamlPath = ...): com.charleskorn.kaml/YamlNode // space.kscience.dataforge.io.yaml/toYamlNode|toYamlNode@space.kscience.dataforge.meta.Meta(com.charleskorn.kaml.YamlPath){}[0]
