@@ -6,14 +6,16 @@ import space.kscience.dataforge.names.Name
 
 public class SlfLogManager : AbstractPlugin(), LogManager {
 
-    override fun logger(name: Name): Logger = Logger { tag, body ->
-        val logger = LoggerFactory.getLogger("${context.name.toString().uppercase()}.$name") //KotlinLogging.logger("[${context.name}] $name")
+    override fun logger(name: Name): Logger = Logger { level, source, body ->
+        val logger = LoggerFactory.getLogger(
+            if (source == null) name.toString() else "$source.$name"
+        )
         val message = body.safe
-        when (tag) {
-            LogManager.DEBUG -> logger.debug(message)
-            LogManager.INFO -> logger.info(message)
-            LogManager.WARNING -> logger.warn(message)
-            LogManager.ERROR -> logger.error(message)
+        when (level) {
+            Logger.Level.DEBUG -> logger.debug(message)
+            Logger.Level.INFO -> logger.info(message)
+            Logger.Level.WARNING -> logger.warn(message)
+            Logger.Level.ERROR -> logger.error(message)
             else -> logger.trace(message)
         }
     }

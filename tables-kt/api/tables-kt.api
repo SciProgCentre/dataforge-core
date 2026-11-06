@@ -239,6 +239,7 @@ public final class space/kscience/tables/RowTableKt {
 
 public abstract interface class space/kscience/tables/Rows {
 	public abstract fun getHeaders ()Ljava/util/List;
+	public fun rowFlow ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun rowSequence ()Lkotlin/sequences/Sequence;
 }
 
@@ -297,6 +298,7 @@ public abstract interface class space/kscience/tables/Table : space/kscience/tab
 	public fun getHeaders ()Ljava/util/List;
 	public abstract fun getOrNull (ILjava/lang/String;)Ljava/lang/Object;
 	public abstract fun getRows ()Ljava/util/List;
+	public fun rowFlow ()Lkotlinx/coroutines/flow/Flow;
 	public fun rowSequence ()Lkotlin/sequences/Sequence;
 }
 

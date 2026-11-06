@@ -11,7 +11,21 @@ abstract fun interface <#A: out kotlin/Any?> space.kscience.dataforge.context/Fa
 }
 
 abstract fun interface space.kscience.dataforge.context/Logger { // space.kscience.dataforge.context/Logger|null[0]
-    abstract fun log(kotlin/String, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/Logger.log|log(kotlin.String;kotlin.Function0<kotlin.String>){}[0]
+    abstract fun log(space.kscience.dataforge.context/Logger.Level, kotlin/String?, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/Logger.log|log(space.kscience.dataforge.context.Logger.Level;kotlin.String?;kotlin.Function0<kotlin.String>){}[0]
+
+    final enum class Level : kotlin/Enum<space.kscience.dataforge.context/Logger.Level> { // space.kscience.dataforge.context/Logger.Level|null[0]
+        enum entry DEBUG // space.kscience.dataforge.context/Logger.Level.DEBUG|null[0]
+        enum entry ERROR // space.kscience.dataforge.context/Logger.Level.ERROR|null[0]
+        enum entry INFO // space.kscience.dataforge.context/Logger.Level.INFO|null[0]
+        enum entry TRACE // space.kscience.dataforge.context/Logger.Level.TRACE|null[0]
+        enum entry WARNING // space.kscience.dataforge.context/Logger.Level.WARNING|null[0]
+
+        final val entries // space.kscience.dataforge.context/Logger.Level.entries|#static{}entries[0]
+            final fun <get-entries>(): kotlin.enums/EnumEntries<space.kscience.dataforge.context/Logger.Level> // space.kscience.dataforge.context/Logger.Level.entries.<get-entries>|<get-entries>#static(){}[0]
+
+        final fun valueOf(kotlin/String): space.kscience.dataforge.context/Logger.Level // space.kscience.dataforge.context/Logger.Level.valueOf|valueOf#static(kotlin.String){}[0]
+        final fun values(): kotlin/Array<space.kscience.dataforge.context/Logger.Level> // space.kscience.dataforge.context/Logger.Level.values|values#static(){}[0]
+    }
 }
 
 abstract interface <#A: space.kscience.dataforge.context/Plugin> space.kscience.dataforge.context/PluginFactory : space.kscience.dataforge.context/Factory<#A> { // space.kscience.dataforge.context/PluginFactory|null[0]
@@ -34,8 +48,9 @@ abstract interface space.kscience.dataforge.context/LogManager : space.kscience.
         abstract fun <get-defaultLogger>(): space.kscience.dataforge.context/Logger // space.kscience.dataforge.context/LogManager.defaultLogger.<get-defaultLogger>|<get-defaultLogger>(){}[0]
 
     abstract fun logger(space.kscience.dataforge.names/Name): space.kscience.dataforge.context/Logger // space.kscience.dataforge.context/LogManager.logger|logger(space.kscience.dataforge.names.Name){}[0]
-    open fun log(kotlin/String, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/LogManager.log|log(kotlin.String;kotlin.Function0<kotlin.String>){}[0]
-    open fun log(space.kscience.dataforge.names/Name, kotlin/String, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/LogManager.log|log(space.kscience.dataforge.names.Name;kotlin.String;kotlin.Function0<kotlin.String>){}[0]
+    open fun log(space.kscience.dataforge.context/Logger.Level, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/LogManager.log|log(space.kscience.dataforge.context.Logger.Level;kotlin.Function0<kotlin.String>){}[0]
+    open fun log(space.kscience.dataforge.context/Logger.Level, kotlin/String?, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/LogManager.log|log(space.kscience.dataforge.context.Logger.Level;kotlin.String?;kotlin.Function0<kotlin.String>){}[0]
+    open fun log(space.kscience.dataforge.names/Name, space.kscience.dataforge.context/Logger.Level, kotlin/String? = ..., kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/LogManager.log|log(space.kscience.dataforge.names.Name;space.kscience.dataforge.context.Logger.Level;kotlin.String?;kotlin.Function0<kotlin.String>){}[0]
 
     final object Companion { // space.kscience.dataforge.context/LogManager.Companion|null[0]
         final const val DEBUG // space.kscience.dataforge.context/LogManager.Companion.DEBUG|{}DEBUG[0]
@@ -295,12 +310,13 @@ final val space.kscience.dataforge.provider/length // space.kscience.dataforge.p
 final val space.kscience.dataforge.provider/tail // space.kscience.dataforge.provider/tail|@space.kscience.dataforge.provider.Path{}tail[0]
     final fun (space.kscience.dataforge.provider/Path).<get-tail>(): space.kscience.dataforge.provider/Path? // space.kscience.dataforge.provider/tail.<get-tail>|<get-tail>@space.kscience.dataforge.provider.Path(){}[0]
 
-final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/debug(kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/debug|debug@space.kscience.dataforge.context.Logger(kotlin.Function0<kotlin.String>){}[0]
-final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/error(kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/error|error@space.kscience.dataforge.context.Logger(kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/debug(kotlin/String? = ..., kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/debug|debug@space.kscience.dataforge.context.Logger(kotlin.String?;kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/error(kotlin/String? = ..., kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/error|error@space.kscience.dataforge.context.Logger(kotlin.String?;kotlin.Function0<kotlin.String>){}[0]
 final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/error(kotlin/Throwable?, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/error|error@space.kscience.dataforge.context.Logger(kotlin.Throwable?;kotlin.Function0<kotlin.String>){}[0]
-final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/info(kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/info|info@space.kscience.dataforge.context.Logger(kotlin.Function0<kotlin.String>){}[0]
-final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/trace(kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/trace|trace@space.kscience.dataforge.context.Logger(kotlin.Function0<kotlin.String>){}[0]
-final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/warn(kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/warn|warn@space.kscience.dataforge.context.Logger(kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/info(kotlin/String? = ..., kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/info|info@space.kscience.dataforge.context.Logger(kotlin.String?;kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/log(space.kscience.dataforge.context/Logger.Level, kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/log|log@space.kscience.dataforge.context.Logger(space.kscience.dataforge.context.Logger.Level;kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/trace(kotlin/String? = ..., kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/trace|trace@space.kscience.dataforge.context.Logger(kotlin.String?;kotlin.Function0<kotlin.String>){}[0]
+final fun (space.kscience.dataforge.context/Logger).space.kscience.dataforge.context/warn(kotlin/String? = ..., kotlin/Function0<kotlin/String>) // space.kscience.dataforge.context/warn|warn@space.kscience.dataforge.context.Logger(kotlin.String?;kotlin.Function0<kotlin.String>){}[0]
 final fun (space.kscience.dataforge.names/Name).space.kscience.dataforge.provider/asPath(kotlin/String? = ...): space.kscience.dataforge.provider/Path // space.kscience.dataforge.provider/asPath|asPath@space.kscience.dataforge.names.Name(kotlin.String?){}[0]
 final fun (space.kscience.dataforge.provider/Path).space.kscience.dataforge.provider/plus(space.kscience.dataforge.provider/Path): space.kscience.dataforge.provider/Path // space.kscience.dataforge.provider/plus|plus@space.kscience.dataforge.provider.Path(space.kscience.dataforge.provider.Path){}[0]
 final fun (space.kscience.dataforge.provider/PathToken).space.kscience.dataforge.provider/asPath(): space.kscience.dataforge.provider/Path // space.kscience.dataforge.provider/asPath|asPath@space.kscience.dataforge.provider.PathToken(){}[0]

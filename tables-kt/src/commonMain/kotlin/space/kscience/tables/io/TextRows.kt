@@ -1,7 +1,10 @@
 package space.kscience.tables.io
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.io.Sink
 import kotlinx.io.readByteArray
+import kotlinx.io.readLine
 import kotlinx.io.writeString
 import space.kscience.dataforge.io.Binary
 import space.kscience.dataforge.io.Envelope
@@ -37,6 +40,18 @@ internal class TextRows(
 //                }
 //            } while (!endOfInput)
 //        }
+    }
+
+    override fun rowFlow(): Flow<Row<Value>> = flow {
+        binary.readSuspend {
+            while (!exhausted()) {
+                val line = readLine()
+                if (!line.isNullOrBlank()) {
+                    val row = Table.readTextRow(line, headers, delimiter)
+                    emit(row)
+                }
+            }
+        }
     }
 
     companion object{

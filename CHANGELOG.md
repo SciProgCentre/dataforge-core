@@ -3,11 +3,14 @@
 ## Unreleased
 
 ### Added
+- `instant` and `duration` property delegates for `MetaProvider` and `MutableMetaProvider`
+- `Meta.getIndexedList(name: String)` extension function
+- `rowFlow()` stream method for `Rows` and `Table`
+- `monitorCycle` parameter in `FileDataTree` to configure directory polling interval
 
 ### Changed
 - Replace yamlkt with kotaml
-- Meta::getIndexed renamed to Meta::filterIndexed to better reflect its functionality
-
+- Refactor `Logger` and `LogManager` to use `Logger.Level` enum and support optional logging `source`
 
 ### Deprecated
 

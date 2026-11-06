@@ -5,6 +5,8 @@ import com.jsoizo.kotlincsv.csvWriter
 import com.jsoizo.kotlincsv.reader.*
 import com.jsoizo.kotlincsv.writer.CsvWriterConfigBuilder
 import com.jsoizo.kotlincsv.writer.write
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import space.kscience.tables.*
 import java.nio.file.Path
 import kotlin.io.path.inputStream
@@ -48,6 +50,7 @@ public fun Table.Companion.readCsvRows(
                 MapRow(it)
             }
 
+            override fun rowFlow(): Flow<Row<String>>  = rowSequence().asFlow()
         }
     }
 }

@@ -5,15 +5,17 @@ import space.kscience.dataforge.names.Name
 
 public class ConsoleLogManager : AbstractPlugin(), LogManager {
 
-    override fun logger(name: Name): Logger  = Logger { tag, body ->
+    override fun logger(name: Name): Logger  = Logger { level, source, body ->
         val message: String = body.safe
-        when (tag) {
+
+        val prefix = if (source == null) "" else "[$source] "
+        when (level) {
             // TODO depends on https://youtrack.jetbrains.com/issue/KT-33595/
-            LogManager.DEBUG -> console.asDynamic().debug("[${context.name}] $name: $message")
-            LogManager.INFO -> console.info("[${context.name}] $name: $message")
-            LogManager.WARNING ->  console.warn("[${context.name}] $name: $message")
-            LogManager.ERROR -> console.error("[${context.name}] $name: $message")
-            else ->  console.log("[${context.name}] $name: $message")
+            Logger.Level.DEBUG -> console.asDynamic().debug("$prefix$name: $message")
+            Logger.Level.INFO -> console.info("$prefix$name: $message")
+            Logger.Level.WARNING ->  console.warn("$prefix$name: $message")
+            Logger.Level.ERROR -> console.error("$prefix$name: $message")
+            else ->  console.log("$prefix$name: $message")
         }
     }
 

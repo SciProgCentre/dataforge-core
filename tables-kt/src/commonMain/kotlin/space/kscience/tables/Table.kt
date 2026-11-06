@@ -1,6 +1,7 @@
 package space.kscience.tables
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 
 /**
  * Finite or infinite row set. Rows are produced in a lazy suspendable [Flow].
@@ -16,6 +17,11 @@ public interface Rows<out T> {
      * A lazy sequence of rows.
      */
     public fun rowSequence(): Sequence<Row<T>>
+
+    /**
+     * A lazy flow of rows.
+     */
+    public fun rowFlow(): Flow<Row<T>> = rowSequence().asFlow()
 }
 
 /**
@@ -27,6 +33,7 @@ public interface Table<out T> : Rows<T> {
     override val headers: TableHeader<T> get() = columns.toList()
     public val rows: List<Row<T>>
     override fun rowSequence(): Sequence<Row<T>> = rows.asSequence()
+    override fun rowFlow(): Flow<Row<T>> = rows.asFlow()
 
     public companion object
 }
@@ -92,7 +99,7 @@ public interface Row<out T> {
 /**
  * Get a [Row] value or throw error if it is null
  */
-public operator fun <T: Any> Row<T>.get(column: String): T =
+public operator fun <T : Any> Row<T>.get(column: String): T =
     getOrNull(column) ?: error("Element with column name $column not found in $this")
 
 /**

@@ -31,8 +31,8 @@ public final class space/kscience/dataforge/workspace/EnvelopeDataKt {
 public final class space/kscience/dataforge/workspace/FileDataTree : space/kscience/dataforge/data/DataTree {
 	public static final field Companion Lspace/kscience/dataforge/workspace/FileDataTree$Companion;
 	public static final field DF_FILE_EXTENSION Ljava/lang/String;
-	public fun <init> (Lspace/kscience/dataforge/io/IOPlugin;Ljava/nio/file/Path;ZZ)V
-	public synthetic fun <init> (Lspace/kscience/dataforge/io/IOPlugin;Ljava/nio/file/Path;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lspace/kscience/dataforge/io/IOPlugin;Ljava/nio/file/Path;ZZJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lspace/kscience/dataforge/io/IOPlugin;Ljava/nio/file/Path;ZZJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun getData ()Lspace/kscience/dataforge/data/Data;
 	public fun getDataType ()Lkotlin/reflect/KType;
 	public final fun getIncludeExtensions ()Z

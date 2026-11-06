@@ -112,8 +112,10 @@ public abstract interface class space/kscience/dataforge/context/LogManager : sp
 	public static final field TRACE Ljava/lang/String;
 	public static final field WARNING Ljava/lang/String;
 	public abstract fun getDefaultLogger ()Lspace/kscience/dataforge/context/Logger;
-	public fun log (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
-	public fun log (Lspace/kscience/dataforge/names/Name;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public fun log (Lspace/kscience/dataforge/context/Logger$Level;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public fun log (Lspace/kscience/dataforge/context/Logger$Level;Lkotlin/jvm/functions/Function0;)V
+	public fun log (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/context/Logger$Level;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun log$default (Lspace/kscience/dataforge/context/LogManager;Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/context/Logger$Level;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 	public abstract fun logger (Lspace/kscience/dataforge/names/Name;)Lspace/kscience/dataforge/context/Logger;
 }
 
@@ -126,18 +128,35 @@ public final class space/kscience/dataforge/context/LogManager$Companion {
 }
 
 public final class space/kscience/dataforge/context/LogManagerKt {
-	public static final fun debug (Lspace/kscience/dataforge/context/Logger;Lkotlin/jvm/functions/Function0;)V
+	public static final fun debug (Lspace/kscience/dataforge/context/Logger;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun debug$default (Lspace/kscience/dataforge/context/Logger;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun error (Lspace/kscience/dataforge/context/Logger;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
 	public static final fun error (Lspace/kscience/dataforge/context/Logger;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
-	public static final fun error (Lspace/kscience/dataforge/context/Logger;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun error$default (Lspace/kscience/dataforge/context/Logger;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 	public static final fun getLogger (Lspace/kscience/dataforge/context/Context;)Lspace/kscience/dataforge/context/LogManager;
 	public static final fun getLogger (Lspace/kscience/dataforge/context/ContextAware;)Lspace/kscience/dataforge/context/Logger;
-	public static final fun info (Lspace/kscience/dataforge/context/Logger;Lkotlin/jvm/functions/Function0;)V
-	public static final fun trace (Lspace/kscience/dataforge/context/Logger;Lkotlin/jvm/functions/Function0;)V
-	public static final fun warn (Lspace/kscience/dataforge/context/Logger;Lkotlin/jvm/functions/Function0;)V
+	public static final fun info (Lspace/kscience/dataforge/context/Logger;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun info$default (Lspace/kscience/dataforge/context/Logger;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun log (Lspace/kscience/dataforge/context/Logger;Lspace/kscience/dataforge/context/Logger$Level;Lkotlin/jvm/functions/Function0;)V
+	public static final fun trace (Lspace/kscience/dataforge/context/Logger;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun trace$default (Lspace/kscience/dataforge/context/Logger;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun warn (Lspace/kscience/dataforge/context/Logger;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun warn$default (Lspace/kscience/dataforge/context/Logger;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 }
 
 public abstract interface class space/kscience/dataforge/context/Logger {
-	public abstract fun log (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public abstract fun log (Lspace/kscience/dataforge/context/Logger$Level;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class space/kscience/dataforge/context/Logger$Level : java/lang/Enum {
+	public static final field DEBUG Lspace/kscience/dataforge/context/Logger$Level;
+	public static final field ERROR Lspace/kscience/dataforge/context/Logger$Level;
+	public static final field INFO Lspace/kscience/dataforge/context/Logger$Level;
+	public static final field TRACE Lspace/kscience/dataforge/context/Logger$Level;
+	public static final field WARNING Lspace/kscience/dataforge/context/Logger$Level;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lspace/kscience/dataforge/context/Logger$Level;
+	public static fun values ()[Lspace/kscience/dataforge/context/Logger$Level;
 }
 
 public abstract interface class space/kscience/dataforge/context/Plugin : space/kscience/dataforge/context/ContextAware, space/kscience/dataforge/meta/MetaRepr, space/kscience/dataforge/misc/Named, space/kscience/dataforge/provider/Provider {

@@ -1,11 +1,8 @@
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.meta.Meta
@@ -20,6 +17,8 @@ import java.nio.file.spi.FileSystemProvider
 import kotlin.io.path.*
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Represents a data tree for managing and monitoring files and directories.
@@ -30,12 +29,14 @@ import kotlin.reflect.typeOf
  * @property path The path to the file or directory to be managed by the data tree.
  * @property monitor Whether to enable monitoring for changes in the file system. Defaults to false.
  * @property includeExtensions Whether to include file extensions in the node names. Defaults to false.
+ * @property monitorCycle The delay between monitoring cycles (if monitor is enabled). Defaults to 0.5 seconds.
  */
 public class FileDataTree(
     public val io: IOPlugin,
     public val path: Path,
     private val monitor: Boolean = false,
     public val includeExtensions: Boolean = true,
+    private val monitorCycle: Duration = 500.milliseconds
 ) : DataTree<Binary> {
     override val dataType: KType = typeOf<Binary>()
 
@@ -146,6 +147,7 @@ public class FileDataTree(
                             }
                         }
                         key.reset()
+                        delay(monitorCycle)
                     }
                 }
             }

@@ -45,6 +45,7 @@ abstract interface <#A: out kotlin/Any?> space.kscience.tables/Rows { // space.k
         abstract fun <get-headers>(): kotlin.collections/List<space.kscience.tables/ColumnHeader<#A>> // space.kscience.tables/Rows.headers.<get-headers>|<get-headers>(){}[0]
 
     abstract fun rowSequence(): kotlin.sequences/Sequence<space.kscience.tables/Row<#A>> // space.kscience.tables/Rows.rowSequence|rowSequence(){}[0]
+    open fun rowFlow(): kotlinx.coroutines.flow/Flow<space.kscience.tables/Row<#A>> // space.kscience.tables/Rows.rowFlow|rowFlow(){}[0]
 }
 
 abstract interface <#A: out kotlin/Any?> space.kscience.tables/Table : space.kscience.tables/Rows<#A> { // space.kscience.tables/Table|null[0]
@@ -56,6 +57,7 @@ abstract interface <#A: out kotlin/Any?> space.kscience.tables/Table : space.ksc
         open fun <get-headers>(): kotlin.collections/List<space.kscience.tables/ColumnHeader<#A>> // space.kscience.tables/Table.headers.<get-headers>|<get-headers>(){}[0]
 
     abstract fun getOrNull(kotlin/Int, kotlin/String): #A? // space.kscience.tables/Table.getOrNull|getOrNull(kotlin.Int;kotlin.String){}[0]
+    open fun rowFlow(): kotlinx.coroutines.flow/Flow<space.kscience.tables/Row<#A>> // space.kscience.tables/Table.rowFlow|rowFlow(){}[0]
     open fun rowSequence(): kotlin.sequences/Sequence<space.kscience.tables/Row<#A>> // space.kscience.tables/Table.rowSequence|rowSequence(){}[0]
 
     final object Companion // space.kscience.tables/Table.Companion|null[0]
