@@ -7,6 +7,8 @@ import kotlinx.serialization.serializer
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.parseAsName
+import kotlin.time.Duration
+import kotlin.time.Instant
 
 
 /**
@@ -113,6 +115,26 @@ public interface MetaConverter<T> : MetaReader<T> {
 
             override fun readOrNull(source: Meta): Long? = source.long
             override fun convert(obj: Long): Meta = Meta(obj.asValue())
+        }
+
+        public val instant: MetaConverter<Instant> = object : MetaConverter<Instant> {
+            override val descriptor: MetaDescriptor = MetaDescriptor {
+                valueType(ValueType.STRING)
+            }
+
+            override fun readOrNull(source: Meta): Instant? = source.value?.instant
+
+            override fun convert(obj: Instant): Meta = Meta(obj.toString().asValue())
+        }
+
+        public val duration: MetaConverter<Duration> = object : MetaConverter<Duration> {
+            override val descriptor: MetaDescriptor = MetaDescriptor {
+                valueType(ValueType.STRING)
+            }
+
+            override fun readOrNull(source: Meta): Duration? = source.value?.duration
+
+            override fun convert(obj: Duration): Meta = Meta(obj.toString().asValue())
         }
 
         public inline fun <reified E : Enum<E>> enum(): MetaConverter<E> = object : MetaConverter<E> {
