@@ -4,6 +4,7 @@ import space.kscience.dataforge.meta.descriptors.Described
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
+import kotlin.jvm.JvmName
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.time.Duration
@@ -215,6 +216,7 @@ public fun MetaProvider.instant(
  *         or the value provided by the [default] function when necessary.
  *         Throws an error if the meta value type is not compatible with [Instant].
  */
+@JvmName("instantOrNull")
 public fun MetaProvider.instant(
     key: Name? = null,
     default: () -> Instant? = { null }
@@ -245,6 +247,7 @@ public fun MetaProvider.duration(
  * @param default A lambda providing the default value when the key is not found or the value is null/invalid.
  * @return A MetaDelegate for the requested Duration? value.
  */
+@JvmName("durationOrNull")
 public fun MetaProvider.duration(
     key: Name? = null,
     default: () -> Duration? = { null }

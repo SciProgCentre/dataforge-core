@@ -5,6 +5,7 @@ import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.getIndexedList
+import kotlin.jvm.JvmName
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 import kotlin.time.Duration
@@ -269,6 +270,7 @@ public fun <T> MutableMetaProvider.listValue(
  * @param default the fallback value provider used when no readable [Instant] value is present.
  * @return a mutable meta delegate that reads and writes an optional [Instant] value.
  */
+@JvmName("instantOrNull")
 public fun MutableMetaProvider.instant(
     key: Name? = null,
     default: () -> Instant? = { null }
@@ -345,6 +347,7 @@ public fun MutableMetaProvider.duration(
  * @param default A function that provides the duration when the stored value is missing or null.
  * @return A mutable meta delegate that reads and writes [Duration] values.
  */
+@JvmName("durationOrNull")
 public fun MutableMetaProvider.duration(
     key: Name? = null,
     default: () -> Duration
