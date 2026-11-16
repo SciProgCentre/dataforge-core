@@ -8,7 +8,6 @@ import space.kscience.dataforge.names.getIndexedList
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 
@@ -256,6 +255,33 @@ public fun <T> MutableMetaProvider.listValue(
     reader = { it?.list?.map(reader) }
 )
 
+
+/**
+ * Creates a mutable delegate for an optional [Instant] value stored in this meta provider.
+ *
+ * The delegate reads the value associated with the specified [key], or with the property name
+ * when [key] is not provided. If the stored value is absent or cannot be read as an [Instant],
+ * the value supplied by [default] is returned.
+ *
+ * Assigned values are stored as string values using their string representation.
+ *
+ * @param key the meta value name to use, or `null` to use the delegated property name.
+ * @param default the fallback value provider used when no readable [Instant] value is present.
+ * @return a mutable meta delegate that reads and writes an optional [Instant] value.
+ */
+public fun MutableMetaProvider.instant(
+    key: Name? = null,
+    default: () -> Instant? = { null }
+): MutableMetaDelegate<Instant?> = value(
+    key = key,
+    writer = {
+        it.toString().asValue()
+    },
+    reader = {
+        it?.instant ?: default()
+    }
+)
+
 /**
  * Creates a mutable metadata delegate for an [Instant] value.
  *
@@ -278,13 +304,30 @@ public fun MutableMetaProvider.instant(
         it.toString().asValue()
     },
     reader = {
-        when (it?.type) {
-            null, ValueType.NULL -> default()
-            ValueType.NUMBER -> Instant.fromEpochMilliseconds(it.number.toLong())
-            ValueType.STRING -> Instant.parse(it.string)
-            ValueType.BOOLEAN -> error("Instant cannot be represented as a boolean")
-            ValueType.LIST -> error("Instant cannot be represented as a list")
-        }
+        it?.instant ?: default()
+    }
+)
+
+/**
+ * Creates a mutable delegate for reading and writing a nullable duration value in this meta provider.
+ * The value is stored as the string representation of the assigned duration and read back from the
+ * meta value duration representation. If the value is absent or cannot be read as a duration, the
+ * result of [default] is returned.
+ *
+ * @param key the meta value name to use, or `null` to use the delegated property name.
+ * @param default a function that provides a fallback duration when no readable duration value is present.
+ * @return a mutable delegate that reads and writes a nullable duration value.
+ */
+public fun MutableMetaProvider.duration(
+    key: Name? = null,
+    default: () -> Duration? = { null }
+): MutableMetaDelegate<Duration?> = value(
+    key = key,
+    writer = {
+        it.toString().asValue()
+    },
+    reader = {
+        it?.duration ?: default()
     }
 )
 
@@ -311,12 +354,6 @@ public fun MutableMetaProvider.duration(
         it.toString().asValue()
     },
     reader = {
-        when (it?.type) {
-            null, ValueType.NULL -> default()
-            ValueType.NUMBER -> it.double.seconds
-            ValueType.STRING -> Duration.parse(it.string)
-            ValueType.BOOLEAN -> error("Duration cannot be represented as a boolean")
-            ValueType.LIST -> error("Duration cannot be represented as a list")
-        }
+        it?.duration ?: default()
     }
 )

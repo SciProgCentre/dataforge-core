@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Value extensions for instant and durations. Add meta providers for instant and duration values.
 - `instant` and `duration` property delegates for `MetaProvider` and `MutableMetaProvider`
 - `Meta.getIndexedList(name: String)` extension function
 - `rowFlow()` stream method for `Rows` and `Table`
