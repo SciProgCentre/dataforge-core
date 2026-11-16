@@ -19,6 +19,7 @@
 
 ### Fixed
 
+- Front matter reading exception handling for empty file
 - Reject non-string list values for native enum choices
 - Validate string values against native enum choices, including lists
 - Return null when a native enum value belongs to another enum type
