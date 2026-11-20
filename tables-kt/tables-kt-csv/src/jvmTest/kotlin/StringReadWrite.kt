@@ -7,9 +7,10 @@ import space.kscience.dataforge.meta.Value
 import space.kscience.tables.*
 
 internal class StringReadWrite {
-    val table = RowTable<Value> {
-        val a by ColumnHeader.typed<Value>()
-        val b by ColumnHeader.typed<Value>()
+    val a by ColumnHeader.typed<Value>()
+    val b by ColumnHeader.typed<Value>()
+
+    val table = RowTable<Value>(a, b) {
         valueRow(a to 1, b to "b1")
         valueRow(a to 2, b to "b2")
     }
@@ -27,7 +28,7 @@ internal class StringReadWrite {
     fun writeReadTsv() {
         val string = Table.writeCsvString(table) { dialect = CsvDialect.TSV }
         println(string)
-        val reconstructed = Table.readCsvString(string){ dialect = CsvDialect.TSV }
+        val reconstructed = Table.readCsvString(string) { dialect = CsvDialect.TSV }
 
         assertEquals("b2", reconstructed[1, "b"])
     }

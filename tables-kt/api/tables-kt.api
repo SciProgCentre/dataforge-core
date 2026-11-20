@@ -12,6 +12,7 @@ public final class space/kscience/tables/CachedTransformationColumn : space/ksci
 public final class space/kscience/tables/CastColumnKt {
 	public static final fun cast (Lspace/kscience/tables/Column;Lkotlin/reflect/KType;)Lspace/kscience/tables/Column;
 	public static final fun get (Ljava/util/Collection;Lspace/kscience/tables/ColumnHeader;)Lspace/kscience/tables/Column;
+	public static final fun getOrNull (Ljava/util/Collection;Lspace/kscience/tables/ColumnHeader;)Lspace/kscience/tables/Column;
 }
 
 public abstract interface class space/kscience/tables/Column : space/kscience/tables/ColumnHeader {
@@ -35,14 +36,6 @@ public final class space/kscience/tables/ColumnHeaderKt {
 	public static final fun ColumnHeader (Ljava/lang/String;Lspace/kscience/dataforge/meta/ValueType;Lkotlin/jvm/functions/Function1;)Lspace/kscience/tables/ColumnHeader;
 	public static synthetic fun ColumnHeader$default (Ljava/lang/String;Lspace/kscience/dataforge/meta/ValueType;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/tables/ColumnHeader;
 	public static final fun getValueType (Lspace/kscience/tables/ColumnHeader;)Lspace/kscience/dataforge/meta/ValueType;
-}
-
-public final class space/kscience/tables/ColumnProperty : kotlin/properties/ReadOnlyProperty {
-	public fun <init> (Lspace/kscience/tables/Table;Lkotlin/reflect/KType;)V
-	public final fun getTable ()Lspace/kscience/tables/Table;
-	public final fun getType ()Lkotlin/reflect/KType;
-	public synthetic fun getValue (Ljava/lang/Object;Lkotlin/reflect/KProperty;)Ljava/lang/Object;
-	public fun getValue (Ljava/lang/Object;Lkotlin/reflect/KProperty;)Lspace/kscience/tables/Column;
 }
 
 public class space/kscience/tables/ColumnScheme : space/kscience/dataforge/meta/Scheme {
@@ -194,6 +187,13 @@ public final class space/kscience/tables/MutableTableKt {
 	public static final fun set (Lspace/kscience/tables/MutableTable;Ljava/lang/String;Ljava/lang/Iterable;)V
 }
 
+public final class space/kscience/tables/NumericColumnsKt {
+	public static final fun rowsToDoubleColumn (Lspace/kscience/tables/Table;Ljava/lang/String;Lspace/kscience/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;)Lspace/kscience/tables/DoubleColumn;
+	public static synthetic fun rowsToDoubleColumn$default (Lspace/kscience/tables/Table;Ljava/lang/String;Lspace/kscience/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/tables/DoubleColumn;
+	public static final fun rowsToIntColumn (Lspace/kscience/tables/Table;Ljava/lang/String;Lspace/kscience/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;)Lspace/kscience/tables/IntColumn;
+	public static synthetic fun rowsToIntColumn$default (Lspace/kscience/tables/Table;Ljava/lang/String;Lspace/kscience/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/tables/IntColumn;
+}
+
 public abstract interface class space/kscience/tables/Row {
 	public abstract fun getOrNull (Ljava/lang/String;)Ljava/lang/Object;
 }
@@ -306,6 +306,7 @@ public final class space/kscience/tables/Table$Companion {
 }
 
 public final class space/kscience/tables/TableKt {
+	public static final fun asSequence (Lspace/kscience/tables/Column;)Lkotlin/sequences/Sequence;
 	public static final fun contentEquals (Lspace/kscience/tables/Column;Lspace/kscience/tables/Column;Lkotlin/jvm/functions/Function2;)Z
 	public static synthetic fun contentEquals$default (Lspace/kscience/tables/Column;Lspace/kscience/tables/Column;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Z
 	public static final fun get (Ljava/util/Collection;Ljava/lang/String;)Lspace/kscience/tables/Column;
@@ -315,8 +316,16 @@ public final class space/kscience/tables/TableKt {
 	public static final fun getIndices (Lspace/kscience/tables/Column;)Lkotlin/ranges/IntRange;
 	public static final fun getOrNull (Ljava/util/Collection;Ljava/lang/String;)Lspace/kscience/tables/Column;
 	public static final fun iterator (Lspace/kscience/tables/Column;)Ljava/util/Iterator;
-	public static final fun listValues (Lspace/kscience/tables/Column;)Ljava/util/List;
-	public static final fun sequence (Lspace/kscience/tables/Column;)Lkotlin/sequences/Sequence;
+	public static final fun toList (Lspace/kscience/tables/Column;)Ljava/util/List;
+}
+
+public final class space/kscience/tables/TableView : space/kscience/tables/Table {
+	public fun <init> (Lspace/kscience/tables/Table;Ljava/util/List;Ljava/util/Map;)V
+	public synthetic fun <init> (Lspace/kscience/tables/Table;Ljava/util/List;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getColumns ()Ljava/util/Collection;
+	public fun getOrNull (ILjava/lang/String;)Ljava/lang/Object;
+	public final fun getOrigin ()Lspace/kscience/tables/Table;
+	public fun getRows ()Ljava/util/List;
 }
 
 public final class space/kscience/tables/TransformationColumn : space/kscience/tables/Column {
@@ -333,10 +342,6 @@ public final class space/kscience/tables/TransformationColumn : space/kscience/t
 public final class space/kscience/tables/TransformationColumnKt {
 	public static final fun rowsToColumn (Lspace/kscience/tables/Table;Lspace/kscience/tables/ColumnHeader;ZLkotlin/jvm/functions/Function1;)Lspace/kscience/tables/Column;
 	public static synthetic fun rowsToColumn$default (Lspace/kscience/tables/Table;Lspace/kscience/tables/ColumnHeader;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/tables/Column;
-	public static final fun rowsToDoubleColumn (Lspace/kscience/tables/Table;Ljava/lang/String;Lspace/kscience/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;)Lspace/kscience/tables/DoubleColumn;
-	public static synthetic fun rowsToDoubleColumn$default (Lspace/kscience/tables/Table;Ljava/lang/String;Lspace/kscience/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/tables/DoubleColumn;
-	public static final fun rowsToIntColumn (Lspace/kscience/tables/Table;Ljava/lang/String;Lspace/kscience/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;)Lspace/kscience/tables/IntColumn;
-	public static synthetic fun rowsToIntColumn$default (Lspace/kscience/tables/Table;Ljava/lang/String;Lspace/kscience/dataforge/meta/Meta;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/kscience/tables/IntColumn;
 }
 
 public final class space/kscience/tables/ValueColumnScheme : space/kscience/tables/ColumnScheme {
