@@ -222,4 +222,4 @@ public fun MetaRefStore.validateWithResult(item: Meta?): Sequence<MetaValidation
 /**
  * Validate [item] against this [MetaRefStore]. Return true if all validation results are valid
  */
-public fun MetaRefStore.validate(meta: Meta?): Boolean = validateWithResult(meta).none() { !it.isValid }
+public fun MetaRefStore.validate(meta: Meta?): Boolean = validateWithResult(meta).none { !it.isValid }

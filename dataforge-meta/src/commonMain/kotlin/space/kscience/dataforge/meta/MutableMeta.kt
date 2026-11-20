@@ -97,7 +97,7 @@ public infix fun Name.putIndexed(iterable: Iterable<Meta>) {
 
 context(mutableMeta: MutableMeta)
 public infix fun Name.put(meta: Meta) {
-    mutableMeta.set(this, meta)
+    mutableMeta[this] = meta
 }
 
 context(mutableMeta: MutableMeta)
@@ -112,52 +112,52 @@ public infix fun Name.put(builder: MutableMeta.() -> Unit) {
 
 context(mutableMeta: MutableMeta)
 public infix fun String.put(meta: Meta) {
-    mutableMeta.set(Name.parse(this), meta)
+    mutableMeta[parseAsName()] = meta
 }
 
 context(mutableMeta: MutableMeta)
 public infix fun String.put(value: Value?) {
-    mutableMeta.setValue(Name.parse(this), value)
+    mutableMeta.setValue(parseAsName(), value)
 }
 
 context(mutableMeta: MutableMeta)
 public infix fun String.put(string: String) {
-    mutableMeta.setValue(Name.parse(this), string.asValue())
+    mutableMeta.setValue(parseAsName(), string.asValue())
 }
 
 context(mutableMeta: MutableMeta)
 public infix fun String.put(number: Number) {
-    mutableMeta.setValue(Name.parse(this), number.asValue())
+    mutableMeta.setValue(parseAsName(), number.asValue())
 }
 
 context(mutableMeta: MutableMeta)
 public infix fun String.put(boolean: Boolean) {
-    mutableMeta.setValue(Name.parse(this), boolean.asValue())
+    mutableMeta.setValue(parseAsName(), boolean.asValue())
 }
 
 context(mutableMeta: MutableMeta)
 public infix fun String.put(enum: Enum<*>) {
-    mutableMeta.setValue(Name.parse(this), EnumValue(enum))
+    mutableMeta.setValue(parseAsName(), EnumValue(enum))
 }
 
 context(mutableMeta: MutableMeta)
 public infix fun String.put(array: DoubleArray) {
-    mutableMeta.setValue(Name.parse(this), array.asValue())
+    mutableMeta.setValue(parseAsName(), array.asValue())
 }
 
 context(mutableMeta: MutableMeta)
 public infix fun String.put(array: ByteArray) {
-    mutableMeta.setValue(Name.parse(this), array.asValue())
+    mutableMeta.setValue(parseAsName(), array.asValue())
 }
 
 context(mutableMeta: MutableMeta)
 public infix fun String.put(repr: MetaRepr) {
-    mutableMeta[Name.parse(this)] = repr.toMeta()
+    mutableMeta[parseAsName()] = repr.toMeta()
 }
 
 context(mutableMeta: MutableMeta)
 public infix fun String.putIndexed(iterable: Iterable<Meta>) {
-    mutableMeta.setIndexed(Name.parse(this), iterable)
+    mutableMeta.setIndexed(parseAsName(), iterable)
 }
 
 context(mutableMeta: MutableMeta)
@@ -456,6 +456,16 @@ public inline fun Meta.copy(modification: MutableMeta.() -> Unit = {}): Meta = M
     modification()
 }
 
+/**
+ * Mutable meta view that overlays a source provider with a default provider.
+ *
+ * Values and child nodes are read from the source provider when present, and fall back to
+ * the default provider otherwise. Write operations are always applied to the source provider,
+ * leaving the default provider unchanged.
+ *
+ * The view is rooted at the specified name. Nested nodes returned by this class keep the same
+ * source and default providers while extending the root name with the requested child path.
+ */
 private class MutableMetaWithDefault(
     val source: MutableMetaProvider, val default: MetaProvider, val rootName: Name,
 ) : MutableMeta {

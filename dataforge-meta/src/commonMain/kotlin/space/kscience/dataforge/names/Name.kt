@@ -116,6 +116,10 @@ public class Name(public val tokens: List<NameToken>) {
  */
 public fun Name(vararg tokens: NameToken): Name = if(tokens.isEmpty()) Name.EMPTY else  Name(tokens.toList())
 
+/**
+ * Create a Name from iterable tokens. If there are no tokens, return the empty name.
+ */
+public fun Iterable<NameToken>.toName(): Name = Name(this.toList())
 
 /**
  * Transform this [Name] to a string without escaping special characters in tokens.
@@ -167,7 +171,6 @@ public fun Name.replaceLast(replacement: (NameToken) -> NameToken): Name {
     if (isEmpty()) return Name.EMPTY
     return cutLast() + replacement(lastOrNull()!!)
 }
-
 
 /**
  * Convert the [String] to a [Name] by simply wrapping it in a single name token body without parsing.
