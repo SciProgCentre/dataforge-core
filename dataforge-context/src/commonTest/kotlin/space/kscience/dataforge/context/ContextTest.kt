@@ -27,6 +27,28 @@ class ContextTest {
     }
 
     @Test
+    fun contextMetadataIncludesParent() {
+        val parent = Context()
+        try {
+            val child = parent.buildContext("child")
+            assertEquals(parent.name.toString(), child.toMeta()["parent"].string)
+        } finally {
+            parent.close()
+        }
+    }
+
+    @Test
+    fun pluginMetadataIncludesType() {
+        val context = Context { plugin(TestPlugin) }
+        try {
+            val plugin = context.plugins[TestPlugin]!!
+            assertEquals("TestPlugin", plugin.toMeta()["type"].string)
+        } finally {
+            context.close()
+        }
+    }
+
+    @Test
     fun testPluginManager() {
         val context = Context {
             plugin(TestPlugin())

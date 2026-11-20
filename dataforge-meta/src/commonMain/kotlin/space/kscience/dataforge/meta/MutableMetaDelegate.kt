@@ -5,8 +5,11 @@ import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.getIndexedList
+import kotlin.jvm.JvmName
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
+import kotlin.time.Duration
+import kotlin.time.Instant
 
 
 /* Read-write delegates */
@@ -180,7 +183,9 @@ public fun MutableMetaProvider.number(key: Name? = null, default: () -> Number):
 public inline fun <reified E : Enum<E>> MutableMetaProvider.enum(
     default: E,
     key: Name? = null,
-): MutableMetaDelegate<E> = value(key) { value -> value?.string?.let { enumValueOf<E>(it) } ?: default }
+): MutableMetaDelegate<E> = value(key) { value ->
+    value?.string?.let { str -> enumValues<E>().firstOrNull { it.name == str } } ?: default
+}
 
 /* Number delegates */
 
@@ -249,4 +254,109 @@ public fun <T> MutableMetaProvider.listValue(
     key,
     writer = { it?.map(writer)?.asValue() },
     reader = { it?.list?.map(reader) }
+)
+
+
+/**
+ * Creates a mutable delegate for an optional [Instant] value stored in this meta provider.
+ *
+ * The delegate reads the value associated with the specified [key], or with the property name
+ * when [key] is not provided. If the stored value is absent or cannot be read as an [Instant],
+ * the value supplied by [default] is returned.
+ *
+ * Assigned values are stored as string values using their string representation.
+ *
+ * @param key the meta value name to use, or `null` to use the delegated property name.
+ * @param default the fallback value provider used when no readable [Instant] value is present.
+ * @return a mutable meta delegate that reads and writes an optional [Instant] value.
+ */
+@JvmName("instantOrNull")
+public fun MutableMetaProvider.instant(
+    key: Name? = null,
+    default: () -> Instant? = { null }
+): MutableMetaDelegate<Instant?> = value(
+    key = key,
+    writer = {
+        it.toString().asValue()
+    },
+    reader = {
+        it?.instant ?: default()
+    }
+)
+
+/**
+ * Creates a mutable metadata delegate for an [Instant] value.
+ *
+ * The value is read from the metadata entry identified by [key], or by the delegated property name when [key] is null.
+ * Missing or null metadata values are replaced with the value produced by [default].
+ * Numeric values are interpreted as epoch milliseconds, and string values are parsed as [Instant].
+ * Boolean and list values are not supported and cause an error when read.
+ * Written values are stored as string values using the [Instant] string representation.
+ *
+ * @param key optional metadata key to use instead of the delegated property name.
+ * @param default provider of the value used when the metadata entry is missing or null.
+ * @return a mutable delegate that reads and writes an [Instant] metadata value.
+ */
+public fun MutableMetaProvider.instant(
+    key: Name? = null,
+    default: () -> Instant
+): MutableMetaDelegate<Instant> = value(
+    key = key,
+    writer = {
+        it.toString().asValue()
+    },
+    reader = {
+        it?.instant ?: default()
+    }
+)
+
+/**
+ * Creates a mutable delegate for reading and writing a nullable duration value in this meta provider.
+ * The value is stored as the string representation of the assigned duration and read back from the
+ * meta value duration representation. If the value is absent or cannot be read as a duration, the
+ * result of [default] is returned.
+ *
+ * @param key the meta value name to use, or `null` to use the delegated property name.
+ * @param default a function that provides a fallback duration when no readable duration value is present.
+ * @return a mutable delegate that reads and writes a nullable duration value.
+ */
+public fun MutableMetaProvider.duration(
+    key: Name? = null,
+    default: () -> Duration? = { null }
+): MutableMetaDelegate<Duration?> = value(
+    key = key,
+    writer = {
+        it.toString().asValue()
+    },
+    reader = {
+        it?.duration ?: default()
+    }
+)
+
+/**
+ * Creates a mutable delegate for a [Duration] value stored in this meta provider.
+ *
+ * The value is read from the specified [key], or from the delegated property name when [key] is null.
+ * Missing or null values are resolved using [default]. Numeric values are interpreted as seconds,
+ * and string values are parsed with [Duration.parse]. Boolean and list values are not supported
+ * and cause an error when read.
+ *
+ * Written durations are stored as string values using their standard string representation.
+ *
+ * @param key The meta value name to bind the delegate to, or null to use the delegated property name.
+ * @param default A function that provides the duration when the stored value is missing or null.
+ * @return A mutable meta delegate that reads and writes [Duration] values.
+ */
+@JvmName("durationOrNull")
+public fun MutableMetaProvider.duration(
+    key: Name? = null,
+    default: () -> Duration
+): MutableMetaDelegate<Duration> = value(
+    key = key,
+    writer = {
+        it.toString().asValue()
+    },
+    reader = {
+        it?.duration ?: default()
+    }
 )

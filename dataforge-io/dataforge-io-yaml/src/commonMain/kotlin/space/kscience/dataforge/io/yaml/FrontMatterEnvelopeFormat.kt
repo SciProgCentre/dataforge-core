@@ -8,6 +8,8 @@ import kotlinx.io.readByteString
 import kotlinx.io.writeString
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.Global
+import space.kscience.dataforge.context.error
+import space.kscience.dataforge.context.logger
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.meta.Meta
 import space.kscience.dataforge.names.Name
@@ -73,10 +75,15 @@ public class FrontMatterEnvelopeFormat(
 
         override fun peekFormat(io: IOPlugin, binary: Binary): EnvelopeFormat? = binary.read {
             //read raw string to avoid UTF issues
-            val line = readByteString(3)
-            return@read if (line == "---".encodeToByteString()) {
-                default
-            } else {
+            try {
+                val line = readByteString(3)
+                return@read if (line == "---".encodeToByteString()) {
+                    default
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                io.logger.error(e) { "Failed to read front matter separator" }
                 null
             }
         }

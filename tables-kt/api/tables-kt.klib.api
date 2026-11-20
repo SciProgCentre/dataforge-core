@@ -45,6 +45,7 @@ abstract interface <#A: out kotlin/Any?> space.kscience.tables/Rows { // space.k
         abstract fun <get-headers>(): kotlin.collections/List<space.kscience.tables/ColumnHeader<#A>> // space.kscience.tables/Rows.headers.<get-headers>|<get-headers>(){}[0]
 
     abstract fun rowSequence(): kotlin.sequences/Sequence<space.kscience.tables/Row<#A>> // space.kscience.tables/Rows.rowSequence|rowSequence(){}[0]
+    open fun rowFlow(): kotlinx.coroutines.flow/Flow<space.kscience.tables/Row<#A>> // space.kscience.tables/Rows.rowFlow|rowFlow(){}[0]
 }
 
 abstract interface <#A: out kotlin/Any?> space.kscience.tables/Table : space.kscience.tables/Rows<#A> { // space.kscience.tables/Table|null[0]
@@ -56,6 +57,7 @@ abstract interface <#A: out kotlin/Any?> space.kscience.tables/Table : space.ksc
         open fun <get-headers>(): kotlin.collections/List<space.kscience.tables/ColumnHeader<#A>> // space.kscience.tables/Table.headers.<get-headers>|<get-headers>(){}[0]
 
     abstract fun getOrNull(kotlin/Int, kotlin/String): #A? // space.kscience.tables/Table.getOrNull|getOrNull(kotlin.Int;kotlin.String){}[0]
+    open fun rowFlow(): kotlinx.coroutines.flow/Flow<space.kscience.tables/Row<#A>> // space.kscience.tables/Table.rowFlow|rowFlow(){}[0]
     open fun rowSequence(): kotlin.sequences/Sequence<space.kscience.tables/Row<#A>> // space.kscience.tables/Table.rowSequence|rowSequence(){}[0]
 
     final object Companion // space.kscience.tables/Table.Companion|null[0]
@@ -146,7 +148,6 @@ final class <#A: kotlin/Any?> space.kscience.tables/RowTableBuilder : space.ksci
     final fun <#A1: #A> row(kotlin/Array<out kotlin/Pair<space.kscience.tables/ColumnHeader<#A1>, #A1>>...): space.kscience.tables/Row<#A> // space.kscience.tables/RowTableBuilder.row|row(kotlin.Array<out|kotlin.Pair<space.kscience.tables.ColumnHeader<0:0>,0:0>>...){0§<1:0>}[0]
     final fun addRow(space.kscience.tables/Row<#A>): space.kscience.tables/Row<#A> // space.kscience.tables/RowTableBuilder.addRow|addRow(space.kscience.tables.Row<1:0>){}[0]
     final fun row(kotlin.collections/Map<kotlin/String, #A?>): space.kscience.tables/Row<#A> // space.kscience.tables/RowTableBuilder.row|row(kotlin.collections.Map<kotlin.String,1:0?>){}[0]
-    final inline fun <#A1: reified #A> column(kotlin/Int? = ..., noinline kotlin/Function1<space.kscience.tables/ColumnScheme, kotlin/Unit> = ...): kotlin.properties/PropertyDelegateProvider<kotlin/Any?, kotlin.properties/ReadOnlyProperty<kotlin/Any?, space.kscience.tables/ColumnHeader<#A1>>> // space.kscience.tables/RowTableBuilder.column|column(kotlin.Int?;kotlin.Function1<space.kscience.tables.ColumnScheme,kotlin.Unit>){0§<1:0>}[0]
     final inline fun <#A1: reified #A> newColumn(kotlin/String, kotlin/Int? = ..., noinline kotlin/Function1<space.kscience.tables/ColumnScheme, kotlin/Unit> = ...): space.kscience.tables/ColumnHeader<#A1> // space.kscience.tables/RowTableBuilder.newColumn|newColumn(kotlin.String;kotlin.Int?;kotlin.Function1<space.kscience.tables.ColumnScheme,kotlin.Unit>){0§<1:0>}[0]
 }
 
@@ -207,6 +208,19 @@ final class <#A: kotlin/Any?> space.kscience.tables/SpreadSheetTable : space.ksc
     final fun getOrNull(kotlin/Int, kotlin/String): #A? // space.kscience.tables/SpreadSheetTable.getOrNull|getOrNull(kotlin.Int;kotlin.String){}[0]
     final fun set(kotlin/Int, kotlin/String, #A?) // space.kscience.tables/SpreadSheetTable.set|set(kotlin.Int;kotlin.String;1:0?){}[0]
     final inline fun <#A1: reified #A> defineColumn(kotlin/String, kotlin/Function1<space.kscience.tables/ColumnScheme, kotlin/Unit>) // space.kscience.tables/SpreadSheetTable.defineColumn|defineColumn(kotlin.String;kotlin.Function1<space.kscience.tables.ColumnScheme,kotlin.Unit>){0§<1:0>}[0]
+}
+
+final class <#A: kotlin/Any?> space.kscience.tables/TableView : space.kscience.tables/Table<#A> { // space.kscience.tables/TableView|null[0]
+    constructor <init>(space.kscience.tables/Table<#A>, kotlin.collections/List<kotlin/Int> = ..., kotlin.collections/Map<space.kscience.tables/Column<#A>, space.kscience.tables/Column<#A>> = ...) // space.kscience.tables/TableView.<init>|<init>(space.kscience.tables.Table<1:0>;kotlin.collections.List<kotlin.Int>;kotlin.collections.Map<space.kscience.tables.Column<1:0>,space.kscience.tables.Column<1:0>>){}[0]
+
+    final val columns // space.kscience.tables/TableView.columns|{}columns[0]
+        final fun <get-columns>(): kotlin.collections/Collection<space.kscience.tables/Column<#A>> // space.kscience.tables/TableView.columns.<get-columns>|<get-columns>(){}[0]
+    final val origin // space.kscience.tables/TableView.origin|{}origin[0]
+        final fun <get-origin>(): space.kscience.tables/Table<#A> // space.kscience.tables/TableView.origin.<get-origin>|<get-origin>(){}[0]
+    final val rows // space.kscience.tables/TableView.rows|{}rows[0]
+        final fun <get-rows>(): kotlin.collections/List<space.kscience.tables/Row<#A>> // space.kscience.tables/TableView.rows.<get-rows>|<get-rows>(){}[0]
+
+    final fun getOrNull(kotlin/Int, kotlin/String): #A? // space.kscience.tables/TableView.getOrNull|getOrNull(kotlin.Int;kotlin.String){}[0]
 }
 
 final class space.kscience.tables/DoubleColumn : space.kscience.tables/Column<kotlin/Double> { // space.kscience.tables/DoubleColumn|null[0]
@@ -359,10 +373,10 @@ final fun <#A: kotlin/Any?, #B: #A> (space.kscience.tables/MutableTable<#A>).spa
 final fun <#A: kotlin/Any?, #B: kotlin/Any?> (space.kscience.tables/Table<#A>).space.kscience.tables/rowsToColumn(space.kscience.tables/ColumnHeader<#B>, kotlin/Boolean = ..., kotlin/Function1<space.kscience.tables/Row<#A>, #B?>): space.kscience.tables/Column<#B> // space.kscience.tables/rowsToColumn|rowsToColumn@space.kscience.tables.Table<0:0>(space.kscience.tables.ColumnHeader<0:1>;kotlin.Boolean;kotlin.Function1<space.kscience.tables.Row<0:0>,0:1?>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (kotlin.collections/Collection<space.kscience.tables/Column<#A>>).space.kscience.tables/get(kotlin/String): space.kscience.tables/Column<#A> // space.kscience.tables/get|get@kotlin.collections.Collection<space.kscience.tables.Column<0:0>>(kotlin.String){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (kotlin.collections/Collection<space.kscience.tables/Column<#A>>).space.kscience.tables/getOrNull(kotlin/String): space.kscience.tables/Column<#A>? // space.kscience.tables/getOrNull|getOrNull@kotlin.collections.Collection<space.kscience.tables.Column<0:0>>(kotlin.String){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Column<#A>).space.kscience.tables/asSequence(): kotlin.sequences/Sequence<#A?> // space.kscience.tables/asSequence|asSequence@space.kscience.tables.Column<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (space.kscience.tables/Column<#A>).space.kscience.tables/get(kotlin/Int): #A // space.kscience.tables/get|get@space.kscience.tables.Column<0:0>(kotlin.Int){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (space.kscience.tables/Column<#A>).space.kscience.tables/iterator(): kotlin.collections/Iterator<#A?> // space.kscience.tables/iterator|iterator@space.kscience.tables.Column<0:0>(){0§<kotlin.Any?>}[0]
-final fun <#A: kotlin/Any?> (space.kscience.tables/Column<#A>).space.kscience.tables/listValues(): kotlin.collections/List<#A?> // space.kscience.tables/listValues|listValues@space.kscience.tables.Column<0:0>(){0§<kotlin.Any?>}[0]
-final fun <#A: kotlin/Any?> (space.kscience.tables/Column<#A>).space.kscience.tables/sequence(): kotlin.sequences/Sequence<#A?> // space.kscience.tables/sequence|sequence@space.kscience.tables.Column<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (space.kscience.tables/Column<#A>).space.kscience.tables/toList(): kotlin.collections/List<#A?> // space.kscience.tables/toList|toList@space.kscience.tables.Column<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (space.kscience.tables/ColumnTable<#A>).space.kscience.tables/builder(): space.kscience.tables/ColumnTableBuilder<#A> // space.kscience.tables/builder|builder@space.kscience.tables.ColumnTable<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (space.kscience.tables/MutableTable<#A>).space.kscience.tables/set(kotlin/String, kotlin.collections/Iterable<#A>) // space.kscience.tables/set|set@space.kscience.tables.MutableTable<0:0>(kotlin.String;kotlin.collections.Iterable<0:0>){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (space.kscience.tables/RowTable<#A>).space.kscience.tables/toMutableRowTable(): space.kscience.tables/RowTableBuilder<#A> // space.kscience.tables/toMutableRowTable|toMutableRowTable@space.kscience.tables.RowTable<0:0>(){0§<kotlin.Any?>}[0]

@@ -6,7 +6,7 @@ A framework for pull-based data processing
 
 ## Artifact:
 
-The Maven coordinates of this project are `space.kscience:dataforge-workspace:0.12.0`.
+The Maven coordinates of this project are `space.kscience:dataforge-workspace:0.13.0`.
 
 **Gradle Kotlin DSL:**
 ```kotlin
@@ -16,6 +16,6 @@ repositories {
 }
 
 dependencies {
-    implementation("space.kscience:dataforge-workspace:0.12.0")
+    implementation("space.kscience:dataforge-workspace:0.13.0")
 }
 ```

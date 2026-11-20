@@ -21,6 +21,6 @@ internal class SpreadSheetTest {
         }
 
         assertEquals(22, ss[2, c]?.int)
-        assertEquals(6, ss.columns["b"].sequence().sumOf { it?.int ?: 0 })
+        assertEquals(6, ss.columns["b"].asSequence().sumOf { it?.int ?: 0 })
     }
 }

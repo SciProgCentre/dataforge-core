@@ -1,11 +1,10 @@
 package space.kscience.dataforge.workspace
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import space.kscience.dataforge.context.error
+import space.kscience.dataforge.context.logger
 import space.kscience.dataforge.data.*
 import space.kscience.dataforge.io.*
 import space.kscience.dataforge.meta.Meta
@@ -14,12 +13,15 @@ import space.kscience.dataforge.meta.put
 import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
 import space.kscience.dataforge.names.plus
+import space.kscience.dataforge.names.toName
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.spi.FileSystemProvider
 import kotlin.io.path.*
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Represents a data tree for managing and monitoring files and directories.
@@ -30,12 +32,16 @@ import kotlin.reflect.typeOf
  * @property path The path to the file or directory to be managed by the data tree.
  * @property monitor Whether to enable monitoring for changes in the file system. Defaults to false.
  * @property includeExtensions Whether to include file extensions in the node names. Defaults to false.
+ * @property monitorCycle The delay between monitoring cycles (if monitor is enabled). Defaults to 0.5 seconds.
+ * @property failOnParseError Whether to fail if a file cannot be parsed. Defaults to true.
  */
 public class FileDataTree(
     public val io: IOPlugin,
     public val path: Path,
     private val monitor: Boolean = false,
     public val includeExtensions: Boolean = true,
+    private val monitorCycle: Duration = 500.milliseconds,
+    private val failOnParseError: Boolean = true,
 ) : DataTree<Binary> {
     override val dataType: KType = typeOf<Binary>()
 
@@ -72,7 +78,13 @@ public class FileDataTree(
         get() = when {
             path.isRegularFile() -> {
                 //TODO process zip
-                readFileAsData(path)
+                try {
+                    readFileAsData(path)
+                } catch (e: Exception) {
+                    if (failOnParseError) throw e
+                    io.logger.error(e) { "Failed to read file ${path.toAbsolutePath()}" }
+                    null
+                }
             }
 
             path.isDirectory() -> {
@@ -85,7 +97,13 @@ public class FileDataTree(
                 val meta: Meta? = path.listDirectoryEntries().find {
                     it.fileName.nameWithoutExtension == IOPlugin.META_FILE_NAME
                 }?.let {
-                    io.readMetaFileOrNull(it)
+                    try {
+                        io.readMetaFileOrNull(it)
+                    } catch (e: Exception) {
+                        if (failOnParseError) throw e
+                        io.logger.error(e) { "Failed to read meta file ${it.toAbsolutePath()}" }
+                        null
+                    }
                 }
 
                 if (dataBinary != null || meta != null) {
@@ -124,7 +142,10 @@ public class FileDataTree(
         callbackFlow<Name> {
             val watchService: WatchService = path.fileSystem.newWatchService()
 
-            fun Path.toName() = Name(map { NameToken.parse(if(includeExtensions) it.name else it.nameWithoutExtension) })
+            fun Path.toName() = map {
+                NameToken.parse(if (includeExtensions) it.name else it.nameWithoutExtension)
+            }.toName()
+
 
             fun monitor(childPath: Path): Job {
                 val key: WatchKey = childPath.register(
@@ -146,6 +167,7 @@ public class FileDataTree(
                             }
                         }
                         key.reset()
+                        delay(monitorCycle)
                     }
                 }
             }
@@ -179,8 +201,16 @@ public class FileDataTree(
  * @param monitor A flag indicating whether changes in the directory should be monitored. Default is `false`.
  * @param includeExtensions A flag indicating whether file extensions should be included into names. Default is `true`.
  */
-public fun IOPlugin.readDirectory(path: Path, monitor: Boolean = false, includeExtensions: Boolean = true): FileDataTree =
-    FileDataTree(io = this, path = path, monitor = monitor, includeExtensions = includeExtensions)
+public fun IOPlugin.readDirectory(
+    path: Path,
+    monitor: Boolean = false,
+    includeExtensions: Boolean = true
+): FileDataTree = FileDataTree(
+    io = this,
+    path = path,
+    monitor = monitor,
+    includeExtensions = includeExtensions
+)
 
 /**
  * Writes the contents of a directory to a dynamic data sink.
@@ -198,30 +228,3 @@ public suspend fun DataSink<Any>.directory(
 ) {
     writeAll(io.readDirectory(path, monitor), prefix)
 }
-
-///**
-// * @param resources The names of the resources to read.
-// * @param classLoader The class loader to use for loading the resources. By default, it uses the current thread's context class loader.
-// */
-//@DFExperimental
-//public fun DataSink<Binary>.resources(
-//    io: IOPlugin,
-//    resource: String,
-//    vararg otherResources: String,
-//    classLoader: ClassLoader = Thread.currentThread().contextClassLoader,
-//) {
-//    //create a file system if necessary
-//    val uri = Thread.currentThread().contextClassLoader.getResource("common")!!.toURI()
-//    try {
-//        uri.toPath()
-//    } catch (e: FileSystemNotFoundException) {
-//        FileSystems.newFileSystem(uri, mapOf("create" to "true"))
-//    }
-//
-//    listOf(resource, *otherResources).forEach { r ->
-//        val path = classLoader.getResource(r)?.toURI()?.toPath() ?: error(
-//            "Resource with name $r is not resolved"
-//        )
-//        io.readAsDataTree(r.asName(), path)
-//    }
-//}

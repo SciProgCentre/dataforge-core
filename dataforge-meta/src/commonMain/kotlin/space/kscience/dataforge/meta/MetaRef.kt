@@ -6,6 +6,8 @@ import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.startsWith
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
+import kotlin.time.Duration
+import kotlin.time.Instant
 
 
 /**
@@ -191,6 +193,18 @@ public inline fun <reified E : Enum<E>> MetaSpec.enum(
 ): PropertyDelegateProvider<MetaSpec, ReadOnlyProperty<MetaSpec, MetaRef<E>>> =
     item(MetaConverter.enum(), key, descriptorBuilder)
 
+public fun MetaSpec.instant(
+    key: Name? = null,
+    descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
+): PropertyDelegateProvider<MetaSpec, ReadOnlyProperty<MetaSpec, MetaRef<Instant>>> =
+    item(MetaConverter.instant, key, descriptorBuilder)
+
+public fun MetaSpec.duration(
+    key: Name? = null,
+    descriptorBuilder: MetaDescriptorBuilder.() -> Unit = {},
+): PropertyDelegateProvider<MetaSpec, ReadOnlyProperty<MetaSpec, MetaRef<Duration>>> =
+    item(MetaConverter.duration, key, descriptorBuilder)
+
 public inline fun <reified T> MetaSpec.serializable(
     key: Name? = null,
     jsonEncoder: Json = Json,
@@ -208,4 +222,4 @@ public fun MetaRefStore.validateWithResult(item: Meta?): Sequence<MetaValidation
 /**
  * Validate [item] against this [MetaRefStore]. Return true if all validation results are valid
  */
-public fun MetaRefStore.validate(meta: Meta?): Boolean = validateWithResult(meta).none() { !it.isValid }
+public fun MetaRefStore.validate(meta: Meta?): Boolean = validateWithResult(meta).none { !it.isValid }

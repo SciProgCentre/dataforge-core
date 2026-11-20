@@ -1,11 +1,34 @@
 package space.kscience.dataforge.meta.descriptors
 
 
+import io.github.optimumcode.json.schema.ErrorCollector
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.serializer
+import space.kscience.dataforge.meta.DescriptorTest.Choice
 import space.kscience.dataforge.meta.ValueType
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class DescriptorJsonSchemaTest {
+
+    @Test
+    fun testNullableEnumJsonSchema() {
+        val descriptor = MetaDescriptor(serializer<Choice?>())
+        val schema = io.github.optimumcode.json.schema.JsonSchema.fromJsonElement(descriptor.toJsonSchema())
+        assertTrue(schema.validate(JsonPrimitive("A"), ErrorCollector.EMPTY))
+        assertTrue(schema.validate(JsonPrimitive("B"), ErrorCollector.EMPTY))
+        assertTrue(schema.validate(JsonNull, ErrorCollector.EMPTY))
+        assertFalse(schema.validate(JsonPrimitive("C"), ErrorCollector.EMPTY))
+        assertFalse(schema.validate(JsonPrimitive(true), ErrorCollector.EMPTY))
+
+        val nonNullable = MetaDescriptor(serializer<Choice>())
+        val nonNullableSchema = io.github.optimumcode.json.schema.JsonSchema.fromJsonElement(nonNullable.toJsonSchema())
+        assertTrue(nonNullableSchema.validate(JsonPrimitive("A"), ErrorCollector.EMPTY))
+        assertFalse(nonNullableSchema.validate(JsonNull, ErrorCollector.EMPTY))
+    }
 
     val descriptor = MetaDescriptor {
         node("aNode") {

@@ -1,9 +1,12 @@
 package space.kscience.dataforge.meta
 
 import kotlinx.serialization.Serializable
+import space.kscience.dataforge.meta.descriptors.MetaDescriptor
+import space.kscience.dataforge.meta.descriptors.get
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 
 @DFExperimental
 internal class MetaRefTest {
@@ -15,6 +18,16 @@ internal class MetaRefTest {
         val integer by int { description = "Integer value" }
         val string by string { description = "String value" }
         val custom by item(MetaConverter.serializable<XY>()) { description = "custom value" }
+    }
+
+    @Test
+    fun testItemUsesConverterDescriptor() {
+        val descriptor = MetaDescriptor { description = "Coordinates" }
+        val spec = object : MetaSpec() {
+            val coordinates by item(MetaConverter.serializable<XY>(descriptor))
+        }
+        assertSame(descriptor, spec.coordinates.descriptor)
+        assertEquals(descriptor, spec.descriptor["coordinates"])
     }
 
     @Test

@@ -237,9 +237,9 @@ public val Meta?.short: Short? get() = number?.toShort()
 
 public inline fun <reified E : Enum<E>> Meta?.enum(): E? = this?.value?.let {
     if (it is EnumValue<*>) {
-        it.value as E
+        it.value as? E
     } else {
-        string?.let { str -> enumValueOf<E>(str) }
+        string?.let { str -> enumValues<E>().firstOrNull { it.name == str } }
     }
 }
 

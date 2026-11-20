@@ -50,6 +50,20 @@ public class DoubleColumn(
     }
 }
 
+/**
+ * A column of non-null integer values backed by an [IntArray].
+ *
+ * Values are stored in primitive form to avoid boxing in the backing storage. For valid
+ * indices, every position contains an integer value and access does not return `null`.
+ * Valid indices are in the range from `0` inclusive to [size] exclusive.
+ *
+ * Equality and hash code are based on the column name, the contents of the backing
+ * array, and the associated metadata.
+ *
+ * @param name the column name exposed by its header
+ * @param data the backing array containing column values
+ * @param meta metadata associated with the column
+ */
 public class IntColumn(
     override val name: String,
     public val data: IntArray,
@@ -91,4 +105,29 @@ public class IntColumn(
             noinline metaBuilder: ColumnScheme.() -> Unit
         ): IntColumn = IntColumn(name, data, ColumnScheme(metaBuilder).toMeta())
     }
+}
+
+
+/**
+ * Create a virtual column from a given column header and sequential data
+ */
+public fun <T> Table<T>.rowsToDoubleColumn(
+    name: String,
+    meta: Meta = Meta.EMPTY,
+    block: (Row<T>) -> Double,
+): DoubleColumn {
+    val data = DoubleArray(rows.size) { block(rows[it]) }
+    return DoubleColumn(name, data, meta)
+}
+
+/**
+ * Create a virtual column from a given column header and sequential data
+ */
+public fun <T> Table<T>.rowsToIntColumn(
+    name: String,
+    meta: Meta = Meta.EMPTY,
+    block: (Row<T>) -> Int,
+): IntColumn {
+    val data = IntArray(rows.size) { block(rows[it]) }
+    return IntColumn(name, data, meta)
 }

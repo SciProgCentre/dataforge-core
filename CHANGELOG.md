@@ -14,6 +14,37 @@
 
 ### Security
 
+## 0.13.0 - 2026-11-20
+
+### Added
+
+- Docs for tables-kt
+- Value extensions for instant and durations. Add meta providers for instant and duration values.
+- `instant` and `duration` property delegates for `MetaProvider` and `MutableMetaProvider`
+- `Meta.getIndexedList(name: String)` extension function
+- `rowFlow()` stream method for `Rows` and `Table`
+- `monitorCycle` parameter in `FileDataTree` to configure directory polling interval
+
+### Changed
+
+- Signigicant refactorting of tables-kt
+- Replace yamlkt with kotaml
+- Refactor `Logger` and `LogManager` to use `Logger.Level` enum and support optional logging `source`
+
+### Fixed
+
+- Error management for FileDataTree. There is an optional flag to log errors instead of failing.
+- Front matter reading exception handling for empty file
+- Reject non-string list values for native enum choices
+- Validate string values against native enum choices, including lists
+- Return null when a native enum value belongs to another enum type
+- Allow empty byte-array binary reads and validate read ranges relative to the current view
+- Find metadata files by filename prefix and close directory streams in metadata readers
+- Include null in descriptors derived from nullable primitive and enum serializers
+- Preserve explicit descriptors in serializable converters
+- Return null from enum readers and delegates when the value is not a member of the enum
+- Fix copying a data tree without a prefix
+
 ## 0.12.0 - 2026-09-10
 
 ### Changed
@@ -44,7 +75,7 @@
 
 ### Added
 
-- Serial descriptor builder based on 
+- Serial descriptor builder based on
 - Rows to envelope converter
 - Validation for MetaSpec
 - Detailed Meta validation result
@@ -57,7 +88,7 @@
 - **BREAKING** Refactor Tables text API.
 - Change context `modify` to context `deriveContext` and add modification suffix as parameter.
 - Updated Exposed in tables to 1.0.0
-- **BREAKING** DataTree builders refactor. 
+- **BREAKING** DataTree builders refactor.
 - **BREAKING** filter data by type separated from branch by type.
 - **BREAKING** Data builders use `put` instead of `data`. Use `putValue` for static values and `value` for root value.
 - Include flag to include file extensions into FileDataTree node names.
@@ -68,7 +99,7 @@
 
 ### Removed
 
-- String name pattern is replaced by a class-based name pattern 
+- String name pattern is replaced by a class-based name pattern
 
 ### Fixed
 
@@ -92,7 +123,8 @@
 
 ### Changed
 
-- **BREAKING** `Context.request(plugin)` now has nullable parameter null means taking existing plugin with any configuration.
+- **BREAKING** `Context.request(plugin)` now has nullable parameter null means taking existing plugin with any
+  configuration.
 
 ### Fixed
 
@@ -121,7 +153,7 @@
 
 - Coroutine exception logging in context
 - `ObservableMutableMetaSerializer`
-- `MutableMetaView` - a Meta wrapper that creates nodes only when its or its children are changed. 
+- `MutableMetaView` - a Meta wrapper that creates nodes only when its or its children are changed.
 
 ### Changed
 
@@ -135,7 +167,8 @@
 
 ### Removed
 
-- Remove implicit io format resolver in `IOPlugin` and `FileWorkspaceCache`. There are no guarantees that only one format is present in the contrxt for each type.
+- Remove implicit io format resolver in `IOPlugin` and `FileWorkspaceCache`. There are no guarantees that only one
+  format is present in the contrxt for each type.
 - Dependencies on `atomicfu` and `kotlin.reflect` from dataforge-data to improve performance.
 
 ### Fixed
@@ -192,7 +225,8 @@
 - Descriptor `children` renamed to `nodes`
 - `MetaConverter` now inherits `MetaSpec` (former `Specifiction`). So `MetaConverter` could be used more universally.
 - Meta copy and modification now use lightweight non-observable meta builders.
-- Full refactor of Data API. DataTree now works similar to Meta: contains optional anonymous root element and data items. Updates are available for `ObservaleDataSource` and `ObservableDataTree` variants.
+- Full refactor of Data API. DataTree now works similar to Meta: contains optional anonymous root element and data
+  items. Updates are available for `ObservaleDataSource` and `ObservableDataTree` variants.
 
 ### Deprecated
 
@@ -301,11 +335,13 @@
 ### Changed
 
 - **API breaking** Config is deprecated, use `ObservableMeta` instead.
-- **API breaking** Descriptor no has a member property `defaultValue` instead of `defaultItem()` extension. It caches default value state on the first call. It is done because computing default on each call is too expensive.
+- **API breaking** Descriptor no has a member property `defaultValue` instead of `defaultItem()` extension. It caches
+  default value state on the first call. It is done because computing default on each call is too expensive.
 - Kotlin 1.5.10
 - Build tools 0.10.0
 - Relaxed type restriction on `MetaConverter`. Now nullables are available.
-- **Huge API-breaking refactoring of Meta**. Meta now can have both value and children. There is only one kind of descriptor now.
+- **Huge API-breaking refactoring of Meta**. Meta now can have both value and children. There is only one kind of
+  descriptor now.
 - **API breaking** `String.toName()` is replaced by `Name.parse()`
 - **API breaking** Configurable`config` changed to `meta`
 

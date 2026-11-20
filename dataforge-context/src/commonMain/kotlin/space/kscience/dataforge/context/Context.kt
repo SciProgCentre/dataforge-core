@@ -139,7 +139,7 @@ public open class Context internal constructor(
     }
 
     override fun toMeta(): Meta = Meta {
-        "parent" to parent?.name
+        parent?.let { "parent" put it.name.toString() }
         properties.layers.firstOrNull()?.let { set("properties", it) }
         "plugins" putIndexed plugins.map { it.toMeta() }
     }

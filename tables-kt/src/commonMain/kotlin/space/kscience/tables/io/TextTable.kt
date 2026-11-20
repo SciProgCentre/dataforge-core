@@ -27,6 +27,8 @@ internal class TextTable(
 
     override fun rowSequence(): Sequence<Row<Value>> = TextRows(headers, binary, delimiter).rowSequence()
 
+    override fun rowFlow(): Flow<Row<Value>> = TextRows(headers, binary, delimiter).rowFlow()
+
     private fun readAt(offset: Int): Row<Value> = binary.read(offset) {
         val line = readLine() ?: error("Line not found")
         Table.readTextRow(line, headers, delimiter)

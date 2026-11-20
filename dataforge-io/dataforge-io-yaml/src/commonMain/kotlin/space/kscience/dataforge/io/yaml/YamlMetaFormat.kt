@@ -1,88 +1,144 @@
 package space.kscience.dataforge.io.yaml
 
+import com.charleskorn.kaml.*
 import kotlinx.io.Sink
 import kotlinx.io.Source
-import kotlinx.io.readString
-import kotlinx.io.writeString
-import net.mamoe.yamlkt.*
+import kotlinx.io.bytestring.decodeToString
+import kotlinx.io.okio.asOkioSink
+import kotlinx.io.readByteString
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.io.MetaFormat
 import space.kscience.dataforge.io.MetaFormatFactory
 import space.kscience.dataforge.meta.*
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.meta.descriptors.get
+import space.kscience.dataforge.names.Name
 import space.kscience.dataforge.names.NameToken
-import space.kscience.dataforge.names.withIndex
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.set
+import space.kscience.dataforge.names.asName
 
-public fun Meta.toYaml(): YamlMap {
-    val map: Map<String, Any?> = items.entries.associate { (key, item) ->
-        key.toString() to if (item.isLeaf) {
-            item.value?.value
-        } else {
-            item.toYaml()
-        }
-    }
+private val SYNTHETIC_LOCATION = Location(1, 1)
 
-    return YamlMap(map)
+private fun Value.toYamlNode(path: YamlPath): YamlNode = when {
+    isList() -> YamlList(list.mapIndexed { index, listValue ->
+        listValue.toYamlNode(
+            path.withListEntry(index, SYNTHETIC_LOCATION)
+        )
+    }, path)
+
+    else -> YamlScalar(string, path)
+
 }
 
-private class YamlMeta(private val yamlMap: YamlMap, private val descriptor: MetaDescriptor? = null) : Meta {
-
-    override val value: Value?
-        get() = yamlMap.getStringOrNull(null)?.let { Value.parse(it) }
-
-    private fun buildItems(): Map<NameToken, Meta> {
-        val map = LinkedHashMap<NameToken, Meta>()
-
-        yamlMap.content.entries.forEach { (key, value) ->
-            val stringKey = key.toString()
-            val itemDescriptor = descriptor?.get(stringKey)
-            val token = NameToken(stringKey)
-            when (value) {
-                YamlNull -> Meta(Null)
-                is YamlLiteral -> map[token] = Meta(Value.parse(value.content))
-                is YamlMap -> map[token] = value.toMeta()
-                is YamlList -> if (value.all { it is YamlLiteral }) {
-                    val listValue = ListValue(
-                        value.map {
-                            //We already checked that all values are primitives
-                            Value.parse((it as YamlLiteral).content)
-                        }
-                    )
-                    map[token] = Meta(listValue)
-                } else value.forEachIndexed { index, yamlElement ->
-                    val indexKey = itemDescriptor?.indexKey
-                    val indexValue: String = (yamlElement as? YamlMap)?.getStringOrNull(indexKey)
-                        ?: index.toString() //In case index is non-string, the backward transformation will be broken.
-
-                    val tokenWithIndex = token.withIndex(indexValue)
-                    map[tokenWithIndex] = yamlElement.toMeta(itemDescriptor)
-                }
+/**
+ * Converts a [Meta] object into a [YamlNode] representation.
+ * The resulting [YamlNode] can either be a [YamlMap], [YamlList], [YamlScalar], or [YamlNull],
+ * depending on the structure and content of the [Meta] object.
+ *
+ * @param path The initial [YamlPath] for the node. Defaults to the root path.
+ * @return A [YamlNode] representation of the current [Meta] object.
+ */
+public fun Meta.toYamlNode(path: YamlPath = YamlPath.root): YamlNode {
+    if (items.isNotEmpty()) {
+        val map: Map<YamlScalar, YamlNode> = buildMap {
+            items.entries.forEach { (token, child) ->
+                val keyPath = path.withMapElementKey(token.toString(), SYNTHETIC_LOCATION)
+                val key = YamlScalar(token.toString(), keyPath, plain = false)
+                val value = child.toYamlNode(keyPath.withMapElementValue(SYNTHETIC_LOCATION))
+                put(key, value)
+            }
+            value?.let {
+                val keyPath = path.withMapElementKey(Meta.VALUE_KEY, SYNTHETIC_LOCATION)
+                put(YamlScalar(Meta.VALUE_KEY, keyPath), it.toYamlNode(path.withMapElementValue(SYNTHETIC_LOCATION)))
             }
         }
-        return map
+        return YamlMap(map, path)
+    } else {
+        val value = value
+        return when {
+            value == null -> YamlNull(path)
+            value.isList() -> YamlList(value.list.mapIndexed { index, listValue ->
+                listValue.toYamlNode(
+                    path.withListEntry(index, SYNTHETIC_LOCATION)
+                )
+            }, path)
+
+            else -> YamlScalar(value.string, path)
+
+        }
     }
 
-    override val items: Map<NameToken, Meta> get() = buildItems()
-
-    override fun toString(): String = Meta.toString(this)
-    override fun equals(other: Any?): Boolean = Meta.equals(this, other as? Meta)
-    override fun hashCode(): Int = Meta.hashCode(this)
 }
 
-public fun YamlElement.toMeta(descriptor: MetaDescriptor? = null): Meta = when (this) {
-    YamlNull -> Meta(Null)
-    is YamlLiteral -> Meta(Value.parse(content))
-    is YamlMap -> toMeta()
-    //We can't return multiple items therefore we create top level node
-    is YamlList -> YamlMap(mapOf("@yamlArray" to this)).toMeta(descriptor)
+
+private fun YamlNode.toValueOrNull(): Value? = when (this) {
+    is YamlList -> items.mapNotNull { it.toValueOrNull() }.asValue()
+    is YamlMap -> null
+    is YamlNull -> Null
+    is YamlScalar -> Value.parse(content)
+    is YamlTaggedNode -> null
 }
 
-public fun YamlMap.toMeta(): Meta = YamlMeta(this)
+private fun MutableMeta.setYaml(token: NameToken?, yaml: YamlNode, descriptor: MetaDescriptor?) {
+    if (token?.toString() == Meta.VALUE_KEY) {
+        this.value = yaml.toValueOrNull()
+        return
+    }
+    when (yaml) {
+        is YamlScalar -> {
+            val value = Value.parse(yaml.content)
+            if (token == null) {
+                this.value = value
+            } else {
+                setValue(token.asName(), value)
+            }
+        }
 
+        is YamlMap -> if (token == null) {
+            yaml.entries.forEach { (key, node) ->
+                val token = NameToken.parse(key.content)
+                setYaml(token, node, descriptor?.get(token.body))
+            }
+        } else {
+            set(
+                token,
+                Meta {
+                    yaml.entries.forEach { (key, node) ->
+                        val token = NameToken.parse(key.content)
+                        setYaml(token, node, descriptor?.get(token.body))
+                    }
+                }
+            )
+
+        }
+
+        is YamlList -> if (yaml.items.all { it is YamlNull || it is YamlScalar }) {
+            if (token == null) {
+                value = yaml.toValueOrNull()
+            } else {
+                setValue(token.asName(), yaml.toValueOrNull())
+            }
+        } else {
+            val name = token?.asName() ?: Name.of("@jsonArray")
+            setIndexed(name, yaml.items.map { it.toMeta(token?.body?.let { tokenBody -> descriptor?.get(tokenBody) }) })
+        }
+
+        else -> {
+            // do nothing
+        }
+    }
+}
+
+/**
+ * Converts the current [YamlNode] instance into a [Meta] representation.
+ *
+ * @param descriptor An optional [MetaDescriptor] that provides structural information
+ * about the meta node to be created, such as allowed child nodes, allowed value types,
+ * and other constraints. If null, no descriptor constraints will be used.
+ * @return A [Meta] object created based on the structure and content of the [YamlNode].
+ */
+public fun YamlNode.toMeta(descriptor: MetaDescriptor? = null): Meta = Meta {
+    setYaml(null, this@toMeta, descriptor)
+}
 
 /**
  * Represent meta as Yaml
@@ -90,13 +146,12 @@ public fun YamlMap.toMeta(): Meta = YamlMeta(this)
 public class YamlMetaFormat(private val meta: Meta) : MetaFormat {
 
     override fun writeMeta(sink: Sink, meta: Meta, descriptor: MetaDescriptor?) {
-        val yaml: YamlMap = meta.toYaml()
-        val string = Yaml.encodeToString(YamlMap.serializer(), yaml)
-        sink.writeString(string)
+        val yaml: YamlNode = meta.toYamlNode()
+        Yaml.default.encodeToSink(YamlNode.serializer(), yaml, sink.asOkioSink())
     }
 
     override fun readMeta(source: Source, descriptor: MetaDescriptor?): Meta {
-        val yaml = Yaml.decodeYamlMapFromString(source.readString())
+        val yaml = Yaml.default.parseToYamlNode(source.readByteString().decodeToString())
         return yaml.toMeta()
     }
 

@@ -5,6 +5,7 @@ import kotlinx.coroutines.test.runTest
 import space.kscience.dataforge.actions.Action
 import space.kscience.dataforge.actions.invoke
 import space.kscience.dataforge.actions.mapping
+import space.kscience.dataforge.actions.then
 import space.kscience.dataforge.misc.DFExperimental
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -44,6 +45,35 @@ internal class ActionsTest {
         }
 
         assertEquals(5, result.awaitData("4").await())
+    }
+
+    object Actions{
+        val plusOne = Action.mapping<Int, Int> {
+            result { it + 1 }
+        }
+
+        val toDouble = Action.mapping<Int, Double> {
+            result{it.toDouble()}
+        }
+
+        val square = Action.mapping<Double, Double> {
+            result{ it*it}
+        }
+    }
+
+    @Test
+    fun actionCompositionTest() = runTest{
+        val data: DataTree<Int> = DataTree {
+            repeat(10) {
+                putValue(it.toString(), it)
+            }
+        }
+
+        val action = Actions.plusOne.then(Actions.toDouble).then(Actions.square)
+
+        val result = action(data)
+
+        assertEquals(25.0, result.awaitData("4").await())
     }
 
 }

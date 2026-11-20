@@ -18,8 +18,26 @@ public open class ColumnTable<out T>(final override val columns: Collection<Colu
     override fun getOrNull(row: Int, column: String): T? = columns[column].getOrNull(row)
 }
 
+/**
+ * Creates a [ColumnTable] from the specified columns.
+ *
+ * All columns must have the same size, as required by [ColumnTable].
+ *
+ * @param T boundary type for values stored in the table columns.
+ * @param columns columns to include in the table.
+ * @return a column-based table containing the provided [columns].
+ * @throws IllegalArgumentException if the provided columns do not all have the same size.
+ */
 public fun <T> ColumnTable(vararg columns: Column<T>): ColumnTable<T> = ColumnTable(columns.toList())
 
+/**
+ * Creates a column-based table with the specified number of rows and initializes it using the provided builder.
+ *
+ * @param T the common boundary type for values stored in the table columns
+ * @param size the number of rows each column in the table must contain
+ * @param builder the configuration block used to add and configure columns
+ * @return a column table containing the columns configured by the builder
+ */
 public inline fun <T> ColumnTable(size: Int, builder: ColumnTableBuilder<T>.() -> Unit): ColumnTable<T> =
     ColumnTableBuilder<T>(size).apply(builder)
 
@@ -42,6 +60,6 @@ internal class VirtualRow<T>(val table: Table<T>, val index: Int) : Row<T> {
  * The resulting table does not in general follow changes of the initial table.
  */
 public fun <T> Table<T>.toColumnTable(): ColumnTable<T> = (this as? ColumnTable<T>) ?: ColumnTable(
-    columns.map { c -> c as? ListColumn ?: ListColumn(c, c.listValues()) }
+    columns.map { c -> c as? ListColumn ?: ListColumn(c, c.toList()) }
 )
 

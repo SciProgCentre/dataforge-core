@@ -41,4 +41,12 @@ class MetaDelegateTest {
 
     }
 
+    @Test
+    fun delegateEnumWithUnknownValueReturnsDefault() {
+        val testObject = TestScheme.empty()
+        testObject.meta["enumValue"] = "UNKNOWN"
+
+        assertEquals(TestEnum.YES, testObject.enumValue)
+    }
+
 }

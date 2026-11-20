@@ -82,9 +82,10 @@ public val IOPlugin.Companion.DATA_FILE_NAME: String get() = "@data"
 
 /**
  * Read file containing meta using given [formatOverride] or file extension to infer meta type.
- * If [path] is a directory search for file starting with `meta` in it.
+ * If [path] is a directory, search for a filename starting with `@meta` in it.
  *
- * Returns null if meta could not be resolved
+ * Returns null if the path or metadata file is missing, or the format could not be resolved.
+ * Reading and parsing errors are propagated.
  */
 public fun IOPlugin.readMetaFileOrNull(
     path: Path,
@@ -94,8 +95,9 @@ public fun IOPlugin.readMetaFileOrNull(
     if (!Files.exists(path)) return null
 
     val actualPath: Path = if (Files.isDirectory(path)) {
-        Files.list(path).asSequence().find { it.fileName.startsWith(IOPlugin.META_FILE_NAME) }
-            ?: return null
+        Files.list(path).use { entries ->
+            entries.asSequence().find { it.fileName.toString().startsWith(IOPlugin.META_FILE_NAME) }
+        } ?: return null
     } else {
         path
     }
@@ -109,7 +111,7 @@ public fun IOPlugin.readMetaFileOrNull(
 
 /**
  * Read file containing meta using given [formatOverride] or file extension to infer meta type.
- * If [path] is a directory search for file starting with `meta` in it.
+ * If [path] is a directory, search for a filename starting with `@meta` in it.
  *
  * Fails if nothing works.
  */
@@ -121,8 +123,9 @@ public fun IOPlugin.readMetaFile(
     if (!Files.exists(path)) error("Meta file $path does not exist")
 
     val actualPath: Path = if (Files.isDirectory(path)) {
-        Files.list(path).asSequence().find { it.fileName.startsWith(IOPlugin.META_FILE_NAME) }
-            ?: error("The directory $path does not contain meta file")
+        Files.list(path).use { entries ->
+            entries.asSequence().find { it.fileName.toString().startsWith(IOPlugin.META_FILE_NAME) }
+        } ?: error("The directory $path does not contain meta file")
     } else {
         path
     }

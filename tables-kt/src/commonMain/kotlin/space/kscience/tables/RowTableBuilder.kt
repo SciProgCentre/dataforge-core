@@ -18,7 +18,7 @@ public class RowTableBuilder<C>(
     }
 
     /**
-     * Create a new column header for the table
+     * Register a new column header for the table
      */
     @PublishedApi
     internal fun <T : C> newColumn(name: String, type: KType, meta: Meta, index: Int?): ColumnHeader<T> {
@@ -31,28 +31,28 @@ public class RowTableBuilder<C>(
         return header
     }
 
-    public fun addRow(row: Row<C>): Row<C> {
-        rows.add(row)
-        return row
-    }
-
+    /**
+     * Register a new column header for the table
+     */
     public inline fun <reified T : C> newColumn(
         name: String,
         index: Int? = null,
         noinline columnMetaBuilder: ColumnScheme.() -> Unit = {},
     ): ColumnHeader<T> = newColumn(name, typeOf<T>(), ColumnScheme(columnMetaBuilder).toMeta(), index)
 
-    public inline fun <reified T : C> column(
-        index: Int? = null,
-        noinline columnMetaBuilder: ColumnScheme.() -> Unit = {},
-    ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, ColumnHeader<T>>> =
-        PropertyDelegateProvider { _, property ->
-            val res: ColumnHeader<T> = newColumn(property.name, index, columnMetaBuilder)
-            ReadOnlyProperty { _, _ -> res }
-        }
-
     public fun row(map: Map<String, C?>): Row<C> {
         val row = MapRow(map)
+        rows.add(row)
+        return row
+    }
+
+    /**
+     * Adds [row] to this table builder.
+     *
+     * @param row the row to add.
+     * @return the added [row].
+     */
+    public fun addRow(row: Row<C>): Row<C> {
         rows.add(row)
         return row
     }

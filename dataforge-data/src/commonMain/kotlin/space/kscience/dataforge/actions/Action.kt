@@ -38,6 +38,18 @@ public infix fun <T, I, R> Action<T, I>.then(action: Action<I, R>): Action<T, R>
     action.execute(this@then.execute(dataSet, meta, scope), meta, scope)
 }
 
+/**
+ * Invokes this action on the given data tree and returns the transformed data tree.
+ *
+ * This is a convenience operator for [Action.execute]. The provided [meta] is passed as
+ * action configuration, and [updateScope] is used for observing and propagating updates
+ * from the source data tree.
+ *
+ * @param dataSet the source data tree to transform.
+ * @param meta the action configuration metadata.
+ * @param updateScope the coroutine scope used to handle update propagation.
+ * @return the resulting data tree produced by this action.
+ */
 @DFExperimental
 @OptIn(DelicateCoroutinesApi::class)
 public operator fun <T, R> Action<T, R>.invoke(

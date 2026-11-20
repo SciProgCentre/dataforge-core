@@ -17,6 +17,7 @@ internal class ColumnAsDataColumn<T>(
     val column: TableColumn<T>,
     val indexList: List<Int> = column.indices.toList(),
     val nameOverride: String = column.name,
+    val typeOverride: KType = column.type
 ) : ValueColumn<T> {
 
     override fun get(indices: Iterable<Int>): ValueColumn<T> {
@@ -30,6 +31,13 @@ internal class ColumnAsDataColumn<T>(
     }
 
     override fun rename(newName: String): ValueColumn<T> = ColumnAsDataColumn<T>(column, indexList, newName)
+
+    override fun changeType(type: KType): ValueColumn<T> = ColumnAsDataColumn(
+        column = column,
+        indexList = indexList,
+        nameOverride = nameOverride,
+        typeOverride = type
+    )
 
     override fun distinct(): ValueColumn<T> {
         val newIndices = indexList.distinctBy { column.getOrNull(it) }
@@ -53,7 +61,7 @@ internal class ColumnAsDataColumn<T>(
 
     override fun toSet(): Set<T> = indexList.map { column[it] }.toSet()
 
-    override fun type(): KType = column.type
+    override fun type(): KType = typeOverride
 
     override fun values(): Iterable<T> = indexList.asSequence().map { column[it] }.asIterable()
 

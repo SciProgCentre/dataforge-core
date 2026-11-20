@@ -4,8 +4,11 @@ import space.kscience.dataforge.meta.descriptors.Described
 import space.kscience.dataforge.meta.descriptors.MetaDescriptor
 import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.names.Name
+import kotlin.jvm.JvmName
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
+import kotlin.time.Duration
+import kotlin.time.Instant
 
 /* Meta delegates */
 
@@ -187,3 +190,67 @@ public fun MetaProvider.boolean(key: Name? = null, default: () -> Boolean): Meta
 
 public fun MetaProvider.number(key: Name? = null, default: () -> Number): MetaDelegate<Number> =
     value(key = key) { it?.numberOrNull ?: default() }
+
+/**
+ * Creates a [MetaDelegate] for an [Instant] value using a specified key and default value provider.
+ *
+ * @param key The optional [Name] key used to locate the meta value. If null, the property's name will be used as the key.
+ * @param default A function that provides the default [Instant] value when the meta value is null or not found.
+ * @return A [MetaDelegate] that resolves to an [Instant] value. The [Instant] is resolved from the meta value if available,
+ *         or the value provided by the [default] function when necessary.
+ *         Throws an error if the meta value type is not compatible with [Instant].
+ */
+public fun MetaProvider.instant(
+    key: Name? = null,
+    default: () -> Instant
+): MetaDelegate<Instant> = value(key = key) {
+    it?.instant ?: default()
+}
+
+/**
+ * Creates a [MetaDelegate] for an [Instant] value using a specified key and default (nullable) value provider.
+ *
+ * @param key The optional [Name] key used to locate the meta value. If null, the property's name will be used as the key.
+ * @param default A function that provides the default [Instant?] value when the meta value is null or not found.
+ * @return A [MetaDelegate] that resolves to an [Instant?] value. The [Instant?] is resolved from the meta value if available,
+ *         or the value provided by the [default] function when necessary.
+ *         Throws an error if the meta value type is not compatible with [Instant].
+ */
+@JvmName("instantOrNull")
+public fun MetaProvider.instant(
+    key: Name? = null,
+    default: () -> Instant? = { null }
+): MetaDelegate<Instant?> = value(key = key) {
+    it?.instant ?: default()
+}
+
+/**
+ * Provides a delegated property of type Duration, which retrieves its value from a MetaProvider.
+ * If the value is not present or cannot be interpreted as a Duration, the provided default function is used.
+ *
+ * @param key The key identifying the value within the MetaProvider. Defaults to the property name if null.
+ * @param default A lambda providing the default value when the key is not found or the value is null/invalid.
+ * @return A MetaDelegate for the requested Duration value.
+ */
+public fun MetaProvider.duration(
+    key: Name? = null,
+    default: () -> Duration
+): MetaDelegate<Duration> = value(key = key) {
+    it?.duration ?: default()
+}
+
+/**
+ * Provides a delegated property of type Duration?, which retrieves its value from a MetaProvider.
+ * If the value is not present or cannot be interpreted as a Duration, the provided default (nullable) function is used.
+ *
+ * @param key The key identifying the value within the MetaProvider. Defaults to the property name if null.
+ * @param default A lambda providing the default value when the key is not found or the value is null/invalid.
+ * @return A MetaDelegate for the requested Duration? value.
+ */
+@JvmName("durationOrNull")
+public fun MetaProvider.duration(
+    key: Name? = null,
+    default: () -> Duration? = { null }
+): MetaDelegate<Duration?> = value(key = key) {
+    it?.duration ?: default()
+}
