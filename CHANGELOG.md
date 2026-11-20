@@ -4,6 +4,20 @@
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## 0.13.0 - 2026-11-20
+
+### Added
+
 - Docs for tables-kt
 - Value extensions for instant and durations. Add meta providers for instant and duration values.
 - `instant` and `duration` property delegates for `MetaProvider` and `MutableMetaProvider`
@@ -16,10 +30,6 @@
 - Signigicant refactorting of tables-kt
 - Replace yamlkt with kotaml
 - Refactor `Logger` and `LogManager` to use `Logger.Level` enum and support optional logging `source`
-
-### Deprecated
-
-### Removed
 
 ### Fixed
 
@@ -34,8 +44,6 @@
 - Preserve explicit descriptors in serializable converters
 - Return null from enum readers and delegates when the value is not a member of the enum
 - Fix copying a data tree without a prefix
-
-### Security
 
 ## 0.12.0 - 2026-09-10
 
