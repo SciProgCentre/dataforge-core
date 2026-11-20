@@ -10,6 +10,7 @@ kscience {
     native()
     dependencies {
         api(projects.dataforgeIo)
+        implementation("org.jetbrains.kotlinx:kotlinx-io-okio:${spclibs.versions.kotlinx.io.get()}")
         implementation(libs.kotaml)
     }
     useSerialization()

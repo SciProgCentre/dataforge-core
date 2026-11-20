@@ -1333,6 +1333,7 @@ public final class space/kscience/dataforge/names/NameKt {
 	public static final fun startsWith (Lspace/kscience/dataforge/names/Name;Ljava/lang/String;)Z
 	public static final fun startsWith (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/names/Name;)Z
 	public static final fun startsWith (Lspace/kscience/dataforge/names/Name;Lspace/kscience/dataforge/names/NameToken;)Z
+	public static final fun toName (Ljava/lang/Iterable;)Lspace/kscience/dataforge/names/Name;
 	public static final fun toStringUnescaped (Lspace/kscience/dataforge/names/Name;)Ljava/lang/String;
 	public static final fun withIndex (Lspace/kscience/dataforge/names/Name;Ljava/lang/String;)Lspace/kscience/dataforge/names/Name;
 }

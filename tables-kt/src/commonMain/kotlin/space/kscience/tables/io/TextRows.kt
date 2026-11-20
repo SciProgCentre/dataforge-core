@@ -31,15 +31,6 @@ internal class TextRows(
             .map {
                 Table.readTextRow(it, headers, delimiter)
             }
-//        flow {
-//            do {
-//                val line = readUTF8Line()
-//                if (!line.isNullOrBlank()) {
-//                    val row = readRow(headers, line)
-//                    emit(row)
-//                }
-//            } while (!endOfInput)
-//        }
     }
 
     override fun rowFlow(): Flow<Row<Value>> = flow {
