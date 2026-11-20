@@ -4,6 +4,7 @@
 
 ### Added
 
+- Docs for tables-kt
 - Value extensions for instant and durations. Add meta providers for instant and duration values.
 - `instant` and `duration` property delegates for `MetaProvider` and `MutableMetaProvider`
 - `Meta.getIndexedList(name: String)` extension function
@@ -12,6 +13,7 @@
 
 ### Changed
 
+- Signigicant refactorting of tables-kt
 - Replace yamlkt with kotaml
 - Refactor `Logger` and `LogManager` to use `Logger.Level` enum and support optional logging `source`
 

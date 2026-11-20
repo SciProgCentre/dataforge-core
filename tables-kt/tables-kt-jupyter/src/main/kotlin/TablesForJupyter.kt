@@ -75,7 +75,7 @@ public class TablesForJupyter : JupyterIntegration() {
                             +column.name
                         }
                     }
-                    column.sequence().take(MAX_ROWS).forEach { value ->
+                    column.asSequence().take(MAX_ROWS).forEach { value ->
                         tr {
                             classes = classes + "tables-kt-row"
                             td {

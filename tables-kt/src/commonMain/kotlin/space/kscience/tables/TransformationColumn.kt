@@ -62,27 +62,3 @@ public fun <T, R> Table<T>.rowsToColumn(
 } else {
     TransformationColumn(this, header.type, header.name, header.meta, mapper)
 }
-
-/**
- * Create a virtual column from a given column header and sequential data
- */
-public fun <T> Table<T>.rowsToDoubleColumn(
-    name: String,
-    meta: Meta = Meta.EMPTY,
-    block: (Row<T>) -> Double,
-): DoubleColumn {
-    val data = DoubleArray(rows.size) { block(rows[it]) }
-    return DoubleColumn(name, data, meta)
-}
-
-/**
- * Create a virtual column from a given column header and sequential data
- */
-public fun <T> Table<T>.rowsToIntColumn(
-    name: String,
-    meta: Meta = Meta.EMPTY,
-    block: (Row<T>) -> Int,
-): IntColumn {
-    val data = IntArray(rows.size) { block(rows[it]) }
-    return IntColumn(name, data, meta)
-}

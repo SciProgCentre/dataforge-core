@@ -39,7 +39,7 @@ public class ColumnTableBuilder<T>(
      * Get or set values for given column. The size of column must be the same as table [rowsNum]
      */
     public var <R : T> ColumnHeader<R>.values: Collection<R?>
-        get() = columns[this].listValues()
+        get() = columns[this].toList()
         set(value) {
             val newColumn = ListColumn(this, value.toList())
             removeColumn(name)

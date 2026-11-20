@@ -4,15 +4,12 @@ import com.jsoizo.kotlincsv.CsvDialect
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import space.kscience.dataforge.meta.Value
-import space.kscience.tables.RowTable
-import space.kscience.tables.Table
-import space.kscience.tables.get
-import space.kscience.tables.valueRow
+import space.kscience.tables.*
 
 internal class StringReadWrite {
     val table = RowTable<Value> {
-        val a by column<Value>()
-        val b by column<Value>()
+        val a by ColumnHeader.typed<Value>()
+        val b by ColumnHeader.typed<Value>()
         valueRow(a to 1, b to "b1")
         valueRow(a to 2, b to "b2")
     }

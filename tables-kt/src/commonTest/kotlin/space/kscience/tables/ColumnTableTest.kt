@@ -18,7 +18,7 @@ class ColumnTableTest {
             transform("c") { it[a] - it[b] }
         }
         assertTrue {
-            columnTable.columns["c"].listValues().all { it == 0.0 }
+            columnTable.columns["c"].toList().all { it == 0.0 }
         }
     }
 }
