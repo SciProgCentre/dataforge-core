@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: linux-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
