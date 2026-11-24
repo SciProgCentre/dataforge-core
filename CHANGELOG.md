@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Meta extensions for instant and duration values.
 
 ### Changed
 

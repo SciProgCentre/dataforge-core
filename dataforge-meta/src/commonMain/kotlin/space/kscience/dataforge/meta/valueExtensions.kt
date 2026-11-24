@@ -63,6 +63,11 @@ public val Value.instant: Instant?
     }
 
 /**
+ * Represent [Instant] as value in string representation.
+ */
+public fun Instant.asValue(): Value = toString().asValue()
+
+/**
  * Returns this value as a duration.
  *
  * A null value is returned as `null`. Numeric values are interpreted as a
@@ -81,5 +86,10 @@ public val Value.duration: Duration?
         ValueType.BOOLEAN -> error("Duration cannot be represented as a boolean")
         ValueType.LIST -> error("Duration cannot be represented as a list")
     }
+
+/**
+ * Represent [Duration] as value in string representation.
+ */
+public fun Duration.asValue(): Value = toString().asValue()
 
 public fun Value.toMeta(): Meta = Meta(this)

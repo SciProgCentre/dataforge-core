@@ -5,6 +5,8 @@ import kotlinx.serialization.json.Json
 import space.kscience.dataforge.misc.DfType
 import space.kscience.dataforge.names.*
 import kotlin.jvm.JvmName
+import kotlin.time.Duration
+import kotlin.time.Instant
 
 
 /**
@@ -234,6 +236,8 @@ public val Meta?.float: Float? get() = number?.toFloat()
 public val Meta?.int: Int? get() = number?.toInt()
 public val Meta?.long: Long? get() = number?.toLong()
 public val Meta?.short: Short? get() = number?.toShort()
+public val Meta?.instant: Instant? get() = this?.value?.instant
+public val Meta?.duration: Duration? get() = this?.value?.duration
 
 public inline fun <reified E : Enum<E>> Meta?.enum(): E? = this?.value?.let {
     if (it is EnumValue<*>) {

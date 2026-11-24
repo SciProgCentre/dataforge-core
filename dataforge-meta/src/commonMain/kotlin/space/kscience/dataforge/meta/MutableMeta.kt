@@ -5,6 +5,7 @@ import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
 import kotlin.js.JsName
+import kotlin.time.Instant
 
 
 /**
@@ -143,6 +144,16 @@ public infix fun String.put(enum: Enum<*>) {
 context(mutableMeta: MutableMeta)
 public infix fun String.put(array: DoubleArray) {
     mutableMeta.setValue(parseAsName(), array.asValue())
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(array: ByteArray) {
+    mutableMeta.setValue(parseAsName(), array.asValue())
+}
+
+context(mutableMeta: MutableMeta)
+public infix fun String.put(instant: Instant) {
+    mutableMeta.setValue(parseAsName(), instant.asValue())
 }
 
 context(mutableMeta: MutableMeta)
