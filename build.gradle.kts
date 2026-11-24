@@ -11,7 +11,7 @@ plugins {
 
 allprojects {
     group = "space.kscience"
-    version = "0.13.1"
+    version = "0.13.1-dev"
 }
 
 subprojects {
