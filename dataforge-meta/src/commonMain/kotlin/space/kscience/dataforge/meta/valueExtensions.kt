@@ -67,6 +67,8 @@ public val Value.instant: Instant?
  */
 public fun Instant.asValue(): Value = toString().asValue()
 
+public fun Meta(instant: Instant): Meta = Meta(instant.asValue())
+
 /**
  * Returns this value as a duration.
  *
@@ -91,5 +93,7 @@ public val Value.duration: Duration?
  * Represent [Duration] as value in string representation.
  */
 public fun Duration.asValue(): Value = toString().asValue()
+
+public fun Meta(duration: Duration): Meta = Meta(duration.asValue())
 
 public fun Value.toMeta(): Meta = Meta(this)
