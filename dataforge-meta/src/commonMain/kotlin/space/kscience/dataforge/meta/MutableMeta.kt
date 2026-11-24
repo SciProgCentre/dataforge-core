@@ -5,6 +5,7 @@ import space.kscience.dataforge.misc.DFExperimental
 import space.kscience.dataforge.misc.ThreadSafe
 import space.kscience.dataforge.names.*
 import kotlin.js.JsName
+import kotlin.time.Duration
 import kotlin.time.Instant
 
 
@@ -157,8 +158,8 @@ public infix fun String.put(instant: Instant) {
 }
 
 context(mutableMeta: MutableMeta)
-public infix fun String.put(array: ByteArray) {
-    mutableMeta.setValue(parseAsName(), array.asValue())
+public infix fun String.put(duration: Duration) {
+    mutableMeta.setValue(parseAsName(), duration.asValue())
 }
 
 context(mutableMeta: MutableMeta)
